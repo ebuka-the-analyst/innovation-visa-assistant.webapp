@@ -123,12 +123,18 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           vision: formData.vision,
         };
 
+        console.log('Submitting questionnaire data:', data);
         const response = await apiRequest('POST', '/api/questionnaire/submit', data);
+        console.log('Questionnaire submission response:', response.status);
         const responseData = await response.json();
+        console.log('Response data:', responseData);
 
         if (responseData.planId) {
+          console.log('Got plan ID:', responseData.planId);
           const checkoutResponse = await apiRequest('POST', '/api/payment/create-checkout', { planId: responseData.planId });
+          console.log('Checkout response:', checkoutResponse.status);
           const checkoutData = await checkoutResponse.json();
+          console.log('Checkout data:', checkoutData);
 
           if (checkoutData.url) {
             window.location.href = checkoutData.url;
