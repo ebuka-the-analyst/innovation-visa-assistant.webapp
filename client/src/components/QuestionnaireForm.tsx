@@ -116,18 +116,30 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           uniqueness: formData.uniqueness,
           technology: formData.technology,
           experience: formData.experience,
-          funding: parseInt(formData.funding || '0'),
+          funding: parseInt(formData.funding) || 0,
           revenue: formData.revenue,
-          jobCreation: parseInt(formData.jobCreation || '0'),
+          jobCreation: parseInt(formData.jobCreation) || 1,
           expansion: formData.expansion,
           vision: formData.vision,
         };
 
         const response = await apiRequest('POST', '/api/questionnaire/submit', data);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || errorData.message || "Submission failed");
+        }
+        
         const responseData = await response.json();
 
         if (responseData.planId) {
           const checkoutResponse = await apiRequest('POST', '/api/payment/create-checkout', { planId: responseData.planId });
+          
+          if (!checkoutResponse.ok) {
+            const errorData = await checkoutResponse.json();
+            throw new Error(errorData.error || "Failed to create payment session");
+          }
+          
           const checkoutData = await checkoutResponse.json();
 
           if (checkoutData.url) {
@@ -139,9 +151,10 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           throw new Error("Plan ID not received");
         }
       } catch (error) {
+        console.error("Form submission error:", error);
         toast({
           title: "Submission Error",
-          description: error instanceof Error ? error.message : "Failed to submit questionnaire. Please try again.",
+          description: error instanceof Error ? error.message : "Failed to submit. Please try again.",
           variant: "destructive",
         });
         setIsSubmitting(false);
