@@ -124,22 +124,10 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
         };
 
         const response = await apiRequest('POST', '/api/questionnaire/submit', data);
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || errorData.message || "Submission failed");
-        }
-        
         const responseData = await response.json();
 
         if (responseData.planId) {
           const checkoutResponse = await apiRequest('POST', '/api/payment/create-checkout', { planId: responseData.planId });
-          
-          if (!checkoutResponse.ok) {
-            const errorData = await checkoutResponse.json();
-            throw new Error(errorData.error || "Failed to create payment session");
-          }
-          
           const checkoutData = await checkoutResponse.json();
 
           if (checkoutData.url) {
