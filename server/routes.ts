@@ -5,6 +5,7 @@ import { questionnaireSchema } from "@shared/schema";
 import Stripe from "stripe";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
+import { z } from "zod";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
@@ -24,6 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/questionnaire/submit", async (req, res) => {
     try {
+      console.log("Questionnaire submission received:", JSON.stringify(req.body, null, 2));
       const data = questionnaireSchema.parse(req.body);
       
       const businessPlan = await storage.createBusinessPlan(data);
@@ -35,10 +37,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Questionnaire submission error:", error);
-      res.status(400).json({ 
-        success: false, 
-        error: error instanceof Error ? error.message : "Invalid questionnaire data" 
-      });
+      
+      if (error instanceof z.ZodError) {
+        const firstError = error.errors[0];
+        const fieldName = firstError.path.join('.');
+        const message = firstError.message;
+        
+        res.status(400).json({ 
+          success: false, 
+          error: `${fieldName}: ${message}`,
+          details: error.errors
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          error: error instanceof Error ? error.message : "Invalid questionnaire data" 
+        });
+      }
     }
   });
 
