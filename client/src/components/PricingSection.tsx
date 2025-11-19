@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check, X, Star } from "lucide-react";
+import { Link } from "wouter";
 
 const tiers = [
   {
@@ -114,15 +115,16 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              <Button
-                className="w-full"
-                variant={tier.popular ? "default" : "outline"}
-                size="lg"
-                data-testid={`button-select-${tier.name.toLowerCase()}`}
-                onClick={() => console.log(`${tier.name} plan selected`)}
-              >
-                {tier.cta}
-              </Button>
+              <Link href={`/questionnaire?tier=${tier.name.toLowerCase()}`}>
+                <Button
+                  className="w-full"
+                  variant={tier.popular ? "default" : "outline"}
+                  size="lg"
+                  data-testid={`button-select-${tier.name.toLowerCase()}`}
+                >
+                  {tier.cta}
+                </Button>
+              </Link>
             </Card>
           ))}
         </div>
