@@ -99,19 +99,15 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           vision: formData.vision,
         };
 
-        const response = await apiRequest('/api/questionnaire/submit', {
-          method: 'POST',
-          body: JSON.stringify(data),
-        });
+        const response = await apiRequest('POST', '/api/questionnaire/submit', data);
+        const responseData = await response.json();
 
-        if (response.planId) {
-          const checkoutResponse = await apiRequest('/api/payment/create-checkout', {
-            method: 'POST',
-            body: JSON.stringify({ planId: response.planId }),
-          });
+        if (responseData.planId) {
+          const checkoutResponse = await apiRequest('POST', '/api/payment/create-checkout', { planId: responseData.planId });
+          const checkoutData = await checkoutResponse.json();
 
-          if (checkoutResponse.url) {
-            window.location.href = checkoutResponse.url;
+          if (checkoutData.url) {
+            window.location.href = checkoutData.url;
           } else {
             throw new Error("Checkout URL not received");
           }

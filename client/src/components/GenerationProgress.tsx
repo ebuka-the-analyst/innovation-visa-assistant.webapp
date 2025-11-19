@@ -43,12 +43,10 @@ export default function GenerationProgress({ planId }: { planId: string }) {
           return;
         }
 
-        const verifyResponse = await apiRequest('/api/payment/verify', {
-          method: 'POST',
-          body: JSON.stringify({ sessionId, planId }),
-        });
+        const verifyResponse = await apiRequest('POST', '/api/payment/verify', { sessionId, planId });
+        const verifyData = await verifyResponse.json();
 
-        if (!verifyResponse.verified) {
+        if (!verifyData.verified) {
           setStatus('failed');
           toast({
             title: "Payment Verification Failed",
@@ -58,10 +56,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
           return;
         }
 
-        await apiRequest('/api/generate/start', {
-          method: 'POST',
-          body: JSON.stringify({ planId }),
-        });
+        await apiRequest('POST', '/api/generate/start', { planId });
       } catch (error) {
         console.error('Failed to start generation:', error);
         setStatus('failed');
@@ -86,13 +81,14 @@ export default function GenerationProgress({ planId }: { planId: string }) {
 
     const pollInterval = setInterval(async () => {
       try {
-        const response = await apiRequest(`/api/generate/status/${planId}`);
-        setStatus(response.status);
+        const response = await fetch(`/api/generate/status/${planId}`);
+        const data = await response.json();
+        setStatus(data.status);
         
-        if (response.status === 'completed' && response.pdfUrl) {
-          setPdfUrl(response.pdfUrl);
+        if (data.status === 'completed' && data.pdfUrl) {
+          setPdfUrl(data.pdfUrl);
           clearInterval(pollInterval);
-        } else if (response.status === 'failed') {
+        } else if (data.status === 'failed') {
           clearInterval(pollInterval);
           toast({
             title: "Generation Failed",
