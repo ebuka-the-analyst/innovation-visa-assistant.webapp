@@ -75,6 +75,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid tier" });
       }
 
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+        : 'http://localhost:5000';
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
@@ -91,8 +95,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         ],
         mode: "payment",
-        success_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/generation?session_id={CHECKOUT_SESSION_ID}&plan_id=${planId}`,
-        cancel_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/questionnaire`,
+        success_url: `${baseUrl}/generation?session_id={CHECKOUT_SESSION_ID}&plan_id=${planId}`,
+        cancel_url: `${baseUrl}/questionnaire`,
         metadata: {
           planId: businessPlan.id,
         },
