@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -48,12 +49,11 @@ export default function Header() {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          <Button variant="ghost" onClick={() => console.log('Sign in clicked')}>
-            Sign In
-          </Button>
-          <Button onClick={() => console.log('Get started clicked')} data-testid="button-header-cta">
-            Get Started
-          </Button>
+          <Link href="/questionnaire">
+            <Button data-testid="button-header-cta">
+              Get Started
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Menu Toggle */}

@@ -6,6 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { ArrowRight, ArrowLeft, CheckCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 
 const steps = [
   {
@@ -45,19 +48,84 @@ const steps = [
   },
 ];
 
-export default function QuestionnaireForm() {
+export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string }) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState<Record<string, string>>({ tier });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const progress = ((currentStep + 1) / steps.length) * 100;
   const currentStepData = steps[currentStep];
 
-  const handleNext = () => {
-    console.log('Next step clicked', formData);
+  const validateCurrentStep = (): boolean => {
+    const requiredFields = currentStepData.fields.filter(f => f.required).map(f => f.name);
+    const missingFields = requiredFields.filter(field => !formData[field] || formData[field].trim() === '');
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: "Required Fields Missing",
+        description: "Please fill in all required fields before continuing.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    return true;
+  };
+
+  const handleNext = async () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      if (validateCurrentStep()) {
+        setCurrentStep(currentStep + 1);
+      }
     } else {
-      console.log('Form submitted:', formData);
+      if (!validateCurrentStep()) return;
+      
+      setIsSubmitting(true);
+      try {
+        const data = {
+          tier: formData.tier || 'premium',
+          businessName: formData.businessName,
+          industry: formData.industry,
+          problem: formData.problem,
+          uniqueness: formData.uniqueness,
+          technology: formData.technology,
+          experience: formData.experience,
+          funding: parseInt(formData.funding || '0'),
+          revenue: formData.revenue,
+          jobCreation: parseInt(formData.jobCreation || '0'),
+          expansion: formData.expansion,
+          vision: formData.vision,
+        };
+
+        const response = await apiRequest('/api/questionnaire/submit', {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+
+        if (response.planId) {
+          const checkoutResponse = await apiRequest('/api/payment/create-checkout', {
+            method: 'POST',
+            body: JSON.stringify({ planId: response.planId }),
+          });
+
+          if (checkoutResponse.url) {
+            window.location.href = checkoutResponse.url;
+          } else {
+            throw new Error("Checkout URL not received");
+          }
+        } else {
+          throw new Error("Plan ID not received");
+        }
+      } catch (error) {
+        toast({
+          title: "Submission Error",
+          description: error instanceof Error ? error.message : "Failed to submit questionnaire. Please try again.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -161,14 +229,18 @@ export default function QuestionnaireForm() {
             <Button
               variant="outline"
               onClick={handleBack}
-              disabled={currentStep === 0}
+              disabled={currentStep === 0 || isSubmitting}
               data-testid="button-back"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
-            <Button onClick={handleNext} data-testid="button-next">
-              {currentStep === steps.length - 1 ? "Generate Plan" : "Continue"}
+            <Button 
+              onClick={handleNext} 
+              disabled={isSubmitting}
+              data-testid="button-next"
+            >
+              {isSubmitting ? "Processing..." : currentStep === steps.length - 1 ? "Proceed to Payment" : "Continue"}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>

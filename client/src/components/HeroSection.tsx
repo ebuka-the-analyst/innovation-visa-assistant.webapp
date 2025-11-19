@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle } from "lucide-react";
+import { Link } from "wouter";
 import heroImage from "@assets/generated_images/3D_business_plan_hero_102d84d2.png";
 
 export default function HeroSection() {
@@ -49,20 +50,21 @@ export default function HeroSection() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                size="lg" 
-                className="group"
-                data-testid="button-generate-plan"
-                onClick={() => console.log('Generate plan clicked')}
-              >
-                Generate My Business Plan
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <Link href="/questionnaire">
+                <Button 
+                  size="lg" 
+                  className="group"
+                  data-testid="button-generate-plan"
+                >
+                  Generate My Business Plan
+                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
               <Button 
                 size="lg" 
                 variant="outline"
                 data-testid="button-view-sample"
-                onClick={() => console.log('View sample clicked')}
+                onClick={() => alert('Sample plans coming soon!')}
               >
                 See Sample Plan
               </Button>

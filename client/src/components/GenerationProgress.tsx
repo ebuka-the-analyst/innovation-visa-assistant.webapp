@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Download, CheckCircle } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import novaAvatar from "@assets/generated_images/Nova_innovation_agent_avatar_e5dc5701.png";
 import sterlingAvatar from "@assets/generated_images/Sterling_financial_agent_avatar_4fce3650.png";
 import atlasAvatar from "@assets/generated_images/Atlas_growth_agent_avatar_a0808a5e.png";
@@ -14,12 +18,63 @@ const stages = [
   { id: 6, name: "Finalizing document", agent: "Sage", avatar: sageAvatar, duration: 1500 },
 ];
 
-export default function GenerationProgress() {
+export default function GenerationProgress({ planId }: { planId: string }) {
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
+  const [status, setStatus] = useState<string>('pending');
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate progress
+    if (!planId) return;
+
+    const verifyPaymentAndStart = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+
+        if (!sessionId) {
+          setStatus('failed');
+          toast({
+            title: "Payment Required",
+            description: "No payment session found. Please complete payment first.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const verifyResponse = await apiRequest('/api/payment/verify', {
+          method: 'POST',
+          body: JSON.stringify({ sessionId, planId }),
+        });
+
+        if (!verifyResponse.verified) {
+          setStatus('failed');
+          toast({
+            title: "Payment Verification Failed",
+            description: "Unable to verify payment. Please contact support.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        await apiRequest('/api/generate/start', {
+          method: 'POST',
+          body: JSON.stringify({ planId }),
+        });
+      } catch (error) {
+        console.error('Failed to start generation:', error);
+        setStatus('failed');
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to start generation. Please contact support.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    verifyPaymentAndStart();
+
     let totalDuration = 0;
     stages.forEach((stage, index) => {
       totalDuration += stage.duration;
@@ -28,7 +83,30 @@ export default function GenerationProgress() {
         setProgress(((index + 1) / stages.length) * 100);
       }, totalDuration - stage.duration);
     });
-  }, []);
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await apiRequest(`/api/generate/status/${planId}`);
+        setStatus(response.status);
+        
+        if (response.status === 'completed' && response.pdfUrl) {
+          setPdfUrl(response.pdfUrl);
+          clearInterval(pollInterval);
+        } else if (response.status === 'failed') {
+          clearInterval(pollInterval);
+          toast({
+            title: "Generation Failed",
+            description: "Something went wrong. Please contact support.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Status poll error:', error);
+      }
+    }, 3000);
+
+    return () => clearInterval(pollInterval);
+  }, [planId, toast]);
 
   const currentStageData = stages[currentStage];
 
@@ -123,10 +201,28 @@ export default function GenerationProgress() {
           {/* Progress bar */}
           <Progress value={progress} className="h-2 mb-8" />
 
-          {/* Time estimate */}
-          <div className="text-center text-sm text-muted-foreground">
-            <p>Estimated time remaining: {Math.ceil((stages.length - currentStage) * 2 / 60)} minute{Math.ceil((stages.length - currentStage) * 2 / 60) !== 1 ? 's' : ''}</p>
-          </div>
+          {/* Time estimate or completion */}
+          {status === 'completed' && pdfUrl ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-center gap-2 text-chart-3">
+                <CheckCircle className="w-6 h-6" />
+                <p className="text-lg font-semibold">Business Plan Complete!</p>
+              </div>
+              <Button
+                size="lg"
+                className="w-full"
+                onClick={() => window.open(pdfUrl, '_blank')}
+                data-testid="button-download-pdf"
+              >
+                <Download className="w-5 h-5 mr-2" />
+                Download Your Business Plan
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center text-sm text-muted-foreground">
+              <p>Estimated time remaining: {Math.ceil((stages.length - currentStage) * 2 / 60)} minute{Math.ceil((stages.length - currentStage) * 2 / 60) !== 1 ? 's' : ''}</p>
+            </div>
+          )}
         </div>
 
         {/* Stage indicators */}
