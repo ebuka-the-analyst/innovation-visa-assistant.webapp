@@ -59,16 +59,40 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const currentStepData = steps[currentStep];
 
   const validateCurrentStep = (): boolean => {
-    const requiredFields = currentStepData.fields.filter(f => f.required).map(f => f.name);
-    const missingFields = requiredFields.filter(field => !formData[field] || formData[field].trim() === '');
+    const requiredFields = currentStepData.fields.filter(f => f.required);
     
-    if (missingFields.length > 0) {
-      toast({
-        title: "Required Fields Missing",
-        description: "Please fill in all required fields before continuing.",
-        variant: "destructive",
-      });
-      return false;
+    for (const field of requiredFields) {
+      const value = formData[field.name];
+      
+      if (!value || value.trim() === '') {
+        toast({
+          title: "Required Field Missing",
+          description: `Please fill in: ${field.label}`,
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      if (field.type === 'textarea' && value.trim().length < 10) {
+        toast({
+          title: "More Detail Needed",
+          description: `${field.label} needs at least 10 characters (currently ${value.trim().length})`,
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      if (field.type === 'number') {
+        const num = parseInt(value);
+        if (isNaN(num) || num <= 0) {
+          toast({
+            title: "Invalid Number",
+            description: `${field.label} must be a positive number`,
+            variant: "destructive",
+          });
+          return false;
+        }
+      }
     }
     
     return true;
