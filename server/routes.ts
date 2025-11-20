@@ -23,6 +23,10 @@ const PRICING = {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  app.get("/api/health", async (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+  
   app.post("/api/questionnaire/submit", async (req, res) => {
     try {
       console.log("Questionnaire submission received:", JSON.stringify(req.body, null, 2));
