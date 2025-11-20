@@ -66,6 +66,39 @@ export function generatePDFContent(plan: BusinessPlan): string {
       color: #888;
       margin-top: 60px;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 10pt;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f5f5f5;
+      font-weight: bold;
+      color: #0093d9;
+    }
+    ul, ol {
+      margin: 15px 0;
+      padding-left: 30px;
+    }
+    li {
+      margin-bottom: 8px;
+      font-size: 11pt;
+    }
+    .section-break {
+      margin-top: 50px;
+      border-top: 2px solid #e0e0e0;
+      padding-top: 30px;
+    }
+    strong {
+      color: #1a1a1a;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
