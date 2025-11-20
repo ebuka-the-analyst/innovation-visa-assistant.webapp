@@ -1,0 +1,211 @@
+FINFLOW AI REVENUE MODEL (3-Tier SaaS Subscription)
+PRIMARY REVENUE: MONTHLY SUBSCRIPTIONS
+TIER 1: BASIC (Launch: Month 1, Year 1)
+Target Customer: Micro to small SMEs
+• Revenue: £200K-£2M
+• Employees: 2-20
+• Use case: Single business owner, simple cash flow needs
+Monthly Price: £60/month (£720/year)
+Annual Plan: £600/year (£50/month effective - 17% discount)
+Features Included:
+• 90-day cash flow forecast
+• 1 bank account connection
+• 1 user seat
+• Anomaly detection & alerts (email)
+• Basic scenario planning (3 scenarios)
+• Mobile app access
+• Standard support (48-hour response)
+• Monthly report exports
+Target Adoption: 70% of customers (Year 1-3)
+Customer Examples: Independent retailers, sole practitioners, small cafes
+---
+TIER 2: PROFESSIONAL (Launch: Month 13, Year 2)
+Target Customer: Small to medium SMEs
+• Revenue: £2M-£10M
+• Employees: 20-100
+• Use case: Finance manager/bookkeeper, multi-location, complex cash flow
+Monthly Price: £120/month (£1,440/year)
+Annual Plan: £1,200/year (£100/month effective - 17% discount)
+Everything in Basic, PLUS:
+• 180-day cash flow forecast (vs 90 days)
+• 3 bank account connections
+• 5 user seats
+• Accounting software integration (Xero, QuickBooks, Sage)
+• Advanced scenario planning (unlimited scenarios)
+• Industry benchmark comparison
+• SMS + email alerts
+• Priority support (24-hour response)
+• Weekly report automation
+• Custom export formats (CSV, Excel, PDF)
+• API access (50 calls/day)
+Target Adoption: 25% of customers (Year 2-3)
+Customer Examples: Multi-location retailers, consulting firms, hospitality groups
+---
+TIER 3: ENTERPRISE (Launch: Month 31, Year 3)
+Target Customer: Medium SMEs and small enterprises
+• Revenue: £10M-£50M
+• Employees: 100-250
+• Use case: CFO/Finance Director, multi-entity, strategic planning
+Monthly Price: £250/month (£3,000/year)
+Annual Plan: £2,700/year (£225/month effective - 10% discount)
+Custom Pricing: £300-500/month for £50M+ revenue businesses
+Everything in Professional, PLUS:
+• 365-day cash flow forecast
+• Unlimited bank accounts
+• Unlimited user seats
+• Multi-entity consolidation (subsidiaries, divisions)
+• Dedicated account manager
+• Custom integrations (ERP systems, bespoke accounting)
+• White-label option (for accounting firms)
+• SSO/SAML authentication
+• Premium support (4-hour response, phone support)
+• Quarterly business review meetings
+• Custom dashboards and reports
+• API access (unlimited calls)
+• Data retention: 10 years (vs 7 years standard)
+• Onboarding training (2 hours)
+Target Adoption: 5% of customers (Year 3)
+Customer Examples: Restaurant chains, large professional services firms, manufacturers
+---
+REVENUE MIX EVOLUTION:
+Year 1 (660 customers, all Basic tier):
+• Basic (£60/mo): 660 customers = £39,600 MRR
+• Total MRR Month 12: £39,600
+• Total ARR: £475,200
+Year 2 (2,215 customers):
+• Basic (£60/mo): 1,661 customers (75%) = £99,660 MRR
+• Professional (£120/mo): 554 customers (25%) = £66,480 MRR
+• Total MRR Month 24: £166,140
+• Blended ARPU: £75/month
+• Total ARR: £1,993,680
+Year 3 (4,757 customers):
+• Basic (£60/mo): 3,332 customers (70%) = £199,920 MRR
+• Professional (£120/mo): 1,189 customers (25%) = £142,680 MRR
+• Enterprise (£250/mo): 238 customers (5%) = £59,500 MRR
+• Total MRR Month 36: £402,100
+• Blended ARPU: £84.50/month
+• Total ARR: £4,825,200
+---
+SECONDARY REVENUE: ADD-ON MODULES & SERVICES
+ADD-ON 1: Premium Support SLA (Available Year 2+)
+Price: £30/month per customer
+• 2-hour response time (vs 24-48 hours)
+• Phone support access
+• Dedicated support agent
+• Proactive health checks
+Target: 10% of Professional tier customers
+Year 3 Revenue: 119 customers × £30 = £3,570/month
+ADD-ON 2: Extra User Seats (Professional tier)
+Price: £20/month per additional user (beyond 5 seats)
+• Unlimited users with this add-on
+Target: 15% of Professional tier customers (avg 3 extra seats)
+Year 3 Revenue: 178 customers × 3 seats × £20 = £10,680/month
+ADD-ON 3: API Access (Basic tier users)
+Price: £50/month
+• 500 API calls/day
+• Enables custom integrations for Basic tier
+Target: 5% of Basic tier customers
+Year 3 Revenue: 167 customers × £50 = £8,350/month
+ADD-ON 4: White-Label Partnership (Accounting Firms)
+Price: £100/month per firm + £5/client/month
+• Accounting firm can rebrand FinFlow for their clients
+• Firm charges their own pricing
+• We provide backend + support
+Target: 15 accounting firms by Year 3 (avg 30 clients each)
+Year 3 Revenue: (15 firms × £100) + (450 clients × £5) = £3,750/month
+Total Add-On Revenue Year 3: £26,350/month (£316,200/year)
+---
+ONE-TIME REVENUE: ONBOARDING & SETUP
+Standard Onboarding: £0 (Included)
+• Self-service for Basic tier
+• Automated bank connection via Plaid
+• Product walkthrough videos
+• Email onboarding sequence
+Professional Onboarding: £0 (Included)
+• 30-minute kickoff call
+• Accounting software integration support
+• Team training (up to 5 users)
+Enterprise Onboarding Fee: £500 one-time
+• 2-hour personalized training session
+• Custom integration setup (if needed)
+• Dedicated onboarding specialist
+• Multi-entity configuration
+Target: 238 Enterprise customers Year 3
+Year 3 Revenue: 238 × £500 = £119,000 (one-time)
+Implementation Services (Large Customers): £1,500-3,000
+• For complex ERP integrations
+• Custom data migration
+• Bespoke reporting setup
+Target: 10 customers Year 3
+Year 3 Revenue: 10 × £2,000 avg = £20,000 (one-time)
+Total One-Time Revenue Year 3: £139,000
+---
+FUTURE REVENUE STREAMS (Year 4+):
+Financing Marketplace (Year 4):
+• Partner with lenders for cash flow-based loans
+• Revenue share: 1% of loan value
+• Example: £50K loan = £500 revenue
+• Target: 200 loans/year = £100K/year
+Data & Insights (Year 5):
+• Anonymized SME cash flow benchmark reports
+• Sold to banks, investors, researchers
+• Price: £10K-50K per report
+• Target: 5 reports/year = £150K/year
+---
+3-YEAR REVENUE SUMMARY:
+Year 1:
+• Subscription Revenue: £171,600
+• Add-On Revenue: £0 (not launched)
+• One-Time Revenue: £0 (free onboarding)
+• Total Year 1: £171,600
+Year 2:
+• Subscription Revenue: £1,067,400
+• Add-On Revenue: £45,000
+• One-Time Revenue: £28,000
+• Total Year 2: £1,140,400
+Year 3:
+• Subscription Revenue: £2,857,000
+• Add-On Revenue: £316,200
+• One-Time Revenue: £139,000
+• Total Year 3: £3,312,200
+3-Year Total Revenue: £4,624,200
+---
+REVENUE METRICS & UNIT ECONOMICS:
+Customer Lifetime Value (LTV):
+• Average customer lifetime: 54 months (4.5 years)
+• Average ARPU (blended): £75/month
+• Gross margin: 87%
+• LTV = £75 × 54 × 87% = £3,524
+Customer Acquisition Cost (CAC):
+• Year 1: £180 (high due to startup costs)
+• Year 2: £160 (efficiency gains)
+• Year 3: £140 (partnership channel reduces CAC)
+LTV:CAC Ratio:
+• Year 1: 19.6:1 (£3,524 / £180)
+• Year 3: 25.2:1 (£3,524 / £140)
+• Target: >3:1 (we significantly exceed)
+CAC Payback Period:
+• Year 1: 3.5 months (£180 / (£60 × 87%))
+• Year 3: 2.2 months (£140 / (£75 × 87%))
+• Target: <12 months (we significantly beat)
+Monthly Recurring Revenue (MRR) Growth:
+• Month 1: £600
+• Month 12: £39,600 (6,500% growth)
+• Month 24: £166,140 (320% YoY growth)
+• Month 36: £402,100 (142% YoY growth)
+Net Revenue Retention (NRR):
+• Year 2: 105% (upsells offset churn)
+• Year 3: 115% (tier upgrades + add-ons)
+• Target: >100% (indicates healthy expansion revenue)
+Churn Rate:
+• Year 1: 5% monthly (23% customers churn during year)
+• Year 2: 3% monthly (product-market fit improving)
+• Year 3: 2.5% monthly (mature product, strong retention)
+• Target: <5% monthly (we achieve by Year 2)
+This revenue model demonstrates:
+✅ Clear pricing tiers aligned with customer segments
+✅ Expansion revenue opportunities (upsells, add-ons)
+✅ Strong unit economics (25:1 LTV:CAC, 2.2-month payback)
+✅ Sustainable growth (142% MRR growth Year 3)
+✅ Multiple revenue streams (subscriptions, add-ons, services)
+✅ Path to £4.6M revenue in 3 years
