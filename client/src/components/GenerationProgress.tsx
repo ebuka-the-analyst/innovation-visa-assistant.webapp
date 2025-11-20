@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Download, CheckCircle, Home, FileText, Mail } from "lucide-react";
+import { Download, CheckCircle, Home, FileText, Mail, Share2, Send, Linkedin, RefreshCw, LayoutDashboard } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -223,6 +223,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 <p className="text-lg font-semibold">Business Plan Complete!</p>
               </div>
               
+              {/* Primary action - Download */}
               <Button
                 size="lg"
                 className="w-full"
@@ -233,8 +234,63 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 Download Your Business Plan
               </Button>
 
+              {/* Share & Action Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const subject = `${tier.charAt(0).toUpperCase() + tier.slice(1)} Business Plan - ${pdfUrl.split('/').pop()}`;
+                    const body = `I've generated my UK Innovation Visa business plan using VisaPrep AI.\n\nView it here: ${window.location.origin}${pdfUrl}\n\nBest regards`;
+                    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                  }}
+                  data-testid="button-share-email"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Email Share
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const text = `Just generated my UK Innovation Visa business plan with VisaPrep AI! 🚀 #InnovationVisa #StartupUK`;
+                    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + pdfUrl)}`;
+                    window.open(url, '_blank', 'width=600,height=600');
+                  }}
+                  data-testid="button-share-linkedin"
+                >
+                  <Linkedin className="w-4 h-4 mr-2" />
+                  LinkedIn
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    toast({
+                      title: "Request Revision",
+                      description: "Our team will review your request within 24 hours. Check your email for updates.",
+                    });
+                    window.location.href = `mailto:support@visaprepai.com?subject=Revision Request - Plan ${planId}&body=Please describe the changes you'd like to make to your business plan:`;
+                  }}
+                  data-testid="button-request-revision"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Request Revision
+                </Button>
+                
+                <Link href="/dashboard" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    data-testid="button-view-dashboard"
+                  >
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    View Dashboard
+                  </Button>
+                </Link>
+              </div>
+
               <div className="pt-4 border-t border-border">
-                <p className="text-sm font-medium text-muted-foreground mb-3 text-center">What's Next?</p>
+                <p className="text-sm font-medium text-muted-foreground mb-3 text-center">Quick Actions</p>
                 <div className="space-y-2">
                   <Link href="/questionnaire">
                     <Button
