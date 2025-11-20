@@ -7,6 +7,8 @@ import { z } from "zod";
 import { generateVerificationCode, generateVerificationEmail, sendEmail } from "./email";
 
 export function setupAuthRoutes(app: Express) {
+  const EMAIL_VERIFICATION_REQUIRED = process.env.EMAIL_VERIFICATION_REQUIRED === 'true';
+  
   // Sign up with email/password
   app.post("/api/auth/signup", async (req, res) => {
     try {
@@ -18,39 +20,61 @@ export function setupAuthRoutes(app: Express) {
       }
 
       const hashedPassword = await bcrypt.hash(validated.password, 10);
-      const verificationCode = generateVerificationCode();
-      const codeExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+      const verificationCode = EMAIL_VERIFICATION_REQUIRED ? generateVerificationCode() : null;
+      const codeExpiresAt = EMAIL_VERIFICATION_REQUIRED ? new Date(Date.now() + 15 * 60 * 1000) : null;
       
       const user = await storage.createUser({
         email: validated.email,
         password: hashedPassword,
         displayName: validated.displayName,
         googleId: null,
-        emailVerified: false,
+        emailVerified: !EMAIL_VERIFICATION_REQUIRED, // Auto-verify if not required
         verificationCode,
         codeExpiresAt,
-        lastCodeSentAt: new Date(),
+        lastCodeSentAt: EMAIL_VERIFICATION_REQUIRED ? new Date() : null,
         verificationAttempts: 0,
       });
 
-      // Send verification email
-      const emailHtml = generateVerificationEmail(verificationCode, validated.displayName);
-      const emailResult = await sendEmail({
-        to: validated.email,
-        subject: "Verify your VisaPrep AI account",
-        html: emailHtml,
-      });
+      // Send verification email only if required
+      if (EMAIL_VERIFICATION_REQUIRED && verificationCode) {
+        const emailHtml = generateVerificationEmail(verificationCode, validated.displayName);
+        const emailResult = await sendEmail({
+          to: validated.email,
+          subject: "Verify your VisaPrep AI account",
+          html: emailHtml,
+        });
 
-      if (!emailResult.success) {
-        console.error("Failed to send verification email:", emailResult.error);
+        if (!emailResult.success) {
+          console.error("Failed to send verification email:", emailResult.error);
+        }
+
+        res.json({ 
+          success: true, 
+          message: "Account created! Please check your email for verification code.",
+          userId: user.id,
+          email: user.email,
+          requiresVerification: true,
+        });
+      } else {
+        // Auto-login if verification not required
+        req.login(user, (err) => {
+          if (err) {
+            return res.status(500).json({ error: "Auto-login failed" });
+          }
+          res.json({ 
+            success: true, 
+            message: "Account created successfully!",
+            userId: user.id,
+            email: user.email,
+            requiresVerification: false,
+            user: {
+              id: user.id,
+              email: user.email,
+              displayName: user.displayName,
+            }
+          });
+        });
       }
-
-      res.json({ 
-        success: true, 
-        message: "Account created! Please check your email for verification code.",
-        userId: user.id,
-        email: user.email,
-      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors[0].message });
