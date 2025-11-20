@@ -78,16 +78,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payment/create-checkout", async (req, res) => {
+  app.post("/api/payment/create-checkout", requireAuth, async (req, res) => {
     try {
       const { planId } = req.body;
+      const user = req.user as any;
       
       if (!planId) {
         return res.status(400).json({ error: "Plan ID is required" });
       }
 
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan) {
+      if (!businessPlan || businessPlan.userId !== user.id) {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
@@ -132,16 +133,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payment/verify", async (req, res) => {
+  app.post("/api/payment/verify", requireAuth, async (req, res) => {
     try {
       const { sessionId, planId } = req.body;
+      const user = req.user as any;
 
       if (!sessionId || !planId) {
         return res.status(400).json({ error: "Session ID and Plan ID required" });
       }
 
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan) {
+      if (!businessPlan || businessPlan.userId !== user.id) {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
@@ -168,16 +170,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/generate/start", async (req, res) => {
+  app.post("/api/generate/start", requireAuth, async (req, res) => {
     try {
       const { planId } = req.body;
+      const user = req.user as any;
 
       if (!planId) {
         return res.status(400).json({ error: "Plan ID is required" });
       }
 
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan) {
+      if (!businessPlan || businessPlan.userId !== user.id) {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
@@ -216,12 +219,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/generate/status/:planId", async (req, res) => {
+  app.get("/api/generate/status/:planId", requireAuth, async (req, res) => {
     try {
       const { planId } = req.params;
+      const user = req.user as any;
       
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan) {
+      if (!businessPlan || businessPlan.userId !== user.id) {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
@@ -235,6 +239,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Status check error:", error);
       res.status(500).json({ error: "Failed to check status" });
+    }
+  });
+
+  app.post("/api/chat", requireAuth, async (req, res) => {
+    try {
+      const { message, planId, conversationHistory } = req.body;
+      const user = req.user as any;
+
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      let contextInfo = '';
+      
+      // If planId is provided, verify ownership
+      if (planId) {
+        const businessPlan = await storage.getBusinessPlan(planId);
+        
+        // CRITICAL SECURITY: Return 404 if plan doesn't exist or isn't owned by user
+        if (!businessPlan || businessPlan.userId !== user.id) {
+          return res.status(404).json({ error: "Business plan not found" });
+        }
+        
+        // Plan exists and is owned by user - add context
+        contextInfo = `
+USER'S BUSINESS PLAN CONTEXT:
+- Business Name: ${businessPlan.businessName}
+- Industry: ${businessPlan.industry}
+- Tier: ${businessPlan.tier}
+- Status: ${businessPlan.status}
+- Innovation Stage: ${businessPlan.innovationStage || 'Not specified'}
+- Problem: ${businessPlan.problem ? businessPlan.problem.substring(0, 200) + '...' : 'Not specified'}
+- Funding: £${businessPlan.funding?.toLocaleString() || '0'}
+- Job Creation Target: ${businessPlan.jobCreation || 'Not specified'}
+`;
+      }
+      // If no planId, chat continues without business plan context (general visa questions)
+
+      const systemPrompt = `You are an expert UK Innovation Visa consultant with 15+ years of experience. 
+You help entrepreneurs understand visa requirements, improve their business plans, and navigate the endorsing body application process.
+
+Key areas of expertise:
+1. UK Innovation Visa criteria (Innovation, Viability, Scalability)
+2. Endorsing bodies (Tech Nation, Innovator International, universities)
+3. Business plan requirements and common rejection reasons
+4. Financial modeling for visa applications
+5. Evidence requirements and supporting documentation
+
+${contextInfo}
+
+Guidelines:
+- Provide specific, actionable advice
+- Reference official UKVI guidance when relevant
+- Be honest about challenges and typical approval rates
+- Suggest concrete next steps when possible
+- Keep responses concise (2-3 paragraphs max unless asked for detail)
+- If you don't know something, admit it and suggest where to find the answer`;
+
+      const messages = [
+        { role: "system" as const, content: systemPrompt },
+        ...(conversationHistory || []).slice(-4).map((msg: any) => ({
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content
+        })),
+        { role: "user" as const, content: message }
+      ];
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4-turbo-preview",
+        messages,
+        temperature: 0.7,
+        max_tokens: 500,
+      });
+
+      const response = completion.choices[0]?.message?.content || 
+        "I apologize, but I'm having trouble generating a response. Please try again.";
+
+      res.json({ response });
+    } catch (error) {
+      console.error("Chat error:", error);
+      res.status(500).json({ error: "Failed to generate response" });
     }
   });
 
@@ -400,12 +485,13 @@ ${generatedSections.join('\n\n---\n\n')}`;
     });
   }
 
-  app.get("/api/download/pdf/:planId", async (req, res) => {
+  app.get("/api/download/pdf/:planId", requireAuth, async (req, res) => {
     try {
       const { planId } = req.params;
+      const user = req.user as any;
       
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan) {
+      if (!businessPlan || businessPlan.userId !== user.id) {
         return res.status(404).send(`
           <html><body style="font-family: sans-serif; padding: 40px; text-align: center;">
             <h1>Business Plan Not Found</h1>

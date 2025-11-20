@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award } from "lucide-react";
 import { AuthHeader } from "@/components/AuthHeader";
+import Chatbot from "@/components/Chatbot";
 import type { BusinessPlan } from "@shared/schema";
 import { format } from "date-fns";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip } from "recharts";
@@ -400,6 +401,9 @@ export default function Dashboard() {
           </Card>
         )}
       </main>
+      
+      {/* Floating Chatbot */}
+      <Chatbot planId={completedPlan?.id} />
     </div>
   );
 }
