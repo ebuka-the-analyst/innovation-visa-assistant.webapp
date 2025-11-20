@@ -445,7 +445,7 @@ Generate a complete, evidence-based business plan that an experienced endorsing 
         { role: "user", content: userPrompt },
       ],
       temperature: 0.6,
-      max_tokens: 16000,
+      max_tokens: 4000,
     });
 
     const generatedContent = completion.choices[0]?.message?.content || "";
