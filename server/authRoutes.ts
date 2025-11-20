@@ -57,6 +57,8 @@ export function setupAuthRoutes(app: Express) {
         });
       } else {
         // Auto-login if verification not required
+        console.log(`Auto-verified account created: ${user.email} (verification disabled via feature flag)`);
+        
         req.login(user, (err) => {
           if (err) {
             return res.status(500).json({ error: "Auto-login failed" });
