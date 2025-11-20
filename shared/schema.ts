@@ -72,7 +72,9 @@ export const businessPlans = pgTable("business_plans", {
   generatedContent: text("generated_content"),
   pdfUrl: text("pdf_url"),
   status: varchar("status", { length: 20 }).notNull().default('pending'),
+  currentGenerationStage: text("current_generation_stage"),
   stripeSessionId: text("stripe_session_id"),
+  userId: varchar("user_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
