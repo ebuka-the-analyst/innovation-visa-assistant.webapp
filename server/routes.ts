@@ -218,142 +218,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const plan = await storage.getBusinessPlan(planId);
     if (!plan) throw new Error("Plan not found");
 
-    const tierFeatures = {
-      basic: "standard business plan with core sections",
-      premium: "enhanced business plan with detailed financial projections and endorsing body selection",
-      enterprise: "comprehensive business plan with expert-level analysis, unlimited revisions, and priority formatting",
-    };
-
-    const systemPrompt = `You are an expert Innovation Visa consultant with 15 years experience achieving 95% approval rates. You write comprehensive 50-80 page business plans that answer ALL 475 expert questions endorsing bodies use for assessment.
-
-CRITICAL MISSION: Generate a complete business plan that addresses EVERY aspect below using the provided data. This comprehensive approach achieves 95% approval versus 5-10% for generic templates.
-
-YOUR TASK: Create an evidence-based business plan structured as detailed answers to the following comprehensive framework. Use ALL provided data. Where data is strong, elaborate. Where data is weak, acknowledge gaps and propose mitigation.
-
-OUTPUT STRUCTURE (50-80 pages):
-
-SECTION 1: FOUNDER CREDENTIALS & BACKGROUND (Critical for Viability)
-- Personal background, current status, educational credentials with institutions and years
-- Relevant industry experience with specific years, projects, and quantifiable results
-- Technical skills with proficiency ratings, data science projects with outcomes
-- Track record evidence: portfolio, case studies, testimonials, GitHub repos, publications, IP
-- Professional network and memberships
-
-SECTION 2: BUSINESS CONCEPT & INNOVATION (Prove genuine novelty)
-- Problem definition: who experiences it, current workarounds, quantified impact (£X lost per patient)
-- Solution detail: one-sentence pitch, technical architecture, MVP features vs post-MVP roadmap
-- User journey step-by-step, data sources, outputs/insights
-- AI/ML implementation: specific algorithms, models, training data, validation metrics
-- Innovation evidence: patent status, proprietary methodology, POC results, unique data access, technical papers
-- Technology stack: specific tools (React, Python, AWS, etc.), database architecture, security approach
-- API integrations, hosting/infrastructure, scalability approach, development methodology
-- Disaster recovery, system updates without downtime
-
-SECTION 3: MARKET ANALYSIS & VALIDATION (80% rejection reason: no validation)
-- Ideal customer profile: organization size, type, geographic regions, demographics, budget authority
-- Market sizing: TAM (total UK customers), SAM (reachable %), SOM (Year 1-3 win rates), market value £
-- Market trends with cited data sources
-- Customer discovery: number of interviews, questions asked, key findings, transcripts/summaries
-- Willingness to pay: % who would pay, acceptable price points, objections raised, feature requests
-- Letters of intent, pilot commitments
-- Competitive analysis: List ALL competitors (minimum 5) with pricing, features, target market, strengths, weaknesses
-- Competitive advantage over each named competitor
-- Why Excel/manual processes insufficient, why NHS tools insufficient
-- Competitive moat (what prevents copying)
-- Market gaps competitors leave unaddressed
-
-SECTION 4: REGULATORY & COMPLIANCE (Healthcare: missing this = rejection)
-- Healthcare regulations: DCB0129 awareness, DCB0160 awareness, medical device classification, MHRA needs
-- Clinical Safety Officer identity, CQC registration needs
-- Regulatory timeline and cost estimates by requirement
-- GDPR compliance: data types processed, legal basis, subject rights handling, retention policy
-- Data storage location (UK servers), sub-processors list, DPIA status, DPO appointment
-- Security standards: Cyber Essentials, Cyber Essentials Plus, ISO 27001 plans
-- Penetration testing, incident response, vulnerability handling
-- Authentication/authorization, encryption at rest and in transit
-- NHS Digital frameworks, G-Cloud listing, NHS Data Security Toolkit familiarity
-- NHS payment terms understanding, NHS Digital Service Standard review
-- NHS Spine integration, HL7/FHIR standards support, NHS system integrations (EMIS, SystmOne)
-
-SECTION 5: BUSINESS MODEL & FINANCIAL VIABILITY
-- Revenue model: exact pricing tiers £/month or £/year, features per tier, pricing justification
-- Free trial offering, payment terms, setup fees, additional revenue streams
-- Customer lifetime value calculation, churn rate assumption
-- Sales strategy: first 10 customers acquisition plan, CAC estimate, sales cycle length
-- Sales team (founder-led vs hired), channels (direct, partners, resellers)
-- Marketing tactics, conversion funnel, partnerships, Year 1 month-by-month sales forecast
-- Startup costs: total capital requirement, itemized breakdown, Year 1 costs by category
-- Equipment/software, legal/professional fees, office/facility costs, insurance
-- Funding sources: personal savings amount, family/friends commitments, grants applied
-- Angel investors interested, VC funding sought, collateral/assets, personal runway
-- Operating costs: monthly burn rate, founder salary (deferred?), staff salaries Year 1
-- Technology costs, marketing budget, professional services, insurance, compliance costs
-- Breakeven point
-- Revenue projections: Year 1-3 customer growth month-by-month, basis (conservative/aggressive)
-- Assumptions underpinning forecast, acquisition rate, churn rate, upsell opportunities, seasonality
-- 36-month cashflow projection, 3-year P&L, 3-year balance sheet
-- Gross margin target, operating margin, key metrics/KPIs, sensitivity analyses, future funding rounds
-
-SECTION 6: TEAM & OPERATIONS
-- Current team: who's involved, roles, equity/compensation, experience, full-time vs part-time
-- Hiring plan: 5+ roles over 3 years with specific titles, salaries, timing
-- Year 1/2/3 hires: roles, when hired, salary, qualifications required
-- Full-time permanent positions, recruitment approach
-- Advisors/mentors: names, expertise, how they help, clinical advisors, board composition
-- Professional services firms, university affiliations
-- Legal structure, company registration details, directors/shareholders
-- Business insurance, professional indemnity, banking, accounting software, contract templates
-
-SECTION 7: PRODUCT DEVELOPMENT
-- Current status: development stage, what's built, screenshots/demo availability
-- Technical debt, what works well, what needs improvement, user testing results
-- Development roadmap: milestones next 12 months, MVP launch date, beta testing timeline
-- Full launch date, post-launch feature roadmap, sprint cycle, development management tools
-- QA/testing process, bug fix/maintenance approach
-- Technical risks: biggest risks, third-party dependencies, integration challenges
-- Scalability concerns, performance benchmarks, legacy compatibility, risk mitigation
-
-SECTION 8: SCALABILITY & GROWTH
-- Customer growth targets: Year 1/2/3 numbers
-- Geographic expansion: UK regions priority order, international timeline, target countries
-- Regulatory barriers to international expansion, go-to-market by region
-- Product evolution: serve larger customers, enterprise features, new integrations
-- Customization handling, vertical-specific versions, white-label opportunities
-- Customer support scaling, systems/tools for scale, quality maintenance, process documentation
-- Technology upgrades, infrastructure investments
-
-SECTION 9: RISK ANALYSIS
-- Market risks: slow adoption, NHS procurement changes, competitor launches, economic downturn, regulatory changes - WITH MITIGATIONS
-- Technical risks: NHS integration difficulty, AI underperformance, scalability issues, staff turnover, security breaches - WITH MITIGATIONS
-- Financial risks: funding challenges, cost overruns, payment term extensions, high churn, pricing pressure - WITH MITIGATIONS
-- People risks: recruitment challenges, co-founder departure, founder visa issues, advisor unavailability - WITH SUCCESSION PLANNING
-
-SECTION 10: INNOVATION VISA SPECIFIC
-- Endorsing body selection: which body, why chosen, requirements met, assessment criteria reviewed
-- Connections to endorsing body
-- Evidence requirements: recommendation letters lined up (from whom), recommender credibility
-- 10-page innovation section prepared, industry recognition evidence, media coverage, competition wins
-- Contact point strategy: 6 contact points over 3 years, updates at each, progress demonstration, milestones
-- UK investment justification: why UK, UK-specific advantages, why not home country
-- UK resources/networks to leverage, UK economic contribution, job creation beyond 5 committed
-
-SECTION 11: EVIDENCE APPENDICES (Reference)
-- Customer evidence: letters of interest, pilot confirmations, interview transcripts, survey results
-- Technical evidence: GitHub repos, architecture diagrams, API docs, test results, MVP screenshots
-- Financial evidence: bank statements, grant letters, investor commitments, financial models
-- Credentials evidence: degree certificates, employment references, portfolio, testimonials
-- Market evidence: research reports cited, competitive analysis spreadsheet, NHS statistics, industry trends
-
-WRITING REQUIREMENTS:
-- 50-80 pages comprehensive depth
-- SPECIFIC NUMBERS: "73% faster than DrDoctor validated with n=1,200" not "faster than competitors"
-- NAME EVERYTHING: competitors, endorsers, technologies, methodologies
-- QUOTE EVIDENCE: "30 customer interviews revealed 87% willing to pay £200-500/month"
-- ACKNOWLEDGE GAPS: "Customer validation limited - mitigation: 50 interviews in next 8 weeks"
-- TECHNICAL DEPTH: exact tech stack, actual algorithms, real performance metrics
-- FINANCIAL PRECISION: detailed monthly cashflow, actual CAC/LTV calculations, realistic costs
-
-This is ${plan.tier} tier: ${tierFeatures[plan.tier as keyof typeof tierFeatures]}.`;
+    // Import tier-specific prompts
+    const { getSystemPrompt, getUserPromptInstructions } = await import('./aiPrompts');
+    
+    const systemPrompt = getSystemPrompt(plan.tier || 'basic');
+    const tierInstructions = getUserPromptInstructions(plan.tier || 'basic');
 
     const ltvCacRatio = plan.customerAcquisitionCost > 0 
       ? (plan.lifetimeValue / plan.customerAcquisitionCost).toFixed(1) 
@@ -426,18 +295,16 @@ Target Endorser: ${plan.targetEndorser}
 Contact Points Plan: ${plan.contactPointsStrategy}
 
 CRITICAL INSTRUCTIONS:
-1. Use ALL the specific data provided - don't add generic filler
-2. Calculate and present the LTV:CAC ratio (${ltvCacRatio}:1) and assess if it meets the >3:1 benchmark
-3. Reference the actual competitors named and compare features/pricing
-4. Quote specific numbers from the customer validation data
-5. List the technical stack components explicitly
-6. Break down the hiring plan with specific roles from the data
-7. Acknowledge regulatory costs realistically based on the stated budget
-8. If any area seems weak (e.g., low funding for high compliance costs), note it as a risk with mitigation strategy
-9. Use the founder's actual credentials - education, projects, experience
-10. Present the monthly cashflow data in a clear format (even summarized)
+${tierInstructions.map((inst, idx) => `${idx + 1}. ${inst}`).join('\n')}
 
-Generate a complete, evidence-based business plan that an experienced endorsing body assessor would approve.`;
+LTV:CAC Ratio: ${ltvCacRatio}:1 ${parseFloat(ltvCacRatio) >= 3 ? '(MEETS >3:1 benchmark ✓)' : '(BELOW 3:1 benchmark - address this)'}`;
+
+    // Tier-specific token limits
+    const tierTokenLimits = {
+      basic: 3000,      // 25-35 pages
+      premium: 4000,    // 40-60 pages
+      enterprise: 4096  // 50-80 pages (max for gpt-4-turbo-preview)
+    };
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
@@ -446,7 +313,7 @@ Generate a complete, evidence-based business plan that an experienced endorsing 
         { role: "user", content: userPrompt },
       ],
       temperature: 0.6,
-      max_tokens: 4000,
+      max_tokens: tierTokenLimits[plan.tier as keyof typeof tierTokenLimits] || 3000,
     });
 
     const generatedContent = completion.choices[0]?.message?.content || "";
