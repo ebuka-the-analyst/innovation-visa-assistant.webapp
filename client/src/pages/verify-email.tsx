@@ -53,31 +53,34 @@ export default function VerifyEmail() {
     setIsVerifying(true);
 
     try {
-      const response = await apiRequest({
-        url: "/api/auth/verify-code",
-        method: "POST",
-        data: { email, code },
-      });
+      const response = await apiRequest('POST', '/api/auth/verify-code', { email, code });
+      const data = await response.json();
 
-      toast({
-        title: "Email verified!",
-        description: "Welcome to VisaPrep AI. Redirecting...",
-      });
+      if (data.success) {
+        toast({
+          title: "Email verified!",
+          description: "Welcome to VisaPrep AI. Redirecting...",
+        });
 
-      setTimeout(() => {
-        setLocation("/dashboard");
-      }, 1000);
-    } catch (error: any) {
-      const errorMessage = error.message || "Verification failed";
-      
-      if (error.attemptsLeft !== undefined) {
-        setAttemptsLeft(error.attemptsLeft);
+        setTimeout(() => {
+          setLocation("/dashboard");
+        }, 1000);
+      } else {
+        if (data.attemptsLeft !== undefined) {
+          setAttemptsLeft(data.attemptsLeft);
+        }
+
+        toast({
+          variant: "destructive",
+          title: "Verification failed",
+          description: data.error || "Verification failed",
+        });
       }
-
+    } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Verification failed",
-        description: errorMessage,
+        title: "Error",
+        description: error instanceof Error ? error.message : "Verification failed",
       });
     } finally {
       setIsVerifying(false);
@@ -92,33 +95,38 @@ export default function VerifyEmail() {
     setIsResending(true);
 
     try {
-      await apiRequest({
-        url: "/api/auth/resend-code",
-        method: "POST",
-        data: { email },
-      });
+      const response = await apiRequest('POST', '/api/auth/resend-code', { email });
+      const data = await response.json();
 
-      toast({
-        title: "Code sent!",
-        description: "A new verification code has been sent to your email.",
-      });
+      if (data.success) {
+        toast({
+          title: "Code sent!",
+          description: "A new verification code has been sent to your email.",
+        });
 
-      setResendCooldown(120); // 2 minutes cooldown
-      setAttemptsLeft(5); // Reset attempts
-      setCode(""); // Clear input
-    } catch (error: any) {
-      const errorMessage = error.message || "Failed to resend code";
-      
-      // Extract wait time from error message
-      const waitMatch = errorMessage.match(/wait (\d+) seconds/);
-      if (waitMatch) {
-        setResendCooldown(parseInt(waitMatch[1]));
+        setResendCooldown(120); // 2 minutes cooldown
+        setAttemptsLeft(5); // Reset attempts
+        setCode(""); // Clear input
+      } else {
+        const errorMessage = data.error || "Failed to resend code";
+        
+        // Extract wait time from error message
+        const waitMatch = errorMessage.match(/wait (\d+) seconds/);
+        if (waitMatch) {
+          setResendCooldown(parseInt(waitMatch[1]));
+        }
+
+        toast({
+          variant: "destructive",
+          title: "Failed to resend",
+          description: errorMessage,
+        });
       }
-
+    } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Failed to resend",
-        description: errorMessage,
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to resend code",
       });
     } finally {
       setIsResending(false);
