@@ -1,18 +1,16 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, LogOut } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { AuthHeader } from "@/components/AuthHeader";
 import type { BusinessPlan } from "@shared/schema";
 import { format } from "date-fns";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
 
   const { data: user, isLoading: userLoading } = useQuery<{ id: string; email: string; displayName?: string }>({
     queryKey: ['/api/auth/me'],
@@ -22,17 +20,6 @@ export default function Dashboard() {
   const { data: businessPlans, isLoading: plansLoading } = useQuery<BusinessPlan[]>({
     queryKey: ['/api/dashboard/plans'],
     enabled: !!user,
-  });
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest('POST', '/api/auth/logout', {});
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.clear();
-      setLocation("/login");
-    },
   });
 
   if (userLoading) {
@@ -68,27 +55,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
-      {/* Header */}
-      <header className="border-b bg-background/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">VisaPrep AI</h1>
-              <p className="text-sm text-muted-foreground">Welcome back, {user.displayName || user.email}</p>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline"
-                onClick={() => logoutMutation.mutate()}
-                data-testid="button-logout"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AuthHeader />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
