@@ -218,105 +218,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const plan = await storage.getBusinessPlan(planId);
     if (!plan) throw new Error("Plan not found");
 
-    // Import tier-specific prompts
-    const { getSystemPrompt, getUserPromptInstructions } = await import('./aiPrompts');
+    // Import section-based prompts
+    const { getSectionsForTier, getSectionSystemPrompt } = await import('./aiPrompts');
     
-    const systemPrompt = getSystemPrompt(plan.tier || 'basic');
-    const tierInstructions = getUserPromptInstructions(plan.tier || 'basic');
-
+    const sections = getSectionsForTier(plan.tier || 'basic');
     const ltvCacRatio = plan.customerAcquisitionCost > 0 
       ? (plan.lifetimeValue / plan.customerAcquisitionCost).toFixed(1) 
       : 'N/A';
 
-    const userPrompt = `Generate an endorsing body-ready business plan using this ACTUAL EVIDENCE:
-
+    // Build shared data context once
+    const sharedDataContext = `
 BUSINESS OVERVIEW:
-Name: ${plan.businessName}
-Industry: ${plan.industry}
-Innovation Stage: ${plan.innovationStage}
-Product Status: ${plan.productStatus}
-${plan.existingCustomers ? `Existing Customers: ${plan.existingCustomers}` : ''}
-${plan.tractionEvidence ? `Traction: ${plan.tractionEvidence}` : ''}
+- Name: ${plan.businessName}
+- Industry: ${plan.industry}
+- Innovation Stage: ${plan.innovationStage}
+- Product Status: ${plan.productStatus}
+${plan.existingCustomers ? `- Existing Customers: ${plan.existingCustomers}` : ''}
+${plan.tractionEvidence ? `- Traction: ${plan.tractionEvidence}` : ''}
 
 PROBLEM & SOLUTION:
 ${plan.problem}
 
 INNOVATION & TECHNICAL ARCHITECTURE:
-Differentiation: ${plan.uniqueness}
-Technology Stack: ${plan.techStack}
-Data Architecture: ${plan.dataArchitecture}
-AI/ML Methodology: ${plan.aiMethodology}
-Compliance Design: ${plan.complianceDesign}
-IP Status: ${plan.patentStatus}
+- Differentiation: ${plan.uniqueness}
+- Technology Stack: ${plan.techStack}
+- Data Architecture: ${plan.dataArchitecture}
+- AI/ML Methodology: ${plan.aiMethodology}
+- Compliance Design: ${plan.complianceDesign}
+- IP Status: ${plan.patentStatus}
 
 FOUNDER CREDENTIALS:
-Education: ${plan.founderEducation}
-Work History: ${plan.founderWorkHistory}
-Achievements: ${plan.founderAchievements}
-Relevant Projects: ${plan.relevantProjects}
-Additional Experience: ${plan.experience}
+- Education: ${plan.founderEducation}
+- Work History: ${plan.founderWorkHistory}
+- Achievements: ${plan.founderAchievements}
+- Relevant Projects: ${plan.relevantProjects}
+- Additional Experience: ${plan.experience}
 
 FINANCIAL MODEL:
-Initial Capital: £${plan.funding.toLocaleString()}
-Funding Sources: ${plan.fundingSources}
-Monthly Cashflow (36 months): ${plan.monthlyProjections}
-CAC: £${plan.customerAcquisitionCost.toLocaleString()}
-LTV: £${plan.lifetimeValue.toLocaleString()}
-LTV:CAC Ratio: ${ltvCacRatio}:1
-Payback Period: ${plan.paybackPeriod} months
-Cost Breakdown: ${plan.detailedCosts}
-Revenue Model: ${plan.revenue}
+- Initial Capital: £${plan.funding.toLocaleString()}
+- Funding Sources: ${plan.fundingSources}
+- Monthly Cashflow: ${plan.monthlyProjections}
+- CAC: £${plan.customerAcquisitionCost.toLocaleString()}
+- LTV: £${plan.lifetimeValue.toLocaleString()}
+- LTV:CAC Ratio: ${ltvCacRatio}:1 ${parseFloat(ltvCacRatio) >= 3 ? '(MEETS >3:1 benchmark ✓)' : '(BELOW 3:1 - address this)'}
+- Payback Period: ${plan.paybackPeriod} months
+- Cost Breakdown: ${plan.detailedCosts}
+- Revenue Model: ${plan.revenue}
 
 COMPETITIVE ANALYSIS:
-Competitors: ${plan.competitors}
-Competitive Advantage: ${plan.competitiveDifferentiation}
+- Competitors: ${plan.competitors}
+- Competitive Advantage: ${plan.competitiveDifferentiation}
 
 MARKET VALIDATION:
-Customer Interviews: ${plan.customerInterviews}
-${plan.lettersOfIntent ? `Letters of Intent: ${plan.lettersOfIntent}` : ''}
-Willingness to Pay: ${plan.willingnessToPay}
-Market Size (TAM/SAM/SOM): ${plan.marketSize}
+- Customer Interviews: ${plan.customerInterviews}
+${plan.lettersOfIntent ? `- Letters of Intent: ${plan.lettersOfIntent}` : ''}
+- Willingness to Pay: ${plan.willingnessToPay}
+- Market Size (TAM/SAM/SOM): ${plan.marketSize}
 
 REGULATORY & COMPLIANCE:
-Requirements: ${plan.regulatoryRequirements}
-Timeline: ${plan.complianceTimeline}
-Budget: £${plan.complianceBudget.toLocaleString()}
+- Requirements: ${plan.regulatoryRequirements}
+- Timeline: ${plan.complianceTimeline}
+- Budget: £${plan.complianceBudget.toLocaleString()}
 
 SCALABILITY & GROWTH:
-Job Creation Target: ${plan.jobCreation} employees in 3 years
-Hiring Plan: ${plan.hiringPlan}
-Geographic Focus: ${plan.specificRegions}
-Expansion Strategy: ${plan.expansion}
-${plan.internationalPlan ? `International Plans: ${plan.internationalPlan}` : ''}
-5-Year Vision: ${plan.vision}
+- Job Creation Target: ${plan.jobCreation} employees in 3 years
+- Hiring Plan: ${plan.hiringPlan}
+- Geographic Focus: ${plan.specificRegions}
+- Expansion Strategy: ${plan.expansion}
+${plan.internationalPlan ? `- International Plans: ${plan.internationalPlan}` : ''}
+- 5-Year Vision: ${plan.vision}
 
 ENDORSER STRATEGY:
-Target Endorser: ${plan.targetEndorser}
-Contact Points Plan: ${plan.contactPointsStrategy}
+- Target Endorser: ${plan.targetEndorser}
+- Contact Points Plan: ${plan.contactPointsStrategy}`;
 
-CRITICAL INSTRUCTIONS:
-${tierInstructions.map((inst, idx) => `${idx + 1}. ${inst}`).join('\n')}
+    // Generate sections sequentially with multi-pass approach
+    const generatedSections: string[] = [];
+    
+    console.log(`Starting multi-pass generation for ${sections.length} sections (${plan.tier} tier)`);
+    
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      console.log(`Generating section ${i + 1}/${sections.length}: ${section.title}`);
+      
+      const sectionSystemPrompt = getSectionSystemPrompt(
+        plan.tier || 'basic',
+        section,
+        i + 1,
+        sections.length
+      );
+      
+      const sectionUserPrompt = `${sharedDataContext}
 
-LTV:CAC Ratio: ${ltvCacRatio}:1 ${parseFloat(ltvCacRatio) >= 3 ? '(MEETS >3:1 benchmark ✓)' : '(BELOW 3:1 benchmark - address this)'}`;
+Write the complete narrative for: ${section.title}
 
-    // Tier-specific token limits
-    const tierTokenLimits = {
-      basic: 3000,      // 25-35 pages
-      premium: 4000,    // 40-60 pages
-      enterprise: 4096  // 50-80 pages (max for gpt-4-turbo-preview)
-    };
+Remember: Write FULL prose content for this section. No outlines or placeholders. Use ALL relevant data above.`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.6,
-      max_tokens: tierTokenLimits[plan.tier as keyof typeof tierTokenLimits] || 3000,
-    });
+      try {
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4-turbo-preview",
+          messages: [
+            { role: "system", content: sectionSystemPrompt },
+            { role: "user", content: sectionUserPrompt },
+          ],
+          temperature: 0.6,
+          max_tokens: section.maxTokens,
+        });
 
-    const generatedContent = completion.choices[0]?.message?.content || "";
+        const sectionContent = completion.choices[0]?.message?.content || "";
+        generatedSections.push(`\n\n## ${section.title}\n\n${sectionContent}`);
+        
+        console.log(`✓ Section ${i + 1} complete (${sectionContent.length} chars)`);
+      } catch (error) {
+        console.error(`Error generating section ${i + 1}:`, error);
+        generatedSections.push(`\n\n## ${section.title}\n\n[Generation failed for this section]`);
+      }
+    }
+
+    // Stitch all sections together
+    const generatedContent = `# BUSINESS PLAN: ${plan.businessName}
+**Industry:** ${plan.industry}
+**Tier:** ${plan.tier?.toUpperCase()}
+**Generated:** ${new Date().toLocaleDateString('en-GB')}
+
+---
+
+${generatedSections.join('\n\n---\n\n')}`;
 
     const pdfUrl = generatePDFUrl(planId);
 
