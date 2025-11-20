@@ -76,12 +76,22 @@ export function setupAuth(app: Express) {
               
               if (user) {
                 await storage.linkGoogleAccount(user.id, profile.id);
+                // Verify email if not already verified (Google emails are trusted)
+                if (!user.emailVerified) {
+                  await storage.verifyUserEmail(user.id);
+                }
               } else {
+                // New Google user - create with verified email
                 user = await storage.createUser({
                   email,
                   googleId: profile.id,
                   displayName: profile.displayName || email.split('@')[0],
                   password: null,
+                  emailVerified: true, // Google emails are pre-verified
+                  verificationCode: null,
+                  codeExpiresAt: null,
+                  lastCodeSentAt: null,
+                  verificationAttempts: 0,
                 });
               }
             }

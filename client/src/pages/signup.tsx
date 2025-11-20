@@ -31,9 +31,10 @@ export default function Signup() {
       if (data.success) {
         toast({
           title: "Account created!",
-          description: "Welcome to VisaPrep AI.",
+          description: "Please check your email for verification code.",
         });
-        setLocation("/dashboard");
+        // Redirect to verification page with email in URL
+        setLocation(`/verify-email?email=${encodeURIComponent(email)}`);
       } else {
         toast({
           title: "Signup Failed",

@@ -10,6 +10,9 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   linkGoogleAccount(userId: string, googleId: string): Promise<void>;
   getUserBusinessPlans(userId: string): Promise<BusinessPlan[]>;
+  verifyUserEmail(userId: string): Promise<void>;
+  incrementVerificationAttempts(userId: string): Promise<void>;
+  updateVerificationCode(userId: string, code: string, expiresAt: Date): Promise<void>;
   
   // Business plan management
   getBusinessPlan(id: string): Promise<BusinessPlan | undefined>;
@@ -74,6 +77,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(businessPlans.stripeSessionId, sessionId))
       .limit(1);
     return result[0];
+  }
+
+  async verifyUserEmail(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        emailVerified: true,
+        verificationCode: null,
+        codeExpiresAt: null,
+        verificationAttempts: 0
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async incrementVerificationAttempts(userId: string): Promise<void> {
+    const user = await this.getUserById(userId);
+    if (user) {
+      await db
+        .update(users)
+        .set({ verificationAttempts: user.verificationAttempts + 1 })
+        .where(eq(users.id, userId));
+    }
+  }
+
+  async updateVerificationCode(userId: string, code: string, expiresAt: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        verificationCode: code,
+        codeExpiresAt: expiresAt,
+        lastCodeSentAt: new Date(),
+        verificationAttempts: 0
+      })
+      .where(eq(users.id, userId));
   }
 }
 

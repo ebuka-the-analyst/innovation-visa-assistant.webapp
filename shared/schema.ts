@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -9,6 +9,11 @@ export const users = pgTable("users", {
   password: text("password"), // Null for Google OAuth users
   googleId: text("google_id").unique(), // For Google OAuth
   displayName: text("display_name"),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  verificationCode: text("verification_code"),
+  codeExpiresAt: timestamp("code_expires_at"),
+  lastCodeSentAt: timestamp("last_code_sent_at"),
+  verificationAttempts: integer("verification_attempts").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
