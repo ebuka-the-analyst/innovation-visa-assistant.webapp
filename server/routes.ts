@@ -179,11 +179,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      await storage.updateBusinessPlan(planId, { status: 'generating' });
+      await storage.updateBusinessPlan(planId, { 
+        status: 'generating',
+        currentGenerationStage: 'Starting generation - preparing AI agents...'
+      });
 
       generateBusinessPlan(planId).catch(error => {
         console.error("Background generation error:", error);
-        storage.updateBusinessPlan(planId, { status: 'failed' });
+        storage.updateBusinessPlan(planId, { 
+          status: 'failed',
+          currentGenerationStage: 'Generation failed'
+        });
       });
 
       res.json({ success: true, message: "Generation started" });
@@ -206,7 +212,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: businessPlan.status,
         generatedContent: businessPlan.generatedContent,
         pdfUrl: businessPlan.pdfUrl,
-        tier: businessPlan.tier
+        tier: businessPlan.tier,
+        currentGenerationStage: businessPlan.currentGenerationStage
       });
     } catch (error) {
       console.error("Status check error:", error);
@@ -297,8 +304,24 @@ ENDORSER STRATEGY:
     
     console.log(`Starting multi-pass generation for ${sections.length} sections (${plan.tier} tier)`);
     
+    // Helper to get stage description based on progress
+    const getStageDescription = (sectionIndex: number, total: number): string => {
+      const progress = sectionIndex / total;
+      if (progress === 0) return 'Starting generation - analyzing your business model...';
+      if (progress < 0.3) return `Analyzing - Section ${sectionIndex}/${total}: ${sections[sectionIndex - 1]?.title || ''}`;
+      if (progress < 0.7) return `Building business plan - Section ${sectionIndex}/${total}: ${sections[sectionIndex - 1]?.title || ''}`;
+      if (progress < 0.9) return `Proofreading - Section ${sectionIndex}/${total}: ${sections[sectionIndex - 1]?.title || ''}`;
+      return 'Finalizing your business plan - almost ready...';
+    };
+    
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i];
+      
+      // Update stage in real-time
+      await storage.updateBusinessPlan(planId, {
+        currentGenerationStage: getStageDescription(i, sections.length)
+      });
+      
       console.log(`Generating section ${i + 1}/${sections.length}: ${section.title}`);
       
       const sectionSystemPrompt = getSectionSystemPrompt(
@@ -334,6 +357,11 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
         generatedSections.push(`\n\n## ${section.title}\n\n[Generation failed for this section]`);
       }
     }
+    
+    // Update to finalizing stage before PDF generation
+    await storage.updateBusinessPlan(planId, {
+      currentGenerationStage: 'Finalizing - generating your PDF document...'
+    });
 
     // Stitch all sections together
     const generatedContent = `# BUSINESS PLAN: ${plan.businessName}
@@ -351,6 +379,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       status: 'completed',
       generatedContent,
       pdfUrl,
+      currentGenerationStage: 'Complete - your business plan is ready!'
     });
   }
 
