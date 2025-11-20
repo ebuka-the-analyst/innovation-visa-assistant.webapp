@@ -164,18 +164,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
-      if (businessPlan.status !== 'paid') {
-        return res.status(403).json({ 
-          error: "Payment verification required before generation",
-          currentStatus: businessPlan.status 
-        });
-      }
-
       if (businessPlan.status === 'generating' || businessPlan.status === 'completed') {
         return res.json({ 
           success: true, 
           message: "Generation already in progress or completed",
           status: businessPlan.status 
+        });
+      }
+
+      if (businessPlan.status !== 'paid') {
+        return res.status(403).json({ 
+          error: "Payment verification required before generation",
+          currentStatus: businessPlan.status 
         });
       }
 
@@ -223,43 +223,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
       enterprise: "comprehensive business plan with expert-level analysis, unlimited revisions, and priority formatting",
     };
 
-    const systemPrompt = `You are an expert business plan writer specializing in UK Innovation Visa applications. Generate a comprehensive, professional business plan that addresses all three visa criteria: Innovation, Viability, and Scalability.
+    const systemPrompt = `You are a senior business plan consultant with 15+ years experience advising on UK Innovation Visa applications for Tech Nation, Global Entrepreneurs Programme, and university endorsers. You understand what assessors look for and how to present evidence-based, credible applications that pass technical review.
 
-The plan should be formatted for endorsing bodies like Tech Nation and Innovate UK. This is a ${plan.tier} tier plan requiring ${tierFeatures[plan.tier as keyof typeof tierFeatures]}.
+CRITICAL REQUIREMENTS (from actual endorsing body feedback):
+1. NO VAGUE BUZZWORDS - Every claim must be specific, measurable, and evidenced
+2. NO GENERIC TEMPLATES - Tailor content to actual data provided
+3. TECHNICAL CREDIBILITY - Assessors have technical experts who reject hand-waving
+4. EVIDENCE-BASED - Reference specific metrics, validation studies, customer quotes
+5. FINANCIAL REALISM - Cashflow must align with stated funding and costs
+6. REGULATORY AWARENESS - Show understanding of compliance requirements for the sector
 
-Structure the plan with these sections:
-1. Executive Summary
-2. Business Description
-3. Market Analysis
-4. Innovation Statement (addressing uniqueness and competitive advantage)
-5. Viability Assessment (addressing team capability and financial sustainability)
-6. Scalability Plan (addressing job creation and growth potential)
-7. Financial Projections (3-year forecast)
-8. Risk Analysis
-9. Conclusion
+Structure with these REQUIRED sections:
+1. Executive Summary (2-3 paragraphs, specific metrics)
+2. Innovation Stage Declaration (current development status with evidence)
+3. Business Description & Market Analysis
+4. Technical Architecture & Innovation (specific technology stack, algorithms, IP status)
+5. Founder Credentials & Domain Expertise (education, work history, relevant projects)
+6. Financial Model & Unit Economics (monthly cashflow, CAC, LTV, funding sources)
+7. Competitive Analysis (named competitors with feature comparison)
+8. Market Validation Evidence (customer interviews, LOIs, willingness-to-pay data)
+9. Regulatory Compliance Roadmap (requirements, timeline, costs)
+10. Scalability & Job Creation Plan (specific roles, salaries, regions)
+11. Endorser Strategy (target body and contact points plan)
+12. Risk Analysis & Mitigation
+13. Conclusion
 
-Write in professional, persuasive language that demonstrates the business meets all Innovation Visa criteria. Be specific and avoid generic statements.`;
+WRITING STYLE:
+- Use specific numbers: "73% improvement over baseline X" not "significant improvement"
+- Name competitors: "Unlike DrDoctor and Patchs which..." not "competitors in the market"
+- Quote evidence: "Validated through 30 customer interviews showing..." not "market research indicates"
+- Technical depth: "Uses GPT-4 API with RAG architecture achieving..." not "AI-powered analytics"
+- Financial precision: "£3,200 CAC, £24,000 LTV, 7.5:1 ratio" not "strong unit economics"
 
-    const userPrompt = `Generate a business plan for:
+This is a ${plan.tier} tier requiring ${tierFeatures[plan.tier as keyof typeof tierFeatures]}.`;
 
-Business Name: ${plan.businessName}
+    const ltvCacRatio = plan.customerAcquisitionCost > 0 
+      ? (plan.lifetimeValue / plan.customerAcquisitionCost).toFixed(1) 
+      : 'N/A';
+
+    const userPrompt = `Generate an endorsing body-ready business plan using this ACTUAL EVIDENCE:
+
+BUSINESS OVERVIEW:
+Name: ${plan.businessName}
 Industry: ${plan.industry}
+Innovation Stage: ${plan.innovationStage}
+Product Status: ${plan.productStatus}
+${plan.existingCustomers ? `Existing Customers: ${plan.existingCustomers}` : ''}
+${plan.tractionEvidence ? `Traction: ${plan.tractionEvidence}` : ''}
 
-Problem Being Solved: ${plan.problem}
+PROBLEM & SOLUTION:
+${plan.problem}
 
-Innovation & Uniqueness: ${plan.uniqueness}
-Technology/Approach: ${plan.technology}
+INNOVATION & TECHNICAL ARCHITECTURE:
+Differentiation: ${plan.uniqueness}
+Technology Stack: ${plan.techStack}
+Data Architecture: ${plan.dataArchitecture}
+AI/ML Methodology: ${plan.aiMethodology}
+Compliance Design: ${plan.complianceDesign}
+IP Status: ${plan.patentStatus}
 
-Team & Experience: ${plan.experience}
-Initial Funding: £${plan.funding.toLocaleString()}
+FOUNDER CREDENTIALS:
+Education: ${plan.founderEducation}
+Work History: ${plan.founderWorkHistory}
+Achievements: ${plan.founderAchievements}
+Relevant Projects: ${plan.relevantProjects}
+Additional Experience: ${plan.experience}
+
+FINANCIAL MODEL:
+Initial Capital: £${plan.funding.toLocaleString()}
+Funding Sources: ${plan.fundingSources}
+Monthly Cashflow (36 months): ${plan.monthlyProjections}
+CAC: £${plan.customerAcquisitionCost.toLocaleString()}
+LTV: £${plan.lifetimeValue.toLocaleString()}
+LTV:CAC Ratio: ${ltvCacRatio}:1
+Payback Period: ${plan.paybackPeriod} months
+Cost Breakdown: ${plan.detailedCosts}
 Revenue Model: ${plan.revenue}
 
-Scalability:
-- Job Creation Plan: ${plan.jobCreation} employees in 3 years
-- Market Expansion: ${plan.expansion}
-- Long-term Vision: ${plan.vision}
+COMPETITIVE ANALYSIS:
+Competitors: ${plan.competitors}
+Competitive Advantage: ${plan.competitiveDifferentiation}
 
-Generate a complete, endorsing body-ready business plan.`;
+MARKET VALIDATION:
+Customer Interviews: ${plan.customerInterviews}
+${plan.lettersOfIntent ? `Letters of Intent: ${plan.lettersOfIntent}` : ''}
+Willingness to Pay: ${plan.willingnessToPay}
+Market Size (TAM/SAM/SOM): ${plan.marketSize}
+
+REGULATORY & COMPLIANCE:
+Requirements: ${plan.regulatoryRequirements}
+Timeline: ${plan.complianceTimeline}
+Budget: £${plan.complianceBudget.toLocaleString()}
+
+SCALABILITY & GROWTH:
+Job Creation Target: ${plan.jobCreation} employees in 3 years
+Hiring Plan: ${plan.hiringPlan}
+Geographic Focus: ${plan.specificRegions}
+Expansion Strategy: ${plan.expansion}
+${plan.internationalPlan ? `International Plans: ${plan.internationalPlan}` : ''}
+5-Year Vision: ${plan.vision}
+
+ENDORSER STRATEGY:
+Target Endorser: ${plan.targetEndorser}
+Contact Points Plan: ${plan.contactPointsStrategy}
+
+CRITICAL INSTRUCTIONS:
+1. Use ALL the specific data provided - don't add generic filler
+2. Calculate and present the LTV:CAC ratio (${ltvCacRatio}:1) and assess if it meets the >3:1 benchmark
+3. Reference the actual competitors named and compare features/pricing
+4. Quote specific numbers from the customer validation data
+5. List the technical stack components explicitly
+6. Break down the hiring plan with specific roles from the data
+7. Acknowledge regulatory costs realistically based on the stated budget
+8. If any area seems weak (e.g., low funding for high compliance costs), note it as a risk with mitigation strategy
+9. Use the founder's actual credentials - education, projects, experience
+10. Present the monthly cashflow data in a clear format (even summarized)
+
+Generate a complete, evidence-based business plan that an experienced endorsing body assessor would approve.`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
@@ -267,8 +347,8 @@ Generate a complete, endorsing body-ready business plan.`;
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      temperature: 0.7,
-      max_tokens: 4000,
+      temperature: 0.6,
+      max_tokens: 8000,
     });
 
     const generatedContent = completion.choices[0]?.message?.content || "";
