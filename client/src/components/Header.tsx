@@ -49,6 +49,11 @@ export default function Header() {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-4">
+          <Link href="/login">
+            <Button variant="ghost" data-testid="button-header-signin">
+              Sign In
+            </Button>
+          </Link>
           <Link href="/pricing">
             <Button data-testid="button-header-cta">
               Get Started

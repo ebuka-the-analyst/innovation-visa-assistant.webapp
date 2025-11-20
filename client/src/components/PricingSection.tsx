@@ -115,7 +115,7 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              <Link href={`/questionnaire?tier=${tier.name.toLowerCase()}`}>
+              <Link href="/pricing">
                 <Button
                   className="w-full"
                   variant={tier.popular ? "default" : "outline"}
