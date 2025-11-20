@@ -87,7 +87,7 @@ export function setupAuthRoutes(app: Express) {
 
   // Google OAuth callback
   app.get(
-    "/api/auth/google/callback",
+    "/api/auth/callback/google",
     passport.authenticate("google", { failureRedirect: "/login?error=google" }),
     (req, res) => {
       res.redirect("/dashboard");

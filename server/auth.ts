@@ -52,7 +52,7 @@ export function setupAuth(app: Express) {
   // Google OAuth Strategy
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
   const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const callbackURL = process.env.GOOGLE_CALLBACK_URL || "http://localhost:5000/api/auth/google/callback";
+  const callbackURL = process.env.GOOGLE_CALLBACK_URL || "http://localhost:5000/api/auth/callback/google";
 
   if (googleClientId && googleClientSecret) {
     passport.use(
