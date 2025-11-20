@@ -260,8 +260,20 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
         };
 
         console.log('Submitting enhanced questionnaire:', data);
-        const response = await apiRequest('POST', '/api/questionnaire/submit', data);
+        
+        const response = await fetch('/api/questionnaire/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
         const responseData = await response.json();
+        console.log('Server response:', responseData);
+
+        if (!response.ok) {
+          console.error('Validation errors:', responseData.details);
+          throw new Error(responseData.error || 'Validation failed');
+        }
 
         if (responseData.planId) {
           const checkoutResponse = await apiRequest('POST', '/api/payment/create-checkout', { planId: responseData.planId });
