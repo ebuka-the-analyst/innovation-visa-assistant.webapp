@@ -21,18 +21,35 @@ const PRICING = {
   enterprise: { amount: 19900, name: "Enterprise Plan" },
 };
 
+import { requireAuth } from "./auth";
+
 export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/health", async (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
+
+  app.get("/api/dashboard/plans", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const plans = await storage.getUserBusinessPlans(user.id);
+      res.json(plans);
+    } catch (error) {
+      console.error("Dashboard plans error:", error);
+      res.status(500).json({ error: "Failed to fetch business plans" });
+    }
+  });
   
-  app.post("/api/questionnaire/submit", async (req, res) => {
+  app.post("/api/questionnaire/submit", requireAuth, async (req, res) => {
     try {
       console.log("Questionnaire submission received:", JSON.stringify(req.body, null, 2));
       const data = questionnaireSchema.parse(req.body);
+      const user = req.user as any;
       
-      const businessPlan = await storage.createBusinessPlan(data);
+      const businessPlan = await storage.createBusinessPlan({
+        ...data,
+        userId: user.id,
+      });
       
       res.json({ 
         success: true, 
