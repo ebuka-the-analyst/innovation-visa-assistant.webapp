@@ -42,11 +42,22 @@ Preferred communication style: Simple, everyday language.
 - Express.js for HTTP server and API routing
 - TypeScript throughout for type consistency
 - Custom logging middleware for API request tracking
-- Session-based architecture (no authentication implemented yet)
+- Session-based authentication with Passport.js
+- Email/password + Google OAuth authentication
+- Email verification system with 6-digit codes
 
 **API Design**
 - RESTful endpoints under `/api` prefix
-- Key endpoints:
+- Authentication endpoints:
+  - `POST /api/auth/signup` - Create new account and send verification email
+  - `POST /api/auth/login` - Email/password login
+  - `POST /api/auth/verify-code` - Verify email with 6-digit code
+  - `POST /api/auth/resend-code` - Resend verification code (rate limited)
+  - `GET /api/auth/google` - Initiate Google OAuth flow
+  - `GET /api/auth/callback/google` - Google OAuth callback
+  - `POST /api/auth/logout` - End user session
+  - `GET /api/auth/me` - Get current user
+- Business plan endpoints:
   - `POST /api/questionnaire/submit` - Saves questionnaire data and creates business plan record
   - `POST /api/payment/create-checkout` - Initiates Stripe payment session
   - `POST /api/payment/verify` - Verifies payment completion
@@ -75,10 +86,18 @@ Preferred communication style: Simple, everyday language.
 
 **Database Schema**
 
-**Users Table** (authentication foundation, not fully implemented)
+**Users Table** (authentication system)
 - `id`: UUID primary key
-- `username`: Unique identifier
-- `password`: Hashed password storage
+- `email`: Unique email address
+- `password`: Hashed password (bcrypt, null for Google OAuth users)
+- `googleId`: Google OAuth identifier
+- `displayName`: User's display name
+- `emailVerified`: Boolean flag for email verification status
+- `verificationCode`: 6-digit code for email verification
+- `codeExpiresAt`: Expiration timestamp for verification code (15 minutes)
+- `lastCodeSentAt`: Timestamp of last verification email sent (for rate limiting)
+- `verificationAttempts`: Counter for failed verification attempts (max 5)
+- `createdAt`: Account creation timestamp
 
 **Business Plans Table** (core entity)
 - `id`: UUID primary key
@@ -112,6 +131,15 @@ Preferred communication style: Simple, everyday language.
   - Generates comprehensive business plan content based on questionnaire responses
   - Tailored prompts for visa compliance (Innovation, Viability, Scalability criteria)
 
+**Email Service**
+- **Resend**: Transactional email service for verification codes
+  - Integration: REST API with fetch
+  - Sends 6-digit verification codes to new users
+  - Professional HTML email templates with VisaPrep branding
+  - Free tier: 100 emails/day, 3,000 emails/month
+  - Configuration: `RESEND_API_KEY` environment variable
+  - Default sender: `onboarding@resend.dev` (can be customized with verified domain)
+
 **Database**
 - **Neon Database**: Serverless PostgreSQL
   - Integration: `@neondatabase/serverless` with WebSocket support
@@ -139,3 +167,33 @@ Preferred communication style: Simple, everyday language.
 - **PostCSS/Autoprefixer**: CSS processing pipeline
 - **class-variance-authority**: Type-safe component variant management
 - **tailwind-merge**: Intelligent class name merging via `cn()` utility
+
+## Email Verification System
+
+**Verification Flow**
+1. User signs up with email/password → Account created, verification code generated
+2. 6-digit code sent to email address (15-minute expiration)
+3. User redirected to verification page to enter code
+4. Code verified → Email marked as verified, user logged in
+5. Google OAuth users automatically verified (trusted emails)
+
+**Abuse Protection**
+- **Code Expiration**: Verification codes expire after 15 minutes
+- **Attempt Limiting**: Maximum 5 verification attempts per code
+- **Rate Limiting**: 
+  - Resend code: Max 1 email per 2 minutes
+  - Prevents spam and abuse of email service
+- **Attempt Counter**: Tracks failed verification attempts, resets on new code
+
+**Email Templates**
+- Professional HTML emails with VisaPrep branding
+- Gradient header with logo
+- Large, readable verification code display
+- Security tips and help information
+- Mobile-responsive design
+
+**Implementation Details**
+- Email sending: `server/email.ts` (Resend API integration)
+- Code generation: Cryptographically random 6-digit numbers
+- Storage: Database fields track code, expiration, attempts, and last sent time
+- Frontend: Dedicated `/verify-email` page with countdown timers and UX feedback
