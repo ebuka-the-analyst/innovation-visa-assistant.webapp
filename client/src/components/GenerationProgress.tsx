@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Download, CheckCircle } from "lucide-react";
+import { Download, CheckCircle, Home, FileText, Mail } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 import novaAvatar from "@assets/generated_images/Nova_innovation_agent_avatar_e5dc5701.png";
 import sterlingAvatar from "@assets/generated_images/Sterling_financial_agent_avatar_4fce3650.png";
 import atlasAvatar from "@assets/generated_images/Atlas_growth_agent_avatar_a0808a5e.png";
@@ -199,11 +200,12 @@ export default function GenerationProgress({ planId }: { planId: string }) {
 
           {/* Time estimate or completion */}
           {status === 'completed' && pdfUrl ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="flex items-center justify-center gap-2 text-chart-3">
                 <CheckCircle className="w-6 h-6" />
                 <p className="text-lg font-semibold">Business Plan Complete!</p>
               </div>
+              
               <Button
                 size="lg"
                 className="w-full"
@@ -213,6 +215,50 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 <Download className="w-5 h-5 mr-2" />
                 Download Your Business Plan
               </Button>
+
+              <div className="pt-4 border-t border-border">
+                <p className="text-sm font-medium text-muted-foreground mb-3 text-center">What's Next?</p>
+                <div className="space-y-2">
+                  <Link href="/questionnaire">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      data-testid="button-create-another"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Create Another Business Plan
+                    </Button>
+                  </Link>
+                  
+                  <Link href="/">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      data-testid="button-home"
+                    >
+                      <Home className="w-4 h-4 mr-2" />
+                      Return to Home
+                    </Button>
+                  </Link>
+
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => window.location.href = 'mailto:support@visaprepai.com?subject=Business%20Plan%20Support'}
+                    data-testid="button-support"
+                  >
+                    <Mail className="w-4 h-4 mr-2" />
+                    Contact Support
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-accent/20 rounded-lg p-4 mt-4">
+                <p className="text-xs text-muted-foreground text-center">
+                  <strong className="text-foreground">Next Steps for Your Visa:</strong><br />
+                  Review your business plan, gather supporting evidence (letters of support, financial documents, patent applications), and submit to your chosen endorsing body.
+                </p>
+              </div>
             </div>
           ) : (
             <div className="text-center text-sm text-muted-foreground">
