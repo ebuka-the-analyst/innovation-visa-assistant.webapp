@@ -29,12 +29,21 @@ export default function Signup() {
       const data = await response.json();
 
       if (data.success) {
-        toast({
-          title: "Account created!",
-          description: "Please check your email for verification code.",
-        });
-        // Redirect to verification page with email in URL
-        setLocation(`/verify-email?email=${encodeURIComponent(email)}`);
+        if (data.requiresVerification) {
+          // Email verification required - redirect to verification page
+          toast({
+            title: "Account created!",
+            description: "Please check your email for verification code.",
+          });
+          setLocation(`/verify-email?email=${encodeURIComponent(email)}`);
+        } else {
+          // No verification required - auto-logged in
+          toast({
+            title: "Welcome!",
+            description: "Your account is ready. Let's create your business plan.",
+          });
+          setLocation("/dashboard");
+        }
       } else {
         toast({
           title: "Signup Failed",
@@ -62,25 +71,33 @@ export default function Signup() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-          <CardDescription>Get started with VisaPrep AI</CardDescription>
+          <CardDescription>Get started with VisaPrep AI in seconds</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button 
-            variant="outline" 
-            className="w-full" 
-            onClick={handleGoogleSignup}
-            data-testid="button-google-signup"
-          >
-            <FcGoogle className="mr-2 h-5 w-5" />
-            Continue with Google
-          </Button>
+          <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-3">
+            <p className="text-sm font-medium text-primary mb-2 flex items-center gap-2">
+              <span className="text-lg">✓</span> Recommended
+            </p>
+            <Button 
+              variant="default"
+              className="w-full" 
+              onClick={handleGoogleSignup}
+              data-testid="button-google-signup"
+            >
+              <FcGoogle className="mr-2 h-5 w-5" />
+              Continue with Google
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+              Instant access - no verification needed
+            </p>
+          </div>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with email</span>
+              <span className="bg-card px-2 text-muted-foreground">Or use email</span>
             </div>
           </div>
 
