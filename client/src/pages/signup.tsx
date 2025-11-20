@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -155,22 +155,22 @@ export default function Signup() {
         <CardFooter className="flex flex-col space-y-2">
           <p className="text-sm text-muted-foreground text-center">
             Already have an account?{" "}
-            <a 
+            <Link 
               href="/login" 
               className="text-primary hover:underline font-medium"
               data-testid="link-login"
             >
               Sign in
-            </a>
+            </Link>
           </p>
           <p className="text-sm text-muted-foreground text-center">
-            <a 
+            <Link 
               href="/" 
               className="text-primary hover:underline"
               data-testid="link-home"
             >
               Back to home
-            </a>
+            </Link>
           </p>
         </CardFooter>
       </Card>
