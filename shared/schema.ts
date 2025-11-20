@@ -41,26 +41,26 @@ export const businessPlans = pgTable("business_plans", {
   founderAchievements: text("founder_achievements").notNull(),
   relevantProjects: text("relevant_projects").notNull(),
   
-  monthlyProjections: jsonb("monthly_projections").notNull(),
+  monthlyProjections: text("monthly_projections").notNull(),
   customerAcquisitionCost: integer("cac").notNull(),
   lifetimeValue: integer("ltv").notNull(),
   paybackPeriod: integer("payback_period").notNull(),
   fundingSources: text("funding_sources").notNull(),
   detailedCosts: text("detailed_costs").notNull(),
   
-  competitors: jsonb("competitors").notNull(),
+  competitors: text("competitors").notNull(),
   competitiveDifferentiation: text("competitive_differentiation").notNull(),
   
   customerInterviews: text("customer_interviews").notNull(),
   lettersOfIntent: text("letters_of_intent"),
   willingnessToPay: text("willingness_to_pay").notNull(),
-  marketSize: jsonb("market_size").notNull(),
+  marketSize: text("market_size").notNull(),
   
-  regulatoryRequirements: jsonb("regulatory_requirements").notNull(),
+  regulatoryRequirements: text("regulatory_requirements").notNull(),
   complianceTimeline: text("compliance_timeline").notNull(),
   complianceBudget: integer("compliance_budget").notNull(),
   
-  hiringPlan: jsonb("hiring_plan").notNull(),
+  hiringPlan: text("hiring_plan").notNull(),
   specificRegions: text("specific_regions").notNull(),
   internationalPlan: text("international_plan"),
   
