@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import QuestionnaireForm from "@/components/QuestionnaireForm";
+import EvidencePreparationGuide from "@/components/EvidencePreparationGuide";
 
 export default function Questionnaire() {
   const [tier, setTier] = useState('premium');
@@ -16,7 +17,10 @@ export default function Questionnaire() {
   return (
     <div className="min-h-screen">
       <Header />
-      <QuestionnaireForm tier={tier} />
+      <div className="container mx-auto px-4 py-12">
+        <EvidencePreparationGuide />
+        <QuestionnaireForm tier={tier} />
+      </div>
     </div>
   );
 }
