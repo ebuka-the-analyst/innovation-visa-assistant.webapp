@@ -5,8 +5,11 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  email: text("email").notNull().unique(),
+  password: text("password"), // Null for Google OAuth users
+  googleId: text("google_id").unique(), // For Google OAuth
+  displayName: text("display_name"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const businessPlans = pgTable("business_plans", {
@@ -78,9 +81,20 @@ export const businessPlans = pgTable("business_plans", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const signupSchema = z.object({
+  email: z.string().email("Valid email required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  displayName: z.string().min(2, "Name required"),
+});
+
+export const loginSchema = z.object({
+  email: z.string().email("Valid email required"),
+  password: z.string().min(1, "Password required"),
 });
 
 export const insertBusinessPlanSchema = createInsertSchema(businessPlans).omit({
