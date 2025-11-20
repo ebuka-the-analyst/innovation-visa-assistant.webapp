@@ -197,3 +197,21 @@ Preferred communication style: Simple, everyday language.
 - Code generation: Cryptographically random 6-digit numbers
 - Storage: Database fields track code, expiration, attempts, and last sent time
 - Frontend: Dedicated `/verify-email` page with countdown timers and UX feedback
+
+**Feature Flag: EMAIL_VERIFICATION_REQUIRED**
+- **Purpose**: Control whether email verification is required for signup
+- **Default**: `false` (verification optional for MVP launch)
+- **Location**: Environment variable in Replit Secrets
+- **Behavior**:
+  - When `false` (default): Users auto-verified and logged in immediately after signup, no verification email sent
+  - When `true`: Traditional email verification flow with 6-digit code required
+- **Rationale**: 
+  - Resend free tier only sends to verified account email (benedict9211@gmail.com)
+  - Domain verification required to send to other recipients
+  - Feature flag allows MVP launch without blocking signups
+  - Google OAuth provides trusted verified emails as recommended path
+- **Security**: Acceptable risk for MVP given Stripe payment flow + rate limits + monitoring
+- **Future**: Flip to `true` once domain verified in Resend (see resend.com/domains)
+- **Files Modified**:
+  - `server/authRoutes.ts`: Conditional verification logic
+  - `client/src/pages/signup.tsx`: Conditional redirect (verify-email vs dashboard)
