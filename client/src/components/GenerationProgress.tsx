@@ -10,19 +10,24 @@ import sterlingAvatar from "@assets/generated_images/Sterling_financial_agent_av
 import atlasAvatar from "@assets/generated_images/Atlas_growth_agent_avatar_a0808a5e.png";
 import sageAvatar from "@assets/generated_images/Sage_compliance_agent_avatar_9dabb0a2.png";
 
-const stages = [
-  { id: 1, name: "Analyzing your business model", agent: "Nova", avatar: novaAvatar, duration: 2000 },
-  { id: 2, name: "Generating market analysis", agent: "Nova", avatar: novaAvatar, duration: 2000 },
-  { id: 3, name: "Creating financial projections", agent: "Sterling", avatar: sterlingAvatar, duration: 2000 },
-  { id: 4, name: "Crafting scalability plan", agent: "Atlas", avatar: atlasAvatar, duration: 2000 },
-  { id: 5, name: "Ensuring compliance", agent: "Sage", avatar: sageAvatar, duration: 1500 },
-  { id: 6, name: "Finalizing document", agent: "Sage", avatar: sageAvatar, duration: 1500 },
-];
+// Helper to determine which agent and avatar to show based on stage text
+const getAgentForStage = (stageText: string) => {
+  const stage = stageText.toLowerCase();
+  if (stage.includes('starting') || stage.includes('analyzing')) {
+    return { name: "Nova", avatar: novaAvatar };
+  } else if (stage.includes('building')) {
+    return { name: "Sterling", avatar: sterlingAvatar };
+  } else if (stage.includes('proofreading')) {
+    return { name: "Atlas", avatar: atlasAvatar };
+  } else if (stage.includes('finalizing') || stage.includes('complete')) {
+    return { name: "Sage", avatar: sageAvatar };
+  }
+  return { name: "Nova", avatar: novaAvatar };
+};
 
 export default function GenerationProgress({ planId }: { planId: string }) {
-  const [progress, setProgress] = useState(0);
-  const [currentStage, setCurrentStage] = useState(0);
   const [status, setStatus] = useState<string>('pending');
+  const [currentStage, setCurrentStage] = useState<string>('Initializing...');
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [tier, setTier] = useState<string>('basic');
   const { toast } = useToast();
@@ -72,15 +77,6 @@ export default function GenerationProgress({ planId }: { planId: string }) {
 
     verifyPaymentAndStart();
 
-    let totalDuration = 0;
-    stages.forEach((stage, index) => {
-      totalDuration += stage.duration;
-      setTimeout(() => {
-        setCurrentStage(index);
-        setProgress(((index + 1) / stages.length) * 100);
-      }, totalDuration - stage.duration);
-    });
-
     const pollInterval = setInterval(async () => {
       try {
         const response = await fetch(`/api/generate/status/${planId}`);
@@ -89,6 +85,10 @@ export default function GenerationProgress({ planId }: { planId: string }) {
         
         if (data.tier) {
           setTier(data.tier);
+        }
+        
+        if (data.currentGenerationStage) {
+          setCurrentStage(data.currentGenerationStage);
         }
         
         if (data.status === 'completed' && data.pdfUrl) {
@@ -110,7 +110,19 @@ export default function GenerationProgress({ planId }: { planId: string }) {
     return () => clearInterval(pollInterval);
   }, [planId, toast]);
 
-  const currentStageData = stages[currentStage];
+  const agentInfo = getAgentForStage(currentStage);
+  
+  // Calculate progress based on stage text
+  const calculateProgress = (stage: string): number => {
+    if (stage.includes('Complete')) return 100;
+    if (stage.includes('Finalizing')) return 95;
+    if (stage.includes('Proofreading')) return 75;
+    if (stage.includes('Building')) return 50;
+    if (stage.includes('Analyzing')) return 25;
+    return 10;
+  };
+  
+  const progress = calculateProgress(currentStage);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4 relative overflow-hidden">
@@ -173,8 +185,8 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                   <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-chart-3 p-1 animate-pulse">
                     <div className="w-full h-full rounded-full bg-background/10 backdrop-blur-sm flex items-center justify-center overflow-hidden">
                       <img 
-                        src={currentStageData.avatar} 
-                        alt={currentStageData.agent}
+                        src={agentInfo.avatar} 
+                        alt={agentInfo.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -188,14 +200,14 @@ export default function GenerationProgress({ planId }: { planId: string }) {
               </div>
             </div>
 
-            {/* Current task description */}
+            {/* Current task description - REAL stages from backend */}
             <div className="text-center">
               <p className="text-2xl font-semibold mb-2 min-h-[32px]">
-                {currentStageData.name}
-                <span className="animate-pulse">...</span>
+                {currentStage}
+                {status === 'generating' && <span className="animate-pulse">...</span>}
               </p>
               <p className="text-muted-foreground">
-                {currentStageData.agent} is working on your plan
+                {agentInfo.name} is working on your plan
               </p>
             </div>
           </div>
@@ -303,21 +315,10 @@ export default function GenerationProgress({ planId }: { planId: string }) {
             </div>
           ) : (
             <div className="text-center text-sm text-muted-foreground">
-              <p>Estimated time remaining: {Math.ceil((stages.length - currentStage) * 2 / 60)} minute{Math.ceil((stages.length - currentStage) * 2 / 60) !== 1 ? 's' : ''}</p>
+              <p>Estimated time: {tier === 'enterprise' ? '6-8' : tier === 'premium' ? '5-7' : '3-5'} minutes</p>
+              <p className="text-xs mt-1">We're generating a comprehensive business plan tailored to your needs</p>
             </div>
           )}
-        </div>
-
-        {/* Stage indicators */}
-        <div className="mt-8 flex justify-center gap-2">
-          {stages.map((stage, index) => (
-            <div
-              key={stage.id}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index <= currentStage ? "bg-primary" : "bg-muted"
-              }`}
-            />
-          ))}
         </div>
       </div>
 
