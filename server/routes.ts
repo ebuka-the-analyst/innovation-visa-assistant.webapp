@@ -205,7 +205,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         status: businessPlan.status,
         generatedContent: businessPlan.generatedContent,
-        pdfUrl: businessPlan.pdfUrl
+        pdfUrl: businessPlan.pdfUrl,
+        tier: businessPlan.tier
       });
     } catch (error) {
       console.error("Status check error:", error);

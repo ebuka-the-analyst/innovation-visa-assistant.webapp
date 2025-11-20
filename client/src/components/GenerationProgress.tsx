@@ -24,6 +24,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
   const [currentStage, setCurrentStage] = useState(0);
   const [status, setStatus] = useState<string>('pending');
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [tier, setTier] = useState<string>('basic');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -85,6 +86,10 @@ export default function GenerationProgress({ planId }: { planId: string }) {
         const response = await fetch(`/api/generate/status/${planId}`);
         const data = await response.json();
         setStatus(data.status);
+        
+        if (data.tier) {
+          setTier(data.tier);
+        }
         
         if (data.status === 'completed' && data.pdfUrl) {
           setPdfUrl(data.pdfUrl);
@@ -254,6 +259,42 @@ export default function GenerationProgress({ planId }: { planId: string }) {
               </div>
 
               <div className="bg-accent/20 rounded-lg p-4 mt-4">
+                <p className="text-xs font-medium text-foreground mb-2 text-center">
+                  {tier === 'basic' && '✨ Basic Plan'}
+                  {tier === 'premium' && '⭐ Premium Plan'}
+                  {tier === 'enterprise' && '💎 Enterprise Plan'}
+                </p>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  {tier === 'basic' && (
+                    <>
+                      <p className="text-center">✓ Standard business plan template</p>
+                      <p className="text-center">✓ 1 revision included</p>
+                      <p className="text-center text-foreground font-medium mt-2">
+                        Need more? Upgrade to Premium for detailed financials, 3 revisions, and endorsing body selection.
+                      </p>
+                    </>
+                  )}
+                  {tier === 'premium' && (
+                    <>
+                      <p className="text-center">✓ Enhanced business plan with detailed financials</p>
+                      <p className="text-center">✓ 3 revisions included</p>
+                      <p className="text-center">✓ Endorsing body selection guidance</p>
+                      <p className="text-center">✓ Priority generation queue</p>
+                    </>
+                  )}
+                  {tier === 'enterprise' && (
+                    <>
+                      <p className="text-center">✓ Full business plan package</p>
+                      <p className="text-center">✓ Unlimited revisions</p>
+                      <p className="text-center">✓ Human expert review</p>
+                      <p className="text-center">✓ Cover letter generation</p>
+                      <p className="text-center">✓ 24-hour delivery</p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-primary/10 rounded-lg p-4 mt-3">
                 <p className="text-xs text-muted-foreground text-center">
                   <strong className="text-foreground">Next Steps for Your Visa:</strong><br />
                   Review your business plan, gather supporting evidence (letters of support, financial documents, patent applications), and submit to your chosen endorsing body.
