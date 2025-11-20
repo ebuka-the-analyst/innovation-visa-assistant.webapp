@@ -1,6 +1,429 @@
 // Tier-specific AI prompts incorporating expert Innovation Visa critique
 // Goal: 95-100% approval rate by addressing all major rejection triggers
 
+// Section definitions for multi-pass generation
+export interface Section {
+  title: string;
+  pageTarget: string;
+  requirements: string[];
+  maxTokens: number;
+}
+
+export const getSectionsForTier = (tier: string): Section[] => {
+  if (tier === 'basic') {
+    return [
+      {
+        title: "1. EXECUTIVE SUMMARY",
+        pageTarget: "2 pages",
+        requirements: [
+          "Business concept overview",
+          "Founder background summary",
+          "Market opportunity",
+          "Financial snapshot",
+          "Key milestones"
+        ],
+        maxTokens: 1000
+      },
+      {
+        title: "2. FOUNDER CREDENTIALS",
+        pageTarget: "3-4 pages",
+        requirements: [
+          "Education and qualifications",
+          "Relevant work experience",
+          "Technical skills",
+          "Key achievements"
+        ],
+        maxTokens: 1500
+      },
+      {
+        title: "3. INNOVATION & TECHNOLOGY",
+        pageTarget: "4-5 pages",
+        requirements: [
+          "Problem statement",
+          "Solution overview",
+          "Technology stack",
+          "Competitive differentiation",
+          "IP status"
+        ],
+        maxTokens: 2000
+      },
+      {
+        title: "4. MARKET ANALYSIS",
+        pageTarget: "4-5 pages",
+        requirements: [
+          "Target market definition",
+          "Market size (TAM/SAM/SOM)",
+          "Customer validation summary",
+          "Competitor analysis (list 5+ competitors)",
+          "Competitive advantages"
+        ],
+        maxTokens: 2000
+      },
+      {
+        title: "5. BUSINESS MODEL & FINANCIALS",
+        pageTarget: "3-4 pages",
+        requirements: [
+          "Revenue model and pricing",
+          "Customer acquisition strategy",
+          "Basic financial projections (Year 1-3)",
+          "Funding sources"
+        ],
+        maxTokens: 1500
+      },
+      {
+        title: "6. REGULATORY COMPLIANCE",
+        pageTarget: "2-3 pages",
+        requirements: [
+          "Key regulatory requirements",
+          "Compliance timeline",
+          "Budget allocation"
+        ],
+        maxTokens: 1000
+      },
+      {
+        title: "7. SCALABILITY & GROWTH",
+        pageTarget: "3-4 pages",
+        requirements: [
+          "Hiring plan",
+          "Geographic expansion",
+          "3-year growth targets"
+        ],
+        maxTokens: 1500
+      },
+      {
+        title: "8. RISK ANALYSIS",
+        pageTarget: "2-3 pages",
+        requirements: [
+          "Key risks identified",
+          "Mitigation strategies"
+        ],
+        maxTokens: 1000
+      }
+    ];
+  }
+  
+  if (tier === 'premium') {
+    return [
+      {
+        title: "1. EXECUTIVE SUMMARY",
+        pageTarget: "3 pages",
+        requirements: [
+          "Comprehensive overview with specific metrics",
+          "Quantified value proposition"
+        ],
+        maxTokens: 1200
+      },
+      {
+        title: "2. FOUNDER CREDENTIALS & VALIDATION",
+        pageTarget: "5-6 pages",
+        requirements: [
+          "Detailed education (institutions, years, grades)",
+          "Work history with quantifiable achievements",
+          "Technical expertise with evidence",
+          "Portfolio/publications/IP",
+          "Professional network"
+        ],
+        maxTokens: 2500
+      },
+      {
+        title: "3. INNOVATION & TECHNICAL DEPTH",
+        pageTarget: "8-10 pages",
+        requirements: [
+          "Problem quantification with market impact",
+          "Technical architecture diagram description",
+          "AI/ML methodology with SPECIFIC metrics (MAPE, RMSE, time horizon)",
+          "Data provenance explanation",
+          "Industry-specific models",
+          "Technology stack with justification",
+          "Patent status",
+          "Competitive technical comparison"
+        ],
+        maxTokens: 3500
+      },
+      {
+        title: "4. MARKET ANALYSIS & VALIDATION",
+        pageTarget: "8-10 pages",
+        requirements: [
+          "TAM/SAM/SOM with methodology",
+          "Customer discovery details",
+          "Willingness to pay analysis",
+          "Letters of intent details",
+          "Competitor analysis (7+ competitors)",
+          "Market gaps and differentiation"
+        ],
+        maxTokens: 3500
+      },
+      {
+        title: "5. FINANCIAL VIABILITY WITH REALISTIC MODELING",
+        pageTarget: "10-12 pages",
+        requirements: [
+          "Revenue model with tier breakdown",
+          "REALISTIC customer acquisition",
+          "Sales team sizing (2-3 deals/month benchmark)",
+          "Detailed cost breakdown",
+          "LTV:CAC calculation with HONEST math (include ALL costs)",
+          "Cash requirement analysis",
+          "36-month cashflow projection",
+          "Sensitivity analysis",
+          "Break-even timeline"
+        ],
+        maxTokens: 4000
+      },
+      {
+        title: "6. REGULATORY & COMPLIANCE",
+        pageTarget: "5-6 pages",
+        requirements: [
+          "Comprehensive requirements list",
+          "Timeline with milestones",
+          "Detailed budget (£101K+ over 3 years)",
+          "GDPR compliance approach",
+          "Security certifications plan"
+        ],
+        maxTokens: 2500
+      },
+      {
+        title: "7. TEAM & HIRING",
+        pageTarget: "4-5 pages",
+        requirements: [
+          "Current team",
+          "Detailed hiring plan with market-rate salaries",
+          "Timing aligned with revenue growth",
+          "Advisors and mentors"
+        ],
+        maxTokens: 2000
+      },
+      {
+        title: "8. SCALABILITY & GROWTH",
+        pageTarget: "5-6 pages",
+        requirements: [
+          "Customer growth targets with justification",
+          "Geographic expansion plan",
+          "Product roadmap",
+          "Support scaling strategy"
+        ],
+        maxTokens: 2500
+      },
+      {
+        title: "9. RISK ANALYSIS",
+        pageTarget: "3-4 pages",
+        requirements: [
+          "Market, technical, financial, people risks",
+          "Specific mitigation strategies",
+          "Contingency planning"
+        ],
+        maxTokens: 1500
+      },
+      {
+        title: "10. ENDORSING BODY SELECTION",
+        pageTarget: "3-4 pages",
+        requirements: [
+          "Recommended endorsers (Tech Nation, Innovator International)",
+          "Fit assessment",
+          "Application strategy",
+          "Contact points plan (6 touchpoints over 3 years)"
+        ],
+        maxTokens: 1500
+      }
+    ];
+  }
+  
+  // Enterprise tier (most comprehensive)
+  return [
+    {
+      title: "1. EXECUTIVE SUMMARY",
+      pageTarget: "4 pages",
+      requirements: [
+        "Comprehensive overview with quantified impact",
+        "Innovation significance with evidence",
+        "Market validation summary",
+        "Financial viability snapshot",
+        "Endorsing body fit"
+      ],
+      maxTokens: 1500
+    },
+    {
+      title: "2. FOUNDER CREDENTIALS & VALIDATION",
+      pageTarget: "6-8 pages",
+      requirements: [
+        "Complete education with honors/awards",
+        "Detailed work history with measurable impact",
+        "Technical expertise evidence",
+        "Publications, patents, IP",
+        "Professional recognition",
+        "Advisory roles"
+      ],
+      maxTokens: 3000
+    },
+    {
+      title: "3. INNOVATION & TECHNICAL DEPTH",
+      pageTarget: "10-12 pages",
+      requirements: [
+        "Problem quantification (cite market research)",
+        "Technical architecture with diagrams",
+        "AI/ML methodology - MANDATORY: Accuracy metrics (MAPE/RMSE), time horizon (30-day), validation (walk-forward), test set size",
+        "Data provenance - WHERE 2.8M transactions came from",
+        "GDPR/legal basis for data",
+        "Independent validation OR plan to obtain it",
+        "Industry models architecture",
+        "Technology stack justification",
+        "Patent status with filing details",
+        "Academic literature context (3-5 papers)"
+      ],
+      maxTokens: 4096
+    },
+    {
+      title: "4. MARKET ANALYSIS & VALIDATION",
+      pageTarget: "10-12 pages",
+      requirements: [
+        "TAM/SAM/SOM with detailed methodology",
+        "Customer discovery (interview count, quotes)",
+        "Willingness to pay evidence",
+        "Letters of intent analysis",
+        "Competitor deep-dive (10+ competitors)",
+        "Market gaps with evidence",
+        "Distribution partnerships"
+      ],
+      maxTokens: 4096
+    },
+    {
+      title: "5. FINANCIAL VIABILITY - EXPERT LEVEL",
+      pageTarget: "12-15 pages",
+      requirements: [
+        "Revenue model with detailed tier breakdown",
+        "Month-by-month customer acquisition",
+        "Sales team sizing (2-3 deals/month benchmark for FinTech SaaS)",
+        "Complete cost breakdown (staff at market rates, infrastructure, compliance)",
+        "LTV:CAC calculation - SHOW ALL COSTS (sales salaries, marketing, tools, overhead)",
+        "Industry benchmark comparison (minimum 3:1)",
+        "Year 1 cash requirement with burn rate",
+        "ALL funding sources with amounts and evidence",
+        "36-month cashflow with sensitivities",
+        "Break-even analysis"
+      ],
+      maxTokens: 4096
+    },
+    {
+      title: "6. REGULATORY & COMPLIANCE",
+      pageTarget: "6-8 pages",
+      requirements: [
+        "Comprehensive regulatory requirements",
+        "Detailed timeline with dependencies",
+        "Budget breakdown (£101K+ over 3 years)",
+        "GDPR compliance implementation",
+        "Data processing agreements",
+        "Security certifications roadmap",
+        "Ongoing compliance costs"
+      ],
+      maxTokens: 3000
+    },
+    {
+      title: "7. TEAM & HIRING PLAN",
+      pageTarget: "5-6 pages",
+      requirements: [
+        "Current team with credentials",
+        "Detailed hiring plan by quarter",
+        "Market-rate salaries by role",
+        "Justification for each hire aligned with growth",
+        "Advisory board",
+        "Talent acquisition strategy"
+      ],
+      maxTokens: 2500
+    },
+    {
+      title: "8. SCALABILITY & GROWTH STRATEGY",
+      pageTarget: "6-8 pages",
+      requirements: [
+        "Customer growth targets with evidence",
+        "Geographic expansion timeline",
+        "Product roadmap with customer input",
+        "Infrastructure scaling plan",
+        "Support team scaling",
+        "Partnership strategy"
+      ],
+      maxTokens: 3000
+    },
+    {
+      title: "9. COMPREHENSIVE RISK ANALYSIS",
+      pageTarget: "4-5 pages",
+      requirements: [
+        "Market risks with mitigation",
+        "Technical risks with contingency",
+        "Financial risks with scenarios",
+        "People/talent risks",
+        "Regulatory risks",
+        "Competitive risks"
+      ],
+      maxTokens: 2000
+    },
+    {
+      title: "10. ENDORSING BODY STRATEGY",
+      pageTarget: "4-5 pages",
+      requirements: [
+        "Primary target (Tech Nation/Innovator International)",
+        "Fit assessment with criteria mapping",
+        "Application strategy and timeline",
+        "Contact points plan (6+ touchpoints)",
+        "Evidence portfolio summary"
+      ],
+      maxTokens: 2000
+    }
+  ];
+};
+
+// Generate system prompt for a specific section
+export const getSectionSystemPrompt = (tier: string, section: Section, sectionNumber: number, totalSections: number): string => {
+  const qualityLevel = tier === 'enterprise' ? 'EXPERT-LEVEL (99.9% approval target)' : 
+                       tier === 'premium' ? 'ENHANCED PROFESSIONAL' : 'PROFESSIONAL';
+  
+  return `You are an expert Innovation Visa consultant with 15 years experience achieving 95%+ approval rates.
+
+TASK: Write section ${sectionNumber} of ${totalSections} for a ${qualityLevel} business plan.
+
+SECTION: ${section.title}
+TARGET LENGTH: ${section.pageTarget} (~${section.maxTokens * 0.4} words)
+
+CRITICAL INSTRUCTIONS:
+1. Write the COMPLETE NARRATIVE for this section - no outlines, no meta-commentary
+2. Use ALL relevant data provided - don't add fictional details
+3. Write in professional, persuasive prose suitable for endorsing body reviewers
+4. Include specific numbers, metrics, and evidence from the data
+5. Be thorough and detailed - fill the target page count
+6. If tier is premium/enterprise, address expert critique requirements listed below
+
+${tier === 'basic' ? `
+BASIC TIER GUIDANCE:
+- Be HONEST about gaps: "Customer validation: 14 interviews (target: 30 more in next 8 weeks)"
+- Provide realistic mitigation strategies for weaknesses
+- Keep claims evidence-based
+` : ''}
+
+${tier === 'premium' ? `
+PREMIUM TIER REQUIREMENTS:
+- State accuracy metrics with SPECIFIC types (MAPE, RMSE) and time horizons
+- Explain data provenance where applicable  
+- Calculate LTV:CAC with HONEST math including ALL costs
+- Size sales teams realistically (2-3 deals/month for FinTech SaaS)
+- Show realistic financial projections that add up mathematically
+` : ''}
+
+${tier === 'enterprise' ? `
+ENTERPRISE TIER - CRITICAL REQUIREMENTS:
+- MANDATORY accuracy metrics: Type (MAPE/RMSE), time horizon (30-day), validation method, test set size
+- MANDATORY data provenance: Explain exactly where data came from (licensed/partnered/public/synthetic)
+- MANDATORY independent validation: State source OR explicit plan (institution, timeline, methodology)
+- LTV:CAC: Include ALL costs (sales salaries, marketing, tools, overhead) - target >3:1
+- Sales team: Benchmark-based sizing (2-3 deals/month for FinTech SaaS)
+- Technical architecture: Describe system, data pipeline, ML infrastructure
+- Academic context: Reference 3-5 relevant papers
+- Risk honesty: Acknowledge gaps with specific mitigation strategies
+` : ''}
+
+REQUIREMENTS FOR THIS SECTION:
+${section.requirements.map((req, idx) => `${idx + 1}. ${req}`).join('\n')}
+
+Write the complete section now. Do not write "here's what should be included" or provide an outline. Write the actual business plan content.`;
+};
+
 export const getSystemPrompt = (tier: string): string => {
   const basePrompt = `You are an expert Innovation Visa consultant with 15 years experience achieving 95% approval rates.`;
   
