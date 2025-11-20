@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Header from "@/components/Header";
+import { AuthHeader } from "@/components/AuthHeader";
 import QuestionnaireForm from "@/components/QuestionnaireForm";
 import EvidencePreparationGuide from "@/components/EvidencePreparationGuide";
 
@@ -16,7 +16,7 @@ export default function Questionnaire() {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      <AuthHeader />
       <div className="container mx-auto px-4 py-12">
         <EvidencePreparationGuide />
         <QuestionnaireForm tier={tier} />
