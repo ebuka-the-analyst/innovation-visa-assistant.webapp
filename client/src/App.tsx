@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import Dashboard from "@/pages/dashboard";
+import Pricing from "@/pages/pricing";
 import Questionnaire from "@/pages/questionnaire";
 import Generation from "@/pages/generation";
 import NotFound from "@/pages/not-found";
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/pricing" component={Pricing} />
       <Route path="/questionnaire" component={Questionnaire} />
       <Route path="/generation" component={Generation} />
       <Route component={NotFound} />
