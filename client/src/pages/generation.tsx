@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AuthHeader } from "@/components/AuthHeader";
 import GenerationProgress from "@/components/GenerationProgress";
+import Chatbot from "@/components/Chatbot";
 
 export default function Generation() {
   const [planId, setPlanId] = useState<string | null>(null);
@@ -28,6 +29,7 @@ export default function Generation() {
     <div className="min-h-screen">
       <AuthHeader />
       <GenerationProgress planId={planId} />
+      <Chatbot planId={planId} />
     </div>
   );
 }
