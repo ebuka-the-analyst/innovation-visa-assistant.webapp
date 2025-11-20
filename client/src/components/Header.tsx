@@ -49,7 +49,7 @@ export default function Header() {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          <Link href="/questionnaire">
+          <Link href="/pricing">
             <Button data-testid="button-header-cta">
               Get Started
             </Button>
@@ -89,10 +89,14 @@ export default function Header() {
               FAQ
             </button>
             <div className="flex flex-col gap-2 pt-4 border-t border-border">
-              <Button variant="ghost" className="w-full justify-start">
-                Sign In
-              </Button>
-              <Button className="w-full">Get Started</Button>
+              <Link href="/login" className="w-full">
+                <Button variant="ghost" className="w-full justify-start">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/pricing" className="w-full">
+                <Button className="w-full">Get Started</Button>
+              </Link>
             </div>
           </div>
         </div>
