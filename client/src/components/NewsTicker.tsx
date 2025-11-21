@@ -83,7 +83,7 @@ export default function NewsTicker() {
 
   return (
     <>
-      <div className="relative bg-gradient-to-r from-primary/10 to-chart-3/10 border-b border-primary/20 overflow-hidden">
+      <div className="relative border-b border-primary/20 overflow-hidden" style={{ backgroundColor: "#11b6e9" }}>
         <div className="container mx-auto px-4 md:px-6 py-2">
           <div className="flex items-center gap-2">
             {/* Start Navigation Button */}
@@ -131,16 +131,6 @@ export default function NewsTicker() {
               </div>
             </div>
 
-            {/* End Navigation Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleForward}
-              className="h-6 w-6 flex-shrink-0"
-              data-testid="button-ticker-forward"
-            >
-              <ChevronRight className="w-3 h-3" />
-            </Button>
           </div>
         </div>
 
@@ -155,7 +145,7 @@ export default function NewsTicker() {
           }
 
           .animate-ticker-scroll {
-            animation: ticker-scroll 20s linear infinite;
+            animation: ticker-scroll 6.67s linear infinite;
           }
 
           .animate-ticker-scroll:hover {
