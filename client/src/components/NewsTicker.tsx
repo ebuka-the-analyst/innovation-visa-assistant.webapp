@@ -65,6 +65,10 @@ export default function NewsTicker() {
   const [modalOpen, setModalOpen] = useState(false);
   const tickerRef = useRef<HTMLDivElement>(null);
 
+  // Calculate animation duration based on number of news items
+  // Each item gets ~1.2 seconds to display fully (longer for user to read)
+  const animationDuration = Math.max(newsItems.length * 1.2, 30);
+
   // Fetch news on mount and poll every 30 minutes
   useEffect(() => {
     const fetchNews = async () => {
@@ -189,7 +193,7 @@ export default function NewsTicker() {
           }
 
           .animate-ticker-scroll {
-            animation: ticker-scroll 12s linear infinite;
+            animation: ticker-scroll ${animationDuration}s linear infinite;
           }
 
           .animate-ticker-scroll:hover {
