@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import logoImg from "@assets/BhenMedia_1763690019470.png";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -64,8 +65,9 @@ export default function Header() {
           </button>
         </div>
 
-        {/* CTA Buttons */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* CTA Buttons & Theme Toggle */}
+        <div className="hidden md:flex items-center gap-2">
+          <ThemeToggle />
           <Link href="/login">
             <Button variant="ghost" data-testid="button-header-signin">
               Sign In
