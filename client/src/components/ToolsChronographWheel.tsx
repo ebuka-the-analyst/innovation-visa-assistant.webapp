@@ -32,9 +32,10 @@ export default function ToolsChronographWheel() {
       {/* Outer metal bezel effect */}
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "800px", width: "600px" }}>
         
-        {/* Header */}
-        <div className="px-6 pt-4 pb-2 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
+        {/* Static Header Section */}
+        <div className="relative z-20 px-6 pt-4 pb-3 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
           <h3 className="text-2xl font-black text-black">100+ TOOLS HUB</h3>
+          <p className="text-xs text-gray-600 mt-1">Application Requirement Checks</p>
         </div>
 
         {/* Main Container with Featured Tool in Center */}
@@ -82,27 +83,31 @@ export default function ToolsChronographWheel() {
 
           {/* Fade masks - top and bottom */}
           <div
-            className="absolute top-0 left-0 right-0 pointer-events-none"
+            className="absolute top-0 left-0 right-0 pointer-events-none z-10"
             style={{
-              height: "150px",
+              height: "120px",
               background: "linear-gradient(to bottom, rgba(240,244,248,0.95) 0%, rgba(240,244,248,0.3) 100%)",
               backdropFilter: "blur(3px)",
             }}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 pointer-events-none"
+            className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
             style={{
-              height: "150px",
+              height: "120px",
               background: "linear-gradient(to top, rgba(240,244,248,0.95) 0%, rgba(240,244,248,0.3) 100%)",
               backdropFilter: "blur(3px)",
             }}
           />
 
-          {/* Featured Tool Box - Centered */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-4">
-            <div className="p-6 bg-white border-2 border-gray-300 rounded-lg w-full" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}>
+          {/* Featured Tool Box - Centered Behind */}
+          <div className="absolute inset-0 flex items-center justify-center px-4 z-5">
+            <div 
+              className="p-6 bg-white border-2 border-gray-300 rounded-lg w-full cursor-pointer hover:shadow-lg transition-shadow" 
+              style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
+              onClick={() => {}}
+            >
               <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 pointer-events-auto">
+                <div className="flex-1">
                   <p className="text-sm text-gray-400 font-semibold mb-2">
                     {String(selectedToolIdx + 1).padStart(3, "0")}
                   </p>
