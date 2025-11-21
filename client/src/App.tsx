@@ -26,6 +26,7 @@ import RFEDefenceLab from "@/pages/rfe-defence-lab";
 import Diagnostics from "@/pages/diagnostics";
 import Settings from "@/pages/settings";
 import DataModal from "@/pages/data-modal";
+import ToolsHub from "@/pages/tools-hub";
 
 function Router() {
   return (
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/diagnostics" component={Diagnostics} />
       <Route path="/settings" component={Settings} />
       <Route path="/data-manager" component={DataModal} />
+      <Route path="/tools-hub" component={ToolsHub} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -22,6 +22,7 @@ const tiers = [
       "Standard business plan format",
       "PDF download",
       "48-hour delivery",
+      "30 essential tools",
     ],
   },
   {
@@ -40,6 +41,7 @@ const tiers = [
       "Competitive analysis",
       "PDF download",
       "24-hour delivery",
+      "60+ tools suite",
     ],
   },
   {
@@ -58,6 +60,26 @@ const tiers = [
       "Endorsing body optimization",
       "PDF download",
       "12-hour priority delivery",
+      "82+ advanced tools",
+    ],
+  },
+  {
+    id: "ultimate",
+    name: "Ultimate Plan",
+    price: "£299",
+    description: "Everything you need to guarantee approval",
+    pages: "80+ pages",
+    features: [
+      "All Enterprise features",
+      "Complete access to all 88 tools",
+      "24/7 VIP support",
+      "Personal visa strategist",
+      "Unlimited revisions",
+      "Priority endorsement prep",
+      "RFE defense strategy",
+      "Appeal strategy planning",
+      "1-hour priority delivery",
+      "Success guarantee coaching",
     ],
   },
 ];
@@ -90,7 +112,7 @@ export default function Pricing() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
           {tiers.map((tier) => (
             <Card 
               key={tier.id} 
