@@ -23,6 +23,7 @@ import FeaturesDashboard from "@/pages/features-dashboard";
 import KPIDashboard from "@/pages/kpi-dashboard";
 import EvidenceGraph from "@/pages/evidence-graph";
 import RFEDefenceLab from "@/pages/rfe-defence-lab";
+import Diagnostics from "@/pages/diagnostics";
 
 function Router() {
   return (
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/kpi-dashboard" component={KPIDashboard} />
       <Route path="/evidence-graph" component={EvidenceGraph} />
       <Route path="/rfe-defence-lab" component={RFEDefenceLab} />
+      <Route path="/diagnostics" component={Diagnostics} />
       <Route component={NotFound} />
     </Switch>
   );

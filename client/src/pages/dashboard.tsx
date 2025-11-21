@@ -343,15 +343,29 @@ export default function Dashboard() {
                     </CardContent>
                     <CardFooter className="flex gap-2">
                       {plan.status === 'completed' && plan.pdfUrl && (
-                        <Button 
-                          variant="default" 
-                          className="flex-1"
-                          onClick={() => window.open(plan.pdfUrl!, '_blank')}
-                          data-testid={`button-download-${plan.id}`}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
+                        <>
+                          <Button 
+                            variant="default" 
+                            className="flex-1"
+                            onClick={() => window.open(plan.pdfUrl!, '_blank')}
+                            data-testid={`button-download-${plan.id}`}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={() => {
+                              localStorage.setItem('lastPlanId', plan.id);
+                              setLocation(`/diagnostics?planId=${plan.id}`);
+                            }}
+                            data-testid={`button-diagnostics-${plan.id}`}
+                          >
+                            <Zap className="h-4 w-4 mr-2" />
+                            Diagnostics
+                          </Button>
+                        </>
                       )}
                       {plan.status === 'pending' && (
                         <Button 
