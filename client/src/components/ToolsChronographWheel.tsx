@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -9,7 +9,7 @@ export default function ToolsChronographWheel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const wheelRef = useRef<HTMLDivElement>(null);
   const tools = ALL_TOOLS;
-  const itemHeight = 8; // Height of each tool item (scaled down)
+  const itemHeight = 10; // Height of each tool item
 
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
@@ -44,10 +44,35 @@ export default function ToolsChronographWheel() {
     <div
       className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
-      style={{ scale: "0.40", transformOrigin: "bottom left" }}
+      style={{ scale: "0.50", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
       <div className="w-72 h-72 rounded-full border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-4 flex items-center justify-center">
+        {/* Circular text "Tools Hub" around the edge */}
+        <svg
+          className="absolute w-full h-full"
+          viewBox="0 0 288 288"
+          style={{ pointerEvents: "none" }}
+        >
+          <defs>
+            <path
+              id="circlePath"
+              d="M 144, 144 m -120, 0 a 120,120 0 1,1 240,0 a 120,120 0 1,1 -240,0"
+              fill="none"
+            />
+          </defs>
+          <text
+            fontSize="18"
+            fontWeight="bold"
+            fill="#0D2C4A"
+            opacity="0.6"
+            letterSpacing="8"
+          >
+            <textPath href="#circlePath" startOffset="50%" textAnchor="middle">
+              TOOLS HUB
+            </textPath>
+          </text>
+        </svg>
         {/* Inner chrome cover with cutout */}
         <div
           className="absolute w-64 h-64 rounded-full pointer-events-none"
@@ -74,18 +99,19 @@ export default function ToolsChronographWheel() {
               transform: `translateY(${-currentIndex * itemHeight + 2 * itemHeight}px)`,
             }}
           >
-            {/* Create extended list for looping */}
+            {/* Create extended list for looping - 5 visible at a time */}
             {[...Array(3)].map((_, loopIdx) =>
               tools.map((tool, idx) => {
                 const globalIdx = loopIdx * tools.length + idx;
                 const isCenter = idx === currentIndex % tools.length;
+                const relativePos = (idx - currentIndex + tools.length) % tools.length;
 
                 return (
                   <div
                     key={`${loopIdx}-${idx}`}
-                    className={`h-2 px-3 flex items-center gap-2 transition-all cursor-pointer ${
+                    className={`h-3 px-3 flex items-center gap-2 transition-all cursor-pointer ${
                       isCenter
-                        ? "bg-primary/30 border-l-4 border-l-primary font-semibold text-sm"
+                        ? "bg-primary/40 border-l-4 border-l-primary font-semibold text-xs"
                         : "opacity-50 text-xs hover:opacity-75"
                     }`}
                     onClick={() => {
