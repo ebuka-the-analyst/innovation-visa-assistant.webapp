@@ -1,8 +1,10 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 import ChatBot from "@/components/ChatBot";
 import Home from "@/pages/home";
 import Login from "@/pages/login";
@@ -28,6 +30,9 @@ import Settings from "@/pages/settings";
 import DataModal from "@/pages/data-modal";
 import ToolsHub from "@/pages/tools-hub";
 import FeaturesShowcase from "@/pages/features-showcase";
+
+// Pages that don't need sidebar (auth pages)
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/pricing"];
 
 function Router() {
   return (
@@ -60,13 +65,39 @@ function Router() {
   );
 }
 
+function AppLayout() {
+  const [location] = useLocation();
+  const showSidebar = !SIDEBAR_HIDDEN_ROUTES.includes(location);
+
+  if (!showSidebar) {
+    return <Router />;
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="flex h-screen w-full">
+        <AppSidebar />
+        <div className="flex flex-col flex-1 w-full">
+          <header className="flex items-center gap-4 px-4 py-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <SidebarTrigger data-testid="button-sidebar-toggle" className="-ml-2" />
+            <div className="flex-1" />
+          </header>
+          <main className="flex-1 overflow-auto">
+            <Router />
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ChatBot />
         <Toaster />
-        <Router />
+        <AppLayout />
       </TooltipProvider>
     </QueryClientProvider>
   );
