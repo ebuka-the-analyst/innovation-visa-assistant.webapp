@@ -8,7 +8,7 @@ export default function VisaAssistantDisclaimer() {
   if (isDismissed) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 px-4 py-3 z-40">
+    <div className="fixed top-0 left-0 right-0 bg-amber-50 dark:bg-amber-950/50 border-b-2 border-amber-300 dark:border-amber-700 px-4 py-3" style={{ zIndex: 9999 }}>
       <div className="container mx-auto max-w-6xl">
         <div className="flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />

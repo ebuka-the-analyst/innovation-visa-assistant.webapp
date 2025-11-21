@@ -25,7 +25,7 @@ export default function CookieConsent() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-slate-900 dark:bg-slate-950 border-t border-slate-700 p-4 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-slate-900 dark:bg-slate-950 border-t-2 border-slate-600 p-4" style={{ zIndex: 9998 }}>
       <div className="container mx-auto max-w-6xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex-1">
