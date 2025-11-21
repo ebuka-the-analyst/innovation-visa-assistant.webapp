@@ -20,8 +20,14 @@ export default function Header() {
       <nav className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/">
-          <div className="flex items-center cursor-pointer hover:opacity-80 transition-opacity" data-testid="button-logo">
+          <div className="flex flex-col items-start cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
             <img src={logoImg} alt="BhenMedia" className="h-12 w-auto" />
+            <div className="relative mt-0.5">
+              <p className="text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
+                UK's #1 Innovation Visa Partner
+              </p>
+              <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-chart-3 to-primary rounded-full" />
+            </div>
           </div>
         </Link>
 
