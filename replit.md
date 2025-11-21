@@ -8,21 +8,37 @@ VisaPrep AI is a SaaS application that generates professional business plans for
 
 ### Innovator Founder Visa (Replaced Old Innovator Visa)
 
+**Official Sources:**
+- GOV.UK Innovator Founder visa page (updated November 2025)
+- Home Office guidance Version 9.0 (published November 11, 2025)
+
 **Key Changes from Old Visa:**
-- NO fixed £50,000 minimum investment requirement
+- NO fixed £50,000 minimum investment requirement for INDIVIDUAL applicants
 - Funding must be "appropriate" and "sufficient" for YOUR business plan
 - Could be less than, equal to, or more than £50k depending on business needs
-- Endorsing bodies assess appropriateness based on your specific circumstances
+- Endorsing bodies assess appropriateness AND legitimacy of funds
+
+**TEAM APPLICANTS (New Business):**
+- Each co-founder must independently have £50,000 available to invest
+- Each co-founder needs SEPARATE endorsement (not linked applications)
+- Each must individually score 70 points
 
 **Official Requirements:**
-- Personal savings: £1,270 (28 consecutive days)
-- Business funding: "Appropriate" amount (no fixed minimum)
+- Personal savings: £1,270 (28 consecutive days) - mandatory for all
+- Business funding: "Appropriate" amount (no fixed minimum for individuals)
+- Endorsement letter: Must confirm no concerns over fund legitimacy/sources
 - No investment needed if business already established/endorsed
+- Points: 70 total (50 from business criteria + 10 English B2 + 10 financial)
 
 **Visa Fees (Nov 2025):**
 - Application: £1,274 (outside UK) or £1,590 (extension/switch in UK)
 - Endorsement assessment: £1,000
 - Per-meeting fee: £500 each (minimum 2 meetings required)
+- Duration: 3 years, then settlement eligible
+
+**Switching Restrictions:**
+- Cannot switch from: Visitor, Short-term Student, Parent of Child Student, Seasonal Worker, domestic worker
+- Students can only switch if completed course (or 12+ months of PhD)
 
 ## User Preferences
 
