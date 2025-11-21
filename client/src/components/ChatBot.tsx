@@ -133,7 +133,6 @@ export default function ChatBot() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-bold text-lg">UK-Innovation Visa Assistant</h3>
-                <p className="text-xs opacity-90">Official GOV.UK guidance</p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
