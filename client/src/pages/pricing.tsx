@@ -29,7 +29,7 @@ const tiers = [
   {
     id: "basic",
     name: "Basic Plan",
-    price: "£49",
+    price: "£19",
     description: "Perfect for simple business concepts",
     pages: "25-35 pages",
     features: [
@@ -45,7 +45,7 @@ const tiers = [
   {
     id: "premium",
     name: "Premium Plan",
-    price: "£99",
+    price: "£39",
     description: "Most popular for strong applications",
     pages: "40-60 pages",
     popular: true,
@@ -64,7 +64,7 @@ const tiers = [
   {
     id: "enterprise",
     name: "Enterprise Plan",
-    price: "£199",
+    price: "£79",
     description: "Maximum detail for complex ventures",
     pages: "50-80 pages",
     features: [
@@ -83,7 +83,7 @@ const tiers = [
   {
     id: "ultimate",
     name: "Ultimate Plan",
-    price: "£299",
+    price: "£99",
     description: "Everything you need to guarantee approval",
     pages: "80+ pages",
     features: [
