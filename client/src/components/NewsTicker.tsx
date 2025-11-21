@@ -189,7 +189,7 @@ export default function NewsTicker() {
           }
 
           .animate-ticker-scroll {
-            animation: ticker-scroll 6.67s linear infinite;
+            animation: ticker-scroll 200s linear infinite;
           }
 
           .animate-ticker-scroll:hover {
