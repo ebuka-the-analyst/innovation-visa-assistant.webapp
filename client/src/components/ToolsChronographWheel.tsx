@@ -39,12 +39,27 @@ export default function ToolsChronographWheel() {
       style={{ scale: "0.50", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
-      <div className="w-72 h-80 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-6 flex flex-col items-center justify-center">
+      <div className="w-72 h-80 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-4 flex flex-col items-center justify-center">
         
-        {/* TOOLS HUB Label at top */}
-        <div className="text-center mb-4 absolute top-4 left-0 right-0">
-          <h3 className="text-sm font-bold text-primary opacity-70">TOOLS HUB</h3>
-        </div>
+        {/* TOOLS HUB text on bezel edge using SVG */}
+        <svg
+          className="absolute w-full h-full top-0 left-0"
+          viewBox="0 0 288 320"
+          style={{ pointerEvents: "none" }}
+        >
+          <text
+            x="144"
+            y="28"
+            fontSize="16"
+            fontWeight="bold"
+            fill="#0D2C4A"
+            opacity="0.6"
+            textAnchor="middle"
+            letterSpacing="3"
+          >
+            TOOLS HUB
+          </text>
+        </svg>
 
         {/* Inner chrome cover overlay */}
         <div
@@ -58,11 +73,12 @@ export default function ToolsChronographWheel() {
         {/* Scrollable container with overflow hidden */}
         <div
           ref={wheelRef}
-          className="relative w-full flex-1 overflow-hidden flex flex-col items-center justify-center mt-8"
+          className="relative w-full flex-1 overflow-hidden flex flex-col items-center justify-center"
           onWheel={handleWheel}
           style={{
-            height: "200px",
+            height: "220px",
             perspective: "1000px",
+            marginTop: "8px",
           }}
         >
           {/* Tool items - vertical scroll with mask effect */}
