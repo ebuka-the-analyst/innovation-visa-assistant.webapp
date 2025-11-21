@@ -33,6 +33,15 @@ import ToolsHub from "@/pages/tools-hub";
 import FeaturesShowcase from "@/pages/features-showcase";
 import EndorserInvestmentRequirements from "@/pages/endorser-investment-requirements";
 import AIAssistant from "@/pages/ai-assistant";
+import PointsCalculator from "@/pages/tools/points-calculator";
+import SavingsValidator from "@/pages/tools/savings-validator";
+import FeeEstimator from "@/pages/tools/fee-estimator";
+import FundingChecker from "@/pages/tools/funding-checker";
+import IncomeCalculator from "@/pages/tools/income-calculator";
+import ComplianceChecker from "@/pages/tools/compliance-checker";
+import MarketAnalysis from "@/pages/tools/market-analysis";
+import RiskAnalysis from "@/pages/tools/risk-analysis";
+import InnovationScore from "@/pages/tools/innovation-score";
 
 // Pages that don't need sidebar (auth pages)
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/pricing"];
@@ -65,6 +74,15 @@ function Router() {
       <Route path="/features" component={FeaturesShowcase} />
       <Route path="/endorser-investment" component={EndorserInvestmentRequirements} />
       <Route path="/ai-assistant" component={AIAssistant} />
+      <Route path="/tools/points-calculator" component={PointsCalculator} />
+      <Route path="/tools/savings-validator" component={SavingsValidator} />
+      <Route path="/tools/fee-estimator" component={FeeEstimator} />
+      <Route path="/tools/funding-checker" component={FundingChecker} />
+      <Route path="/tools/income-calculator" component={IncomeCalculator} />
+      <Route path="/tools/compliance-checker" component={ComplianceChecker} />
+      <Route path="/tools/market-analysis" component={MarketAnalysis} />
+      <Route path="/tools/risk-analysis" component={RiskAnalysis} />
+      <Route path="/tools/innovation-score" component={InnovationScore} />
       <Route component={NotFound} />
     </Switch>
   );
