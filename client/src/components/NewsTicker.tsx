@@ -1,6 +1,5 @@
-import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
+import { useState } from "react";
 import NewsModal from "./NewsModal";
 import type { NewsItem } from "./NewsModal";
 
@@ -62,19 +61,6 @@ const NEWS_ITEMS: NewsItem[] = [
 export default function NewsTicker() {
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const tickerRef = useRef<HTMLDivElement>(null);
-
-  const handleRewind = () => {
-    if (tickerRef.current) {
-      tickerRef.current.scrollLeft -= 500;
-    }
-  };
-
-  const handleForward = () => {
-    if (tickerRef.current) {
-      tickerRef.current.scrollLeft += 500;
-    }
-  };
 
   const handleArticleClick = (article: NewsItem) => {
     setSelectedArticle(article);
@@ -93,44 +79,53 @@ export default function NewsTicker() {
               </span>
             </div>
 
-            {/* Scrollable ticker */}
-            <div className="flex-1 overflow-x-auto scroll-smooth" ref={tickerRef}>
-              <div className="flex gap-6 whitespace-nowrap py-1">
+            {/* Auto-scrolling ticker */}
+            <div className="flex-1 overflow-hidden">
+              <div className="animate-ticker-scroll whitespace-nowrap">
                 {NEWS_ITEMS.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => handleArticleClick(item)}
-                    className="text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline flex-shrink-0"
+                    className="inline-block px-4 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
                   >
                     {item.title}
+                    <span className="mx-2 text-primary/40">•</span>
+                  </button>
+                ))}
+                {/* Duplicate for seamless loop */}
+                {NEWS_ITEMS.map((item) => (
+                  <button
+                    key={`dup-${item.id}`}
+                    onClick={() => handleArticleClick(item)}
+                    className="inline-block px-4 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
+                  >
+                    {item.title}
+                    <span className="mx-2 text-primary/40">•</span>
                   </button>
                 ))}
               </div>
             </div>
-
-            {/* Navigation Controls */}
-            <div className="flex items-center gap-0.5 flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleRewind}
-                className="h-6 w-6"
-                data-testid="button-ticker-rewind"
-              >
-                <ChevronLeft className="w-3 h-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleForward}
-                className="h-6 w-6"
-                data-testid="button-ticker-forward"
-              >
-                <ChevronRight className="w-3 h-3" />
-              </Button>
-            </div>
           </div>
         </div>
+
+        <style>{`
+          @keyframes ticker-scroll {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+
+          .animate-ticker-scroll {
+            animation: ticker-scroll 40s linear infinite;
+          }
+
+          .animate-ticker-scroll:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
       </div>
 
       {/* News Modal */}
