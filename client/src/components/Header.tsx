@@ -33,7 +33,7 @@ export default function Header() {
       {!disclaimerDismissed && (
         <div className="w-full bg-black/90 text-white text-xs py-2.5 flex items-center justify-center gap-4 border-b border-border/40">
           <span>
-            <strong>UK-Innovation Visa Assistant Disclaimer:</strong> Trained on GOV.UK guidance. Always verify with official sources.
+            <strong>UK-Innovation Visa Assistant Disclaimer:</strong> Trained on GOV.UK guidance. This doesnt substitute a legal advice. Always verify with official sources.
           </span>
           <button
             onClick={() => setDisclaimerDismissed(true)}
