@@ -23,17 +23,20 @@ export default function ToolsChronographWheel() {
     ultimate: "bg-yellow-50 border-yellow-200 text-yellow-700",
   };
 
-  // Auto-scroll to keep selected tool visible in the center of the list
-  useEffect(() => {
-    if (scrollRef.current) {
-      const itemHeight = 44; // Approximate height of each tool item
-      const containerHeight = scrollRef.current.clientHeight;
-      const scrollCenter = containerHeight / 2;
-      const targetScroll = Math.max(0, selectedToolIdx * itemHeight - scrollCenter);
-      
-      scrollRef.current.scrollTop = targetScroll;
+  // Handle scroll and update selected tool based on center position
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    
+    const scrollTop = scrollRef.current.scrollTop;
+    const containerHeight = scrollRef.current.clientHeight;
+    const itemHeight = 44;
+    const centerPosition = scrollTop + containerHeight / 2;
+    const newSelectedIdx = Math.round(centerPosition / itemHeight);
+    
+    if (newSelectedIdx >= 0 && newSelectedIdx < tools.length && newSelectedIdx !== selectedToolIdx) {
+      setSelectedToolIdx(newSelectedIdx);
     }
-  }, [selectedToolIdx]);
+  };
 
   return (
     <div
@@ -45,12 +48,12 @@ export default function ToolsChronographWheel() {
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "800px", width: "600px" }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="relative z-20 px-6 pt-4 pb-2 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
+        <div className="px-6 pt-4 pb-2 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
           <h3 className="text-2xl font-black text-black">100+ TOOLS HUB</h3>
         </div>
 
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" */}
-        <div className="relative z-20 px-6 py-2 border-b border-gray-300 bg-gray-50">
+        <div className="px-6 py-2 border-b border-gray-300 bg-gray-50">
           <p className="text-sm font-black text-black tracking-wide">APPLICATION REQUIREMENT CHECKS</p>
         </div>
 
@@ -60,6 +63,7 @@ export default function ToolsChronographWheel() {
           <div
             ref={scrollRef}
             className="absolute inset-0 overflow-y-auto overflow-x-hidden px-4 py-3"
+            onScroll={handleScroll}
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
@@ -124,11 +128,10 @@ export default function ToolsChronographWheel() {
           />
 
           {/* Featured Tool Box - Centered Behind */}
-          <div className="absolute inset-0 flex items-center justify-center px-4 z-5">
+          <div className="absolute inset-0 flex items-center justify-center px-4 z-5 pointer-events-none">
             <div 
-              className="p-6 bg-white border-2 border-gray-300 rounded-lg w-full cursor-pointer hover:shadow-lg transition-shadow" 
+              className="p-6 bg-white border-2 border-gray-300 rounded-lg w-full" 
               style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
-              onClick={() => {}}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
