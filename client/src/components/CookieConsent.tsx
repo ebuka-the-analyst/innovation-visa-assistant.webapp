@@ -30,7 +30,7 @@ export default function CookieConsent() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex-1">
             <p className="text-sm text-slate-200 leading-relaxed">
-              We use cookies to enhance your experience on BhenMedia VisaPrep. Cookies help us understand how you use our platform and improve our services. By continuing to use the site, you consent to our use of cookies.{' '}
+              We use cookies to enhance your experience on UK-Innovation Visa Assistant. Cookies help us understand how you use our platform and improve our services. By continuing to use the site, you consent to our use of cookies.{' '}
               <a
                 href="/privacy"
                 className="underline text-accent hover:text-accent/80"
