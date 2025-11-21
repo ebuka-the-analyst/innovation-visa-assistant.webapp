@@ -7,6 +7,7 @@ type IconName = keyof typeof Icons;
 export default function ToolsChronographWheel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedToolIdx, setSelectedToolIdx] = useState(0);
+  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const tools = ALL_TOOLS;
   const selectedTool = tools[selectedToolIdx];
 
@@ -38,6 +39,50 @@ export default function ToolsChronographWheel() {
     }
   };
 
+  // Handle mouse move to scroll
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrollRef.current) return;
+
+    const containerRect = scrollRef.current.getBoundingClientRect();
+    const mouseY = e.clientY - containerRect.top;
+    const containerHeight = containerRect.height;
+    const centerY = containerHeight / 2;
+    const threshold = 80; // Distance from center to trigger scroll
+
+    const distance = Math.abs(mouseY - centerY);
+    const isAboveCenter = mouseY < centerY;
+    const isBelowCenter = mouseY > centerY;
+
+    // Clear existing interval
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+    }
+
+    if (distance < threshold) {
+      // Don't scroll if near center
+      return;
+    }
+
+    // Calculate scroll speed based on distance
+    const speedFactor = (distance - threshold) / (containerHeight / 2 - threshold);
+    const scrollSpeed = speedFactor * 8; // Max 8px per interval
+
+    // Start continuous scrolling
+    scrollIntervalRef.current = setInterval(() => {
+      if (scrollRef.current) {
+        const newScrollTop = scrollRef.current.scrollTop + (isAboveCenter ? -scrollSpeed : scrollSpeed);
+        scrollRef.current.scrollTop = Math.max(0, Math.min(newScrollTop, scrollRef.current.scrollHeight - scrollRef.current.clientHeight));
+      }
+    }, 30);
+  };
+
+  const handleMouseLeave = () => {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+  };
+
   return (
     <div
       className="fixed bottom-8 left-8 z-40"
@@ -64,6 +109,8 @@ export default function ToolsChronographWheel() {
             ref={scrollRef}
             className="absolute inset-0 overflow-y-auto overflow-x-hidden px-4 py-3"
             onScroll={handleScroll}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
