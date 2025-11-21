@@ -195,7 +195,7 @@ export function AppSidebar() {
         {navGroups.map((group, idx) => (
           <div key={idx}>
             <SidebarGroup>
-              <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground">
+              <SidebarGroupLabel className="text-xs font-bold px-3 py-2 rounded-md" style={{ backgroundColor: "#ffa536", color: "#000000" }}>
                 {group.label}
               </SidebarGroupLabel>
               <SidebarGroupContent>
