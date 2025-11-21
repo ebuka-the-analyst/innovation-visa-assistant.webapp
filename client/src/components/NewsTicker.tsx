@@ -23,13 +23,11 @@ export default function NewsTicker() {
   const [newsItems, setNewsItems] = useState<NewsItem[]>(INITIAL_NEWS_ITEMS);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const tickerRef = useRef<HTMLDivElement>(null);
+  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Calculate animation duration based on number of news items
-  // Each item gets 0.5 seconds to display
-  const animationDuration = Math.max(newsItems.length * 0.5, 12);
-
-  // Fetch news on mount and poll every 30 minutes
+  // Fetch news on mount
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -49,35 +47,41 @@ export default function NewsTicker() {
     return () => clearInterval(interval);
   }, []);
 
-  // Check for breaking news every 5 minutes
+  // Auto-scroll animation using JavaScript
   useEffect(() => {
-    const checkBreakingNews = async () => {
-      try {
-        const response = await fetch("/api/news/check", { method: "POST" });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.breaking) {
-            setNewsItems(data.all);
-          }
+    if (!tickerRef.current || newsItems.length === 0) return;
+
+    const startScroll = () => {
+      let currentScroll = 0;
+      const itemHeight = 28; // Approximate height per item
+      const totalHeight = newsItems.length * itemHeight * 2; // Duplicate items
+      const speedPixelsPerSecond = 30; // Pixels per second
+      const scrollDuration = (totalHeight / speedPixelsPerSecond) * 1000; // Duration in ms
+
+      scrollIntervalRef.current = setInterval(() => {
+        currentScroll += 1;
+        if (tickerRef.current) {
+          tickerRef.current.scrollTop = currentScroll % totalHeight;
         }
-      } catch (error) {
-        console.error("Failed to check breaking news:", error);
-      }
+      }, 16); // ~60fps
     };
 
-    const interval = setInterval(checkBreakingNews, 5 * 60 * 1000); // Check every 5 minutes
-    return () => clearInterval(interval);
-  }, []);
+    startScroll();
+
+    return () => {
+      if (scrollIntervalRef.current) clearInterval(scrollIntervalRef.current);
+    };
+  }, [newsItems]);
 
   const handleBackward = () => {
     if (tickerRef.current) {
-      tickerRef.current.scrollLeft -= 300;
+      tickerRef.current.scrollTop -= 100;
     }
   };
 
   const handleForward = () => {
     if (tickerRef.current) {
-      tickerRef.current.scrollLeft += 300;
+      tickerRef.current.scrollTop += 100;
     }
   };
 
@@ -86,13 +90,9 @@ export default function NewsTicker() {
     setModalOpen(true);
   };
 
-  // Calculate the scroll percentage based on exact number of items
-  // We duplicate items for seamless loop, so scroll to show all 1x through items
-  const scrollPercentage = newsItems.length > 0 ? (100 / (newsItems.length * 2)) * 100 : 50;
-
   return (
     <>
-      <div className="flex items-center gap-1 px-2 py-2">
+      <div className="flex items-center gap-1 px-2 py-2 bg-background border-b">
         {/* Start Navigation Button - Far Left */}
         <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1 flex-shrink-0">
           <Button
@@ -106,28 +106,29 @@ export default function NewsTicker() {
           </Button>
         </div>
 
-        {/* Auto-scrolling ticker */}
-        <div className="flex-1 overflow-hidden" ref={tickerRef}>
-          <div className="animate-ticker-scroll whitespace-nowrap">
+        {/* Vertical scrolling ticker */}
+        <div className="flex-1 h-7 overflow-hidden" ref={tickerRef}>
+          <div className="space-y-0">
+            {/* First pass of items */}
             {newsItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleArticleClick(item)}
-                className="inline-block px-3 py-1 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline flex-shrink-0"
+                className="w-full h-7 px-3 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline text-left whitespace-nowrap overflow-hidden text-ellipsis flex items-center"
               >
+                <span className="text-primary/60 mr-2">•</span>
                 {item.title}
-                <span className="mx-2 text-primary/40">•</span>
               </button>
             ))}
-            {/* Duplicate for seamless loop */}
+            {/* Duplicate pass for seamless loop */}
             {newsItems.map((item) => (
               <button
                 key={`dup-${item.id}`}
                 onClick={() => handleArticleClick(item)}
-                className="inline-block px-3 py-1 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline flex-shrink-0"
+                className="w-full h-7 px-3 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline text-left whitespace-nowrap overflow-hidden text-ellipsis flex items-center"
               >
+                <span className="text-primary/60 mr-2">•</span>
                 {item.title}
-                <span className="mx-2 text-primary/40">•</span>
               </button>
             ))}
           </div>
@@ -145,27 +146,6 @@ export default function NewsTicker() {
             <ChevronRight className="w-3 h-3 text-white" />
           </Button>
         </div>
-
-        <style>{`
-          @keyframes ticker-scroll {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(calc(-100% / 2));
-            }
-          }
-
-          .animate-ticker-scroll {
-            animation: ticker-scroll ${animationDuration}s linear infinite;
-            display: flex;
-            gap: 0;
-          }
-
-          .animate-ticker-scroll:hover {
-            animation-play-state: paused;
-          }
-        `}</style>
       </div>
 
       {/* News Modal */}
