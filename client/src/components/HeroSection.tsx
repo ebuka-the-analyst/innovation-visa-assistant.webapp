@@ -8,7 +8,7 @@ import ReadinessScoreWidget from "./ReadinessScoreWidget";
 export default function HeroSection() {
   const [sampleModalOpen, setSampleModalOpen] = useState(false);
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-background via-accent/5 to-primary/5 py-12 md:py-16">
+    <section className="relative overflow-hidden bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8 md:py-12">
       {/* Animated gradient mesh background */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
@@ -97,7 +97,15 @@ export default function HeroSection() {
           </div>
 
           {/* Right: Interactive Readiness Score Widget */}
-          <div className="relative lg:block hidden">
+          <div className="relative lg:block hidden space-y-4">
+            {/* Description */}
+            <div>
+              <p className="text-sm font-semibold text-primary mb-2">AI-Powered Assessment</p>
+              <p className="text-muted-foreground text-sm max-w-sm">
+                See how your business scores across Innovation, Viability, and Scalability criteria. This readiness assessment helps you understand your visa application strength before formal submission.
+              </p>
+            </div>
+
             <div className="relative">
               {/* Holographic glow effect */}
               <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-chart-3/20 to-chart-2/20 blur-3xl rounded-full" />
