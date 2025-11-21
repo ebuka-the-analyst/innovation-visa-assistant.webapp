@@ -31,6 +31,7 @@ import DataModal from "@/pages/data-modal";
 import ToolsHub from "@/pages/tools-hub";
 import FeaturesShowcase from "@/pages/features-showcase";
 import EndorserInvestmentRequirements from "@/pages/endorser-investment-requirements";
+import AIAssistant from "@/pages/ai-assistant";
 
 // Pages that don't need sidebar (auth pages)
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/pricing"];
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/tools-hub" component={ToolsHub} />
       <Route path="/features" component={FeaturesShowcase} />
       <Route path="/endorser-investment" component={EndorserInvestmentRequirements} />
+      <Route path="/ai-assistant" component={AIAssistant} />
       <Route component={NotFound} />
     </Switch>
   );

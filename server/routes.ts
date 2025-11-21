@@ -7,6 +7,7 @@ import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
 import { getLatestNews, generateBreakingNews } from "./newsService";
+import chatRouter from "./chatRoutes";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
