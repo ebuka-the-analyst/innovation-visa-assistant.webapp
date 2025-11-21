@@ -33,8 +33,8 @@ export function AuthHeader() {
           <div className="flex items-center gap-6">
             <Link href="/">
               <div className="flex flex-col items-start cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-auth-logo">
-                <img src={logoImg} alt="BhenMedia" className="h-20 w-72" />
-                <div className="relative mt-0.5">
+                <img src={logoImg} alt="BhenMedia" className="h-12 w-44" />
+                <div className="relative -mt-1">
                   <p className="text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
                     UK's #1 Innovation Visa Partner
                   </p>

@@ -21,8 +21,8 @@ export default function Header() {
         {/* Logo */}
         <Link href="/">
           <div className="flex flex-col items-start cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
-            <img src={logoImg} alt="BhenMedia" className="h-24 w-80" />
-            <div className="relative mt-0.5">
+            <img src={logoImg} alt="BhenMedia" className="h-14 w-48" />
+            <div className="relative -mt-1">
               <p className="text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
                 UK's #1 Innovation Visa Partner
               </p>
