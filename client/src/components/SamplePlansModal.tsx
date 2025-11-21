@@ -157,11 +157,31 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                 </div>
 
                 <div className="flex gap-2">
-                  <Button size="sm" variant="default" className="gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="default" 
+                    className="gap-2"
+                    onClick={() => {
+                      if (plan.pdfUrl && plan.pdfUrl !== "#") {
+                        window.open(plan.pdfUrl, '_blank');
+                      } else {
+                        alert(`Sample PDF for ${plan.businessName} is available when you generate your own plan.`);
+                      }
+                    }}
+                    data-testid={`button-download-sample-${plan.id}`}
+                  >
                     <Download className="w-4 h-4" />
                     Download PDF
                   </Button>
-                  <Button size="sm" variant="outline" className="gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="gap-2"
+                    onClick={() => {
+                      alert(`Full plan for ${plan.businessName}\n\nThis is a sample of ${plan.tier.toUpperCase()} tier:\n\n${plan.highlights.slice(0, 3).join('\n')}`);
+                    }}
+                    data-testid={`button-view-sample-${plan.id}`}
+                  >
                     <ExternalLink className="w-4 h-4" />
                     View Full
                   </Button>
@@ -291,11 +311,31 @@ function SamplePlanCard({ plan }: { plan: typeof SAMPLE_PLANS[0] }) {
       </div>
 
       <div className="flex gap-2">
-        <Button size="sm" variant="default" className="gap-2">
+        <Button 
+          size="sm" 
+          variant="default" 
+          className="gap-2"
+          onClick={() => {
+            if (plan.pdfUrl && plan.pdfUrl !== "#") {
+              window.open(plan.pdfUrl, '_blank');
+            } else {
+              alert(`Sample PDF for ${plan.businessName} is available when you generate your own plan.`);
+            }
+          }}
+          data-testid={`button-download-card-${plan.id}`}
+        >
           <Download className="w-4 h-4" />
           Download PDF
         </Button>
-        <Button size="sm" variant="outline" className="gap-2">
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="gap-2"
+          onClick={() => {
+            alert(`Full plan for ${plan.businessName}\n\nThis is a sample of ${plan.tier.toUpperCase()} tier:\n\n${plan.highlights.slice(0, 3).join('\n')}`);
+          }}
+          data-testid={`button-view-card-${plan.id}`}
+        >
           <ExternalLink className="w-4 h-4" />
           View Full
         </Button>

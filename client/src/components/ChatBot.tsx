@@ -56,7 +56,7 @@ export default function ChatBot() {
       console.log("Chat response data:", data);
       
       if (data.response) {
-        setMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+        setMessages(prev => [...prev, { role: "assistant", content: data.response || "No response received" }]);
       } else if (data.error) {
         setMessages(prev => [...prev, { 
           role: "assistant", 
