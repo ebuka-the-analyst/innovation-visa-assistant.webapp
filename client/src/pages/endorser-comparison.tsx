@@ -85,9 +85,10 @@ export default function EndorserComparison() {
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Endorser Comparison Tool</h1>
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">UKINNOVATOR.ONLINE TRIAGE</span>
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Endorser Comparison & Selection</h1>
             <p className="text-lg text-muted-foreground">
-              Compare UK Innovation Visa endorsement routes and find the best fit for your business
+              AI-driven diagnostic tool to identify which UK endorser route best aligns with your business profile. Part of our structured pre-assessment flow to test eligibility before formal application.
             </p>
           </div>
 

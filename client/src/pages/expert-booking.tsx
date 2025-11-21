@@ -75,9 +75,10 @@ export default function ExpertBooking() {
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Expert Consultant Booking</h1>
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">LAUNCHPAD EXPERT NETWORK</span>
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Book Expert Consultants</h1>
             <p className="text-lg text-muted-foreground">
-              Get personalized guidance from immigration lawyers and visa experts
+              Connect with immigration lawyers, business strategists, and successful visa holders. Get personalized feedback on your structured business brief and navigate the endorsement interview with confidence.
             </p>
           </div>
 

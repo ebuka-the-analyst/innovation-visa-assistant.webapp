@@ -89,9 +89,10 @@ export default function DocumentOrganizer() {
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-4xl mx-auto">
           <div className="mb-12">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Document Evidence Organizer</h1>
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">LAUNCHPAD DOCUMENT MANAGEMENT</span>
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Document Evidence Organizer</h1>
             <p className="text-lg text-muted-foreground">
-              Track, upload, and organize all required documents for your visa application
+              Intelligent document tracking and submission management. Captures all required evidence, identifies gaps, and prepares lawyer-ready packages—preventing costly rejections before they happen.
             </p>
           </div>
 

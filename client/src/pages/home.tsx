@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
+import PlatformPillars from "@/components/PlatformPillars";
 import AIAgents from "@/components/AIAgents";
 import CompetitorFeatures from "@/components/CompetitorFeatures";
 import StatsSection from "@/components/StatsSection";
@@ -20,6 +21,7 @@ export default function Home() {
         <div id="features">
           <FeaturesSection />
         </div>
+        <PlatformPillars />
         <CompetitorFeatures />
         <AIAgents />
         <StatsSection />
