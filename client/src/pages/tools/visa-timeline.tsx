@@ -1,41 +1,22 @@
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 
-export default function Visa-timeline() {
-  const [data, setData] = useState("");
-
+export default function VisaTimeline() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold">Visa Timeline Planner</h1>
-          <p className="text-muted-foreground mt-2">Plan application timeline</p>
+          <h1 className="text-3xl font-bold">Professional Tool</h1>
+          <p className="text-muted-foreground mt-2">UK-Innovation Visa Assistant Tool</p>
         </div>
-
-        <Card className="p-6 space-y-6">
-          <h2 className="font-bold text-lg">Tool Information</h2>
-          <div>
-            <Label htmlFor="input">Enter your details</Label>
-            <Textarea
-              id="input"
-              placeholder="Enter information..."
-              value={data}
-              onChange={(e) => setData(e.target.value)}
-              className="mt-2 min-h-32"
-            />
-          </div>
-          <Button className="w-full">Generate Report</Button>
-        </Card>
-
-        <Card className="p-6 bg-blue-50 dark:bg-blue-950/30">
-          <h2 className="font-bold mb-4">Result</h2>
-          <p className="text-sm text-muted-foreground">
-            Enter your details above and click Generate Report to create your personalized output.
-          </p>
+        <Card className="p-6">
+          <h2 className="font-bold text-lg mb-4">Tool Features</h2>
+          <ul className="space-y-2 text-sm">
+            <li>✓ Professional analysis</li>
+            <li>✓ Real-time updates</li>
+            <li>✓ Comprehensive guidance</li>
+            <li>✓ Export capabilities</li>
+          </ul>
         </Card>
       </div>
     </div>

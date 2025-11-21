@@ -1,13 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
 
-export default function geographicexpansion() {
+export default function GeographicExpansion() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold">Geographic Expansion Planner</h1>
-          <p className="text-muted-foreground mt-2">Professional tool for UK Innovation Visa planning</p>
+          <h1 className="text-3xl font-bold">Professional Tool</h1>
+          <p className="text-muted-foreground mt-2">UK-Innovation Visa Assistant Tool</p>
         </div>
         <Card className="p-6">
           <h2 className="font-bold text-lg mb-4">Tool Features</h2>
