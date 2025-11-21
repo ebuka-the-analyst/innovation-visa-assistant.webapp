@@ -24,11 +24,11 @@ export default function ToolsChronographWheel() {
     if (hoveringUp) {
       interval = setInterval(() => {
         setCurrentIndex((prev) => (prev - 1 + tools.length) % tools.length);
-      }, 80); // Fast scroll up
+      }, 60); // Reasonably fast scroll up
     } else if (hoveringDown) {
       interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % tools.length);
-      }, 80); // Fast scroll down
+      }, 60); // Reasonably fast scroll down
     }
     
     return () => clearInterval(interval);
@@ -58,7 +58,7 @@ export default function ToolsChronographWheel() {
       style={{ scale: "0.50", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
-      <div className="w-72 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "560px" }}>
+      <div className="w-80 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "560px" }}>
         
         {/* Static Header Section */}
         <div className="flex flex-col items-center justify-center pt-4 pb-2 px-4 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
