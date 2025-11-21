@@ -8,7 +8,7 @@ import ReadinessScoreWidget from "./ReadinessScoreWidget";
 export default function HeroSection() {
   const [sampleModalOpen, setSampleModalOpen] = useState(false);
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-background via-accent/5 to-primary/5 py-20 md:py-32">
+    <section className="relative overflow-hidden bg-gradient-to-br from-background via-accent/5 to-primary/5 py-12 md:py-16">
       {/* Animated gradient mesh background */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
