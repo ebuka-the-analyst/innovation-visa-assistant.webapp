@@ -25,6 +25,7 @@ import EvidenceGraph from "@/pages/evidence-graph";
 import RFEDefenceLab from "@/pages/rfe-defence-lab";
 import Diagnostics from "@/pages/diagnostics";
 import Settings from "@/pages/settings";
+import DataModal from "@/pages/data-modal";
 
 function Router() {
   return (
@@ -49,6 +50,7 @@ function Router() {
       <Route path="/rfe-defence-lab" component={RFEDefenceLab} />
       <Route path="/diagnostics" component={Diagnostics} />
       <Route path="/settings" component={Settings} />
+      <Route path="/data-manager" component={DataModal} />
       <Route component={NotFound} />
     </Switch>
   );

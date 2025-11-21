@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Search } from "lucide-react";
+import { Link } from "wouter";
 
 export default function LawyerCTA() {
   return (
@@ -19,10 +20,12 @@ export default function LawyerCTA() {
                 <p className="text-muted-foreground mb-6">
                   Having the right legal guidance is crucial for the outcome of your application. If you don't yet have an immigration lawyer, we will connect you with a vetted and trusted professional from our invite-only network.
                 </p>
-                <Button className="group gap-2">
-                  Learn more
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
+                <Link href="/settings">
+                  <Button className="group gap-2" data-testid="button-connect-lawyer">
+                    Connect with Expert
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
