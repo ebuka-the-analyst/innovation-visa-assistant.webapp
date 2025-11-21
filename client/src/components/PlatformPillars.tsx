@@ -7,33 +7,33 @@ export default function PlatformPillars() {
   const pillars = [
     {
       icon: Brain,
-      name: "TorlyAI",
-      subtitle: "End-to-End Intelligence Platform",
-      description: "Vertically integrated decision-support engine that synthesises eligibility diagnostics, financial modelling, and compliance logic. Generates policy-aware business plans, financial projections, and pitch decks—all internally consistent and endorser-ready.",
+      name: "VisaPrep AI - Intelligence Engine",
+      subtitle: "End-to-End Business Planning",
+      description: "PhD-level AI system that generates comprehensive, endorser-ready business plans. Evaluates your business across Innovation, Viability, and Scalability criteria with financial projections, competitive analysis, and job creation roadmaps—all internally consistent and submission-ready.",
       features: [
         "Innovation, Viability, Scalability assessment",
         "Multi-sheet financial projections",
-        "Narrative business plans",
-        "Pitch deck generation",
-        "PhD-level automated modelling"
+        "Professional business plans (25-80 pages)",
+        "Rejection analysis & reapplication strategy",
+        "Real-time generation in 3-5 minutes"
       ],
       links: [
-        { label: "Start Business Plan", route: "/questionnaire?tier=enterprise" },
-        { label: "View Example", route: "/generation" }
+        { label: "Generate Business Plan", route: "/questionnaire?tier=enterprise" },
+        { label: "See Sample Plans", route: "/#samples" }
       ],
       color: "from-purple-500 to-primary"
     },
     {
       icon: Zap,
-      name: "UKInnovator.online",
-      subtitle: "AI-Led Pre-Assessment & Triage",
-      description: "AI-driven diagnostic layer that operationalises the Innovator Founder rule set. Tests whether your concept meets innovation, viability, and scalability thresholds before investing time and money—creates structured data for lawyer handoff.",
+      name: "VisaPrep AI - Diagnostics",
+      subtitle: "Eligibility & Route Analysis",
+      description: "Real-time AI diagnostic engine that tests your business against all UK Innovation Visa requirements. Compares endorser routes, scores your viability for each endorser, models your team gaps, and forecasts realistic traction benchmarks—so you know your success probability before investing.",
       features: [
-        "Real-time eligibility checking",
-        "Sector & tech attribute capture",
-        "Structured business briefing",
-        "Lawyer-ready data export",
-        "Triage & diagnostic logic"
+        "Real-time eligibility checking against Home Office rules",
+        "Endorser fit scoring & comparison",
+        "4-route visa strategy analysis",
+        "Team skill gap identification",
+        "Traction forecasting vs. comparable ventures"
       ],
       links: [
         { label: "Check Eligibility", route: "/questionnaire" },
@@ -43,19 +43,19 @@ export default function PlatformPillars() {
     },
     {
       icon: Users,
-      name: "The Innovator's Launchpad",
-      subtitle: "AI-Augmented Mentorship & Venture Formation",
-      description: "Hybrid accelerator + training program + AI mentorship studio. Guides Graduate/PSW holders from concept to endorsement-ready business. AI business validator provides continuous feedback on defensibility, positioning, and job creation.",
+      name: "VisaPrep AI - Mentorship Hub",
+      subtitle: "Interview Prep & Expert Network",
+      description: "AI-powered coaching studio + expert network. Mock interview scenarios with PhD-level feedback, document organization with submission checklists, expert immigration lawyer consultations, and settlement planning for post-visa growth. Guides you from application through to ILR eligibility.",
       features: [
-        "Structured curriculum & ideation",
-        "AI business-idea validator",
-        "Interview prep & coaching",
-        "Document organization & checklists",
-        "Expert consultant network"
+        "AI mock interview coaching with feedback",
+        "Document organization & gap identification",
+        "Immigration lawyer & advisor network",
+        "Post-visa settlement & ILR roadmap",
+        "Continuous mentorship & compliance monitoring"
       ],
       links: [
-        { label: "Start Interview Prep", route: "/interview-prep" },
-        { label: "Book Expert", route: "/expert-booking" }
+        { label: "Practice Interviews", route: "/interview-prep" },
+        { label: "Book Expert Consultation", route: "/expert-booking" }
       ],
       color: "from-green-500 to-emerald-500"
     }
@@ -66,10 +66,10 @@ export default function PlatformPillars() {
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="font-serif text-4xl md:text-5xl font-bold mb-4">
-            Three AI Platforms. One Mission.
+            One Platform. Three Power Tools.
           </h2>
           <p className="text-lg text-muted-foreground">
-            Enterprise-grade AI systems designed from the ground up for UK Innovation Visa success
+            VisaPrep AI combines business planning, eligibility diagnostics, and expert mentorship into one unified platform for UK Innovation Visa success
           </p>
         </div>
 
@@ -124,9 +124,9 @@ export default function PlatformPillars() {
         <div className="mt-16 p-8 bg-primary/5 border border-primary/20 rounded-lg text-center">
           <h3 className="font-semibold text-lg mb-3">Integrated Workflow</h3>
           <p className="text-muted-foreground mb-4 max-w-2xl mx-auto">
-            Start with TorlyAI for end-to-end business planning. Use UKInnovator.online for real-time diagnostics. Access The Launchpad for expert guidance, interview prep, and continuous mentorship through to endorsement.
+            Generate your business plan with VisaPrep AI Intelligence Engine. Test your eligibility and compare routes with Diagnostics. Practice interviews and access expert consultants with the Mentorship Hub. All three tools work together seamlessly.
           </p>
-          <p className="text-sm font-semibold text-primary">All three platforms work together. All included in your subscription.</p>
+          <p className="text-sm font-semibold text-primary">Everything included in your VisaPrep AI subscription.</p>
         </div>
       </div>
     </section>
