@@ -703,6 +703,36 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // Settings API
+  app.get("/api/settings/config", async (req, res) => {
+    try {
+      const domain = process.env.REPLIT_DOMAINS 
+        ? process.env.REPLIT_DOMAINS.split(",")[0].trim() 
+        : "localhost:5000";
+      
+      const callbackUrl = process.env.GOOGLE_CALLBACK_URL ||
+        (process.env.REPLIT_DOMAINS 
+          ? `https://${domain}/api/auth/callback/google`
+          : "http://localhost:5000/api/auth/callback/google");
+
+      res.json({
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID ? "✓ Configured" : "Not configured",
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET ? "✓ Configured" : "Not configured",
+          callbackUrl,
+          jsOrigin: `https://${domain}`,
+        },
+        system: {
+          domain,
+          environment: process.env.NODE_ENV || "production",
+        },
+      });
+    } catch (error) {
+      console.error("Settings config error:", error);
+      res.status(500).json({ error: "Failed to fetch configuration" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
