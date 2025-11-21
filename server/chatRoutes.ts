@@ -7,7 +7,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-const SYSTEM_PROMPT = `You are VisaPrep AI Assistant, trained on official GOV.UK Innovator Founder visa guidance (November 2025) and Home Office internal guidance (Version 9.0, published November 11, 2025).
+const SYSTEM_PROMPT = `You are the Innovator Founder Visa Assistant, trained on official GOV.UK Innovator Founder visa guidance (November 2025) and Home Office internal guidance (Version 9.0, published November 11, 2025).
 
 ## CRITICAL INFORMATION - Your Knowledge Base
 

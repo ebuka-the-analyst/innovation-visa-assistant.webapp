@@ -6,19 +6,19 @@ export default function CookieConsent() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const cookieConsent = localStorage.getItem('visaprep_cookie_consent');
+    const cookieConsent = localStorage.getItem('innovator_founder_visa_cookie_consent');
     if (!cookieConsent) {
       setIsVisible(true);
     }
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem('visaprep_cookie_consent', 'accepted');
+    localStorage.setItem('innovator_founder_visa_cookie_consent', 'accepted');
     setIsVisible(false);
   };
 
   const handleReject = () => {
-    localStorage.setItem('visaprep_cookie_consent', 'rejected');
+    localStorage.setItem('innovator_founder_visa_cookie_consent', 'rejected');
     setIsVisible(false);
   };
 
@@ -30,7 +30,7 @@ export default function CookieConsent() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex-1">
             <p className="text-sm text-slate-200 leading-relaxed">
-              We use cookies to enhance your experience on VisaPrep AI. Cookies help us understand how you use our platform and improve our services. By continuing to use the site, you consent to our use of cookies.{' '}
+              We use cookies to enhance your experience on VisaPrep. Cookies help us understand how you use our platform and improve our services. By continuing to use the site, you consent to our use of cookies.{' '}
               <a
                 href="/privacy"
                 className="underline text-accent hover:text-accent/80"
