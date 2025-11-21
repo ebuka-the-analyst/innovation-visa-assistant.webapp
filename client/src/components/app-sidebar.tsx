@@ -31,6 +31,7 @@ import {
   BookOpen,
   Award,
   Clock,
+  DollarSign,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
