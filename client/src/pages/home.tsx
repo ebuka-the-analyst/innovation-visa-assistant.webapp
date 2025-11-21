@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import NewsTicker from "@/components/NewsTicker";
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import PlatformPillars from "@/components/PlatformPillars";
@@ -16,6 +17,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Header />
+      <NewsTicker />
       <main>
         <HeroSection />
         <div id="features">
