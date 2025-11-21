@@ -7,7 +7,6 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import ChatBot from "@/components/ChatBot";
 import CookieConsent from "@/components/CookieConsent";
-import VisaAssistantDisclaimer from "@/components/VisaAssistantDisclaimer";
 import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
@@ -107,7 +106,6 @@ function App() {
       <TooltipProvider>
         <ChatBot />
         <Toaster />
-        <VisaAssistantDisclaimer />
         <AppLayout />
         <CookieConsent />
       </TooltipProvider>
