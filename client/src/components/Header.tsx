@@ -5,9 +5,11 @@ import { Link, useLocation } from "wouter";
 import logoImg from "@assets/BhenMedia_1763690019470.png";
 import ThemeToggle from "./ThemeToggle";
 import { useQuery } from "@tanstack/react-query";
+import { useState as useStateDisclaimer } from "react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [disclaimerDismissed, setDisclaimerDismissed] = useStateDisclaimer(false);
   const [location, setLocation] = useLocation();
 
   const handleNavigation = (sectionId: string) => {
@@ -26,8 +28,24 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
-      <nav className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl">
+      {/* Disclaimer Bar */}
+      {!disclaimerDismissed && (
+        <div className="w-full bg-black/90 text-white text-xs py-2.5 flex items-center justify-center gap-4 border-b border-border/40">
+          <span>
+            <strong>UK-Innovation Visa Assistant Disclaimer:</strong> Trained on GOV.UK guidance. Always verify with official sources.
+          </span>
+          <button
+            onClick={() => setDisclaimerDismissed(true)}
+            className="text-white hover:opacity-75 transition-opacity flex-shrink-0"
+            data-testid="button-dismiss-disclaimer"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      )}
+      
+      <nav className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between border-b border-border/40">
         {/* Logo */}
         <Link href="/">
           <div className="flex flex-col items-start cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
