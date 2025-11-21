@@ -15,6 +15,10 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
+localPort = 34839
+externalPort = 3001
+
+[[ports]]
 localPort = 40081
 externalPort = 3000
 
@@ -48,4 +52,4 @@ integrations = ["javascript_stripe:1.0.0", "javascript_openai:1.0.0", "javascrip
 [userenv]
 
 [userenv.shared]
-GOOGLE_CALLBACK_URL = "https://edusample40.repl.co/api/auth/callback/google"
+GOOGLE_CALLBACK_URL = "https://innovation-visa-assistant.co.uk/api/auth/callback/google"
