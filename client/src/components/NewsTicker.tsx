@@ -86,6 +86,10 @@ export default function NewsTicker() {
     setModalOpen(true);
   };
 
+  // Calculate the scroll percentage based on exact number of items
+  // We duplicate items for seamless loop, so scroll to show all 1x through items
+  const scrollPercentage = newsItems.length > 0 ? (100 / (newsItems.length * 2)) * 100 : 50;
+
   return (
     <>
       <div className="flex items-center gap-1 px-2 py-2">
@@ -109,7 +113,7 @@ export default function NewsTicker() {
               <button
                 key={item.id}
                 onClick={() => handleArticleClick(item)}
-                className="inline-block px-3 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
+                className="inline-block px-3 py-1 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline flex-shrink-0"
               >
                 {item.title}
                 <span className="mx-2 text-primary/40">•</span>
@@ -120,7 +124,7 @@ export default function NewsTicker() {
               <button
                 key={`dup-${item.id}`}
                 onClick={() => handleArticleClick(item)}
-                className="inline-block px-3 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
+                className="inline-block px-3 py-1 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline flex-shrink-0"
               >
                 {item.title}
                 <span className="mx-2 text-primary/40">•</span>
@@ -148,12 +152,14 @@ export default function NewsTicker() {
               transform: translateX(0);
             }
             100% {
-              transform: translateX(-50%);
+              transform: translateX(calc(-100% / 2));
             }
           }
 
           .animate-ticker-scroll {
             animation: ticker-scroll ${animationDuration}s linear infinite;
+            display: flex;
+            gap: 0;
           }
 
           .animate-ticker-scroll:hover {
