@@ -39,27 +39,13 @@ export default function ToolsChronographWheel() {
       style={{ scale: "0.50", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
-      <div className="w-72 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-4 flex flex-col items-center justify-center" style={{ height: "560px" }}>
+      <div className="w-72 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "560px" }}>
         
-        {/* TOOLS HUB text on bezel edge using SVG */}
-        <svg
-          className="absolute w-full h-full top-0 left-0"
-          viewBox="0 0 288 320"
-          style={{ pointerEvents: "none" }}
-        >
-          <text
-            x="144"
-            y="32"
-            fontSize="22"
-            fontWeight="900"
-            fill="#000000"
-            opacity="1"
-            textAnchor="middle"
-            letterSpacing="1"
-          >
-            100+ TOOLS HUB
-          </text>
-        </svg>
+        {/* Static Header Section */}
+        <div className="flex flex-col items-center justify-center pt-4 pb-2 px-4 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
+          <h3 className="text-lg font-black text-black text-center">100+ TOOLS HUB</h3>
+          <p className="text-xs text-gray-600 text-center mt-1">Application Requirement Checks</p>
+        </div>
 
         {/* Inner chrome cover overlay */}
         <div
@@ -73,19 +59,17 @@ export default function ToolsChronographWheel() {
         {/* Scrollable container with overflow hidden */}
         <div
           ref={wheelRef}
-          className="relative w-full flex-1 overflow-hidden flex flex-col items-center justify-center"
+          className="relative flex-1 overflow-hidden flex flex-col items-center justify-center w-full"
           onWheel={handleWheel}
           style={{
-            height: "440px",
             perspective: "1000px",
-            marginTop: "8px",
           }}
         >
           {/* Tool items - vertical scroll with mask effect */}
           <div
-            className="flex flex-col items-center gap-2 transition-transform duration-300 ease-out"
+            className="flex flex-col items-center gap-1 transition-transform duration-300 ease-out"
             style={{
-              transform: `translateY(${-currentIndex * 48}px)`,
+              transform: `translateY(${-currentIndex * 46}px)`,
             }}
           >
             {/* Render 3 cycles of tools for infinite scroll effect */}
@@ -139,20 +123,20 @@ export default function ToolsChronographWheel() {
                     data-testid={`tool-${globalIdx}`}
                   >
                     <div
-                      className={`px-4 py-1.5 rounded-lg flex items-center gap-2 whitespace-nowrap border-2 transition-all ${
+                      className={`px-3 py-1 rounded-md flex items-center gap-2 whitespace-nowrap border transition-all ${
                         isCenter
-                          ? "bg-primary/10 border-primary/80 font-black text-sm text-black"
-                          : "bg-muted/5 border-muted/30 text-xs text-muted-foreground"
+                          ? "bg-primary/15 border-primary font-black text-xs text-black"
+                          : "bg-gray-50 border-gray-200 text-xs text-gray-500"
                       }`}
                       style={{
-                        minWidth: "160px",
+                        minWidth: "150px",
                       }}
                     >
                       <div className="text-primary flex-shrink-0">
                         <GetIconComponent name={tool.icon} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`leading-tight truncate ${isCenter ? "font-black text-black" : ""}`}>
+                        <p className={`leading-tight truncate text-xs ${isCenter ? "font-black text-black" : ""}`}>
                           {tool.name}
                         </p>
                       </div>
