@@ -72,9 +72,10 @@ export default function RejectionAnalysis() {
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-4xl mx-auto">
           <div className="mb-12">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Rejection Analysis</h1>
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">TORLYAI DIAGNOSTIC</span>
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Rejection Analysis & Reapplication Strategy</h1>
             <p className="text-lg text-muted-foreground">
-              Understand why your application was rejected and plan your reapplication strategy
+              AI-powered analysis of rejection reasons with specific recommendations to address gaps. Our PhD-level diagnostic engine identifies exactly what to fix for your next application and predicts success probability.
             </p>
           </div>
 

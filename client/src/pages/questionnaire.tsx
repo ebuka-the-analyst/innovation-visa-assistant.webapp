@@ -18,6 +18,17 @@ export default function Questionnaire() {
     <div className="min-h-screen">
       <AuthHeader />
       <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="mb-6">
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">TORLYAI ENGINE</span>
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mt-4 mb-3">
+              End-to-End Business Intelligence
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Our PhD-level AI platform evaluates your innovation across all three visa criteria (Innovation, Viability, Scalability) and generates policy-aware business plans, financial projections, and pitch decks—all internally consistent and endorser-ready.
+            </p>
+          </div>
+        </div>
         <EvidencePreparationGuide />
         <QuestionnaireForm tier={tier} />
       </div>

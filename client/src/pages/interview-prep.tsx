@@ -132,9 +132,10 @@ export default function InterviewPrep() {
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Interview Prep Training</h1>
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">LAUNCHPAD MENTORSHIP</span>
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Interview Prep & AI Coaching</h1>
             <p className="text-lg text-muted-foreground">
-              Master common interview questions and prepare for your endorsement interview
+              AI-augmented mentorship platform. Practice with realistic endorser scenarios, receive granular feedback on defensibility and positioning, and refine your pitch with expert coaching.
             </p>
           </div>
 
