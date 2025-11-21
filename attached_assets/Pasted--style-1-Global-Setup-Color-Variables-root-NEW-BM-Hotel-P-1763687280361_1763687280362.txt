@@ -1,0 +1,1206 @@
+<style>
+    /* --- 1. Global Setup & Color Variables --- */
+    :root {
+        /* NEW BM Hotel Palette (Orange/Blue) */
+        --hotel-header-dark: #0D2C4A;
+        --hotel-accent-primary: #ffa536;       /* Main Orange */
+        --hotel-accent-secondary: #11b6e9;      /* Main Blue */
+        --hotel-accent-text-light: #BCEAFB;   /* Light blue for text on dark bg */
+        --hotel-sidebar-item-bg: #E7F7FE;      /* Very Light Blue */
+        --hotel-sidebar-item-count-bg: #D9D9D9;
+        --hotel-icon-bg: #FFF6E9;             /* Very Light Orange */
+        --hotel-body-bg: #F8FCFF;             /* Light blue tint bg */
+        --hotel-card-bg: #FFFFFF;
+        --hotel-text-dark: #1A1A1A;
+        --hotel-text-light: #FFFFFF;
+        --hotel-text-muted: #555555;
+        --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.07);
+
+        /* Dark Mode Palette */
+        --bg-dark: #1a1a1a;
+        --card-dark: #2d2d2d;
+        --text-dark: #f0f0f0;
+        --text-muted-dark: #aaa;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    body {
+        background-color: var(--hotel-body-bg);
+        color: var(--hotel-text-muted);
+        transition: background-color 0.3s, color 0.3s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* --- 2. Dark Mode --- */
+    body.dark-mode {
+        --hotel-body-bg: var(--bg-dark);
+        --hotel-card-bg: var(--card-dark);
+        --hotel-text-dark: var(--text-dark);
+        --hotel-text-muted: var(--text-muted-dark);
+        --hotel-sidebar-item-bg: #333;
+        --hotel-icon-bg: #444;
+        --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.3);
+        
+        --footer-text-color: var(--text-muted-dark);
+        --footer-link-hover: var(--hotel-text-light);
+    }
+    
+    :root {
+        --footer-text-color: var(--text-muted-dark);
+        --footer-link-hover: var(--hotel-text-light);
+    }
+    body.dark-mode {
+        --footer-text-color: var(--text-muted-dark);
+        --footer-link-hover: var(--hotel-text-light);
+    }
+
+    /* --- 3. Header Bar --- */
+    .header-bar {
+        display: grid;
+        grid-template-columns: auto 1fr 1.6fr auto; 
+        align-items: center;
+        background-color: var(--hotel-header-dark);
+        color: var(--hotel-text-light);
+        padding: 12px 25px;
+        flex-shrink: 0;
+        gap: 15px;
+    }
+    .header-logo-container {
+        display: flex;
+        align-items: center;
+    }
+    .header-logo-container img {
+        height: 40px;
+        margin-right: 10px;
+    }
+    .header-hotel-title h1 {
+        font-size: 22px;
+        margin: 0;
+        font-weight: 600;
+        color: var(--hotel-text-light);
+        white-space: nowrap;
+    }
+    .header-hotel-title p {
+        font-size: 13px;
+        margin: 0;
+        opacity: 0.9;
+        color: var(--hotel-accent-text-light);
+        white-space: nowrap;
+    }
+    .header-info {
+        display: flex;
+        justify-content: center;
+        gap: 20px; 
+        font-size: 14px; 
+        flex-wrap: nowrap; 
+        white-space: nowrap;
+    }
+    .header-info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--hotel-text-light);
+    }
+    .header-info-item span {
+        color: var(--hotel-accent-text-light);
+    }
+    .header-controls {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: nowrap; 
+    }
+    .header-btn {
+        background-color: var(--hotel-accent-primary);
+        color: var(--hotel-text-light); /* Changed for better contrast on orange */
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 14px;
+        transition: background-color 0.2s;
+        white-space: nowrap;
+    }
+    .header-btn:hover {
+        opacity: 0.85;
+    }
+
+    /* --- 4. Light/Dark Mode Switch --- */
+    .theme-switch-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 24px;
+    }
+    .theme-switch {
+        display: inline-block;
+        height: 28px;
+        position: relative;
+        width: 50px;
+    }
+    .theme-switch input {
+        display: none;
+    }
+    .slider {
+        background-color: #777;
+        bottom: 0;
+        cursor: pointer;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: 0.4s;
+        border-radius: 50px;
+    }
+    .slider:before {
+        background-color: white;
+        bottom: 4px;
+        content: "";
+        height: 20px;
+        left: 4px;
+        position: absolute;
+        transition: 0.4s;
+        width: 20px;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: var(--hotel-accent-primary); /* Use orange for toggle */
+    }
+    input:checked + .slider:before {
+        transform: translateX(22px);
+    }
+
+    /* --- 5. Ticker Bar --- */
+    .ticker-bar {
+        background-color: var(--hotel-accent-secondary); /* Use blue for ticker */
+        color: var(--hotel-text-light);
+        padding: 10px 0;
+        overflow: hidden;
+        position: relative;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+    }
+    .ticker-content {
+        display: flex;
+        white-space: nowrap;
+        animation: scroll 120s linear infinite;
+    }
+    .ticker-content.paused {
+        animation-play-state: paused;
+    }
+    @keyframes scroll {
+        0% { transform: translateX(100%); }
+        100% { transform: translateX(-100%); }
+    }
+    .ticker-item {
+        padding: 0 30px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .ticker-item i {
+        margin-right: 8px;
+        color: var(--hotel-accent-text-light); /* Use light blue */
+    }
+    .ticker-controls {
+        position: absolute;
+        right: 15px;
+        display: flex;
+        gap: 8px;
+        z-index: 1;
+    }
+    .ticker-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+    .ticker-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* --- 6. Main Container --- */
+    .main-wrapper {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    /* --- 7. Filters Sidebar --- */
+    .filters-sidebar {
+        width: 280px;
+        background-color: var(--hotel-card-bg);
+        border-right: 1px solid var(--hotel-sidebar-item-count-bg);
+        padding: 20px 15px;
+        overflow-y: auto;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-soft);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    /* --- 7b. Sidebar Enroll Button --- */
+    .sidebar-enroll-section {
+        padding: 0;
+        margin: 0; 
+        flex-shrink: 0;
+    }
+
+    .enroll-button {
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; 
+        width: 100%; 
+        padding: 15px; 
+        background-color: var(--hotel-accent-primary); /* Use orange */
+        color: var(--hotel-text-light);
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        transition: background-color 0.2s, opacity 0.2s; 
+        cursor: pointer;
+        min-height: 70px;
+    }
+
+    .enroll-button div i {
+         margin-right: 8px;
+    }
+
+    .enroll-button:hover {
+        opacity: 0.85;
+    }
+
+    .enroll-subtext {
+        font-size: 11px; 
+        font-weight: 400; 
+        opacity: 0.9; 
+        margin-top: 4px; 
+        display: block; 
+    }
+
+    body.dark-mode .enroll-button {
+       color: var(--hotel-text-light);
+    }
+    body.dark-mode .enroll-button:hover {
+       opacity: 0.85;
+    }
+
+    .filters-sidebar ul {
+        list-style-type: none;
+        flex-grow: 1;
+        overflow-y: auto;
+        margin: 0;
+        padding: 0;
+        scrollbar-width: thin;
+        scrollbar-color: var(--hotel-accent-secondary) var(--hotel-sidebar-item-bg); /* Blue scrollbar */
+        min-height: 0;
+    }
+    
+    .filters-sidebar li {
+        margin-bottom: 8px;
+    }
+    
+    .filters-sidebar ul li a { 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between;
+        padding: 12px 15px;
+        text-decoration: none;
+        color: var(--hotel-text-dark);
+        background-color: var(--hotel-sidebar-item-bg); /* Light blue bg */
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.3s, color 0.3s, box-shadow 0.2s;
+        cursor: pointer; 
+    }
+    
+    .filters-sidebar ul li a i {
+        margin-right: 10px; 
+        width: 20px; 
+        text-align: center;
+    }
+    
+    .filters-sidebar ul li .link-content { 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-grow: 1; 
+    }
+    
+    .filters-sidebar ul li a:hover, 
+    .filters-sidebar ul li.active a {
+        background-color: var(--hotel-accent-secondary); /* Blue active state */
+        color: var(--hotel-text-light);
+    }
+    
+    .filters-sidebar ul li a .count {
+        background-color: var(--hotel-sidebar-item-count-bg);
+        color: var(--hotel-text-dark);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        transition: background-color 0.3s, color 0.3s;
+        margin-left: 10px; 
+    }
+    
+    .filters-sidebar ul li a:hover .count, 
+    .filters-sidebar ul li.active a .count {
+        background-color: var(--hotel-text-light);
+        color: var(--hotel-accent-secondary); /* Blue text */
+    }
+
+    body.dark-mode .filters-sidebar ul li a .count {
+        color: var(--hotel-header-dark);
+    }
+    
+    body.dark-mode .filters-sidebar ul li a:hover .count, 
+    body.dark-mode .filters-sidebar ul li.active a .count {
+        background-color: var(--hotel-text-light);
+        color: var(--hotel-accent-secondary); /* Blue text */
+    }
+
+    /* --- 8. Main Content Grid --- */
+    .content-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        height: 100%;
+        overflow: hidden;
+        flex: 1;
+        padding: 25px;
+        background-color: var(--hotel-body-bg);
+    }
+    
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+        gap: 20px;
+        overflow-y: auto; 
+        flex-grow: 1;
+        padding: 5px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--hotel-accent-secondary) var(--hotel-body-bg); /* Blue scrollbar */
+    }
+    
+    .services-grid::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .services-grid::-webkit-scrollbar-track {
+        background: var(--hotel-body-bg);
+        border-radius: 4px;
+    }
+    
+    .services-grid::-webkit-scrollbar-thumb {
+        background-color: var(--hotel-accent-secondary); /* Blue scrollbar */
+        border-radius: 4px;
+        border: 2px solid var(--hotel-body-bg);
+    }
+
+    .service-card {
+        background-color: var(--hotel-card-bg);
+        border-radius: 16px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: var(--shadow-soft);
+        transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s, border 0.2s, opacity 0.3s; 
+        position: relative;
+        border: 2px solid transparent;
+        opacity: 1; 
+        max-width: 300px; 
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 180px;
+        cursor: pointer;
+    }
+    
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: var(--hotel-accent-primary); /* Orange border on hover */
+    }
+    
+    .service-card.hidden {
+         display: none; 
+    }
+    
+    .service-card .icon-container {
+        width: 70px;
+        height: 70px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 18px auto;
+        background: var(--hotel-icon-bg); /* Default light orange bg */
+        box-shadow: none;
+        flex-shrink: 0;
+    }
+    
+    .service-card h3 {
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: var(--hotel-text-dark);
+    }
+    
+    .service-card p {
+        font-size: 13px;
+        color: var(--hotel-text-muted);
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .service-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: var(--hotel-accent-primary); /* Orange badge */
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    /* --- 9. Footer --- */
+    .footer-bar {
+        background-color: var(--hotel-header-dark); /* Dark blue footer */
+        color: var(--hotel-text-light);
+        padding: 20px 25px;
+        text-align: center;
+        flex-shrink: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .footer-left p, .footer-center p {
+        font-size: 13px;
+        margin: 0;
+        color: var(--footer-text-color);
+    }
+    .footer-left a, .footer-center a {
+        color: var(--hotel-accent-text-light); /* Light blue links */
+        text-decoration: none;
+    }
+    .footer-left a:hover, .footer-center a:hover {
+        color: var(--footer-link-hover);
+        text-decoration: underline;
+    }
+    .footer-right {
+        display: flex;
+        gap: 15px;
+    }
+    .footer-right a {
+        color: var(--hotel-accent-text-light); /* Light blue icons */
+        font-size: 20px;
+        transition: color 0.2s;
+    }
+    .footer-right a:hover {
+        color: var(--footer-link-hover);
+    }
+
+    /* --- 10. Chat Button --- */
+    .chat-button {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 65px;
+        height: 65px;
+        /* Orange to Dark Blue Gradient */
+        background: linear-gradient(135deg, var(--hotel-accent-primary) 0%, var(--hotel-header-dark) 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s;
+        z-index: 999;
+    }
+    .chat-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    /* --- 11. Chatbot Modal --- */
+    .chatbot-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+    .chatbot-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    .chatbot-modal {
+        background: white;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        height: 700px;
+        max-height: 85vh;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transform: scale(0.9);
+        transition: transform 0.3s;
+    }
+    .chatbot-modal-overlay.active .chatbot-modal {
+        transform: scale(1);
+    }
+    .chatbot-modal-header {
+        /* Orange to Dark Blue Gradient */
+        background: linear-gradient(135deg, var(--hotel-accent-primary) 0%, var(--hotel-header-dark) 100%);
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .chatbot-modal-header h4 {
+        margin: 0;
+        font-size: 20px;
+    }
+    .chatbot-close-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        transition: background 0.2s;
+    }
+    .chatbot-close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    .chatbot-iframe-container {
+        flex: 1;
+        overflow: hidden;
+    }
+    .chatbot-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    /* === LOYALTY MODAL === */
+    .loyalty-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 20px;
+    }
+
+    .loyalty-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .loyalty-modal {
+        background: linear-gradient(135deg, #fefcf8 0%, #ffffff 100%); /* Light orange tint */
+        border-radius: 24px;
+        max-width: 750px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 45px 40px;
+        position: relative;
+        transform: scale(0.9) translateY(30px);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 25px 80px rgba(255, 165, 54, 0.25); /* Orange shadow */
+    }
+
+    .loyalty-modal-overlay.active .loyalty-modal {
+        transform: scale(1) translateY(0);
+    }
+
+    .loyalty-close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 165, 54, 0.1); /* Light orange bg */
+        color: var(--hotel-header-dark);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        z-index: 10;
+    }
+
+    .loyalty-close-btn:hover {
+        background: rgba(255, 165, 54, 0.2); /* Light orange bg hover */
+        transform: rotate(90deg);
+    }
+
+    .loyalty-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .loyalty-badge {
+        display: inline-block;
+        /* Orange to Blue Gradient */
+        background: linear-gradient(135deg, var(--hotel-accent-primary) 0%, var(--hotel-accent-secondary) 100%);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+    }
+
+    .loyalty-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: #1a202c;
+        margin: 0 0 10px 0;
+        /* Orange to Blue Gradient */
+        background: linear-gradient(135deg, var(--hotel-accent-primary) 0%, var(--hotel-accent-secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .loyalty-subtitle {
+        font-size: 16px;
+        color: #666;
+        margin: 0;
+    }
+
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 35px;
+    }
+
+    .benefit-item {
+        background: white;
+        padding: 24px;
+        border-radius: 16px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .benefit-item:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(255, 165, 54, 0.15); /* Orange shadow */
+        border-color: var(--hotel-accent-primary); /* Orange border */
+    }
+
+    .benefit-icon {
+        width: 60px;
+        height: 60px;
+        /* Orange to Blue Gradient */
+        background: linear-gradient(135deg, var(--hotel-accent-primary) 0%, var(--hotel-accent-secondary) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        color: white;
+    }
+
+    .benefit-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a202c;
+        margin: 0 0 8px 0;
+    }
+
+    .benefit-desc {
+        font-size: 13px;
+        color: #666;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .loyalty-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        /* Orange to Blue Gradient */
+        background: linear-gradient(135deg, var(--hotel-accent-primary) 0%, var(--hotel-accent-secondary) 100%);
+        padding: 25px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .stat {
+        color: white;
+    }
+
+    .stat-number {
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        opacity: 0.9;
+    }
+
+    .loyalty-cta {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .enroll-btn-primary {
+        /* Orange to Blue Gradient */
+        background: linear-gradient(135deg, var(--hotel-accent-primary) 0%, var(--hotel-accent-secondary) 100%);
+        color: white;
+        border: none;
+        padding: 16px 40px;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 50px;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(255, 165, 54, 0.3); /* Orange shadow */
+    }
+
+    .enroll-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(255, 165, 54, 0.4); /* Orange shadow */
+    }
+
+    .enroll-btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .cta-subtext {
+        font-size: 14px;
+        color: #666;
+        margin: 12px 0 0 0;
+    }
+
+    .loyalty-footer {
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .trust-text {
+        font-size: 13px;
+        color: #666;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    body.dark-mode .loyalty-modal {
+        background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    }
+    body.dark-mode .loyalty-title {
+        color: #f7fafc;
+    }
+    body.dark-mode .loyalty-subtitle,
+    body.dark-mode .benefit-desc,
+    body.dark-mode .cta-subtext,
+    body.dark-mode .trust-text {
+        color: #cbd5e0;
+    }
+    body.dark-mode .benefit-item {
+        background: #2d3748;
+        border-color: #4a5568;
+    }
+    body.dark-mode .benefit-item:hover {
+        border-color: var(--hotel-accent-primary); /* Orange border */
+    }
+    body.dark-mode .benefit-title {
+        color: #f7fafc;
+    }
+    body.dark-mode .loyalty-close-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: #cbd5e0;
+    }
+    body.dark-mode .loyalty-close-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
+    body.dark-mode .loyalty-footer {
+        border-top-color: #4a5568;
+    }
+
+    @media (max-width: 600px) {
+        .loyalty-modal {
+            width: 95%;
+            padding: 30px 20px;
+        }
+        .loyalty-title {
+            font-size: 24px;
+        }
+        .benefits-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .loyalty-stats {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .stat-number {
+            font-size: 20px;
+        }
+        .loyalty-close-btn {
+            width: 36px;
+            height: 36px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .benefits-grid {
+            grid-template-columns: 1fr;
+        }
+        .loyalty-modal {
+            padding: 25px 15px;
+        }
+        .loyalty-title {
+            font-size: 20px;
+        }
+    }
+
+    /* === SERVICE DETAILS MODAL === */
+    .service-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        padding: 20px;
+    }
+
+    .service-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .service-modal {
+        background: white;
+        border-radius: 20px;
+        max-width: 650px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .service-modal-overlay.active .service-modal {
+        transform: scale(1);
+    }
+
+    .service-modal-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(0, 0, 0, 0.1);
+        color: #333;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        z-index: 10;
+    }
+
+    .service-modal-close:hover {
+        background: rgba(0, 0, 0, 0.2);
+        transform: rotate(90deg);
+    }
+
+    .service-modal-content {
+        padding: 40px;
+    }
+
+    .service-modal-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .service-modal-icon {
+        width: 90px;
+        height: 90px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 40px;
+    }
+
+    .service-modal-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0;
+    }
+
+    .service-modal-body {
+        color: #333;
+    }
+
+    .service-modal-description {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #555;
+        margin-bottom: 25px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid var(--hotel-accent-primary); /* Orange border */
+    }
+
+    .service-modal-section {
+        margin-bottom: 25px;
+    }
+
+    .service-modal-section h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .service-modal-section h3 i {
+        color: var(--hotel-accent-primary); /* Orange icon */
+    }
+
+    .service-modal-benefits {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .service-modal-benefits li {
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+        font-size: 15px;
+        color: #555;
+        padding-left: 30px;
+        position: relative;
+    }
+
+    .service-modal-benefits li:last-child {
+        border-bottom: none;
+    }
+
+    .service-modal-benefits li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: var(--hotel-accent-primary); /* Orange checkmark */
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .service-modal-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 25px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .service-modal-info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .service-modal-info-item i {
+        font-size: 24px;
+        color: var(--hotel-accent-primary); /* Orange icon */
+        margin-top: 2px;
+    }
+
+    .service-modal-info-item strong {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+    }
+
+    .service-modal-info-item p {
+        font-size: 14px;
+        color: #666;
+        margin: 0;
+    }
+
+    .service-modal-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 1px solid #eee;
+    }
+
+    .service-modal-btn-primary,
+    .service-modal-btn-secondary {
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .service-modal-btn-primary {
+        background: var(--hotel-accent-primary); /* Orange button */
+        color: white;
+    }
+
+    .service-modal-btn-primary:hover {
+        background: var(--hotel-header-dark); /* Dark blue hover */
+        transform: translateY(-2px);
+    }
+
+    .service-modal-btn-secondary {
+        background: #f1f1f1;
+        color: #333;
+    }
+
+    .service-modal-btn-secondary:hover {
+        background: #e0e0e0;
+    }
+
+    body.dark-mode .service-modal {
+        background: #2d2d2d;
+    }
+
+    body.dark-mode .service-modal-title,
+    body.dark-mode .service-modal-section h3 {
+        color: #f0f0f0;
+    }
+
+    body.dark-mode .service-modal-description,
+    body.dark-mode .service-modal-benefits li,
+    body.dark-mode .service-modal-info-item p {
+        color: #cbd5e0;
+    }
+
+    body.dark-mode .service-modal-description,
+    body.dark-mode .service-modal-info {
+        background: #1a1a1a;
+    }
+
+    body.dark-mode .service-modal-close {
+        background: rgba(255, 255, 255, 0.1);
+        color: #cbd5e0;
+    }
+
+    body.dark-mode .service-modal-btn-secondary {
+        background: #3a3a3a;
+        color: #f0f0f0;
+    }
+
+    body.dark-mode .service-modal-footer {
+        border-top-color: #4a5568;
+    }
+
+    @media (max-width: 768px) {
+        .service-modal-content {
+            padding: 30px 20px;
+        }
+        .service-modal-info {
+            grid-template-columns: 1fr;
+        }
+        .service-modal-footer {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

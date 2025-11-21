@@ -91,7 +91,7 @@ export default function DocumentOrganizer() {
         <div className="max-w-4xl mx-auto">
           <FeatureNavigation currentPage="document-organizer" />
           <div className="mb-12">
-            <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">VISAPREP AI - MENTORSHIP HUB</span>
+            <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ color: "#ffa536", backgroundColor: "rgba(255, 165, 54, 0.1)" }}>VISAPREP AI - MENTORSHIP HUB</span>
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Document Manager & Evidence Organizer</h1>
             <p className="text-lg text-muted-foreground">
               Intelligent document tracking and submission management. Captures all required evidence, identifies gaps, and prepares lawyer-ready packages—preventing costly rejections before they happen.

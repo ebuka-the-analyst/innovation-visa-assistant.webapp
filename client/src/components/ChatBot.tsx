@@ -68,7 +68,10 @@ export default function ChatBot() {
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-br from-primary to-chart-3 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center text-white z-40 group hover-elevate"
+        className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 via-orange-400 to-blue-500 shadow-lg hover:shadow-2xl transition-all hover:scale-110 flex items-center justify-center text-white z-50 group hover-elevate"
+        style={{
+          background: "linear-gradient(135deg, #ffa536 0%, #11b6e9 100%)"
+        }}
         data-testid="button-chatbot-toggle"
         title="AI Assistant"
       >
@@ -81,9 +84,9 @@ export default function ChatBot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-28 right-6 w-96 h-[600px] shadow-2xl z-40 flex flex-col overflow-hidden rounded-xl">
+        <Card className="fixed bottom-28 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col overflow-hidden rounded-xl">
           {/* Header */}
-          <div className="bg-gradient-to-r from-primary to-chart-3 p-4 text-white">
+          <div className="p-4 text-white" style={{ background: "linear-gradient(135deg, #0D2C4A 0%, #11b6e9 100%)" }}>
             <h3 className="font-bold text-lg">VisaPrep AI Assistant</h3>
             <p className="text-sm opacity-90">PhD-level visa strategy expert</p>
           </div>
@@ -99,9 +102,10 @@ export default function ChatBot() {
                 <div
                   className={`max-w-xs px-4 py-2 rounded-lg ${
                     msg.role === "user"
-                      ? "bg-primary text-white rounded-br-none"
+                      ? "text-white rounded-br-none"
                       : "bg-muted text-foreground rounded-bl-none"
                   }`}
+                  style={msg.role === "user" ? { background: "#ffa536" } : {}}
                 >
                   <p className="text-sm leading-relaxed">{msg.content}</p>
                 </div>
