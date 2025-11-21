@@ -1,5 +1,6 @@
 import { X, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 interface Feature {
   id: string;
@@ -147,6 +148,7 @@ interface FeaturesModalProps {
 }
 
 export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesModalProps) {
+  const [, setLocation] = useLocation();
   const [selectedId, setSelectedId] = useState(featureId || FEATURES[0].id);
   const feature = FEATURES.find(f => f.id === selectedId);
 
@@ -300,7 +302,10 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
                 Ready to generate your business plan?
               </p>
               <button
-                onClick={onClose}
+                onClick={() => {
+                  onClose();
+                  setLocation("/pricing");
+                }}
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-chart-3 text-white font-semibold hover:shadow-lg transition-all hover:scale-105"
                 data-testid="button-start-from-modal"
               >
