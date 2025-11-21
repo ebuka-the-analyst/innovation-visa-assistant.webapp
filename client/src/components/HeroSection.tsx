@@ -53,7 +53,7 @@ export default function HeroSection() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/questionnaire">
+              <Link href="/pricing">
                 <Button 
                   size="lg" 
                   className="group"
