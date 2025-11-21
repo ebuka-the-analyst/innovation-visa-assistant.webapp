@@ -45,7 +45,7 @@ export default function ToolsChronographWheel() {
       style={{ scale: "0.375", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
-      <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "1067px", width: "800px" }}>
+      <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "640px", width: "800px" }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
         <div className="px-4 pt-3 pb-1 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
