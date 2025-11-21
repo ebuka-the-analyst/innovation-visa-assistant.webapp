@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { LogOut, Home } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -30,7 +30,9 @@ export function AuthHeader() {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <h1 className="text-xl font-bold">VisaPrep AI</h1>
+            <Link href="/">
+              <h1 className="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity" data-testid="button-auth-logo">VisaPrep AI</h1>
+            </Link>
             <nav className="hidden md:flex gap-4">
               <Button
                 variant="ghost"

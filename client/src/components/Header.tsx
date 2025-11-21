@@ -18,12 +18,14 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
       <nav className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-chart-3 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">V</span>
+        <Link href="/">
+          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" data-testid="button-logo">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-chart-3 flex items-center justify-center">
+              <span className="text-white font-bold text-lg">V</span>
+            </div>
+            <span className="font-bold text-xl">VisaPrep AI</span>
           </div>
-          <span className="font-bold text-xl">VisaPrep AI</span>
-        </div>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
