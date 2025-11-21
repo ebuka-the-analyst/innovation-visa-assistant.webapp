@@ -47,7 +47,7 @@ export default function ToolsChronographWheel() {
     const mouseY = e.clientY - containerRect.top;
     const containerHeight = containerRect.height;
     const centerY = containerHeight / 2;
-    const threshold = 80; // Distance from center to trigger scroll
+    const threshold = 30; // Distance from center to trigger scroll
 
     const distance = Math.abs(mouseY - centerY);
     const isAboveCenter = mouseY < centerY;
@@ -65,7 +65,7 @@ export default function ToolsChronographWheel() {
 
     // Calculate scroll speed based on distance
     const speedFactor = (distance - threshold) / (containerHeight / 2 - threshold);
-    const scrollSpeed = speedFactor * 8; // Max 8px per interval
+    const scrollSpeed = speedFactor * 20; // Max 20px per interval
 
     // Start continuous scrolling
     scrollIntervalRef.current = setInterval(() => {
@@ -73,7 +73,7 @@ export default function ToolsChronographWheel() {
         const newScrollTop = scrollRef.current.scrollTop + (isAboveCenter ? -scrollSpeed : scrollSpeed);
         scrollRef.current.scrollTop = Math.max(0, Math.min(newScrollTop, scrollRef.current.scrollHeight - scrollRef.current.clientHeight));
       }
-    }, 30);
+    }, 16);
   };
 
   const handleMouseLeave = () => {
