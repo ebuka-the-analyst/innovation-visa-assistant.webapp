@@ -8,6 +8,8 @@ import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
 import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
+import passport from "passport";
+import bcrypt from "bcrypt";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
@@ -29,6 +31,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/health", async (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // Authentication endpoints
+  app.post("/api/auth/login", async (req, res, next) => {
+    try {
+      passport.authenticate("local", async (err: any, user: any, info: any) => {
+        if (err) return res.status(500).json({ error: "Login error", success: false });
+        if (!user) return res.status(401).json({ error: info?.message || "Invalid credentials", success: false });
+        req.logIn(user, (err) => {
+          if (err) return res.status(500).json({ error: "Login failed", success: false });
+          res.json({ success: true, user: { id: user.id, email: user.email, displayName: user.displayName } });
+        });
+      })(req, res, next);
+    } catch (error) {
+      res.status(500).json({ error: "Login error", success: false });
+    }
+  });
+
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { email, password, displayName } = req.body;
+      if (!email || !password || !displayName) {
+        return res.status(400).json({ error: "Missing required fields", success: false });
+      }
+
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ error: "Email already registered", success: false });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const verificationCode = Math.random().toString().substring(2, 8);
+      const codeExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+      const user = await storage.createUser({
+        email,
+        password: hashedPassword,
+        displayName,
+        googleId: null,
+        emailVerified: false,
+        verificationCode,
+        codeExpiresAt,
+        lastCodeSentAt: new Date(),
+        verificationAttempts: 0,
+      });
+
+      req.logIn(user, (err) => {
+        if (err) return res.status(500).json({ error: "Signup error", success: false });
+        res.json({
+          success: true,
+          requiresVerification: true,
+          user: { id: user.id, email: user.email, displayName: user.displayName }
+        });
+      });
+    } catch (error) {
+      console.error("Signup error:", error);
+      res.status(500).json({ error: "Signup failed", success: false });
+    }
+  });
+
+  app.get("/api/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+  app.get("/api/auth/callback/google", passport.authenticate("google", { failureRedirect: "/login" }), (req, res) => {
+    res.redirect("/dashboard");
+  });
+
+  app.get("/api/auth/logout", (req, res) => {
+    req.logOut((err) => {
+      if (err) return res.status(500).json({ error: "Logout failed" });
+      res.json({ success: true });
+    });
+  });
+
+  app.get("/api/auth/me", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      res.json({ user: { id: user.id, email: user.email, displayName: user.displayName } });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch user" });
+    }
   });
 
   app.get("/api/dashboard/plans", requireAuth, async (req, res) => {
