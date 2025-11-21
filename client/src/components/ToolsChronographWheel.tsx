@@ -9,7 +9,7 @@ export default function ToolsChronographWheel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const wheelRef = useRef<HTMLDivElement>(null);
   const tools = ALL_TOOLS;
-  const itemHeight = 56; // Height of each tool item
+  const itemHeight = 8; // Height of each tool item (scaled down)
 
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
@@ -44,6 +44,7 @@ export default function ToolsChronographWheel() {
     <div
       className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
+      style={{ scale: "0.15", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
       <div className="w-72 h-72 rounded-full border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-4 flex items-center justify-center">
@@ -82,7 +83,7 @@ export default function ToolsChronographWheel() {
                 return (
                   <div
                     key={`${loopIdx}-${idx}`}
-                    className={`h-14 px-3 flex items-center gap-2 transition-all cursor-pointer ${
+                    className={`h-2 px-3 flex items-center gap-2 transition-all cursor-pointer ${
                       isCenter
                         ? "bg-primary/30 border-l-4 border-l-primary font-semibold text-sm"
                         : "opacity-50 text-xs hover:opacity-75"
@@ -98,7 +99,7 @@ export default function ToolsChronographWheel() {
                       <GetIconComponent name={tool.icon} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="leading-tight truncate">{tool.name}</p>
+                      <p className="leading-tight truncate text-xs">{tool.name}</p>
                     </div>
                   </div>
                 );
@@ -109,7 +110,7 @@ export default function ToolsChronographWheel() {
 
         {/* Center indicator line (highlight the selected item) */}
         <div
-          className="absolute left-0 right-0 h-14 border-y-2 border-primary/50 pointer-events-none"
+          className="absolute left-0 right-0 h-2 border-y-2 border-primary/50 pointer-events-none"
           style={{
             top: "50%",
             transform: "translateY(-50%)",
