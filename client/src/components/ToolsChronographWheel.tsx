@@ -10,40 +10,49 @@ export default function ToolsChronographWheel() {
   const [rotation, setRotation] = useState(0);
   const wheelRef = useRef<HTMLDivElement>(null);
   const tools = ALL_TOOLS;
-  const itemHeight = 10.8; // Height of each tool item (to display 6 at a time)
+  const visibleCount = 6; // Show 6 tools at a time
 
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
-    return Icon ? <Icon className="w-5 h-5" /> : <Icons.Zap className="w-5 h-5" />;
+    return Icon ? <Icon className="w-4 h-4" /> : <Icons.Zap className="w-4 h-4" />;
   };
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     if (e.deltaY > 0) {
       setCurrentIndex((prev) => (prev + 1) % tools.length);
-      setRotation((prev) => prev + 6.12); // 360/88 * 1.5 for smooth rotation
+      setRotation((prev) => prev + 60); // 360/6 for 6 visible tools
     } else {
       setCurrentIndex((prev) => (prev - 1 + tools.length) % tools.length);
-      setRotation((prev) => prev - 6.12);
+      setRotation((prev) => prev - 60);
     }
   };
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % tools.length);
-    setRotation((prev) => prev + 6.12);
+    setRotation((prev) => prev + 60);
   };
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev - 1 + tools.length) % tools.length);
-    setRotation((prev) => prev - 6.12);
+    setRotation((prev) => prev - 60);
   };
 
-  const getToolAtPosition = (offset: number) => {
-    return tools[(currentIndex + offset + tools.length) % tools.length];
+  // Get visible tools - 6 centered around the current index
+  const getVisibleTools = () => {
+    const visible = [];
+    const start = Math.floor(visibleCount / 2);
+    for (let i = -start; i < visibleCount - start; i++) {
+      visible.push({
+        tool: tools[(currentIndex + i + tools.length) % tools.length],
+        index: (currentIndex + i + tools.length) % tools.length,
+      });
+    }
+    return visible;
   };
 
-  // Visible positions: -2, -1, 0 (center), 1, 2
-  const visiblePositions = [-2, -1, 0, 1, 2];
+  const visibleTools = getVisibleTools();
+  const anglePerTool = 360 / visibleCount;
 
   return (
     <div
@@ -52,7 +61,7 @@ export default function ToolsChronographWheel() {
       style={{ scale: "0.50", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
-      <div className="w-72 h-72 rounded-full border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-4 flex items-center justify-center">
+      <div className="w-72 h-72 rounded-full border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-4 flex items-center justify-center overflow-hidden">
         {/* Animated Circular text "Tools Hub" around the edge */}
         <svg
           className="absolute w-full h-full"
@@ -82,6 +91,7 @@ export default function ToolsChronographWheel() {
             </textPath>
           </text>
         </svg>
+
         {/* Inner chrome cover with cutout */}
         <div
           className="absolute w-64 h-64 rounded-full pointer-events-none"
@@ -91,64 +101,57 @@ export default function ToolsChronographWheel() {
           }}
         />
 
-        {/* Flywheel scrollable area with mask */}
+        {/* Radial tools display */}
         <div
           ref={wheelRef}
-          className="relative w-64 h-64 overflow-hidden rounded-full"
+          className="absolute w-full h-full flex items-center justify-center"
           onWheel={handleWheel}
           style={{
-            mask: "radial-gradient(circle, transparent 0%, transparent 25%, black 40%, black 80%, transparent 95%)",
-            WebkitMask: "radial-gradient(circle, transparent 0%, transparent 25%, black 40%, black 80%, transparent 95%)",
+            pointerEvents: "auto",
           }}
         >
-          {/* Tool items container - scrolls vertically */}
-          <div
-            className="w-full transition-transform duration-300 ease-out"
-            style={{
-              transform: `translateY(${-currentIndex * itemHeight + 2 * itemHeight}px)`,
-            }}
-          >
-            {/* Create extended list for looping - 5 visible at a time */}
-            {[...Array(3)].map((_, loopIdx) =>
-              tools.map((tool, idx) => {
-                const globalIdx = loopIdx * tools.length + idx;
-                const isCenter = idx === currentIndex % tools.length;
-                const relativePos = (idx - currentIndex + tools.length) % tools.length;
+          {/* Tools arranged radially */}
+          {visibleTools.map((item, idx) => {
+            const angle = (idx * anglePerTool - 90) * (Math.PI / 180);
+            const radius = 90;
+            const x = radius * Math.cos(angle);
+            const y = radius * Math.sin(angle);
+            const isCenter = idx === Math.floor(visibleCount / 2);
 
-                return (
-                  <div
-                    key={`${loopIdx}-${idx}`}
-                    className={`h-3 px-3 flex items-center gap-2 transition-all cursor-pointer ${
-                      isCenter
-                        ? "bg-primary/40 border-l-4 border-l-primary font-semibold text-xs"
-                        : "opacity-50 text-xs hover:opacity-75"
-                    }`}
-                    onClick={() => {
-                      if (isCenter) {
-                        // Tool is clickable when centered
-                      }
-                    }}
-                    data-testid={`tool-${globalIdx}`}
-                  >
-                    <div className="text-primary flex-shrink-0">
-                      <GetIconComponent name={tool.icon} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="leading-tight truncate text-xs">{tool.name}</p>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
+            return (
+              <div
+                key={`${item.index}`}
+                className={`absolute flex items-center gap-1 px-2 py-1 rounded transition-all cursor-pointer ${
+                  isCenter
+                    ? "bg-primary/40 border-l-2 border-l-primary font-semibold text-xs z-20"
+                    : "opacity-50 text-xs z-10"
+                }`}
+                style={{
+                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+                  width: "100px",
+                }}
+                data-testid={`tool-radial-${item.index}`}
+              >
+                <div className="text-primary flex-shrink-0">
+                  <GetIconComponent name={item.tool.icon} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="leading-tight truncate text-xs whitespace-nowrap">
+                    {item.tool.name}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Center indicator line (highlight the selected item) */}
+        {/* Center mask/window overlay */}
         <div
-          className="absolute left-0 right-0 h-2 border-y-2 border-primary/50 pointer-events-none"
+          className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 border-2 border-primary/50 pointer-events-none"
           style={{
-            top: "50%",
-            transform: "translateY(-50%)",
+            width: "130px",
+            height: "40px",
+            borderRadius: "8px",
           }}
         />
 
@@ -162,7 +165,7 @@ export default function ToolsChronographWheel() {
         />
       </div>
 
-      {/* Navigation buttons outside the bezel */}
+      {/* Navigation buttons */}
       <div
         className="absolute left-1/2 transform -translate-x-1/2 flex gap-2 mt-80 pointer-events-auto"
         style={{ top: "100%" }}
@@ -193,13 +196,15 @@ export default function ToolsChronographWheel() {
 
       {/* Tool info card below */}
       <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-6 w-64 bg-background/95 backdrop-blur-sm border border-primary/20 rounded-lg p-3 text-center pointer-events-none">
-        <p className="text-xs font-semibold text-primary">{getToolAtPosition(0).name}</p>
+        <p className="text-xs font-semibold text-primary">
+          {tools[currentIndex].name}
+        </p>
         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-          {getToolAtPosition(0).description}
+          {tools[currentIndex].description}
         </p>
         <div className="mt-2">
           <span className="inline-block px-2 py-1 text-xs bg-primary/15 text-primary rounded">
-            {getToolAtPosition(0).tier?.toUpperCase()}
+            {tools[currentIndex].tier?.toUpperCase()}
           </span>
         </div>
       </div>
