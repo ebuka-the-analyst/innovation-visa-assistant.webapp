@@ -1,7 +1,46 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite as originalSetupVite, serveStatic as originalServeStatic, log } from "./vite";
+import type { Express as ExpressType } from "express";
+import type { Server } from "http";
+import path from "path";
+import fs from "fs";
+
+// Wrapper for setupVite that skips API routes
+async function setupVite(app: ExpressType, server: Server) {
+  // Add middleware to prevent Vite from handling API routes
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api/")) {
+      // For API routes, skip the Vite middleware by setting a flag
+      (req as any).skipVite = true;
+    }
+    next();
+  });
+  
+  await originalSetupVite(app, server);
+}
+
+// Wrapper for serveStatic that skips API routes
+function serveStatic(app: ExpressType) {
+  const distPath = path.resolve(import.meta.dirname, "public");
+
+  if (!fs.existsSync(distPath)) {
+    throw new Error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+    );
+  }
+
+  app.use(express.static(distPath));
+
+  // fall through to index.html ONLY for non-API routes
+  app.use("*", (req, res, next) => {
+    if (req.path.startsWith("/api/")) {
+      return next(); // Skip for API routes
+    }
+    res.sendFile(path.resolve(distPath, "index.html"));
+  });
+}
 import { setupAuth } from "./auth";
 import { setupAuthRoutes } from "./authRoutes";
 
