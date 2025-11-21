@@ -22,7 +22,9 @@ export default function ChatBot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   useEffect(() => {
@@ -39,6 +41,7 @@ export default function ChatBot() {
     setIsLoading(true);
 
     try {
+      console.log("Sending chat message:", userMessage);
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,15 +51,23 @@ export default function ChatBot() {
         })
       });
 
-      const data = await response.json() as { response: string };
+      console.log("Chat response status:", response.status);
+      const data = await response.json() as { response?: string; error?: string };
+      console.log("Chat response data:", data);
+      
       if (data.response) {
         setMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+      } else if (data.error) {
+        setMessages(prev => [...prev, { 
+          role: "assistant", 
+          content: `Error: ${data.error}` 
+        }]);
       }
     } catch (error) {
       console.error("Chat error:", error);
       setMessages(prev => [...prev, { 
         role: "assistant", 
-        content: "Sorry, I encountered an error. Please try again." 
+        content: "Sorry, I encountered an error. Please check your connection and try again." 
       }]);
     } finally {
       setIsLoading(false);
@@ -88,23 +99,37 @@ export default function ChatBot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card 
-          className="w-96 h-[600px] shadow-2xl flex flex-col overflow-hidden rounded-xl"
+        <div
+          className="flex flex-col rounded-2xl shadow-2xl border border-border overflow-hidden"
           style={{
             position: "fixed",
             bottom: "112px",
             right: "24px",
-            zIndex: 50
+            zIndex: 50,
+            width: "380px",
+            height: "520px",
+            background: "white"
           }}
         >
           {/* Header */}
-          <div className="p-4 text-white" style={{ background: "linear-gradient(135deg, #0D2C4A 0%, #11b6e9 100%)" }}>
-            <h3 className="font-bold text-lg">VisaPrep AI Assistant</h3>
-            <p className="text-sm opacity-90">PhD-level visa strategy expert</p>
+          <div className="p-4 text-white flex-shrink-0" style={{ background: "linear-gradient(135deg, #0D2C4A 0%, #11b6e9 100%)" }}>
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-bold text-lg">VisaPrep AI</h3>
+                <p className="text-xs opacity-90">Visa strategy expert</p>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white hover:opacity-75 transition-opacity"
+                data-testid="button-close-chat"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-white" style={{ display: "flex", flexDirection: "column", overflowY: "auto" }}>
             {messages.map((msg, idx) => (
               <div
                 key={idx}
@@ -112,20 +137,24 @@ export default function ChatBot() {
                 data-testid={`chat-message-${msg.role}-${idx}`}
               >
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-lg ${
-                    msg.role === "user"
-                      ? "text-white rounded-br-none"
-                      : "bg-muted text-foreground rounded-bl-none"
-                  }`}
-                  style={msg.role === "user" ? { background: "#ffa536" } : {}}
+                  className="px-3 py-2 rounded-lg text-sm max-w-xs"
+                  style={msg.role === "user" ? {
+                    background: "#ffa536",
+                    color: "white",
+                    borderBottomRightRadius: "4px"
+                  } : {
+                    background: "#f0f0f0",
+                    color: "#333",
+                    borderBottomLeftRadius: "4px"
+                  }}
                 >
-                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                  <p className="leading-relaxed">{msg.content}</p>
                 </div>
               </div>
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-muted text-foreground rounded-lg rounded-bl-none px-4 py-2">
+                <div className="px-3 py-2 rounded-lg bg-gray-100 text-gray-600 border-b-l-4" style={{ borderBottomLeftRadius: "4px" }}>
                   <Loader className="w-4 h-4 animate-spin" />
                 </div>
               </div>
@@ -134,27 +163,35 @@ export default function ChatBot() {
           </div>
 
           {/* Input */}
-          <div className="border-t p-4 bg-background">
+          <div className="border-t border-border p-3 bg-white flex-shrink-0">
             <div className="flex gap-2">
               <Input
-                placeholder="Ask about visa strategy..."
+                placeholder="Ask about visa..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                 disabled={isLoading}
                 data-testid="input-chat-message"
+                className="text-sm"
+                style={{ flex: 1 }}
               />
               <Button
                 size="icon"
                 onClick={handleSendMessage}
                 disabled={isLoading || !input.trim()}
                 data-testid="button-chat-send"
+                style={{ 
+                  background: "#ffa536",
+                  color: "white",
+                  width: "36px",
+                  height: "36px"
+                }}
               >
                 <Send className="w-4 h-4" />
               </Button>
             </div>
           </div>
-        </Card>
+        </div>
       )}
     </>
   );
