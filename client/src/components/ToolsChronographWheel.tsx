@@ -114,39 +114,37 @@ export default function ToolsChronographWheel() {
             className="absolute top-0 left-0 right-0 pointer-events-none z-10"
             style={{
               height: "120px",
-              background: "linear-gradient(to bottom, rgba(240,244,248,0.95) 0%, rgba(240,244,248,0.3) 100%)",
-              backdropFilter: "blur(3px)",
+              background: "linear-gradient(to bottom, rgba(240,244,248,1) 0%, rgba(240,244,248,0) 100%)",
             }}
           />
           <div
             className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
             style={{
               height: "120px",
-              background: "linear-gradient(to top, rgba(240,244,248,0.95) 0%, rgba(240,244,248,0.3) 100%)",
-              backdropFilter: "blur(3px)",
+              background: "linear-gradient(to top, rgba(240,244,248,1) 0%, rgba(240,244,248,0) 100%)",
             }}
           />
 
           {/* Featured Tool Box - Centered Behind */}
-          <div className="absolute inset-0 flex items-center justify-center px-2 z-5 pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center px-1 z-5 pointer-events-none">
             <div 
-              className="p-4 bg-white border-2 border-gray-300 rounded-lg w-full" 
+              className="p-3 bg-white border-2 border-gray-300 rounded-lg w-full" 
               style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <p className="text-sm text-gray-400 font-semibold mb-2">
-                    {String(selectedToolIdx + 1).padStart(3, "0")}
-                  </p>
-                  <h2 className="text-2xl font-black text-black leading-tight mb-2">
-                    {selectedTool.name.toUpperCase()}
-                  </h2>
-                  <p className="text-sm text-black font-semibold">
-                    {selectedTool.description.toUpperCase()}
-                  </p>
-                </div>
-                <div className="flex-shrink-0 w-16 h-16 rounded-full border-2 border-gray-400 flex items-center justify-center bg-gray-50 text-gray-600">
-                  <GetIconComponent name={selectedTool.icon} />
+              <div className="flex flex-col gap-2">
+                <p className="text-sm text-gray-400 font-semibold">
+                  {String(selectedToolIdx + 1).padStart(3, "0")}
+                </p>
+                <h2 className="text-2xl font-black text-black leading-tight w-full">
+                  {selectedTool.name.toUpperCase()}
+                </h2>
+                <p className="text-sm text-black font-semibold w-full">
+                  {selectedTool.description.toUpperCase()}
+                </p>
+                <div className="flex justify-center pt-2">
+                  <div className="w-16 h-16 rounded-full border-2 border-gray-400 flex items-center justify-center bg-gray-50 text-gray-600">
+                    <GetIconComponent name={selectedTool.icon} />
+                  </div>
                 </div>
               </div>
             </div>
