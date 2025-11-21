@@ -37,71 +37,87 @@ export default function ToolsChronographWheel() {
           <h3 className="text-2xl font-black text-black">100+ TOOLS HUB</h3>
         </div>
 
-        {/* Featured Tool Box */}
-        <div className="mx-4 mt-4 p-6 bg-gray-50 border border-gray-300 rounded-lg">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <p className="text-sm text-gray-400 font-semibold mb-2">
-                {String(selectedToolIdx + 1).padStart(3, "0")}
-              </p>
-              <h2 className="text-2xl font-black text-black leading-tight mb-3">
-                {selectedTool.name.toUpperCase()}
-              </h2>
-              <p className="text-sm text-black font-semibold">
-                {selectedTool.description.toUpperCase()}
-              </p>
-            </div>
-            <div className="flex-shrink-0 w-16 h-16 rounded-full border-2 border-gray-400 flex items-center justify-center bg-white text-gray-600">
-              <GetIconComponent name={selectedTool.icon} />
+        {/* Main Container with Featured Tool in Center */}
+        <div className="flex-1 relative overflow-hidden">
+          {/* Scrollable tool list background */}
+          <div
+            ref={scrollRef}
+            className="absolute inset-0 overflow-y-auto overflow-x-hidden px-4 py-3"
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <div className="space-y-2">
+              {tools.map((tool, idx) => (
+                <div
+                  key={tool.id}
+                  onClick={() => setSelectedToolIdx(idx)}
+                  className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-100 cursor-pointer transition-colors border border-transparent hover:border-gray-300"
+                  data-testid={`tool-${idx}`}
+                >
+                  {/* Number */}
+                  <div className="text-xs font-bold text-gray-500 w-8 flex-shrink-0 pt-0.5">
+                    {String(idx + 1).padStart(3, "0")}
+                  </div>
+
+                  {/* Tool info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-black truncate">
+                      {tool.name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {tool.description}
+                    </p>
+                  </div>
+
+                  {/* Tier badge */}
+                  <div className={`flex-shrink-0 text-xs font-bold px-2 py-1 rounded border ${tierColors[tool.tier as keyof typeof tierColors]}`}>
+                    {tool.tier.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Scrollable list of tools */}
-        <div
-          ref={scrollRef}
-          className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-3 mt-2"
-          style={{
-            scrollbarWidth: "thin",
-            scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <div className="space-y-2">
-            {tools.map((tool, idx) => (
-              <div
-                key={tool.id}
-                onClick={() => setSelectedToolIdx(idx)}
-                className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-100 cursor-pointer transition-colors border border-transparent hover:border-gray-300"
-                data-testid={`tool-${idx}`}
-              >
-                {/* Number */}
-                <div className="text-xs font-bold text-gray-500 w-8 flex-shrink-0 pt-0.5">
-                  {String(idx + 1).padStart(3, "0")}
-                </div>
+          {/* Fade masks - top and bottom */}
+          <div
+            className="absolute top-0 left-0 right-0 pointer-events-none"
+            style={{
+              height: "150px",
+              background: "linear-gradient(to bottom, rgba(240,244,248,0.95) 0%, rgba(240,244,248,0.3) 100%)",
+              backdropFilter: "blur(3px)",
+            }}
+          />
+          <div
+            className="absolute bottom-0 left-0 right-0 pointer-events-none"
+            style={{
+              height: "150px",
+              background: "linear-gradient(to top, rgba(240,244,248,0.95) 0%, rgba(240,244,248,0.3) 100%)",
+              backdropFilter: "blur(3px)",
+            }}
+          />
 
-                {/* Tool info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-black truncate">
-                    {tool.name}
+          {/* Featured Tool Box - Centered */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-4">
+            <div className="p-6 bg-white border-2 border-gray-300 rounded-lg w-full" style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 pointer-events-auto">
+                  <p className="text-sm text-gray-400 font-semibold mb-2">
+                    {String(selectedToolIdx + 1).padStart(3, "0")}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {tool.description}
+                  <h2 className="text-2xl font-black text-black leading-tight mb-3">
+                    {selectedTool.name.toUpperCase()}
+                  </h2>
+                  <p className="text-sm text-black font-semibold">
+                    {selectedTool.description.toUpperCase()}
                   </p>
                 </div>
-
-                {/* Tier badge */}
-                <div className={`flex-shrink-0 text-xs font-bold px-2 py-1 rounded border ${tierColors[tool.tier as keyof typeof tierColors]}`}>
-                  {tool.tier.charAt(0).toUpperCase()}
+                <div className="flex-shrink-0 w-16 h-16 rounded-full border-2 border-gray-400 flex items-center justify-center bg-gray-50 text-gray-600">
+                  <GetIconComponent name={selectedTool.icon} />
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Counter at bottom */}
-          <div className="sticky bottom-0 mt-3 pt-2 border-t border-gray-300 bg-white/90 text-center">
-            <p className="text-xs font-bold text-black">
-              Total: {tools.length} Tools
-            </p>
+            </div>
           </div>
         </div>
 
