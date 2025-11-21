@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -7,6 +7,8 @@ type IconName = keyof typeof Icons;
 
 export default function ToolsChronographWheel() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [hoveringUp, setHoveringUp] = useState(false);
+  const [hoveringDown, setHoveringDown] = useState(false);
   const wheelRef = useRef<HTMLDivElement>(null);
   const tools = ALL_TOOLS;
 
@@ -14,6 +16,23 @@ export default function ToolsChronographWheel() {
     const Icon = Icons[name as IconName] as any;
     return Icon ? <Icon className="w-4 h-4" /> : <Icons.Zap className="w-4 h-4" />;
   };
+
+  // Auto-scroll when hovering over up/down buttons
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (hoveringUp) {
+      interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev - 1 + tools.length) % tools.length);
+      }, 80); // Fast scroll up
+    } else if (hoveringDown) {
+      interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % tools.length);
+      }, 80); // Fast scroll down
+    }
+    
+    return () => clearInterval(interval);
+  }, [hoveringUp, hoveringDown, tools.length]);
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
@@ -186,19 +205,23 @@ export default function ToolsChronographWheel() {
       {/* Side Navigation buttons - Up/Down arrows */}
       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 pointer-events-auto">
         <button
+          onMouseEnter={() => setHoveringUp(true)}
+          onMouseLeave={() => setHoveringUp(false)}
           onClick={handlePrev}
           className="p-3 rounded-full bg-background/90 hover:bg-primary/20 transition-all border-2 border-gray-400 hover:border-primary active:scale-95 shadow-md group"
           data-testid="button-prev-tool-side"
-          title="Scroll Up"
+          title="Hover to scroll up fast"
         >
           <ChevronUp className="w-5 h-5 text-gray-700 group-hover:text-primary transition-colors" />
         </button>
 
         <button
+          onMouseEnter={() => setHoveringDown(true)}
+          onMouseLeave={() => setHoveringDown(false)}
           onClick={handleNext}
           className="p-3 rounded-full bg-background/90 hover:bg-primary/20 transition-all border-2 border-gray-400 hover:border-primary active:scale-95 shadow-md group"
           data-testid="button-next-tool-side"
-          title="Scroll Down"
+          title="Hover to scroll down fast"
         >
           <ChevronDown className="w-5 h-5 text-gray-700 group-hover:text-primary transition-colors" />
         </button>
