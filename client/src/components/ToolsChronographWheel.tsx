@@ -48,12 +48,12 @@ export default function ToolsChronographWheel() {
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "1067px", width: "800px" }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="px-6 pt-4 pb-2 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
+        <div className="px-4 pt-3 pb-1 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
           <h3 className="text-2xl font-black text-black">100+ TOOLS HUB</h3>
         </div>
 
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" */}
-        <div className="px-6 py-2 border-b border-gray-300 bg-gray-50">
+        <div className="px-4 py-1.5 border-b border-gray-300 bg-gray-50">
           <p className="text-sm font-black text-black tracking-wide">APPLICATION REQUIREMENT CHECKS</p>
         </div>
 
@@ -128,17 +128,17 @@ export default function ToolsChronographWheel() {
           />
 
           {/* Featured Tool Box - Centered Behind */}
-          <div className="absolute inset-0 flex items-center justify-center px-4 z-5 pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center px-2 z-5 pointer-events-none">
             <div 
-              className="p-6 bg-white border-2 border-gray-300 rounded-lg w-full" 
+              className="p-4 bg-white border-2 border-gray-300 rounded-lg w-full" 
               style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <p className="text-sm text-gray-400 font-semibold mb-2">
                     {String(selectedToolIdx + 1).padStart(3, "0")}
                   </p>
-                  <h2 className="text-2xl font-black text-black leading-tight mb-3">
+                  <h2 className="text-2xl font-black text-black leading-tight mb-2">
                     {selectedTool.name.toUpperCase()}
                   </h2>
                   <p className="text-sm text-black font-semibold">
