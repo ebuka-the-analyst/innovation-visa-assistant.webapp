@@ -83,7 +83,7 @@ export default function NewsTicker() {
 
   return (
     <>
-      <div className="flex items-center justify-between px-2 py-1">
+      <div className="flex items-center gap-1 px-2 py-2">
         {/* Start Navigation Button - Far Left */}
         <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1 flex-shrink-0">
           <Button
@@ -95,6 +95,33 @@ export default function NewsTicker() {
           >
             <ChevronLeft className="w-3 h-3 text-white" />
           </Button>
+        </div>
+
+        {/* Auto-scrolling ticker */}
+        <div className="flex-1 overflow-hidden" ref={tickerRef}>
+          <div className="animate-ticker-scroll whitespace-nowrap">
+            {NEWS_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleArticleClick(item)}
+                className="inline-block px-3 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
+              >
+                {item.title}
+                <span className="mx-2 text-primary/40">•</span>
+              </button>
+            ))}
+            {/* Duplicate for seamless loop */}
+            {NEWS_ITEMS.map((item) => (
+              <button
+                key={`dup-${item.id}`}
+                onClick={() => handleArticleClick(item)}
+                className="inline-block px-3 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
+              >
+                {item.title}
+                <span className="mx-2 text-primary/40">•</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* End Navigation Button - Far Right */}
@@ -109,9 +136,6 @@ export default function NewsTicker() {
             <ChevronRight className="w-3 h-3 text-white" />
           </Button>
         </div>
-
-        {/* Hidden ticker ref for scroll functionality */}
-        <div ref={tickerRef} className="hidden" />
 
         <style>{`
           @keyframes ticker-scroll {
