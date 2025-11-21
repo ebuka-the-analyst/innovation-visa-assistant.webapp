@@ -27,6 +27,7 @@ import Diagnostics from "@/pages/diagnostics";
 import Settings from "@/pages/settings";
 import DataModal from "@/pages/data-modal";
 import ToolsHub from "@/pages/tools-hub";
+import FeaturesShowcase from "@/pages/features-showcase";
 
 function Router() {
   return (
@@ -53,6 +54,7 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/data-manager" component={DataModal} />
       <Route path="/tools-hub" component={ToolsHub} />
+      <Route path="/features" component={FeaturesShowcase} />
       <Route component={NotFound} />
     </Switch>
   );
