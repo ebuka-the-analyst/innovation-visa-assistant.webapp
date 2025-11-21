@@ -66,8 +66,8 @@ export default function NewsTicker() {
   const tickerRef = useRef<HTMLDivElement>(null);
 
   // Calculate animation duration based on number of news items
-  // Each item gets ~0.4 seconds to display (150% speed - 3x faster)
-  const animationDuration = Math.max(newsItems.length * 0.4, 10);
+  // Each item gets ~0.6 seconds to display (100% speed - double of 50%)
+  const animationDuration = Math.max(newsItems.length * 0.6, 15);
 
   // Fetch news on mount and poll every 30 minutes
   useEffect(() => {
