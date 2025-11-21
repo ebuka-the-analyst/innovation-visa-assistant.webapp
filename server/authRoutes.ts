@@ -266,8 +266,13 @@ export function setupAuthRoutes(app: Express) {
   // Google OAuth callback
   app.get(
     "/api/auth/callback/google",
+    (req, res, next) => {
+      console.log("🔥 GOOGLE CALLBACK HIT:", req.url);
+      next();
+    },
     passport.authenticate("google", { failureRedirect: "/login?error=google" }),
     (req, res) => {
+      console.log("✅ GOOGLE AUTH SUCCESS, redirecting to dashboard");
       res.redirect("/dashboard");
     }
   );

@@ -82,6 +82,15 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // Add middleware to skip static file serving for API routes
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api/")) {
+      // Skip to error handler if no route matched
+      return next();
+    }
+    next();
+  });
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
