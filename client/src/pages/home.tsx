@@ -6,19 +6,20 @@ import PlatformPillars from "@/components/PlatformPillars";
 import AIAgents from "@/components/AIAgents";
 import CompetitorFeatures from "@/components/CompetitorFeatures";
 import StatsSection from "@/components/StatsSection";
-import EverythingWeOfferSection from "@/components/EverythingWeOfferSection";
 import PricingSection from "@/components/PricingSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import LawyerCTA from "@/components/LawyerCTA";
 import FAQSection from "@/components/FAQSection";
 import Disclaimer from "@/components/Disclaimer";
 import Footer from "@/components/Footer";
+import ToolsFlywheel from "@/components/ToolsFlywheel";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
       <Header />
       <NewsTicker />
+      <ToolsFlywheel />
       <main>
         <HeroSection />
         <div id="features">
@@ -26,7 +27,6 @@ export default function Home() {
         </div>
         <PlatformPillars />
         <AIAgents />
-        <EverythingWeOfferSection />
         <CompetitorFeatures />
         <StatsSection />
         <div id="pricing">
