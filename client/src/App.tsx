@@ -76,12 +76,16 @@ function AppLayout() {
   const showSidebar = !SIDEBAR_HIDDEN_ROUTES.includes(location);
 
   if (!showSidebar) {
-    return <Router />;
+    return (
+      <div style={{ paddingTop: "60px" }}>
+        <Router />
+      </div>
+    );
   }
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full">
+      <div className="flex h-screen w-full" style={{ paddingTop: "60px" }}>
         <AppSidebar />
         <div className="flex flex-col flex-1 w-full">
           <header className="flex items-center gap-4 px-4 py-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
