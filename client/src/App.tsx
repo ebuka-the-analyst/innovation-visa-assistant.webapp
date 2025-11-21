@@ -19,6 +19,9 @@ import ExpertBooking from "@/pages/expert-booking";
 import RejectionAnalysis from "@/pages/rejection-analysis";
 import SettlementPlanning from "@/pages/settlement-planning";
 import FeaturesDashboard from "@/pages/features-dashboard";
+import KPIDashboard from "@/pages/kpi-dashboard";
+import EvidenceGraph from "@/pages/evidence-graph";
+import RFEDefenceLab from "@/pages/rfe-defence-lab";
 
 function Router() {
   return (
@@ -38,6 +41,9 @@ function Router() {
       <Route path="/rejection-analysis" component={RejectionAnalysis} />
       <Route path="/settlement-planning" component={SettlementPlanning} />
       <Route path="/features-dashboard" component={FeaturesDashboard} />
+      <Route path="/kpi-dashboard" component={KPIDashboard} />
+      <Route path="/evidence-graph" component={EvidenceGraph} />
+      <Route path="/rfe-defence-lab" component={RFEDefenceLab} />
       <Route component={NotFound} />
     </Switch>
   );
