@@ -39,7 +39,7 @@ export default function ToolsChronographWheel() {
       style={{ scale: "0.50", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
-      <div className="w-72 h-80 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-4 flex flex-col items-center justify-center">
+      <div className="w-72 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-4 flex flex-col items-center justify-center" style={{ height: "560px" }}>
         
         {/* TOOLS HUB text on bezel edge using SVG */}
         <svg
@@ -76,7 +76,7 @@ export default function ToolsChronographWheel() {
           className="relative w-full flex-1 overflow-hidden flex flex-col items-center justify-center"
           onWheel={handleWheel}
           style={{
-            height: "220px",
+            height: "440px",
             perspective: "1000px",
             marginTop: "8px",
           }}
