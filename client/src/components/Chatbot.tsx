@@ -55,7 +55,7 @@ export default function Chatbot({ planId }: ChatbotProps) {
       const response = await apiRequest('POST', '/api/chat', {
         message: input.trim(),
         planId: planId || null,
-        conversationHistory: messages.slice(-4), // Send last 4 messages for context
+        conversationHistory: messages.slice(-8), // Send last 8 messages for deeper context
       });
 
       const data = await response.json();
