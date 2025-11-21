@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { AuthHeader } from "@/components/AuthHeader";
-import { CheckCircle2, Clock, Lock, BookOpen, Users, TrendingUp, Home } from "lucide-react";
+import { CheckCircle2, Clock, Lock, BookOpen, Users, TrendingUp, Home, BarChart3 } from "lucide-react";
 
 const features = [
   {
@@ -88,8 +88,31 @@ const features = [
         route: "/settlement-planning",
         status: "Long-term strategy",
         color: "from-indigo-500 to-purple-500"
+      },
+      {
+        icon: BarChart3,
+        title: "KPI Dashboard",
+        description: "Real-time visa compliance tracking",
+        route: "/kpi-dashboard",
+        status: "Monitor performance",
+        color: "from-cyan-500 to-blue-500"
       }
     ]
+  }
+];
+
+const advancedFeatures = [
+  {
+    title: "Evidence Graph",
+    description: "Map every claim to supporting evidence. Spot gaps before submission.",
+    route: "/evidence-graph",
+    color: "from-orange-500 to-yellow-500"
+  },
+  {
+    title: "RFE Defence Lab",
+    description: "Predict refusal grounds & build mitigation strategies.",
+    route: "/rfe-defence-lab",
+    color: "from-pink-500 to-rose-500"
   }
 ];
 
@@ -145,7 +168,7 @@ export default function FeaturesDashboard() {
             ))}
           </div>
 
-          <div className="mt-16 p-8 bg-primary/5 border border-primary/20 rounded-lg">
+          <div className="mt-16 p-8 bg-primary/5 border border-primary/20 rounded-lg mb-12">
             <h3 className="font-semibold text-lg mb-3">How to Use This Dashboard</h3>
             <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside">
               <li><strong>Phase 1:</strong> Generate your business plan and compare endorser routes</li>
@@ -155,8 +178,34 @@ export default function FeaturesDashboard() {
               <li><strong>Phase 5:</strong> Plan your long-term UK settlement and ILR journey</li>
             </ol>
           </div>
+
+          <div className="mb-16">
+            <h2 className="text-2xl font-bold mb-6">Advanced Features</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {advancedFeatures.map((feature) => (
+                <Link key={feature.route} href={feature.route}>
+                  <Card
+                    className={`p-8 hover-elevate cursor-pointer group overflow-hidden relative h-full`}
+                    data-testid={`card-advanced-${feature.title.replace(/\s+/g, '-').toLowerCase()}`}
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-5 group-hover:opacity-10 transition-opacity`} />
+                    
+                    <div className="relative z-10">
+                      <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
+}
+
+interface LinkProps {
+  href: string;
+  children: React.ReactNode;
 }
