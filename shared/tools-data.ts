@@ -13,6 +13,7 @@ export const ALL_TOOLS: Tool[] = [
   { id: "app-req-checker", name: "Application Requirements Checker", description: "Verify all required documents and eligibility criteria", category: "compliance", stage: "before", tier: "free", icon: "CheckCircle" },
   { id: "advisors-finder", name: "Approved Advisors/Endorsers Finder", description: "Find and compare approved visa advisors and endorsers", category: "documentation", stage: "before", tier: "basic", icon: "Users" },
   { id: "advisor-prep-guide", name: "Advisor Meeting Prep Guide", description: "Prepare for meetings with immigration advisors", category: "documentation", stage: "before", tier: "premium", icon: "BookOpen" },
+  { id: "advisory-board-builder", name: "Advisory Board Builder", description: "Build and structure advisory board for credibility", category: "team", stage: "before", tier: "premium", icon: "Users" },
 
   // B - Business Foundation
   { id: "business-plan", name: "Business Plan Generator", description: "Generate comprehensive business plans", category: "business", stage: "during", tier: "basic", icon: "FileText" },
@@ -86,6 +87,7 @@ export const ALL_TOOLS: Tool[] = [
   { id: "market-research", name: "Market Research Compiler", description: "Compile market research data and insights", category: "business", stage: "before", tier: "premium", icon: "Search" },
   { id: "competitor-bench", name: "Competitor Benchmarking", description: "Benchmark against competitors", category: "business", stage: "before", tier: "premium", icon: "Users" },
   { id: "market-size", name: "Market Size Calculator", description: "Calculate market size and opportunity", category: "business", stage: "before", tier: "premium", icon: "Globe" },
+  { id: "cac-calculator", name: "Customer Acquisition Cost Calculator", description: "Calculate CAC and optimize customer acquisition strategy", category: "financial", stage: "during", tier: "premium", icon: "DollarSign" },
 
   // N - Narrative & Pitch
   { id: "narrative-builder", name: "Narrative Builder", description: "Build compelling business narrative", category: "documentation", stage: "during", tier: "premium", icon: "BookOpen" },
@@ -104,6 +106,7 @@ export const ALL_TOOLS: Tool[] = [
   { id: "risk-analysis", name: "Risk Analysis & Mitigation", description: "Analyze and mitigate business risks", category: "defense", stage: "during", tier: "premium", icon: "AlertTriangle" },
   { id: "contingency-plan", name: "Contingency Planning Tool", description: "Create contingency and backup plans", category: "business", stage: "before", tier: "premium", icon: "AlertCircle" },
   { id: "roadmap-builder", name: "Project Roadmap Builder", description: "Build detailed project roadmap", category: "business", stage: "during", tier: "premium", icon: "Map" },
+  { id: "pmf-validator", name: "Product-Market Fit Validator", description: "Validate product-market fit with customers", category: "innovation", stage: "before", tier: "premium", icon: "Zap" },
 
   // Q - Q&A & Questions
   { id: "faq-generator", name: "FAQ Generator", description: "Generate FAQs for your business", category: "documentation", stage: "during", tier: "premium", icon: "HelpCircle" },
@@ -122,12 +125,14 @@ export const ALL_TOOLS: Tool[] = [
   { id: "scenario-planner", name: "Scenario Planner", description: "Plan best/worst case scenarios", category: "business", stage: "before", tier: "premium", icon: "Zap" },
   { id: "settlement-planning", name: "Settlement Planning", description: "Plan post-visa settlement", category: "documentation", stage: "after", tier: "premium", icon: "Home" },
   { id: "site-strategy", name: "Site/Location Strategy", description: "Plan office locations and expansion", category: "business", stage: "during", tier: "premium", icon: "MapPin" },
+  { id: "salary-threshold", name: "Salary Threshold Calculator", description: "Calculate salary thresholds and compliance requirements", category: "compliance", stage: "before", tier: "premium", icon: "DollarSign" },
 
   // T - Tax & Timeline
   { id: "tax-planning", name: "Tax Planning & Structure Advisor", description: "Plan optimal tax structure", category: "compliance", stage: "before", tier: "premium", icon: "DollarSign" },
   { id: "tax-compliance", name: "Tax Compliance Tracker", description: "Track tax compliance requirements", category: "compliance", stage: "after", tier: "premium", icon: "CheckCircle" },
   { id: "timeline-tracker", name: "Timeline Tracker", description: "Track application timeline stages", category: "documentation", stage: "during", tier: "basic", icon: "Calendar" },
   { id: "milestone-timeline", name: "Milestone Timeline Planner", description: "Plan milestone timelines", category: "business", stage: "before", tier: "premium", icon: "Calendar" },
+  { id: "tech-stack-assess", name: "Tech Stack Assessment", description: "Evaluate and validate technology stack choices", category: "innovation", stage: "before", tier: "premium", icon: "Zap" },
 
   // U - Unique Value & Unit Economics
   { id: "uvp-generator", name: "Unique Value Proposition Generator", description: "Generate compelling UVP", category: "innovation", stage: "before", tier: "premium", icon: "Sparkles" },
@@ -157,6 +162,7 @@ export const ALL_TOOLS: Tool[] = [
   // Z - Zero-to-Approved Roadmap
   { id: "zero-approved", name: "Zero-to-Approved Roadmap", description: "Complete roadmap from zero to visa approved", category: "business", stage: "before", tier: "enterprise", icon: "Map" },
   { id: "zone-planning", name: "Zone Planning", description: "Plan for London/Tier 2 expansion", category: "business", stage: "during", tier: "premium", icon: "MapPin" },
+  { id: "revenue-forecast", name: "Revenue Forecasting Tool", description: "Generate detailed revenue forecasts by product/service", category: "financial", stage: "during", tier: "premium", icon: "LineChart" },
 ];
 
 export const TIER_DESCRIPTIONS = {
