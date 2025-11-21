@@ -1,69 +1,39 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef } from "react";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
-import { ChevronDown, ChevronUp } from "lucide-react";
 
 type IconName = keyof typeof Icons;
 
 export default function ToolsChronographWheel() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [hoveringUp, setHoveringUp] = useState(false);
-  const [hoveringDown, setHoveringDown] = useState(false);
-  const wheelRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const tools = ALL_TOOLS;
 
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
-    return Icon ? <Icon className="w-4 h-4" /> : <Icons.Zap className="w-4 h-4" />;
+    return Icon ? <Icon className="w-3 h-3" /> : <Icons.Zap className="w-3 h-3" />;
   };
 
-  // Auto-scroll when hovering over up/down buttons
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (hoveringUp) {
-      interval = setInterval(() => {
-        setCurrentIndex((prev) => (prev - 1 + tools.length) % tools.length);
-      }, 60); // Reasonably fast scroll up
-    } else if (hoveringDown) {
-      interval = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % tools.length);
-      }, 60); // Reasonably fast scroll down
-    }
-    
-    return () => clearInterval(interval);
-  }, [hoveringUp, hoveringDown, tools.length]);
-
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    if (e.deltaY > 0) {
-      setCurrentIndex((prev) => (prev + 1) % tools.length);
-    } else {
-      setCurrentIndex((prev) => (prev - 1 + tools.length) % tools.length);
-    }
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % tools.length);
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + tools.length) % tools.length);
+  const tierColors = {
+    free: "bg-green-50 border-green-200 text-green-700",
+    basic: "bg-blue-50 border-blue-200 text-blue-700",
+    premium: "bg-purple-50 border-purple-200 text-purple-700",
+    enterprise: "bg-red-50 border-red-200 text-red-700",
+    ultimate: "bg-yellow-50 border-yellow-200 text-yellow-700",
   };
 
   return (
     <div
       className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
-      style={{ scale: "0.50", transformOrigin: "bottom left" }}
+      style={{ scale: "0.40", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
-      <div className="w-80 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "560px" }}>
+      <div className="w-96 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "700px" }}>
         
         {/* Static Header Section */}
-        <div className="flex flex-col items-center justify-center pt-4 pb-2 px-4 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
-          <h3 className="text-lg font-black text-black text-center">100+ TOOLS HUB</h3>
-          <p className="text-xs text-gray-600 text-center mt-1">Application Requirement Checks</p>
+        <div className="flex flex-col items-center justify-center pt-3 pb-2 px-4 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
+          <h3 className="text-sm font-black text-black text-center">104 TOOLS HUB</h3>
+          <p className="text-xs text-gray-600 text-center mt-0.5">All Application Requirements</p>
         </div>
 
         {/* Inner chrome cover overlay */}
@@ -75,121 +45,56 @@ export default function ToolsChronographWheel() {
           }}
         />
 
-        {/* Scrollable container with overflow hidden */}
+        {/* Scrollable list of ALL tools */}
         <div
-          ref={wheelRef}
-          className="relative flex-1 overflow-hidden flex flex-col items-center justify-center w-full"
-          onWheel={handleWheel}
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-2"
           style={{
-            perspective: "1000px",
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
           }}
         >
-          {/* Tool items - vertical scroll with mask effect */}
-          <div
-            className="flex flex-col items-center gap-1 transition-transform duration-300 ease-out"
-            style={{
-              transform: `translateY(${-currentIndex * 46}px)`,
-            }}
-          >
-            {/* Render 3 cycles of tools for infinite scroll effect */}
-            {[...Array(3)].map((_, cycle) =>
-              tools.map((tool, idx) => {
-                const globalIdx = cycle * tools.length + idx;
-                const currentPos = currentIndex % tools.length;
-                const isCenter = idx === currentPos;
-                
-                // Calculate circular distance (handles wrap-around)
-                let positionFromCenter = Math.abs(idx - currentPos);
-                if (positionFromCenter > tools.length / 2) {
-                  positionFromCenter = tools.length - positionFromCenter;
-                }
-                
-                // Show 5 tools: 2 above center, center, 2 below
-                let opacity = 0;
-                let scale = 0.7;
-                let display = true;
-                
-                if (isCenter) {
-                  opacity = 1;
-                  scale = 1;
-                } else if (positionFromCenter === 1) {
-                  opacity = 0.6;
-                  scale = 0.9;
-                } else if (positionFromCenter === 2) {
-                  opacity = 0.35;
-                  scale = 0.8;
-                } else {
-                  opacity = 0;
-                  scale = 0.6;
-                  display = false;
-                }
+          <div className="space-y-1">
+            {tools.map((tool, idx) => (
+              <div
+                key={tool.id}
+                className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
+                data-testid={`tool-${idx}`}
+              >
+                {/* Number */}
+                <div className="text-xs font-bold text-gray-400 w-5 flex-shrink-0">
+                  {String(idx + 1).padStart(3, "0")}
+                </div>
 
-                if (!display && opacity === 0) {
-                  return null;
-                }
+                {/* Icon */}
+                <div className="text-primary flex-shrink-0 mt-0.5">
+                  <GetIconComponent name={tool.icon} />
+                </div>
 
-                return (
-                  <div
-                    key={`${cycle}-${idx}`}
-                    className="transition-all duration-300"
-                    style={{
-                      opacity,
-                      transform: `scale(${scale})`,
-                      height: "44px",
-                      pointerEvents: isCenter ? "auto" : "none",
-                      display: opacity === 0 ? "none" : "block",
-                    }}
-                    data-testid={`tool-${globalIdx}`}
-                  >
-                    <div
-                      className={`px-3 py-1 rounded-md flex items-center gap-2 whitespace-nowrap border transition-all ${
-                        isCenter
-                          ? "bg-primary/15 border-primary font-black text-xs text-black"
-                          : "bg-gray-50 border-gray-200 text-xs text-gray-500"
-                      }`}
-                      style={{
-                        minWidth: "150px",
-                      }}
-                    >
-                      <div className="text-primary flex-shrink-0">
-                        <GetIconComponent name={tool.icon} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`leading-tight truncate text-xs ${isCenter ? "font-black text-black" : ""}`}>
-                          {tool.name}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+                {/* Tool info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-black truncate">
+                    {tool.name}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {tool.description}
+                  </p>
+                </div>
+
+                {/* Tier badge */}
+                <div className={`flex-shrink-0 text-xs font-bold px-1.5 py-0.5 rounded border ${tierColors[tool.tier as keyof typeof tierColors]}`}>
+                  {tool.tier.charAt(0).toUpperCase()}
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Center highlight box overlay */}
-          <div
-            className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 border-2 border-primary/60 pointer-events-none rounded-lg"
-            style={{
-              width: "180px",
-              height: "52px",
-              boxShadow: "0 0 20px rgba(16, 185, 129, 0.1) inset",
-            }}
-          />
-
-          {/* Fade mask - hide content outside center box */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: `linear-gradient(to bottom, 
-                transparent 0%, 
-                rgba(255,255,255,0.3) 30%, 
-                rgba(255,255,255,0) 50%, 
-                rgba(255,255,255,0.3) 70%, 
-                transparent 100%)`,
-              maskImage: `radial-gradient(ellipse 100px 60px at center, transparent 0%, black 100%)`,
-              WebkitMaskImage: `radial-gradient(ellipse 100px 60px at center, transparent 0%, black 100%)`,
-            }}
-          />
+          {/* Counter at bottom */}
+          <div className="sticky bottom-0 mt-2 pt-2 border-t border-gray-300 bg-white/80 text-center">
+            <p className="text-xs font-bold text-black">
+              Total: {tools.length} Tools
+            </p>
+          </div>
         </div>
 
         {/* Stainless steel cover effect */}
@@ -202,41 +107,23 @@ export default function ToolsChronographWheel() {
         />
       </div>
 
-      {/* Side Navigation buttons - Up/Down arrows */}
-      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 pointer-events-auto">
-        <button
-          onMouseEnter={() => setHoveringUp(true)}
-          onMouseLeave={() => setHoveringUp(false)}
-          onClick={handlePrev}
-          className="p-3 rounded-full bg-background/90 hover:bg-primary/20 transition-all border-2 border-gray-400 hover:border-primary active:scale-95 shadow-md group"
-          data-testid="button-prev-tool-side"
-          title="Hover to scroll up fast"
-        >
-          <ChevronUp className="w-5 h-5 text-gray-700 group-hover:text-primary transition-colors" />
-        </button>
-
-        <button
-          onMouseEnter={() => setHoveringDown(true)}
-          onMouseLeave={() => setHoveringDown(false)}
-          onClick={handleNext}
-          className="p-3 rounded-full bg-background/90 hover:bg-primary/20 transition-all border-2 border-gray-400 hover:border-primary active:scale-95 shadow-md group"
-          data-testid="button-next-tool-side"
-          title="Hover to scroll down fast"
-        >
-          <ChevronDown className="w-5 h-5 text-gray-700 group-hover:text-primary transition-colors" />
-        </button>
-      </div>
-
-      {/* Tool info card below */}
-      <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-16 w-56 bg-background/95 backdrop-blur-sm border border-primary/20 rounded-lg p-3 text-center pointer-events-none">
-        <p className="text-xs font-semibold text-primary">{tools[currentIndex].name}</p>
-        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-          {tools[currentIndex].description}
-        </p>
-        <div className="mt-2">
-          <span className="inline-block px-2 py-1 text-xs bg-primary/15 text-primary rounded">
-            {tools[currentIndex].tier?.toUpperCase()}
-          </span>
+      {/* Legend below */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-4 w-full flex justify-center gap-6 text-xs pointer-events-none">
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded bg-green-100 border border-green-200"></span>
+          <span className="text-gray-700">FREE</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded bg-blue-100 border border-blue-200"></span>
+          <span className="text-gray-700">BASIC</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded bg-purple-100 border border-purple-200"></span>
+          <span className="text-gray-700">PREMIUM</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded bg-red-100 border border-red-200"></span>
+          <span className="text-gray-700">ENTERPRISE</span>
         </div>
       </div>
     </div>
