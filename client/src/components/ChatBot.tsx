@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MessageCircle, X, Send, Loader } from "lucide-react";
+import { MessageCircle, X, Send, Loader, AlertCircle } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -84,16 +84,23 @@ export default function ChatBot() {
           position: "fixed",
           bottom: "24px",
           right: "24px",
-          zIndex: 50,
-          background: "linear-gradient(135deg, #ffa536 0%, #11b6e9 100%)"
+          zIndex: 9999,
+          background: "linear-gradient(135deg, #ffa536 0%, #11b6e9 100%)",
+          animation: isOpen ? "none" : "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
         }}
         data-testid="button-chatbot-toggle"
         title="AI Assistant"
       >
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+          }
+        `}</style>
         {isOpen ? (
           <X className="w-6 h-6" />
         ) : (
-          <MessageCircle className="w-6 h-6 group-hover:animate-bounce" />
+          <MessageCircle className="w-6 h-6" />
         )}
       </button>
 
@@ -105,12 +112,22 @@ export default function ChatBot() {
             position: "fixed",
             bottom: "112px",
             right: "24px",
-            zIndex: 50,
+            zIndex: 9999,
             width: "380px",
-            height: "520px",
+            height: "580px",
             background: "white"
           }}
         >
+          {/* Disclaimer Banner */}
+          <div className="bg-amber-50 dark:bg-amber-950/50 border-b-2 border-amber-300 dark:border-amber-700 px-3 py-2.5 flex-shrink-0">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-amber-900 dark:text-amber-100">
+                <strong>Disclaimer:</strong> Trained on official GOV.UK guidance (November 2025). Always verify with official sources or contact Home Office directly.
+              </div>
+            </div>
+          </div>
+
           {/* Header */}
           <div className="p-4 text-white flex-shrink-0" style={{ background: "linear-gradient(135deg, #0D2C4A 0%, #11b6e9 100%)" }}>
             <div className="flex justify-between items-start">
