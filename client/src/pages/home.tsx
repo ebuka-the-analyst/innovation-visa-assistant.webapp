@@ -6,6 +6,7 @@ import PlatformPillars from "@/components/PlatformPillars";
 import AIAgents from "@/components/AIAgents";
 import CompetitorFeatures from "@/components/CompetitorFeatures";
 import StatsSection from "@/components/StatsSection";
+import EverythingWeOfferSection from "@/components/EverythingWeOfferSection";
 import PricingSection from "@/components/PricingSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import LawyerCTA from "@/components/LawyerCTA";
@@ -24,8 +25,9 @@ export default function Home() {
           <FeaturesSection />
         </div>
         <PlatformPillars />
-        <CompetitorFeatures />
         <AIAgents />
+        <EverythingWeOfferSection />
+        <CompetitorFeatures />
         <StatsSection />
         <div id="pricing">
           <PricingSection />
