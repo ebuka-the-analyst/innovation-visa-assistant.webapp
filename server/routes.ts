@@ -649,6 +649,35 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // Chat API endpoint - Multi-LLM powered visa assistant
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { message, conversationHistory } = req.body;
+
+      if (!message || typeof message !== "string" || message.trim().length === 0) {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      const { chatWithMultipleLLMs } = await import("./chatService");
+      
+      const result = await chatWithMultipleLLMs(
+        message,
+        conversationHistory || []
+      );
+
+      res.json({ 
+        response: result.response,
+        provider: result.provider 
+      });
+    } catch (error) {
+      console.error("Chat API error:", error);
+      res.status(500).json({ 
+        error: "Failed to process chat message",
+        response: "I apologize for the technical difficulty. Please try again shortly. For immediate assistance, please contact support or visit the official Home Office website."
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
