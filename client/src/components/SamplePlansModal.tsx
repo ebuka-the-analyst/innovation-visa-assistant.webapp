@@ -2,7 +2,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink, FileText } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface SamplePlanModalProps {
   open: boolean;
@@ -108,8 +110,36 @@ const SAMPLE_PLANS = [
   }
 ];
 
+interface SamplePlan {
+  id: string;
+  title: string;
+  tier: string;
+  industry: string;
+  businessName: string;
+  summary: string;
+  highlights: string[];
+  pdfUrl: string;
+}
+
 export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModalProps) {
+  const [selectedPlan, setSelectedPlan] = useState<SamplePlan | null>(null);
+  const [viewFullOpen, setViewFullOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleViewFull = (plan: SamplePlan) => {
+    setSelectedPlan(plan);
+    setViewFullOpen(true);
+  };
+
+  const handleDownload = (plan: SamplePlan) => {
+    toast({
+      title: "Sample PDF Preview",
+      description: `Full business plan for ${plan.businessName} (${plan.tier.charAt(0).toUpperCase() + plan.tier.slice(1)} tier) is available after you generate your own plan. Complete the questionnaire and select your tier to get started!`,
+    });
+  };
+
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -161,13 +191,7 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                     size="sm" 
                     variant="default" 
                     className="gap-2"
-                    onClick={() => {
-                      if (plan.pdfUrl && plan.pdfUrl !== "#") {
-                        window.open(plan.pdfUrl, '_blank');
-                      } else {
-                        alert(`Sample PDF for ${plan.businessName} is available when you generate your own plan.`);
-                      }
-                    }}
+                    onClick={() => handleDownload(plan)}
                     data-testid={`button-download-sample-${plan.id}`}
                   >
                     <Download className="w-4 h-4" />
@@ -177,9 +201,7 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                     size="sm" 
                     variant="outline" 
                     className="gap-2"
-                    onClick={() => {
-                      alert(`Full plan for ${plan.businessName}\n\nThis is a sample of ${plan.tier.toUpperCase()} tier:\n\n${plan.highlights.slice(0, 3).join('\n')}`);
-                    }}
+                    onClick={() => handleViewFull(plan)}
                     data-testid={`button-view-sample-${plan.id}`}
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -192,19 +214,19 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
 
           <TabsContent value="basic" className="space-y-4">
             {SAMPLE_PLANS.filter(p => p.tier === "basic").map((plan) => (
-              <SamplePlanCard key={plan.id} plan={plan} />
+              <SamplePlanCard key={plan.id} plan={plan} onViewFull={handleViewFull} onDownload={handleDownload} />
             ))}
           </TabsContent>
 
           <TabsContent value="premium" className="space-y-4">
             {SAMPLE_PLANS.filter(p => p.tier === "premium").map((plan) => (
-              <SamplePlanCard key={plan.id} plan={plan} />
+              <SamplePlanCard key={plan.id} plan={plan} onViewFull={handleViewFull} onDownload={handleDownload} />
             ))}
           </TabsContent>
 
           <TabsContent value="enterprise" className="space-y-4">
             {SAMPLE_PLANS.filter(p => p.tier === "enterprise").map((plan) => (
-              <SamplePlanCard key={plan.id} plan={plan} />
+              <SamplePlanCard key={plan.id} plan={plan} onViewFull={handleViewFull} onDownload={handleDownload} />
             ))}
           </TabsContent>
 
@@ -279,10 +301,70 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
         </Tabs>
       </DialogContent>
     </Dialog>
+
+    {/* View Full Plan Modal */}
+    <Dialog open={viewFullOpen} onOpenChange={setViewFullOpen}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl">{selectedPlan?.businessName}</DialogTitle>
+          <DialogDescription>{selectedPlan?.title}</DialogDescription>
+        </DialogHeader>
+        
+        {selectedPlan && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Business Overview</h3>
+              <p className="text-sm text-foreground">{selectedPlan.summary}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground font-semibold">Industry</p>
+                <p className="text-sm font-medium">{selectedPlan.industry}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-semibold">Tier</p>
+                <p className="text-sm font-medium capitalize">{selectedPlan.tier}</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-lg mb-3">Key Highlights</h3>
+              <div className="space-y-2">
+                {selectedPlan.highlights.map((highlight, idx) => (
+                  <div key={idx} className="flex gap-3 p-3 bg-muted/50 rounded-lg">
+                    <span className="text-primary font-bold text-lg">✓</span>
+                    <p className="text-sm">{highlight}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-border space-y-3">
+              <p className="text-xs text-muted-foreground">
+                💡 This is a sample of a {selectedPlan.tier.charAt(0).toUpperCase() + selectedPlan.tier.slice(1)} tier business plan. To download the complete PDF with all sections covering Innovation, Viability, and Scalability criteria, generate your own plan through the questionnaire.
+              </p>
+              <Button 
+                onClick={() => {
+                  setViewFullOpen(false);
+                  handleDownload(selectedPlan);
+                }}
+                className="w-full gap-2"
+                data-testid="button-generate-plan-from-sample"
+              >
+                <FileText className="w-4 h-4" />
+                Generate Your Plan Now
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 
-function SamplePlanCard({ plan }: { plan: typeof SAMPLE_PLANS[0] }) {
+function SamplePlanCard({ plan, onViewFull, onDownload }: { plan: typeof SAMPLE_PLANS[0]; onViewFull: (plan: SamplePlan) => void; onDownload: (plan: SamplePlan) => void }) {
   return (
     <Card className="p-6 hover-elevate">
       <div className="flex items-start justify-between mb-4">
@@ -315,13 +397,7 @@ function SamplePlanCard({ plan }: { plan: typeof SAMPLE_PLANS[0] }) {
           size="sm" 
           variant="default" 
           className="gap-2"
-          onClick={() => {
-            if (plan.pdfUrl && plan.pdfUrl !== "#") {
-              window.open(plan.pdfUrl, '_blank');
-            } else {
-              alert(`Sample PDF for ${plan.businessName} is available when you generate your own plan.`);
-            }
-          }}
+          onClick={() => onDownload(plan)}
           data-testid={`button-download-card-${plan.id}`}
         >
           <Download className="w-4 h-4" />
@@ -331,9 +407,7 @@ function SamplePlanCard({ plan }: { plan: typeof SAMPLE_PLANS[0] }) {
           size="sm" 
           variant="outline" 
           className="gap-2"
-          onClick={() => {
-            alert(`Full plan for ${plan.businessName}\n\nThis is a sample of ${plan.tier.toUpperCase()} tier:\n\n${plan.highlights.slice(0, 3).join('\n')}`);
-          }}
+          onClick={() => onViewFull(plan)}
           data-testid={`button-view-card-${plan.id}`}
         >
           <ExternalLink className="w-4 h-4" />
