@@ -93,13 +93,13 @@ export default function ToolsChronographWheel() {
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "640px", width: "800px" }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="px-4 pt-3 pb-1 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
-          <h3 className="text-2xl font-black text-black">100+ TOOLS HUB</h3>
+        <div className="px-4 pt-3 pb-2 border-b-2 border-gray-400 bg-gray-300">
+          <h3 className="text-4xl font-black text-black">100+ TOOLS HUB</h3>
         </div>
 
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" */}
-        <div className="px-4 py-1.5 border-b border-gray-300 bg-gray-50">
-          <p className="text-sm font-black text-black tracking-wide">APPLICATION REQUIREMENT CHECKS</p>
+        <div className="px-4 py-2 border-b-2 border-gray-400 bg-gray-300">
+          <p className="text-lg font-black text-black tracking-wide">APPLICATION REQUIREMENT CHECKS</p>
         </div>
 
         {/* Main Container with Featured Tool in Center */}
