@@ -32,10 +32,14 @@ export default function ToolsChronographWheel() {
       {/* Outer metal bezel effect */}
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "800px", width: "600px" }}>
         
-        {/* Static Header Section */}
-        <div className="relative z-20 px-6 pt-4 pb-3 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
+        {/* Static Header Section - "100+ TOOLS HUB" */}
+        <div className="relative z-20 px-6 pt-4 pb-2 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
           <h3 className="text-2xl font-black text-black">100+ TOOLS HUB</h3>
-          <p className="text-xs text-gray-600 mt-1">Application Requirement Checks</p>
+        </div>
+
+        {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" */}
+        <div className="relative z-20 px-6 py-2 border-b border-gray-300 bg-gray-50">
+          <p className="text-sm font-black text-black tracking-wide">APPLICATION REQUIREMENT CHECKS</p>
         </div>
 
         {/* Main Container with Featured Tool in Center */}
