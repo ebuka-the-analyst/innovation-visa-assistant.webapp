@@ -7,9 +7,10 @@ type IconName = keyof typeof Icons;
 
 export default function ToolsChronographWheel() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [rotation, setRotation] = useState(0);
   const wheelRef = useRef<HTMLDivElement>(null);
   const tools = ALL_TOOLS;
-  const itemHeight = 10; // Height of each tool item
+  const itemHeight = 10.8; // Height of each tool item (to display 6 at a time)
 
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
@@ -20,17 +21,21 @@ export default function ToolsChronographWheel() {
     e.preventDefault();
     if (e.deltaY > 0) {
       setCurrentIndex((prev) => (prev + 1) % tools.length);
+      setRotation((prev) => prev + 6.12); // 360/88 * 1.5 for smooth rotation
     } else {
       setCurrentIndex((prev) => (prev - 1 + tools.length) % tools.length);
+      setRotation((prev) => prev - 6.12);
     }
   };
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % tools.length);
+    setRotation((prev) => prev + 6.12);
   };
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev - 1 + tools.length) % tools.length);
+    setRotation((prev) => prev - 6.12);
   };
 
   const getToolAtPosition = (offset: number) => {
@@ -48,25 +53,29 @@ export default function ToolsChronographWheel() {
     >
       {/* Outer metal bezel effect */}
       <div className="w-72 h-72 rounded-full border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-4 flex items-center justify-center">
-        {/* Circular text "Tools Hub" around the edge */}
+        {/* Animated Circular text "Tools Hub" around the edge */}
         <svg
           className="absolute w-full h-full"
           viewBox="0 0 288 288"
-          style={{ pointerEvents: "none" }}
+          style={{
+            pointerEvents: "none",
+            transform: `rotate(${rotation}deg)`,
+            transition: "transform 0.3s ease-out",
+          }}
         >
           <defs>
             <path
               id="circlePath"
-              d="M 144, 144 m -120, 0 a 120,120 0 1,1 240,0 a 120,120 0 1,1 -240,0"
+              d="M 144, 144 m -110, 0 a 110,110 0 1,1 220,0 a 110,110 0 1,1 -220,0"
               fill="none"
             />
           </defs>
           <text
-            fontSize="18"
+            fontSize="24"
             fontWeight="bold"
             fill="#0D2C4A"
-            opacity="0.6"
-            letterSpacing="8"
+            opacity="0.8"
+            letterSpacing="10"
           >
             <textPath href="#circlePath" startOffset="50%" textAnchor="middle">
               TOOLS HUB
