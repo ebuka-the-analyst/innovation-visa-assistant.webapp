@@ -103,12 +103,12 @@ export default function PlatformPillars() {
                   </ul>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t">
-                  {pillar.links.map((link) => (
+                <div className="space-y-2 pt-4 border-t">
+                  {pillar.links.map((link, idx) => (
                     <Link key={link.label} href={link.route}>
                       <Button
-                        variant="outline"
-                        className="w-full"
+                        variant={idx === 0 ? "default" : "outline"}
+                        className={`w-full font-semibold ${idx === 0 ? "bg-gradient-to-r from-primary to-chart-3 hover:from-primary/90 hover:to-chart-3/90" : "border-primary/30 text-foreground hover:bg-primary/10"}`}
                         data-testid={`button-${pillar.name.replace(/\s+/g, '-').toLowerCase()}-${link.label.replace(/\s+/g, '-').toLowerCase()}`}
                       >
                         {link.label}
