@@ -36,8 +36,7 @@ export default function AIAssistant() {
 
   const chatMutation = useMutation({
     mutationFn: async (userMessage: string) => {
-      const result = await apiRequest('POST', '/api/chat', { message: userMessage });
-      return result as { response: string };
+      return apiRequest('POST', '/api/chat', { message: userMessage }) as Promise<{ response: string }>;
     },
     onSuccess: (data) => {
       const assistantMessage: Message = {
