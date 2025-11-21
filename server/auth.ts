@@ -78,7 +78,7 @@ export function setupAuth(app: Express) {
           clientSecret: googleClientSecret,
           callbackURL,
         },
-        async (accessToken, refreshToken, profile, done) => {
+        async (accessToken: any, refreshToken: any, profile: any, done: any) => {
           try {
             const email = profile.emails?.[0]?.value;
             if (!email) {
@@ -88,7 +88,7 @@ export function setupAuth(app: Express) {
             let user = await storage.getUserByGoogleId(profile.id);
 
             if (!user) {
-              user = await storage.getUserByEmail(email);
+              user = await storage.getUserByEmail(email) || undefined;
               
               if (user) {
                 await storage.linkGoogleAccount(user.id, profile.id);

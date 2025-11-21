@@ -247,9 +247,21 @@ export function setupAuthRoutes(app: Express) {
   });
 
   // Google OAuth initiation
-  app.get("/api/auth/google", passport.authenticate("google", { 
-    scope: ["profile", "email"] 
-  }));
+  app.get("/api/auth/google", (req, res, next) => {
+    // Get the current hostname from request to set correct callback URL
+    const protocol = req.protocol;
+    const hostname = req.get('host');
+    const callbackURL = `${protocol}://${hostname}/api/auth/callback/google`;
+    
+    // Override the callbackURL for this request
+    req.query.callbackURL = callbackURL;
+    
+    passport.authenticate("google", { 
+      scope: ["profile", "email"],
+      accessType: "offline",
+      prompt: "consent"
+    })(req, res, next);
+  });
 
   // Google OAuth callback
   app.get(
