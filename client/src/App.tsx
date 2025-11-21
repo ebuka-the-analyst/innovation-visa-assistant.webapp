@@ -12,6 +12,12 @@ import Pricing from "@/pages/pricing";
 import Questionnaire from "@/pages/questionnaire";
 import Generation from "@/pages/generation";
 import NotFound from "@/pages/not-found";
+import EndorserComparison from "@/pages/endorser-comparison";
+import DocumentOrganizer from "@/pages/document-organizer";
+import InterviewPrep from "@/pages/interview-prep";
+import ExpertBooking from "@/pages/expert-booking";
+import RejectionAnalysis from "@/pages/rejection-analysis";
+import SettlementPlanning from "@/pages/settlement-planning";
 
 function Router() {
   return (
@@ -24,6 +30,12 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/questionnaire" component={Questionnaire} />
       <Route path="/generation" component={Generation} />
+      <Route path="/endorser-comparison" component={EndorserComparison} />
+      <Route path="/document-organizer" component={DocumentOrganizer} />
+      <Route path="/interview-prep" component={InterviewPrep} />
+      <Route path="/expert-booking" component={ExpertBooking} />
+      <Route path="/rejection-analysis" component={RejectionAnalysis} />
+      <Route path="/settlement-planning" component={SettlementPlanning} />
       <Route component={NotFound} />
     </Switch>
   );
