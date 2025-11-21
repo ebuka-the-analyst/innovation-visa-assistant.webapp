@@ -84,61 +84,58 @@ export default function NewsTicker() {
   return (
     <>
       <div className="relative bg-gradient-to-r from-primary/10 to-chart-3/10 border-b border-primary/20 overflow-hidden">
-        <div className="container mx-auto px-4 md:px-6 py-2">
-          <div className="flex items-center gap-2">
-            {/* Start Navigation Button */}
-            <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleBackward}
-                className="h-6 w-6 flex-shrink-0"
-                data-testid="button-ticker-backward"
-              >
-                <ChevronLeft className="w-3 h-3 text-white" />
-              </Button>
-            </div>
+        <div className="relative flex items-center py-2 px-2">
+          {/* Start Navigation Button - Far Left */}
+          <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBackward}
+              className="h-6 w-6"
+              data-testid="button-ticker-backward"
+            >
+              <ChevronLeft className="w-3 h-3 text-white" />
+            </Button>
+          </div>
 
-            {/* Auto-scrolling ticker */}
-            <div className="flex-1 overflow-x-auto scroll-smooth" ref={tickerRef}>
-              <div className="animate-ticker-scroll whitespace-nowrap">
-                {NEWS_ITEMS.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleArticleClick(item)}
-                    className="inline-block px-4 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
-                  >
-                    {item.title}
-                    <span className="mx-2 text-primary/40">•</span>
-                  </button>
-                ))}
-                {/* Duplicate for seamless loop */}
-                {NEWS_ITEMS.map((item) => (
-                  <button
-                    key={`dup-${item.id}`}
-                    onClick={() => handleArticleClick(item)}
-                    className="inline-block px-4 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
-                  >
-                    {item.title}
-                    <span className="mx-2 text-primary/40">•</span>
-                  </button>
-                ))}
-              </div>
+          {/* Auto-scrolling ticker */}
+          <div className="flex-1 overflow-x-auto scroll-smooth" ref={tickerRef}>
+            <div className="animate-ticker-scroll whitespace-nowrap">
+              {NEWS_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleArticleClick(item)}
+                  className="inline-block px-4 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
+                >
+                  {item.title}
+                  <span className="mx-2 text-primary/40">•</span>
+                </button>
+              ))}
+              {/* Duplicate for seamless loop */}
+              {NEWS_ITEMS.map((item) => (
+                <button
+                  key={`dup-${item.id}`}
+                  onClick={() => handleArticleClick(item)}
+                  className="inline-block px-4 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
+                >
+                  {item.title}
+                  <span className="mx-2 text-primary/40">•</span>
+                </button>
+              ))}
             </div>
+          </div>
 
-            {/* End Navigation Button */}
-            <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleForward}
-                className="h-6 w-6 flex-shrink-0"
-                data-testid="button-ticker-forward"
-              >
-                <ChevronRight className="w-3 h-3 text-white" />
-              </Button>
-            </div>
-
+          {/* End Navigation Button - Far Right */}
+          <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleForward}
+              className="h-6 w-6"
+              data-testid="button-ticker-forward"
+            >
+              <ChevronRight className="w-3 h-3 text-white" />
+            </Button>
           </div>
         </div>
 
