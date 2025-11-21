@@ -60,8 +60,8 @@ export function setupAuth(app: Express) {
     // If running on Replit, use the user-facing domain
     if (process.env.REPLIT_DOMAINS) {
       const domains = process.env.REPLIT_DOMAINS.split(",").map(d => d.trim());
-      // Find the non-janeway domain (user-facing domain)
-      const userDomain = domains.find(d => !d.includes("janeway") && !d.includes(".") === false);
+      // Find the first non-janeway domain (user-facing domain)
+      const userDomain = domains.find(d => !d.includes("janeway"));
       if (userDomain) {
         callbackURL = `https://${userDomain}/api/auth/callback/google`;
       } else {
@@ -75,6 +75,7 @@ export function setupAuth(app: Express) {
   }
   
   console.log("[OAuth] Using callback URL:", callbackURL);
+  console.log("[OAuth] Domains available:", process.env.REPLIT_DOMAINS || "localhost");
 
   if (googleClientId && googleClientSecret) {
     passport.use(
