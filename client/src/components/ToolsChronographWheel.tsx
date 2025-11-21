@@ -158,19 +158,23 @@ export default function ToolsChronographWheel() {
 
           {/* Fade masks - top and bottom */}
           <div
-            className="absolute top-0 left-0 right-0 pointer-events-none z-10"
+            className="absolute top-0 left-0 right-0 pointer-events-none z-10 flex items-center justify-center"
             style={{
               height: "120px",
               background: "linear-gradient(to bottom, rgba(240,244,248,1) 0%, rgba(240,244,248,0) 100%)",
             }}
-          />
+          >
+            <Icons.ChevronUp className="w-8 h-8 text-orange-500 animate-bounce" style={{ animationDelay: "0s" }} />
+          </div>
           <div
-            className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
+            className="absolute bottom-0 left-0 right-0 pointer-events-none z-10 flex items-center justify-center"
             style={{
               height: "120px",
               background: "linear-gradient(to top, rgba(240,244,248,1) 0%, rgba(240,244,248,0) 100%)",
             }}
-          />
+          >
+            <Icons.ChevronDown className="w-8 h-8 text-orange-500 animate-bounce" style={{ animationDelay: "0.2s" }} />
+          </div>
 
           {/* Featured Tool Box - Centered Behind */}
           <div className="absolute inset-0 flex items-center justify-center px-1 z-5 pointer-events-none">
