@@ -44,7 +44,7 @@ export default function ToolsChronographWheel() {
     <div
       className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
-      style={{ scale: "0.15", transformOrigin: "bottom left" }}
+      style={{ scale: "0.40", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
       <div className="w-72 h-72 rounded-full border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative p-4 flex items-center justify-center">
