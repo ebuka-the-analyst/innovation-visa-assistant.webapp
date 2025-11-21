@@ -3,7 +3,7 @@ import { ArrowRight, CheckCircle } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import SamplePlansModal from "./SamplePlansModal";
-import heroImage from "@assets/generated_images/3D_business_plan_hero_102d84d2.png";
+import ReadinessScoreWidget from "./ReadinessScoreWidget";
 
 export default function HeroSection() {
   const [sampleModalOpen, setSampleModalOpen] = useState(false);
@@ -96,22 +96,19 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Right: 3D Mockup */}
+          {/* Right: Interactive Readiness Score Widget */}
           <div className="relative lg:block hidden">
             <div className="relative">
               {/* Holographic glow effect */}
               <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-chart-3/20 to-chart-2/20 blur-3xl rounded-full" />
               
-              {/* Image with 3D transform */}
-              <div className="relative transform hover:scale-105 transition-transform duration-500" style={{ perspective: "1000px" }}>
-                <img
-                  src={heroImage}
-                  alt="Professional Business Plan Document"
-                  className="w-full h-auto rounded-lg shadow-2xl"
-                  style={{
-                    transform: "rotateY(-5deg) rotateX(2deg)",
-                    transformStyle: "preserve-3d",
-                  }}
+              {/* Readiness Score Widget with animation */}
+              <div className="relative p-8 bg-card/50 backdrop-blur-sm rounded-2xl border border-primary/10 shadow-2xl hover-elevate transition-all duration-500">
+                <ReadinessScoreWidget 
+                  overallScore={78}
+                  innovationScore={82}
+                  viabilityScore={75}
+                  scalabilityScore={76}
                 />
               </div>
             </div>
