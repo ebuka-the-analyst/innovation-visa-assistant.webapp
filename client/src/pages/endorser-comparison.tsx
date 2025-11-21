@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Check, X, Info } from "lucide-react";
 import { useState } from "react";
 import { AuthHeader } from "@/components/AuthHeader";
+import FeatureNavigation from "@/components/FeatureNavigation";
 
 const endorsers = [
   {
@@ -84,6 +85,7 @@ export default function EndorserComparison() {
       <AuthHeader />
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-6xl mx-auto">
+          <FeatureNavigation currentPage="endorser-comparison" />
           <div className="mb-12">
             <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">UKINNOVATOR.ONLINE TRIAGE</span>
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Endorser Comparison & Selection</h1>

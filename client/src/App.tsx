@@ -18,6 +18,7 @@ import InterviewPrep from "@/pages/interview-prep";
 import ExpertBooking from "@/pages/expert-booking";
 import RejectionAnalysis from "@/pages/rejection-analysis";
 import SettlementPlanning from "@/pages/settlement-planning";
+import FeaturesDashboard from "@/pages/features-dashboard";
 
 function Router() {
   return (
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/expert-booking" component={ExpertBooking} />
       <Route path="/rejection-analysis" component={RejectionAnalysis} />
       <Route path="/settlement-planning" component={SettlementPlanning} />
+      <Route path="/features-dashboard" component={FeaturesDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
