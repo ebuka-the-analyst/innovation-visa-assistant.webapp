@@ -17,9 +17,9 @@ const openai = new OpenAI({
 });
 
 const PRICING = {
-  basic: { amount: 4900, name: "Basic Plan" },
-  premium: { amount: 9900, name: "Premium Plan" },
-  enterprise: { amount: 19900, name: "Enterprise Plan" },
+  basic: { amount: 1900, name: "Basic Plan" },
+  premium: { amount: 3900, name: "Premium Plan" },
+  enterprise: { amount: 7900, name: "Enterprise Plan" },
 };
 
 import { requireAuth } from "./auth";

@@ -6,7 +6,7 @@ import { Link } from "wouter";
 const tiers = [
   {
     name: "Basic",
-    price: "£49",
+    price: "£19",
     description: "Perfect for getting started",
     features: [
       { name: "Standard business plan template", included: true },
@@ -22,7 +22,7 @@ const tiers = [
   },
   {
     name: "Premium",
-    price: "£99",
+    price: "£39",
     description: "Most comprehensive option",
     features: [
       { name: "Enhanced business plan", included: true },
@@ -38,7 +38,7 @@ const tiers = [
   },
   {
     name: "Enterprise",
-    price: "£199",
+    price: "£79",
     description: "Complete visa preparation",
     features: [
       { name: "Full business plan package", included: true },
