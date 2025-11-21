@@ -1,17 +1,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import logoImg from "@assets/BhenMedia_1763690019470.png";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [location, setLocation] = useLocation();
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setMobileMenuOpen(false);
+  const handleNavigation = (sectionId: string) => {
+    setMobileMenuOpen(false);
+    
+    // If on home page, scroll to section
+    if (location === "/") {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // On other pages, navigate to home with anchor
+      setLocation(`/#${sectionId}`);
     }
   };
 
@@ -34,20 +42,23 @@ export default function Header() {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
           <button
-            onClick={() => scrollToSection('features')}
+            onClick={() => handleNavigation('features')}
             className="text-sm font-medium hover:text-primary transition-colors"
+            data-testid="button-nav-features"
           >
             Features
           </button>
           <button
-            onClick={() => scrollToSection('pricing')}
+            onClick={() => handleNavigation('pricing')}
             className="text-sm font-medium hover:text-primary transition-colors"
+            data-testid="button-nav-pricing"
           >
             Pricing
           </button>
           <button
-            onClick={() => scrollToSection('faq')}
+            onClick={() => handleNavigation('faq')}
             className="text-sm font-medium hover:text-primary transition-colors"
+            data-testid="button-nav-faq"
           >
             FAQ
           </button>
@@ -82,20 +93,23 @@ export default function Header() {
         <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl">
           <div className="container mx-auto px-4 py-6 flex flex-col gap-4">
             <button
-              onClick={() => scrollToSection('features')}
+              onClick={() => handleNavigation('features')}
               className="text-left py-2 hover:text-primary transition-colors"
+              data-testid="button-mobile-nav-features"
             >
               Features
             </button>
             <button
-              onClick={() => scrollToSection('pricing')}
+              onClick={() => handleNavigation('pricing')}
               className="text-left py-2 hover:text-primary transition-colors"
+              data-testid="button-mobile-nav-pricing"
             >
               Pricing
             </button>
             <button
-              onClick={() => scrollToSection('faq')}
+              onClick={() => handleNavigation('faq')}
               className="text-left py-2 hover:text-primary transition-colors"
+              data-testid="button-mobile-nav-faq"
             >
               FAQ
             </button>
