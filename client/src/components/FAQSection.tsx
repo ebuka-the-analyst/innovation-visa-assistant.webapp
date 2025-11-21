@@ -49,7 +49,7 @@ export default function FAQSection() {
             Frequently Asked Questions
           </h2>
           <p className="text-lg text-muted-foreground">
-            Everything you need to know about VisaPrep AI
+            Everything you need to know about VisaPrep
           </p>
         </div>
 

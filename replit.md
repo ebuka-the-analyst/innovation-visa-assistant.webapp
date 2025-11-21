@@ -1,8 +1,8 @@
-# VisaPrep AI - Business Plan Generator
+# VisaPrep - Innovator Founder Visa Platform
 
 ## Overview
 
-VisaPrep AI is a SaaS application that generates professional business plans for UK Innovation Visa (Innovator Founder) applicants. The platform uses AI (OpenAI GPT) to create comprehensive, endorsing body-ready business plans covering the three key visa criteria: Innovation, Viability, and Scalability. Users complete a multi-step questionnaire, purchase a tier (Basic, Premium, or Enterprise), and receive a professionally formatted PDF business plan within minutes.
+VisaPrep is a SaaS application that generates professional business plans for UK Innovator Founder visa applicants. It features the Innovator Founder Visa Assistant for real-time guidance. The platform uses AI (OpenAI GPT) to create comprehensive, endorsing body-ready business plans covering the three key visa criteria: Innovation, Viability, and Scalability. Users complete a multi-step questionnaire, purchase a tier (Basic, Premium, or Enterprise), and receive a professionally formatted PDF business plan within minutes.
 
 ## Critical Information - Updated November 2025
 

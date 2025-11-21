@@ -24,7 +24,7 @@ export async function sendEmail({ to, subject, html }: SendEmailParams) {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "VisaPrep AI <onboarding@resend.dev>",
+        from: "VisaPrep <onboarding@resend.dev>",
         to: [to],
         subject,
         html,
@@ -68,10 +68,10 @@ export function generateVerificationEmail(code: string, displayName: string): st
           <tr>
             <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600; letter-spacing: -0.5px;">
-                VisaPrep AI
+                VisaPrep
               </h1>
               <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 15px;">
-                UK Innovation Visa Business Plans
+                Innovator Founder Visa Platform
               </p>
             </td>
           </tr>

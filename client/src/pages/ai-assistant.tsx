@@ -18,7 +18,7 @@ export default function AIAssistant() {
     {
       id: '0',
       role: 'assistant',
-      content: 'Hello! I\'m VisaPrep AI Assistant, trained on official GOV.UK Innovator Founder visa guidance (November 2025). I can help you with eligibility, requirements, fees, documentation, team applications, settlement planning, and more. What would you like to know?',
+      content: 'Hello! I\'m the Innovator Founder Visa Assistant, trained on official GOV.UK Innovator Founder visa guidance (November 2025). I can help you with eligibility, requirements, fees, documentation, team applications, settlement planning, and more. What would you like to know?',
       timestamp: new Date(),
     }
   ]);
@@ -83,7 +83,7 @@ export default function AIAssistant() {
               <MessageCircle className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold">VisaPrep AI Assistant</h1>
+              <h1 className="text-4xl font-bold">Innovator Founder Visa Assistant</h1>
               <p className="text-muted-foreground">Official Innovator Founder Visa Guidance (November 2025)</p>
             </div>
           </div>
@@ -95,7 +95,7 @@ export default function AIAssistant() {
             <AlertCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm">
               <p className="font-semibold text-green-700">100% Accurate Official Guidance</p>
-              <p className="text-green-600">This assistant is trained on GOV.UK official documents, Home Office guidance v9.0, and endorsing bodies instructions. All information is current as of November 2025.</p>
+              <p className="text-green-600">The Innovator Founder Visa Assistant is trained on GOV.UK official documents, Home Office guidance v9.0, and endorsing bodies instructions. All information is current as of November 2025.</p>
             </div>
           </div>
         </Card>
