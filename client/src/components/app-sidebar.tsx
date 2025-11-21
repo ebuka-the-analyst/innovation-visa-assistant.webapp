@@ -163,6 +163,12 @@ export function AppSidebar() {
           description: "Endorser analysis",
         },
         {
+          title: "Investment Requirements",
+          url: "/endorser-investment",
+          icon: DollarSign,
+          description: "Minimum investment by route",
+        },
+        {
           title: "Document Organizer",
           url: "/document-organizer",
           icon: FileText,
