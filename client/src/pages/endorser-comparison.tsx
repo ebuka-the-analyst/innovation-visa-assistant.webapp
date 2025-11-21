@@ -87,8 +87,8 @@ export default function EndorserComparison() {
         <div className="max-w-6xl mx-auto">
           <FeatureNavigation currentPage="endorser-comparison" />
           <div className="mb-12">
-            <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">UKINNOVATOR.ONLINE TRIAGE</span>
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Endorser Comparison & Selection</h1>
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">VISAPREP AI - DIAGNOSTICS</span>
+            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Endorser Scoring & Comparison</h1>
             <p className="text-lg text-muted-foreground">
               AI-driven diagnostic tool to identify which UK endorser route best aligns with your business profile. Part of our structured pre-assessment flow to test eligibility before formal application.
             </p>
