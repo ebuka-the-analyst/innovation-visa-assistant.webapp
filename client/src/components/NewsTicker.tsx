@@ -99,13 +99,6 @@ export default function NewsTicker() {
               </Button>
             </div>
 
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <AlertCircle className="w-3 h-3 text-primary animate-pulse" />
-              <span className="text-xs font-bold text-primary uppercase tracking-wider whitespace-nowrap">
-                News
-              </span>
-            </div>
-
             {/* Auto-scrolling ticker */}
             <div className="flex-1 overflow-x-auto scroll-smooth" ref={tickerRef}>
               <div className="animate-ticker-scroll whitespace-nowrap">
@@ -131,6 +124,19 @@ export default function NewsTicker() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* End Navigation Button */}
+            <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleForward}
+                className="h-6 w-6 flex-shrink-0"
+                data-testid="button-ticker-forward"
+              >
+                <ChevronRight className="w-3 h-3 text-white" />
+              </Button>
             </div>
 
           </div>
