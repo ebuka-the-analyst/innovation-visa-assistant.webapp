@@ -94,12 +94,12 @@ export default function ToolsChronographWheel() {
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
         <div className="px-4 pt-3 pb-2 border-b-2 border-gray-400 bg-gray-300">
-          <h3 className="text-4xl font-black text-black">100+ TOOLS HUB</h3>
+          <h3 className="text-4xl font-black" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
         </div>
 
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" */}
         <div className="px-4 py-2 border-b-2 border-gray-400 bg-gray-300">
-          <p className="text-lg font-black text-black tracking-wide">APPLICATION REQUIREMENT CHECKS</p>
+          <p className="text-lg font-black tracking-wide" style={{ color: "#000000" }}>APPLICATION REQUIREMENT CHECKS</p>
         </div>
 
         {/* Main Container with Featured Tool in Center */}
