@@ -55,9 +55,9 @@ export default function ToolsChronographWheel() {
             fill="#0D2C4A"
             opacity="0.6"
             textAnchor="middle"
-            letterSpacing="3"
+            letterSpacing="2"
           >
-            TOOLS HUB
+            100+ TOOLS HUB
           </text>
         </svg>
 
@@ -184,32 +184,24 @@ export default function ToolsChronographWheel() {
         />
       </div>
 
-      {/* Navigation buttons */}
-      <div
-        className="absolute left-1/2 transform -translate-x-1/2 flex gap-2 pointer-events-auto"
-        style={{ top: "100%", marginTop: "20px" }}
-      >
+      {/* Side Navigation buttons - Up/Down arrows */}
+      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 pointer-events-auto">
         <button
           onClick={handlePrev}
-          className="p-2 rounded-full bg-primary/15 hover:bg-primary/25 transition-colors border border-primary/30"
-          data-testid="button-prev-tool"
-          title="Previous"
+          className="p-3 rounded-full bg-background/90 hover:bg-primary/20 transition-all border-2 border-gray-400 hover:border-primary active:scale-95 shadow-md group"
+          data-testid="button-prev-tool-side"
+          title="Scroll Up"
         >
-          <ChevronUp className="w-4 h-4 text-primary" />
+          <ChevronUp className="w-5 h-5 text-gray-700 group-hover:text-primary transition-colors" />
         </button>
-
-        <div className="flex items-center justify-center text-xs text-muted-foreground font-medium w-14">
-          <span className="text-primary">{currentIndex + 1}</span>
-          <span className="text-muted-foreground">/{tools.length}</span>
-        </div>
 
         <button
           onClick={handleNext}
-          className="p-2 rounded-full bg-primary/15 hover:bg-primary/25 transition-colors border border-primary/30"
-          data-testid="button-next-tool"
-          title="Next"
+          className="p-3 rounded-full bg-background/90 hover:bg-primary/20 transition-all border-2 border-gray-400 hover:border-primary active:scale-95 shadow-md group"
+          data-testid="button-next-tool-side"
+          title="Scroll Down"
         >
-          <ChevronDown className="w-4 h-4 text-primary" />
+          <ChevronDown className="w-5 h-5 text-gray-700 group-hover:text-primary transition-colors" />
         </button>
       </div>
 
