@@ -179,13 +179,13 @@ export default function ToolsChronographWheel() {
               style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
             >
               <div className="flex flex-col gap-2">
-                <p className="text-lg text-gray-400 font-semibold">
+                <p className="text-2xl text-gray-400 font-semibold">
                   {String(selectedToolIdx + 1).padStart(3, "0")}
                 </p>
-                <h2 className="text-4xl font-black text-black leading-tight w-full">
+                <h2 className="text-6xl font-black text-black leading-tight w-full">
                   {selectedTool.name.toUpperCase()}
                 </h2>
-                <p className="text-base text-black font-semibold w-full">
+                <p className="text-lg text-black font-semibold w-full">
                   {selectedTool.description.toUpperCase()}
                 </p>
                 <div className="flex justify-center pt-2">
