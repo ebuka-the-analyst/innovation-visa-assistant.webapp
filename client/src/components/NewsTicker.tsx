@@ -1,10 +1,10 @@
 import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import NewsModal from "./NewsModal";
 import type { NewsItem } from "./NewsModal";
 
-const NEWS_ITEMS: NewsItem[] = [
+const INITIAL_NEWS_ITEMS: NewsItem[] = [
   { id: "1", title: "Tech Nation 2025: AI, Cyber Security, CleanTech prioritized for Innovation Visa endorsements", date: "Nov 21, 2025", content: "Tech Nation announces strategic focus areas for 2025 applications, emphasizing artificial intelligence, cybersecurity innovations, and climate technology solutions.", source: "Tech Nation", category: "Endorser" },
   { id: "2", title: "Home Office extends Innovation Visa processing to 2-3 weeks average following recent policy update", date: "Nov 20, 2025", content: "Standard processing timeline now 2-3 weeks post-endorsement. Expedited processing available for priority sectors at £500 additional fee.", source: "Home Office", category: "Processing" },
   { id: "3", title: "Innovator International expands eligibility to include B2B SaaS and service-based innovations", date: "Nov 19, 2025", content: "Updated criteria now accept software-as-a-service platforms and professional services innovations, broadening endorsement opportunities beyond traditional product companies.", source: "Innovator International", category: "Endorser" },
@@ -60,9 +60,50 @@ const NEWS_ITEMS: NewsItem[] = [
 ];
 
 export default function NewsTicker() {
+  const [newsItems, setNewsItems] = useState<NewsItem[]>(INITIAL_NEWS_ITEMS);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const tickerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch news on mount and poll every 30 minutes
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch("/api/news");
+        if (response.ok) {
+          const news = await response.json();
+          setNewsItems(news);
+        }
+      } catch (error) {
+        console.error("Failed to fetch news:", error);
+      }
+    };
+
+    fetchNews();
+    const interval = setInterval(fetchNews, 30 * 60 * 1000); // Check every 30 minutes
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Check for breaking news every 5 minutes
+  useEffect(() => {
+    const checkBreakingNews = async () => {
+      try {
+        const response = await fetch("/api/news/check", { method: "POST" });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.breaking) {
+            setNewsItems(data.all);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to check breaking news:", error);
+      }
+    };
+
+    const interval = setInterval(checkBreakingNews, 5 * 60 * 1000); // Check every 5 minutes
+    return () => clearInterval(interval);
+  }, []);
 
   const handleBackward = () => {
     if (tickerRef.current) {
@@ -100,7 +141,7 @@ export default function NewsTicker() {
         {/* Auto-scrolling ticker */}
         <div className="flex-1 overflow-hidden" ref={tickerRef}>
           <div className="animate-ticker-scroll whitespace-nowrap">
-            {NEWS_ITEMS.map((item) => (
+            {newsItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleArticleClick(item)}
@@ -111,7 +152,7 @@ export default function NewsTicker() {
               </button>
             ))}
             {/* Duplicate for seamless loop */}
-            {NEWS_ITEMS.map((item) => (
+            {newsItems.map((item) => (
               <button
                 key={`dup-${item.id}`}
                 onClick={() => handleArticleClick(item)}
