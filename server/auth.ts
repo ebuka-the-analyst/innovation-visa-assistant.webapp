@@ -53,22 +53,28 @@ export function setupAuth(app: Express) {
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
   const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
   
-  // Use explicit callback URL (avoid ephemeral janeway domains)
+  // Use explicit callback URL
   let callbackURL = process.env.GOOGLE_CALLBACK_URL;
+  
   if (!callbackURL) {
-    // Only use user-facing domain, skip janeway.prod.repl.run
+    // If running on Replit, use the user-facing domain
     if (process.env.REPLIT_DOMAINS) {
-      const domains = process.env.REPLIT_DOMAINS.split(",");
-      const userFacingDomain = domains.find(d => !d.includes("janeway")) || domains[0];
-      if (userFacingDomain.includes("janeway")) {
-        callbackURL = "http://localhost:5000/api/auth/callback/google";
+      const domains = process.env.REPLIT_DOMAINS.split(",").map(d => d.trim());
+      // Find the non-janeway domain (user-facing domain)
+      const userDomain = domains.find(d => !d.includes("janeway") && !d.includes(".") === false);
+      if (userDomain) {
+        callbackURL = `https://${userDomain}/api/auth/callback/google`;
       } else {
-        callbackURL = `https://${userFacingDomain}/api/auth/callback/google`;
+        // Fallback to first domain if no non-janeway found
+        callbackURL = `https://${domains[0]}/api/auth/callback/google`;
       }
     } else {
+      // Local development
       callbackURL = "http://localhost:5000/api/auth/callback/google";
     }
   }
+  
+  console.log("[OAuth] Using callback URL:", callbackURL);
 
   if (googleClientId && googleClientSecret) {
     passport.use(
