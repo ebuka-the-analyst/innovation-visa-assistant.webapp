@@ -46,7 +46,7 @@ export default function ToolsFlywheel() {
 
   return (
     <div
-      className="fixed bottom-24 left-8 w-64 rounded-lg border border-primary/30 bg-background/95 backdrop-blur-sm shadow-lg hover-elevate transition-all z-40"
+      className="fixed bottom-8 left-8 w-64 rounded-lg border border-primary/30 bg-background/95 backdrop-blur-sm shadow-lg hover-elevate transition-all z-40"
       onWheel={handleWheel}
       data-testid="flywheel-container"
     >
