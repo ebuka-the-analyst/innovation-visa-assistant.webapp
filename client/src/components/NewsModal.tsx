@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Calendar, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface NewsItem {
+export interface NewsItem {
   id: string;
   title: string;
   date: string;
