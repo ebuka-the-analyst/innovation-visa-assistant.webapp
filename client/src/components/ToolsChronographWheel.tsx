@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
 
@@ -22,6 +22,18 @@ export default function ToolsChronographWheel() {
     enterprise: "bg-red-50 border-red-200 text-red-700",
     ultimate: "bg-yellow-50 border-yellow-200 text-yellow-700",
   };
+
+  // Auto-scroll to keep selected tool visible in the center of the list
+  useEffect(() => {
+    if (scrollRef.current) {
+      const itemHeight = 44; // Approximate height of each tool item
+      const containerHeight = scrollRef.current.clientHeight;
+      const scrollCenter = containerHeight / 2;
+      const targetScroll = Math.max(0, selectedToolIdx * itemHeight - scrollCenter);
+      
+      scrollRef.current.scrollTop = targetScroll;
+    }
+  }, [selectedToolIdx]);
 
   return (
     <div
@@ -58,17 +70,25 @@ export default function ToolsChronographWheel() {
                 <div
                   key={tool.id}
                   onClick={() => setSelectedToolIdx(idx)}
-                  className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-100 cursor-pointer transition-colors border border-transparent hover:border-gray-300"
+                  className={`flex items-start gap-2 p-2 rounded-md cursor-pointer transition-all border ${
+                    idx === selectedToolIdx
+                      ? "bg-primary/20 border-primary font-bold"
+                      : "hover:bg-gray-100 border-transparent hover:border-gray-300"
+                  }`}
                   data-testid={`tool-${idx}`}
                 >
                   {/* Number */}
-                  <div className="text-xs font-bold text-gray-500 w-8 flex-shrink-0 pt-0.5">
+                  <div className={`text-xs font-bold w-8 flex-shrink-0 pt-0.5 ${
+                    idx === selectedToolIdx ? "text-primary" : "text-gray-500"
+                  }`}>
                     {String(idx + 1).padStart(3, "0")}
                   </div>
 
                   {/* Tool info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-black truncate">
+                    <p className={`text-xs truncate ${
+                      idx === selectedToolIdx ? "font-black text-black" : "font-semibold text-black"
+                    }`}>
                       {tool.name}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
