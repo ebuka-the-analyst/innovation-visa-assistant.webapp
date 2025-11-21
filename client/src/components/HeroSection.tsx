@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import { Link } from "wouter";
+import { useState } from "react";
+import SamplePlansModal from "./SamplePlansModal";
 import heroImage from "@assets/generated_images/3D_business_plan_hero_102d84d2.png";
 
 export default function HeroSection() {
+  const [sampleModalOpen, setSampleModalOpen] = useState(false);
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-accent/5 to-primary/5 py-20 md:py-32">
       {/* Animated gradient mesh background */}
@@ -64,9 +67,9 @@ export default function HeroSection() {
                 size="lg" 
                 variant="outline"
                 data-testid="button-view-sample"
-                onClick={() => alert('Sample plans coming soon!')}
+                onClick={() => setSampleModalOpen(true)}
               >
-                See Sample Plan
+                See Sample Plans
               </Button>
             </div>
 
@@ -115,6 +118,8 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
+
+      <SamplePlansModal open={sampleModalOpen} onOpenChange={setSampleModalOpen} />
     </section>
   );
 }
