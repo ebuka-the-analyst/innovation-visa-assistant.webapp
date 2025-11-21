@@ -1,4 +1,4 @@
-import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import NewsModal from "./NewsModal";
@@ -23,7 +23,6 @@ export default function NewsTicker() {
   const [newsItems, setNewsItems] = useState<NewsItem[]>(INITIAL_NEWS_ITEMS);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [scrollPosition, setScrollPosition] = useState(0);
   const tickerRef = useRef<HTMLDivElement>(null);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -42,31 +41,24 @@ export default function NewsTicker() {
     };
 
     fetchNews();
-    const interval = setInterval(fetchNews, 30 * 60 * 1000); // Check every 30 minutes
-
+    const interval = setInterval(fetchNews, 30 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-scroll animation using JavaScript
+  // Auto-scroll horizontally
   useEffect(() => {
     if (!tickerRef.current || newsItems.length === 0) return;
 
-    const startScroll = () => {
-      let currentScroll = 0;
-      const itemHeight = 28; // Approximate height per item
-      const totalHeight = newsItems.length * itemHeight * 2; // Duplicate items
-      const speedPixelsPerSecond = 30; // Pixels per second
-      const scrollDuration = (totalHeight / speedPixelsPerSecond) * 1000; // Duration in ms
+    let currentScroll = 0;
+    const itemWidth = 300; // Width per item
+    const totalWidth = newsItems.length * itemWidth * 2;
 
-      scrollIntervalRef.current = setInterval(() => {
-        currentScroll += 1;
-        if (tickerRef.current) {
-          tickerRef.current.scrollTop = currentScroll % totalHeight;
-        }
-      }, 16); // ~60fps
-    };
-
-    startScroll();
+    scrollIntervalRef.current = setInterval(() => {
+      currentScroll += 1;
+      if (tickerRef.current) {
+        tickerRef.current.scrollLeft = currentScroll % totalWidth;
+      }
+    }, 16); // ~60fps
 
     return () => {
       if (scrollIntervalRef.current) clearInterval(scrollIntervalRef.current);
@@ -75,13 +67,13 @@ export default function NewsTicker() {
 
   const handleBackward = () => {
     if (tickerRef.current) {
-      tickerRef.current.scrollTop -= 100;
+      tickerRef.current.scrollLeft -= 300;
     }
   };
 
   const handleForward = () => {
     if (tickerRef.current) {
-      tickerRef.current.scrollTop += 100;
+      tickerRef.current.scrollLeft += 300;
     }
   };
 
@@ -93,7 +85,7 @@ export default function NewsTicker() {
   return (
     <>
       <div className="flex items-center gap-1 px-2 py-2 bg-background border-b">
-        {/* Start Navigation Button - Far Left */}
+        {/* Left Navigation */}
         <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1 flex-shrink-0">
           <Button
             variant="ghost"
@@ -106,26 +98,26 @@ export default function NewsTicker() {
           </Button>
         </div>
 
-        {/* Vertical scrolling ticker */}
-        <div className="flex-1 h-7 overflow-hidden" ref={tickerRef}>
-          <div className="space-y-0">
-            {/* First pass of items */}
+        {/* Horizontal scrolling ticker */}
+        <div className="flex-1 overflow-hidden" ref={tickerRef}>
+          <div className="flex gap-4 pb-2" style={{ minWidth: "max-content" }}>
+            {/* First pass */}
             {newsItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleArticleClick(item)}
-                className="w-full h-7 px-3 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline text-left whitespace-nowrap overflow-hidden text-ellipsis flex items-center"
+                className="flex-shrink-0 w-80 px-3 py-1 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline text-left whitespace-normal line-clamp-2"
               >
                 <span className="text-primary/60 mr-2">•</span>
                 {item.title}
               </button>
             ))}
-            {/* Duplicate pass for seamless loop */}
+            {/* Duplicate for seamless loop */}
             {newsItems.map((item) => (
               <button
                 key={`dup-${item.id}`}
                 onClick={() => handleArticleClick(item)}
-                className="w-full h-7 px-3 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline text-left whitespace-nowrap overflow-hidden text-ellipsis flex items-center"
+                className="flex-shrink-0 w-80 px-3 py-1 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline text-left whitespace-normal line-clamp-2"
               >
                 <span className="text-primary/60 mr-2">•</span>
                 {item.title}
@@ -134,7 +126,7 @@ export default function NewsTicker() {
           </div>
         </div>
 
-        {/* End Navigation Button - Far Right */}
+        {/* Right Navigation */}
         <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1 flex-shrink-0">
           <Button
             variant="ghost"
