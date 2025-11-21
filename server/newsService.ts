@@ -1,10 +1,15 @@
-import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import NewsModal from "./NewsModal";
-import type { NewsItem } from "./NewsModal";
+import fetch from "node-fetch";
 
-const NEWS_ITEMS: NewsItem[] = [
+export interface NewsItem {
+  id: string;
+  title: string;
+  date: string;
+  content: string;
+  source: string;
+  category: string;
+}
+
+const INITIAL_NEWS: NewsItem[] = [
   { id: "1", title: "Tech Nation 2025: AI, Cyber Security, CleanTech prioritized for Innovation Visa endorsements", date: "Nov 21, 2025", content: "Tech Nation announces strategic focus areas for 2025 applications, emphasizing artificial intelligence, cybersecurity innovations, and climate technology solutions.", source: "Tech Nation", category: "Endorser" },
   { id: "2", title: "Home Office extends Innovation Visa processing to 2-3 weeks average following recent policy update", date: "Nov 20, 2025", content: "Standard processing timeline now 2-3 weeks post-endorsement. Expedited processing available for priority sectors at £500 additional fee.", source: "Home Office", category: "Processing" },
   { id: "3", title: "Innovator International expands eligibility to include B2B SaaS and service-based innovations", date: "Nov 19, 2025", content: "Updated criteria now accept software-as-a-service platforms and professional services innovations, broadening endorsement opportunities beyond traditional product companies.", source: "Innovator International", category: "Endorser" },
@@ -59,111 +64,22 @@ const NEWS_ITEMS: NewsItem[] = [
   { id: "52", title: "Case Studies: 50+ approved applications published by Home Office for reference and guidance", date: "Oct 1, 2025", content: "Home Office published comprehensive case studies of successful Innovation Visa applications across industries, sectors, and founder backgrounds for learning.", source: "Home Office", category: "Resources" }
 ];
 
-export default function NewsTicker() {
-  const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const tickerRef = useRef<HTMLDivElement>(null);
+let newsCache: NewsItem[] = [...INITIAL_NEWS];
+let lastUpdateTime = Date.now();
 
-  const handleBackward = () => {
-    if (tickerRef.current) {
-      tickerRef.current.scrollLeft -= 300;
-    }
-  };
+export async function getLatestNews(): Promise<NewsItem[]> {
+  return newsCache;
+}
 
-  const handleForward = () => {
-    if (tickerRef.current) {
-      tickerRef.current.scrollLeft += 300;
-    }
-  };
+export async function addNews(newItem: NewsItem): Promise<NewsItem[]> {
+  if (newsCache.length >= 50) {
+    newsCache = newsCache.slice(1);
+  }
+  newsCache = [newItem, ...newsCache];
+  lastUpdateTime = Date.now();
+  return newsCache;
+}
 
-  const handleArticleClick = (article: NewsItem) => {
-    setSelectedArticle(article);
-    setModalOpen(true);
-  };
-
-  return (
-    <>
-      <div className="relative bg-gradient-to-r from-primary/10 to-chart-3/10 border-b border-primary/20 overflow-hidden">
-        <div className="container mx-auto px-4 md:px-6 py-2">
-          <div className="flex items-center gap-2">
-            {/* Start Navigation Button */}
-            <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleBackward}
-                className="h-6 w-6 flex-shrink-0"
-                data-testid="button-ticker-backward"
-              >
-                <ChevronLeft className="w-3 h-3 text-white" />
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <AlertCircle className="w-3 h-3 text-primary animate-pulse" />
-              <span className="text-xs font-bold text-primary uppercase tracking-wider whitespace-nowrap">
-                News
-              </span>
-            </div>
-
-            {/* Auto-scrolling ticker */}
-            <div className="flex-1 overflow-x-auto scroll-smooth" ref={tickerRef}>
-              <div className="animate-ticker-scroll whitespace-nowrap">
-                {NEWS_ITEMS.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleArticleClick(item)}
-                    className="inline-block px-4 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
-                  >
-                    {item.title}
-                    <span className="mx-2 text-primary/40">•</span>
-                  </button>
-                ))}
-                {/* Duplicate for seamless loop */}
-                {NEWS_ITEMS.map((item) => (
-                  <button
-                    key={`dup-${item.id}`}
-                    onClick={() => handleArticleClick(item)}
-                    className="inline-block px-4 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline"
-                  >
-                    {item.title}
-                    <span className="mx-2 text-primary/40">•</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <style>{`
-          @keyframes ticker-scroll {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(-50%);
-            }
-          }
-
-          .animate-ticker-scroll {
-            animation: ticker-scroll 6.67s linear infinite;
-          }
-
-          .animate-ticker-scroll:hover {
-            animation-play-state: paused;
-          }
-        `}</style>
-      </div>
-
-      {/* News Modal */}
-      {selectedArticle && (
-        <NewsModal
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-          article={selectedArticle}
-        />
-      )}
-    </>
-  );
+export function getNewsUpdateTime(): number {
+  return lastUpdateTime;
 }
