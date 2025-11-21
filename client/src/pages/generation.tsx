@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { AuthHeader } from "@/components/AuthHeader";
 import GenerationProgress from "@/components/GenerationProgress";
 import Chatbot from "@/components/Chatbot";
 
@@ -16,18 +15,14 @@ export default function Generation() {
 
   if (!planId) {
     return (
-      <div className="min-h-screen">
-        <AuthHeader />
-        <div className="flex items-center justify-center py-20">
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+      <div className="flex items-center justify-center py-20">
+        <p className="text-muted-foreground">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <AuthHeader />
+    <div>
       <GenerationProgress planId={planId} />
       <Chatbot planId={planId} />
     </div>
