@@ -1,5 +1,6 @@
-import { AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
 import NewsModal from "./NewsModal";
 import type { NewsItem } from "./NewsModal";
 
@@ -61,6 +62,19 @@ const NEWS_ITEMS: NewsItem[] = [
 export default function NewsTicker() {
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const tickerRef = useRef<HTMLDivElement>(null);
+
+  const handleBackward = () => {
+    if (tickerRef.current) {
+      tickerRef.current.scrollLeft -= 300;
+    }
+  };
+
+  const handleForward = () => {
+    if (tickerRef.current) {
+      tickerRef.current.scrollLeft += 300;
+    }
+  };
 
   const handleArticleClick = (article: NewsItem) => {
     setSelectedArticle(article);
@@ -72,6 +86,17 @@ export default function NewsTicker() {
       <div className="relative bg-gradient-to-r from-primary/10 to-chart-3/10 border-b border-primary/20 overflow-hidden">
         <div className="container mx-auto px-4 md:px-6 py-2">
           <div className="flex items-center gap-2">
+            {/* Start Navigation Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBackward}
+              className="h-6 w-6 flex-shrink-0"
+              data-testid="button-ticker-backward"
+            >
+              <ChevronLeft className="w-3 h-3" />
+            </Button>
+
             <div className="flex items-center gap-1.5 flex-shrink-0">
               <AlertCircle className="w-3 h-3 text-primary animate-pulse" />
               <span className="text-xs font-bold text-primary uppercase tracking-wider whitespace-nowrap">
@@ -80,7 +105,7 @@ export default function NewsTicker() {
             </div>
 
             {/* Auto-scrolling ticker */}
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-x-auto scroll-smooth" ref={tickerRef}>
               <div className="animate-ticker-scroll whitespace-nowrap">
                 {NEWS_ITEMS.map((item) => (
                   <button
@@ -105,6 +130,17 @@ export default function NewsTicker() {
                 ))}
               </div>
             </div>
+
+            {/* End Navigation Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleForward}
+              className="h-6 w-6 flex-shrink-0"
+              data-testid="button-ticker-forward"
+            >
+              <ChevronRight className="w-3 h-3" />
+            </Button>
           </div>
         </div>
 
@@ -119,7 +155,7 @@ export default function NewsTicker() {
           }
 
           .animate-ticker-scroll {
-            animation: ticker-scroll 40s linear infinite;
+            animation: ticker-scroll 20s linear infinite;
           }
 
           .animate-ticker-scroll:hover {
