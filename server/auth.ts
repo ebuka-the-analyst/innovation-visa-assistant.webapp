@@ -52,7 +52,17 @@ export function setupAuth(app: Express) {
   // Google OAuth Strategy
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
   const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const callbackURL = process.env.GOOGLE_CALLBACK_URL || "http://localhost:5000/api/auth/callback/google";
+  
+  // Auto-detect callback URL based on environment
+  let callbackURL = process.env.GOOGLE_CALLBACK_URL;
+  if (!callbackURL) {
+    if (process.env.REPLIT_DOMAINS) {
+      const domain = process.env.REPLIT_DOMAINS.split(",")[0];
+      callbackURL = `https://${domain}/api/auth/callback/google`;
+    } else {
+      callbackURL = "http://localhost:5000/api/auth/callback/google";
+    }
+  }
 
   if (googleClientId && googleClientSecret) {
     passport.use(
