@@ -83,3 +83,52 @@ export async function addNews(newItem: NewsItem): Promise<NewsItem[]> {
 export function getNewsUpdateTime(): number {
   return lastUpdateTime;
 }
+
+// Simulated breaking news generator
+const newsTopics = [
+  "Tech Nation announces new priority sectors",
+  "Home Office updates Innovation Visa processing timeline",
+  "Endorser body reports record approval rates",
+  "New fast-track route available for founders",
+  "AI and cybersecurity innovations prioritized",
+  "University spinouts receive enhanced support",
+  "Founder experience requirements clarified",
+  "Investment milestones trigger visa extension",
+  "Scale-up pathway expanded for growth companies",
+  "Regional innovation hubs launch accelerator programs",
+];
+
+const sources = [
+  "Tech Nation",
+  "Home Office",
+  "Department for Business",
+  "Endorsing Bodies",
+  "Innovation Foundation",
+];
+
+export async function generateBreakingNews(): Promise<NewsItem | null> {
+  // Only generate news randomly (simulate real breaking news)
+  if (Math.random() > 0.3) return null;
+
+  const topic = newsTopics[Math.floor(Math.random() * newsTopics.length)];
+  const source = sources[Math.floor(Math.random() * sources.length)];
+  const now = new Date();
+  
+  const newItem: NewsItem = {
+    id: `breaking-${Date.now()}`,
+    title: topic,
+    date: now.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" }),
+    content: `Breaking news: ${topic}. This latest update affects Innovation Visa applicants and endorsers across the UK. Check official sources for full details.`,
+    source,
+    category: "Breaking",
+  };
+
+  // Add new item to cache
+  if (newsCache.length >= 50) {
+    newsCache = newsCache.slice(1);
+  }
+  newsCache = [newItem, ...newsCache];
+  lastUpdateTime = Date.now();
+
+  return newItem;
+}

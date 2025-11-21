@@ -6,6 +6,7 @@ import Stripe from "stripe";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
+import { getLatestNews, generateBreakingNews } from "./newsService";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
@@ -675,6 +676,30 @@ ${generatedSections.join('\n\n---\n\n')}`;
         error: "Failed to process chat message",
         response: "I apologize for the technical difficulty. Please try again shortly. For immediate assistance, please contact support or visit the official Home Office website."
       });
+    }
+  });
+
+  app.get("/api/news", async (req, res) => {
+    try {
+      const news = await getLatestNews();
+      res.json(news);
+    } catch (error) {
+      console.error("News fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch news" });
+    }
+  });
+
+  app.post("/api/news/check", async (req, res) => {
+    try {
+      const breakingNews = await generateBreakingNews();
+      const news = await getLatestNews();
+      res.json({ 
+        breaking: breakingNews, 
+        all: news 
+      });
+    } catch (error) {
+      console.error("Breaking news check error:", error);
+      res.status(500).json({ error: "Failed to check for breaking news" });
     }
   });
 
