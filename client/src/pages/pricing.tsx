@@ -10,6 +10,23 @@ import { Badge } from "@/components/ui/badge";
 
 const tiers = [
   {
+    id: "free",
+    name: "Free Plan",
+    price: "Free",
+    description: "Start your visa journey",
+    pages: "10-15 pages",
+    features: [
+      "Basic business overview",
+      "Innovation introduction",
+      "Essential compliance guide",
+      "Application requirements checker",
+      "Document organizer",
+      "Visa timeline planner",
+      "10 foundational tools",
+      "Email support",
+    ],
+  },
+  {
     id: "basic",
     name: "Basic Plan",
     price: "£49",
@@ -112,7 +129,7 @@ export default function Pricing() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
           {tiers.map((tier) => (
             <Card 
               key={tier.id} 

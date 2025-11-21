@@ -4,13 +4,13 @@ export interface Tool {
   description: string;
   category: "business" | "financial" | "innovation" | "team" | "growth" | "compliance" | "defense" | "documentation";
   stage: "before" | "during" | "after";
-  tier: "basic" | "premium" | "enterprise" | "ultimate";
+  tier: "free" | "basic" | "premium" | "enterprise" | "ultimate";
   icon: string;
 }
 
 export const ALL_TOOLS: Tool[] = [
   // A - Application & Advisors
-  { id: "app-req-checker", name: "Application Requirements Checker", description: "Verify all required documents and eligibility criteria", category: "compliance", stage: "before", tier: "basic", icon: "CheckCircle" },
+  { id: "app-req-checker", name: "Application Requirements Checker", description: "Verify all required documents and eligibility criteria", category: "compliance", stage: "before", tier: "free", icon: "CheckCircle" },
   { id: "advisors-finder", name: "Approved Advisors/Endorsers Finder", description: "Find and compare approved visa advisors and endorsers", category: "documentation", stage: "before", tier: "basic", icon: "Users" },
   { id: "advisor-prep-guide", name: "Advisor Meeting Prep Guide", description: "Prepare for meetings with immigration advisors", category: "documentation", stage: "before", tier: "premium", icon: "BookOpen" },
 
@@ -23,10 +23,10 @@ export const ALL_TOOLS: Tool[] = [
   // C - Compliance & Criteria
   { id: "compliance-checker", name: "Compliance Checker", description: "Ensure compliance with UK visa rules and regulations", category: "compliance", stage: "during", tier: "basic", icon: "Shield" },
   { id: "criteria-scorer", name: "Criteria Assessment Scorer", description: "Score Innovation, Viability, and Scalability criteria", category: "business", stage: "during", tier: "premium", icon: "BarChart3" },
-  { id: "company-formation", name: "Company Formation & Structure Guide", description: "Guide for UK company formation and legal structure", category: "compliance", stage: "before", tier: "basic", icon: "Building2" },
+  { id: "company-formation", name: "Company Formation & Structure Guide", description: "Guide for UK company formation and legal structure", category: "compliance", stage: "before", tier: "free", icon: "Building2" },
 
   // D - Documents & Data
-  { id: "doc-organizer", name: "Document Organizer", description: "Organize and track all application documents", category: "documentation", stage: "during", tier: "basic", icon: "Folder" },
+  { id: "doc-organizer", name: "Document Organizer", description: "Organize and track all application documents", category: "documentation", stage: "during", tier: "free", icon: "Folder" },
   { id: "due-diligence", name: "Due Diligence Report Generator", description: "Generate comprehensive due diligence reports", category: "documentation", stage: "during", tier: "enterprise", icon: "FileCheck" },
   { id: "data-security", name: "Data Security & Privacy Compliance Guide", description: "Ensure data security and GDPR compliance", category: "compliance", stage: "before", tier: "premium", icon: "Lock" },
   { id: "doc-verification", name: "Document Verification Tracker", description: "Track verification status of all documents", category: "documentation", stage: "during", tier: "premium", icon: "ClipboardCheck" },
@@ -63,8 +63,8 @@ export const ALL_TOOLS: Tool[] = [
   { id: "ip-audit", name: "Intellectual Property Audit", description: "Audit existing IP and identify gaps", category: "innovation", stage: "before", tier: "enterprise", icon: "Audit" },
 
   // J - Journey & Jurisdiction
-  { id: "visa-timeline", name: "Visa Journey Timeline Planner", description: "Plan visa application timeline and milestones", category: "documentation", stage: "before", tier: "basic", icon: "Calendar" },
-  { id: "jurisdiction-checker", name: "UK Jurisdiction & Eligibility Checker", description: "Verify UK jurisdiction and visa eligibility", category: "compliance", stage: "before", tier: "basic", icon: "MapPin" },
+  { id: "visa-timeline", name: "Visa Journey Timeline Planner", description: "Plan visa application timeline and milestones", category: "documentation", stage: "before", tier: "free", icon: "Calendar" },
+  { id: "jurisdiction-checker", name: "UK Jurisdiction & Eligibility Checker", description: "Verify UK jurisdiction and visa eligibility", category: "compliance", stage: "before", tier: "free", icon: "MapPin" },
   { id: "visa-status-tracker", name: "Visa Status Tracker", description: "Track visa application status in real-time", category: "documentation", stage: "during", tier: "premium", icon: "Clock" },
   { id: "settlement-guide", name: "Post-Approval Settlement Guide", description: "Guide for post-visa settlement and setup", category: "documentation", stage: "after", tier: "premium", icon: "Home" },
 
@@ -76,7 +76,7 @@ export const ALL_TOOLS: Tool[] = [
 
   // L - Legal & Lawyer
   { id: "legal-compliance", name: "Legal Compliance Guide", description: "Comprehensive UK legal compliance guide", category: "compliance", stage: "before", tier: "premium", icon: "Scale" },
-  { id: "lawyer-finder", name: "Lawyer Finder & Booking", description: "Find and book immigration lawyers", category: "documentation", stage: "before", tier: "basic", icon: "Users" },
+  { id: "lawyer-finder", name: "Lawyer Finder & Booking", description: "Find and book immigration lawyers", category: "documentation", stage: "before", tier: "free", icon: "Users" },
   { id: "legal-templates", name: "Legal Document Templates", description: "Ready-to-use legal document templates", category: "documentation", stage: "during", tier: "premium", icon: "FileText" },
   { id: "regulatory-tracker", name: "Regulatory Requirement Tracker", description: "Track all regulatory requirements", category: "compliance", stage: "during", tier: "premium", icon: "CheckCircle" },
 
@@ -137,8 +137,8 @@ export const ALL_TOOLS: Tool[] = [
   // V - Validation & Verification
   { id: "viability-checker", name: "Viability Checker", description: "Check business viability", category: "business", stage: "during", tier: "premium", icon: "CheckCircle" },
   { id: "validation-report", name: "Validation Report Generator", description: "Generate validation reports", category: "documentation", stage: "during", tier: "premium", icon: "FileCheck" },
-  { id: "eligibility-validator", name: "Visa Eligibility Validator", description: "Validate visa eligibility", category: "compliance", stage: "before", tier: "basic", icon: "CheckCircle" },
-  { id: "verification-checklist", name: "Verification Document Checklist", description: "Complete verification checklist", category: "documentation", stage: "during", tier: "basic", icon: "CheckList" },
+  { id: "eligibility-validator", name: "Visa Eligibility Validator", description: "Validate visa eligibility", category: "compliance", stage: "before", tier: "free", icon: "CheckCircle" },
+  { id: "verification-checklist", name: "Verification Document Checklist", description: "Complete verification checklist", category: "documentation", stage: "during", tier: "free", icon: "CheckList" },
 
   // W - Weaknesses & Win Probability
   { id: "weakness-analysis", name: "Weakness Analysis & Defense Builder", description: "Identify and defend weaknesses", category: "defense", stage: "before", tier: "enterprise", icon: "AlertTriangle" },
@@ -160,6 +160,7 @@ export const ALL_TOOLS: Tool[] = [
 ];
 
 export const TIER_DESCRIPTIONS = {
+  free: "Free tools to explore and get started with your visa journey",
   basic: "For getting started with UK Innovation Visa - business plan + essentials",
   premium: "Full feature suite for comprehensive visa preparation and business planning",
   enterprise: "Advanced tools for complex applications and maximum success probability",

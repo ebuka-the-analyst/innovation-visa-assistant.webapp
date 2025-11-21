@@ -45,6 +45,7 @@ export default function ToolsHub() {
   };
 
   const tierLabels = {
+    free: "Free",
     basic: "Basic",
     premium: "Premium",
     enterprise: "Enterprise",
@@ -52,6 +53,7 @@ export default function ToolsHub() {
   };
 
   const tierColors = {
+    free: "bg-gray-50 border-gray-200",
     basic: "bg-blue-50 border-blue-200",
     premium: "bg-purple-50 border-purple-200",
     enterprise: "bg-orange-50 border-orange-200",
@@ -208,13 +210,15 @@ export default function ToolsHub() {
                       </div>
                       <div
                         className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                          tool.tier === "basic"
-                            ? "bg-blue-100 text-blue-700"
-                            : tool.tier === "premium"
-                              ? "bg-purple-100 text-purple-700"
-                              : tool.tier === "enterprise"
-                                ? "bg-orange-100 text-orange-700"
-                                : "bg-amber-100 text-amber-700"
+                          tool.tier === "free"
+                            ? "bg-gray-100 text-gray-700"
+                            : tool.tier === "basic"
+                              ? "bg-blue-100 text-blue-700"
+                              : tool.tier === "premium"
+                                ? "bg-purple-100 text-purple-700"
+                                : tool.tier === "enterprise"
+                                  ? "bg-orange-100 text-orange-700"
+                                  : "bg-amber-100 text-amber-700"
                         }`}
                         data-testid={`badge-tier-${tool.id}`}
                       >
@@ -233,6 +237,12 @@ export default function ToolsHub() {
           <Card className="p-6 text-center">
             <div className="text-3xl font-bold text-primary">{ALL_TOOLS.length}</div>
             <p className="text-sm text-muted-foreground mt-2">Total Tools</p>
+          </Card>
+          <Card className="p-6 text-center">
+            <div className="text-3xl font-bold text-gray-600">
+              {ALL_TOOLS.filter((t) => t.tier === "free").length}
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">Free Tools</p>
           </Card>
           <Card className="p-6 text-center">
             <div className="text-3xl font-bold text-purple-600">
