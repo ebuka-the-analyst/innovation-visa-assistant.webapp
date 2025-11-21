@@ -68,8 +68,12 @@ export default function ChatBot() {
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 via-orange-400 to-blue-500 shadow-lg hover:shadow-2xl transition-all hover:scale-110 flex items-center justify-center text-white z-50 group hover-elevate"
+        className="w-16 h-16 rounded-full shadow-lg hover:shadow-2xl transition-all hover:scale-110 flex items-center justify-center text-white group hover-elevate"
         style={{
+          position: "fixed",
+          bottom: "24px",
+          right: "24px",
+          zIndex: 50,
           background: "linear-gradient(135deg, #ffa536 0%, #11b6e9 100%)"
         }}
         data-testid="button-chatbot-toggle"
@@ -84,7 +88,15 @@ export default function ChatBot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-28 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col overflow-hidden rounded-xl">
+        <Card 
+          className="w-96 h-[600px] shadow-2xl flex flex-col overflow-hidden rounded-xl"
+          style={{
+            position: "fixed",
+            bottom: "112px",
+            right: "24px",
+            zIndex: 50
+          }}
+        >
           {/* Header */}
           <div className="p-4 text-white" style={{ background: "linear-gradient(135deg, #0D2C4A 0%, #11b6e9 100%)" }}>
             <h3 className="font-bold text-lg">VisaPrep AI Assistant</h3>
