@@ -10,12 +10,12 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-chart-3 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">V</span>
+                <span className="text-white font-bold text-lg">U</span>
               </div>
-              <span className="font-bold text-xl">BhenMedia VisaPrep</span>
+              <span className="font-bold text-xl">UK-Innovation Visa Assistant</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              UK's #1 Innovation Visa Partner. AI-powered business plans and official GOV.UK guidance.
+              AI-powered business plans and official GOV.UK guidance for UK Innovator Founder visa applicants.
             </p>
           </div>
 
@@ -64,7 +64,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2025 BhenMedia VisaPrep. All rights reserved.
+            © 2025 UK-Innovation Visa Assistant. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>

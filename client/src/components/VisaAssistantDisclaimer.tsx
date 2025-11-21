@@ -14,7 +14,7 @@ export default function VisaAssistantDisclaimer() {
           <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <div className="text-sm text-amber-900 dark:text-amber-100">
-              <strong>Innovator Founder Visa Assistant Disclaimer:</strong> This assistant is trained on official GOV.UK guidance (November 2025, Home Office v9.0) and provides informational support only. It does not constitute legal advice. Always verify with official GOV.UK sources or contact Home Office directly for definitive answers. Individual circumstances may vary.{' '}
+              <strong>UK-Innovation Visa Assistant Disclaimer:</strong> This assistant is trained on official GOV.UK guidance (November 2025, Home Office v9.0) and provides informational support only. It does not constitute legal advice. Always verify with official GOV.UK sources or contact Home Office directly for definitive answers. Individual circumstances may vary.{' '}
               <a
                 href="/ai-assistant"
                 className="underline font-semibold hover:text-amber-800 dark:hover:text-amber-200"
