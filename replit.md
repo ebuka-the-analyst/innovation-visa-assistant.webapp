@@ -2,7 +2,27 @@
 
 ## Overview
 
-VisaPrep AI is a SaaS application that generates professional business plans for UK Innovation Visa applicants. The platform uses AI (OpenAI GPT) to create comprehensive, endorsing body-ready business plans covering the three key visa criteria: Innovation, Viability, and Scalability. Users complete a multi-step questionnaire, purchase a tier (Basic, Premium, or Enterprise), and receive a professionally formatted PDF business plan within minutes.
+VisaPrep AI is a SaaS application that generates professional business plans for UK Innovation Visa (Innovator Founder) applicants. The platform uses AI (OpenAI GPT) to create comprehensive, endorsing body-ready business plans covering the three key visa criteria: Innovation, Viability, and Scalability. Users complete a multi-step questionnaire, purchase a tier (Basic, Premium, or Enterprise), and receive a professionally formatted PDF business plan within minutes.
+
+## Critical Information - Updated November 2025
+
+### Innovator Founder Visa (Replaced Old Innovator Visa)
+
+**Key Changes from Old Visa:**
+- NO fixed £50,000 minimum investment requirement
+- Funding must be "appropriate" and "sufficient" for YOUR business plan
+- Could be less than, equal to, or more than £50k depending on business needs
+- Endorsing bodies assess appropriateness based on your specific circumstances
+
+**Official Requirements:**
+- Personal savings: £1,270 (28 consecutive days)
+- Business funding: "Appropriate" amount (no fixed minimum)
+- No investment needed if business already established/endorsed
+
+**Visa Fees (Nov 2025):**
+- Application: £1,274 (outside UK) or £1,590 (extension/switch in UK)
+- Endorsement assessment: £1,000
+- Per-meeting fee: £500 each (minimum 2 meetings required)
 
 ## User Preferences
 
@@ -28,8 +48,11 @@ Preferred communication style: Simple, everyday language.
 
 **Key Pages**
 - Home: Marketing page with hero, features, AI agents showcase, pricing, testimonials, and FAQ
+- Dashboard: Shows user's business plans with radar charts for Innovation/Viability/Scalability scores, demo data included
 - Questionnaire: Multi-step form collecting business information across 4 stages (Business Overview, Innovation, Viability, Scalability)
 - Generation: Real-time progress tracking with animated AI agent workflow
+- Tools Hub: 104+ comprehensive visa application tools organized by category
+- Endorser Investment Requirements: Official funding guidance based on GOV.UK
 
 **State Management Pattern**
 - Server state handled by React Query with custom `apiRequest` helper
@@ -215,3 +238,13 @@ Preferred communication style: Simple, everyday language.
 - **Files Modified**:
   - `server/authRoutes.ts`: Conditional verification logic
   - `client/src/pages/signup.tsx`: Conditional redirect (verify-email vs dashboard)
+
+## Dashboard Demo Data
+
+The dashboard includes realistic demo data for showcase purposes:
+- **BhenMedia** (Premium tier, completed) - VisaPrep AI company with full business plan
+- **NeuroData Analytics** (Enterprise tier, completed) - Healthcare AI/ML example
+- **GreenTech Solutions** (Basic tier, generating) - Shows in-progress state
+- **SwiftLegal AI** (Premium tier, pending) - Shows pending state
+
+Demo data is replaced when user creates real business plans.
