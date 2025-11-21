@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, AlertCircle, Copy } from "lucide-react";
+import { AuthHeader } from "@/components/AuthHeader";
 
 export default function Settings() {
   const [copied, setCopied] = useState<string | null>(null);
@@ -64,8 +65,10 @@ export default function Settings() {
   );
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6 max-w-2xl">
-      <div className="mb-8">
+    <>
+      <AuthHeader />
+      <div className="container mx-auto py-8 px-4 md:px-6 max-w-2xl">
+        <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2" data-testid="heading-settings">Settings & Configuration</h1>
         <p className="text-muted-foreground">Manage your VisaPrep AI integrations and API configuration</p>
       </div>
@@ -175,6 +178,7 @@ export default function Settings() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </>
   );
 }

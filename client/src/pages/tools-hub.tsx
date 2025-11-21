@@ -12,6 +12,8 @@ import {
 import { ALL_TOOLS, Tool } from "@shared/tools-data";
 import { Search, Filter } from "lucide-react";
 import * as Icons from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { AuthHeader } from "@/components/AuthHeader";
 
 type IconName = keyof typeof Icons;
 
@@ -20,6 +22,11 @@ export default function ToolsHub() {
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [stageFilter, setStageFilter] = useState<string>("");
   const [tierFilter, setTierFilter] = useState<string>("");
+
+  const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
+    queryKey: ["/api/auth/me"],
+    retry: false,
+  });
 
   const filteredTools = useMemo(() => {
     return ALL_TOOLS.filter((tool) => {
@@ -66,8 +73,10 @@ export default function ToolsHub() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-      <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+    <>
+      {user && <AuthHeader />}
+      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
+        <div className="container mx-auto px-4 md:px-6 max-w-7xl">
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-3" data-testid="heading-tools-hub">
@@ -264,6 +273,7 @@ export default function ToolsHub() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
