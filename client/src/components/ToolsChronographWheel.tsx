@@ -49,13 +49,13 @@ export default function ToolsChronographWheel() {
         >
           <text
             x="144"
-            y="28"
-            fontSize="16"
-            fontWeight="bold"
-            fill="#0D2C4A"
-            opacity="0.6"
+            y="32"
+            fontSize="22"
+            fontWeight="900"
+            fill="#000000"
+            opacity="1"
             textAnchor="middle"
-            letterSpacing="2"
+            letterSpacing="1"
           >
             100+ TOOLS HUB
           </text>
@@ -141,7 +141,7 @@ export default function ToolsChronographWheel() {
                     <div
                       className={`px-4 py-1.5 rounded-lg flex items-center gap-2 whitespace-nowrap border-2 transition-all ${
                         isCenter
-                          ? "bg-primary/15 border-primary/80 font-bold text-sm"
+                          ? "bg-primary/10 border-primary/80 font-black text-sm text-black"
                           : "bg-muted/5 border-muted/30 text-xs text-muted-foreground"
                       }`}
                       style={{
@@ -152,7 +152,9 @@ export default function ToolsChronographWheel() {
                         <GetIconComponent name={tool.icon} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="leading-tight truncate">{tool.name}</p>
+                        <p className={`leading-tight truncate ${isCenter ? "font-black text-black" : ""}`}>
+                          {tool.name}
+                        </p>
                       </div>
                     </div>
                   </div>
