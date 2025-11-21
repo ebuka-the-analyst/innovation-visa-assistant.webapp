@@ -42,10 +42,10 @@ export default function ToolsChronographWheel() {
     <div
       className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
-      style={{ scale: "0.35", transformOrigin: "bottom left" }}
+      style={{ scale: "0.75", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
-      <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "800px", width: "600px" }}>
+      <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "1067px", width: "800px" }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
         <div className="px-6 pt-4 pb-2 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
