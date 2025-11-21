@@ -95,12 +95,12 @@ export default function ToolsHub() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">Category</label>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <Select value={categoryFilter || "all"} onValueChange={(val) => setCategoryFilter(val === "all" ? "" : val)}>
                   <SelectTrigger data-testid="select-category">
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     {categories.map((cat) => (
                       <SelectItem key={cat} value={cat}>
                         {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -112,12 +112,12 @@ export default function ToolsHub() {
 
               <div>
                 <label className="text-sm font-medium mb-2 block">Stage</label>
-                <Select value={stageFilter} onValueChange={setStageFilter}>
+                <Select value={stageFilter || "all"} onValueChange={(val) => setStageFilter(val === "all" ? "" : val)}>
                   <SelectTrigger data-testid="select-stage">
                     <SelectValue placeholder="All Stages" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Stages</SelectItem>
+                    <SelectItem value="all">All Stages</SelectItem>
                     {stages.map((stage) => (
                       <SelectItem key={stage} value={stage}>
                         {stageLabels[stage as keyof typeof stageLabels]}
@@ -129,12 +129,12 @@ export default function ToolsHub() {
 
               <div>
                 <label className="text-sm font-medium mb-2 block">Tier</label>
-                <Select value={tierFilter} onValueChange={setTierFilter}>
+                <Select value={tierFilter || "all"} onValueChange={(val) => setTierFilter(val === "all" ? "" : val)}>
                   <SelectTrigger data-testid="select-tier">
                     <SelectValue placeholder="All Tiers" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Tiers</SelectItem>
+                    <SelectItem value="all">All Tiers</SelectItem>
                     {tiers.map((tier) => (
                       <SelectItem key={tier} value={tier}>
                         {tierLabels[tier as keyof typeof tierLabels]}
