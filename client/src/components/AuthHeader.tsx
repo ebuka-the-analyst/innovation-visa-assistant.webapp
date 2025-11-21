@@ -3,7 +3,7 @@ import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { LogOut, Home } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import logoImg from "@assets/image_1763689913982.png";
+import logoImg from "@assets/BhenMedia_1763690019470.png";
 
 export function AuthHeader() {
   const [, setLocation] = useLocation();
@@ -32,9 +32,8 @@ export function AuthHeader() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/">
-              <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" data-testid="button-auth-logo">
-                <img src={logoImg} alt="VisaPrep AI" className="h-8 w-8 rounded-lg" />
-                <h1 className="text-xl font-bold">VisaPrep AI</h1>
+              <div className="cursor-pointer hover:opacity-80 transition-opacity" data-testid="button-auth-logo">
+                <img src={logoImg} alt="BhenMedia" className="h-10 w-auto" />
               </div>
             </Link>
             <nav className="hidden md:flex gap-4">
