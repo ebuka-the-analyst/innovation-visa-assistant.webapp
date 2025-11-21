@@ -92,25 +92,37 @@ export default function ToolsChronographWheel() {
             {[...Array(3)].map((_, cycle) =>
               tools.map((tool, idx) => {
                 const globalIdx = cycle * tools.length + idx;
-                const isCenter = idx === currentIndex % tools.length;
-                const positionFromCenter = Math.abs(idx - (currentIndex % tools.length));
+                const currentPos = currentIndex % tools.length;
+                const isCenter = idx === currentPos;
                 
-                // Calculate opacity and scale based on position
+                // Calculate circular distance (handles wrap-around)
+                let positionFromCenter = Math.abs(idx - currentPos);
+                if (positionFromCenter > tools.length / 2) {
+                  positionFromCenter = tools.length - positionFromCenter;
+                }
+                
+                // Show 5 tools: 2 above center, center, 2 below
                 let opacity = 0;
                 let scale = 0.7;
+                let display = true;
                 
                 if (isCenter) {
                   opacity = 1;
                   scale = 1;
                 } else if (positionFromCenter === 1) {
-                  opacity = 0.5;
-                  scale = 0.85;
+                  opacity = 0.6;
+                  scale = 0.9;
                 } else if (positionFromCenter === 2) {
-                  opacity = 0.25;
-                  scale = 0.75;
+                  opacity = 0.35;
+                  scale = 0.8;
                 } else {
                   opacity = 0;
                   scale = 0.6;
+                  display = false;
+                }
+
+                if (!display && opacity === 0) {
+                  return null;
                 }
 
                 return (
@@ -120,19 +132,20 @@ export default function ToolsChronographWheel() {
                     style={{
                       opacity,
                       transform: `scale(${scale})`,
-                      height: "48px",
+                      height: "44px",
                       pointerEvents: isCenter ? "auto" : "none",
+                      display: opacity === 0 ? "none" : "block",
                     }}
                     data-testid={`tool-${globalIdx}`}
                   >
                     <div
-                      className={`px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap border-2 transition-all ${
+                      className={`px-4 py-1.5 rounded-lg flex items-center gap-2 whitespace-nowrap border-2 transition-all ${
                         isCenter
-                          ? "bg-primary/30 border-primary font-semibold text-sm"
-                          : "bg-muted/10 border-transparent text-xs"
+                          ? "bg-primary/15 border-primary/80 font-bold text-sm"
+                          : "bg-muted/5 border-muted/30 text-xs text-muted-foreground"
                       }`}
                       style={{
-                        minWidth: "140px",
+                        minWidth: "160px",
                       }}
                     >
                       <div className="text-primary flex-shrink-0">
