@@ -113,10 +113,10 @@ export default function HeroSection() {
               {/* Readiness Score Widget with animation */}
               <div className="relative p-8 bg-card/50 backdrop-blur-sm rounded-2xl border border-primary/10 shadow-2xl hover-elevate transition-all duration-500">
                 <ReadinessScoreWidget 
-                  overallScore={78}
-                  innovationScore={82}
-                  viabilityScore={75}
-                  scalabilityScore={76}
+                  overallScore={88}
+                  innovationScore={88}
+                  viabilityScore={87}
+                  scalabilityScore={89}
                 />
               </div>
             </div>
