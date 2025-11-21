@@ -53,12 +53,18 @@ export function setupAuth(app: Express) {
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
   const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
   
-  // Auto-detect callback URL based on environment
+  // Use explicit callback URL (avoid ephemeral janeway domains)
   let callbackURL = process.env.GOOGLE_CALLBACK_URL;
   if (!callbackURL) {
+    // Only use user-facing domain, skip janeway.prod.repl.run
     if (process.env.REPLIT_DOMAINS) {
-      const domain = process.env.REPLIT_DOMAINS.split(",")[0];
-      callbackURL = `https://${domain}/api/auth/callback/google`;
+      const domains = process.env.REPLIT_DOMAINS.split(",");
+      const userFacingDomain = domains.find(d => !d.includes("janeway")) || domains[0];
+      if (userFacingDomain.includes("janeway")) {
+        callbackURL = "http://localhost:5000/api/auth/callback/google";
+      } else {
+        callbackURL = `https://${userFacingDomain}/api/auth/callback/google`;
+      }
     } else {
       callbackURL = "http://localhost:5000/api/auth/callback/google";
     }
