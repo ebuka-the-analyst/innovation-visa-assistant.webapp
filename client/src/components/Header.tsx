@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link } from "wouter";
+import logoImg from "@assets/image_1763689913982.png";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -20,9 +21,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/">
           <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" data-testid="button-logo">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-chart-3 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">V</span>
-            </div>
+            <img src={logoImg} alt="VisaPrep AI" className="h-8 w-8 rounded-lg" />
             <span className="font-bold text-xl">VisaPrep AI</span>
           </div>
         </Link>
