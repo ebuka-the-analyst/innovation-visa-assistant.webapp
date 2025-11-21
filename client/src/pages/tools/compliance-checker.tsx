@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
 
 export default function ComplianceChecker() {
   const [checklist, setChecklist] = useState({
@@ -26,7 +24,7 @@ export default function ComplianceChecker() {
   const total = Object.keys(checklist).length;
   const percentage = Math.round((completed / total) * 100);
 
-  const toggleCheck = (key: string) => {
+  const toggleCheck = (key: keyof typeof checklist) => {
     setChecklist(prev => ({
       ...prev,
       [key]: !prev[key]
@@ -68,49 +66,68 @@ export default function ComplianceChecker() {
                 checked={checklist.business_plan}
                 onChange={() => toggleCheck('business_plan')}
                 className="w-4 h-4"
-              
+                data-testid="check-business-plan"
+              />
               <span>Have a genuine, original business plan</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.unique_genuine}
                 onChange={() => toggleCheck('unique_genuine')}
-              
+                className="w-4 h-4"
+                data-testid="check-unique-genuine"
+              />
               <span>Plan meets a market need or creates competitive advantage</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.market_need}
                 onChange={() => toggleCheck('market_need')}
-              
+                className="w-4 h-4"
+                data-testid="check-market-need"
+              />
               <span>Evidence of market research and opportunity validation</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.founder_involved}
                 onChange={() => toggleCheck('founder_involved')}
-              
+                className="w-4 h-4"
+                data-testid="check-founder-involved"
+              />
               <span>Founder is instrumental founder (not just joining)</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.realistic_viability}
                 onChange={() => toggleCheck('realistic_viability')}
-              
+                className="w-4 h-4"
+                data-testid="check-realistic-viability"
+              />
               <span>Plan is realistic and achievable with your resources</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.job_creation}
                 onChange={() => toggleCheck('job_creation')}
-              
+                className="w-4 h-4"
+                data-testid="check-job-creation"
+              />
               <span>Evidence of job creation and growth potential</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.scalability_evidence}
                 onChange={() => toggleCheck('scalability_evidence')}
-              
+                className="w-4 h-4"
+                data-testid="check-scalability-evidence"
+              />
               <span>Plan demonstrates scalability to national/international markets</span>
             </label>
           </div>
@@ -121,31 +138,43 @@ export default function ComplianceChecker() {
           <h2 className="font-bold text-lg">Financial Requirements</h2>
           <div className="space-y-3">
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.capital_appropriate}
                 onChange={() => toggleCheck('capital_appropriate')}
-              
+                className="w-4 h-4"
+                data-testid="check-capital-appropriate"
+              />
               <span>Funding amount is appropriate for your business stage</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.legitimate_funds}
                 onChange={() => toggleCheck('legitimate_funds')}
-              
+                className="w-4 h-4"
+                data-testid="check-legitimate-funds"
+              />
               <span>Funds have legitimate, verifiable sources (no laundering concerns)</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.personal_savings_1270}
                 onChange={() => toggleCheck('personal_savings_1270')}
-              
+                className="w-4 h-4"
+                data-testid="check-personal-savings"
+              />
               <span>Have £1,270 personal savings (mandatory for all applicants)</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.savings_28_days}
                 onChange={() => toggleCheck('savings_28_days')}
-              
+                className="w-4 h-4"
+                data-testid="check-savings-28days"
+              />
               <span>Personal savings held for 28 consecutive days</span>
             </label>
           </div>
@@ -156,17 +185,23 @@ export default function ComplianceChecker() {
           <h2 className="font-bold text-lg">Language & Eligibility</h2>
           <div className="space-y-3">
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.english_b2}
                 onChange={() => toggleCheck('english_b2')}
-              
+                className="w-4 h-4"
+                data-testid="check-english-b2"
+              />
               <span>Meet English B2 level requirement (GCSE/A-Level/UK degree/IELTS 7.0+)</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.no_switching_restrictions}
                 onChange={() => toggleCheck('no_switching_restrictions')}
-              
+                className="w-4 h-4"
+                data-testid="check-switching-restrictions"
+              />
               <span>Not coming from restricted visa (Visitor/Student/Seasonal Worker)</span>
             </label>
           </div>
@@ -177,17 +212,23 @@ export default function ComplianceChecker() {
           <h2 className="font-bold text-lg">Documentation</h2>
           <div className="space-y-3">
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.endorsement_letter}
                 onChange={() => toggleCheck('endorsement_letter')}
-              
+                className="w-4 h-4"
+                data-testid="check-endorsement-letter"
+              />
               <span>Endorsement letter from approved body (within 3 months of application)</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox"
+              <input
+                type="checkbox"
                 checked={checklist.document_authenticity}
                 onChange={() => toggleCheck('document_authenticity')}
-              
+                className="w-4 h-4"
+                data-testid="check-document-authenticity"
+              />
               <span>All documents authentic and certified (translations where needed)</span>
             </label>
           </div>
