@@ -560,11 +560,10 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const plan = await storage.getBusinessPlan(planId);
       if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
 
-      const { endorserSimulator } = await import("./calculators/endorserSimulator");
-      const { getAllEndorsers, scoreBusinessPlanForEndorser } = endorserSimulator;
+      const { getAllEndorsers, scoreBusinessPlanForEndorser } = await import("./calculators/endorserSimulator");
       
       const endorsers = getAllEndorsers();
-      const scores = endorsers.map(e => scoreBusinessPlanForEndorser(plan, e.id));
+      const scores = endorsers.map((e: any) => scoreBusinessPlanForEndorser(plan, e.id));
       
       res.json({ endorsers, scores });
     } catch (error) {
@@ -580,8 +579,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const plan = await storage.getBusinessPlan(planId);
       if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
 
-      const { routePlanner } = await import("./calculators/routePlanner");
-      const { compareRoutes } = routePlanner;
+      const { compareRoutes } = await import("./calculators/routePlanner");
       
       const analysis = compareRoutes(plan);
       res.json(analysis);
@@ -598,8 +596,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const plan = await storage.getBusinessPlan(planId);
       if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
 
-      const { teamModeller } = await import("./calculators/teamModeller");
-      const { generateTeamPlan, assessTeamSkills } = teamModeller;
+      const { generateTeamPlan, assessTeamSkills } = await import("./calculators/teamModeller");
       
       const teamPlan = generateTeamPlan(plan);
       const skillAssessment = assessTeamSkills(plan);
@@ -618,8 +615,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const plan = await storage.getBusinessPlan(planId);
       if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
 
-      const { tractionForecaster } = await import("./calculators/tractionForecaster");
-      const { forecastTraction } = tractionForecaster;
+      const { forecastTraction } = await import("./calculators/tractionForecaster");
       
       const forecast = forecastTraction(plan);
       res.json(forecast);
@@ -636,8 +632,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const plan = await storage.getBusinessPlan(planId);
       if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
 
-      const { ruleChangeEngine } = await import("./calculators/ruleChangeEngine");
-      const { getRuleEngineStatus } = ruleChangeEngine;
+      const { getRuleEngineStatus } = await import("./calculators/ruleChangeEngine");
       
       const businessProfile = {
         industry: plan.industry,
