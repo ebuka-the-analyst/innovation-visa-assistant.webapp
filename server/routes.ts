@@ -551,6 +551,109 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // ============ ADVANCED FEATURES API ENDPOINTS ============
+
+  app.get("/api/endorser/simulate/:planId", requireAuth, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user as any;
+      const plan = await storage.getBusinessPlan(planId);
+      if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
+
+      const { endorserSimulator } = await import("./calculators/endorserSimulator");
+      const { getAllEndorsers, scoreBusinessPlanForEndorser } = endorserSimulator;
+      
+      const endorsers = getAllEndorsers();
+      const scores = endorsers.map(e => scoreBusinessPlanForEndorser(plan, e.id));
+      
+      res.json({ endorsers, scores });
+    } catch (error) {
+      console.error("Endorser simulator error:", error);
+      res.status(500).json({ error: "Failed to analyze endorsers" });
+    }
+  });
+
+  app.get("/api/routes/analyze/:planId", requireAuth, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user as any;
+      const plan = await storage.getBusinessPlan(planId);
+      if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
+
+      const { routePlanner } = await import("./calculators/routePlanner");
+      const { compareRoutes } = routePlanner;
+      
+      const analysis = compareRoutes(plan);
+      res.json(analysis);
+    } catch (error) {
+      console.error("Route planner error:", error);
+      res.status(500).json({ error: "Failed to analyze routes" });
+    }
+  });
+
+  app.get("/api/team/model/:planId", requireAuth, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user as any;
+      const plan = await storage.getBusinessPlan(planId);
+      if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
+
+      const { teamModeller } = await import("./calculators/teamModeller");
+      const { generateTeamPlan, assessTeamSkills } = teamModeller;
+      
+      const teamPlan = generateTeamPlan(plan);
+      const skillAssessment = assessTeamSkills(plan);
+      
+      res.json({ teamPlan, skillAssessment });
+    } catch (error) {
+      console.error("Team modeller error:", error);
+      res.status(500).json({ error: "Failed to generate team plan" });
+    }
+  });
+
+  app.get("/api/traction/forecast/:planId", requireAuth, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user as any;
+      const plan = await storage.getBusinessPlan(planId);
+      if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
+
+      const { tractionForecaster } = await import("./calculators/tractionForecaster");
+      const { forecastTraction } = tractionForecaster;
+      
+      const forecast = forecastTraction(plan);
+      res.json(forecast);
+    } catch (error) {
+      console.error("Traction forecaster error:", error);
+      res.status(500).json({ error: "Failed to forecast traction" });
+    }
+  });
+
+  app.get("/api/rules/check/:planId", requireAuth, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user as any;
+      const plan = await storage.getBusinessPlan(planId);
+      if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
+
+      const { ruleChangeEngine } = await import("./calculators/ruleChangeEngine");
+      const { getRuleEngineStatus } = ruleChangeEngine;
+      
+      const businessProfile = {
+        industry: plan.industry,
+        stage: plan.innovationStage,
+        funding: plan.funding,
+        jobCreation: plan.jobCreation,
+      };
+      
+      const status = getRuleEngineStatus(businessProfile);
+      res.json(status);
+    } catch (error) {
+      console.error("Rule engine error:", error);
+      res.status(500).json({ error: "Failed to check rules" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
