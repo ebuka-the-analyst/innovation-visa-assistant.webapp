@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import logoImg from "@assets/BhenMedia_1763690019470.png";
 import ThemeToggle from "./ThemeToggle";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -42,13 +43,12 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
-          <button
-            onClick={() => handleNavigation('features')}
-            className="text-sm font-medium hover:text-primary transition-colors"
-            data-testid="button-nav-features"
-          >
-            Features
-          </button>
+          <Link href="/features" className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-all-features">
+            All Features
+          </Link>
+          <Link href="/tools-hub" className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-tools-hub">
+            Tools
+          </Link>
           <button
             onClick={() => handleNavigation('pricing')}
             className="text-sm font-medium hover:text-primary transition-colors"
