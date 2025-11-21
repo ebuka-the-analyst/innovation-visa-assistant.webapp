@@ -28,12 +28,23 @@ export default function ToolsChronographWheel() {
       style={{ scale: "0.40", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
-      <div className="w-96 rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "700px" }}>
+      <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "700px", width: "520px" }}>
         
         {/* Static Header Section */}
         <div className="flex flex-col items-center justify-center pt-3 pb-2 px-4 border-b border-gray-300 bg-gradient-to-b from-gray-50 to-transparent">
           <h3 className="text-sm font-black text-black text-center">104 TOOLS HUB</h3>
           <p className="text-xs text-gray-600 text-center mt-0.5">All Application Requirements</p>
+        </div>
+
+        {/* First Tool Highlight Box */}
+        <div className="mx-3 mt-2 p-3 bg-primary/10 border-2 border-primary rounded-lg">
+          <div className="flex items-start gap-2">
+            <div className="text-xs font-black text-primary">001</div>
+            <div className="flex-1">
+              <p className="text-sm font-black text-black">{tools[0]?.name || "Loading..."}</p>
+              <p className="text-xs text-gray-600 mt-0.5">{tools[0]?.description || ""}</p>
+            </div>
+          </div>
         </div>
 
         {/* Inner chrome cover overlay */}
