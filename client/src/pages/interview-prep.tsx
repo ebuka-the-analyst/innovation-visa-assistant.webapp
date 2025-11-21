@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, BookOpen, Award } from "lucide-react";
 import { useState } from "react";
 import { AuthHeader } from "@/components/AuthHeader";
+import FeatureNavigation from "@/components/FeatureNavigation";
 
 const interviewScenarios = [
   {

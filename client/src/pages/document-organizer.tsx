@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { CheckCircle2, Circle, Upload, Download, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { AuthHeader } from "@/components/AuthHeader";
+import FeatureNavigation from "@/components/FeatureNavigation";
 
 const documentCategories = [
   {
@@ -88,6 +89,7 @@ export default function DocumentOrganizer() {
       <AuthHeader />
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-4xl mx-auto">
+          <FeatureNavigation currentPage="document-organizer" />
           <div className="mb-12">
             <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">LAUNCHPAD DOCUMENT MANAGEMENT</span>
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Document Evidence Organizer</h1>
