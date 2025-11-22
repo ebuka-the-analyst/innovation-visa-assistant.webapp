@@ -197,7 +197,9 @@ export default function ToolsChronographWheel() {
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
             backgroundColor: isMinimized ? "#11b6e9" : "#e63946",
-            color: "#ffffff"
+            color: "#ffffff",
+            scale: "0.7",
+            transformOrigin: "top right"
           }}
         >
           {isMinimized ? (
