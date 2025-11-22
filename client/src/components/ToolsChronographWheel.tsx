@@ -11,13 +11,27 @@ export default function ToolsChronographWheel() {
   const widgetRef = useRef<HTMLDivElement>(null);
   const isMouseOverWidgetRef = useRef(false);
   const [selectedToolIdx, setSelectedToolIdx] = useState(0);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const [isHoveringUp, setIsHoveringUp] = useState(false);
   const [isHoveringDown, setIsHoveringDown] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const chevronScrollRef = useRef<NodeJS.Timeout | null>(null);
+  const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
   const tools = ALL_TOOLS;
   const selectedTool = tools[selectedToolIdx];
+
+  // Reset inactivity timer
+  const resetInactivityTimer = () => {
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+    }
+    
+    if (!isMinimized) {
+      inactivityTimerRef.current = setTimeout(() => {
+        setIsMinimized(true);
+      }, 8000); // 8 seconds
+    }
+  };
 
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
@@ -108,13 +122,24 @@ export default function ToolsChronographWheel() {
           scrollRef.current.scrollHeight - scrollRef.current.clientHeight
         )
       );
+      resetInactivityTimer();
     };
 
     container.addEventListener("wheel", handleNativeWheel, { passive: false });
     return () => {
       container.removeEventListener("wheel", handleNativeWheel);
     };
-  }, []);
+  }, [isMinimized]);
+
+  // Inactivity timer - close widget after 8 seconds of inactivity when open
+  useEffect(() => {
+    resetInactivityTimer();
+    return () => {
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+      }
+    };
+  }, [isMinimized]);
 
   // Handle quick scroll on chevron hover
   useEffect(() => {
@@ -176,6 +201,7 @@ export default function ToolsChronographWheel() {
       style={{ scale: "0.375", transformOrigin: "bottom left" }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
+        resetInactivityTimer();
       }}
       onMouseLeave={() => {
         isMouseOverWidgetRef.current = false;
@@ -191,7 +217,10 @@ export default function ToolsChronographWheel() {
 
         {/* Floating Close/Open Button - Always on top */}
         <button
-          onClick={() => setIsMinimized(!isMinimized)}
+          onClick={() => {
+            setIsMinimized(!isMinimized);
+            resetInactivityTimer();
+          }}
           className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-4 px-6 py-3 rounded-full font-bold text-xl"
           data-testid="button-toggle-tools-hub"
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
