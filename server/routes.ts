@@ -10,6 +10,7 @@ import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
 import passport from "passport";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
@@ -640,6 +641,95 @@ ${generatedSections.join('\n\n---\n\n')}`;
     } catch (error) {
       console.error("Settings config error:", error);
       res.status(500).json({ error: "Failed to fetch configuration" });
+    }
+  });
+
+  // Session Handoff API for QR Mobile Upload
+  app.post("/api/session-handoff", async (req, res) => {
+    try {
+      const { toolId, payload } = req.body;
+      
+      if (!toolId || !payload) {
+        return res.status(400).json({ error: "toolId and payload are required" });
+      }
+
+      // Generate unique token
+      const token = crypto.randomUUID();
+      
+      // Set expiration (15 minutes from now)
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+      
+      // Save to database
+      await storage.createSessionHandoff({
+        token,
+        toolId,
+        payload,
+        expiresAt,
+        consumed: false,
+      });
+      
+      // Return token for QR code
+      const domain = process.env.REPLIT_DOMAINS 
+        ? process.env.REPLIT_DOMAINS.split(",")[0].trim() 
+        : "localhost:5000";
+      
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+        : `http://${domain}`;
+      
+      const handoffUrl = `${baseUrl}/handoff?token=${token}`;
+      
+      res.json({ token, handoffUrl, expiresAt });
+    } catch (error) {
+      console.error("Session handoff creation error:", error);
+      res.status(500).json({ error: "Failed to create session handoff" });
+    }
+  });
+
+  app.get("/api/session-handoff/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+      
+      const handoff = await storage.getSessionHandoff(token);
+      
+      if (!handoff) {
+        return res.status(404).json({ error: "Session not found or expired" });
+      }
+      
+      // Mark as consumed
+      await storage.consumeSessionHandoff(token);
+      
+      res.json({ 
+        toolId: handoff.toolId, 
+        payload: handoff.payload 
+      });
+    } catch (error) {
+      console.error("Session handoff retrieval error:", error);
+      res.status(500).json({ error: "Failed to retrieve session" });
+    }
+  });
+
+  // Referral Tracking API for Share Buttons
+  app.post("/api/referrals", async (req, res) => {
+    try {
+      const { toolId, channel, sessionToken } = req.body;
+      const user = req.user as any;
+      
+      if (!toolId || !channel) {
+        return res.status(400).json({ error: "toolId and channel are required" });
+      }
+      
+      await storage.createReferral({
+        userId: user?.id || null,
+        toolId,
+        channel,
+        sessionToken: sessionToken || null,
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Referral tracking error:", error);
+      res.status(500).json({ error: "Failed to track referral" });
     }
   });
 
