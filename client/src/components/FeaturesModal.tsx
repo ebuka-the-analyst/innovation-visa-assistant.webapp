@@ -171,7 +171,7 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
         onClick={onClose}
       >
         <div
-          className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden"
+          className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
           style={{
             animation: "slideInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
@@ -208,7 +208,7 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
           {/* Content */}
           <div className="relative z-10">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-border bg-gradient-to-r from-primary/5 to-chart-3/5">
+            <div className="flex items-center justify-between p-6 border-b border-border bg-gradient-to-r from-primary/5 to-chart-3/5 dark:from-slate-800 dark:to-slate-800">
               <div className="flex items-center gap-3">
                 <Sparkles className="w-6 h-6 text-primary animate-spin" style={{ animationDuration: "3s" }} />
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
@@ -297,7 +297,7 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
             </div>
 
             {/* Footer CTA */}
-            <div className="border-t border-border p-6 bg-muted/30 flex justify-between items-center">
+            <div className="border-t border-border p-6 bg-muted/30 dark:bg-slate-800 flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
                 Ready to generate your business plan?
               </p>
