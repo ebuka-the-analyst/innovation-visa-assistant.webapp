@@ -267,7 +267,11 @@ export default function ToolsChronographWheel() {
           </div>
 
           {/* Featured Tool Box - Centered Behind */}
-          <div className="absolute inset-0 flex items-center justify-center px-1 z-5">
+          <div 
+            className="absolute inset-0 flex items-center justify-center px-1 z-5"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+          >
             <div 
               onClick={() => setLocation(`/tools/${selectedTool.id}`)}
               className="p-3 bg-white border-2 border-gray-300 rounded-lg w-full cursor-pointer hover:shadow-lg transition-shadow" 
