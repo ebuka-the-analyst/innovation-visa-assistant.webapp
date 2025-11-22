@@ -134,6 +134,10 @@ export default function Header() {
               FAQ
             </button>
             <div className="flex flex-col gap-2 pt-4 border-t border-border">
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <span className="text-sm text-muted-foreground">Dark Mode</span>
+              </div>
               <Link href="/login" className="w-full">
                 <Button variant="ghost" className="w-full justify-start">
                   Sign In
