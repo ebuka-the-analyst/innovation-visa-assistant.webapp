@@ -93,7 +93,7 @@ export default function Chatbot({ planId }: ChatbotProps) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover-elevate active-elevate-2 flex items-center justify-center z-50"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover-elevate active-elevate-2 flex items-center justify-center z-50 pulse-glow"
         data-testid="button-open-chat"
         aria-label="Open chat"
       >
