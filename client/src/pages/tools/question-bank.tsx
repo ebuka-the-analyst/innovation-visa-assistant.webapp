@@ -1,52 +1,6 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
-import { useState } from "react";
-
+import { Card } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { Input } from "@/components/ui/input"; import { Textarea } from "@/components/ui/textarea"; import { AuthHeader } from "@/components/AuthHeader"; import { ToolNavigation } from "@/components/ToolNavigation"; import { useState } from "react";
 export default function QUESTIONBANK() {
-  const [data, setData] = useState({ f1: "", f2: "", f3: "" });
-  const [submitted, setSubmitted] = useState(false);
-
-  return (
-    <>
-      <AuthHeader />
-      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <div className="max-w-2xl mx-auto">
-          <ToolNavigation />
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold">Question Bank</h1>
-            <p className="text-muted-foreground">Collect and organize information</p>
-          </div>
-          
-          {!submitted ? (
-            <div>
-              <Card className="p-6 mb-4">
-                <label className="block mb-4">
-                  <p className="font-semibold mb-2">Field 1</p>
-                  <Input value={data.f1} onChange={e => setData({ ...data, f1: e.target.value })} placeholder="Enter information" />
-                </label>
-                <label className="block mb-4">
-                  <p className="font-semibold mb-2">Field 2</p>
-                  <Input value={data.f2} onChange={e => setData({ ...data, f2: e.target.value })} placeholder="Enter information" />
-                </label>
-                <label>
-                  <p className="font-semibold mb-2">Notes</p>
-                  <Textarea value={data.f3} onChange={e => setData({ ...data, f3: e.target.value })} placeholder="Additional notes" className="h-20" />
-                </label>
-              </Card>
-              <Button onClick={() => setSubmitted(true)} className="w-full bg-primary">Submit & Save</Button>
-            </div>
-          ) : (
-            <Card className="p-6">
-              <p className="text-green-700 font-semibold mb-3">✓ Information saved successfully</p>
-              <Button onClick={() => setSubmitted(false)} className="w-full">Add More</Button>
-            </Card>
-          )}
-        </div>
-      </div>
-    </>
-  );
+  const [data, setData] = useState({f1:"",f2:"",f3:""}), [done, setDone] = useState(false);
+  const progress = [data.f1.length>10, data.f2.length>10, data.f3.length>20].filter(Boolean).length;
+  return <><AuthHeader /><div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6"><ToolNavigation /><h1 className="text-4xl font-bold mb-2">Question Bank</h1><p className="text-muted-foreground mb-6">Information collector</p>{!done?<div><Card className="p-4 mb-4"><div className="w-full bg-gray-200 h-2 rounded-full"><div style={{width:`${(progress/3)*100}%`}} className="bg-primary h-2 rounded-full"/></div></Card><Card className="p-4 mb-4"><label className="block mb-3"><span className="font-semibold text-sm block mb-1">Field 1</span><Input value={data.f1} onChange={e=>setData({...data,f1:e.target.value})} maxLength={500}/></label><label className="block mb-3"><span className="font-semibold text-sm block mb-1">Field 2</span><Input value={data.f2} onChange={e=>setData({...data,f2:e.target.value})} maxLength={500}/></label><label><span className="font-semibold text-sm block mb-1">Notes</span><Textarea value={data.f3} onChange={e=>setData({...data,f3:e.target.value})} className="h-20" maxLength={1000}/></label></Card><Button onClick={()=>setDone(true)} className="w-full bg-primary">Submit</Button></div>:<Card className="p-6"><p className="text-green-700 font-bold mb-3">✓ Saved</p><Button onClick={()=>setDone(false)} className="w-full">Edit</Button></Card>}</div></>;
 }
