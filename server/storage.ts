@@ -1,6 +1,6 @@
 import { type User, type InsertUser, type BusinessPlan, type InsertBusinessPlan, type SessionHandoff, type InsertSessionHandoff, type Referral, type InsertReferral, users, businessPlans, sessionHandoffs, referrals } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and, gt, lt } from "drizzle-orm";
 
 export interface IStorage {
   // User management
@@ -152,7 +152,7 @@ export class DatabaseStorage implements IStorage {
   async cleanupExpiredHandoffs(): Promise<void> {
     await db
       .delete(sessionHandoffs)
-      .where(gt(sessionHandoffs.expiresAt, new Date()));
+      .where(lt(sessionHandoffs.expiresAt, new Date()));
   }
 
   async createReferral(insertReferral: InsertReferral): Promise<Referral> {
