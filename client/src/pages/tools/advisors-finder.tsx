@@ -23,19 +23,26 @@ export default function AdvisorsFinder() {
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <ToolNavigation />
-        <div className="w-full">
-          <h1 className="text-4xl font-bold mb-2">Advisors Finder</h1>
-          <p className="text-muted-foreground mb-6">Finder & comparison</p>
+        <div className="flex gap-6">
+          {/* Left sidebar - fixed */}
+          <div className="flex-shrink-0">
+            {/* Widget placeholder */}
+          </div>
+          
+          {/* Main content - constrained width */}
+          <div className="max-w-4xl flex-1">
+            <h1 className="text-4xl font-bold mb-2">Advisors Finder</h1>
+            <p className="text-muted-foreground mb-6">Finder & comparison</p>
 
-          <Input
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="mb-4"
-            data-testid="input-search-advisors"
-          />
+            <Input
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="mb-4"
+              data-testid="input-search-advisors"
+            />
 
-          <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-4">
             {filtered.map((i) => (
               <Card key={i.id} className="p-4">
                 <div className="flex justify-between mb-2">
@@ -65,6 +72,7 @@ export default function AdvisorsFinder() {
                 </Button>
               </Card>
             ))}
+            </div>
           </div>
         </div>
       </div>
