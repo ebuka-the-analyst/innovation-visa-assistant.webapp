@@ -306,9 +306,11 @@ export default function ToolsChronographWheel() {
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
           >
-            <div 
-              onClick={() => setLocation(`/tools/${selectedTool.id}`)}
-              className="p-3 bg-white border-2 border-gray-300 rounded-lg w-full cursor-pointer hover:shadow-lg transition-shadow" 
+            <a 
+              href={`/tools/${selectedTool.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 bg-white border-2 border-gray-300 rounded-lg w-full cursor-pointer hover:shadow-lg transition-shadow block" 
               style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
             >
               <div className="flex flex-col gap-2">
@@ -327,7 +329,7 @@ export default function ToolsChronographWheel() {
                   </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
         </div>
         )}
