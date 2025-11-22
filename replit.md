@@ -12,6 +12,10 @@
 **QR Code Mobile Upload:** Users can scan QR codes to continue their work on mobile devices
 **Social Share Buttons:** Share tools via WhatsApp, Email, Twitter, LinkedIn with optional progress
 
+**CRITICAL BUGS FIXED (November 22, 2025):**
+- ✅ Session handoff cleanup bug - was deleting active tokens instead of expired ones (changed gt to lt)
+- ✅ Mobile UX bug - "Upload from Phone" button now hidden on mobile devices (can't scan QR with same phone)
+
 **Components Built:**
 - ✅ `useSessionHandoff` hook - QR generation and session management
 - ✅ `SessionHandoffDialog` - QR code display modal
