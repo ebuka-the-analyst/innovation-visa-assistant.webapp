@@ -5,12 +5,11 @@ import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { useState } from "react";
 
-export default function ToolComponent() {
+export default function AdvisorPrepGuide() {
   const [input, setInput] = useState("");
   const [result, setResult] = useState("");
 
   const handleAnalyze = () => {
-    // Placeholder analysis logic
     setResult("Analysis complete. Your data has been processed and recommendations are ready.");
   };
 
@@ -22,8 +21,8 @@ export default function ToolComponent() {
           <ToolNavigation />
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Advisor Meeting Prep Guide</h1>
-            <p className="text-lg text-muted-foreground">Prepare for meetings with immigration advisors</p>
+            <h1 className="text-4xl font-bold mb-2"></h1>
+            <p className="text-lg text-muted-foreground"></p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-8">
