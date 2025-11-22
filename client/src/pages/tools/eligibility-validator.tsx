@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
+import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -68,7 +69,34 @@ export default function EligibilityValidator() {
     a.click();
   };
 
-  useEffect(() => { loadProgress(); }, []);
+  const getSerializedState = () => {
+    return {
+      scores,
+      dependents,
+      savedDate,
+      tab
+    };
+  };
+
+  useEffect(() => {
+    const handoffKey = 'eligibility-validator_handoff';
+    const handoffData = localStorage.getItem(handoffKey);
+    
+    if (handoffData) {
+      try {
+        const payload = JSON.parse(handoffData);
+        if (payload.scores) setScores(payload.scores);
+        if (payload.dependents !== undefined) setDependents(payload.dependents);
+        if (payload.savedDate) setSavedDate(payload.savedDate);
+        if (payload.tab) setTab(payload.tab);
+        localStorage.removeItem(handoffKey);
+      } catch (err) {
+        console.error('Failed to restore handoff data:', err);
+      }
+    } else {
+      loadProgress();
+    }
+  }, []);
 
   const chartData = [
     {name:"Innovation",value:scores.innovation},
@@ -87,13 +115,16 @@ export default function EligibilityValidator() {
           <h1 className="text-4xl font-bold mb-2">Eligibility Validator</h1>
           <p className="text-muted-foreground mb-6">Precise visa eligibility calculation</p>
 
-          <div className="flex gap-2 mb-6 flex-wrap">
-            <Button onClick={saveProgress} className="gap-2" variant="outline"><Save className="w-4 h-4" /> Save</Button>
-            <Button onClick={() => setShowRecommendations(!showRecommendations)} className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
-            <Button onClick={() => setShowActionPlan(!showActionPlan)} className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
-            <Button onClick={exportReport} className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
-            <Button onClick={loadProgress} className="gap-2" variant="outline"><RefreshCw className="w-4 h-4" /> Restore</Button>
-          </div>
+          <ToolUtilityBar
+            toolId="eligibility-validator"
+            toolName="Eligibility Validator"
+            onSave={saveProgress}
+            onRestore={loadProgress}
+            onExport={exportReport}
+            onSmartTips={() => setShowRecommendations(!showRecommendations)}
+            onActionPlan={() => setShowActionPlan(!showActionPlan)}
+            getSerializedState={getSerializedState}
+          />
 
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
 
