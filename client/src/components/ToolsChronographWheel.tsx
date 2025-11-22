@@ -89,6 +89,21 @@ export default function ToolsChronographWheel() {
     }
   };
 
+  // Handle wheel scroll on widget - prevent page scroll
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (!scrollRef.current) return;
+
+    const scrollDelta = e.deltaY > 0 ? 30 : -30;
+    scrollRef.current.scrollTop = Math.max(
+      0,
+      Math.min(
+        scrollRef.current.scrollTop + scrollDelta,
+        scrollRef.current.scrollHeight - scrollRef.current.clientHeight
+      )
+    );
+  };
+
   // Handle quick scroll on chevron hover
   useEffect(() => {
     if (isHoveringUp && scrollRef.current) {
@@ -271,6 +286,7 @@ export default function ToolsChronographWheel() {
             className="absolute inset-0 flex items-center justify-center px-1 z-5"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
+            onWheel={handleWheel}
           >
             <div 
               onClick={() => setLocation(`/tools/${selectedTool.id}`)}
