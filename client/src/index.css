@@ -330,4 +330,26 @@
   .pulse-glow-orange {
     animation: rotate-glow-orange 3s linear infinite;
   }
+
+  /* Swipe hint animation - shows users they can swipe */
+  @keyframes swipe-hint {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-15px);
+    }
+  }
+
+  /* Swipe out animation - dismisses widget off screen */
+  @keyframes swipe-out {
+    0% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-150vw);
+      opacity: 0;
+    }
+  }
 }

@@ -10,10 +10,14 @@ export default function ToolsChronographWheel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<HTMLDivElement>(null);
   const isMouseOverWidgetRef = useRef(false);
+  const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
   const [selectedToolIdx, setSelectedToolIdx] = useState(0);
   const [isMinimized, setIsMinimized] = useState(true);
   const [isHoveringUp, setIsHoveringUp] = useState(false);
   const [isHoveringDown, setIsHoveringDown] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const chevronScrollRef = useRef<NodeJS.Timeout | null>(null);
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -127,6 +131,48 @@ export default function ToolsChronographWheel() {
     };
   }, []);
 
+  // Handle touch swipe to dismiss
+  useEffect(() => {
+    const container = widgetRef.current;
+    if (!container) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartXRef.current = e.touches[0].clientX;
+      touchStartYRef.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      
+      const deltaX = touchStartXRef.current - touchEndX;
+      const deltaY = Math.abs(touchStartYRef.current - touchEndY);
+      
+      // Swipe left detected (min 50px horizontal, less vertical movement)
+      if (deltaX > 50 && deltaY < 30) {
+        setIsDismissed(true);
+        setShowSwipeHint(false);
+      }
+    };
+
+    container.addEventListener("touchstart", handleTouchStart);
+    container.addEventListener("touchend", handleTouchEnd);
+    
+    return () => {
+      container.removeEventListener("touchstart", handleTouchStart);
+      container.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
+
+  // Animate swipe hint on mount
+  useEffect(() => {
+    if (!showSwipeHint) return;
+    const timer = setTimeout(() => {
+      setShowSwipeHint(false);
+    }, 4000); // Show hint for 4 seconds
+    return () => clearTimeout(timer);
+  }, [showSwipeHint]);
+
   // Inactivity timer - close widget after 8 seconds of inactivity when open
   useEffect(() => {
     if (isMinimized) {
@@ -208,12 +254,20 @@ export default function ToolsChronographWheel() {
     };
   }, [isHoveringDown]);
 
+  if (isDismissed) {
+    return null;
+  }
+
   return (
     <div
       ref={widgetRef}
       className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
-      style={{ scale: "0.375", transformOrigin: "bottom left" }}
+      style={{ 
+        scale: "0.375", 
+        transformOrigin: "bottom left",
+        animation: showSwipeHint ? "swipe-hint 1.5s ease-in-out 0.5s infinite" : "none"
+      }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
         recordActivity();
