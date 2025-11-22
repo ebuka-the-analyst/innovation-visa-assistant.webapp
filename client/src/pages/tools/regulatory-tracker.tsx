@@ -11,7 +11,7 @@ import { Download, AlertTriangle, TrendingUp } from "lucide-react";
 const REGULATORY_CHANGES_2024 = [
   {topic:"Immigration Rules",item:"Points-Based System refinements",date:"Apr 2024",impact:"High",status:"In Effect"},
   {topic:"Employment",item:"National Minimum Wage increase to £11.44",date:"Apr 2024",impact:"High",status:"In Effect"},
-  {topic:"Tax",item:"Corporation tax rate change","Apr 2023",impact:"High",status:"In Effect"},
+  {topic:"Tax",item:"Corporation tax rate change",date:"Apr 2023",impact:"High",status:"In Effect"},
   {topic:"Data Protection",item:"GDPR enforcement increase by ICO",date:"Ongoing",impact:"High",status:"Active"},
   {topic:"Company Law",item:"Large company reporting requirements",date:"Jan 2024",impact:"Medium",status:"In Effect"}
 ];
