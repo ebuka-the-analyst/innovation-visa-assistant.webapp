@@ -17,13 +17,6 @@ const stats = [
     source: "UKVI Processing Times 2026"
   },
   {
-    icon: PoundSterling,
-    value: "£50,000",
-    label: "Minimum Investment",
-    subtext: "Required capital investment in your UK business",
-    source: "UK Home Office 2026"
-  },
-  {
     icon: Calendar,
     value: "3",
     label: "years",
