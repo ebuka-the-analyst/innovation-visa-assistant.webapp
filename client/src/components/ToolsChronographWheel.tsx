@@ -211,9 +211,9 @@ export default function ToolsChronographWheel() {
   return (
     <div
       ref={widgetRef}
-      className="fixed bottom-8 left-8 z-40"
+      className="fixed bottom-8 left-8 right-8 z-40"
       data-testid="chronograph-wheel-container"
-      style={{ scale: "0.375", transformOrigin: "bottom left" }}
+      style={{ scale: "0.375", transformOrigin: "bottom left", maxWidth: "calc(100vw - 4rem)" }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
         recordActivity();
