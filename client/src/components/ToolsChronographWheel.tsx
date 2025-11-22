@@ -213,6 +213,7 @@ export default function ToolsChronographWheel() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Stainless steel cover effect */}
         <div
@@ -222,7 +223,6 @@ export default function ToolsChronographWheel() {
             boxShadow: "0 4px 12px rgba(0,0,0,0.2) inset",
           }}
         />
-        )}
       </div>
     </div>
   );
