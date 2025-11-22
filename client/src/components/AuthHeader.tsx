@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Home } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import logoImg from "@assets/BhenMedia_1763690019470.png";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export function AuthHeader() {
   const [, setLocation] = useLocation();
@@ -58,6 +59,7 @@ export function AuthHeader() {
             <div className="hidden sm:block text-sm text-muted-foreground">
               {user.displayName || user.email}
             </div>
+            <ThemeToggle />
             <Button
               variant="outline"
               size="sm"
