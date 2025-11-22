@@ -31,8 +31,8 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl">
       {/* Disclaimer Bar */}
       {!disclaimerDismissed && (
-        <div className="w-full bg-black/90 dark:bg-white text-white dark:text-black text-xs py-2.5 flex items-center justify-center gap-4 border-b border-border/40">
-          <span>
+        <div className="w-full bg-black/90 dark:bg-white text-white dark:text-black text-xs py-2 px-3 md:py-2.5 flex items-center justify-between md:justify-center gap-2 md:gap-4 border-b border-border/40">
+          <span className="line-clamp-2 md:line-clamp-1">
             <strong>UK-Innovation Visa Assistant Disclaimer:</strong> Trained on GOV.UK guidance. This doesnt substitute a legal advice. Always verify with official sources.
           </span>
           <button
@@ -45,14 +45,14 @@ export default function Header() {
         </div>
       )}
       
-      <nav className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between border-b border-border/40">
+      <nav className="container mx-auto px-3 md:px-6 h-16 flex items-center justify-between border-b border-border/40">
         {/* Logo */}
         <Link href="/">
           <div className="flex flex-col items-start cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
-            <img src={logoImg} alt="BhenMedia" className="h-14 w-48" />
-            <div className="relative -mt-1">
-              <p className="text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
-                UK's #1 Innovation Visa Partner
+            <img src={logoImg} alt="BhenMedia" className="h-8 md:h-14 w-auto md:w-48 max-w-xs" />
+            <div className="relative -mt-0.5 md:-mt-1">
+              <p className="text-xs md:text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
+                UK's #1 Visa Partner
               </p>
               <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-chart-3 to-primary rounded-full" />
             </div>
