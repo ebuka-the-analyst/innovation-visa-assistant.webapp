@@ -22,8 +22,30 @@
 **Backend Infrastructure:**
 - ✅ `sessionHandoffs` database table - Ephemeral token storage (15min TTL)
 - ✅ `referrals` database table - Share tracking analytics
-- ✅ `/api/session-handoff` - Create and retrieve session tokens
+- ✅ `/api/session-handoff` - Create and retrieve session tokens with HMAC security
 - ✅ `/api/referrals` - Track share button clicks
+
+**Critical Handoff Consumption Pattern:**
+Each tool must implement this pattern on mount to restore QR handoff state:
+```typescript
+useEffect(() => {
+  const handoffKey = '${toolId}_handoff';
+  const handoffData = localStorage.getItem(handoffKey);
+  
+  if (handoffData) {
+    const payload = JSON.parse(handoffData);
+    // Restore state from payload
+    // Clear handoff cache after consumption
+    localStorage.removeItem(handoffKey);
+  } else {
+    // Load from regular progress
+  }
+}, []);
+```
+
+**Integration Status:**
+- ✅ Application Requirements Checker - FULLY INTEGRATED & TESTED
+- ⏳ Remaining 12 Batch 1 tools - PENDING ROLLOUT
 
 ---
 
