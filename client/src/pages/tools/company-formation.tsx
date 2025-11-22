@@ -20,7 +20,7 @@ export default function TOOL_COMPONENT() {
         <div className="max-w-6xl mx-auto">
           <ToolNavigation />
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Tool: TOOL_NAME</h1>
+            <h1 className="text-2xl font-bold mb-2">Company Formation & Structure Guide</h1>
             <p className="text-lg text-muted-foreground">Professional analysis and guidance tool</p>
           </div>
 
