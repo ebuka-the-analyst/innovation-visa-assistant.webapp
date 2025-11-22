@@ -11,7 +11,6 @@ const endorsers = [
     description: "Technology-focused, fastest processing",
     features: {
       focusAreas: "AI, Fintech, Biotech, Cyber Security, Deep Tech",
-      minInvestment: "£50,000",
       timeline: "6-8 weeks endorsement",
       successRate: "88%",
       requirements: "10% R&D spend, clear tech differentiation",
@@ -27,7 +26,6 @@ const endorsers = [
     description: "Global scope, diverse sectors",
     features: {
       focusAreas: "Any innovative business",
-      minInvestment: "£50,000",
       timeline: "8-10 weeks endorsement",
       successRate: "82%",
       requirements: "Clear innovation, market validation",
@@ -43,7 +41,6 @@ const endorsers = [
     description: "Academic partnerships, research-heavy",
     features: {
       focusAreas: "Research-backed innovation",
-      minInvestment: "£50,000",
       timeline: "4-6 weeks endorsement",
       successRate: "85%",
       requirements: "University partnership, research output",
@@ -58,7 +55,6 @@ const endorsers = [
 
 const comparisonAreas = [
   { key: "focusAreas", label: "Focus Areas" },
-  { key: "minInvestment", label: "Minimum Investment" },
   { key: "timeline", label: "Endorsement Timeline" },
   { key: "successRate", label: "Success Rate" },
   { key: "requirements", label: "Key Requirements" },
