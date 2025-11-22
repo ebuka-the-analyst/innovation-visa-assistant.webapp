@@ -156,7 +156,7 @@ export default function ToolsChronographWheel() {
         {/* Floating Close/Open Button - Always on top */}
         <button
           onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute top-4 right-4 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-6 px-12 py-6 rounded-full font-black text-4xl"
+          className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-sm"
           data-testid="button-toggle-tools-hub"
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
@@ -166,13 +166,13 @@ export default function ToolsChronographWheel() {
         >
           {isMinimized ? (
             <>
-              <Icons.ChevronUp className="w-14 h-14" />
-              Open it
+              <Icons.ChevronUp className="w-4 h-4" />
+              Open
             </>
           ) : (
             <>
-              Close it
-              <Icons.X className="w-14 h-14" />
+              Close
+              <Icons.X className="w-4 h-4" />
             </>
           )}
         </button>
