@@ -18,6 +18,7 @@ export default function ToolsChronographWheel() {
   const [isHoveringDown, setIsHoveringDown] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
+  const [isHoveringWidget, setIsHoveringWidget] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const chevronScrollRef = useRef<NodeJS.Timeout | null>(null);
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -270,10 +271,12 @@ export default function ToolsChronographWheel() {
       }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
+        setIsHoveringWidget(true);
         recordActivity();
       }}
       onMouseLeave={() => {
         isMouseOverWidgetRef.current = false;
+        setIsHoveringWidget(false);
       }}
     >
       {/* Outer metal bezel effect */}
@@ -300,7 +303,9 @@ export default function ToolsChronographWheel() {
             transformOrigin: "top right"
           }}
         >
-          {isMinimized ? (
+          {isHoveringWidget && !isMinimized ? (
+            <span style={{ fontSize: "clamp(0.8rem, 2vw, 1.5rem)" }}>Swipe left to minimise</span>
+          ) : isMinimized ? (
             <>
               <Icons.ChevronUp className="w-8 h-8" />
               <span style={{ fontSize: "clamp(0.8rem, 2vw, 1.5rem)" }}>Open</span>
