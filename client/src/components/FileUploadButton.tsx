@@ -121,6 +121,7 @@ export function FileUploadButton({
                 size="sm"
                 onClick={() => cameraInputRef.current?.click()}
                 data-testid="button-camera-upload"
+                className="dark:text-white dark:border-slate-600"
               >
                 <Camera className="h-4 w-4 mr-2" />
                 Camera
@@ -135,6 +136,7 @@ export function FileUploadButton({
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 data-testid="button-file-upload"
+                className="dark:text-white dark:border-slate-600"
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Upload
@@ -151,6 +153,7 @@ export function FileUploadButton({
               size="sm"
               onClick={() => fileInputRef.current?.click()}
               data-testid="button-file-upload"
+              className="dark:text-white dark:border-slate-600"
             >
               <FileText className="h-4 w-4 mr-2" />
               {config.label}
