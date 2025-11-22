@@ -21,8 +21,7 @@ export default function ToolsChronographWheel() {
     const width = window.innerWidth;
     if (width < 640) return 0.3; // Small mobile
     if (width < 1024) return 0.45; // Tablet
-    if (width < 1536) return 0.65; // Laptop
-    return 0.85; // 4K screens
+    return 1; // Big & bigger screens - original size
   };
   
   const [scale, setScale] = useState(0.375);
@@ -262,25 +261,25 @@ export default function ToolsChronographWheel() {
             recordActivity();
             setIsMinimized(!isMinimized);
           }}
-          className="absolute top-1 right-1 sm:top-2 sm:right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-xs sm:text-sm md:text-base"
+          className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-4 px-6 py-3 rounded-full font-bold text-xl"
           data-testid="button-toggle-tools-hub"
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
             backgroundColor: isMinimized ? "#11b6e9" : "#e63946",
             color: "#ffffff",
-            scale: "0.85",
+            scale: "0.7",
             transformOrigin: "top right"
           }}
         >
           {isMinimized ? (
             <>
-              <Icons.ChevronUp className="w-4 h-4 sm:w-6 sm:h-6" />
-              <span className="hidden sm:inline">Open</span>
+              <Icons.ChevronUp className="w-8 h-8" />
+              Open
             </>
           ) : (
             <>
-              <span className="hidden sm:inline">Close</span>
-              <Icons.X className="w-4 h-4 sm:w-6 sm:h-6" />
+              Close
+              <Icons.X className="w-8 h-8" />
             </>
           )}
         </button>
