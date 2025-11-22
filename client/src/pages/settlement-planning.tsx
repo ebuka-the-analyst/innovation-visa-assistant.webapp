@@ -9,7 +9,7 @@ const settlementSteps = [
     year: "Year 1",
     title: "Visa Grant & Business Launch",
     milestones: [
-      "Receive Innovation Visa approval",
+      "Receive Innovator Founder Visa approval",
       "Establish UK business operations",
       "Meet initial job creation targets",
       "Begin financial projections tracking",
@@ -112,7 +112,7 @@ export default function SettlementPlanning() {
             <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">POST-VISA ROADMAP</span>
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Settlement Planning & ILR Strategy</h1>
             <p className="text-lg text-muted-foreground">
-              Long-term planning from Innovation Visa through ILR (Indefinite Leave to Remain) and British Citizenship. Includes tax optimization, international expansion strategy, and post-settlement pathways.
+              Long-term planning from Innovator Founder Visa through ILR (Indefinite Leave to Remain) and British Citizenship. Includes tax optimization, international expansion strategy, and post-settlement pathways.
             </p>
           </div>
 
@@ -217,7 +217,7 @@ export default function SettlementPlanning() {
                   <div>
                     <h3 className="font-semibold text-lg mb-2">Scale Strategically</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Your Innovation Visa startup has proven you can innovate and create value. Use this foundation to expand internationally while maintaining your UK presence and fulfilling ILR requirements.
+                      Your Innovator Founder Visa startup has proven you can innovate and create value. Use this foundation to expand internationally while maintaining your UK presence and fulfilling ILR requirements.
                     </p>
                     <Button gap-2>
                       <TrendingUp className="w-4 h-4" />

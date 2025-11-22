@@ -8,7 +8,7 @@ import {
 const faqs = [
   {
     question: "What if I'm not approved for the visa?",
-    answer: "While we can't guarantee visa approval (as that's decided by endorsing bodies and UK government), our business plans are specifically designed to meet all Innovation Visa criteria. We offer a 7-day money-back guarantee if you're not satisfied with the quality of the generated plan.",
+    answer: "While we can't guarantee visa approval (as that's decided by endorsing bodies and UK government), our business plans are specifically designed to meet all Innovator Founder Visa criteria. We offer a 7-day money-back guarantee if you're not satisfied with the quality of the generated plan.",
   },
   {
     question: "How long does generation take?",
@@ -24,7 +24,7 @@ const faqs = [
   },
   {
     question: "Do you guarantee visa approval?",
-    answer: "No service can guarantee visa approval as the decision lies with endorsing bodies and UK Visas & Immigration. However, our plans are designed to comprehensively address all three visa criteria: Innovation, Viability, and Scalability.",
+    answer: "No service can guarantee visa approval as the decision lies with endorsing bodies and UK Visas & Immigration. However, our plans are designed to comprehensively address all three Innovator Founder Visa criteria: Innovation, Viability, and Scalability.",
   },
   {
     question: "What's included in the business plan?",

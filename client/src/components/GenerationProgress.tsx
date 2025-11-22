@@ -240,7 +240,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                   variant="outline"
                   onClick={() => {
                     const subject = `${tier.charAt(0).toUpperCase() + tier.slice(1)} Business Plan - ${pdfUrl.split('/').pop()}`;
-                    const body = `I've generated my UK Innovation Visa business plan using VisaPrep AI.\n\nView it here: ${window.location.origin}${pdfUrl}\n\nBest regards`;
+                    const body = `I've generated my UK Innovator Founder Visa business plan using VisaPrep AI.\n\nView it here: ${window.location.origin}${pdfUrl}\n\nBest regards`;
                     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                   }}
                   data-testid="button-share-email"
@@ -252,7 +252,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    const text = `Just generated my UK Innovation Visa business plan with VisaPrep AI! 🚀 #InnovationVisa #StartupUK`;
+                    const text = `Just generated my UK Innovator Founder Visa business plan with VisaPrep AI! 🚀 #InnovationVisa #StartupUK`;
                     const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + pdfUrl)}`;
                     window.open(url, '_blank', 'width=600,height=600');
                   }}

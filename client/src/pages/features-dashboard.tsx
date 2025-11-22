@@ -125,7 +125,7 @@ export default function FeaturesDashboard() {
           <div className="mb-16">
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Your Visa Journey</h1>
             <p className="text-lg text-muted-foreground">
-              Navigate through all features in the optimal order for UK Innovation Visa success
+              Navigate through all features in the optimal order for UK Innovator Founder Visa success
             </p>
           </div>
 

@@ -66,7 +66,7 @@ export default function FeaturesSection() {
               Everything You Need to Succeed
             </h2>
             <p className="text-lg text-muted-foreground">
-              Comprehensive features designed specifically for UK Innovation Visa applications
+              Comprehensive features designed specifically for UK Innovator Founder Visa applications
             </p>
           </div>
 

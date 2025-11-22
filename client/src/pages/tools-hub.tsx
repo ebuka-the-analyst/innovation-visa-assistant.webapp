@@ -85,7 +85,7 @@ export default function ToolsHub() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-3" data-testid="heading-tools-hub">
-            UK Innovation Visa Tools
+            UK Innovator Founder Visa Tools
           </h1>
           <p className="text-lg text-muted-foreground">
             88 powerful tools to help you from application to approval and beyond

@@ -145,7 +145,7 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
         <DialogHeader>
           <DialogTitle className="text-2xl">Sample Business Plans</DialogTitle>
           <DialogDescription>
-            Real-world examples of approved Innovation Visa business plans across different industries
+            Real-world examples of approved Innovator Founder Visa business plans across different industries
           </DialogDescription>
         </DialogHeader>
 

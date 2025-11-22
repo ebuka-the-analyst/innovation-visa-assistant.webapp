@@ -37,7 +37,7 @@ export function AuthHeader() {
                 <img src={logoImg} alt="BhenMedia" className="h-12 w-44" />
                 <div className="relative -mt-1">
                   <p className="text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
-                    UK's #1 Innovation Visa Partner
+                    UK's #1 Innovator Founder Visa Partner
                   </p>
                   <div className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-chart-3 to-primary rounded-full" />
                 </div>

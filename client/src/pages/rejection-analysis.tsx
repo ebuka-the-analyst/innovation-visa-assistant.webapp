@@ -48,7 +48,7 @@ export default function RejectionAnalysis() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: `I received a UK Innovation Visa rejection. ${rejectionReason}. Selected rejection categories: ${selectedReasons.join(", ")}. Please provide: 1) Analysis of why this likely happened, 2) Specific recommendations to address this, 3) Probability of success if I reapply with these changes.`,
+          message: `I received a UK Innovator Founder Visa rejection. ${rejectionReason}. Selected rejection categories: ${selectedReasons.join(", ")}. Please provide: 1) Analysis of why this likely happened, 2) Specific recommendations to address this, 3) Probability of success if I reapply with these changes.`,
           conversationHistory: []
         })
       });

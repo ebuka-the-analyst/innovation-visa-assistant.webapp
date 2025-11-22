@@ -21,7 +21,7 @@ export function ToolNavigation() {
             <img src={logoImg} alt="BhenMedia" className="h-8 w-auto" />
             <div className="flex flex-col items-start">
               <p className="text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
-                UK's #1 Visa Partner
+                UK's #1 Innovator Founder Visa Partner
               </p>
             </div>
           </div>

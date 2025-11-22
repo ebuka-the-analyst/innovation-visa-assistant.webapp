@@ -125,7 +125,7 @@ export default function Pricing() {
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Choose Your Plan</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Select the tier that best matches your business complexity and visa application needs
+            Select the tier that best matches your business complexity for your Innovator Founder Visa application
           </p>
         </div>
 
@@ -184,7 +184,7 @@ export default function Pricing() {
 
         <div className="mt-12 text-center text-sm text-muted-foreground">
           <p>All plans include AI-powered generation that answers all 475 expert framework questions</p>
-          <p className="mt-2">Optimized for UK Innovation Visa endorsing body approval • 99.9% target approval rate</p>
+          <p className="mt-2">Optimized for UK Innovator Founder Visa endorsing body approval • 99.9% target approval rate</p>
         </div>
       </main>
     </div>

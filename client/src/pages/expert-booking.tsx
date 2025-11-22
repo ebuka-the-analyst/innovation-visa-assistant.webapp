@@ -45,7 +45,7 @@ const experts = [
     id: 4,
     name: "David Wong",
     title: "Tech Founder & Visa Expert",
-    bio: "Successfully exited 2 startups on Innovation Visa",
+    bio: "Successfully exited 2 startups on Innovator Founder Visa",
     specialties: ["Tech Innovation", "Founder Strategy", "Market Validation"],
     rating: 5.0,
     reviews: 203,

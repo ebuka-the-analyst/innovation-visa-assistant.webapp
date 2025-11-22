@@ -56,7 +56,7 @@ export function ShareSheet({
 
   const shareViaWhatsApp = async () => {
     const shareUrl = await getShareUrl();
-    const text = `Check out this UK Innovation Visa tool: ${toolName}`;
+    const text = `Check out this UK Innovator Founder Visa tool: ${toolName}`;
     const url = `https://wa.me/?text=${encodeURIComponent(text + '\n' + shareUrl)}`;
     window.open(url, '_blank');
     trackShare('whatsapp');
@@ -64,9 +64,9 @@ export function ShareSheet({
 
   const shareViaEmail = async () => {
     const shareUrl = await getShareUrl();
-    const subject = encodeURIComponent(`UK Innovation Visa Tool: ${toolName}`);
+    const subject = encodeURIComponent(`UK Innovator Founder Visa Tool: ${toolName}`);
     const body = encodeURIComponent(
-      `I thought you might find this UK Innovation Visa tool helpful:\n\n${toolName}\n\n${shareUrl}\n\nThis is from the UK's #1 Innovation Visa Partner - BhenMedia`
+      `I thought you might find this UK Innovator Founder Visa tool helpful:\n\n${toolName}\n\n${shareUrl}\n\nThis is from the UK's #1 Innovator Founder Visa Partner - BhenMedia`
     );
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
     trackShare('email');
@@ -74,7 +74,7 @@ export function ShareSheet({
 
   const shareViaTwitter = async () => {
     const shareUrl = await getShareUrl();
-    const text = encodeURIComponent(`Check out this UK Innovation Visa tool: ${toolName}`);
+    const text = encodeURIComponent(`Check out this UK Innovator Founder Visa tool: ${toolName}`);
     const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`;
     window.open(url, '_blank');
     trackShare('twitter');
@@ -93,7 +93,7 @@ export function ShareSheet({
       try {
         await navigator.share({
           title: toolName,
-          text: `Check out this UK Innovation Visa tool: ${toolName}`,
+          text: `Check out this UK Innovator Founder Visa tool: ${toolName}`,
           url: shareUrl,
         });
         trackShare('native');

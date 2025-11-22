@@ -306,7 +306,7 @@ export default function EvidencePreparationGuide() {
             Evidence Preparation Guide
           </h2>
           <p className="text-muted-foreground text-lg">
-            Expert-designed framework: {totalQuestions} questions from a 15-year Innovation Visa veteran
+            Expert-designed framework: {totalQuestions} questions from a 15-year Innovator Founder Visa veteran
           </p>
         </div>
       </div>

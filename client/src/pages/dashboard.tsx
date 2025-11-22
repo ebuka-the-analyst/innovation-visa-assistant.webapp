@@ -39,11 +39,11 @@ const DUMMY_PLANS: BusinessPlan[] = [
     detailedCosts: "Team: £180k/year (3 FT). Infrastructure: £15k/year (servers, DBs, APIs). Marketing: £50k/year. Legal/Compliance: £20k/year. Operations: £35k/year. Total Year 1: £300k.",
     revenue: "B2B SaaS model: £19-£199/plan depending on tier. Target: 1000 plans in Year 1 = £800k revenue (conservative). Year 2: 5000 plans = £4M ARR.",
     competitors: "Tech Nation Accelerator (limited to their cohort), traditional immigration consultants (£3k-5k per person), generic business plan generators",
-    competitiveDifferentiation: "Only AI solution purpose-built for UK Innovation Visa. Our questionnaire was co-created with visa officers and endorser advisors. 25x cheaper than consultants. 60+ hours saved per founder.",
+    competitiveDifferentiation: "Only AI solution purpose-built for UK Innovator Founder Visa. Our questionnaire was co-created with visa officers and endorser advisors. 25x cheaper than consultants. 60+ hours saved per founder.",
     customerInterviews: "Interviewed 50 recent visa applicants. 94% said they'd pay for this solution. 12 endorser organizations expressed interest in partnership. Tech Nation piloting with their cohort.",
     lettersOfIntent: "LOI from Tech Nation (500 founders/year). LOI from immigration consulting firm (referral partnership). 8 individual founders committed to purchase.",
     willingnessToPay: "Founders willing to pay £50-200 depending on tier. Corporate endorsers interested in £500/month partner license. Consulting firms interested in white-label offering.",
-    marketSize: "TAM: 10,000 UK Innovation Visa applications/year × £100 ARPU = £1M. SAM: Tech/fintech founders = 3,000/year = £300k. SOM Year 1: 300 users = £90k.",
+    marketSize: "TAM: 10,000 UK Innovator Founder Visa applications/year × £100 ARPU = £1M. SAM: Tech/fintech founders = 3,000/year = £300k. SOM Year 1: 300 users = £90k.",
     regulatoryRequirements: "FCA guidance on offering visa services (compliant). Data protection: GDPR and UK Data Protection Act 2018. Immigration advice: Operating under Tech Nation's registration.",
     complianceTimeline: "Month 1-2: Complete FCA compliance review. Month 2-3: GDPR audit and certification. Month 3-4: Immigration advice regulation compliance. Ongoing: Quarterly compliance audits.",
     complianceBudget: 75000,
@@ -284,7 +284,7 @@ function calculateCompleteness(plan: BusinessPlan): number {
   return Math.round((filledFields / fields.length) * 100);
 }
 
-// Calculate Innovation Visa Radar data
+// Calculate Innovator Founder Visa Radar data
 function calculateRadarData(plan: BusinessPlan) {
   // Innovation score (0-100)
   let innovationScore = 0;
@@ -388,7 +388,7 @@ export default function Dashboard() {
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold mb-2">Dashboard</h2>
-            <p className="text-muted-foreground">Track your UK Innovation Visa applications</p>
+            <p className="text-muted-foreground">Track your UK Innovator Founder Visa applications</p>
           </div>
           <Button 
             size="lg"
@@ -468,16 +468,16 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Innovation Visa Radar Chart - Only show if there's a completed plan */}
+            {/* Innovator Founder Visa Radar Chart - Only show if there's a completed plan */}
             {completedPlan && radarData && (
               <Card data-testid="card-visa-radar">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Award className="h-5 w-5 text-primary" />
-                    <CardTitle>Innovation Visa Strength Indicator</CardTitle>
+                    <CardTitle>Innovator Founder Visa Strength Indicator</CardTitle>
                   </div>
                   <CardDescription>
-                    Your business plan performance across the three core UK Innovation Visa criteria
+                    Your business plan performance across the three core UK Innovator Founder Visa criteria
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -619,7 +619,7 @@ export default function Dashboard() {
             </div>
             <h3 className="text-xl font-semibold mb-2">No business plans yet</h3>
             <p className="text-muted-foreground mb-6">
-              Create your first AI-powered business plan for your UK Innovation Visa application
+              Create your first AI-powered business plan for your UK Innovator Founder Visa application
             </p>
             <Button 
               size="lg"
