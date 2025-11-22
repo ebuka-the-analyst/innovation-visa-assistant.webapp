@@ -8,11 +8,12 @@ type IconName = keyof typeof Icons;
 export default function ToolsChronographWheel() {
   const [, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const widgetRef = useRef<HTMLDivElement>(null);
+  const isMouseOverWidgetRef = useRef(false);
   const [selectedToolIdx, setSelectedToolIdx] = useState(0);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isHoveringUp, setIsHoveringUp] = useState(false);
   const [isHoveringDown, setIsHoveringDown] = useState(false);
-  const [isMouseOverWidget, setIsMouseOverWidget] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const chevronScrollRef = useRef<NodeJS.Timeout | null>(null);
   const tools = ALL_TOOLS;
@@ -90,20 +91,30 @@ export default function ToolsChronographWheel() {
     }
   };
 
-  // Handle wheel scroll on widget - prevent page scroll only when over widget
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    if (!isMouseOverWidget || !scrollRef.current) return;
+  // Setup native wheel event listener with passive: false for proper preventDefault
+  useEffect(() => {
+    const container = widgetRef.current;
+    if (!container) return;
 
-    e.preventDefault();
-    const scrollDelta = e.deltaY > 0 ? 30 : -30;
-    scrollRef.current.scrollTop = Math.max(
-      0,
-      Math.min(
-        scrollRef.current.scrollTop + scrollDelta,
-        scrollRef.current.scrollHeight - scrollRef.current.clientHeight
-      )
-    );
-  };
+    const handleNativeWheel = (e: WheelEvent) => {
+      if (!isMouseOverWidgetRef.current || !scrollRef.current) return;
+
+      e.preventDefault();
+      const scrollDelta = e.deltaY > 0 ? 30 : -30;
+      scrollRef.current.scrollTop = Math.max(
+        0,
+        Math.min(
+          scrollRef.current.scrollTop + scrollDelta,
+          scrollRef.current.scrollHeight - scrollRef.current.clientHeight
+        )
+      );
+    };
+
+    container.addEventListener("wheel", handleNativeWheel, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", handleNativeWheel);
+    };
+  }, []);
 
   // Handle quick scroll on chevron hover
   useEffect(() => {
@@ -159,12 +170,16 @@ export default function ToolsChronographWheel() {
 
   return (
     <div
+      ref={widgetRef}
       className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
       style={{ scale: "0.375", transformOrigin: "bottom left" }}
-      onMouseEnter={() => setIsMouseOverWidget(true)}
-      onMouseLeave={() => setIsMouseOverWidget(false)}
-      onWheel={handleWheel}
+      onMouseEnter={() => {
+        isMouseOverWidgetRef.current = true;
+      }}
+      onMouseLeave={() => {
+        isMouseOverWidgetRef.current = false;
+      }}
     >
       {/* Outer metal bezel effect */}
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "800px", transition: "height 0.3s ease" }}>
