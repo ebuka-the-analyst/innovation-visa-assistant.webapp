@@ -1,10 +1,12 @@
 import { useRef, useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
 
 type IconName = keyof typeof Icons;
 
 export default function ToolsChronographWheel() {
+  const [, setLocation] = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedToolIdx, setSelectedToolIdx] = useState(0);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -141,9 +143,10 @@ export default function ToolsChronographWheel() {
 
   return (
     <div
-      className="fixed bottom-8 left-8 z-40"
+      className="fixed bottom-8 left-8 z-40 cursor-pointer hover:opacity-90 transition-opacity"
       data-testid="chronograph-wheel-container"
       style={{ scale: "0.375", transformOrigin: "bottom left" }}
+      onClick={() => setLocation("/tools-hub")}
     >
       {/* Outer metal bezel effect */}
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "800px", transition: "height 0.3s ease" }}>
