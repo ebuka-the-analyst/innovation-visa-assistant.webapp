@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import ThemeToggle from "@/components/ThemeToggle";
 import ChatBot from "@/components/ChatBot";
 import CookieConsent from "@/components/CookieConsent";
 import ToolsChronographWheel from "@/components/ToolsChronographWheel";
@@ -314,6 +315,7 @@ function AppLayout() {
               <TooltipContent>Toggle sidebar menu</TooltipContent>
             </Tooltip>
             <div className="flex-1" />
+            <ThemeToggle />
           </header>
           <main className="flex-1 overflow-auto">
             <Router />
