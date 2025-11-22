@@ -101,37 +101,27 @@ export default function ToolsChronographWheel() {
         {/* Floating Close/Open Button - Always on top */}
         <button
           onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute top-2 right-2 flex-shrink-0 text-black hover:opacity-70 transition-opacity z-50"
+          className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-2 px-4 py-2 rounded-full font-bold text-lg"
           data-testid="button-toggle-tools-hub"
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
-            width: "40px", 
-            height: "40px", 
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(255, 165, 54, 0.9)",
-            borderRadius: "8px",
-            border: "2px solid #000000"
+            backgroundColor: isMinimized ? "#11b6e9" : "#e63946",
+            color: "#ffffff"
           }}
         >
-          <Icons.X className="w-6 h-6" />
+          {isMinimized ? (
+            <>
+              <Icons.ChevronUp className="w-5 h-5" />
+              Open it
+            </>
+          ) : (
+            <>
+              Close it
+              <Icons.X className="w-5 h-5" />
+            </>
+          )}
         </button>
 
-        {/* Click to Open Indicator - Show when minimized */}
-        {isMinimized && (
-          <div 
-            className="absolute inset-0 flex items-center justify-center"
-            style={{
-              pointerEvents: "none"
-            }}
-          >
-            <div className="text-center animate-pulse" style={{ color: "#000000" }}>
-              <Icons.ChevronUp className="w-8 h-8 mx-auto mb-2" style={{ color: "#11b6e9" }} />
-              <p className="text-sm font-bold">Click to Open</p>
-            </div>
-          </div>
-        )}
 
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" - Hidden when minimized */}
         {!isMinimized && (
