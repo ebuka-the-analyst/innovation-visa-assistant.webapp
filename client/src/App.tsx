@@ -103,6 +103,45 @@ import SupplyChain from "@/pages/tools/supply-chain";
 import TeamAssessment from "@/pages/tools/team-assessment";
 import TeamScaling from "@/pages/tools/team-scaling";
 import VisaTimeline from "@/pages/tools/visa-timeline";
+import AdvisorPrepGuide from "@/pages/tools/advisor-prep-guide";
+import AdvisoryBoardBuilder from "@/pages/tools/advisory-board-builder";
+import AppReqChecker from "@/pages/tools/app-req-checker";
+import BreakevenCalculator from "@/pages/tools/breakeven-calculator";
+import BudgetCostAnalyzer from "@/pages/tools/budget-cost-analyzer";
+import BusinessPlan from "@/pages/tools/business-plan";
+import CompanyFormation from "@/pages/tools/company-formation";
+import ComplianceXray from "@/pages/tools/compliance-xray";
+import CriteriaScorer from "@/pages/tools/criteria-scorer";
+import DeepXray from "@/pages/tools/deep-xray";
+import EligibilityValidator from "@/pages/tools/eligibility-validator";
+import EndorserComparison from "@/pages/tools/endorser-comparison";
+import MilestoneTimeline from "@/pages/tools/milestone-timeline";
+import MinInvestmentCalc from "@/pages/tools/min-investment-calc";
+import RedFlagFixer from "@/pages/tools/red-flag-fixer";
+import RejectionAnalysis from "@/pages/tools/rejection-analysis";
+import RevenueForecast from "@/pages/tools/revenue-forecast";
+import RfeDefense from "@/pages/tools/rfe-defense";
+import SalaryThreshold from "@/pages/tools/salary-threshold";
+import SettlementPlanning from "@/pages/tools/settlement-planning";
+import SiteStrategy from "@/pages/tools/site-strategy";
+import StrengthScorer from "@/pages/tools/strength-scorer";
+import TaxCompliance from "@/pages/tools/tax-compliance";
+import TaxPlanning from "@/pages/tools/tax-planning";
+import TechStackAssess from "@/pages/tools/tech-stack-assess";
+import TimelineTracker from "@/pages/tools/timeline-tracker";
+import UnitEconomics from "@/pages/tools/unit-economics";
+import UspValidator from "@/pages/tools/usp-validator";
+import UvpGenerator from "@/pages/tools/uvp-generator";
+import ValidationReport from "@/pages/tools/validation-report";
+import VerificationChecklist from "@/pages/tools/verification-checklist";
+import ViabilityChecker from "@/pages/tools/viability-checker";
+import VisaStatusTracker from "@/pages/tools/visa-status-tracker";
+import WeaknessAnalysis from "@/pages/tools/weakness-analysis";
+import WinPredictor from "@/pages/tools/win-predictor";
+import YearTracker from "@/pages/tools/year-tracker";
+import YoyProjector from "@/pages/tools/yoy-projector";
+import ZeroApproved from "@/pages/tools/zero-approved";
+import ZonePlanning from "@/pages/tools/zone-planning";
 
 // Pages that don't need sidebar (auth pages)
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/pricing"];
@@ -205,6 +244,45 @@ function Router() {
       <Route path="/tools/team-assessment" component={TeamAssessment} />
       <Route path="/tools/team-scaling" component={TeamScaling} />
       <Route path="/tools/visa-timeline" component={VisaTimeline} />
+      <Route path="/tools/advisor-prep-guide" component={AdvisorPrepGuide} />
+      <Route path="/tools/advisory-board-builder" component={AdvisoryBoardBuilder} />
+      <Route path="/tools/app-req-checker" component={AppReqChecker} />
+      <Route path="/tools/breakeven-calculator" component={BreakevenCalculator} />
+      <Route path="/tools/budget-cost-analyzer" component={BudgetCostAnalyzer} />
+      <Route path="/tools/business-plan" component={BusinessPlan} />
+      <Route path="/tools/company-formation" component={CompanyFormation} />
+      <Route path="/tools/compliance-xray" component={ComplianceXray} />
+      <Route path="/tools/criteria-scorer" component={CriteriaScorer} />
+      <Route path="/tools/deep-xray" component={DeepXray} />
+      <Route path="/tools/eligibility-validator" component={EligibilityValidator} />
+      <Route path="/tools/endorser-comparison" component={EndorserComparison} />
+      <Route path="/tools/milestone-timeline" component={MilestoneTimeline} />
+      <Route path="/tools/min-investment-calc" component={MinInvestmentCalc} />
+      <Route path="/tools/red-flag-fixer" component={RedFlagFixer} />
+      <Route path="/tools/rejection-analysis" component={RejectionAnalysis} />
+      <Route path="/tools/revenue-forecast" component={RevenueForecast} />
+      <Route path="/tools/rfe-defense" component={RfeDefense} />
+      <Route path="/tools/salary-threshold" component={SalaryThreshold} />
+      <Route path="/tools/settlement-planning" component={SettlementPlanning} />
+      <Route path="/tools/site-strategy" component={SiteStrategy} />
+      <Route path="/tools/strength-scorer" component={StrengthScorer} />
+      <Route path="/tools/tax-compliance" component={TaxCompliance} />
+      <Route path="/tools/tax-planning" component={TaxPlanning} />
+      <Route path="/tools/tech-stack-assess" component={TechStackAssess} />
+      <Route path="/tools/timeline-tracker" component={TimelineTracker} />
+      <Route path="/tools/unit-economics" component={UnitEconomics} />
+      <Route path="/tools/usp-validator" component={UspValidator} />
+      <Route path="/tools/uvp-generator" component={UvpGenerator} />
+      <Route path="/tools/validation-report" component={ValidationReport} />
+      <Route path="/tools/verification-checklist" component={VerificationChecklist} />
+      <Route path="/tools/viability-checker" component={ViabilityChecker} />
+      <Route path="/tools/visa-status-tracker" component={VisaStatusTracker} />
+      <Route path="/tools/weakness-analysis" component={WeaknessAnalysis} />
+      <Route path="/tools/win-predictor" component={WinPredictor} />
+      <Route path="/tools/year-tracker" component={YearTracker} />
+      <Route path="/tools/yoy-projector" component={YoyProjector} />
+      <Route path="/tools/zero-approved" component={ZeroApproved} />
+      <Route path="/tools/zone-planning" component={ZonePlanning} />
       <Route component={NotFound} />
     </Switch>
   );
