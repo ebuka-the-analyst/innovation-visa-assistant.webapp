@@ -2,29 +2,16 @@ import { useRef, useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 type IconName = keyof typeof Icons;
 
 export default function ToolsChronographWheel() {
   const [, setLocation] = useLocation();
-  const isMobile = useIsMobile();
   const scrollRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<HTMLDivElement>(null);
   const isMouseOverWidgetRef = useRef(false);
   const [selectedToolIdx, setSelectedToolIdx] = useState(0);
   const [isMinimized, setIsMinimized] = useState(true);
-  
-  // Responsive scale based on screen size
-  const getResponsiveScale = () => {
-    if (typeof window === "undefined") return 0.375;
-    const width = window.innerWidth;
-    if (width < 640) return 0.3; // Small mobile
-    if (width < 1024) return 0.45; // Tablet
-    return 1; // Big & bigger screens - original size
-  };
-  
-  const [scale, setScale] = useState(0.375);
   const [isHoveringUp, setIsHoveringUp] = useState(false);
   const [isHoveringDown, setIsHoveringDown] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -39,18 +26,6 @@ export default function ToolsChronographWheel() {
   const recordActivity = () => {
     lastActivityRef.current = Date.now();
   };
-
-  // Update scale on mount and window resize
-  useEffect(() => {
-    setScale(getResponsiveScale());
-    
-    const handleResize = () => {
-      setScale(getResponsiveScale());
-    };
-    
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
@@ -236,9 +211,9 @@ export default function ToolsChronographWheel() {
   return (
     <div
       ref={widgetRef}
-      className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 md:bottom-8 md:left-8 z-40"
+      className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
-      style={{ scale: scale.toString(), transformOrigin: "bottom left", transition: "scale 0.3s ease" }}
+      style={{ scale: "0.375", transformOrigin: "bottom left" }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
         recordActivity();
@@ -274,11 +249,11 @@ export default function ToolsChronographWheel() {
           {isMinimized ? (
             <>
               <Icons.ChevronUp className="w-8 h-8" />
-              Open
+              <span style={{ fontSize: "clamp(0.8rem, 2vw, 1.5rem)" }}>Open</span>
             </>
           ) : (
             <>
-              Close
+              <span style={{ fontSize: "clamp(0.8rem, 2vw, 1.5rem)" }}>Close</span>
               <Icons.X className="w-8 h-8" />
             </>
           )}
