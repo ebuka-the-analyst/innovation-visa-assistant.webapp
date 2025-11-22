@@ -64,11 +64,11 @@ export default function ToolsHub() {
   };
 
   const tierColors = {
-    free: "bg-gray-50 border-gray-200",
-    basic: "bg-blue-50 border-blue-200",
-    premium: "bg-purple-50 border-purple-200",
-    enterprise: "bg-orange-50 border-orange-200",
-    ultimate: "bg-gradient-to-br from-amber-50 to-orange-50 border-orange-300",
+    free: "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700",
+    basic: "bg-blue-50 dark:bg-slate-800 border-blue-200 dark:border-slate-700",
+    premium: "bg-purple-50 dark:bg-slate-800 border-purple-200 dark:border-slate-700",
+    enterprise: "bg-orange-50 dark:bg-slate-800 border-orange-200 dark:border-slate-700",
+    ultimate: "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-700 border-orange-300 dark:border-slate-700",
   };
 
   const GetIconComponent = ({ name }: { name: string }) => {
@@ -93,7 +93,7 @@ export default function ToolsHub() {
         </div>
 
         {/* Search & Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8 border">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm p-6 mb-8 border dark:border-slate-700">
           <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
