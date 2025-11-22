@@ -213,3 +213,41 @@ export const insertReferralSchema = createInsertSchema(referrals).omit({
 
 export type InsertReferral = z.infer<typeof insertReferralSchema>;
 export type Referral = typeof referrals.$inferSelect;
+
+// File Storage for Backend Upload Handling
+export const uploadedFiles = pgTable("uploaded_files", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id"),
+  toolId: text("tool_id").notNull(),
+  fileName: text("file_name").notNull(),
+  fileType: varchar("file_type", { length: 50 }).notNull(),
+  fileSize: integer("file_size").notNull(),
+  blobUrl: text("blob_url"),
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+});
+
+export const insertUploadedFileSchema = createInsertSchema(uploadedFiles).omit({
+  id: true,
+  uploadedAt: true,
+});
+
+export type InsertUploadedFile = z.infer<typeof insertUploadedFileSchema>;
+export type UploadedFile = typeof uploadedFiles.$inferSelect;
+
+// Analytics for Tool Usage & Sharing
+export const toolAnalytics = pgTable("tool_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id"),
+  toolId: text("tool_id").notNull(),
+  action: varchar("action", { length: 50 }).notNull(), // save, export, share, upload, download
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertToolAnalyticsSchema = createInsertSchema(toolAnalytics).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertToolAnalytics = z.infer<typeof insertToolAnalyticsSchema>;
+export type ToolAnalytic = typeof toolAnalytics.$inferSelect;
