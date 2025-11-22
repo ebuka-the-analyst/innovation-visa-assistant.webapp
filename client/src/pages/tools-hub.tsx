@@ -16,6 +16,7 @@ import * as Icons from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
+import Footer from "@/components/Footer";
 
 type IconName = keyof typeof Icons;
 
@@ -279,6 +280,7 @@ export default function ToolsHub() {
         </div>
       </div>
       </div>
+      <Footer />
     </>
   );
 }
