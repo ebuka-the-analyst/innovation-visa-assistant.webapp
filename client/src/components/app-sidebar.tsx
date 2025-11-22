@@ -91,7 +91,7 @@ export function AppSidebar() {
           title: "Rejection Analysis",
           url: "/rejection-analysis",
           icon: TrendingUp,
-          description: "PhD-level rejection strategies",
+          description: "Advanced rejection strategies",
         },
         {
           title: "Diagnostics",

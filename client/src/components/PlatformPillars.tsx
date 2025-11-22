@@ -9,7 +9,7 @@ export default function PlatformPillars() {
       icon: Brain,
       name: "VisaPrep AI - Intelligence Engine",
       subtitle: "End-to-End Business Planning",
-      description: "PhD-level AI system that generates comprehensive, endorser-ready business plans. Evaluates your business across Innovation, Viability, and Scalability criteria with financial projections, competitive analysis, and job creation roadmaps—all internally consistent and submission-ready.",
+      description: "Advanced AI system that generates comprehensive, endorser-ready business plans. Evaluates your business across Innovation, Viability, and Scalability criteria with financial projections, competitive analysis, and job creation roadmaps—all internally consistent and submission-ready.",
       features: [
         "Innovation, Viability, Scalability assessment",
         "Multi-sheet financial projections",
@@ -45,7 +45,7 @@ export default function PlatformPillars() {
       icon: Users,
       name: "VisaPrep AI - Mentorship Hub",
       subtitle: "Interview Prep & Expert Network",
-      description: "AI-powered coaching studio + expert network. Mock interview scenarios with PhD-level feedback, document organization with submission checklists, expert immigration lawyer consultations, and settlement planning for post-visa growth. Guides you from application through to ILR eligibility.",
+      description: "AI-powered coaching studio + expert network. Mock interview scenarios with Advanced feedback, document organization with submission checklists, expert immigration lawyer consultations, and settlement planning for post-visa growth. Guides you from application through to ILR eligibility.",
       features: [
         "AI mock interview coaching with feedback",
         "Document organization & gap identification",

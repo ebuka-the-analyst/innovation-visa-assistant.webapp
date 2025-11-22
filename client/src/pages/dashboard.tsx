@@ -19,7 +19,7 @@ const DUMMY_PLANS: BusinessPlan[] = [
     businessName: "BhenMedia",
     industry: "AI/SaaS - Media & Content",
     problem: "Current UK visa system lacks AI-powered business plan generation, forcing founders to spend 60+ hours on documentation",
-    uniqueness: "VisaPrep AI combines PhD-level visa expertise with GPT-4 to generate policy-aware, endorser-ready business plans in minutes. Our proprietary questionnaire maps to all 475 visa criteria across Innovation, Viability, and Scalability. No competitor offers this integrated solution.",
+    uniqueness: "VisaPrep AI combines Advanced visa expertise with GPT-4 to generate policy-aware, endorser-ready business plans in minutes. Our proprietary questionnaire maps to all 475 visa criteria across Innovation, Viability, and Scalability. No competitor offers this integrated solution.",
     technology: "Next.js, React, TypeScript, PostgreSQL, OpenAI GPT-4 API, Stripe for payments, Drizzle ORM",
     techStack: "Frontend: React 18 with TypeScript, Tailwind CSS. Backend: Express.js, PostgreSQL with Drizzle ORM. AI: OpenAI GPT-4 for business plan generation and analysis. Integrations: Stripe for payments, Resend for email.",
     dataArchitecture: "PostgreSQL database with Drizzle ORM. User profiles, business plan questionnaires, generated content stored securely. Document storage for PDFs. Real-time WebSocket updates for generation progress.",

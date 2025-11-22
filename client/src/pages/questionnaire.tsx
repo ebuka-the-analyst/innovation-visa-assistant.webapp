@@ -27,7 +27,7 @@ export default function Questionnaire() {
               Generate Your Business Plan
             </h1>
             <p className="text-lg text-muted-foreground">
-              Our PhD-level AI platform evaluates your innovation across all three visa criteria (Innovation, Viability, Scalability) and generates policy-aware business plans, financial projections, and pitch decks—all internally consistent and endorser-ready.
+              Our Advanced AI platform evaluates your innovation across all three visa criteria (Innovation, Viability, Scalability) and generates policy-aware business plans, financial projections, and pitch decks—all internally consistent and endorser-ready.
             </p>
           </div>
         </div>

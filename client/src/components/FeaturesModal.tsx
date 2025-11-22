@@ -20,7 +20,7 @@ const FEATURES: Feature[] = [
     icon: "🧠",
     color: "from-orange-400 to-orange-600",
     detailedInstructions: [
-      "Our PhD-level AI analyzes your business model and innovation",
+      "Our Advanced AI analyzes your business model and innovation",
       "Generates personalized content addressing the three visa criteria",
       "Uses real market data and comparable company benchmarks",
       "Adapts tone and depth based on your sector and maturity",

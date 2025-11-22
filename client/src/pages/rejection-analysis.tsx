@@ -74,7 +74,7 @@ export default function RejectionAnalysis() {
             <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">VISAPREP AI DIAGNOSTIC</span>
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Rejection Analysis & Reapplication Strategy</h1>
             <p className="text-lg text-muted-foreground">
-              AI-powered analysis of rejection reasons with specific recommendations to address gaps. Our PhD-level diagnostic engine identifies exactly what to fix for your next application and predicts success probability.
+              AI-powered analysis of rejection reasons with specific recommendations to address gaps. Our Advanced diagnostic engine identifies exactly what to fix for your next application and predicts success probability.
             </p>
           </div>
 

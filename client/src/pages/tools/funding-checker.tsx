@@ -12,7 +12,7 @@ export default function FundingChecker() {
           <ToolNavigation />
           <div className="mb-8">
             <h1 className="text-4xl font-bold">Funding Checker</h1>
-            <p className="text-lg text-muted-foreground">PhD-Level Strategic Analysis</p>
+            <p className="text-lg text-muted-foreground">Advanced Strategic Analysis</p>
           </div>
           <Card className="p-8"><h2 className="text-2xl font-bold mb-4">Funding Checker</h2><p className="text-muted-foreground mb-6">Premium tool with comprehensive analysis.</p><div className="grid md:grid-cols-3 gap-4 mb-6"><Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10"><h3 className="font-semibold">Analysis</h3></Card><Card className="p-4 bg-blue-50"><h3 className="font-semibold">Insights</h3></Card><Card className="p-4 bg-green-50"><h3 className="font-semibold">Expertise</h3></Card></div><Button className="w-full">Get Started</Button></Card>
         </div>
