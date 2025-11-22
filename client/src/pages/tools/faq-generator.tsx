@@ -1,35 +1,48 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { useState } from "react";
 
 export default function FAQGENERATOR() {
-  const [generated, setGenerated] = useState(false);
+  const [data, setData] = useState({ f1: "", f2: "", f3: "" });
+  const [submitted, setSubmitted] = useState(false);
 
   return (
     <>
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           <ToolNavigation />
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Faq Generator</h1>
-            <p className="text-lg text-muted-foreground">Report Generation</p>
+            <h1 className="text-4xl font-bold">Faq Generator</h1>
+            <p className="text-muted-foreground">Collect and organize information</p>
           </div>
-          <Button onClick={() => setGenerated(!generated)} className="w-full mb-6 bg-primary">Generate Report</Button>
-          {generated ? (
-            <div className="space-y-4">
-              {["Executive Summary", "Analysis"].map((s, i) => (
-                <Card key={i} className="p-6">
-                  <h3 className="font-semibold mb-2">{s}</h3>
-                  <p className="text-sm text-muted-foreground">Content</p>
-                </Card>
-              ))}
+          
+          {!submitted ? (
+            <div>
+              <Card className="p-6 mb-4">
+                <label className="block mb-4">
+                  <p className="font-semibold mb-2">Field 1</p>
+                  <Input value={data.f1} onChange={e => setData({ ...data, f1: e.target.value })} placeholder="Enter information" />
+                </label>
+                <label className="block mb-4">
+                  <p className="font-semibold mb-2">Field 2</p>
+                  <Input value={data.f2} onChange={e => setData({ ...data, f2: e.target.value })} placeholder="Enter information" />
+                </label>
+                <label>
+                  <p className="font-semibold mb-2">Notes</p>
+                  <Textarea value={data.f3} onChange={e => setData({ ...data, f3: e.target.value })} placeholder="Additional notes" className="h-20" />
+                </label>
+              </Card>
+              <Button onClick={() => setSubmitted(true)} className="w-full bg-primary">Submit & Save</Button>
             </div>
           ) : (
-            <Card className="p-12 text-center">
-              <p className="text-muted-foreground">Click to generate report</p>
+            <Card className="p-6">
+              <p className="text-green-700 font-semibold mb-3">✓ Information saved successfully</p>
+              <Button onClick={() => setSubmitted(false)} className="w-full">Add More</Button>
             </Card>
           )}
         </div>

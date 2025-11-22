@@ -5,11 +5,18 @@ import { ToolNavigation } from "@/components/ToolNavigation";
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
+const DIMS = [
+  { n: "Innovation", desc: "Originality and genuineness" },
+  { n: "Market Need", desc: "Addresses real market problem" },
+  { n: "Technology", desc: "Feasible and realistic approach" },
+  { n: "Scalability", desc: "Ability to grow and scale" },
+  { n: "IP/Advantage", desc: "Competitive moat and IP" }
+];
+
 export default function IPROADMAP() {
-  const [scores, setScores] = useState({ d1: 12, d2: 15, d3: 14, d4: 13, d5: 11 });
+  const [scores, setScores] = useState({ d0: 12, d1: 14, d2: 13, d3: 11, d4: 10 });
   const total = Object.values(scores).reduce((a: number, b: number) => a + b, 0);
-  const pct = (total / 100) * 100;
-  const data = Object.entries(scores).map(([k, v]) => ({ d: k, s: v }));
+  const data = DIMS.map((d, i) => ({ name: d.n.substring(0, 6), score: scores[`d${i}` as keyof typeof scores] }));
 
   return (
     <>
@@ -18,25 +25,37 @@ export default function IPROADMAP() {
         <div className="max-w-7xl mx-auto">
           <ToolNavigation />
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Ip Roadmap</h1>
-            <p className="text-lg text-muted-foreground">Advanced Assessment</p>
+            <h1 className="text-4xl font-bold">Ip Roadmap</h1>
+            <p className="text-muted-foreground">Multi-dimensional assessment scoring</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10">
-              <h3 className="font-semibold text-muted-foreground">Score</h3>
-              <p className="text-5xl font-bold">{total}/100</p>
-              <p className="text-lg font-semibold mt-2">{pct > 80 ? "Excellent" : pct > 60 ? "Strong" : "Moderate"}%</p>
-            </Card>
-            <Card className="p-6">
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={data}>
-                  <CartesianGrid />
-                  <XAxis dataKey="d" />
-                  <YAxis domain={[0, 20]} />
-                  <Bar dataKey="s" fill="#ffa536" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
+          
+          <Card className="p-6 mb-6">
+            <h3 className="text-lg font-bold">Total Score: {total}/100</h3>
+            <p className="text-sm text-muted-foreground mt-2">
+              Level: {total > 75 ? "Excellent" : total > 60 ? "Strong" : total > 40 ? "Moderate" : "Developing"}
+            </p>
+          </Card>
+
+          <Card className="p-6 mb-6">
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={data}>
+                <CartesianGrid />
+                <XAxis dataKey="name" />
+                <YAxis domain={[0, 20]} />
+                <Bar dataKey="score" fill="#ffa536" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <div className="space-y-3">
+            {DIMS.map((d, i) => (
+              <Card key={i} className="p-4">
+                <p className="font-semibold text-sm mb-2">{d.n}</p>
+                <p className="text-xs text-muted-foreground mb-2">{d.desc}</p>
+                <Slider min={0} max={20} step={1} value={[scores[`d${i}` as keyof typeof scores]]} onValueChange={(v) => setScores({ ...scores, [`d${i}`]: v[0] })} className="mb-2" />
+                <p className="text-xs font-bold">{scores[`d${i}` as keyof typeof scores]}/20</p>
+              </Card>
+            ))}
           </div>
         </div>
       </div>
