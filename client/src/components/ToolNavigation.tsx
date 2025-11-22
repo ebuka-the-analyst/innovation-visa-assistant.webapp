@@ -16,6 +16,15 @@ export function ToolNavigation() {
       <Button
         variant="outline"
         size="sm"
+        onClick={() => window.location.href = "/"}
+        data-testid="button-home"
+      >
+        <Home className="w-4 h-4 mr-2" />
+        Home
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
         onClick={() => window.location.href = "/tools-hub"}
         data-testid="button-tools-hub"
       >
