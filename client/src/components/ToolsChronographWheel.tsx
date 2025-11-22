@@ -17,20 +17,14 @@ export default function ToolsChronographWheel() {
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const chevronScrollRef = useRef<NodeJS.Timeout | null>(null);
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActivityRef = useRef<number>(Date.now());
+  const checkInactivityRef = useRef<NodeJS.Timeout | null>(null);
   const tools = ALL_TOOLS;
   const selectedTool = tools[selectedToolIdx];
 
-  // Reset inactivity timer
-  const resetInactivityTimer = () => {
-    if (inactivityTimerRef.current) {
-      clearTimeout(inactivityTimerRef.current);
-    }
-    
-    if (!isMinimized) {
-      inactivityTimerRef.current = setTimeout(() => {
-        setIsMinimized(true);
-      }, 8000); // 8 seconds
-    }
+  // Record user activity
+  const recordActivity = () => {
+    lastActivityRef.current = Date.now();
   };
 
   const GetIconComponent = ({ name }: { name: string }) => {
@@ -48,6 +42,7 @@ export default function ToolsChronographWheel() {
 
   // Handle scroll and update selected tool based on center position
   const handleScroll = () => {
+    recordActivity();
     if (!scrollRef.current) return;
     
     const scrollTop = scrollRef.current.scrollTop;
@@ -63,6 +58,7 @@ export default function ToolsChronographWheel() {
 
   // Handle mouse move to scroll
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    recordActivity();
     if (!scrollRef.current) return;
 
     const containerRect = scrollRef.current.getBoundingClientRect();
@@ -113,6 +109,7 @@ export default function ToolsChronographWheel() {
     const handleNativeWheel = (e: WheelEvent) => {
       if (!isMouseOverWidgetRef.current || !scrollRef.current) return;
 
+      recordActivity();
       e.preventDefault();
       const scrollDelta = e.deltaY > 0 ? 30 : -30;
       scrollRef.current.scrollTop = Math.max(
@@ -122,21 +119,39 @@ export default function ToolsChronographWheel() {
           scrollRef.current.scrollHeight - scrollRef.current.clientHeight
         )
       );
-      resetInactivityTimer();
     };
 
     container.addEventListener("wheel", handleNativeWheel, { passive: false });
     return () => {
       container.removeEventListener("wheel", handleNativeWheel);
     };
-  }, [isMinimized]);
+  }, []);
 
   // Inactivity timer - close widget after 8 seconds of inactivity when open
   useEffect(() => {
-    resetInactivityTimer();
+    if (isMinimized) {
+      // Clear timer if widget is minimized
+      if (checkInactivityRef.current) {
+        clearInterval(checkInactivityRef.current);
+      }
+      return;
+    }
+
+    // Start activity check when widget is opened
+    recordActivity();
+    
+    checkInactivityRef.current = setInterval(() => {
+      const timeSinceLastActivity = Date.now() - lastActivityRef.current;
+      
+      // Close widget if 8 seconds of inactivity
+      if (timeSinceLastActivity > 8000) {
+        setIsMinimized(true);
+      }
+    }, 500); // Check every 500ms
+
     return () => {
-      if (inactivityTimerRef.current) {
-        clearTimeout(inactivityTimerRef.current);
+      if (checkInactivityRef.current) {
+        clearInterval(checkInactivityRef.current);
       }
     };
   }, [isMinimized]);
@@ -201,7 +216,7 @@ export default function ToolsChronographWheel() {
       style={{ scale: "0.375", transformOrigin: "bottom left" }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
-        resetInactivityTimer();
+        recordActivity();
       }}
       onMouseLeave={() => {
         isMouseOverWidgetRef.current = false;
@@ -218,8 +233,8 @@ export default function ToolsChronographWheel() {
         {/* Floating Close/Open Button - Always on top */}
         <button
           onClick={() => {
+            recordActivity();
             setIsMinimized(!isMinimized);
-            resetInactivityTimer();
           }}
           className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-4 px-6 py-3 rounded-full font-bold text-xl"
           data-testid="button-toggle-tools-hub"
