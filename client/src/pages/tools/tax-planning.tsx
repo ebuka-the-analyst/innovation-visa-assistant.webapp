@@ -4,29 +4,21 @@ import { Input } from "@/components/ui/input";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { useState } from "react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function TAXPLANNING() {
-  const [inputs, setInputs] = useState({ v1: 10000, v2: 15 });
-  const [results, setResults] = useState<any>(null);
+  const [initial, setInitial] = useState(50000);
+  const [monthly, setMonthly] = useState(15000);
+  const [growth, setGrowth] = useState(5);
 
-  const calculate = () => {
-    const months = 12;
-    const projections = Array.from({ length: months }, (_, i) => {
-      const m = i + 1;
-      const val = inputs.v1 * Math.pow(1 + inputs.v2 / 100, m);
-      return { month: m, value: Math.round(val), cumulative: Math.round(val * 1.2) };
-    });
-    const final = projections[months - 1].value;
-    const growth = ((final - inputs.v1) / inputs.v1 * 100).toFixed(1);
-    setResults({
-      final,
-      growth,
-      projections,
-      factors: [{ c: "Primary", v: 65 }, { c: "Secondary", v: 25 }, { c: "Tertiary", v: 10 }],
-      scenarios: [{ s: "Best", v: final * 1.3, p: 25 }, { s: "Base", v: final, p: 50 }, { s: "Worst", v: final * 0.7, p: 25 }]
-    });
-  };
+  const projections = Array.from({ length: 12 }, (_, i) => ({
+    m: i + 1,
+    cash: initial - monthly * (i + 1),
+    revenue: i * growth * 1000
+  }));
+  
+  const finalCash = initial - monthly * 12;
+  const runway = Math.round(initial / monthly);
 
   return (
     <>
@@ -35,47 +27,53 @@ export default function TAXPLANNING() {
         <div className="max-w-7xl mx-auto">
           <ToolNavigation />
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Tax Planning</h1>
-            <p className="text-lg text-muted-foreground">Strategic Financial Forecasting</p>
+            <h1 className="text-4xl font-bold">Tax Planning</h1>
+            <p className="text-muted-foreground">Financial modeling and cash flow analysis</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-4 mb-6">
-            <Input type="number" placeholder="Value 1" value={inputs.v1} onChange={e => setInputs({ ...inputs, v1: parseInt(e.target.value) || 0 })} />
-            <Input type="number" placeholder="Growth %" value={inputs.v2} onChange={e => setInputs({ ...inputs, v2: parseFloat(e.target.value) || 0 })} />
-          </div>
-          <Button onClick={calculate} className="w-full mb-6">Generate Analysis</Button>
-          {results && (
-            <div className="space-y-6">
-              <div className="grid md:grid-cols-4 gap-4">
-                <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10">
-                  <h3 className="text-sm font-medium">Final Value</h3>
-                  <p className="text-3xl font-bold mt-2">£{results.final.toLocaleString()}</p>
-                </Card>
-                <Card className="p-6 bg-blue-50">
-                  <h3 className="text-sm font-medium">Growth</h3>
-                  <p className="text-3xl font-bold mt-2">{results.growth}%</p>
-                </Card>
-                <Card className="p-6 bg-green-50">
-                  <h3 className="text-sm font-medium">Monthly Avg</h3>
-                  <p className="text-3xl font-bold mt-2">£{Math.round(results.final / 12).toLocaleString()}</p>
-                </Card>
-                <Card className="p-6 bg-orange-50">
-                  <h3 className="text-sm font-medium">Risk Level</h3>
-                  <p className="text-3xl font-bold mt-2">Medium</p>
-                </Card>
-              </div>
-              <Card className="p-6">
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={results.projections.slice(0, 12)}>
-                    <CartesianGrid />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="value" stroke="#ffa536" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Card>
+          
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
+            <div>
+              <label className="text-sm font-semibold">Initial Capital (£)</label>
+              <Input type="number" value={initial} onChange={e => setInitial(Number(e.target.value))} />
             </div>
-          )}
+            <div>
+              <label className="text-sm font-semibold">Monthly Burn (£)</label>
+              <Input type="number" value={monthly} onChange={e => setMonthly(Number(e.target.value))} />
+            </div>
+            <div>
+              <label className="text-sm font-semibold">Growth (%)</label>
+              <Input type="number" value={growth} onChange={e => setGrowth(Number(e.target.value))} />
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
+            <Card className="p-4">
+              <p className="text-xs text-muted-foreground">Runway</p>
+              <p className="text-2xl font-bold mt-2">{runway} months</p>
+            </Card>
+            <Card className="p-4">
+              <p className="text-xs text-muted-foreground">Year-End Cash</p>
+              <p className="text-2xl font-bold mt-2">£{finalCash.toLocaleString()}</p>
+            </Card>
+            <Card className={`p-4 ${finalCash > 0 ? "bg-green-50" : "bg-red-50"}`}>
+              <p className="text-xs text-muted-foreground">Status</p>
+              <p className={`text-lg font-bold mt-2 ${finalCash > 0 ? "text-green-700" : "text-red-700"}`}>
+                {finalCash > 0 ? "Viable" : "At Risk"}
+              </p>
+            </Card>
+          </div>
+
+          <Card className="p-6">
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={projections}>
+                <CartesianGrid />
+                <XAxis dataKey="m" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="cash" stroke="#ffa536" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </Card>
         </div>
       </div>
     </>

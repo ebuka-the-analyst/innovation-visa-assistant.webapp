@@ -1,43 +1,62 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+
+const DIMS = [
+  { n: "Innovation", desc: "Originality and genuineness" },
+  { n: "Market Need", desc: "Addresses real market problem" },
+  { n: "Technology", desc: "Feasible and realistic approach" },
+  { n: "Scalability", desc: "Ability to grow and scale" },
+  { n: "IP/Advantage", desc: "Competitive moat and IP" }
+];
 
 export default function BUSINESSMODELVALIDATOR() {
-  const [sections, setSections] = useState({ a: "", b: "", c: "" });
-  const [done, setDone] = useState(false);
-  const complete = Object.values(sections).filter((s: string) => s.length > 50).length;
-  const pct = (complete / 3) * 100;
+  const [scores, setScores] = useState({ d0: 12, d1: 14, d2: 13, d3: 11, d4: 10 });
+  const total = Object.values(scores).reduce((a: number, b: number) => a + b, 0);
+  const data = DIMS.map((d, i) => ({ name: d.n.substring(0, 6), score: scores[`d${i}` as keyof typeof scores] }));
 
   return (
     <>
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <ToolNavigation />
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Business Model Validator</h1>
-            <p className="text-lg text-muted-foreground">Advanced Strategic Planning</p>
+            <h1 className="text-4xl font-bold">Business Model Validator</h1>
+            <p className="text-muted-foreground">Multi-dimensional assessment scoring</p>
           </div>
+          
           <Card className="p-6 mb-6">
-            <div className="flex justify-between mb-2">
-              <span>Completion</span>
-              <span>{Math.round(pct)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 h-2 rounded-full">
-              <div style={{ width: `${pct}%` }} className="bg-primary h-2 rounded-full" />
-            </div>
+            <h3 className="text-lg font-bold">Total Score: {total}/100</h3>
+            <p className="text-sm text-muted-foreground mt-2">
+              Level: {total > 75 ? "Excellent" : total > 60 ? "Strong" : total > 40 ? "Moderate" : "Developing"}
+            </p>
           </Card>
-          {[{ k: "a", t: "Foundation" }, { k: "b", t: "Strategy" }, { k: "c", t: "Metrics" }].map(s => (
-            <Card key={s.k} className="p-4 mb-3">
-              <label className="font-semibold mb-2 block">{s.t}</label>
-              <Textarea value={sections[s.k as keyof typeof sections]} onChange={e => setSections({ ...sections, [s.k]: e.target.value })} className="h-20" />
-            </Card>
-          ))}
-          <Button onClick={() => setDone(!done)} className="w-full bg-primary">Export Plan</Button>
-          {done && <Card className="p-4 mt-4 bg-green-50"><p className="text-green-700 font-semibold">✓ Plan Ready</p></Card>}
+
+          <Card className="p-6 mb-6">
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={data}>
+                <CartesianGrid />
+                <XAxis dataKey="name" />
+                <YAxis domain={[0, 20]} />
+                <Bar dataKey="score" fill="#ffa536" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <div className="space-y-3">
+            {DIMS.map((d, i) => (
+              <Card key={i} className="p-4">
+                <p className="font-semibold text-sm mb-2">{d.n}</p>
+                <p className="text-xs text-muted-foreground mb-2">{d.desc}</p>
+                <Slider min={0} max={20} step={1} value={[scores[`d${i}` as keyof typeof scores]]} onValueChange={(v) => setScores({ ...scores, [`d${i}`]: v[0] })} className="mb-2" />
+                <p className="text-xs font-bold">{scores[`d${i}` as keyof typeof scores]}/20</p>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </>
