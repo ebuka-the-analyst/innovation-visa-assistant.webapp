@@ -93,18 +93,45 @@ export default function ToolsChronographWheel() {
       {/* Outer metal bezel effect */}
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "800px", transition: "height 0.3s ease" }}>
         
-        {/* Static Header Section - "100+ TOOLS HUB" with Close Button */}
+        {/* Static Header Section - "100+ TOOLS HUB" */}
         <div className="px-4 pt-3 pb-2 border-b-2 border-gray-400 flex items-center justify-between" style={{ backgroundColor: "#ffa536" }}>
           <h3 className="text-4xl font-black" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
-          <button
-            onClick={() => setIsMinimized(!isMinimized)}
-            className="flex-shrink-0 text-black hover:opacity-70 transition-opacity"
-            data-testid="button-toggle-tools-hub"
-            aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
-          >
-            <Icons.X className="w-8 h-8" />
-          </button>
         </div>
+
+        {/* Floating Close/Open Button - Always on top */}
+        <button
+          onClick={() => setIsMinimized(!isMinimized)}
+          className="absolute top-2 right-2 flex-shrink-0 text-black hover:opacity-70 transition-opacity z-50"
+          data-testid="button-toggle-tools-hub"
+          aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
+          style={{ 
+            width: "40px", 
+            height: "40px", 
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(255, 165, 54, 0.9)",
+            borderRadius: "8px",
+            border: "2px solid #000000"
+          }}
+        >
+          <Icons.X className="w-6 h-6" />
+        </button>
+
+        {/* Click to Open Indicator - Show when minimized */}
+        {isMinimized && (
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              pointerEvents: "none"
+            }}
+          >
+            <div className="text-center animate-pulse" style={{ color: "#000000" }}>
+              <Icons.ChevronUp className="w-8 h-8 mx-auto mb-2" style={{ color: "#11b6e9" }} />
+              <p className="text-sm font-bold">Click to Open</p>
+            </div>
+          </div>
+        )}
 
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" - Hidden when minimized */}
         {!isMinimized && (
