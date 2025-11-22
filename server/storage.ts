@@ -1,6 +1,6 @@
-import { type User, type InsertUser, type BusinessPlan, type InsertBusinessPlan, users, businessPlans } from "@shared/schema";
+import { type User, type InsertUser, type BusinessPlan, type InsertBusinessPlan, type SessionHandoff, type InsertSessionHandoff, type Referral, type InsertReferral, users, businessPlans, sessionHandoffs, referrals } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, gt } from "drizzle-orm";
 
 export interface IStorage {
   // User management
@@ -19,6 +19,15 @@ export interface IStorage {
   createBusinessPlan(plan: InsertBusinessPlan): Promise<BusinessPlan>;
   updateBusinessPlan(id: string, updates: Partial<BusinessPlan>): Promise<BusinessPlan | undefined>;
   getBusinessPlanByStripeSession(sessionId: string): Promise<BusinessPlan | undefined>;
+  
+  // Session handoff for QR mobile upload
+  createSessionHandoff(handoff: InsertSessionHandoff): Promise<SessionHandoff>;
+  getSessionHandoff(token: string): Promise<SessionHandoff | undefined>;
+  consumeSessionHandoff(token: string): Promise<void>;
+  cleanupExpiredHandoffs(): Promise<void>;
+  
+  // Referral tracking
+  createReferral(referral: InsertReferral): Promise<Referral>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -111,6 +120,44 @@ export class DatabaseStorage implements IStorage {
         verificationAttempts: 0
       })
       .where(eq(users.id, userId));
+  }
+
+  async createSessionHandoff(insertHandoff: InsertSessionHandoff): Promise<SessionHandoff> {
+    const result = await db.insert(sessionHandoffs).values(insertHandoff).returning();
+    return result[0]!;
+  }
+
+  async getSessionHandoff(token: string): Promise<SessionHandoff | undefined> {
+    const result = await db
+      .select()
+      .from(sessionHandoffs)
+      .where(
+        and(
+          eq(sessionHandoffs.token, token),
+          eq(sessionHandoffs.consumed, false),
+          gt(sessionHandoffs.expiresAt, new Date())
+        )
+      )
+      .limit(1);
+    return result[0];
+  }
+
+  async consumeSessionHandoff(token: string): Promise<void> {
+    await db
+      .update(sessionHandoffs)
+      .set({ consumed: true })
+      .where(eq(sessionHandoffs.token, token));
+  }
+
+  async cleanupExpiredHandoffs(): Promise<void> {
+    await db
+      .delete(sessionHandoffs)
+      .where(gt(sessionHandoffs.expiresAt, new Date()));
+  }
+
+  async createReferral(insertReferral: InsertReferral): Promise<Referral> {
+    const result = await db.insert(referrals).values(insertReferral).returning();
+    return result[0]!;
   }
 }
 

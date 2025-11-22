@@ -178,3 +178,38 @@ export type User = typeof users.$inferSelect;
 export type InsertBusinessPlan = z.infer<typeof insertBusinessPlanSchema>;
 export type BusinessPlan = typeof businessPlans.$inferSelect;
 export type QuestionnaireData = z.infer<typeof questionnaireSchema>;
+
+// Session Handoff for QR Mobile Upload
+export const sessionHandoffs = pgTable("session_handoffs", {
+  token: varchar("token", { length: 36 }).primaryKey(),
+  toolId: text("tool_id").notNull(),
+  payload: jsonb("payload").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  consumed: boolean("consumed").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertSessionHandoffSchema = createInsertSchema(sessionHandoffs).omit({
+  createdAt: true,
+});
+
+export type InsertSessionHandoff = z.infer<typeof insertSessionHandoffSchema>;
+export type SessionHandoff = typeof sessionHandoffs.$inferSelect;
+
+// Referral Tracking for Share Buttons
+export const referrals = pgTable("referrals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id"),
+  toolId: text("tool_id").notNull(),
+  channel: varchar("channel", { length: 20 }).notNull(), // whatsapp, email, twitter, linkedin
+  sessionToken: varchar("session_token", { length: 36 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertReferralSchema = createInsertSchema(referrals).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertReferral = z.infer<typeof insertReferralSchema>;
+export type Referral = typeof referrals.$inferSelect;
