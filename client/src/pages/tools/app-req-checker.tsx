@@ -5,6 +5,7 @@ import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { useState, useEffect } from "react";
 import { Download, AlertTriangle, CheckCircle2, Info, TrendingUp, Save, Share2, Lightbulb, Calendar, RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
@@ -122,8 +123,37 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
     a.click();
   };
 
+  // Function 6: Get Serialized State for QR Code
+  const getSerializedState = () => {
+    return {
+      checks,
+      savedDate,
+      tab
+    };
+  };
+
   useEffect(() => {
-    loadProgress();
+    // Check for handoff payload from QR code scan
+    const handoffKey = 'app-req-checker_handoff';
+    const handoffData = localStorage.getItem(handoffKey);
+    
+    if (handoffData) {
+      try {
+        const payload = JSON.parse(handoffData);
+        // Restore state from handoff payload
+        if (payload.checks) setChecks(payload.checks);
+        if (payload.savedDate) setSavedDate(payload.savedDate);
+        if (payload.tab) setTab(payload.tab);
+        
+        // Clear handoff data after consumption
+        localStorage.removeItem(handoffKey);
+      } catch (err) {
+        console.error('Failed to restore handoff data:', err);
+      }
+    } else {
+      // No handoff, load from regular progress
+      loadProgress();
+    }
   }, []);
 
   return (
@@ -135,23 +165,16 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
           <h1 className="text-4xl font-bold mb-2">Application Requirements Checker</h1>
           <p className="text-muted-foreground mb-6">PhD-level assessment of your 70-point application readiness</p>
 
-          <div className="flex gap-2 mb-6 flex-wrap">
-            <Button onClick={saveProgress} className="gap-2" variant="outline">
-              <Save className="w-4 h-4" /> Save Progress
-            </Button>
-            <Button onClick={() => setShowRecommendations(!showRecommendations)} className="gap-2" variant="outline">
-              <Lightbulb className="w-4 h-4" /> Smart Tips
-            </Button>
-            <Button onClick={() => setShowActionPlan(!showActionPlan)} className="gap-2" variant="outline">
-              <Calendar className="w-4 h-4" /> Action Plan
-            </Button>
-            <Button onClick={exportReport} className="gap-2" variant="outline">
-              <Download className="w-4 h-4" /> Export
-            </Button>
-            <Button onClick={loadProgress} className="gap-2" variant="outline">
-              <RefreshCw className="w-4 h-4" /> Restore
-            </Button>
-          </div>
+          <ToolUtilityBar
+            toolId="app-req-checker"
+            toolName="Application Requirements Checker"
+            onSave={saveProgress}
+            onSmartTips={() => setShowRecommendations(!showRecommendations)}
+            onActionPlan={() => setShowActionPlan(!showActionPlan)}
+            onExport={exportReport}
+            onRestore={loadProgress}
+            getSerializedState={getSerializedState}
+          />
 
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
 

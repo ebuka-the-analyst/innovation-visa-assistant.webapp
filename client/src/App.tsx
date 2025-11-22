@@ -33,6 +33,7 @@ import ToolsHub from "@/pages/tools-hub";
 import FeaturesShowcase from "@/pages/features-showcase";
 import EndorserInvestmentRequirements from "@/pages/endorser-investment-requirements";
 import AIAssistant from "@/pages/ai-assistant";
+import Handoff from "@/pages/handoff";
 import AdvisorsFinder from "@/pages/tools/advisors-finder";
 import AppealStrategy from "@/pages/tools/appeal-strategy";
 import BusinessModelValidator from "@/pages/tools/business-model-validator";
@@ -175,6 +176,7 @@ function Router() {
       <Route path="/features" component={FeaturesShowcase} />
       <Route path="/endorser-investment" component={EndorserInvestmentRequirements} />
       <Route path="/ai-assistant" component={AIAssistant} />
+      <Route path="/handoff" component={Handoff} />
       <Route path="/tools/advisors-finder" component={AdvisorsFinder} />
       <Route path="/tools/appeal-strategy" component={AppealStrategy} />
       <Route path="/tools/business-model-validator" component={BusinessModelValidator} />
