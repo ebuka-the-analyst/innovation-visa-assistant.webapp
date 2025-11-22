@@ -12,6 +12,7 @@ export default function ToolsChronographWheel() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isHoveringUp, setIsHoveringUp] = useState(false);
   const [isHoveringDown, setIsHoveringDown] = useState(false);
+  const [isMouseOverWidget, setIsMouseOverWidget] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const chevronScrollRef = useRef<NodeJS.Timeout | null>(null);
   const tools = ALL_TOOLS;
@@ -89,11 +90,11 @@ export default function ToolsChronographWheel() {
     }
   };
 
-  // Handle wheel scroll on widget - prevent page scroll
+  // Handle wheel scroll on widget - prevent page scroll only when over widget
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    if (!scrollRef.current) return;
+    if (!isMouseOverWidget || !scrollRef.current) return;
 
+    e.preventDefault();
     const scrollDelta = e.deltaY > 0 ? 30 : -30;
     scrollRef.current.scrollTop = Math.max(
       0,
@@ -161,6 +162,9 @@ export default function ToolsChronographWheel() {
       className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
       style={{ scale: "0.375", transformOrigin: "bottom left" }}
+      onMouseEnter={() => setIsMouseOverWidget(true)}
+      onMouseLeave={() => setIsMouseOverWidget(false)}
+      onWheel={handleWheel}
     >
       {/* Outer metal bezel effect */}
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "800px", transition: "height 0.3s ease" }}>
@@ -286,7 +290,6 @@ export default function ToolsChronographWheel() {
             className="absolute inset-0 flex items-center justify-center px-1 z-5"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            onWheel={handleWheel}
           >
             <div 
               onClick={() => setLocation(`/tools/${selectedTool.id}`)}
