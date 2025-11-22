@@ -1,8 +1,10 @@
 import { X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 export default function BlackNovemberBanner() {
+  const [, setLocation] = useLocation();
   const [isVisible, setIsVisible] = useState(true);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -70,6 +72,7 @@ export default function BlackNovemberBanner() {
             {/* Right side - CTA */}
             <div className="flex items-center gap-2 flex-shrink-0">
               <Button
+                onClick={() => setLocation("/pricing")}
                 className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap h-auto"
                 data-testid="button-black-november-cta"
               >
