@@ -12,7 +12,7 @@ export default function Tool() {
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Key Milestones Tracker</h1>
+          <h1 className="text-4xl font-bold mb-2">Venture Fit Analyzer</h1>
           <p className="text-lg text-muted-foreground mb-8">Professional analysis and guidance</p>
           
           <div className="grid md:grid-cols-2 gap-6">
