@@ -289,17 +289,33 @@
   /* Pulsing glow animation for chat and tools widgets */
   @keyframes pulse-glow {
     0% {
-      box-shadow: 0 0 0 0 rgba(17, 182, 233, 0.7);
+      box-shadow: 0 0 0 2px rgba(17, 182, 233, 1), 0 0 0 8px rgba(17, 182, 233, 0.6), 0 0 20px 8px rgba(17, 182, 233, 0.4);
     }
     50% {
-      box-shadow: 0 0 0 10px rgba(17, 182, 233, 0);
+      box-shadow: 0 0 0 2px rgba(17, 182, 233, 1), 0 0 0 12px rgba(17, 182, 233, 0.3), 0 0 30px 12px rgba(17, 182, 233, 0.1);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(17, 182, 233, 0);
+      box-shadow: 0 0 0 2px rgba(17, 182, 233, 1), 0 0 0 8px rgba(17, 182, 233, 0.6), 0 0 20px 8px rgba(17, 182, 233, 0.4);
+    }
+  }
+
+  @keyframes pulse-glow-orange {
+    0% {
+      box-shadow: 0 0 0 3px rgba(255, 165, 54, 1), 0 0 0 10px rgba(255, 165, 54, 0.6), 0 0 25px 10px rgba(255, 165, 54, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 3px rgba(255, 165, 54, 1), 0 0 0 15px rgba(255, 165, 54, 0.3), 0 0 35px 15px rgba(255, 165, 54, 0.1);
+    }
+    100% {
+      box-shadow: 0 0 0 3px rgba(255, 165, 54, 1), 0 0 0 10px rgba(255, 165, 54, 0.6), 0 0 25px 10px rgba(255, 165, 54, 0.4);
     }
   }
 
   .pulse-glow {
     animation: pulse-glow 2s infinite;
+  }
+
+  .pulse-glow-orange {
+    animation: pulse-glow-orange 2s infinite;
   }
 }
