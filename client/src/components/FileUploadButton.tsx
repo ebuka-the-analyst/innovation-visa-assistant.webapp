@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, Camera, FileText } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface UploadedFile {
   id: string;
@@ -113,35 +114,50 @@ export function FileUploadButton({
 
       {isMobile && config.allowCamera ? (
         <div className="flex gap-2">
-          <Button
-            variant={variant}
-            size="sm"
-            onClick={() => cameraInputRef.current?.click()}
-            data-testid="button-camera-upload"
-          >
-            <Camera className="h-4 w-4 mr-2" />
-            Camera
-          </Button>
-          <Button
-            variant={variant}
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-            data-testid="button-file-upload"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={variant}
+                size="sm"
+                onClick={() => cameraInputRef.current?.click()}
+                data-testid="button-camera-upload"
+              >
+                <Camera className="h-4 w-4 mr-2" />
+                Camera
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Take a photo with your device camera</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={variant}
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                data-testid="button-file-upload"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Upload a file from your device</TooltipContent>
+          </Tooltip>
         </div>
       ) : (
-        <Button
-          variant={variant}
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-          data-testid="button-file-upload"
-        >
-          <FileText className="h-4 w-4 mr-2" />
-          {config.label}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={variant}
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              data-testid="button-file-upload"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              {config.label}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{config.description}</TooltipContent>
+        </Tooltip>
       )}
     </div>
   );
