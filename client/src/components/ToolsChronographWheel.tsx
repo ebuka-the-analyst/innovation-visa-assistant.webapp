@@ -7,6 +7,7 @@ type IconName = keyof typeof Icons;
 export default function ToolsChronographWheel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedToolIdx, setSelectedToolIdx] = useState(0);
+  const [isMinimized, setIsMinimized] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const tools = ALL_TOOLS;
   const selectedTool = tools[selectedToolIdx];
@@ -90,19 +91,30 @@ export default function ToolsChronographWheel() {
       style={{ scale: "0.375", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
-      <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: "640px", width: "800px" }}>
+      <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "800px", transition: "height 0.3s ease" }}>
         
-        {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="px-4 pt-3 pb-2 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
+        {/* Static Header Section - "100+ TOOLS HUB" with Close Button */}
+        <div className="px-4 pt-3 pb-2 border-b-2 border-gray-400 flex items-center justify-between" style={{ backgroundColor: "#ffa536" }}>
           <h3 className="text-4xl font-black" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
+          <button
+            onClick={() => setIsMinimized(!isMinimized)}
+            className="flex-shrink-0 text-black hover:opacity-70 transition-opacity"
+            data-testid="button-toggle-tools-hub"
+            aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
+          >
+            <Icons.X className="w-8 h-8" />
+          </button>
         </div>
 
-        {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" */}
-        <div className="px-4 py-2 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
-          <p className="text-lg font-black tracking-wide" style={{ color: "#000000" }}>APPLICATION REQUIREMENT CHECKS</p>
-        </div>
+        {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" - Hidden when minimized */}
+        {!isMinimized && (
+          <div className="px-4 py-2 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
+            <p className="text-lg font-black tracking-wide" style={{ color: "#000000" }}>APPLICATION REQUIREMENT CHECKS</p>
+          </div>
+        )}
 
-        {/* Main Container with Featured Tool in Center */}
+        {/* Main Container with Featured Tool in Center - Hidden when minimized */}
+        {!isMinimized && (
         <div className="flex-1 relative overflow-hidden">
           {/* Scrollable tool list background */}
           <div
@@ -210,6 +222,7 @@ export default function ToolsChronographWheel() {
             boxShadow: "0 4px 12px rgba(0,0,0,0.2) inset",
           }}
         />
+        )}
       </div>
     </div>
   );
