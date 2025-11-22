@@ -5,8 +5,8 @@ import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState } from "react";
-import { Download, AlertTriangle, CheckCircle2, Info, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Download, AlertTriangle, CheckCircle2, Info, TrendingUp, Save, Share2, Lightbulb, Calendar, RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
 
 const CRITERIA = [
@@ -39,11 +39,14 @@ export default function AppReqChecker() {
   const [checks, setChecks] = useState<any>({});
   const [expanded, setExpanded] = useState<any>({});
   const [tab, setTab] = useState("overview");
+  const [savedDate, setSavedDate] = useState<string>("");
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [showActionPlan, setShowActionPlan] = useState(false);
   
   const criteriaDone = CRITERIA.reduce((sum, cat) => sum + cat.items.filter(i => checks[`${cat.id}-${i.name}`]).length, 0);
   const criteriaTotal = CRITERIA.reduce((sum, cat) => sum + cat.items.length, 0);
   const criteriaScore = Math.round((criteriaDone / criteriaTotal) * 50);
-  const totalScore = criteriaScore + 20; // 50 for business + 20 for English/Financial
+  const totalScore = criteriaScore + 20;
 
   const chartData = [
     {name:"Innovation",value:checks["1-Tech-driven innovation"]?16.7:0},
@@ -53,6 +56,76 @@ export default function AppReqChecker() {
     {name:"Financial",value:20}
   ];
 
+  // Function 1: Save Progress to localStorage
+  const saveProgress = () => {
+    localStorage.setItem('appReqCheckerProgress', JSON.stringify(checks));
+    localStorage.setItem('appReqCheckerDate', new Date().toLocaleDateString());
+    setSavedDate(new Date().toLocaleDateString());
+  };
+
+  // Function 2: Load Progress from localStorage
+  const loadProgress = () => {
+    const saved = localStorage.getItem('appReqCheckerProgress');
+    if (saved) {
+      setChecks(JSON.parse(saved));
+      const date = localStorage.getItem('appReqCheckerDate');
+      setSavedDate(date || '');
+    }
+  };
+
+  // Function 3: Generate Smart Recommendations
+  const getRecommendations = () => {
+    const gaps = [];
+    if (!checks["1-Tech-driven innovation"]) gaps.push("Develop patent or IP strategy - critical for scoring");
+    if (!checks["2-Market validation"]) gaps.push("Conduct customer interviews to validate market demand");
+    if (!checks["3-Growth trajectory"]) gaps.push("Create 3-year business plan with measurable milestones");
+    if (criteriaDone < 5) gaps.push("Complete at least 5 criteria items before submission");
+    if (totalScore < 50) gaps.push("Target minimum 50 points - focus on business criteria first");
+    return gaps.slice(0, 5);
+  };
+
+  // Function 4: Generate Action Plan with Timeline
+  const generateActionPlan = () => {
+    const plan = [
+      {week:"Week 1-2", action:"Complete Tech Innovation documentation", priority:"Critical"},
+      {week:"Week 3-4", action:"Conduct 5+ customer interviews", priority:"High"},
+      {week:"Week 5-6", action:"Finalize business plan and financial projections", priority:"High"},
+      {week:"Week 7-8", action:"Prepare all supporting documents", priority:"Medium"},
+      {week:"Week 9", action:"Final review and submission", priority:"Critical"}
+    ];
+    return plan;
+  };
+
+  // Function 5: Export Assessment Report
+  const exportReport = () => {
+    const report = `
+APPLICATION REQUIREMENTS ASSESSMENT
+Date: ${new Date().toLocaleDateString()}
+Score: ${totalScore}/70
+
+BUSINESS CRITERIA: ${criteriaScore}/50
+- Innovation: ${checks["1-Tech-driven innovation"]?"✓":"✗"}
+- Viability: ${checks["2-Market validation"]?"✓":"✗"}
+- Potential: ${checks["3-Growth trajectory"]?"✓":"✗"}
+
+ENGLISH & FINANCIAL: 20/20
+- English Level: B2+ Required ✓
+- Financial: £1,270 for 28 days ✓
+
+STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
+    `;
+    const blob = new Blob([report], {type: 'text/plain'});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'app-requirements-assessment.txt';
+    a.click();
+  };
+
+  useEffect(() => {
+    loadProgress();
+  }, []);
+
   return (
     <>
       <AuthHeader />
@@ -61,6 +134,52 @@ export default function AppReqChecker() {
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Application Requirements Checker</h1>
           <p className="text-muted-foreground mb-6">PhD-level assessment of your 70-point application readiness</p>
+
+          <div className="flex gap-2 mb-6 flex-wrap">
+            <Button onClick={saveProgress} className="gap-2" variant="outline">
+              <Save className="w-4 h-4" /> Save Progress
+            </Button>
+            <Button onClick={() => setShowRecommendations(!showRecommendations)} className="gap-2" variant="outline">
+              <Lightbulb className="w-4 h-4" /> Smart Tips
+            </Button>
+            <Button onClick={() => setShowActionPlan(!showActionPlan)} className="gap-2" variant="outline">
+              <Calendar className="w-4 h-4" /> Action Plan
+            </Button>
+            <Button onClick={exportReport} className="gap-2" variant="outline">
+              <Download className="w-4 h-4" /> Export
+            </Button>
+            <Button onClick={loadProgress} className="gap-2" variant="outline">
+              <RefreshCw className="w-4 h-4" /> Restore
+            </Button>
+          </div>
+
+          {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
+
+          {showRecommendations && (
+            <Card className="p-4 mb-4 bg-blue-50 border-blue-200">
+              <h3 className="font-bold mb-2">Smart Recommendations</h3>
+              <ul className="space-y-1">
+                {getRecommendations().map((rec, i) => <li key={i} className="text-sm">• {rec}</li>)}
+              </ul>
+            </Card>
+          )}
+
+          {showActionPlan && (
+            <Card className="p-4 mb-4 bg-green-50 border-green-200">
+              <h3 className="font-bold mb-3">Action Plan Timeline</h3>
+              <div className="space-y-2">
+                {generateActionPlan().map((item, i) => (
+                  <div key={i} className="flex gap-3">
+                    <span className="font-bold text-sm">{item.week}</span>
+                    <div>
+                      <p className="text-sm">{item.action}</p>
+                      <span className={`text-xs px-1 ${item.priority==="Critical"?"text-red-600":"text-yellow-600"}`}>{item.priority}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
           <Tabs value={tab} onValueChange={setTab} className="mb-6">
             <TabsList className="grid w-full grid-cols-4">
@@ -97,7 +216,7 @@ export default function AppReqChecker() {
               <Alert className="border-blue-200 bg-blue-50">
                 <Info className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-blue-700">
-                  You need 50 points from business criteria (Innovation + Viability + Potential), 10 for English (B2), and 10 for financial requirements (£1,270 for 28 days).
+                  You need 50 points from business criteria, 10 for English (B2), and 10 for financial requirements.
                 </AlertDescription>
               </Alert>
 
@@ -172,7 +291,7 @@ export default function AppReqChecker() {
               <Alert className="border-amber-200 bg-amber-50">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
                 <AlertDescription className="text-amber-700">
-                  Bank statement must show £1,270 available for 28 consecutive days immediately before application submission.
+                  Bank statement must show £1,270 available for 28 consecutive days.
                 </AlertDescription>
               </Alert>
             </TabsContent>

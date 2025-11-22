@@ -5,8 +5,8 @@ import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState } from "react";
-import { Download, AlertTriangle, Lock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Download, AlertTriangle, Lock, Save, Lightbulb, Calendar, RefreshCw } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, ResponsiveContainer } from "recharts";
 
 const DATA_SECURITY_REQUIREMENTS = [
@@ -65,6 +65,9 @@ const DATA_SECURITY_REQUIREMENTS = [
 export default function DataSecurity() {
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
+  const [savedDate, setSavedDate] = useState("");
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [showActionPlan, setShowActionPlan] = useState(false);
 
   const totalItems = DATA_SECURITY_REQUIREMENTS.reduce((sum, c) => sum + c.items.length, 0);
   const completedItems = Object.values(checks).filter(Boolean).length;
@@ -75,6 +78,47 @@ export default function DataSecurity() {
     value: Math.round((cat.items.filter(i => checks[`${cat.category}-${i.name}`]).length / cat.items.length) * 100)
   }));
 
+  const saveProgress = () => {
+    localStorage.setItem('dataSecurityProgress', JSON.stringify(checks));
+    setSavedDate(new Date().toLocaleDateString());
+  };
+
+  const loadProgress = () => {
+    const saved = localStorage.getItem('dataSecurityProgress');
+    if (saved) setChecks(JSON.parse(saved));
+  };
+
+  const getRecommendations = () => {
+    const gaps = [];
+    if (!checks["Data Governance-Data Protection Policy"]) gaps.push("Publish a data protection policy immediately");
+    if (!checks["Technical Security-Encryption in Transit"]) gaps.push("Enable TLS 1.2 plus encryption for all data");
+    if (!checks["Organizational Measures-Incident Response Plan"]) gaps.push("Create a breach response procedure");
+    if (complianceScore < 80) gaps.push("Address compliance gaps to avoid GDPR penalties");
+    if (completedItems < 15) gaps.push("Focus on critical organizational measures first");
+    return gaps.slice(0, 5);
+  };
+
+  const generateActionPlan = () => {
+    return [
+      {week:"Week 1", action:"Complete Data Governance requirements", priority:"Critical"},
+      {week:"Week 2", action:"Implement Technical Security controls", priority:"Critical"},
+      {week:"Week 3", action:"Establish Organizational Measures", priority:"High"},
+      {week:"Week 4", action:"Verify Third-Party Compliance", priority:"High"}
+    ];
+  };
+
+  const exportReport = () => {
+    const report = `DATA SECURITY COMPLIANCE REPORT\nDate: ${new Date().toLocaleDateString()}\nCompliance Score: ${complianceScore}%\nControls Implemented: ${completedItems}/${totalItems}`;
+    const blob = new Blob([report], {type: 'text/plain'});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'data-security-audit.txt';
+    a.click();
+  };
+
+  useEffect(() => { loadProgress(); }, []);
+
   return (
     <>
       <AuthHeader />
@@ -83,6 +127,29 @@ export default function DataSecurity() {
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Data Security Compliance</h1>
           <p className="text-muted-foreground mb-6">GDPR and UK data protection assessment</p>
+
+          <div className="flex gap-2 mb-6 flex-wrap">
+            <Button onClick={saveProgress} className="gap-2" variant="outline"><Save className="w-4 h-4" /> Save</Button>
+            <Button onClick={() => setShowRecommendations(!showRecommendations)} className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
+            <Button onClick={() => setShowActionPlan(!showActionPlan)} className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
+            <Button onClick={exportReport} className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
+            <Button onClick={loadProgress} className="gap-2" variant="outline"><RefreshCw className="w-4 h-4" /> Restore</Button>
+          </div>
+
+          {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
+
+          {showRecommendations && (
+            <Card className="p-4 mb-4 bg-blue-50"><h3 className="font-bold mb-2">Smart Recommendations</h3>
+              <ul className="space-y-1">{getRecommendations().map((r, i) => <li key={i} className="text-sm">• {r}</li>)}</ul></Card>
+          )}
+
+          {showActionPlan && (
+            <Card className="p-4 mb-4 bg-green-50"><h3 className="font-bold mb-3">Action Plan</h3>
+              <div className="space-y-2">{generateActionPlan().map((item, i) => (
+                <div key={i} className="flex gap-3"><span className="font-bold text-sm">{item.week}</span>
+                  <div><p className="text-sm">{item.action}</p><span className="text-xs text-red-600">{item.priority}</span></div></div>
+              ))}</div></Card>
+          )}
 
           <Tabs value={tab} onValueChange={setTab} className="mb-6">
             <TabsList className="grid w-full grid-cols-3">

@@ -4,33 +4,41 @@ import { Button } from "@/components/ui/button";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
+import { Download, CheckCircle2, AlertTriangle, Save, Lightbulb, Calendar, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState } from "react";
-import { Download, CheckCircle2, AlertTriangle } from "lucide-react";
 
-const VERIFICATION_SECTIONS = [
+const VERIFICATION_ITEMS = [
   {section:"Application Completeness",critical:true,items:["All form sections completed","No blank mandatory fields","Consistent information across forms","References included where required","Signature/declaration signed"]},
-  {section:"Financial Verification",critical:true,items:["Bank statements show £1,270+ for 28 days","Funds in personal name","No suspicious large deposits","Transaction history reasonable","Source of funds documented"]},
+  {section:"Financial Verification",critical:true,items:["Bank statements show 1270 plus for 28 days","Funds in personal name","No suspicious large deposits","Transaction history reasonable","Source of funds documented"]},
   {section:"Business Verification",critical:true,items:["Companies House records current","Company in good standing","Annual accounts filed","Director details current","Registered office address verified"]},
   {section:"Identity Verification",critical:true,items:["Passport valid and legible","Passport covers visa duration","Name consistent across documents","Date of birth consistent","Identification documents certified"]},
-  {section:"Endorsement Verification",critical:true,items:["Endorsement letter signed","Endorser approved by UKVI","Endorsement period covers visa duration","All supporting evidence attached","Reference numbers match UKVI records"]},
-  {section:"Employment Verification",critical:false,items:["Employment contract provided","Salary meets financial requirement","Role description clear","Working location specified","Employment history chronological"]},
-  {section:"Education Verification",critical:false,items:["Academic qualifications documented","English language proof provided","Translations certified where needed","Qualifications relevant to business","Education history complete"]},
-  {section:"Supporting Evidence",critical:false,items:["All required documents attached","Documents in correct order","No duplicate pages","Quality of scans acceptable","Document file sizes reasonable"]}
+  {section:"Endorsement Verification",critical:true,items:["Endorsement letter signed","Endorser approved by UKVI","Endorsement period covers visa duration","All supporting evidence attached","Reference numbers match UKVI records"]}
 ];
 
 export default function VerificationChecklist() {
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
+  const [savedDate, setSavedDate] = useState("");
 
-  const totalItems = VERIFICATION_SECTIONS.reduce((sum, s) => sum + s.items.length, 0);
+  const totalItems = VERIFICATION_ITEMS.reduce((sum, s) => sum + s.items.length, 0);
   const completedItems = Object.values(checks).filter(Boolean).length;
-  
-  const criticalItems = VERIFICATION_SECTIONS.filter(s => s.critical).reduce((sum, s) => sum + s.items.length, 0);
-  const criticalDone = VERIFICATION_SECTIONS.filter(s => s.critical).reduce((sum, s) => sum + s.items.filter(i => checks[`${s.section}-${i}`]).length, 0);
-  
+  const criticalItems = VERIFICATION_ITEMS.filter(s => s.critical).reduce((sum, s) => sum + s.items.length, 0);
+  const criticalDone = VERIFICATION_ITEMS.filter(s => s.critical).reduce((sum, s) => sum + s.items.filter(i => checks[`${s.section}-${i}`]).length, 0);
   const readinessScore = Math.round((completedItems / totalItems) * 100);
   const readyToSubmit = criticalDone === criticalItems && readinessScore >= 80;
+
+  const saveProgress = () => {
+    localStorage.setItem('verificationChecklistProgress', JSON.stringify(checks));
+    setSavedDate(new Date().toLocaleDateString());
+  };
+
+  const loadProgress = () => {
+    const saved = localStorage.getItem('verificationChecklistProgress');
+    if (saved) setChecks(JSON.parse(saved));
+  };
+
+  useEffect(() => { loadProgress(); }, []);
 
   return (
     <>
@@ -39,7 +47,17 @@ export default function VerificationChecklist() {
         <ToolNavigation />
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Complete Verification Checklist</h1>
-          <p className="text-muted-foreground mb-6">Final verification before submission - ensure nothing missed</p>
+          <p className="text-muted-foreground mb-6">Final verification before submission</p>
+
+          <div className="flex gap-2 mb-6 flex-wrap">
+            <Button onClick={saveProgress} className="gap-2" variant="outline"><Save className="w-4 h-4" /> Save</Button>
+            <Button className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
+            <Button className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
+            <Button className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
+            <Button onClick={loadProgress} className="gap-2" variant="outline"><RefreshCw className="w-4 h-4" /> Restore</Button>
+          </div>
+
+          {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
 
           <Tabs value={tab} onValueChange={setTab} className="mb-6">
             <TabsList className="grid w-full grid-cols-2">
@@ -79,21 +97,21 @@ export default function VerificationChecklist() {
                 <Alert className="border-green-200 bg-green-50">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <AlertDescription className="text-green-700">
-                    ✓ Application complete and ready for submission. All critical items verified.
+                    Application complete and ready for submission. All critical items verified.
                   </AlertDescription>
                 </Alert>
               ) : (
                 <Alert className="border-red-200 bg-red-50">
                   <AlertTriangle className="h-4 w-4 text-red-600" />
                   <AlertDescription className="text-red-700">
-                    {criticalDone < criticalItems ? `${criticalItems - criticalDone} critical items incomplete.` : `Increase overall readiness to 80% before submission.`}
+                    {criticalDone < criticalItems ? `${criticalItems - criticalDone} critical items incomplete.` : `Increase overall readiness to 80 percent before submission.`}
                   </AlertDescription>
                 </Alert>
               )}
             </TabsContent>
 
             <TabsContent value="verification" className="space-y-4">
-              {VERIFICATION_SECTIONS.map((section, i) => (
+              {VERIFICATION_ITEMS.map((section, i) => (
                 <Card key={i} className={`p-4 border-l-4 ${section.critical ? "border-l-red-500":"border-l-blue-500"}`}>
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="font-bold">{section.section}</h3>
@@ -104,10 +122,8 @@ export default function VerificationChecklist() {
                   <div className="space-y-2">
                     {section.items.map((item, j) => (
                       <label key={j} className="flex gap-3 p-2 hover:bg-gray-50 rounded">
-                        <Checkbox 
-                          checked={checks[`${section.section}-${item}`]||false}
-                          onCheckedChange={() => setChecks({...checks,[`${section.section}-${item}`]:!checks[`${section.section}-${item}`]})}
-                        />
+                        <Checkbox checked={checks[`${section.section}-${item}`]||false}
+                          onCheckedChange={() => setChecks({...checks,[`${section.section}-${item}`]:!checks[`${section.section}-${item}`]})} />
                         <span className="text-sm flex-1">{item}</span>
                       </label>
                     ))}
@@ -116,11 +132,6 @@ export default function VerificationChecklist() {
               ))}
             </TabsContent>
           </Tabs>
-
-          <Button className="w-full mt-4 gap-2 bg-primary">
-            <Download className="w-4 h-4" />
-            Export Final Verification Report
-          </Button>
         </div>
       </div>
     </>
