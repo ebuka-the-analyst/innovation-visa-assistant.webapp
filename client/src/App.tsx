@@ -32,19 +32,13 @@ import ToolsHub from "@/pages/tools-hub";
 import FeaturesShowcase from "@/pages/features-showcase";
 import EndorserInvestmentRequirements from "@/pages/endorser-investment-requirements";
 import AIAssistant from "@/pages/ai-assistant";
-import AdvisorPrep from "@/pages/tools/advisor-prep";
 import AdvisorsFinder from "@/pages/tools/advisors-finder";
-import AdvisoryBoard from "@/pages/tools/advisory-board";
 import AppealStrategy from "@/pages/tools/appeal-strategy";
-import ApplicationRequirements from "@/pages/tools/application-requirements";
-import Breakeven from "@/pages/tools/breakeven";
-import BudgetCost from "@/pages/tools/budget-cost";
 import BusinessModelValidator from "@/pages/tools/business-model-validator";
 import CacCalculator from "@/pages/tools/cac-calculator";
 import CompetitorBench from "@/pages/tools/competitor-bench";
 import ComplianceChecker from "@/pages/tools/compliance-checker";
 import ContingencyPlan from "@/pages/tools/contingency-plan";
-import CustomerResearch from "@/pages/tools/customer-research";
 import DataSecurity from "@/pages/tools/data-security";
 import DocOrganizer from "@/pages/tools/doc-organizer";
 import DocVerification from "@/pages/tools/doc-verification";
@@ -102,18 +96,13 @@ import RoadmapBuilder from "@/pages/tools/roadmap-builder";
 import SavingsValidator from "@/pages/tools/savings-validator";
 import ScalabilityRoadmap from "@/pages/tools/scalability-roadmap";
 import ScenarioPlanner from "@/pages/tools/scenario-planner";
-import SensitivityAnalysis from "@/pages/tools/sensitivity-analysis";
 import SettlementGuide from "@/pages/tools/settlement-guide";
 import SuccessMetrics from "@/pages/tools/success-metrics";
 import SuccessPredictor from "@/pages/tools/success-predictor";
 import SupplyChain from "@/pages/tools/supply-chain";
-import TalentStrategy from "@/pages/tools/talent-strategy";
 import TeamAssessment from "@/pages/tools/team-assessment";
-import TeamRoles from "@/pages/tools/team-roles";
 import TeamScaling from "@/pages/tools/team-scaling";
-import TestingPlan from "@/pages/tools/testing-plan";
 import VisaTimeline from "@/pages/tools/visa-timeline";
-import VisaTracker from "@/pages/tools/visa-tracker";
 
 // Pages that don't need sidebar (auth pages)
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/pricing"];
@@ -145,19 +134,13 @@ function Router() {
       <Route path="/features" component={FeaturesShowcase} />
       <Route path="/endorser-investment" component={EndorserInvestmentRequirements} />
       <Route path="/ai-assistant" component={AIAssistant} />
-      <Route path="/tools/advisor-prep" component={AdvisorPrep} />
       <Route path="/tools/advisors-finder" component={AdvisorsFinder} />
-      <Route path="/tools/advisory-board" component={AdvisoryBoard} />
       <Route path="/tools/appeal-strategy" component={AppealStrategy} />
-      <Route path="/tools/application-requirements" component={ApplicationRequirements} />
-      <Route path="/tools/breakeven" component={Breakeven} />
-      <Route path="/tools/budget-cost" component={BudgetCost} />
       <Route path="/tools/business-model-validator" component={BusinessModelValidator} />
       <Route path="/tools/cac-calculator" component={CacCalculator} />
       <Route path="/tools/competitor-bench" component={CompetitorBench} />
       <Route path="/tools/compliance-checker" component={ComplianceChecker} />
       <Route path="/tools/contingency-plan" component={ContingencyPlan} />
-      <Route path="/tools/customer-research" component={CustomerResearch} />
       <Route path="/tools/data-security" component={DataSecurity} />
       <Route path="/tools/doc-organizer" component={DocOrganizer} />
       <Route path="/tools/doc-verification" component={DocVerification} />
@@ -215,18 +198,13 @@ function Router() {
       <Route path="/tools/savings-validator" component={SavingsValidator} />
       <Route path="/tools/scalability-roadmap" component={ScalabilityRoadmap} />
       <Route path="/tools/scenario-planner" component={ScenarioPlanner} />
-      <Route path="/tools/sensitivity-analysis" component={SensitivityAnalysis} />
       <Route path="/tools/settlement-guide" component={SettlementGuide} />
       <Route path="/tools/success-metrics" component={SuccessMetrics} />
       <Route path="/tools/success-predictor" component={SuccessPredictor} />
       <Route path="/tools/supply-chain" component={SupplyChain} />
-      <Route path="/tools/talent-strategy" component={TalentStrategy} />
       <Route path="/tools/team-assessment" component={TeamAssessment} />
-      <Route path="/tools/team-roles" component={TeamRoles} />
       <Route path="/tools/team-scaling" component={TeamScaling} />
-      <Route path="/tools/testing-plan" component={TestingPlan} />
       <Route path="/tools/visa-timeline" component={VisaTimeline} />
-      <Route path="/tools/visa-tracker" component={VisaTracker} />
       <Route component={NotFound} />
     </Switch>
   );
