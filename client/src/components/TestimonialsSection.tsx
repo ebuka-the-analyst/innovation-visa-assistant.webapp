@@ -55,7 +55,7 @@ export default function TestimonialsSection() {
             Trusted by Successful Applicants
           </h2>
           <p className="text-lg text-muted-foreground">
-            Join hundreds of entrepreneurs who received their UK Innovation Visa approval
+            Join hundreds of entrepreneurs who received their UK Innovator Founder Visa approval
           </p>
         </div>
 

@@ -40,7 +40,7 @@ export default function EverythingWeOfferSection() {
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">Everything You Need</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            A complete platform with 88 powerful AI tools, expert guidance, and everything required to get your UK Innovation Visa approved
+            A complete platform with 88 powerful AI tools, expert guidance, and everything required to get your UK Innovator Founder Visa approved
           </p>
         </div>
 

@@ -11,7 +11,7 @@ const tiers = [
     id: "free",
     name: "Free Plan",
     price: "Free",
-    description: "Start your visa journey",
+    description: "Start your Innovator Founder Visa journey",
     pages: "10-15 pages",
     features: [
       "Basic business overview",

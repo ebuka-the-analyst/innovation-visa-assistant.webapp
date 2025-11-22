@@ -25,7 +25,7 @@ const MAIN_FEATURES = [
   { title: "88 AI-Powered Tools", description: "Complete toolkit from application to approval" },
   { title: "5 Pricing Tiers", description: "Free to Ultimate with varying feature access" },
   { title: "Expert Dashboard", description: "Monitor your visa application progress" },
-  { title: "Breaking News Ticker", description: "Real-time UK Innovation Visa updates" },
+  { title: "Breaking News Ticker", description: "Real-time UK Innovator Founder Visa updates" },
   { title: "Diagnostics Engine", description: "Application readiness scoring (88% benchmark)" },
   { title: "AI Agent Assistants", description: "Nova, Sterling, Atlas, and Sage AI agents" },
   { title: "Endorser Comparison", description: "Compare and select approved endorsers" },
@@ -60,7 +60,7 @@ export default function FeaturesShowcase() {
         {/* Hero */}
         <div className="border-b">
           <div className="container mx-auto px-4 md:px-6 py-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4" data-testid="heading-features">Everything You Need for UK Innovation Visa Success</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4" data-testid="heading-features">Everything You Need for UK Innovator Founder Visa Success</h1>
             <p className="text-xl text-muted-foreground max-w-2xl">
               A complete platform with 88 tools, AI agents, expert guidance, and everything required to turn your innovation into a visa-approved business
             </p>

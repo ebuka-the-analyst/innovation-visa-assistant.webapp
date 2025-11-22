@@ -7,7 +7,7 @@ const tiers = [
   {
     name: "Basic",
     price: "£19",
-    description: "Perfect for getting started",
+    description: "Perfect for Innovator Founder Visa applications",
     features: [
       { name: "Standard business plan template", included: true },
       { name: "AI-powered content generation", included: true },
@@ -23,7 +23,7 @@ const tiers = [
   {
     name: "Premium",
     price: "£39",
-    description: "Most comprehensive option",
+    description: "Most comprehensive Innovator Founder plan",
     features: [
       { name: "Enhanced business plan", included: true },
       { name: "AI-powered content generation", included: true },
@@ -39,7 +39,7 @@ const tiers = [
   {
     name: "Enterprise",
     price: "£79",
-    description: "Complete visa preparation",
+    description: "Complete Innovator Founder Visa preparation",
     features: [
       { name: "Full business plan package", included: true },
       { name: "AI-powered content generation", included: true },

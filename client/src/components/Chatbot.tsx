@@ -21,7 +21,7 @@ export default function Chatbot({ planId }: ChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Hi! I'm your UK Innovation Visa assistant. I can help answer questions about your business plan, visa requirements, and endorsing bodies. How can I help you today?",
+      content: "Hi! I'm your UK Innovator Founder Visa assistant. I can help answer questions about your business plan, visa requirements, and endorsing bodies. How can I help you today?",
       timestamp: new Date(),
     }
   ]);

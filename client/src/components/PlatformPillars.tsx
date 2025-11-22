@@ -27,7 +27,7 @@ export default function PlatformPillars() {
       icon: Zap,
       name: "VisaPrep AI - Diagnostics",
       subtitle: "Eligibility & Route Analysis",
-      description: "Real-time AI diagnostic engine that tests your business against all UK Innovation Visa requirements. Compares endorser routes, scores your viability for each endorser, models your team gaps, and forecasts realistic traction benchmarks—so you know your success probability before investing.",
+      description: "Real-time AI diagnostic engine that tests your business against all UK Innovator Founder Visa requirements. Compares endorser routes, scores your viability for each endorser, models your team gaps, and forecasts realistic traction benchmarks—so you know your success probability before investing.",
       features: [
         "Real-time eligibility checking against Home Office rules",
         "Endorser fit scoring & comparison",
@@ -69,7 +69,7 @@ export default function PlatformPillars() {
             One Platform. Three Power Tools.
           </h2>
           <p className="text-lg text-muted-foreground">
-            VisaPrep AI combines business planning, eligibility diagnostics, and expert mentorship into one unified platform for UK Innovation Visa success
+            VisaPrep AI combines business planning, eligibility diagnostics, and expert mentorship into one unified platform for UK Innovator Founder Visa success
           </p>
         </div>
 

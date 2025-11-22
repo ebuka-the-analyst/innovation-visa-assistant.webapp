@@ -14,7 +14,7 @@ export default function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm the UK-Innovation Visa Assistant. I can help you with UK Innovation Visa strategy, business plan advice, and answers to all your visa questions. What would you like to know?"
+      content: "Hi! I'm the UK Innovator Founder Visa Assistant. I can help you with Innovator Founder Visa strategy, business plan advice, and answers to all your visa questions. What would you like to know?"
     }
   ]);
   const [input, setInput] = useState("");
@@ -132,7 +132,7 @@ export default function ChatBot() {
           <div className="p-4 text-white flex-shrink-0" style={{ background: "linear-gradient(135deg, #0D2C4A 0%, #11b6e9 100%)" }}>
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-bold text-lg">UK-Innovation Visa Assistant</h3>
+                <h3 className="font-bold text-lg">UK Innovator Founder Visa Assistant</h3>
               </div>
               <button
                 onClick={() => setIsOpen(false)}

@@ -43,7 +43,7 @@ export default function CompetitorFeatures() {
             Everything You Need to Succeed
           </h2>
           <p className="text-lg text-muted-foreground">
-            Complete toolkit for UK Innovation Visa success
+            Complete toolkit for UK Innovator Founder Visa success
           </p>
         </div>
 
