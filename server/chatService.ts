@@ -27,7 +27,8 @@ When you cannot answer with high confidence:
 - Do not guess or speculate about policy details`;
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
 });
 
 export async function chatWithMultipleLLMs(
@@ -36,10 +37,10 @@ export async function chatWithMultipleLLMs(
 ): Promise<{ response: string; provider: string }> {
   // Try each LLM in order of preference
   
-  // 1. Try OpenAI (GPT-4)
+  // 1. Try OpenAI (GPT-4o via Replit AI Integrations)
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -61,7 +62,7 @@ export async function chatWithMultipleLLMs(
     const content = response.choices[0]?.message?.content || "";
     return {
       response: addDisclaimerIfNeeded(content),
-      provider: "GPT-4",
+      provider: "GPT-4o",
     };
   } catch (error) {
     console.warn("OpenAI API failed, trying Gemini...", error);
