@@ -119,10 +119,10 @@ export function ToolUtilityBar({
               variant="outline"
               size="sm"
               onClick={handleUploadFromPhone}
-              data-testid="button-upload-from-phone"
+              data-testid="button-continue-on-mobile"
             >
               <Smartphone className="h-4 w-4 mr-2" />
-              Upload from Phone
+              Continue on Mobile
             </Button>
           )}
 

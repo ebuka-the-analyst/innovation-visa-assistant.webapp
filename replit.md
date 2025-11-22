@@ -14,7 +14,8 @@
 
 **CRITICAL BUGS FIXED (November 22, 2025):**
 - ✅ Session handoff cleanup bug - was deleting active tokens instead of expired ones (changed gt to lt)
-- ✅ Mobile UX bug - "Upload from Phone" button now hidden on mobile devices (can't scan QR with same phone)
+- ✅ Mobile UX bug - "Continue on Mobile" button now hidden on mobile devices (can't scan QR with same phone)
+- ✅ UX clarity fix - renamed misleading "Upload from Phone" to clear "Continue on Mobile" button text
 
 **Components Built:**
 - ✅ `useSessionHandoff` hook - QR generation and session management
