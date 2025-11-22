@@ -1,13 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home } from "lucide-react";
+import { useLocation } from "wouter";
 
 export function ToolNavigation() {
+  const [, setLocation] = useLocation();
+
   return (
     <div className="flex items-center gap-3 mb-6">
       <Button
         variant="outline"
         size="sm"
-        onClick={() => window.history.back()}
+        onClick={() => setLocation("/tools-hub")}
         data-testid="button-back"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -16,7 +19,7 @@ export function ToolNavigation() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => window.location.href = "/"}
+        onClick={() => setLocation("/")}
         data-testid="button-home"
       >
         <Home className="w-4 h-4 mr-2" />
@@ -25,7 +28,7 @@ export function ToolNavigation() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => window.location.href = "/tools-hub"}
+        onClick={() => setLocation("/tools-hub")}
         data-testid="button-tools-hub"
       >
         <Home className="w-4 h-4 mr-2" />
