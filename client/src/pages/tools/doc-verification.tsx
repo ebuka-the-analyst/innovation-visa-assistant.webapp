@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+import { FileUploadButton } from "@/components/FileUploadButton";
+import { fileUploadConfigs } from "@/lib/fileUploadConfigs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
-import { Download, Save, Lightbulb, Calendar, RefreshCw, FileCheck } from "lucide-react";
+import { Download, Save, Lightbulb, Calendar, RefreshCw, FileCheck, X } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const DOC_CATEGORIES = [
@@ -49,6 +51,7 @@ export default function DocVerification() {
   const [savedDate, setSavedDate] = useState("");
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{name: string, size: number, type: string}>>([]);
 
   const totalDocs = DOC_CATEGORIES.reduce((sum, c) => sum + c.items.length, 0);
   const completedDocs = Object.values(checks).filter(Boolean).length;

@@ -114,18 +114,6 @@ export function ToolUtilityBar({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          {!isMobile && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleUploadFromPhone}
-              data-testid="button-continue-on-mobile"
-            >
-              <Smartphone className="h-4 w-4 mr-2" />
-              Continue on Mobile
-            </Button>
-          )}
-
           <Button
             variant="outline"
             size="sm"
@@ -135,6 +123,19 @@ export function ToolUtilityBar({
             <Share2 className="h-4 w-4 mr-2" />
             Share
           </Button>
+          
+          {!isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleUploadFromPhone}
+              data-testid="button-continue-on-mobile"
+              className="hover-elevate"
+              title="Continue on Mobile"
+            >
+              <Smartphone className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 
