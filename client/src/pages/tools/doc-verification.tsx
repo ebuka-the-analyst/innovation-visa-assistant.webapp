@@ -5,12 +5,14 @@ import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
+import { FileList } from "@/components/FileList";
 import { fileUploadConfigs } from "@/lib/fileUploadConfigs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { Download, Save, Lightbulb, Calendar, RefreshCw, FileCheck, X } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { UploadedFile } from "@/components/FileUploadButton";
 
 const DOC_CATEGORIES = [
   {category:"Identity Documents",critical:true,items:[
@@ -51,7 +53,7 @@ export default function DocVerification() {
   const [savedDate, setSavedDate] = useState("");
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{name: string, size: number, type: string}>>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
   const totalDocs = DOC_CATEGORIES.reduce((sum, c) => sum + c.items.length, 0);
   const completedDocs = Object.values(checks).filter(Boolean).length;
@@ -105,11 +107,23 @@ export default function DocVerification() {
     a.click();
   };
 
+  const handleFileUpload = (file: any) => {
+    setUploadedFiles(prev => [...prev, file]);
+    localStorage.setItem('docVerificationFiles', JSON.stringify([...uploadedFiles, file]));
+  };
+
+  const handleRemoveFile = (fileId: string) => {
+    const updated = uploadedFiles.filter(f => f.id !== fileId);
+    setUploadedFiles(updated);
+    localStorage.setItem('docVerificationFiles', JSON.stringify(updated));
+  };
+
   const getSerializedState = () => {
     return {
       checks,
       savedDate,
-      tab
+      tab,
+      uploadedFiles
     };
   };
 
@@ -123,12 +137,21 @@ export default function DocVerification() {
         if (payload.checks) setChecks(payload.checks);
         if (payload.savedDate) setSavedDate(payload.savedDate);
         if (payload.tab) setTab(payload.tab);
+        if (payload.uploadedFiles) setUploadedFiles(payload.uploadedFiles);
         localStorage.removeItem(handoffKey);
       } catch (err) {
         console.error('Failed to restore handoff data:', err);
       }
     } else {
       loadProgress();
+      const savedFiles = localStorage.getItem('docVerificationFiles');
+      if (savedFiles) {
+        try {
+          setUploadedFiles(JSON.parse(savedFiles));
+        } catch (err) {
+          console.error('Failed to load files:', err);
+        }
+      }
     }
   }, []);
 
@@ -157,6 +180,16 @@ export default function DocVerification() {
             onActionPlan={() => setShowActionPlan(!showActionPlan)}
             getSerializedState={getSerializedState}
           />
+
+          <div className="mb-4">
+            <FileUploadButton
+              config={fileUploadConfigs.documentVerification}
+              onFileSelected={handleFileUpload}
+              variant="secondary"
+            />
+          </div>
+
+          <FileList files={uploadedFiles} onRemove={handleRemoveFile} />
 
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
 
