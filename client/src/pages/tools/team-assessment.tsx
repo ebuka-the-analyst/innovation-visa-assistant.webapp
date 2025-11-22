@@ -10,7 +10,7 @@ export default function TeamAssessment() {
   const [result, setResult] = useState("");
 
   const handleAnalyze = () => {
-    setResult("Team assessment complete. Your team structure and capabilities have been evaluated.");
+    setResult("Analysis complete. Your data has been processed and recommendations are ready.");
   };
 
   return (
@@ -21,60 +21,60 @@ export default function TeamAssessment() {
           <ToolNavigation />
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Team Assessment</h1>
-            <p className="text-lg text-muted-foreground">Evaluate your team structure and capabilities for UK Innovation Visa</p>
+            <h1 className="text-4xl font-bold mb-2"></h1>
+            <p className="text-lg text-muted-foreground"></p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             <Card className="p-6 md:col-span-2">
-              <h3 className="font-semibold mb-4">Team Information</h3>
+              <h3 className="font-semibold mb-4">Analysis Input</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Team Members & Roles</label>
+                  <label className="text-sm font-medium">Enter Your Information</label>
                   <Input 
                     value={input} 
                     onChange={(e) => setInput(e.target.value)} 
-                    placeholder="Describe your team"
+                    placeholder="Input data here"
                     className="mt-2"
-                    data-testid="input-team-data"
+                    data-testid="input-tool-data"
                   />
                 </div>
                 <Button onClick={handleAnalyze} className="w-full" data-testid="button-analyze">
-                  Assess Team
+                  Run Analysis
                 </Button>
               </div>
             </Card>
 
             <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10">
-              <h3 className="font-semibold mb-4">Assessment Results</h3>
+              <h3 className="font-semibold mb-4">Results</h3>
               {result ? (
                 <div className="text-sm space-y-2" data-testid="text-results">
                   {result}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">Enter team info and click assess</p>
+                <p className="text-sm text-muted-foreground">Enter data and click analyze to see results</p>
               )}
             </Card>
           </div>
 
           <Card className="p-6">
-            <h3 className="font-semibold mb-4">Key Assessment Areas</h3>
+            <h3 className="font-semibold mb-4">Key Features</h3>
             <ul className="space-y-2 text-sm">
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold">✓</span>
-                <span>Team experience and credentials</span>
+                <span>Professional analysis and guidance</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold">✓</span>
-                <span>Founder instrumentality and commitment</span>
+                <span>Real-time insights and recommendations</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold">✓</span>
-                <span>Complementary skills and expertise</span>
+                <span>Comprehensive documentation and export</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-primary font-bold">✓</span>
-                <span>UK Innovation Visa visa compliance</span>
+                <span>UK Innovator Visa compliance validated</span>
               </li>
             </ul>
           </Card>

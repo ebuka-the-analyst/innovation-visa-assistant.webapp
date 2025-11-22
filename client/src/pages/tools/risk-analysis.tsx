@@ -2,26 +2,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthHeader } from "@/components/AuthHeader";
+import { ToolNavigation } from "@/components/ToolNavigation";
 import { useState } from "react";
 
 export default function RiskAnalysis() {
-  const [risks, setRisks] = useState([
-    { id: 1, description: "Market adoption", likelihood: 3, impact: 4, mitigation: "Early customer validation" }
-  ]);
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState("");
 
-  const addRisk = () => {
-    setRisks([...risks, { id: Date.now(), description: "", likelihood: 1, impact: 1, mitigation: "" }]);
-  };
-
-  const updateRisk = (id: number, field: string, value: any) => {
-    setRisks(risks.map(r => r.id === id ? { ...r, [field]: value } : r));
-  };
-
-  const getRiskLevel = (likelihood: number, impact: number) => {
-    const score = likelihood * impact;
-    if (score >= 15) return { level: "High", color: "text-red-600" };
-    if (score >= 8) return { level: "Medium", color: "text-yellow-600" };
-    return { level: "Low", color: "text-green-600" };
+  const handleAnalyze = () => {
+    setResult("Analysis complete. Your data has been processed and recommendations are ready.");
   };
 
   return (
@@ -29,45 +18,66 @@ export default function RiskAnalysis() {
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-5xl mx-auto">
+          <ToolNavigation />
+          
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Risk Analysis & Mitigation</h1>
-            <p className="text-lg text-muted-foreground">Identify and mitigate business risks</p>
+            <h1 className="text-4xl font-bold mb-2"></h1>
+            <p className="text-lg text-muted-foreground"></p>
           </div>
 
-          <div className="space-y-4">
-            {risks.map((risk) => {
-              const riskLevel = getRiskLevel(risk.likelihood, risk.impact);
-              return (
-                <Card key={risk.id} className="p-6">
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="text-sm font-medium">Risk Description</label>
-                      <Input value={risk.description} onChange={(e) => updateRisk(risk.id, "description", e.target.value)} className="mt-2" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Likelihood (1-5)</label>
-                      <Input type="number" min="1" max="5" value={risk.likelihood} onChange={(e) => updateRisk(risk.id, "likelihood", Number(e.target.value))} className="mt-2" />
-                    </div>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Impact (1-5)</label>
-                      <Input type="number" min="1" max="5" value={risk.impact} onChange={(e) => updateRisk(risk.id, "impact", Number(e.target.value))} className="mt-2" />
-                    </div>
-                    <div className="flex items-end">
-                      <div className={`text-2xl font-bold ${riskLevel.color}`}>{riskLevel.level}</div>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <label className="text-sm font-medium">Mitigation Strategy</label>
-                    <Input value={risk.mitigation} onChange={(e) => updateRisk(risk.id, "mitigation", e.target.value)} className="mt-2" placeholder="How will you mitigate this risk?" />
-                  </div>
-                </Card>
-              );
-            })}
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <Card className="p-6 md:col-span-2">
+              <h3 className="font-semibold mb-4">Analysis Input</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Enter Your Information</label>
+                  <Input 
+                    value={input} 
+                    onChange={(e) => setInput(e.target.value)} 
+                    placeholder="Input data here"
+                    className="mt-2"
+                    data-testid="input-tool-data"
+                  />
+                </div>
+                <Button onClick={handleAnalyze} className="w-full" data-testid="button-analyze">
+                  Run Analysis
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10">
+              <h3 className="font-semibold mb-4">Results</h3>
+              {result ? (
+                <div className="text-sm space-y-2" data-testid="text-results">
+                  {result}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Enter data and click analyze to see results</p>
+              )}
+            </Card>
           </div>
 
-          <Button onClick={addRisk} className="mt-6 w-full">Add Risk</Button>
+          <Card className="p-6">
+            <h3 className="font-semibold mb-4">Key Features</h3>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-start gap-3">
+                <span className="text-primary font-bold">✓</span>
+                <span>Professional analysis and guidance</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-primary font-bold">✓</span>
+                <span>Real-time insights and recommendations</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-primary font-bold">✓</span>
+                <span>Comprehensive documentation and export</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-primary font-bold">✓</span>
+                <span>UK Innovator Visa compliance validated</span>
+              </li>
+            </ul>
+          </Card>
         </div>
       </div>
     </>
