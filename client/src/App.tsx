@@ -114,15 +114,15 @@ import ComplianceXray from "@/pages/tools/compliance-xray";
 import CriteriaScorer from "@/pages/tools/criteria-scorer";
 import DeepXray from "@/pages/tools/deep-xray";
 import EligibilityValidator from "@/pages/tools/eligibility-validator";
-import EndorserComparison from "@/pages/tools/endorser-comparison";
+import EndorserComparisonTool from "@/pages/tools/endorser-comparison";
 import MilestoneTimeline from "@/pages/tools/milestone-timeline";
 import MinInvestmentCalc from "@/pages/tools/min-investment-calc";
 import RedFlagFixer from "@/pages/tools/red-flag-fixer";
-import RejectionAnalysis from "@/pages/tools/rejection-analysis";
+import RejectionAnalysisTool from "@/pages/tools/rejection-analysis";
 import RevenueForecast from "@/pages/tools/revenue-forecast";
 import RfeDefense from "@/pages/tools/rfe-defense";
 import SalaryThreshold from "@/pages/tools/salary-threshold";
-import SettlementPlanning from "@/pages/tools/settlement-planning";
+import SettlementPlanningTool from "@/pages/tools/settlement-planning";
 import SiteStrategy from "@/pages/tools/site-strategy";
 import StrengthScorer from "@/pages/tools/strength-scorer";
 import TaxCompliance from "@/pages/tools/tax-compliance";
@@ -131,6 +131,7 @@ import TechStackAssess from "@/pages/tools/tech-stack-assess";
 import TimelineTracker from "@/pages/tools/timeline-tracker";
 import UnitEconomics from "@/pages/tools/unit-economics";
 import UspValidator from "@/pages/tools/usp-validator";
+import DocumentOrganizerTool from "@/pages/tools/doc-organizer";
 import UvpGenerator from "@/pages/tools/uvp-generator";
 import ValidationReport from "@/pages/tools/validation-report";
 import VerificationChecklist from "@/pages/tools/verification-checklist";
@@ -181,7 +182,7 @@ function Router() {
       <Route path="/tools/compliance-checker" component={ComplianceChecker} />
       <Route path="/tools/contingency-plan" component={ContingencyPlan} />
       <Route path="/tools/data-security" component={DataSecurity} />
-      <Route path="/tools/doc-organizer" component={DocOrganizer} />
+      <Route path="/tools/doc-organizer" component={DocumentOrganizerTool} />
       <Route path="/tools/doc-verification" component={DocVerification} />
       <Route path="/tools/due-diligence" component={DueDiligence} />
       <Route path="/tools/endorsement-readiness" component={EndorsementReadiness} />
@@ -255,15 +256,15 @@ function Router() {
       <Route path="/tools/criteria-scorer" component={CriteriaScorer} />
       <Route path="/tools/deep-xray" component={DeepXray} />
       <Route path="/tools/eligibility-validator" component={EligibilityValidator} />
-      <Route path="/tools/endorser-comparison" component={EndorserComparison} />
+      <Route path="/tools/endorser-comparison" component={EndorserComparisonTool} />
       <Route path="/tools/milestone-timeline" component={MilestoneTimeline} />
       <Route path="/tools/min-investment-calc" component={MinInvestmentCalc} />
       <Route path="/tools/red-flag-fixer" component={RedFlagFixer} />
-      <Route path="/tools/rejection-analysis" component={RejectionAnalysis} />
+      <Route path="/tools/rejection-analysis" component={RejectionAnalysisTool} />
       <Route path="/tools/revenue-forecast" component={RevenueForecast} />
       <Route path="/tools/rfe-defense" component={RfeDefense} />
       <Route path="/tools/salary-threshold" component={SalaryThreshold} />
-      <Route path="/tools/settlement-planning" component={SettlementPlanning} />
+      <Route path="/tools/settlement-planning" component={SettlementPlanningTool} />
       <Route path="/tools/site-strategy" component={SiteStrategy} />
       <Route path="/tools/strength-scorer" component={StrengthScorer} />
       <Route path="/tools/tax-compliance" component={TaxCompliance} />
