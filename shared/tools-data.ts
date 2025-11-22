@@ -82,8 +82,12 @@ export const ALL_TOOLS: Tool[] = [
   { id: "regulatory-tracker", name: "Regulatory Requirement Tracker", description: "Track all regulatory requirements", category: "compliance", stage: "during", tier: "premium", icon: "CheckCircle" },
 
   // M - Market Research & Analysis & Minimum Investment
-  { id: "min-investment-calc", name: "Funding Appropriateness Checker", description: "Determine appropriate funding level for your business plan (Innovator Founder route - no fixed minimum)", category: "financial", stage: "before", tier: "free", icon: "DollarSign" },
-  { id: "market-analysis", name: "Market Analysis Report Generator", description: "Generate comprehensive market analysis reports", category: "business", stage: "before", tier: "premium", icon: "TrendingUp" },
+  { id: "points-calculator", name: "UK Innovation Visa Points Calculator", description: "Calculate your 70-point score for UK Innovation Visa eligibility", category: "business", stage: "before", tier: "free", icon: "BarChart3" },
+  { id: "savings-validator", name: "Personal Savings Validator", description: "Verify you have the mandatory £1,270 savings for 28 consecutive days", category: "financial", stage: "before", tier: "free", icon: "DollarSign" },
+  { id: "fee-estimator", name: "Fee Estimator", description: "Calculate total UK Innovation Visa application fees", category: "financial", stage: "before", tier: "free", icon: "DollarSign" },
+  { id: "funding-checker", name: "Funding Appropriateness Checker", description: "Verify your funding is appropriate for UK Innovation Visa requirements", category: "financial", stage: "before", tier: "free", icon: "DollarSign" },
+  { id: "income-calculator", name: "Income & Viability Analyzer", description: "Analyze business runway, cashflow, and viability", category: "financial", stage: "during", tier: "premium", icon: "LineChart" },
+  { id: "market-analysis", name: "Market Analysis Report", description: "Calculate TAM/SAM/SOM market sizing and competitive landscape", category: "business", stage: "before", tier: "premium", icon: "TrendingUp" },
   { id: "market-gap", name: "Market Gap Analyzer", description: "Identify and analyze market gaps", category: "innovation", stage: "before", tier: "premium", icon: "Zap" },
   { id: "market-research", name: "Market Research Compiler", description: "Compile market research data and insights", category: "business", stage: "before", tier: "premium", icon: "Search" },
   { id: "competitor-bench", name: "Competitor Benchmarking", description: "Benchmark against competitors", category: "business", stage: "before", tier: "premium", icon: "Users" },
