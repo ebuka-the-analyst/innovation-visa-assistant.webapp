@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import { AuthHeader } from "@/components/AuthHeader";
 type IconName = keyof typeof Icons;
 
 export default function ToolsHub() {
+  const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [stageFilter, setStageFilter] = useState<string>("");
@@ -195,6 +197,7 @@ export default function ToolsHub() {
               {filteredTools.map((tool) => (
                 <Card
                   key={tool.id}
+                  onClick={() => setLocation(`/tools/${tool.id}`)}
                   className={`p-6 hover-elevate cursor-pointer transition-all border-2 ${
                     tierColors[tool.tier as keyof typeof tierColors]
                   }`}
