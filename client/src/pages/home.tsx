@@ -12,14 +12,12 @@ import LawyerCTA from "@/components/LawyerCTA";
 import FAQSection from "@/components/FAQSection";
 import Disclaimer from "@/components/Disclaimer";
 import Footer from "@/components/Footer";
-import ToolsChronographWheel from "@/components/ToolsChronographWheel";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
       <Header />
       <NewsTicker />
-      <ToolsChronographWheel />
       <main>
         <HeroSection />
         <div id="features">
