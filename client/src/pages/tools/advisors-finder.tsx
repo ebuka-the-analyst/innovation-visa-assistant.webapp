@@ -23,7 +23,7 @@ export default function AdvisorsFinder() {
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <ToolNavigation />
-        <div className="max-w-6xl mx-auto">
+        <div className="w-full">
           <h1 className="text-4xl font-bold mb-2">Advisors Finder</h1>
           <p className="text-muted-foreground mb-6">Finder & comparison</p>
 
