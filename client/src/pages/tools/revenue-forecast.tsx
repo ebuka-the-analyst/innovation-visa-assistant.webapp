@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { Input } from "@/components/ui/input"; import { AuthHeader } from "@/components/AuthHeader"; import { ToolNavigation } from "@/components/ToolNavigation"; import { useState } from "react"; import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Download } from "recharts"; import { Download } from "lucide-react";
+import { Card } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { Input } from "@/components/ui/input"; import { AuthHeader } from "@/components/AuthHeader"; import { ToolNavigation } from "@/components/ToolNavigation"; import { useState } from "react"; import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"; import { Download } from "lucide-react";
 export default function REVENUEFORECAST() {
   const [initial, setInitial] = useState(50000), [monthly, setMonthly] = useState(15000), [revenue, setRevenue] = useState(5000);
   const projections = Array.from({length:12}, (_,i)=>({m:i+1, cash: Math.max(0, initial - monthly*(i+1) + revenue*(i+1))}));
