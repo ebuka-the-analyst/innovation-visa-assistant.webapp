@@ -278,6 +278,7 @@ export default function ToolsHub() {
             <p className="text-sm text-muted-foreground mt-2">After Approval</p>
           </Card>
         </div>
+        </div>
       </div>
       <Footer />
     </>
