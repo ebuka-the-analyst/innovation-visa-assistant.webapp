@@ -25,7 +25,7 @@ export default function DATASECURITY() {
           <ToolNavigation />
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">Data Security</h1>
-            <p className="text-lg text-muted-foreground">PhD-Level Compliance Framework</p>
+            <p className="text-lg text-muted-foreground">Professional Compliance Framework</p>
           </div>
           <Card className="p-6 mb-6">
             <div className="flex justify-between mb-2">

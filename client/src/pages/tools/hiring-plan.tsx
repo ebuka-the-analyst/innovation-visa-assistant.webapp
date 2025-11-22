@@ -19,7 +19,7 @@ export default function HIRINGPLAN() {
           <ToolNavigation />
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">Hiring Plan</h1>
-            <p className="text-lg text-muted-foreground">PhD-Level Strategic Planning</p>
+            <p className="text-lg text-muted-foreground">Advanced Strategic Planning</p>
           </div>
           <Card className="p-6 mb-6">
             <div className="flex justify-between mb-2">

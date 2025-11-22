@@ -19,7 +19,7 @@ export default function MARKETGAP() {
           <ToolNavigation />
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">Market Gap</h1>
-            <p className="text-lg text-muted-foreground">PhD-Level Assessment</p>
+            <p className="text-lg text-muted-foreground">Advanced Assessment</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10">

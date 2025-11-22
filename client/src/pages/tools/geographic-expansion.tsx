@@ -11,7 +11,7 @@ export default function GEOGRAPHICEXPANSION() {
           <ToolNavigation />
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">Geographic Expansion</h1>
-            <p className="text-lg text-muted-foreground">PhD-Level Analysis</p>
+            <p className="text-lg text-muted-foreground">Advanced Analysis</p>
           </div>
           <Card className="p-6"><h2 className="text-2xl font-bold">Welcome to Geographic Expansion</h2><p className="text-muted-foreground mt-4">Premium tool for comprehensive analysis</p></Card>
         </div>

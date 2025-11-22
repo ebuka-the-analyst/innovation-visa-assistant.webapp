@@ -36,7 +36,7 @@ export default function BREAKEVENCALCULATOR() {
           <ToolNavigation />
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">Breakeven Calculator</h1>
-            <p className="text-lg text-muted-foreground">PhD-Level Financial Analysis & Strategic Forecasting</p>
+            <p className="text-lg text-muted-foreground">Strategic Financial Forecasting</p>
           </div>
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <Input type="number" placeholder="Value 1" value={inputs.v1} onChange={e => setInputs({ ...inputs, v1: parseInt(e.target.value) || 0 })} />
