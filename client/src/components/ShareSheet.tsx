@@ -66,7 +66,7 @@ export function ShareSheet({
     const shareUrl = await getShareUrl();
     const subject = encodeURIComponent(`UK Innovator Founder Visa Tool: ${toolName}`);
     const body = encodeURIComponent(
-      `I thought you might find this UK Innovator Founder Visa tool helpful:\n\n${toolName}\n\n${shareUrl}\n\nThis is from the UK's #1 Innovator Founder Visa Partner - BhenMedia`
+      `I thought you might find this UK Innovator Founder Visa tool helpful:\n\n${toolName}\n\n${shareUrl}\n\nThis is from the UK's #1 Visa AI Assistant - BhenMedia`
     );
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
     trackShare('email');
