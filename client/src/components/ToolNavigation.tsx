@@ -1,11 +1,22 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Home, Gauge } from "lucide-react";
+import { ArrowLeft, Home, Gauge, DollarSign, HelpCircle } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import logoImg from "@assets/BhenMedia_1763690019470.png";
 
 export function ToolNavigation() {
   const [location, setLocation] = useLocation();
   const isOnToolPage = location.startsWith("/tools/");
+
+  const handleNavigation = (sectionId: string) => {
+    if (location === "/") {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      setLocation(`/#${sectionId}`);
+    }
+  };
 
   return (
     <div className="mb-8">
@@ -57,6 +68,26 @@ export function ToolNavigation() {
         >
           <Gauge className="w-4 h-4" />
           <span className="hidden sm:inline">Tools Hub</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleNavigation("pricing")}
+          className="gap-2"
+          data-testid="button-nav-pricing"
+        >
+          <DollarSign className="w-4 h-4" />
+          <span className="hidden sm:inline">Pricing</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleNavigation("faq")}
+          className="gap-2"
+          data-testid="button-nav-faq"
+        >
+          <HelpCircle className="w-4 h-4" />
+          <span className="hidden sm:inline">FAQ</span>
         </Button>
       </div>
     </div>
