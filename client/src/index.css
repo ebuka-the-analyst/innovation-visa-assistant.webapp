@@ -285,4 +285,21 @@
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
+
+  /* Pulsing glow animation for chat and tools widgets */
+  @keyframes pulse-glow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(17, 182, 233, 0.7);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(17, 182, 233, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(17, 182, 233, 0);
+    }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
 }
