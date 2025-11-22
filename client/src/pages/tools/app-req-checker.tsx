@@ -163,7 +163,7 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
         <ToolNavigation />
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Application Requirements Checker</h1>
-          <p className="text-muted-foreground mb-6">PhD-level assessment of your 70-point application readiness</p>
+          <p className="text-muted-foreground mb-6">Comprehensive assessment of your 70-point application readiness</p>
 
           <ToolUtilityBar
             toolId="app-req-checker"
