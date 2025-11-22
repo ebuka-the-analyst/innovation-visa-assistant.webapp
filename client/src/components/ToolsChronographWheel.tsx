@@ -289,12 +289,12 @@ export default function ToolsChronographWheel() {
 
         {/* Swipe Instruction - Bold visual guide (above widget when closed) */}
         {isHoveringWidget && isMinimized && (
-          <div className="absolute -top-16 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none z-50">
-            <div className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-sm"
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none z-50">
+            <div className="flex items-center gap-3 bg-orange-500 text-white px-6 py-4 rounded-lg font-black text-lg shadow-lg"
               style={{
                 animation: "swipe-instruction-slide 2s ease-in-out infinite"
               }}>
-              <Icons.ArrowLeft className="w-5 h-5" />
+              <Icons.ArrowLeft className="w-7 h-7 flex-shrink-0" />
               <span>Swipe left to remove from screen</span>
             </div>
           </div>
