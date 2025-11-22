@@ -3,19 +3,22 @@ import { ArrowLeft, Home } from "lucide-react";
 import { useLocation } from "wouter";
 
 export function ToolNavigation() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const isOnToolPage = location.startsWith("/tools/");
 
   return (
     <div className="flex items-center gap-3 mb-6">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setLocation("/tools-hub")}
-        data-testid="button-back"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back
-      </Button>
+      {isOnToolPage && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setLocation("/tools-hub")}
+          data-testid="button-back"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      )}
       <Button
         variant="outline"
         size="sm"
