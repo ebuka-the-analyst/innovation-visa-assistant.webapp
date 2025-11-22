@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { Download, Save, Lightbulb, Calendar, RefreshCw } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 
 const HR_ITEMS = [
@@ -21,6 +21,8 @@ export default function HRCompliance() {
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [showActionPlan, setShowActionPlan] = useState(false);
 
   const totalItems = HR_ITEMS.reduce((sum, a) => sum + a.items.length, 0);
   const completedItems = Object.values(checks).filter(Boolean).length;
@@ -28,12 +30,46 @@ export default function HRCompliance() {
 
   const saveProgress = () => {
     localStorage.setItem('hrComplianceProgress', JSON.stringify(checks));
+    localStorage.setItem('hrComplianceDate', new Date().toLocaleDateString());
     setSavedDate(new Date().toLocaleDateString());
   };
 
   const loadProgress = () => {
     const saved = localStorage.getItem('hrComplianceProgress');
-    if (saved) setChecks(JSON.parse(saved));
+    if (saved) {
+      setChecks(JSON.parse(saved));
+      const date = localStorage.getItem('hrComplianceDate');
+      setSavedDate(date || '');
+    }
+  };
+
+  const getRecommendations = () => {
+    const gaps = [];
+    if (!checks["Employment Contracts-Written contract for each employee"]) gaps.push("Issue written contracts to all employees immediately");
+    if (!checks["Payroll & Tax-PAYE registered with HMRC"]) gaps.push("Register for PAYE with HMRC");
+    if (!checks["Minimum Wage-National Minimum Wage verified"]) gaps.push("Verify all wages meet National Minimum Wage");
+    if (complianceScore < 80) gaps.push("Complete all HR compliance items to avoid penalties");
+    if (completedItems < 10) gaps.push("Address critical employment law requirements first");
+    return gaps.slice(0, 5);
+  };
+
+  const generateActionPlan = () => {
+    return [
+      {week:"Week 1", action:"Audit all employment contracts and issue missing ones", priority:"Critical"},
+      {week:"Week 2", action:"Register for PAYE and file outstanding submissions", priority:"Critical"},
+      {week:"Week 3", action:"Complete H&S policy and risk assessments", priority:"High"},
+      {week:"Week 4", action:"Verify wage compliance and maintain records", priority:"High"}
+    ];
+  };
+
+  const exportReport = () => {
+    const report = `HR COMPLIANCE REPORT\nDate: ${new Date().toLocaleDateString()}\nCompliance Score: ${complianceScore}%\nItems Complete: ${completedItems}/${totalItems}\n\nSTATUS: ${complianceScore>=80?"COMPLIANT":"REVIEW NEEDED"}`;
+    const blob = new Blob([report], {type: 'text/plain'});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hr-compliance.txt';
+    a.click();
   };
 
   useEffect(() => { loadProgress(); }, []);
@@ -54,13 +90,34 @@ export default function HRCompliance() {
 
           <div className="flex gap-2 mb-6 flex-wrap">
             <Button onClick={saveProgress} className="gap-2" variant="outline"><Save className="w-4 h-4" /> Save</Button>
-            <Button className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
-            <Button className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
-            <Button className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
+            <Button onClick={() => setShowRecommendations(!showRecommendations)} className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
+            <Button onClick={() => setShowActionPlan(!showActionPlan)} className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
+            <Button onClick={exportReport} className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
             <Button onClick={loadProgress} className="gap-2" variant="outline"><RefreshCw className="w-4 h-4" /> Restore</Button>
           </div>
 
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
+
+          {showRecommendations && (
+            <Card className="p-4 mb-4 bg-blue-50 border-blue-200">
+              <h3 className="font-bold mb-2">Smart Recommendations</h3>
+              <ul className="space-y-1">{getRecommendations().map((r, i) => <li key={i} className="text-sm">• {r}</li>)}</ul>
+            </Card>
+          )}
+
+          {showActionPlan && (
+            <Card className="p-4 mb-4 bg-green-50 border-green-200">
+              <h3 className="font-bold mb-3">Action Plan Timeline</h3>
+              <div className="space-y-2">{generateActionPlan().map((item, i) => (
+                <div key={i} className="flex gap-3">
+                  <span className="font-bold text-sm">{item.week}</span>
+                  <div><p className="text-sm">{item.action}</p>
+                    <span className="text-xs text-red-600">{item.priority}</span>
+                  </div>
+                </div>
+              ))}</div>
+            </Card>
+          )}
 
           <Tabs value={tab} onValueChange={setTab} className="mb-6">
             <TabsList className="grid w-full grid-cols-2">

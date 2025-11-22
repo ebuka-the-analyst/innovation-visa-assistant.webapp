@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { Download, Save, Lightbulb, Calendar, RefreshCw } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const LEGAL_ITEMS = [
   {category:"Company Formation",items:["Incorporated at Companies House","Memorandum & Articles of Association","Company registration certificate"]},
@@ -20,6 +20,8 @@ export default function LegalCompliance() {
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [showActionPlan, setShowActionPlan] = useState(false);
 
   const totalItems = LEGAL_ITEMS.reduce((sum, c) => sum + c.items.length, 0);
   const completedItems = Object.values(checks).filter(Boolean).length;
@@ -27,12 +29,46 @@ export default function LegalCompliance() {
 
   const saveProgress = () => {
     localStorage.setItem('legalComplianceProgress', JSON.stringify(checks));
+    localStorage.setItem('legalComplianceDate', new Date().toLocaleDateString());
     setSavedDate(new Date().toLocaleDateString());
   };
 
   const loadProgress = () => {
     const saved = localStorage.getItem('legalComplianceProgress');
-    if (saved) setChecks(JSON.parse(saved));
+    if (saved) {
+      setChecks(JSON.parse(saved));
+      const date = localStorage.getItem('legalComplianceDate');
+      setSavedDate(date || '');
+    }
+  };
+
+  const getRecommendations = () => {
+    const gaps = [];
+    if (!checks["Company Formation-Incorporated at Companies House"]) gaps.push("Verify Companies House registration status");
+    if (!checks["Regulatory Filings-Annual accounts filed"]) gaps.push("File annual accounts immediately - avoid penalties");
+    if (!checks["Board Governance-Minutes documented"]) gaps.push("Document all board meetings and decisions");
+    if (complianceScore < 100) gaps.push("Complete all legal requirements for visa compliance");
+    if (completedItems < 10) gaps.push("Address critical company law items first");
+    return gaps.slice(0, 5);
+  };
+
+  const generateActionPlan = () => {
+    return [
+      {week:"Week 1", action:"Verify company formation and registration", priority:"Critical"},
+      {week:"Week 2", action:"File outstanding accounts and confirmations", priority:"Critical"},
+      {week:"Week 3", action:"Document board governance and shareholding", priority:"High"},
+      {week:"Week 4", action:"Review and execute missing contracts", priority:"Medium"}
+    ];
+  };
+
+  const exportReport = () => {
+    const report = `LEGAL COMPLIANCE REPORT\nDate: ${new Date().toLocaleDateString()}\nCompliance Score: ${complianceScore}%\nItems Complete: ${completedItems}/${totalItems}\n\nSTATUS: ${complianceScore===100?"FULLY COMPLIANT":"IN PROGRESS"}`;
+    const blob = new Blob([report], {type: 'text/plain'});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'legal-compliance.txt';
+    a.click();
   };
 
   useEffect(() => { loadProgress(); }, []);
@@ -48,13 +84,34 @@ export default function LegalCompliance() {
 
           <div className="flex gap-2 mb-6 flex-wrap">
             <Button onClick={saveProgress} className="gap-2" variant="outline"><Save className="w-4 h-4" /> Save</Button>
-            <Button className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
-            <Button className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
-            <Button className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
+            <Button onClick={() => setShowRecommendations(!showRecommendations)} className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
+            <Button onClick={() => setShowActionPlan(!showActionPlan)} className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
+            <Button onClick={exportReport} className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
             <Button onClick={loadProgress} className="gap-2" variant="outline"><RefreshCw className="w-4 h-4" /> Restore</Button>
           </div>
 
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
+
+          {showRecommendations && (
+            <Card className="p-4 mb-4 bg-blue-50 border-blue-200">
+              <h3 className="font-bold mb-2">Smart Recommendations</h3>
+              <ul className="space-y-1">{getRecommendations().map((r, i) => <li key={i} className="text-sm">• {r}</li>)}</ul>
+            </Card>
+          )}
+
+          {showActionPlan && (
+            <Card className="p-4 mb-4 bg-green-50 border-green-200">
+              <h3 className="font-bold mb-3">Action Plan Timeline</h3>
+              <div className="space-y-2">{generateActionPlan().map((item, i) => (
+                <div key={i} className="flex gap-3">
+                  <span className="font-bold text-sm">{item.week}</span>
+                  <div><p className="text-sm">{item.action}</p>
+                    <span className={`text-xs ${item.priority==="Critical"?"text-red-600":"text-yellow-600"}`}>{item.priority}</span>
+                  </div>
+                </div>
+              ))}</div>
+            </Card>
+          )}
 
           <Tabs value={tab} onValueChange={setTab} className="mb-6">
             <TabsList className="grid w-full grid-cols-2">

@@ -46,6 +46,8 @@ export default function DocVerification() {
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [showActionPlan, setShowActionPlan] = useState(false);
 
   const totalDocs = DOC_CATEGORIES.reduce((sum, c) => sum + c.items.length, 0);
   const completedDocs = Object.values(checks).filter(Boolean).length;
@@ -57,12 +59,46 @@ export default function DocVerification() {
 
   const saveProgress = () => {
     localStorage.setItem('docVerificationProgress', JSON.stringify(checks));
+    localStorage.setItem('docVerificationDate', new Date().toLocaleDateString());
     setSavedDate(new Date().toLocaleDateString());
   };
 
   const loadProgress = () => {
     const saved = localStorage.getItem('docVerificationProgress');
-    if (saved) setChecks(JSON.parse(saved));
+    if (saved) {
+      setChecks(JSON.parse(saved));
+      const date = localStorage.getItem('docVerificationDate');
+      setSavedDate(date || '');
+    }
+  };
+
+  const getRecommendations = () => {
+    const gaps = [];
+    if (criticalDone < criticalItems) gaps.push(`Complete ${criticalItems - criticalDone} critical documents first`);
+    if (!checks["Identity Documents-Valid Passport"]) gaps.push("Obtain passport with 6+ months validity");
+    if (!checks["Financial Documents-Bank Statements (28 days)"]) gaps.push("Prepare 28-day bank statement showing £1,270");
+    if (!checks["Endorsement Documents-Endorsement Letter"]) gaps.push("Secure endorsement letter from approved body");
+    if (verificationScore < 80) gaps.push("Aim for 100% document completion before submission");
+    return gaps.slice(0, 5);
+  };
+
+  const generateActionPlan = () => {
+    return [
+      {week:"Week 1", action:"Collect all identity and passport documents", priority:"Critical"},
+      {week:"Week 2", action:"Gather business registration and governance docs", priority:"Critical"},
+      {week:"Week 3", action:"Prepare financial statements and bank proofs", priority:"Critical"},
+      {week:"Week 4", action:"Finalize endorsement and supporting evidence", priority:"Critical"}
+    ];
+  };
+
+  const exportReport = () => {
+    const report = `DOCUMENT VERIFICATION REPORT\nDate: ${new Date().toLocaleDateString()}\nVerification Score: ${verificationScore}%\nDocuments Complete: ${completedDocs}/${totalDocs}\nCritical Items: ${criticalDone}/${criticalItems}\n\nSTATUS: ${submissionReady?"READY FOR SUBMISSION":"IN PROGRESS"}`;
+    const blob = new Blob([report], {type: 'text/plain'});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'document-verification.txt';
+    a.click();
   };
 
   useEffect(() => { loadProgress(); }, []);
@@ -84,13 +120,34 @@ export default function DocVerification() {
 
           <div className="flex gap-2 mb-6 flex-wrap">
             <Button onClick={saveProgress} className="gap-2" variant="outline"><Save className="w-4 h-4" /> Save</Button>
-            <Button className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
-            <Button className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
-            <Button className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
+            <Button onClick={() => setShowRecommendations(!showRecommendations)} className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
+            <Button onClick={() => setShowActionPlan(!showActionPlan)} className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
+            <Button onClick={exportReport} className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
             <Button onClick={loadProgress} className="gap-2" variant="outline"><RefreshCw className="w-4 h-4" /> Restore</Button>
           </div>
 
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
+
+          {showRecommendations && (
+            <Card className="p-4 mb-4 bg-blue-50 border-blue-200">
+              <h3 className="font-bold mb-2">Smart Recommendations</h3>
+              <ul className="space-y-1">{getRecommendations().map((r, i) => <li key={i} className="text-sm">• {r}</li>)}</ul>
+            </Card>
+          )}
+
+          {showActionPlan && (
+            <Card className="p-4 mb-4 bg-green-50 border-green-200">
+              <h3 className="font-bold mb-3">Action Plan Timeline</h3>
+              <div className="space-y-2">{generateActionPlan().map((item, i) => (
+                <div key={i} className="flex gap-3">
+                  <span className="font-bold text-sm">{item.week}</span>
+                  <div><p className="text-sm">{item.action}</p>
+                    <span className="text-xs text-red-600">{item.priority}</span>
+                  </div>
+                </div>
+              ))}</div>
+            </Card>
+          )}
 
           <Tabs value={tab} onValueChange={setTab} className="mb-6">
             <TabsList className="grid w-full grid-cols-3">
