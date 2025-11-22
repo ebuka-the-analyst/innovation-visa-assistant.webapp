@@ -1,9 +1,8 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 
-export default function InterviewPrep() {
+export default function INTERVIEWPREP() {
   return (
     <>
       <AuthHeader />
@@ -11,10 +10,10 @@ export default function InterviewPrep() {
         <div className="max-w-6xl mx-auto">
           <ToolNavigation />
           <div className="mb-8">
-            <h1 className="text-4xl font-bold">Interview Prep</h1>
-            <p className="text-lg text-muted-foreground">PhD-Level Strategic Analysis</p>
+            <h1 className="text-4xl font-bold mb-2">Interview Prep</h1>
+            <p className="text-lg text-muted-foreground">PhD-Level Analysis</p>
           </div>
-          <Card className="p-8"><h2 className="text-2xl font-bold mb-4">Interview Prep</h2><p className="text-muted-foreground mb-6">Premium tool with comprehensive analysis.</p><div className="grid md:grid-cols-3 gap-4 mb-6"><Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10"><h3 className="font-semibold">Analysis</h3></Card><Card className="p-4 bg-blue-50"><h3 className="font-semibold">Insights</h3></Card><Card className="p-4 bg-green-50"><h3 className="font-semibold">Expertise</h3></Card></div><Button className="w-full">Get Started</Button></Card>
+          <Card className="p-6"><h2 className="text-2xl font-bold">Welcome to Interview Prep</h2><p className="text-muted-foreground mt-4">Premium tool for comprehensive analysis</p></Card>
         </div>
       </div>
     </>

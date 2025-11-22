@@ -2,8 +2,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
+import { useState } from "react";
 
-export default function QuestionBank() {
+export default function QUESTIONBANK() {
+  const [generated, setGenerated] = useState(false);
+
   return (
     <>
       <AuthHeader />
@@ -11,10 +14,24 @@ export default function QuestionBank() {
         <div className="max-w-6xl mx-auto">
           <ToolNavigation />
           <div className="mb-8">
-            <h1 className="text-4xl font-bold">Question Bank</h1>
-            <p className="text-lg text-muted-foreground">PhD-Level Strategic Analysis</p>
+            <h1 className="text-4xl font-bold mb-2">Question Bank</h1>
+            <p className="text-lg text-muted-foreground">Report Generation</p>
           </div>
-          <Card className="p-8"><h2 className="text-2xl font-bold mb-4">Question Bank</h2><p className="text-muted-foreground mb-6">Premium tool with comprehensive analysis.</p><div className="grid md:grid-cols-3 gap-4 mb-6"><Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10"><h3 className="font-semibold">Analysis</h3></Card><Card className="p-4 bg-blue-50"><h3 className="font-semibold">Insights</h3></Card><Card className="p-4 bg-green-50"><h3 className="font-semibold">Expertise</h3></Card></div><Button className="w-full">Get Started</Button></Card>
+          <Button onClick={() => setGenerated(!generated)} className="w-full mb-6 bg-primary">Generate Report</Button>
+          {generated ? (
+            <div className="space-y-4">
+              {["Executive Summary", "Analysis"].map((s, i) => (
+                <Card key={i} className="p-6">
+                  <h3 className="font-semibold mb-2">{s}</h3>
+                  <p className="text-sm text-muted-foreground">Content</p>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="p-12 text-center">
+              <p className="text-muted-foreground">Click to generate report</p>
+            </Card>
+          )}
         </div>
       </div>
     </>
