@@ -242,7 +242,7 @@ export default function VerifyEmail() {
           <p className="text-sm text-muted-foreground text-center">
             Need help?{" "}
             <a 
-              href="mailto:support@visaprep.ai" 
+              href="mailto:support@innovatorfoundervisaassistant.co.uk" 
               className="text-primary hover:underline"
               data-testid="link-support"
             >

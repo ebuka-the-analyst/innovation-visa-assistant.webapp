@@ -269,7 +269,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                       title: "Request Revision",
                       description: "Our team will review your request within 24 hours. Check your email for updates.",
                     });
-                    window.location.href = `mailto:support@visaprepai.com?subject=Revision Request - Plan ${planId}&body=Please describe the changes you'd like to make to your business plan:`;
+                    window.location.href = `mailto:support@innovatorfoundervisaassistant.co.uk?subject=Revision Request - Plan ${planId}&body=Please describe the changes you'd like to make to your business plan:`;
                   }}
                   data-testid="button-request-revision"
                 >
@@ -317,7 +317,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                   <Button
                     variant="outline"
                     className="w-full justify-start"
-                    onClick={() => window.location.href = 'mailto:support@visaprepai.com?subject=Business%20Plan%20Support'}
+                    onClick={() => window.location.href = 'mailto:support@innovatorfoundervisaassistant.co.uk?subject=Business%20Plan%20Support'}
                     data-testid="button-support"
                   >
                     <Mail className="w-4 h-4 mr-2" />

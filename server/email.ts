@@ -66,12 +66,12 @@ export function generateVerificationEmail(code: string, displayName: string): st
         <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center;">
+            <td style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 40px; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600; letter-spacing: -0.5px;">
-                VisaPrep
+                Innovator Visa AI Assistant
               </h1>
               <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 15px;">
-                Innovator Founder Visa Platform
+                UK's #1 Visa AI Assistant
               </p>
             </td>
           </tr>
@@ -104,9 +104,9 @@ export function generateVerificationEmail(code: string, displayName: string): st
               </p>
               
               <!-- Security Notice -->
-              <div style="margin-top: 32px; padding: 16px; background-color: #f7fafc; border-left: 4px solid #667eea; border-radius: 4px;">
+              <div style="margin-top: 32px; padding: 16px; background-color: #f7fafc; border-left: 4px solid #ffa536; border-radius: 4px;">
                 <p style="margin: 0; color: #2d3748; font-size: 14px; line-height: 1.5;">
-                  <strong>🔒 Security Tip:</strong> Never share this code with anyone. VisaPrep AI will never ask for your verification code via email or phone.
+                  <strong>🔒 Security Tip:</strong> Never share this code with anyone. Innovator Visa AI Assistant will never ask for your verification code via email or phone.
                 </p>
               </div>
             </td>
@@ -116,10 +116,10 @@ export function generateVerificationEmail(code: string, displayName: string): st
           <tr>
             <td style="padding: 32px 40px; background-color: #f7fafc; border-top: 1px solid #e2e8f0;">
               <p style="margin: 0 0 8px 0; color: #718096; font-size: 13px; text-align: center;">
-                Need help? Contact us at <a href="mailto:support@visaprep.ai" style="color: #667eea; text-decoration: none;">support@visaprep.ai</a>
+                Need help? Contact us at <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #ffa536; text-decoration: none;">support@innovatorfoundervisaassistant.co.uk</a>
               </p>
               <p style="margin: 0; color: #a0aec0; font-size: 12px; text-align: center;">
-                © 2024 VisaPrep AI. All rights reserved.
+                © 2024 Innovator Visa AI Assistant. All rights reserved.
               </p>
             </td>
           </tr>
@@ -127,7 +127,7 @@ export function generateVerificationEmail(code: string, displayName: string): st
         
         <!-- Disclaimer -->
         <p style="margin: 24px 0 0 0; color: #a0aec0; font-size: 12px; text-align: center; max-width: 600px;">
-          You received this email because you signed up for VisaPrep AI.
+          You received this email because you signed up for Innovator Visa AI Assistant.
         </p>
       </td>
     </tr>

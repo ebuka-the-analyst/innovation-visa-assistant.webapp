@@ -75,7 +75,7 @@ export default function FAQSection() {
         <div className="text-center mt-12">
           <p className="text-muted-foreground mb-4">Still have questions?</p>
           <a
-            href="mailto:support@visaprep.ai"
+            href="mailto:support@innovatorfoundervisaassistant.co.uk"
             className="text-primary hover:underline font-medium"
           >
             Contact our support team →

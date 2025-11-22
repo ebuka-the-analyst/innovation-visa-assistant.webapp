@@ -99,7 +99,7 @@ export default function FAQModal({ isOpen, onClose }: FAQModalProps) {
           <div className="text-center mt-8 pt-6 border-t border-border">
             <p className="text-muted-foreground text-sm mb-2">Still have questions?</p>
             <a
-              href="mailto:support@visaprep.ai"
+              href="mailto:support@innovatorfoundervisaassistant.co.uk"
               className="text-primary hover:underline font-medium text-sm"
             >
               Contact our support team →
