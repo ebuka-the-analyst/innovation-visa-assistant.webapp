@@ -104,13 +104,13 @@ export default function Chatbot({ planId }: ChatbotProps) {
   }
 
   return (
-    <Card className="fixed bottom-6 right-6 w-96 h-[600px] flex flex-col shadow-2xl z-50" data-testid="chatbot-widget">
-      <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-4 border-b">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-            <Bot className="w-5 h-5 text-primary" />
+    <Card className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-full sm:w-96 h-96 sm:h-[600px] flex flex-col shadow-2xl z-50 mx-4 sm:mx-0" data-testid="chatbot-widget" style={{ maxWidth: "calc(100vw - 2rem)" }}>
+      <CardHeader className="flex flex-row items-center justify-between gap-1 sm:gap-2 space-y-0 pb-2 sm:pb-4 border-b">
+        <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+            <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           </div>
-          <CardTitle className="text-base">Visa Assistant</CardTitle>
+          <CardTitle className="text-xs sm:text-base truncate">Visa Assistant</CardTitle>
         </div>
         <Button
           variant="ghost"

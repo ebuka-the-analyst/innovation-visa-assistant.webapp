@@ -2,16 +2,30 @@ import { useRef, useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type IconName = keyof typeof Icons;
 
 export default function ToolsChronographWheel() {
   const [, setLocation] = useLocation();
+  const isMobile = useIsMobile();
   const scrollRef = useRef<HTMLDivElement>(null);
   const widgetRef = useRef<HTMLDivElement>(null);
   const isMouseOverWidgetRef = useRef(false);
   const [selectedToolIdx, setSelectedToolIdx] = useState(0);
   const [isMinimized, setIsMinimized] = useState(true);
+  
+  // Responsive scale based on screen size
+  const getResponsiveScale = () => {
+    if (typeof window === "undefined") return 0.375;
+    const width = window.innerWidth;
+    if (width < 640) return 0.3; // Small mobile
+    if (width < 1024) return 0.45; // Tablet
+    if (width < 1536) return 0.65; // Laptop
+    return 0.85; // 4K screens
+  };
+  
+  const [scale, setScale] = useState(0.375);
   const [isHoveringUp, setIsHoveringUp] = useState(false);
   const [isHoveringDown, setIsHoveringDown] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -26,6 +40,18 @@ export default function ToolsChronographWheel() {
   const recordActivity = () => {
     lastActivityRef.current = Date.now();
   };
+
+  // Update scale on mount and window resize
+  useEffect(() => {
+    setScale(getResponsiveScale());
+    
+    const handleResize = () => {
+      setScale(getResponsiveScale());
+    };
+    
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
@@ -211,9 +237,9 @@ export default function ToolsChronographWheel() {
   return (
     <div
       ref={widgetRef}
-      className="fixed bottom-8 left-8 z-40"
+      className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 md:bottom-8 md:left-8 z-40"
       data-testid="chronograph-wheel-container"
-      style={{ scale: "0.375", transformOrigin: "bottom left" }}
+      style={{ scale: scale.toString(), transformOrigin: "bottom left", transition: "scale 0.3s ease" }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
         recordActivity();
@@ -226,8 +252,8 @@ export default function ToolsChronographWheel() {
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "480px", transition: "height 0.3s ease" }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="px-4 pt-3 pb-2 border-b-2 border-gray-400 flex items-center justify-between pulse-glow-orange rounded-t-2xl" style={{ backgroundColor: "#ffa536" }}>
-          <h3 className="text-4xl font-black" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
+        <div className="px-3 sm:px-4 pt-2 sm:pt-3 pb-1 sm:pb-2 border-b-2 border-gray-400 flex items-center justify-between pulse-glow-orange rounded-t-2xl" style={{ backgroundColor: "#ffa536" }}>
+          <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
         </div>
 
         {/* Floating Close/Open Button - Always on top */}
@@ -236,25 +262,25 @@ export default function ToolsChronographWheel() {
             recordActivity();
             setIsMinimized(!isMinimized);
           }}
-          className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-4 px-6 py-3 rounded-full font-bold text-xl"
+          className="absolute top-1 right-1 sm:top-2 sm:right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-xs sm:text-sm md:text-base"
           data-testid="button-toggle-tools-hub"
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
             backgroundColor: isMinimized ? "#11b6e9" : "#e63946",
             color: "#ffffff",
-            scale: "0.7",
+            scale: "0.85",
             transformOrigin: "top right"
           }}
         >
           {isMinimized ? (
             <>
-              <Icons.ChevronUp className="w-8 h-8" />
-              Open
+              <Icons.ChevronUp className="w-4 h-4 sm:w-6 sm:h-6" />
+              <span className="hidden sm:inline">Open</span>
             </>
           ) : (
             <>
-              Close
-              <Icons.X className="w-8 h-8" />
+              <span className="hidden sm:inline">Close</span>
+              <Icons.X className="w-4 h-4 sm:w-6 sm:h-6" />
             </>
           )}
         </button>
@@ -262,8 +288,8 @@ export default function ToolsChronographWheel() {
 
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" - Hidden when minimized */}
         {!isMinimized && (
-          <div className="px-4 py-2 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
-            <p className="text-lg font-black tracking-wide" style={{ color: "#000000" }}>APPLICATION REQUIREMENT CHECKS</p>
+          <div className="px-3 sm:px-4 py-1 sm:py-2 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
+            <p className="text-xs sm:text-sm md:text-base font-black tracking-wide" style={{ color: "#000000" }}>APPLICATION REQUIREMENT CHECKS</p>
           </div>
         )}
 
@@ -273,7 +299,7 @@ export default function ToolsChronographWheel() {
           {/* Scrollable tool list background */}
           <div
             ref={scrollRef}
-            className="absolute inset-0 overflow-y-auto overflow-x-hidden px-4 py-3"
+            className="absolute inset-0 overflow-y-auto overflow-x-hidden px-2 sm:px-3 py-2 sm:py-3"
             onScroll={handleScroll}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
@@ -282,12 +308,12 @@ export default function ToolsChronographWheel() {
               scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
             }}
           >
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-2">
               {tools.map((tool, idx) => (
                 <div
                   key={tool.id}
                   onClick={() => setSelectedToolIdx(idx)}
-                  className={`flex items-start gap-2 p-2 rounded-md cursor-pointer transition-all border ${
+                  className={`flex items-start gap-1 sm:gap-2 p-1 sm:p-2 rounded-md cursor-pointer transition-all border ${
                     idx === selectedToolIdx
                       ? "bg-primary/20 border-primary font-bold"
                       : "hover:bg-gray-100 border-transparent hover:border-gray-300"
@@ -295,7 +321,7 @@ export default function ToolsChronographWheel() {
                   data-testid={`tool-${idx}`}
                 >
                   {/* Number */}
-                  <div className={`text-xs font-bold w-8 flex-shrink-0 pt-0.5 ${
+                  <div className={`text-xs font-bold w-6 sm:w-8 flex-shrink-0 pt-0.5 ${
                     idx === selectedToolIdx ? "text-primary" : "text-gray-500"
                   }`}>
                     {String(idx + 1).padStart(3, "0")}
@@ -308,13 +334,13 @@ export default function ToolsChronographWheel() {
                     }`}>
                       {tool.name}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">
+                    <p className="text-xs text-gray-500 truncate line-clamp-1">
                       {tool.description}
                     </p>
                   </div>
 
                   {/* Tier badge */}
-                  <div className={`flex-shrink-0 text-xs font-bold px-2 py-1 rounded border ${tierColors[tool.tier as keyof typeof tierColors]}`}>
+                  <div className={`flex-shrink-0 text-xs font-bold px-1 sm:px-2 py-0.5 sm:py-1 rounded border ${tierColors[tool.tier as keyof typeof tierColors]}`}>
                     {tool.tier.charAt(0).toUpperCase()}
                   </div>
                 </div>
@@ -326,29 +352,29 @@ export default function ToolsChronographWheel() {
           <div
             className="absolute top-0 left-0 right-0 z-10 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
             style={{
-              height: "120px",
+              height: "80px",
               background: "linear-gradient(to bottom, rgba(240,244,248,1) 0%, rgba(240,244,248,0) 100%)",
             }}
             onMouseEnter={() => setIsHoveringUp(true)}
             onMouseLeave={() => setIsHoveringUp(false)}
           >
-            <Icons.ChevronUp className={`w-8 h-8 text-orange-500 ${isHoveringUp ? "" : "animate-bounce"}`} style={{ animationDelay: "0s" }} />
+            <Icons.ChevronUp className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-orange-500 ${isHoveringUp ? "" : "animate-bounce"}`} style={{ animationDelay: "0s" }} />
           </div>
           <div
             className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
             style={{
-              height: "120px",
+              height: "80px",
               background: "linear-gradient(to top, rgba(240,244,248,1) 0%, rgba(240,244,248,0) 100%)",
             }}
             onMouseEnter={() => setIsHoveringDown(true)}
             onMouseLeave={() => setIsHoveringDown(false)}
           >
-            <Icons.ChevronDown className={`w-8 h-8 text-orange-500 ${isHoveringDown ? "" : "animate-bounce"}`} style={{ animationDelay: "0.2s" }} />
+            <Icons.ChevronDown className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-orange-500 ${isHoveringDown ? "" : "animate-bounce"}`} style={{ animationDelay: "0.2s" }} />
           </div>
 
           {/* Featured Tool Box - Centered Behind */}
           <div 
-            className="absolute inset-0 flex items-center justify-center px-1 z-5"
+            className="absolute inset-0 flex items-center justify-center px-0.5 sm:px-1 z-5"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
           >
@@ -356,21 +382,21 @@ export default function ToolsChronographWheel() {
               href={`/tools/${selectedTool.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3 bg-white border-2 border-gray-300 rounded-lg w-full cursor-pointer hover:shadow-lg transition-shadow block" 
+              className="p-2 sm:p-3 bg-white border-2 border-gray-300 rounded-lg w-full cursor-pointer hover:shadow-lg transition-shadow block" 
               style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
             >
-              <div className="flex flex-col gap-2">
-                <p className="text-2xl text-black font-black">
+              <div className="flex flex-col gap-1 sm:gap-2">
+                <p className="text-sm sm:text-base md:text-2xl text-black font-black">
                   {String(selectedToolIdx + 1).padStart(3, "0")}
                 </p>
-                <h2 className="text-6xl font-black text-black leading-tight w-full">
+                <h2 className="text-2xl sm:text-4xl md:text-6xl font-black text-black leading-tight w-full">
                   {selectedTool.name.toUpperCase()}
                 </h2>
-                <p className="text-lg text-black font-black w-full">
+                <p className="text-xs sm:text-sm md:text-lg text-black font-black w-full line-clamp-2">
                   {selectedTool.description.toUpperCase()}
                 </p>
-                <div className="flex justify-center pt-2">
-                  <div className="w-16 h-16 rounded-full border-2 border-gray-400 flex items-center justify-center bg-gray-50 text-gray-600">
+                <div className="flex justify-center pt-1 sm:pt-2">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-full border-2 border-gray-400 flex items-center justify-center bg-gray-50 text-gray-600">
                     <GetIconComponent name={selectedTool.icon} />
                   </div>
                 </div>

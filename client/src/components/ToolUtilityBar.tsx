@@ -51,8 +51,8 @@ export function ToolUtilityBar({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 p-4 bg-muted/50 rounded-lg border">
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex flex-wrap items-center gap-1 sm:gap-2 p-2 sm:p-4 bg-muted/50 rounded-lg border">
+        <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
           {onSave && (
             <Tooltip>
               <TooltipTrigger asChild>
