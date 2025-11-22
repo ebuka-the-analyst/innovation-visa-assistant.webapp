@@ -52,7 +52,7 @@ export default function Header() {
             <img src={logoImg} alt="BhenMedia" className="h-8 md:h-14 w-auto md:w-48 max-w-xs" />
             <div className="relative -mt-0.5 md:-mt-1">
               <p className="text-xs md:text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
-                UK's #1 Innovator Founder Visa Partner
+                UK's #1 Visa AI Assistant
               </p>
               <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-chart-3 to-primary rounded-full" />
             </div>
