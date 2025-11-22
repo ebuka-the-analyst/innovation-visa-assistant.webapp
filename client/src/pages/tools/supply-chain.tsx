@@ -1,42 +1,5 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
-import { useState } from "react";
-import { Download } from "lucide-react";
-
+import { Card } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { AuthHeader } from "@/components/AuthHeader"; import { ToolNavigation } from "@/components/ToolNavigation"; import { useState } from "react"; import { Download } from "lucide-react";
 export default function SUPPLYCHAIN() {
-  const [generated, setGenerated] = useState(false);
-
-  return (
-    <>
-      <AuthHeader />
-      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <div className="max-w-3xl mx-auto">
-          <ToolNavigation />
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold">Supply Chain</h1>
-            <p className="text-muted-foreground">Generate professional reports</p>
-          </div>
-          
-          {!generated ? (
-            <Card className="p-8 text-center">
-              <p className="text-muted-foreground mb-4">Ready to generate your comprehensive report</p>
-              <Button onClick={() => setGenerated(true)} size="lg" className="bg-primary">Generate Report</Button>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {["Executive Summary", "Key Findings", "Recommendations", "Supporting Data"].map((section, i) => (
-                <Card key={i} className="p-6">
-                  <h3 className="font-bold mb-2">{section}</h3>
-                  <p className="text-sm text-muted-foreground">Professional {section.toLowerCase()} content</p>
-                </Card>
-              ))}
-              <Button className="w-full gap-2" size="lg"><Download className="w-4 h-4" />Download PDF</Button>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  );
+  const [gen, setGen] = useState(false);
+  return <><AuthHeader /><div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6"><ToolNavigation /><h1 className="text-4xl font-bold mb-2">Supply Chain</h1><p className="text-muted-foreground mb-6">Report generator</p>{!gen?<Card className="p-12 text-center"><h2 className="text-2xl font-bold mb-4">Generate Report</h2><Button onClick={()=>setGen(true)} size="lg" className="bg-primary">Create</Button></Card>:<div className="space-y-3">{["Summary","Analysis","Recommendations","Action Plan"].map((s,i)=><Card key={i} className="p-4"><h3 className="font-bold text-sm">{s}</h3></Card>)}<Button className="w-full gap-2 bg-primary"><Download width={16}/>Download PDF</Button></div>}</div></>;
 }
