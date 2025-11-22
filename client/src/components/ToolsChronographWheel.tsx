@@ -287,10 +287,10 @@ export default function ToolsChronographWheel() {
           <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
         </div>
 
-        {/* Swipe Instruction - Bold visual guide */}
-        {isHoveringWidget && !isMinimized && (
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-center pt-4 pointer-events-none z-45">
-            <div className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-sm animate-pulse"
+        {/* Swipe Instruction - Bold visual guide (above widget when closed) */}
+        {isHoveringWidget && isMinimized && (
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none z-50">
+            <div className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-sm"
               style={{
                 animation: "swipe-instruction-slide 2s ease-in-out infinite"
               }}>
