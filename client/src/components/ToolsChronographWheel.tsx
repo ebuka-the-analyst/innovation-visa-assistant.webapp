@@ -186,13 +186,13 @@ export default function ToolsChronographWheel() {
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
         <div className="px-4 pt-3 pb-2 border-b-2 border-gray-400 flex items-center justify-between pulse-glow-orange rounded-t-2xl" style={{ backgroundColor: "#ffa536" }}>
-          <h3 className="text-lg font-black" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
+          <h3 className="text-4xl font-black" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
         </div>
 
         {/* Floating Close/Open Button - Always on top */}
         <button
           onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-4 px-6 py-3 rounded-full font-bold text-sm"
+          className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-4 px-6 py-3 rounded-full font-bold text-xl"
           data-testid="button-toggle-tools-hub"
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
@@ -217,7 +217,7 @@ export default function ToolsChronographWheel() {
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" - Hidden when minimized */}
         {!isMinimized && (
           <div className="px-4 py-2 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
-            <p className="text-xs font-black tracking-wide" style={{ color: "#000000" }}>APPLICATION REQUIREMENT CHECKS</p>
+            <p className="text-lg font-black tracking-wide" style={{ color: "#000000" }}>APPLICATION REQUIREMENT CHECKS</p>
           </div>
         )}
 
