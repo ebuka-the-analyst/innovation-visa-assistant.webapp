@@ -80,10 +80,10 @@ export default function ToolsHub() {
     <>
       {user && <AuthHeader />}
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-        <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+        <div className="w-full px-4 md:px-8 lg:px-12">
           <ToolNavigation />
-        {/* Header */}
-        <div className="mb-12">
+          {/* Header */}
+          <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-3" data-testid="heading-tools-hub">
             UK Innovator Founder Visa Tools
           </h1>
@@ -196,7 +196,7 @@ export default function ToolsHub() {
               </p>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredTools.map((tool) => (
                 <Card
                   key={tool.id}
@@ -248,7 +248,7 @@ export default function ToolsHub() {
         </div>
 
         {/* Summary Stats */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           <Card className="p-6 text-center">
             <div className="text-3xl font-bold text-primary">{ALL_TOOLS.length}</div>
             <p className="text-sm text-muted-foreground mt-2">Total Tools</p>
@@ -278,7 +278,6 @@ export default function ToolsHub() {
             <p className="text-sm text-muted-foreground mt-2">After Approval</p>
           </Card>
         </div>
-      </div>
       </div>
       <Footer />
     </>
