@@ -143,7 +143,7 @@ export default function ToolsChronographWheel() {
     <div
       className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
-      style={{ scale: "0.75", transformOrigin: "bottom left" }}
+      style={{ scale: "0.375", transformOrigin: "bottom left" }}
     >
       {/* Outer metal bezel effect */}
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "800px", transition: "height 0.3s ease" }}>
@@ -156,7 +156,7 @@ export default function ToolsChronographWheel() {
         {/* Floating Close/Open Button - Always on top */}
         <button
           onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-sm"
+          className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-4 px-6 py-3 rounded-full font-bold text-xl"
           data-testid="button-toggle-tools-hub"
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
@@ -166,13 +166,13 @@ export default function ToolsChronographWheel() {
         >
           {isMinimized ? (
             <>
-              <Icons.ChevronUp className="w-4 h-4" />
+              <Icons.ChevronUp className="w-8 h-8" />
               Open
             </>
           ) : (
             <>
               Close
-              <Icons.X className="w-4 h-4" />
+              <Icons.X className="w-8 h-8" />
             </>
           )}
         </button>
