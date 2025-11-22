@@ -15,6 +15,7 @@ import { Search, Filter } from "lucide-react";
 import * as Icons from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { AuthHeader } from "@/components/AuthHeader";
+import { ToolNavigation } from "@/components/ToolNavigation";
 
 type IconName = keyof typeof Icons;
 
@@ -79,6 +80,7 @@ export default function ToolsHub() {
       {user && <AuthHeader />}
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+          <ToolNavigation />
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-3" data-testid="heading-tools-hub">
