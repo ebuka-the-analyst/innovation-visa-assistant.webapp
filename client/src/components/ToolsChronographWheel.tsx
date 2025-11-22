@@ -8,7 +8,10 @@ export default function ToolsChronographWheel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedToolIdx, setSelectedToolIdx] = useState(0);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isHoveringUp, setIsHoveringUp] = useState(false);
+  const [isHoveringDown, setIsHoveringDown] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const chevronScrollRef = useRef<NodeJS.Timeout | null>(null);
   const tools = ALL_TOOLS;
   const selectedTool = tools[selectedToolIdx];
 
@@ -83,6 +86,58 @@ export default function ToolsChronographWheel() {
       scrollIntervalRef.current = null;
     }
   };
+
+  // Handle quick scroll on chevron hover
+  useEffect(() => {
+    if (isHoveringUp && scrollRef.current) {
+      scrollRef.current.scrollTop = Math.max(0, scrollRef.current.scrollTop - 15);
+    }
+  }, [isHoveringUp]);
+
+  useEffect(() => {
+    if (isHoveringDown && scrollRef.current) {
+      scrollRef.current.scrollTop = Math.min(
+        scrollRef.current.scrollHeight - scrollRef.current.clientHeight,
+        scrollRef.current.scrollTop + 15
+      );
+    }
+  }, [isHoveringDown]);
+
+  // Setup continuous scroll on hover
+  useEffect(() => {
+    if (!isHoveringUp) return;
+
+    if (chevronScrollRef.current) clearInterval(chevronScrollRef.current);
+
+    chevronScrollRef.current = setInterval(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = Math.max(0, scrollRef.current.scrollTop - 12);
+      }
+    }, 50);
+
+    return () => {
+      if (chevronScrollRef.current) clearInterval(chevronScrollRef.current);
+    };
+  }, [isHoveringUp]);
+
+  useEffect(() => {
+    if (!isHoveringDown) return;
+
+    if (chevronScrollRef.current) clearInterval(chevronScrollRef.current);
+
+    chevronScrollRef.current = setInterval(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = Math.min(
+          scrollRef.current.scrollHeight - scrollRef.current.clientHeight,
+          scrollRef.current.scrollTop + 12
+        );
+      }
+    }, 50);
+
+    return () => {
+      if (chevronScrollRef.current) clearInterval(chevronScrollRef.current);
+    };
+  }, [isHoveringDown]);
 
   return (
     <div
@@ -185,24 +240,28 @@ export default function ToolsChronographWheel() {
             </div>
           </div>
 
-          {/* Fade masks - top and bottom */}
+          {/* Fade masks - top and bottom - Interactive */}
           <div
-            className="absolute top-0 left-0 right-0 pointer-events-none z-10 flex items-center justify-center"
+            className="absolute top-0 left-0 right-0 z-10 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
             style={{
               height: "120px",
               background: "linear-gradient(to bottom, rgba(240,244,248,1) 0%, rgba(240,244,248,0) 100%)",
             }}
+            onMouseEnter={() => setIsHoveringUp(true)}
+            onMouseLeave={() => setIsHoveringUp(false)}
           >
-            <Icons.ChevronUp className="w-8 h-8 text-orange-500 animate-bounce" style={{ animationDelay: "0s" }} />
+            <Icons.ChevronUp className={`w-8 h-8 text-orange-500 ${isHoveringUp ? "" : "animate-bounce"}`} style={{ animationDelay: "0s" }} />
           </div>
           <div
-            className="absolute bottom-0 left-0 right-0 pointer-events-none z-10 flex items-center justify-center"
+            className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
             style={{
               height: "120px",
               background: "linear-gradient(to top, rgba(240,244,248,1) 0%, rgba(240,244,248,0) 100%)",
             }}
+            onMouseEnter={() => setIsHoveringDown(true)}
+            onMouseLeave={() => setIsHoveringDown(false)}
           >
-            <Icons.ChevronDown className="w-8 h-8 text-orange-500 animate-bounce" style={{ animationDelay: "0.2s" }} />
+            <Icons.ChevronDown className={`w-8 h-8 text-orange-500 ${isHoveringDown ? "" : "animate-bounce"}`} style={{ animationDelay: "0.2s" }} />
           </div>
 
           {/* Featured Tool Box - Centered Behind */}
