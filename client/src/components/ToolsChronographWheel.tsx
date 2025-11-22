@@ -143,10 +143,9 @@ export default function ToolsChronographWheel() {
 
   return (
     <div
-      className="fixed bottom-8 left-8 z-40 cursor-pointer hover:opacity-90 transition-opacity"
+      className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
       style={{ scale: "0.375", transformOrigin: "bottom left" }}
-      onClick={() => setLocation("/tools-hub")}
     >
       {/* Outer metal bezel effect */}
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "800px", transition: "height 0.3s ease" }}>
@@ -268,9 +267,10 @@ export default function ToolsChronographWheel() {
           </div>
 
           {/* Featured Tool Box - Centered Behind */}
-          <div className="absolute inset-0 flex items-center justify-center px-1 z-5 pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center px-1 z-5">
             <div 
-              className="p-3 bg-white border-2 border-gray-300 rounded-lg w-full" 
+              onClick={() => setLocation(`/tools/${selectedTool.id}`)}
+              className="p-3 bg-white border-2 border-gray-300 rounded-lg w-full cursor-pointer hover:shadow-lg transition-shadow" 
               style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
             >
               <div className="flex flex-col gap-2">
