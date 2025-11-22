@@ -4,26 +4,39 @@ import { Button } from "@/components/ui/button";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
+import { Download, Save, Lightbulb, Calendar, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState } from "react";
-import { Download, AlertTriangle } from "lucide-react";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 
-const HR_REQUIREMENTS = [
-  {area:"Employment Contracts",items:["Written contract for each employee","Clear terms and conditions","Salary and benefits specified","Notice periods defined","Confidentiality clauses included"]},
-  {area:"Payroll & Tax",items:["PAYE registered with HMRC","Monthly payroll submissions","P11D filed for directors","Pension contributions recorded","Income tax deductions correct"]},
-  {area:"Health & Safety",items:["H&S policy (if 5+ employees)","Risk assessment completed","Accident reporting procedure","Emergency evacuation plan","H&S training records kept"]},
-  {area:"Working Hours",items:["Maximum 48 hours per week enforced","Rest breaks provided","Holiday records maintained","Overtime arrangements documented","Working time directive compliant"]},
-  {area:"Minimum Wage",items:["National Minimum Wage verified","£10.42+ for 21+ years (April 2024)","Apprentice minimum £6.40","Junior minimum £8.60","Records maintained for 3 years"]}
+const HR_ITEMS = [
+  {area:"Employment Contracts",items:["Written contract for each employee","Clear terms and conditions","Salary and benefits specified"]},
+  {area:"Payroll & Tax",items:["PAYE registered with HMRC","Monthly payroll submissions","P11D filed for directors"]},
+  {area:"Health & Safety",items:["H&S policy (if 5+ employees)","Risk assessment completed","Accident reporting procedure"]},
+  {area:"Working Hours",items:["Maximum 48 hours per week enforced","Rest breaks provided","Holiday records maintained"]},
+  {area:"Minimum Wage",items:["National Minimum Wage verified","Income tax deductions correct","Records maintained for 3 years"]}
 ];
 
 export default function HRCompliance() {
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
+  const [savedDate, setSavedDate] = useState("");
 
-  const totalItems = HR_REQUIREMENTS.reduce((sum, a) => sum + a.items.length, 0);
+  const totalItems = HR_ITEMS.reduce((sum, a) => sum + a.items.length, 0);
   const completedItems = Object.values(checks).filter(Boolean).length;
   const complianceScore = Math.round((completedItems / totalItems) * 100);
+
+  const saveProgress = () => {
+    localStorage.setItem('hrComplianceProgress', JSON.stringify(checks));
+    setSavedDate(new Date().toLocaleDateString());
+  };
+
+  const loadProgress = () => {
+    const saved = localStorage.getItem('hrComplianceProgress');
+    if (saved) setChecks(JSON.parse(saved));
+  };
+
+  useEffect(() => { loadProgress(); }, []);
 
   const chartData = [
     {name:"Compliant",value:completedItems,fill:"#22c55e"},
@@ -37,7 +50,17 @@ export default function HRCompliance() {
         <ToolNavigation />
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">HR Compliance Checklist</h1>
-          <p className="text-muted-foreground mb-6">UK employment law & HR compliance verification</p>
+          <p className="text-muted-foreground mb-6">UK employment law verification</p>
+
+          <div className="flex gap-2 mb-6 flex-wrap">
+            <Button onClick={saveProgress} className="gap-2" variant="outline"><Save className="w-4 h-4" /> Save</Button>
+            <Button className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
+            <Button className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
+            <Button className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
+            <Button onClick={loadProgress} className="gap-2" variant="outline"><RefreshCw className="w-4 h-4" /> Restore</Button>
+          </div>
+
+          {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
 
           <Tabs value={tab} onValueChange={setTab} className="mb-6">
             <TabsList className="grid w-full grid-cols-2">
@@ -55,7 +78,7 @@ export default function HRCompliance() {
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">Status</p>
                   <p className={`text-2xl font-bold ${complianceScore>=80?"text-green-600":"text-yellow-600"}`}>
-                    {complianceScore>=80?"✓ Compliant":"⚠ Review Needed"}
+                    {complianceScore>=80?"✓ Compliant":"⚠ Review"}
                   </p>
                 </Card>
                 <Card className="p-4">
@@ -77,28 +100,17 @@ export default function HRCompliance() {
                   </PieChart>
                 </ResponsiveContainer>
               </Card>
-
-              {complianceScore < 80 && (
-                <Alert className="border-red-200 bg-red-50">
-                  <AlertTriangle className="h-4 w-4 text-red-600" />
-                  <AlertDescription className="text-red-700">
-                    HR compliance gaps detected. Address these immediately to avoid Employment Tribunal claims and penalties.
-                  </AlertDescription>
-                </Alert>
-              )}
             </TabsContent>
 
             <TabsContent value="checklist" className="space-y-4">
-              {HR_REQUIREMENTS.map((area, i) => (
+              {HR_ITEMS.map((area, i) => (
                 <Card key={i} className="p-4">
                   <h3 className="font-bold mb-3">{area.area}</h3>
                   <div className="space-y-2">
                     {area.items.map((item, j) => (
                       <label key={j} className="flex gap-3 p-2 hover:bg-gray-50 rounded">
-                        <Checkbox 
-                          checked={checks[`${area.area}-${item}`]||false}
-                          onCheckedChange={() => setChecks({...checks,[`${area.area}-${item}`]:!checks[`${area.area}-${item}`]})}
-                        />
+                        <Checkbox checked={checks[`${area.area}-${item}`]||false}
+                          onCheckedChange={() => setChecks({...checks,[`${area.area}-${item}`]:!checks[`${area.area}-${item}`]})} />
                         <span className="text-sm flex-1">{item}</span>
                       </label>
                     ))}
@@ -107,11 +119,6 @@ export default function HRCompliance() {
               ))}
             </TabsContent>
           </Tabs>
-
-          <Button className="w-full mt-4 gap-2 bg-primary">
-            <Download className="w-4 h-4" />
-            Export HR Compliance Report
-          </Button>
         </div>
       </div>
     </>

@@ -5,12 +5,12 @@ import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState } from "react";
-import { Download, AlertTriangle, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Download, AlertTriangle, TrendingUp, Save, Lightbulb, Calendar, RefreshCw } from "lucide-react";
 
-const REGULATORY_CHANGES_2024 = [
+const REGULATORY_CHANGES = [
   {topic:"Immigration Rules",item:"Points-Based System refinements",date:"Apr 2024",impact:"High",status:"In Effect"},
-  {topic:"Employment",item:"National Minimum Wage increase to £11.44",date:"Apr 2024",impact:"High",status:"In Effect"},
+  {topic:"Employment",item:"National Minimum Wage increase to 11.44 pounds",date:"Apr 2024",impact:"High",status:"In Effect"},
   {topic:"Tax",item:"Corporation tax rate change",date:"Apr 2023",impact:"High",status:"In Effect"},
   {topic:"Data Protection",item:"GDPR enforcement increase by ICO",date:"Ongoing",impact:"High",status:"Active"},
   {topic:"Company Law",item:"Large company reporting requirements",date:"Jan 2024",impact:"Medium",status:"In Effect"}
@@ -19,8 +19,21 @@ const REGULATORY_CHANGES_2024 = [
 export default function RegulatoryTracker() {
   const [tracked, setTracked] = useState<any>({});
   const [tab, setTab] = useState("overview");
+  const [savedDate, setSavedDate] = useState("");
 
   const monitoring = Object.values(tracked).filter(Boolean).length;
+
+  const saveProgress = () => {
+    localStorage.setItem('regulatoryTrackerProgress', JSON.stringify(tracked));
+    setSavedDate(new Date().toLocaleDateString());
+  };
+
+  const loadProgress = () => {
+    const saved = localStorage.getItem('regulatoryTrackerProgress');
+    if (saved) setTracked(JSON.parse(saved));
+  };
+
+  useEffect(() => { loadProgress(); }, []);
 
   return (
     <>
@@ -29,7 +42,17 @@ export default function RegulatoryTracker() {
         <ToolNavigation />
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Regulatory Tracker</h1>
-          <p className="text-muted-foreground mb-6">Monitor UK regulatory changes affecting visa applications and compliance</p>
+          <p className="text-muted-foreground mb-6">Monitor UK regulatory changes affecting visa applications</p>
+
+          <div className="flex gap-2 mb-6 flex-wrap">
+            <Button onClick={saveProgress} className="gap-2" variant="outline"><Save className="w-4 h-4" /> Save</Button>
+            <Button className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
+            <Button className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
+            <Button className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
+            <Button onClick={loadProgress} className="gap-2" variant="outline"><RefreshCw className="w-4 h-4" /> Restore</Button>
+          </div>
+
+          {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
 
           <Tabs value={tab} onValueChange={setTab} className="mb-6">
             <TabsList className="grid w-full grid-cols-2">
@@ -42,7 +65,7 @@ export default function RegulatoryTracker() {
                 <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
                   <p className="text-xs text-muted-foreground">Changes Tracked</p>
                   <p className="text-4xl font-bold mt-2">{monitoring}</p>
-                  <p className="text-xs mt-2">of {REGULATORY_CHANGES_2024.length} key changes</p>
+                  <p className="text-xs mt-2">of {REGULATORY_CHANGES.length} key changes</p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">High Impact</p>
@@ -64,7 +87,7 @@ export default function RegulatoryTracker() {
             </TabsContent>
 
             <TabsContent value="changes" className="space-y-4">
-              {REGULATORY_CHANGES_2024.map((change, i) => (
+              {REGULATORY_CHANGES.map((change, i) => (
                 <Card key={i} className={`p-4 border-l-4 ${change.impact === "High" ? "border-l-red-500":"border-l-blue-500"}`}>
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
@@ -80,21 +103,14 @@ export default function RegulatoryTracker() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-3">Effective: {change.date}</p>
                   <label className="flex gap-2">
-                    <Checkbox 
-                      checked={tracked[`${change.item}`]||false}
-                      onCheckedChange={() => setTracked({...tracked,[`${change.item}`]:!tracked[`${change.item}`]})}
-                    />
+                    <Checkbox checked={tracked[`${change.item}`]||false}
+                      onCheckedChange={() => setTracked({...tracked,[`${change.item}`]:!tracked[`${change.item}`]})} />
                     <span className="text-xs">Mark as reviewed and addressed</span>
                   </label>
                 </Card>
               ))}
             </TabsContent>
           </Tabs>
-
-          <Button className="w-full mt-4 gap-2 bg-primary">
-            <Download className="w-4 h-4" />
-            Export Regulatory Status Report
-          </Button>
         </div>
       </div>
     </>
