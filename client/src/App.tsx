@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import ChatBot from "@/components/ChatBot";
 import CookieConsent from "@/components/CookieConsent";
+import ToolsChronographWheel from "@/components/ToolsChronographWheel";
 import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
@@ -320,6 +321,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ChatBot />
+        <ToolsChronographWheel />
         <Toaster />
         <AppLayout />
         <CookieConsent />
