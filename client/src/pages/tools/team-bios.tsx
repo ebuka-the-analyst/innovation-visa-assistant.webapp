@@ -1,0 +1,4 @@
+import { Card } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { AuthHeader } from "@/components/AuthHeader"; import { ToolNavigation } from "@/components/ToolNavigation"; import { Download } from "lucide-react";
+export default function TEAMBIOS() {
+  return <><AuthHeader /><div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6"><ToolNavigation /><h1 className="text-4xl font-bold mb-2">Team Bios</h1><p className="text-muted-foreground mb-4">Documentation builder</p><Card className="p-8"><p className="text-center text-muted-foreground mb-4">Create and organize your Team Bios</p><Button className="w-full gap-2 bg-primary"><Download className="w-4 h-4"/>Export Document</Button></Card></div></>;
+}
