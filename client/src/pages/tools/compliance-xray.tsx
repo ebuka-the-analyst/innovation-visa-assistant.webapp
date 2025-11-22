@@ -56,6 +56,8 @@ export default function ComplianceXRay() {
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [showActionPlan, setShowActionPlan] = useState(false);
 
   const totalItems = BUSINESS_CATEGORIES.reduce((sum, c) => sum + c.items.length, 0);
   const completedItems = Object.values(checks).filter(Boolean).length;
@@ -64,12 +66,17 @@ export default function ComplianceXRay() {
 
   const saveProgress = () => {
     localStorage.setItem('complianceXRayProgress', JSON.stringify(checks));
+    localStorage.setItem('complianceXRayDate', new Date().toLocaleDateString());
     setSavedDate(new Date().toLocaleDateString());
   };
 
   const loadProgress = () => {
     const saved = localStorage.getItem('complianceXRayProgress');
-    if (saved) setChecks(JSON.parse(saved));
+    if (saved) {
+      setChecks(JSON.parse(saved));
+      const date = localStorage.getItem('complianceXRayDate');
+      setSavedDate(date || '');
+    }
   };
 
   const getRecommendations = () => {
@@ -127,13 +134,34 @@ export default function ComplianceXRay() {
 
           <div className="flex gap-2 mb-6 flex-wrap">
             <Button onClick={saveProgress} className="gap-2" variant="outline"><Save className="w-4 h-4" /> Save</Button>
-            <Button className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
-            <Button className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
+            <Button onClick={() => setShowRecommendations(!showRecommendations)} className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
+            <Button onClick={() => setShowActionPlan(!showActionPlan)} className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
             <Button onClick={exportReport} className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
             <Button onClick={loadProgress} className="gap-2" variant="outline"><RefreshCw className="w-4 h-4" /> Restore</Button>
           </div>
 
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
+
+          {showRecommendations && (
+            <Card className="p-4 mb-4 bg-blue-50 border-blue-200">
+              <h3 className="font-bold mb-2">Smart Recommendations</h3>
+              <ul className="space-y-1">{getRecommendations().map((r, i) => <li key={i} className="text-sm">• {r}</li>)}</ul>
+            </Card>
+          )}
+
+          {showActionPlan && (
+            <Card className="p-4 mb-4 bg-green-50 border-green-200">
+              <h3 className="font-bold mb-3">Action Plan Timeline</h3>
+              <div className="space-y-2">{generateActionPlan().map((item, i) => (
+                <div key={i} className="flex gap-3">
+                  <span className="font-bold text-sm">{item.week}</span>
+                  <div><p className="text-sm">{item.action}</p>
+                    <span className={`text-xs ${item.priority==="Critical"?"text-red-600":"text-yellow-600"}`}>{item.priority}</span>
+                  </div>
+                </div>
+              ))}</div>
+            </Card>
+          )}
 
           <Tabs value={tab} onValueChange={setTab} className="mb-6">
             <TabsList className="grid w-full grid-cols-3">

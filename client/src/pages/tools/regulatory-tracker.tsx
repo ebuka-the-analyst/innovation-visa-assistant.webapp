@@ -20,17 +20,53 @@ export default function RegulatoryTracker() {
   const [tracked, setTracked] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [showActionPlan, setShowActionPlan] = useState(false);
 
   const monitoring = Object.values(tracked).filter(Boolean).length;
 
   const saveProgress = () => {
     localStorage.setItem('regulatoryTrackerProgress', JSON.stringify(tracked));
+    localStorage.setItem('regulatoryTrackerDate', new Date().toLocaleDateString());
     setSavedDate(new Date().toLocaleDateString());
   };
 
   const loadProgress = () => {
     const saved = localStorage.getItem('regulatoryTrackerProgress');
-    if (saved) setTracked(JSON.parse(saved));
+    if (saved) {
+      setTracked(JSON.parse(saved));
+      const date = localStorage.getItem('regulatoryTrackerDate');
+      setSavedDate(date || '');
+    }
+  };
+
+  const getRecommendations = () => {
+    const gaps = [];
+    if (monitoring < 3) gaps.push("Review and track at least 3 regulatory changes");
+    if (!tracked["Points-Based System refinements"]) gaps.push("Review points system changes - impacts visa eligibility");
+    if (!tracked["National Minimum Wage increase to 11.44 pounds"]) gaps.push("Update payroll for minimum wage increase");
+    if (!tracked["GDPR enforcement increase by ICO"]) gaps.push("Review GDPR compliance - enforcement increased");
+    if (monitoring === REGULATORY_CHANGES.length) gaps.push("All changes tracked - stay updated quarterly");
+    return gaps.slice(0, 5);
+  };
+
+  const generateActionPlan = () => {
+    return [
+      {week:"Week 1", action:"Review immigration rule changes and assess impact", priority:"Critical"},
+      {week:"Week 2", action:"Update payroll for minimum wage requirements", priority:"High"},
+      {week:"Week 3", action:"Review GDPR compliance against new guidance", priority:"High"},
+      {week:"Week 4", action:"Set up quarterly regulatory review process", priority:"Medium"}
+    ];
+  };
+
+  const exportReport = () => {
+    const report = `REGULATORY TRACKER REPORT\nDate: ${new Date().toLocaleDateString()}\nChanges Tracked: ${monitoring}/${REGULATORY_CHANGES.length}\nHigh Impact Changes: ${REGULATORY_CHANGES.filter(c=>c.impact==="High").length}\n\nSTATUS: ${monitoring>=3?"MONITORING":"REVIEW NEEDED"}`;
+    const blob = new Blob([report], {type: 'text/plain'});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'regulatory-tracker.txt';
+    a.click();
   };
 
   useEffect(() => { loadProgress(); }, []);
@@ -46,13 +82,34 @@ export default function RegulatoryTracker() {
 
           <div className="flex gap-2 mb-6 flex-wrap">
             <Button onClick={saveProgress} className="gap-2" variant="outline"><Save className="w-4 h-4" /> Save</Button>
-            <Button className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
-            <Button className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
-            <Button className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
+            <Button onClick={() => setShowRecommendations(!showRecommendations)} className="gap-2" variant="outline"><Lightbulb className="w-4 h-4" /> Tips</Button>
+            <Button onClick={() => setShowActionPlan(!showActionPlan)} className="gap-2" variant="outline"><Calendar className="w-4 h-4" /> Plan</Button>
+            <Button onClick={exportReport} className="gap-2" variant="outline"><Download className="w-4 h-4" /> Export</Button>
             <Button onClick={loadProgress} className="gap-2" variant="outline"><RefreshCw className="w-4 h-4" /> Restore</Button>
           </div>
 
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
+
+          {showRecommendations && (
+            <Card className="p-4 mb-4 bg-blue-50 border-blue-200">
+              <h3 className="font-bold mb-2">Smart Recommendations</h3>
+              <ul className="space-y-1">{getRecommendations().map((r, i) => <li key={i} className="text-sm">• {r}</li>)}</ul>
+            </Card>
+          )}
+
+          {showActionPlan && (
+            <Card className="p-4 mb-4 bg-green-50 border-green-200">
+              <h3 className="font-bold mb-3">Action Plan Timeline</h3>
+              <div className="space-y-2">{generateActionPlan().map((item, i) => (
+                <div key={i} className="flex gap-3">
+                  <span className="font-bold text-sm">{item.week}</span>
+                  <div><p className="text-sm">{item.action}</p>
+                    <span className={`text-xs ${item.priority==="Critical"?"text-red-600":"text-yellow-600"}`}>{item.priority}</span>
+                  </div>
+                </div>
+              ))}</div>
+            </Card>
+          )}
 
           <Tabs value={tab} onValueChange={setTab} className="mb-6">
             <TabsList className="grid w-full grid-cols-2">
