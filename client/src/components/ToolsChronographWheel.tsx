@@ -169,7 +169,7 @@ export default function ToolsChronographWheel() {
     if (!showSwipeHint) return;
     const timer = setTimeout(() => {
       setShowSwipeHint(false);
-    }, 4000); // Show hint for 4 seconds
+    }, 8000); // Show hint for 8 seconds
     return () => clearTimeout(timer);
   }, [showSwipeHint]);
 
@@ -265,7 +265,8 @@ export default function ToolsChronographWheel() {
       data-testid="chronograph-wheel-container"
       style={{ 
         scale: "0.375", 
-        transformOrigin: "bottom left"
+        transformOrigin: "bottom left",
+        animation: showSwipeHint ? "widget-swipe-pulse 8s ease-in-out" : "none"
       }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
@@ -275,31 +276,6 @@ export default function ToolsChronographWheel() {
         isMouseOverWidgetRef.current = false;
       }}
     >
-      {/* Swipe Hint Indicator - ADHD-friendly prominent animation */}
-      {showSwipeHint && (
-        <div
-          className="absolute -top-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 pointer-events-none"
-          style={{
-            animation: "swipe-hint-pulse 0.8s ease-in-out infinite"
-          }}
-        >
-          {/* Arrow animation */}
-          <div
-            className="flex items-center gap-1"
-            style={{
-              animation: "swipe-arrow-slide 0.8s ease-in-out infinite"
-            }}
-          >
-            <Icons.ArrowLeft className="w-6 h-6 text-orange-500" strokeWidth={3} />
-            <Icons.ArrowLeft className="w-5 h-5 text-orange-500 opacity-60" strokeWidth={3} />
-          </div>
-          {/* Text label */}
-          <div className="text-xs font-black text-orange-600 bg-yellow-200 px-2 py-1 rounded whitespace-nowrap">
-            SWIPE LEFT
-          </div>
-        </div>
-      )}
-
       {/* Outer metal bezel effect */}
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "480px", transition: "height 0.3s ease" }}>
         
