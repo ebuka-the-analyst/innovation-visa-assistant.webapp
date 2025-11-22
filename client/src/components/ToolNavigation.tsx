@@ -2,21 +2,15 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Gauge, DollarSign, HelpCircle } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import logoImg from "@assets/BhenMedia_1763690019470.png";
+import { useState } from "react";
+import PricingModal from "./PricingModal";
+import FAQModal from "./FAQModal";
 
 export function ToolNavigation() {
   const [location, setLocation] = useLocation();
+  const [pricingOpen, setPricingOpen] = useState(false);
+  const [faqOpen, setFaqOpen] = useState(false);
   const isOnToolPage = location.startsWith("/tools/");
-
-  const handleNavigation = (sectionId: string) => {
-    if (location === "/") {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      setLocation(`/#${sectionId}`);
-    }
-  };
 
   return (
     <div className="mb-8">
@@ -72,7 +66,7 @@ export function ToolNavigation() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleNavigation("pricing")}
+          onClick={() => setPricingOpen(true)}
           className="gap-2"
           data-testid="button-nav-pricing"
         >
@@ -82,7 +76,7 @@ export function ToolNavigation() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleNavigation("faq")}
+          onClick={() => setFaqOpen(true)}
           className="gap-2"
           data-testid="button-nav-faq"
         >
@@ -90,6 +84,10 @@ export function ToolNavigation() {
           <span className="hidden sm:inline">FAQ</span>
         </Button>
       </div>
+
+      {/* Modals */}
+      <PricingModal isOpen={pricingOpen} onClose={() => setPricingOpen(false)} />
+      <FAQModal isOpen={faqOpen} onClose={() => setFaqOpen(false)} />
     </div>
   );
 }
