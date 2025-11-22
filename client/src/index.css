@@ -351,6 +351,18 @@
     }
   }
 
+  /* Swipe instruction hover indicator */
+  @keyframes swipe-instruction-slide {
+    0%, 100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    50% {
+      transform: translateX(-20px);
+      opacity: 0.8;
+    }
+  }
+
   /* Swipe out animation - dismisses widget off screen */
   @keyframes swipe-out {
     0% {

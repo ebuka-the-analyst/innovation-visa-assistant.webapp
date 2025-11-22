@@ -287,6 +287,19 @@ export default function ToolsChronographWheel() {
           <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
         </div>
 
+        {/* Swipe Instruction - Bold visual guide */}
+        {isHoveringWidget && !isMinimized && (
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-center pt-4 pointer-events-none z-45">
+            <div className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-sm animate-pulse"
+              style={{
+                animation: "swipe-instruction-slide 2s ease-in-out infinite"
+              }}>
+              <Icons.ArrowLeft className="w-5 h-5" />
+              <span>Swipe left to remove from screen</span>
+            </div>
+          </div>
+        )}
+
         {/* Floating Close/Open Button - Always on top */}
         <button
           onClick={() => {
@@ -303,9 +316,7 @@ export default function ToolsChronographWheel() {
             transformOrigin: "top right"
           }}
         >
-          {isHoveringWidget && !isMinimized ? (
-            <span style={{ fontSize: "clamp(0.8rem, 2vw, 1.5rem)" }}>Swipe left to minimise</span>
-          ) : isMinimized ? (
+          {isMinimized ? (
             <>
               <Icons.ChevronUp className="w-8 h-8" />
               <span style={{ fontSize: "clamp(0.8rem, 2vw, 1.5rem)" }}>Open</span>
