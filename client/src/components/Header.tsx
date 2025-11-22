@@ -31,13 +31,13 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl">
       {/* Disclaimer Bar */}
       {!disclaimerDismissed && (
-        <div className="w-full bg-black/90 text-white text-xs py-2.5 flex items-center justify-center gap-4 border-b border-border/40">
+        <div className="w-full bg-black/90 text-white dark:text-gray-400 text-xs py-2.5 flex items-center justify-center gap-4 border-b border-border/40">
           <span>
             <strong>UK-Innovation Visa Assistant Disclaimer:</strong> Trained on GOV.UK guidance. This doesnt substitute a legal advice. Always verify with official sources.
           </span>
           <button
             onClick={() => setDisclaimerDismissed(true)}
-            className="text-white hover:opacity-75 transition-opacity flex-shrink-0"
+            className="text-white dark:text-gray-400 hover:opacity-75 transition-opacity flex-shrink-0"
             data-testid="button-dismiss-disclaimer"
           >
             <X className="h-3 w-3" />
