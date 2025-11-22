@@ -11,7 +11,7 @@ export default function ToolsChronographWheel() {
   const widgetRef = useRef<HTMLDivElement>(null);
   const isMouseOverWidgetRef = useRef(false);
   const [selectedToolIdx, setSelectedToolIdx] = useState(0);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const [isHoveringUp, setIsHoveringUp] = useState(false);
   const [isHoveringDown, setIsHoveringDown] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -171,9 +171,9 @@ export default function ToolsChronographWheel() {
   return (
     <div
       ref={widgetRef}
-      className="fixed bottom-8 left-8 z-40"
+      className="fixed bottom-8 right-8 z-40"
       data-testid="chronograph-wheel-container"
-      style={{ scale: "0.375", transformOrigin: "bottom left" }}
+      style={{ scale: isMinimized ? "0.6" : "0.375", transformOrigin: "bottom right" }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
       }}
