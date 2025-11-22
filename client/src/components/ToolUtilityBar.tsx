@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SessionHandoffDialog } from "./SessionHandoffDialog";
 import { ShareSheet } from "./ShareSheet";
 import { useSessionHandoff } from "@/hooks/useSessionHandoff";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ToolUtilityBarProps {
   toolId: string;
@@ -31,6 +32,7 @@ export function ToolUtilityBar({
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const { handoffData, isGenerating, generateQRCode } = useSessionHandoff(toolId);
+  const isMobile = useIsMobile();
 
   const handleUploadFromPhone = async () => {
     if (getSerializedState) {
@@ -112,15 +114,17 @@ export function ToolUtilityBar({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleUploadFromPhone}
-            data-testid="button-upload-from-phone"
-          >
-            <Smartphone className="h-4 w-4 mr-2" />
-            Upload from Phone
-          </Button>
+          {!isMobile && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleUploadFromPhone}
+              data-testid="button-upload-from-phone"
+            >
+              <Smartphone className="h-4 w-4 mr-2" />
+              Upload from Phone
+            </Button>
+          )}
 
           <Button
             variant="outline"
