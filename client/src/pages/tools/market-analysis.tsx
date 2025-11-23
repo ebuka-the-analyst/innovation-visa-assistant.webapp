@@ -108,9 +108,9 @@ export default function MarketAnalysis() {
     const somPercent = ((som / sam) * 100).toFixed(1);
     
     // Detailed score calculation breakdown
-    const tamScore = tam >= 100000000 ? 40 : tam >= 50000000 ? 30 : tam >= 10000000 ? 20 : 10;
-    const growthScore = marketGrowth >= 20 ? 30 : marketGrowth >= 15 ? 25 : marketGrowth >= 10 ? 20 : 15;
-    const maturityScore = marketMaturity === "growth" ? 30 : marketMaturity === "emerging" ? 25 : marketMaturity === "mature" ? 20 : 10;
+    const tamScore = tam >= 1000000000 ? 40 : tam >= 100000000 ? 30 : tam >= 50000000 ? 20 : 10;
+    const growthScore = marketGrowth >= 20 ? 30 : marketGrowth >= 15 ? 25 : marketGrowth >= 10 ? 15 : 5;
+    const maturityScore = marketMaturity === "growth" ? 30 : marketMaturity === "emerging" ? 25 : marketMaturity === "mature" ? 15 : 5;
     
     const content = `UK INNOVATOR FOUNDER VISA - MARKET ANALYSIS
 Generated: ${new Date().toLocaleDateString()}
@@ -155,31 +155,34 @@ Formula: Market Score = TAM Component (40pts) + Growth Component (30pts) + Matur
 
 Component 1: TAM Size Assessment
   Input TAM: £${(tam / 1000000).toFixed(1)}M
-  Scoring:
-    - £100M+: 40 points (Excellent)
-    - £50M-£100M: 30 points (Strong)
-    - £10M-£50M: 20 points (Moderate)
-    - <£10M: 10 points (Weak)
+  Scoring Thresholds:
+    - £1,000M+ (£1B+): 40 points (Excellent)
+    - £100M-£1,000M: 30 points (Strong)
+    - £50M-£100M: 20 points (Moderate)
+    - <£50M: 10 points (Weak)
+  Calculation: TAM £${(tam / 1000000).toFixed(1)}M → ${tam >= 1000000000 ? '≥£1B → 40 points' : tam >= 100000000 ? '≥£100M → 30 points' : tam >= 50000000 ? '≥£50M → 20 points' : '<£50M → 10 points'}
   TAM Score: ${tamScore}/40 points
   ${tam >= 100000000 ? '✓ Large TAM demonstrates significant UK Innovator Founder visa scalability potential' : '⚠ Limited TAM may restrict scalability narrative'}
 
 Component 2: Market Growth Assessment
   Input Growth Rate: ${marketGrowth}% CAGR
-  Scoring:
+  Scoring Thresholds:
     - 20%+: 30 points (High growth)
     - 15-20%: 25 points (Strong growth)
-    - 10-15%: 20 points (Moderate growth)
-    - <10%: 15 points (Slow growth)
+    - 10-15%: 15 points (Moderate growth)
+    - <10%: 5 points (Slow growth)
+  Calculation: Growth ${marketGrowth}% → ${marketGrowth >= 20 ? '≥20% → 30 points' : marketGrowth >= 15 ? '≥15% → 25 points' : marketGrowth >= 10 ? '≥10% → 15 points' : '<10% → 5 points'}
   Growth Score: ${growthScore}/30 points
   ${marketGrowth >= 15 ? '✓ High growth rate supports innovative solution narrative for UK Innovator Founder visa' : '⚠ Market growth could be stronger'}
 
 Component 3: Market Maturity Assessment
   Input Maturity: ${marketMaturity.charAt(0).toUpperCase() + marketMaturity.slice(1)}
-  Scoring:
-    - Growing: 30 points (Optimal)
+  Scoring Thresholds:
+    - Growth: 30 points (Optimal)
     - Emerging: 25 points (Good)
-    - Mature: 20 points (Acceptable)
-    - Declining: 10 points (Risky)
+    - Mature: 15 points (Acceptable)
+    - Declining: 5 points (Risky)
+  Calculation: Maturity "${marketMaturity}" → ${marketMaturity === "growth" ? 'Growth → 30 points' : marketMaturity === "emerging" ? 'Emerging → 25 points' : marketMaturity === "mature" ? 'Mature → 15 points' : 'Declining → 5 points'}
   Maturity Score: ${maturityScore}/30 points
   ${marketMaturity === "growth" ? '✓ Growing market ideal for scaling business' : marketMaturity === "emerging" ? '✓ Emerging market offers early-mover advantage' : marketMaturity === "declining" ? '✗ Declining market poses viability risk' : '⚠ Mature market requires strong differentiation'}
 
@@ -309,9 +312,9 @@ Market Analysis Methodology: Industry market research, TAM/SAM/SOM framework
 
   // Chart 4: Market Opportunity Breakdown
   const getOpportunityBreakdown = () => {
-    const tamScore = tam >= 1000000000 ? 40 : tam >= 100000000 ? 30 : 20;
-    const growthScore = marketGrowth >= 20 ? 30 : marketGrowth >= 15 ? 25 : 15;
-    const maturityScore = marketMaturity === "growth" ? 30 : marketMaturity === "emerging" ? 25 : 15;
+    const tamScore = tam >= 1000000000 ? 40 : tam >= 100000000 ? 30 : tam >= 50000000 ? 20 : 10;
+    const growthScore = marketGrowth >= 20 ? 30 : marketGrowth >= 15 ? 25 : marketGrowth >= 10 ? 15 : 5;
+    const maturityScore = marketMaturity === "growth" ? 30 : marketMaturity === "emerging" ? 25 : marketMaturity === "mature" ? 15 : 5;
     
     return [
       { component: "Market Size", score: tamScore, max: 40 },
