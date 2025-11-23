@@ -46,6 +46,9 @@ import { setupAuthRoutes } from "./authRoutes";
 
 const app = express();
 
+// Trust proxy for Replit (required for OAuth and secure cookies)
+app.set('trust proxy', 1);
+
 declare module 'http' {
   interface IncomingMessage {
     rawBody: unknown
@@ -69,9 +72,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'visaprep-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
+  proxy: true, // Trust the reverse proxy
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
+    sameSite: 'lax', // Required for OAuth redirects
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   },
 }));
