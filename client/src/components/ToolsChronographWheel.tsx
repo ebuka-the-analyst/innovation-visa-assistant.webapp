@@ -119,7 +119,7 @@ export default function ToolsChronographWheel() {
     if (!container) return;
 
     const handleNativeWheel = (e: WheelEvent) => {
-      if (!isMouseOverWidgetRef.current || !scrollRef.current) return;
+      if (!isMouseOverWidgetRef.current || !scrollRef.current || blockMouseScrollRef.current) return;
 
       recordActivity();
       e.preventDefault();
@@ -239,15 +239,15 @@ export default function ToolsChronographWheel() {
     };
   }, [isMinimized, isHoveringWidget]);
 
-  // Handle quick scroll on chevron hover
+  // Handle quick scroll on chevron hover (blocked during grace period)
   useEffect(() => {
-    if (isHoveringUp && scrollRef.current) {
+    if (isHoveringUp && scrollRef.current && !blockMouseScrollRef.current) {
       scrollRef.current.scrollTop = Math.max(0, scrollRef.current.scrollTop - 7.5);
     }
   }, [isHoveringUp]);
 
   useEffect(() => {
-    if (isHoveringDown && scrollRef.current) {
+    if (isHoveringDown && scrollRef.current && !blockMouseScrollRef.current) {
       scrollRef.current.scrollTop = Math.min(
         scrollRef.current.scrollHeight - scrollRef.current.clientHeight,
         scrollRef.current.scrollTop + 7.5
@@ -255,14 +255,17 @@ export default function ToolsChronographWheel() {
     }
   }, [isHoveringDown]);
 
-  // Setup continuous scroll on hover
+  // Setup continuous scroll on hover (blocked during grace period)
   useEffect(() => {
-    if (!isHoveringUp) return;
+    if (!isHoveringUp || blockMouseScrollRef.current) {
+      if (chevronScrollRef.current) clearInterval(chevronScrollRef.current);
+      return;
+    }
 
     if (chevronScrollRef.current) clearInterval(chevronScrollRef.current);
 
     chevronScrollRef.current = setInterval(() => {
-      if (scrollRef.current) {
+      if (scrollRef.current && !blockMouseScrollRef.current) {
         scrollRef.current.scrollTop = Math.max(0, scrollRef.current.scrollTop - 6); // 50% of original
       }
     }, 50);
@@ -273,12 +276,15 @@ export default function ToolsChronographWheel() {
   }, [isHoveringUp]);
 
   useEffect(() => {
-    if (!isHoveringDown) return;
+    if (!isHoveringDown || blockMouseScrollRef.current) {
+      if (chevronScrollRef.current) clearInterval(chevronScrollRef.current);
+      return;
+    }
 
     if (chevronScrollRef.current) clearInterval(chevronScrollRef.current);
 
     chevronScrollRef.current = setInterval(() => {
-      if (scrollRef.current) {
+      if (scrollRef.current && !blockMouseScrollRef.current) {
         scrollRef.current.scrollTop = Math.min(
           scrollRef.current.scrollHeight - scrollRef.current.clientHeight,
           scrollRef.current.scrollTop + 6 // 50% of original
