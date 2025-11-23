@@ -7,13 +7,11 @@ import { Label } from "@/components/ui/label";
 import { UserPlus, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -33,10 +31,7 @@ export default function Signup() {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          turnstileToken,
-        }),
+        body: JSON.stringify(formData),
       });
 
       const result = await response.json();
@@ -142,18 +137,10 @@ export default function Signup() {
               <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
             </div>
 
-            {/* Cloudflare Turnstile Bot Protection */}
-            <div className="flex justify-center" data-testid="turnstile-widget">
-              <Turnstile
-                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
-                onSuccess={setTurnstileToken}
-              />
-            </div>
-
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading || !turnstileToken}
+              disabled={isLoading}
               data-testid="button-signup"
             >
               {isLoading ? (

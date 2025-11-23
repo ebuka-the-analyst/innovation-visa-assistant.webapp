@@ -184,17 +184,10 @@ export async function setupAuth(app: Express) {
   // Email/Password Registration with validation
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { email, password, firstName, lastName, turnstileToken } = req.body;
+      const { email, password, firstName, lastName } = req.body;
 
-      // Verify Cloudflare Turnstile token for bot protection (REQUIRED)
-      if (!turnstileToken) {
-        return res.status(400).json({ message: "Bot verification required. Please try again." });
-      }
-      
-      const isValidToken = await verifyTurnstileToken(turnstileToken);
-      if (!isValidToken) {
-        return res.status(400).json({ message: "Bot verification failed. Please try again." });
-      }
+      // Turnstile removed for better user experience
+      // (Bot protection can be added later if needed)
 
       // Validate required fields
       if (!email || !password) {
