@@ -37,11 +37,19 @@ export default function ToolsChronographWheel() {
   // Prevent body scroll when widget is open - mobile fix
   useEffect(() => {
     if (!isMinimized) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
+      const preventBodyScroll = (e: TouchEvent) => {
+        // Only prevent if touch is outside the widget's scrollable area
+        const target = e.target as HTMLElement;
+        if (scrollRef.current && !scrollRef.current.contains(target)) {
+          e.preventDefault();
+        }
+      };
+
+      // Add passive: false to allow preventDefault
+      document.addEventListener('touchmove', preventBodyScroll, { passive: false });
       
       return () => {
-        document.body.style.overflow = originalOverflow;
+        document.removeEventListener('touchmove', preventBodyScroll);
       };
     }
   }, [isMinimized]);
