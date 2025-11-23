@@ -24,8 +24,7 @@ export default function ToolsChronographWheel() {
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
   const checkInactivityRef = useRef<NodeJS.Timeout | null>(null);
-  const isInGracePeriodRef = useRef<boolean>(false);
-  const graceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const initialMousePosRef = useRef<{ x: number; y: number } | null>(null);
   const tools = ALL_TOOLS;
   const selectedTool = tools[selectedToolIdx];
 
@@ -68,8 +67,19 @@ export default function ToolsChronographWheel() {
     recordActivity();
     if (!scrollRef.current) return;
 
-    // Skip scrolling during grace period (right after opening)
-    if (isInGracePeriodRef.current) {
+    // Store initial position on first move after widget opens
+    if (initialMousePosRef.current === null) {
+      initialMousePosRef.current = { x: e.clientX, y: e.clientY };
+      return; // Don't scroll on first move - just record position
+    }
+
+    // Check if mouse has moved significantly from initial position
+    const deltaX = Math.abs(e.clientX - initialMousePosRef.current.x);
+    const deltaY = Math.abs(e.clientY - initialMousePosRef.current.y);
+    const movementThreshold = 10; // pixels
+
+    // Only start scrolling if user has moved mouse at least 10px
+    if (deltaX + deltaY < movementThreshold) {
       return;
     }
 
@@ -179,37 +189,9 @@ export default function ToolsChronographWheel() {
     if (!isMinimized && scrollRef.current) {
       scrollRef.current.scrollTop = 0;
       setSelectedToolIdx(0);
+      // Reset initial mouse position tracking when widget opens
+      initialMousePosRef.current = null;
     }
-  }, [isMinimized]);
-
-  // Grace period: Disable automatic mouse scrolling for 300ms after opening to prevent unintended scrolling
-  useEffect(() => {
-    if (!isMinimized) {
-      // Enable grace period when widget opens
-      isInGracePeriodRef.current = true;
-      
-      // Clear any existing grace timer
-      if (graceTimerRef.current) {
-        clearTimeout(graceTimerRef.current);
-      }
-      
-      // Disable grace period after 300ms
-      graceTimerRef.current = setTimeout(() => {
-        isInGracePeriodRef.current = false;
-      }, 300);
-    } else {
-      // Clear timer when widget minimizes
-      if (graceTimerRef.current) {
-        clearTimeout(graceTimerRef.current);
-      }
-      isInGracePeriodRef.current = false;
-    }
-
-    return () => {
-      if (graceTimerRef.current) {
-        clearTimeout(graceTimerRef.current);
-      }
-    };
   }, [isMinimized]);
 
   // Inactivity timer - minimize widget after 10 seconds when mouse leaves and user scrolls main page
