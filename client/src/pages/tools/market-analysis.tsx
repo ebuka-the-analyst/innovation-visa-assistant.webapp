@@ -110,7 +110,7 @@ export default function MarketAnalysis() {
     // Detailed score calculation breakdown
     const tamScore = tam >= 100000000 ? 40 : tam >= 50000000 ? 30 : tam >= 10000000 ? 20 : 10;
     const growthScore = marketGrowth >= 20 ? 30 : marketGrowth >= 15 ? 25 : marketGrowth >= 10 ? 20 : 15;
-    const maturityScore = marketMaturity === "growing" ? 30 : marketMaturity === "emerging" ? 25 : marketMaturity === "mature" ? 20 : 10;
+    const maturityScore = marketMaturity === "growth" ? 30 : marketMaturity === "emerging" ? 25 : marketMaturity === "mature" ? 20 : 10;
     
     const content = `UK INNOVATOR FOUNDER VISA - MARKET ANALYSIS
 Generated: ${new Date().toLocaleDateString()}
@@ -181,7 +181,7 @@ Component 3: Market Maturity Assessment
     - Mature: 20 points (Acceptable)
     - Declining: 10 points (Risky)
   Maturity Score: ${maturityScore}/30 points
-  ${marketMaturity === "growing" ? '✓ Growing market ideal for scaling business' : marketMaturity === "emerging" ? '✓ Emerging market offers early-mover advantage' : marketMaturity === "declining" ? '✗ Declining market poses viability risk' : '⚠ Mature market requires strong differentiation'}
+  ${marketMaturity === "growth" ? '✓ Growing market ideal for scaling business' : marketMaturity === "emerging" ? '✓ Emerging market offers early-mover advantage' : marketMaturity === "declining" ? '✗ Declining market poses viability risk' : '⚠ Mature market requires strong differentiation'}
 
 Final Market Opportunity Score:
   TAM Component: ${tamScore} pts
@@ -231,7 +231,7 @@ GOV.UK Scalability Assessment Factors:
 CURRENT MARKET POSITION:
 TAM: £${(tam/1000000).toFixed(1)}M ${tam >= 100000000 ? '✓ EXCELLENT (>£100M)' : tam >= 50000000 ? '✓ STRONG (>£50M)' : '⚠ BELOW RECOMMENDED'}
 Growth Rate: ${marketGrowth}% CAGR ${marketGrowth >= 20 ? '✓ HIGH GROWTH' : marketGrowth >= 15 ? '✓ STRONG GROWTH' : '⚠ MODERATE GROWTH'}
-Market Maturity: ${marketMaturity.charAt(0).toUpperCase() + marketMaturity.slice(1)} ${marketMaturity === "growing" || marketMaturity === "emerging" ? '✓ FAVORABLE' : '⚠ REQUIRES STRATEGY'}
+Market Maturity: ${marketMaturity.charAt(0).toUpperCase() + marketMaturity.slice(1)} ${marketMaturity === "growth" || marketMaturity === "emerging" ? '✓ FAVORABLE' : '⚠ REQUIRES STRATEGY'}
 Opportunity Score: ${score}% ${score >= 75 ? '✓ MEETS SCALABILITY BAR' : score >= 60 ? '⚠ NEEDS STRENGTHENING' : '✗ CRITICAL IMPROVEMENTS NEEDED'}
 
 Visa Criterion Alignment:
