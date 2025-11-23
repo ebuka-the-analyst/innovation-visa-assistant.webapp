@@ -186,11 +186,16 @@ export default function ToolsChronographWheel() {
 
   // Swipe hint continues indefinitely - no timeout
 
-  // Reset scroll to top when widget opens and block mouse scrolling briefly
+  // Reset scroll to show tool 001 when widget opens and block mouse scrolling briefly
   useEffect(() => {
     if (!isMinimized && scrollRef.current) {
-      scrollRef.current.scrollTop = 0;
-      setSelectedToolIdx(0);
+      // Set selected tool to 001 (index 7, after 7 dummy tools)
+      setSelectedToolIdx(7);
+      
+      // Calculate scroll position to show tool 001 centered
+      // Each dummy tool is 40px, then spacing between items
+      const scrollPosition = 7 * 40 + 7 * 2; // 7 dummy tools (40px each) + spacing
+      scrollRef.current.scrollTop = scrollPosition;
       
       // Block mouse scrolling for 100ms to prevent auto-scroll on open
       blockMouseScrollRef.current = true;
