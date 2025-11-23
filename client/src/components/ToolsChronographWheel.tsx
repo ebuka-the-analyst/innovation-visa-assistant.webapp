@@ -24,7 +24,8 @@ export default function ToolsChronographWheel() {
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
   const checkInactivityRef = useRef<NodeJS.Timeout | null>(null);
-  const initialMousePosRef = useRef<{ x: number; y: number } | null>(null);
+  const blockMouseScrollRef = useRef<boolean>(false);
+  const blockScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
   const tools = ALL_TOOLS;
   const selectedTool = tools[selectedToolIdx];
 
@@ -67,19 +68,8 @@ export default function ToolsChronographWheel() {
     recordActivity();
     if (!scrollRef.current) return;
 
-    // Store initial position on first move after widget opens
-    if (initialMousePosRef.current === null) {
-      initialMousePosRef.current = { x: e.clientX, y: e.clientY };
-      return; // Don't scroll on first move - just record position
-    }
-
-    // Check if mouse has moved significantly from initial position
-    const deltaX = Math.abs(e.clientX - initialMousePosRef.current.x);
-    const deltaY = Math.abs(e.clientY - initialMousePosRef.current.y);
-    const movementThreshold = 10; // pixels
-
-    // Only start scrolling if user has moved mouse at least 10px
-    if (deltaX + deltaY < movementThreshold) {
+    // Skip scrolling if it's blocked (right after widget opens)
+    if (blockMouseScrollRef.current) {
       return;
     }
 
@@ -184,14 +174,31 @@ export default function ToolsChronographWheel() {
 
   // Swipe hint continues indefinitely - no timeout
 
-  // Reset scroll to top when widget opens
+  // Reset scroll to top when widget opens and block mouse scrolling briefly
   useEffect(() => {
     if (!isMinimized && scrollRef.current) {
       scrollRef.current.scrollTop = 0;
       setSelectedToolIdx(0);
-      // Reset initial mouse position tracking when widget opens
-      initialMousePosRef.current = null;
+      
+      // Block mouse scrolling for 100ms to prevent auto-scroll on open
+      blockMouseScrollRef.current = true;
+      
+      // Clear any existing timer
+      if (blockScrollTimerRef.current) {
+        clearTimeout(blockScrollTimerRef.current);
+      }
+      
+      // Re-enable mouse scrolling after 100ms
+      blockScrollTimerRef.current = setTimeout(() => {
+        blockMouseScrollRef.current = false;
+      }, 100);
     }
+    
+    return () => {
+      if (blockScrollTimerRef.current) {
+        clearTimeout(blockScrollTimerRef.current);
+      }
+    };
   }, [isMinimized]);
 
   // Inactivity timer - minimize widget after 10 seconds when mouse leaves and user scrolls main page
