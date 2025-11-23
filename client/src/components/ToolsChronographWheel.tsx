@@ -351,7 +351,7 @@ export default function ToolsChronographWheel() {
 
       {/* Outer metal bezel effect - Transparent like chat icon */}
       <div 
-        className="border-4 shadow-lg relative flex flex-col cursor-pointer" 
+        className="relative flex flex-col cursor-pointer" 
         style={{ 
           height: isMinimized ? "100px" : "640px", 
           width: isMinimized ? "200px" : "480px", 
@@ -359,6 +359,9 @@ export default function ToolsChronographWheel() {
           transition: "all 0.3s ease",
           backgroundColor: isMinimized ? "transparent" : "rgba(255, 255, 255, 0.05)",
           borderColor: isMinimized ? "transparent" : "rgba(156, 163, 175, 0.1)",
+          borderWidth: isMinimized ? "0" : "4px",
+          borderStyle: "solid",
+          boxShadow: isMinimized ? "none" : "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
           backdropFilter: isMinimized ? "none" : "blur(12px)",
           WebkitBackdropFilter: isMinimized ? "none" : "blur(12px)"
         }}
