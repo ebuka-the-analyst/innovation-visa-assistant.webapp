@@ -482,7 +482,7 @@ export default function ToolsChronographWheel() {
           {/* Scrollable tool list background */}
           <div
             ref={scrollRef}
-            className="absolute inset-0 overflow-y-auto overflow-x-hidden px-2 sm:px-3 py-2 sm:py-3"
+            className="absolute inset-0 overflow-y-scroll overflow-x-hidden px-2 sm:px-3 py-2 sm:py-3"
             onScroll={handleScroll}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
@@ -505,7 +505,8 @@ export default function ToolsChronographWheel() {
               scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
               overscrollBehavior: "contain",
               WebkitOverflowScrolling: "touch",
-              touchAction: "pan-y"
+              touchAction: "pan-y",
+              userSelect: "none"
             }}
           >
             <div className="space-y-1 sm:space-y-2">
