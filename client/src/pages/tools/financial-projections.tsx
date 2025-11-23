@@ -54,12 +54,12 @@ export default function FinancialProjections() {
 
   const getRecommendations = () => {
     const tips = [];
-    if (runway < 6) tips.push("⚠️ Runway below 6 months - secure additional funding immediately");
-    if (netMonthly < 0) tips.push("💰 Monthly burn exceeds revenue - focus on customer acquisition");
-    if (initial < 50000) tips.push("💼 Initial capital below £50k minimum - may not meet visa requirements");
-    if (revenue < 5000) tips.push("📈 Low monthly revenue - accelerate GTM strategy and sales");
-    if (finalCash < 0) tips.push("🚨 Negative year-end cash - revise business model urgently");
-    if (hasBuffer) tips.push("✅ Strong cash buffer - well-positioned for visa approval");
+    if (runway < 6) tips.push("Runway below 6 months - secure additional funding immediately");
+    if (netMonthly < 0) tips.push("Monthly burn exceeds revenue - focus on customer acquisition");
+    if (initial < 50000) tips.push("Initial capital below £50k minimum - may not meet visa requirements");
+    if (revenue < 5000) tips.push("Low monthly revenue - accelerate GTM strategy and sales");
+    if (finalCash < 0) tips.push("Negative year-end cash - revise business model urgently");
+    if (hasBuffer) tips.push("Strong cash buffer - well-positioned for visa approval");
     return tips.slice(0, 5);
   };
 
