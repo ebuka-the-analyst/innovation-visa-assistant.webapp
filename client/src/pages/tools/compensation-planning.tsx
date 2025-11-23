@@ -7,44 +7,43 @@ import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
 import { fileUploadConfigs } from "@/lib/fileUploadConfigs";
 import { useState, useEffect } from "react";
-import { Plus, X, TrendingUp, AlertCircle, Briefcase, DollarSign, Award, ShieldAlert } from "lucide-react";
+import { Plus, X, TrendingUp, AlertCircle, Briefcase, DollarSign, Award, Target } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
 
-// UK GOV.UK Visa Salary Thresholds (2025)
-const UK_VISA_THRESHOLDS = {
-  SKILLED_WORKER_MIN: 25600, // Minimum for skilled worker visa
-  SPONSORSHIP_LICENSE: 38700, // Recommended minimum for sponsorship license
-  GOING_RATE_MEDIAN: 45000, // UK median "going rate" for most roles
-  SENIOR_THRESHOLD: 75000, // Senior role threshold for points
-  SHORTAGE_OCCUPATION_MIN: 20480 // 80% of minimum for shortage occupations
-};
+// UK Innovator Founder Visa Context (November 2025)
+// Scalability Criterion: Job creation potential is KEY to endorsement
+// Viability Criterion: Realistic team costs and budget planning
+// Settlement (ILR): Creating 5 jobs at £25k+ OR 10 jobs at any salary = achievement criterion
 
-interface CompensationBand {
+interface TeamRole {
   id: string;
   role: string;
-  level: string;
+  level: string; // Junior, Mid, Senior, Lead
   minSalary: number;
   maxSalary: number;
-  equity: number;
-  bonusTarget: number;
-  isVisaSponsorable: boolean;
-  costPerHire: number;
+  equity: number; // %
+  bonusTarget: number; // %
+  hiringMonth: number; // Month 1-36 (3-year visa period)
+  isFullTime: boolean;
+  costPerHire: number; // Recruitment costs
 }
 
 export default function CompensationPlanning() {
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
-  const [bands, setBands] = useState<CompensationBand[]>([
-    { id: "1", role: "Software Engineer", level: "Mid-level", minSalary: 70000, maxSalary: 95000, equity: 0.15, bonusTarget: 10, isVisaSponsorable: true, costPerHire: 8500 },
-    { id: "2", role: "Product Manager", level: "Senior", minSalary: 95000, maxSalary: 130000, equity: 0.25, bonusTarget: 15, isVisaSponsorable: true, costPerHire: 12000 }
+  const [fundingAvailable, setFundingAvailable] = useState(150000); // £ available for team building
+  const [roles, setRoles] = useState<TeamRole[]>([
+    { id: "1", role: "Lead Engineer", level: "Senior", minSalary: 70000, maxSalary: 90000, equity: 0.5, bonusTarget: 10, hiringMonth: 1, isFullTime: true, costPerHire: 8000 },
+    { id: "2", role: "Product Designer", level: "Mid", minSalary: 55000, maxSalary: 70000, equity: 0.3, bonusTarget: 8, hiringMonth: 3, isFullTime: true, costPerHire: 6000 }
   ]);
 
   const saveProgress = () => {
     localStorage.setItem('compensationPlanningFiles', JSON.stringify(uploadedFiles));
-    localStorage.setItem('compensationPlanningData', JSON.stringify({ bands }));
+    localStorage.setItem('compensationPlanningData', JSON.stringify({ fundingAvailable, roles }));
     localStorage.setItem('compensationPlanningDate', new Date().toLocaleDateString());
     setSavedDate(new Date().toLocaleDateString());
   };
@@ -52,299 +51,363 @@ export default function CompensationPlanning() {
   const handleFileUpload = (file: any) => setUploadedFiles(prev => [...prev, file]);
   const handleRemoveFile = (id: string) => setUploadedFiles(prev => prev.filter(f => f.id !== id));
 
-  const addBand = () => {
-    setBands([...bands, { 
+  const addRole = () => {
+    setRoles([...roles, { 
       id: Date.now().toString(), 
       role: "New Role", 
-      level: "Mid-level", 
-      minSalary: 60000, 
-      maxSalary: 80000, 
-      equity: 0.1, 
+      level: "Mid", 
+      minSalary: 50000, 
+      maxSalary: 65000, 
+      equity: 0.2, 
       bonusTarget: 10,
-      isVisaSponsorable: false,
+      hiringMonth: 6,
+      isFullTime: true,
       costPerHire: 5000
     }]);
   };
 
-  const removeBand = (id: string) => setBands(bands.filter(b => b.id !== id));
+  const removeRole = (id: string) => setRoles(roles.filter(r => r.id !== id));
 
-  const updateBand = (id: string, field: string, value: any) => {
-    setBands(bands.map(b => b.id === id ? { ...b, [field]: value } : b));
+  const updateRole = (id: string, field: string, value: any) => {
+    setRoles(roles.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
-  // PhD-Level Analytics: Visa Compliance Scoring
-  const getVisaComplianceScore = (): number => {
-    if (bands.length === 0) return 0;
+  // PhD-Level: Scalability Score (Job Creation for Innovator Founder Visa)
+  // Formula: Based on GOV.UK ILR achievement criteria
+  // - 5 full-time jobs at £25k+ = ILR criterion met
+  // - 10 full-time jobs at any salary = ILR criterion met
+  const getScalabilityScore = (): { score: number; jobsCreated: number; meetsILRCriterion: boolean; criterionMet: string } => {
+    const fullTimeRoles = roles.filter(r => r.isFullTime);
+    const jobsCreated = fullTimeRoles.length;
+    const jobsAbove25k = fullTimeRoles.filter(r => r.minSalary >= 25000).length;
     
     let score = 0;
-    const weights = {
-      meetsMinimum: 30,
-      aboveGoingRate: 25,
-      sponsorshipReady: 25,
-      competitiveEquity: 20
-    };
-
-    // Check if salaries meet UK minimum thresholds
-    const rolesAboveMinimum = bands.filter(b => b.minSalary >= UK_VISA_THRESHOLDS.SKILLED_WORKER_MIN).length;
-    score += (rolesAboveMinimum / bands.length) * weights.meetsMinimum;
-
-    // Check if salaries are above "going rate"
-    const rolesAboveGoingRate = bands.filter(b => (b.minSalary + b.maxSalary) / 2 >= UK_VISA_THRESHOLDS.GOING_RATE_MEDIAN).length;
-    score += (rolesAboveGoingRate / bands.length) * weights.aboveGoingRate;
-
-    // Check sponsorship readiness
-    const sponsorableRoles = bands.filter(b => b.isVisaSponsorable && b.minSalary >= UK_VISA_THRESHOLDS.SPONSORSHIP_LICENSE).length;
-    score += (sponsorableRoles / bands.length) * weights.sponsorshipReady;
-
-    // Check equity competitiveness
-    const avgEquity = bands.reduce((sum, b) => sum + b.equity, 0) / bands.length;
-    if (avgEquity >= 0.15) score += weights.competitiveEquity;
-    else if (avgEquity >= 0.1) score += weights.competitiveEquity * 0.7;
-    else if (avgEquity >= 0.05) score += weights.competitiveEquity * 0.4;
-
-    return Math.round(score);
+    let criterionMet = "Not yet";
+    let meetsILRCriterion = false;
+    
+    // Scoring based on job creation milestones
+    if (jobsAbove25k >= 5) {
+      score = 100;
+      criterionMet = "5 jobs at £25k+ (ILR ready)";
+      meetsILRCriterion = true;
+    } else if (jobsCreated >= 10) {
+      score = 100;
+      criterionMet = "10 jobs at any salary (ILR ready)";
+      meetsILRCriterion = true;
+    } else if (jobsAbove25k >= 3) {
+      score = 70;
+      criterionMet = `${jobsAbove25k}/5 jobs (Strong)`;
+    } else if (jobsCreated >= 3) {
+      score = 50;
+      criterionMet = `${jobsCreated} jobs (Growing)`;
+    } else {
+      score = Math.min(30, jobsCreated * 15);
+      criterionMet = `${jobsCreated} jobs (Early stage)`;
+    }
+    
+    return { score, jobsCreated, meetsILRCriterion, criterionMet };
   };
 
-  // PhD-Level Analytics: Total Compensation Calculator
-  const getTotalCompensation = (band: CompensationBand): number => {
-    const baseSalary = (band.minSalary + band.maxSalary) / 2;
-    const bonus = baseSalary * (band.bonusTarget / 100);
-    const equityValue = baseSalary * (band.equity / 100) * 4; // 4-year vesting
+  // PhD-Level: Team Budget Viability Analysis
+  // Formula: Total 36-month team costs vs available funding
+  // Includes: salaries, recruitment costs, employer NI (13.8%), pension (3%)
+  const getTeamBudgetAnalysis = (): { totalCost36Mo: number; monthlyBurnRate: number; fundingGap: number; viabilityScore: number } => {
+    let totalCost36Mo = 0;
+    
+    roles.forEach(role => {
+      const avgSalary = (role.minSalary + role.maxSalary) / 2;
+      const monthsEmployed = 36 - role.hiringMonth + 1; // Months until end of 3-year visa
+      const bonus = avgSalary * (role.bonusTarget / 100);
+      const employerNI = avgSalary * 0.138; // UK Employer National Insurance 13.8%
+      const pension = avgSalary * 0.03; // 3% pension contribution
+      
+      const annualCost = avgSalary + bonus + employerNI + pension;
+      const roleTotal = (annualCost / 12) * monthsEmployed + role.costPerHire;
+      
+      totalCost36Mo += roleTotal;
+    });
+    
+    const monthlyBurnRate = totalCost36Mo / 36;
+    const fundingGap = totalCost36Mo - fundingAvailable;
+    
+    // Viability score: Can you afford this team?
+    let viabilityScore = 0;
+    if (fundingGap <= 0) {
+      viabilityScore = 100; // Fully funded
+    } else if (fundingGap < fundingAvailable * 0.2) {
+      viabilityScore = 85; // Minor gap (manageable)
+    } else if (fundingGap < fundingAvailable * 0.5) {
+      viabilityScore = 60; // Moderate gap (needs attention)
+    } else {
+      viabilityScore = 30; // Significant gap (critical)
+    }
+    
+    return { totalCost36Mo, monthlyBurnRate, fundingGap, viabilityScore };
+  };
+
+  // PhD-Level: Total Compensation Calculator
+  // Formula: Base + Bonus + Equity Value (4-year vesting, startup valuation assumptions)
+  const getTotalCompensation = (role: TeamRole): number => {
+    const baseSalary = (role.minSalary + role.maxSalary) / 2;
+    const bonus = baseSalary * (role.bonusTarget / 100);
+    // Equity valuation: Assume £500k startup valuation, 4-year vesting
+    const equityValue = (500000 * (role.equity / 100)) / 4; // Annual equity value
     return baseSalary + bonus + equityValue;
   };
 
-  // PhD-Level Analytics: Recruitment ROI
-  const getRecruitmentROI = (): { totalCost: number; avgCostPerHire: number; rolesAboveThreshold: number } => {
-    const totalCost = bands.reduce((sum, b) => sum + b.costPerHire, 0);
-    const avgCostPerHire = bands.length > 0 ? totalCost / bands.length : 0;
-    const rolesAboveThreshold = bands.filter(b => b.costPerHire > 10000).length;
+  // PhD-Level: Recruitment ROI Analysis
+  const getRecruitmentAnalysis = (): { totalRecruitmentCost: number; avgCostPerHire: number; costAsPercentOfSalary: number } => {
+    const totalRecruitmentCost = roles.reduce((sum, r) => sum + r.costPerHire, 0);
+    const avgCostPerHire = roles.length > 0 ? totalRecruitmentCost / roles.length : 0;
+    const totalAnnualSalaries = roles.reduce((sum, r) => sum + (r.minSalary + r.maxSalary) / 2, 0);
+    const costAsPercentOfSalary = totalAnnualSalaries > 0 ? (totalRecruitmentCost / totalAnnualSalaries) * 100 : 0;
     
-    return { totalCost, avgCostPerHire, rolesAboveThreshold };
+    return { totalRecruitmentCost, avgCostPerHire, costAsPercentOfSalary };
   };
 
   const exportPlan = () => {
-    const avgEquity = (bands.reduce((sum, b) => sum + b.equity, 0) / bands.length).toFixed(2);
-    const totalBudget = bands.reduce((sum, b) => sum + (b.minSalary + b.maxSalary) / 2, 0);
-    const visaCompliance = getVisaComplianceScore();
-    const { totalCost, avgCostPerHire } = getRecruitmentROI();
+    const { score: scalabilityScore, jobsCreated, meetsILRCriterion, criterionMet } = getScalabilityScore();
+    const { totalCost36Mo, monthlyBurnRate, fundingGap, viabilityScore } = getTeamBudgetAnalysis();
+    const { totalRecruitmentCost, avgCostPerHire } = getRecruitmentAnalysis();
     
-    const content = `UK INNOVATOR FOUNDER VISA - COMPENSATION PLANNING REPORT
+    const content = `UK INNOVATOR FOUNDER VISA - TEAM COMPENSATION PLAN
 Generated: ${new Date().toLocaleDateString()}
 
 ═══════════════════════════════════════════════════════════
-EXECUTIVE SUMMARY
+EXECUTIVE SUMMARY (Innovator Founder Visa Context)
 ═══════════════════════════════════════════════════════════
-Total Roles: ${bands.length}
-Visa Compliance Score: ${visaCompliance}%
-Annual Salary Budget: £${totalBudget.toLocaleString()}
-Average Equity: ${avgEquity}%
-Total Recruitment Cost: £${totalCost.toLocaleString()}
-Average Cost-per-Hire: £${avgCostPerHire.toLocaleString()}
+Total Team Roles: ${roles.length}
+Full-Time Jobs Created: ${jobsCreated}
+Scalability Score: ${scalabilityScore}%
+ILR Job Creation Criterion: ${meetsILRCriterion ? '✓ MET' : '✗ NOT YET MET'}
+Status: ${criterionMet}
+
+36-Month Team Budget: £${totalCost36Mo.toLocaleString()}
+Available Funding: £${fundingAvailable.toLocaleString()}
+Funding Gap: £${fundingGap.toLocaleString()} ${fundingGap > 0 ? '⚠ SHORTFALL' : '✓ SURPLUS'}
+Budget Viability Score: ${viabilityScore}%
+Monthly Burn Rate: £${Math.round(monthlyBurnRate).toLocaleString()}
+
+Total Recruitment Cost: £${totalRecruitmentCost.toLocaleString()}
+Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
 
 ═══════════════════════════════════════════════════════════
-UK GOV.UK VISA THRESHOLDS (2025)
+UK INNOVATOR FOUNDER VISA: SCALABILITY CRITERION
 ═══════════════════════════════════════════════════════════
-✓ Skilled Worker Minimum: £${UK_VISA_THRESHOLDS.SKILLED_WORKER_MIN.toLocaleString()}
-✓ Sponsorship License Recommended: £${UK_VISA_THRESHOLDS.SPONSORSHIP_LICENSE.toLocaleString()}
-✓ Going Rate Median: £${UK_VISA_THRESHOLDS.GOING_RATE_MEDIAN.toLocaleString()}
-✓ Senior Role Threshold: £${UK_VISA_THRESHOLDS.SENIOR_THRESHOLD.toLocaleString()}
+GOV.UK ILR Achievement Criteria (Choose 2 of 7):
+• Create 5 full-time jobs at £25,000+ salary
+• Create 10 full-time jobs at any salary
+• £50,000 actively invested in business
+• £1 million annual revenue
+• Significant IP development
+• Participation in recognized accelerators
 
-═══════════════════════════════════════════════════════════
-COMPENSATION BANDS WITH VISA COMPLIANCE
-═══════════════════════════════════════════════════════════
-${bands.map(b => {
-  const midSalary = (b.minSalary + b.maxSalary) / 2;
-  const totalComp = getTotalCompensation(b);
-  const visaCompliant = b.minSalary >= UK_VISA_THRESHOLDS.SKILLED_WORKER_MIN;
-  const sponsorReady = b.isVisaSponsorable && b.minSalary >= UK_VISA_THRESHOLDS.SPONSORSHIP_LICENSE;
+CURRENT STATUS:
+Full-time jobs: ${jobsCreated}
+Jobs at £25k+: ${roles.filter(r => r.isFullTime && r.minSalary >= 25000).length}
+${meetsILRCriterion ? '✓ JOB CREATION CRITERION MET - Ready for ILR in 3 years' : `⚠ Need ${Math.max(0, 5 - roles.filter(r => r.isFullTime && r.minSalary >= 25000).length)} more jobs at £25k+ OR ${Math.max(0, 10 - jobsCreated)} more jobs total`}
+
+${roles.map((r, idx) => {
+  const avgSalary = (r.minSalary + r.maxSalary) / 2;
+  const totalComp = getTotalCompensation(r);
+  const monthsEmployed = 36 - r.hiringMonth + 1;
+  const annualCost = avgSalary + (avgSalary * (r.bonusTarget / 100)) + (avgSalary * 0.138) + (avgSalary * 0.03);
+  const totalCost = (annualCost / 12) * monthsEmployed + r.costPerHire;
   
   return `
-${b.role} (${b.level})
-─────────────────────────────────────────────────────────
-Salary Range: £${b.minSalary.toLocaleString()} - £${b.maxSalary.toLocaleString()}
-Mid-point: £${midSalary.toLocaleString()}
-Equity: ${b.equity}%
-Bonus Target: ${b.bonusTarget}%
-Total Compensation: £${totalComp.toLocaleString()}
-Cost-per-Hire: £${b.costPerHire.toLocaleString()}
+═══════════════════════════════════════════════════════════
+ROLE ${idx + 1}: ${r.role}
+═══════════════════════════════════════════════════════════
+Level: ${r.level}
+Employment Type: ${r.isFullTime ? 'Full-Time' : 'Part-Time'}
+Hiring Timeline: Month ${r.hiringMonth} of 36-month visa period
 
-VISA COMPLIANCE:
-${visaCompliant ? '✓' : '✗'} Meets Skilled Worker Minimum (£25,600)
-${sponsorReady ? '✓' : '✗'} Ready for Sponsorship License (£38,700+)
-${midSalary >= UK_VISA_THRESHOLDS.GOING_RATE_MEDIAN ? '✓' : '✗'} Above UK Going Rate (£45,000)
-${b.isVisaSponsorable ? '✓' : '✗'} Designated as Visa-Sponsorable Role
+COMPENSATION PACKAGE:
+Salary Range: £${r.minSalary.toLocaleString()} - £${r.maxSalary.toLocaleString()}
+Midpoint: £${avgSalary.toLocaleString()}
+Equity: ${r.equity}%
+Bonus Target: ${r.bonusTarget}%
+Total Compensation (Annual): £${Math.round(totalComp).toLocaleString()}
+
+COST ANALYSIS (Full 36-Month Visa Period):
+Base Salary (${monthsEmployed} months): £${Math.round((avgSalary / 12) * monthsEmployed).toLocaleString()}
+Bonus (${monthsEmployed} months): £${Math.round(((avgSalary * r.bonusTarget / 100) / 12) * monthsEmployed).toLocaleString()}
+Employer NI 13.8% (${monthsEmployed} months): £${Math.round(((avgSalary * 0.138) / 12) * monthsEmployed).toLocaleString()}
+Pension 3% (${monthsEmployed} months): £${Math.round(((avgSalary * 0.03) / 12) * monthsEmployed).toLocaleString()}
+Recruitment Cost: £${r.costPerHire.toLocaleString()}
+TOTAL COST: £${Math.round(totalCost).toLocaleString()}
+
+SCALABILITY CONTRIBUTION:
+${r.isFullTime && r.minSalary >= 25000 ? '✓ Counts toward ILR job creation criterion (full-time, £25k+)' :
+  r.isFullTime ? '✓ Counts toward ILR (full-time job created)' :
+  '⚠ Part-time - does not count toward ILR criterion'}
 `}).join('\n')}
 
 ═══════════════════════════════════════════════════════════
-GOV.UK COMPLIANCE RECOMMENDATIONS
+BUDGET VIABILITY ANALYSIS (GOV.UK Viability Criterion)
 ═══════════════════════════════════════════════════════════
-${getGovUKRecommendations().join('\n')}
+${getViabilityRecommendations().join('\n')}
 
 ═══════════════════════════════════════════════════════════
-MARKET ANALYSIS
+TEAM BUILDING ROADMAP (3-Year Visa Period)
 ═══════════════════════════════════════════════════════════
-${getMarketAnalysis().join('\n')}
+${getHiringTimeline().join('\n')}
 
-═══════════════════════════════════════════════════════════
-RECRUITMENT ROI INSIGHTS
-═══════════════════════════════════════════════════════════
-${getRecruitmentInsights().join('\n')}
-
-Reference: UK Immigration Rules Appendix Skilled Worker
-Source: GOV.UK Home Office Guidance (2025)
+Source: GOV.UK Innovator Founder Visa Guidance (November 2025)
+ILR Criteria: Immigration Rules Appendix Innovator Founder
+Budget Formula: Salary + Bonus + Employer NI (13.8%) + Pension (3%) + Recruitment
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'uk-visa-compensation-plan.txt';
+    a.download = 'innovator-founder-compensation-plan.txt';
     a.click();
   };
 
-  // PhD-Level: GOV.UK-Aligned Recommendations
-  const getGovUKRecommendations = (): string[] => {
+  // GOV.UK-Aligned Recommendations
+  const getViabilityRecommendations = (): string[] => {
     const tips: string[] = [];
+    const { totalCost36Mo, fundingGap, viabilityScore } = getTeamBudgetAnalysis();
+    const { jobsCreated, meetsILRCriterion } = getScalabilityScore();
     
-    // Visa threshold compliance
-    const belowMinimum = bands.filter(b => b.minSalary < UK_VISA_THRESHOLDS.SKILLED_WORKER_MIN);
-    if (belowMinimum.length > 0) {
-      tips.push(`🚨 CRITICAL: ${belowMinimum.length} role(s) below £25,600 minimum - NOT ELIGIBLE for skilled worker visa sponsorship`);
-      tips.push(`   Affected roles: ${belowMinimum.map(b => b.role).join(', ')}`);
-      tips.push(`   Action: Increase salaries to £25,600+ or reclassify as non-sponsorable positions`);
+    if (fundingGap > 0) {
+      tips.push(`🚨 CRITICAL: Funding shortfall of £${Math.round(fundingGap).toLocaleString()} over 3-year visa period`);
+      tips.push(`   Your planned team costs £${Math.round(totalCost36Mo).toLocaleString()} but you have £${fundingAvailable.toLocaleString()} available`);
+      tips.push(`   Risk: Endorsing body may question business viability (core visa criterion)`);
+      tips.push(`   Action: Reduce team size, adjust hiring timeline, or secure additional funding`);
     }
-
-    // Sponsorship license readiness
-    const belowSponsorshipThreshold = bands.filter(b => b.isVisaSponsorable && b.minSalary < UK_VISA_THRESHOLDS.SPONSORSHIP_LICENSE);
-    if (belowSponsorshipThreshold.length > 0) {
-      tips.push(`⚠️ WARNING: ${belowSponsorshipThreshold.length} visa-sponsorable role(s) below £38,700 recommended threshold`);
-      tips.push(`   Roles: ${belowSponsorshipThreshold.map(b => b.role).join(', ')}`);
-      tips.push(`   Risk: May face Home Office scrutiny during sponsor license applications`);
+    
+    if (viabilityScore < 70) {
+      tips.push(`⚠️ WARNING: Budget viability score ${viabilityScore}% below recommended 70% threshold`);
+      tips.push(`   Endorsing bodies assess financial realism during application review`);
     }
-
-    // Going rate compliance
-    const belowGoingRate = bands.filter(b => (b.minSalary + b.maxSalary) / 2 < UK_VISA_THRESHOLDS.GOING_RATE_MEDIAN);
-    if (belowGoingRate.length > 0) {
-      tips.push(`📊 ${belowGoingRate.length} role(s) below £45,000 UK median "going rate" - may impact visa points eligibility`);
+    
+    if (!meetsILRCriterion && jobsCreated < 5) {
+      tips.push(`📋 SCALABILITY: Currently ${jobsCreated} jobs planned - aim for 5 jobs at £25k+ for ILR eligibility`);
+      tips.push(`   Creating qualifying jobs = one of 7 ILR achievement criteria (need 2 total)`);
     }
-
-    // Equity competitiveness
-    const avgEquity = bands.reduce((sum, b) => sum + b.equity, 0) / bands.length;
-    if (avgEquity < 0.1) {
-      tips.push(`💡 Average equity (${avgEquity.toFixed(2)}%) below UK tech startup benchmark (0.1-0.3%)`);
-      tips.push(`   Recommendation: Increase equity to attract skilled international talent`);
+    
+    if (meetsILRCriterion) {
+      tips.push(`✅ EXCELLENT: Job creation criterion MET - ${jobsCreated} jobs demonstrate scalability`);
+      tips.push(`   This satisfies 1 of 2 required ILR achievement criteria for settlement after 3 years`);
     }
-
-    // Cost-per-hire efficiency
-    const { avgCostPerHire, rolesAboveThreshold } = getRecruitmentROI();
-    if (avgCostPerHire > 10000) {
-      tips.push(`💰 Average cost-per-hire (£${avgCostPerHire.toLocaleString()}) exceeds industry benchmark (£5k-8k)`);
-      tips.push(`   Consider: Optimizing recruitment channels, leveraging employee referrals`);
+    
+    const avgEquity = roles.reduce((sum, r) => sum + r.equity, 0) / (roles.length || 1);
+    if (avgEquity < 0.2) {
+      tips.push(`💡 Consider increasing equity allocation (current avg: ${avgEquity.toFixed(2)}%) to attract talent cost-effectively`);
+      tips.push(`   Early-stage startups typically offer 0.25-1.0% equity to reduce cash compensation pressure`);
     }
-
-    return tips.length > 0 ? tips : ['✅ All roles meet UK visa salary thresholds and sponsorship requirements'];
+    
+    return tips.length > 0 ? tips : ['✅ Team compensation plan is realistic and demonstrates business viability'];
   };
 
-  const getMarketAnalysis = (): string[] => {
-    const analysis: string[] = [];
+  // Hiring Timeline Visualization
+  const getHiringTimeline = (): string[] => {
+    const timeline: string[] = [];
+    const sortedRoles = [...roles].sort((a, b) => a.hiringMonth - b.hiringMonth);
     
-    bands.forEach(b => {
-      const midpoint = (b.minSalary + b.maxSalary) / 2;
-      const totalComp = getTotalCompensation(b);
+    let cumulativeCost = 0;
+    sortedRoles.forEach((role, idx) => {
+      const avgSalary = (role.minSalary + role.maxSalary) / 2;
+      const monthsEmployed = 36 - role.hiringMonth + 1;
+      const annualCost = avgSalary + (avgSalary * (role.bonusTarget / 100)) + (avgSalary * 0.138) + (avgSalary * 0.03);
+      const roleCost = (annualCost / 12) * monthsEmployed + role.costPerHire;
+      cumulativeCost += roleCost;
       
-      if (midpoint >= UK_VISA_THRESHOLDS.SENIOR_THRESHOLD) {
-        analysis.push(`✓ ${b.role}: Senior-tier compensation (£${midpoint.toLocaleString()}) - strong for visa points and talent attraction`);
-      }
-      
-      if (b.equity >= 0.2) {
-        analysis.push(`✓ ${b.role}: Competitive equity package (${b.equity}%) - aligns with high-growth startup benchmarks`);
-      }
-      
-      if (totalComp >= 150000) {
-        analysis.push(`✓ ${b.role}: Total compensation £${totalComp.toLocaleString()} - premium positioning for UK market`);
-      }
+      timeline.push(`Month ${role.hiringMonth}: Hire ${role.role} (${role.level}) - ${role.isFullTime ? 'Full-Time' : 'Part-Time'}`);
+      timeline.push(`   Salary: £${avgSalary.toLocaleString()}, 36-mo cost: £${Math.round(roleCost).toLocaleString()}`);
+      timeline.push(`   Cumulative team cost: £${Math.round(cumulativeCost).toLocaleString()}`);
+      if (idx < sortedRoles.length - 1) timeline.push('');
     });
     
-    return analysis.length > 0 ? analysis : ['Market positioning within competitive ranges'];
+    return timeline;
   };
 
-  // PhD-Level: Recruitment ROI Insights
-  const getRecruitmentInsights = (): string[] => {
-    const insights: string[] = [];
-    const { totalCost, avgCostPerHire, rolesAboveThreshold } = getRecruitmentROI();
+  const getSerializedState = () => ({ uploadedFiles, fundingAvailable, roles, savedDate });
+
+  // Chart 1: Job Creation Timeline (Scalability)
+  const getJobCreationTimeline = () => {
+    const monthlyData: { month: number; jobs: number; jobsAt25k: number }[] = [];
+    for (let month = 1; month <= 36; month++) {
+      const jobsByMonth = roles.filter(r => r.hiringMonth <= month && r.isFullTime).length;
+      const jobsAt25kByMonth = roles.filter(r => r.hiringMonth <= month && r.isFullTime && r.minSalary >= 25000).length;
+      monthlyData.push({ month, jobs: jobsByMonth, jobsAt25k: jobsAt25kByMonth });
+    }
+    return monthlyData.filter((_, idx) => idx % 3 === 0); // Show every 3 months
+  };
+
+  // Chart 2: Budget Burn Rate by Quarter
+  const getBudgetBurnRate = () => {
+    const quarterlyData: { quarter: string; cost: number; cumulative: number }[] = [];
+    let cumulative = 0;
     
-    insights.push(`Total recruitment investment: £${totalCost.toLocaleString()}`);
-    insights.push(`Average cost-per-hire: £${avgCostPerHire.toLocaleString()}`);
-    
-    if (rolesAboveThreshold > 0) {
-      insights.push(`${rolesAboveThreshold} role(s) with premium recruitment cost (>£10k) - likely senior/specialized positions`);
+    for (let q = 1; q <= 12; q++) {
+      const quarterStartMonth = (q - 1) * 3 + 1;
+      const quarterEndMonth = q * 3;
+      
+      let quarterCost = 0;
+      roles.forEach(role => {
+        if (role.hiringMonth <= quarterEndMonth) {
+          const avgSalary = (role.minSalary + role.maxSalary) / 2;
+          const monthlyTotal = (avgSalary + (avgSalary * (role.bonusTarget / 100)) + (avgSalary * 0.138) + (avgSalary * 0.03)) / 12;
+          const monthsInQuarter = Math.min(3, Math.max(0, quarterEndMonth - Math.max(quarterStartMonth - 1, role.hiringMonth - 1)));
+          quarterCost += monthlyTotal * monthsInQuarter;
+        }
+      });
+      
+      cumulative += quarterCost;
+      quarterlyData.push({ quarter: `Q${q}`, cost: Math.round(quarterCost), cumulative: Math.round(cumulative) });
     }
     
-    // Calculate potential retention savings
-    const avgSalary = bands.reduce((sum, b) => sum + (b.minSalary + b.maxSalary) / 2, 0) / bands.length;
-    const replacementCost = avgSalary * 1.5; // Industry standard: 1.5x salary
-    insights.push(`\nRetention Impact: Losing one employee costs ~£${replacementCost.toLocaleString()} (1.5x avg salary)`);
-    insights.push(`Retention savings potential: £${(replacementCost * bands.length * 0.1).toLocaleString()} if reducing turnover by 10%`);
+    return quarterlyData;
+  };
+
+  // Chart 3: Compensation Mix by Role
+  const getCompensationMix = () => {
+    return roles.map(r => {
+      const baseSalary = (r.minSalary + r.maxSalary) / 2;
+      const bonus = baseSalary * (r.bonusTarget / 100);
+      const equityValue = (500000 * (r.equity / 100)) / 4;
+      
+      return {
+        role: r.role.substring(0, 12),
+        base: Math.round(baseSalary),
+        bonus: Math.round(bonus),
+        equity: Math.round(equityValue)
+      };
+    });
+  };
+
+  // Chart 4: Team Level Distribution
+  const getTeamLevelDistribution = () => {
+    const levels = roles.reduce((acc, r) => {
+      acc[r.level] = (acc[r.level] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
     
-    return insights;
-  };
-
-  // Chart Data: Visa Compliance Dashboard
-  const getVisaComplianceData = () => {
-    return bands.map(b => ({
-      role: b.role.substring(0, 15),
-      minSalary: b.minSalary,
-      visaMinimum: UK_VISA_THRESHOLDS.SKILLED_WORKER_MIN,
-      sponsorshipThreshold: UK_VISA_THRESHOLDS.SPONSORSHIP_LICENSE,
-      goingRate: UK_VISA_THRESHOLDS.GOING_RATE_MEDIAN
-    }));
-  };
-
-  // Chart Data: Total Compensation Breakdown
-  const getTotalCompData = () => {
-    return bands.slice(0, 5).map(b => ({
-      role: b.role.substring(0, 12),
-      baseSalary: (b.minSalary + b.maxSalary) / 2,
-      bonus: ((b.minSalary + b.maxSalary) / 2) * (b.bonusTarget / 100),
-      equity: ((b.minSalary + b.maxSalary) / 2) * (b.equity / 100) * 4
-    }));
-  };
-
-  // Chart Data: Cost-per-Hire Analysis
-  const getCostPerHireData = () => {
-    return bands.map(b => ({
-      role: b.role.substring(0, 12),
-      cost: b.costPerHire,
-      benchmark: 8000
-    }));
-  };
-
-  // Chart Data: Equity Distribution
-  const getEquityDistribution = () => {
-    const ranges = [
-      { range: '0-0.05%', count: bands.filter(b => b.equity < 0.05).length },
-      { range: '0.05-0.15%', count: bands.filter(b => b.equity >= 0.05 && b.equity < 0.15).length },
-      { range: '0.15-0.3%', count: bands.filter(b => b.equity >= 0.15 && b.equity < 0.3).length },
-      { range: '0.3%+', count: bands.filter(b => b.equity >= 0.3).length }
-    ];
-    return ranges;
+    return Object.entries(levels).map(([level, count]) => ({ level, count }));
   };
 
   useEffect(() => {
     const s = localStorage.getItem('compensationPlanningData');
-    if (s) setBands(JSON.parse(s).bands);
+    if (s) {
+      const data = JSON.parse(s);
+      setFundingAvailable(data.fundingAvailable || 150000);
+      setRoles(data.roles || []);
+    }
     const f = localStorage.getItem('compensationPlanningFiles');
     if (f) setUploadedFiles(JSON.parse(f));
     const d = localStorage.getItem('compensationPlanningDate');
     if (d) setSavedDate(d);
   }, []);
 
-  const visaCompliance = getVisaComplianceScore();
-  const { totalCost, avgCostPerHire } = getRecruitmentROI();
-  const totalBudget = bands.reduce((sum, b) => sum + (b.minSalary + b.maxSalary) / 2, 0);
-  const sponsorableRoles = bands.filter(b => b.isVisaSponsorable && b.minSalary >= UK_VISA_THRESHOLDS.SPONSORSHIP_LICENSE).length;
+  const { score: scalabilityScore, jobsCreated, meetsILRCriterion } = getScalabilityScore();
+  const { totalCost36Mo, monthlyBurnRate, viabilityScore } = getTeamBudgetAnalysis();
+  const { totalRecruitmentCost } = getRecruitmentAnalysis();
 
-  const COLORS = ['#ffa536', '#11b6e9', '#8b5cf6', '#10b981'];
+  const COLORS = ['#ffa536', '#11b6e9', '#8b5cf6', '#10b981', '#ef4444'];
 
   return (
     <>
@@ -352,15 +415,15 @@ Source: GOV.UK Home Office Guidance (2025)
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <ToolNavigation />
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Compensation Planning</h1>
-          <p className="text-muted-foreground mb-6">UK visa-compliant salary bands with GOV.UK threshold analysis</p>
+          <h1 className="text-4xl font-bold mb-2">Team Compensation Planning</h1>
+          <p className="text-muted-foreground mb-6">Job creation for scalability & budget planning for viability (Innovator Founder Visa)</p>
 
           <ToolUtilityBar
             toolId="compensation-planning"
-            toolName="Compensation Planning"
+            toolName="Team Compensation Planning"
             onSave={saveProgress}
             onExport={exportPlan}
-            getSerializedState={() => ({ uploadedFiles, bands, savedDate })}
+            getSerializedState={getSerializedState}
           />
 
           {savedDate && (
@@ -374,97 +437,116 @@ Source: GOV.UK Home Office Guidance (2025)
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
-                <ShieldAlert className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Visa Compliance</span>
+                <Target className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium">Scalability Score</span>
               </div>
-              <p className="text-3xl font-bold">{visaCompliance}%</p>
-              <p className="text-xs text-muted-foreground mt-1">GOV.UK threshold adherence</p>
+              <p className="text-3xl font-bold">{scalabilityScore}%</p>
+              <p className="text-xs text-muted-foreground mt-1">{jobsCreated} jobs created</p>
             </Card>
 
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
-                <Briefcase className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Sponsorable Roles</span>
+                <Award className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium">ILR Criterion</span>
               </div>
-              <p className="text-3xl font-bold">{sponsorableRoles}/{bands.length}</p>
-              <p className="text-xs text-muted-foreground mt-1">Above £38,700 threshold</p>
+              <p className="text-3xl font-bold">{meetsILRCriterion ? '✓' : '✗'}</p>
+              <p className="text-xs text-muted-foreground mt-1">{meetsILRCriterion ? 'Ready for settlement' : 'Not yet met'}</p>
             </Card>
 
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
                 <DollarSign className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Annual Budget</span>
+                <span className="text-sm font-medium">Budget Viability</span>
               </div>
-              <p className="text-3xl font-bold">£{Math.round(totalBudget / 1000)}k</p>
-              <p className="text-xs text-muted-foreground mt-1">Total salary allocation</p>
+              <p className="text-3xl font-bold">{viabilityScore}%</p>
+              <p className="text-xs text-muted-foreground mt-1">£{Math.round(monthlyBurnRate / 1000)}k/month burn</p>
             </Card>
 
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Avg Cost/Hire</span>
+                <Briefcase className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium">36-Mo Cost</span>
               </div>
-              <p className="text-3xl font-bold">£{Math.round(avgCostPerHire / 1000)}k</p>
-              <p className="text-xs text-muted-foreground mt-1">Recruitment investment</p>
+              <p className="text-3xl font-bold">£{Math.round(totalCost36Mo / 1000)}k</p>
+              <p className="text-xs text-muted-foreground mt-1">+£{Math.round(totalRecruitmentCost / 1000)}k recruitment</p>
             </Card>
           </div>
+
+          {/* Budget Configuration */}
+          <Card className="p-6 mb-6">
+            <h3 className="font-semibold mb-4">Available Funding (3-Year Visa Period)</h3>
+            <div className="flex items-center gap-4">
+              <label className="text-sm font-medium">Total Funding Available (£)</label>
+              <Input
+                type="number"
+                value={fundingAvailable}
+                onChange={(e) => setFundingAvailable(Number(e.target.value))}
+                className="w-48"
+                data-testid="input-funding"
+              />
+              <span className="text-sm text-muted-foreground">
+                {totalCost36Mo > fundingAvailable ? 
+                  `⚠ Shortfall: £${Math.round(totalCost36Mo - fundingAvailable).toLocaleString()}` : 
+                  `✓ Surplus: £${Math.round(fundingAvailable - totalCost36Mo).toLocaleString()}`}
+              </span>
+            </div>
+          </Card>
 
           {/* PhD-Level: 4-Chart Analytics Dashboard */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Visa Compliance vs UK Thresholds</h3>
+              <h3 className="font-semibold mb-4">Job Creation Timeline (Scalability)</h3>
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={getVisaComplianceData()}>
+                <AreaChart data={getJobCreationTimeline()}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" label={{ value: 'Month', position: 'insideBottom', offset: -5 }} />
+                  <YAxis label={{ value: 'Jobs Created', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip />
+                  <Legend />
+                  <Area type="monotone" dataKey="jobs" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} name="Total Jobs" />
+                  <Area type="monotone" dataKey="jobsAt25k" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Jobs £25k+" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">Budget Burn Rate by Quarter (Viability)</h3>
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={getBudgetBurnRate()}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="quarter" />
+                  <YAxis yAxisId="left" label={{ value: 'Quarterly £', angle: -90, position: 'insideLeft' }} />
+                  <YAxis yAxisId="right" orientation="right" label={{ value: 'Cumulative £', angle: 90, position: 'insideRight' }} />
+                  <Tooltip formatter={(value: number) => `£${value.toLocaleString()}`} />
+                  <Legend />
+                  <Line yAxisId="left" type="monotone" dataKey="cost" stroke="#11b6e9" name="Quarterly Cost" strokeWidth={2} />
+                  <Line yAxisId="right" type="monotone" dataKey="cumulative" stroke="#ef4444" name="Cumulative Cost" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">Compensation Mix by Role</h3>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={getCompensationMix()}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="role" angle={-15} textAnchor="end" height={60} />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `£${value.toLocaleString()}`} />
+                  <YAxis label={{ value: 'Annual £', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip formatter={(value: number) => `£${value.toLocaleString()}`} />
                   <Legend />
-                  <Bar dataKey="minSalary" fill="#ffa536" name="Your Min Salary" />
-                  <Bar dataKey="visaMinimum" fill="#ef4444" name="Visa Min (£25.6k)" />
-                  <Bar dataKey="sponsorshipThreshold" fill="#f97316" name="Sponsor (£38.7k)" />
-                  <Bar dataKey="goingRate" fill="#10b981" name="Going Rate (£45k)" />
+                  <Bar dataKey="base" stackId="a" fill="#ffa536" name="Base Salary" />
+                  <Bar dataKey="bonus" stackId="a" fill="#11b6e9" name="Bonus" />
+                  <Bar dataKey="equity" stackId="a" fill="#8b5cf6" name="Equity (Annual)" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
 
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Total Compensation Breakdown (Top 5)</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={getTotalCompData()} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="role" angle={-15} textAnchor="end" height={60} />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `£${value.toLocaleString()}`} />
-                  <Legend />
-                  <Bar dataKey="baseSalary" stackId="a" fill="#11b6e9" name="Base Salary" />
-                  <Bar dataKey="bonus" stackId="a" fill="#ffa536" name="Bonus" />
-                  <Bar dataKey="equity" stackId="a" fill="#8b5cf6" name="Equity (4yr)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Cost-per-Hire vs Benchmark</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={getCostPerHireData()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="role" angle={-15} textAnchor="end" height={60} />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `£${value.toLocaleString()}`} />
-                  <Legend />
-                  <Bar dataKey="cost" fill="#ffa536" name="Your Cost" />
-                  <Bar dataKey="benchmark" fill="#64748b" name="Industry Benchmark" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Equity Distribution</h3>
+              <h3 className="font-semibold mb-4">Team Level Distribution</h3>
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
-                  <Pie data={getEquityDistribution()} dataKey="count" nameKey="range" cx="50%" cy="50%" outerRadius={90} label>
-                    {getEquityDistribution().map((entry, index) => (
+                  <Pie data={getTeamLevelDistribution()} dataKey="count" nameKey="level" cx="50%" cy="50%" outerRadius={80} label>
+                    {getTeamLevelDistribution().map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -477,9 +559,9 @@ Source: GOV.UK Home Office Guidance (2025)
 
           {/* GOV.UK-Aligned Recommendations */}
           <Card className="p-6 mb-6">
-            <h3 className="font-semibold mb-4">GOV.UK Compliance Recommendations</h3>
+            <h3 className="font-semibold mb-4">Viability & Scalability Recommendations</h3>
             <div className="space-y-3">
-              {getGovUKRecommendations().map((tip, i) => {
+              {getViabilityRecommendations().map((tip, i) => {
                 const isCritical = tip.includes('CRITICAL');
                 const isWarning = tip.includes('WARNING');
                 return (
@@ -491,131 +573,110 @@ Source: GOV.UK Home Office Guidance (2025)
             </div>
           </Card>
 
-          {/* Compensation Bands Editor */}
+          {/* Team Roles Editor */}
           <Card className="p-6 mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold">Compensation Bands</h3>
-              <Button onClick={addBand} size="sm" data-testid="button-add-band">
-                <Plus className="w-4 h-4 mr-1" /> Add Band
+              <h3 className="font-semibold">Team Roles & Compensation</h3>
+              <Button onClick={addRole} size="sm" data-testid="button-add-role">
+                <Plus className="w-4 h-4 mr-1" /> Add Role
               </Button>
             </div>
 
-            <div className="space-y-4">
-              {bands.map((band) => {
-                const visaCompliant = band.minSalary >= UK_VISA_THRESHOLDS.SKILLED_WORKER_MIN;
-                const sponsorReady = band.isVisaSponsorable && band.minSalary >= UK_VISA_THRESHOLDS.SPONSORSHIP_LICENSE;
-                const totalComp = getTotalCompensation(band);
+            <div className="space-y-6">
+              {roles.map((role) => {
+                const avgSalary = (role.minSalary + role.maxSalary) / 2;
+                const totalComp = getTotalCompensation(role);
+                const countsForILR = role.isFullTime && role.minSalary >= 25000;
                 
                 return (
-                  <Card key={band.id} className={`p-6 border-l-4 ${visaCompliant ? 'border-l-green-500' : 'border-l-red-500'}`}>
+                  <Card key={role.id} className={`p-6 border-l-4 ${countsForILR ? 'border-l-green-500' : 'border-l-orange-500'}`}>
                     <div className="flex justify-between items-start mb-4">
                       <Input
-                        value={band.role}
-                        onChange={(e) => updateBand(band.id, 'role', e.target.value)}
-                        className="font-semibold text-xl w-1/2"
+                        value={role.role}
+                        onChange={(e) => updateRole(role.id, 'role', e.target.value)}
+                        className="font-semibold text-xl w-2/3"
                         placeholder="Role Title"
-                        data-testid={`input-role-${band.id}`}
+                        data-testid={`input-role-${role.id}`}
                       />
-                      <div className="flex items-center gap-2">
-                        {visaCompliant && <Award className="w-5 h-5 text-green-600" title="Visa Compliant" />}
-                        {!visaCompliant && <AlertCircle className="w-5 h-5 text-red-600" title="Below Visa Minimum" />}
-                        <Button variant="ghost" size="sm" onClick={() => removeBand(band.id)} data-testid={`button-remove-${band.id}`}>
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => removeRole(role.id)} data-testid={`button-remove-${role.id}`}>
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                       <div>
                         <label className="text-xs text-muted-foreground block mb-1">Level</label>
-                        <Select value={band.level} onValueChange={(v) => updateBand(band.id, 'level', v)}>
-                          <SelectTrigger data-testid={`select-level-${band.id}`}><SelectValue /></SelectTrigger>
+                        <Select value={role.level} onValueChange={(v) => updateRole(role.id, 'level', v)}>
+                          <SelectTrigger data-testid={`select-level-${role.id}`}><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="Junior">Junior</SelectItem>
-                            <SelectItem value="Mid-level">Mid-level</SelectItem>
+                            <SelectItem value="Mid">Mid</SelectItem>
                             <SelectItem value="Senior">Senior</SelectItem>
                             <SelectItem value="Lead">Lead</SelectItem>
-                            <SelectItem value="Director">Director</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div>
                         <label className="text-xs text-muted-foreground block mb-1">Min Salary (£)</label>
-                        <Input
-                          type="number"
-                          value={band.minSalary}
-                          onChange={(e) => updateBand(band.id, 'minSalary', Number(e.target.value))}
-                          data-testid={`input-min-salary-${band.id}`}
-                        />
+                        <Input type="number" value={role.minSalary} onChange={(e) => updateRole(role.id, 'minSalary', Number(e.target.value))} data-testid={`input-min-${role.id}`} />
                       </div>
 
                       <div>
                         <label className="text-xs text-muted-foreground block mb-1">Max Salary (£)</label>
-                        <Input
-                          type="number"
-                          value={band.maxSalary}
-                          onChange={(e) => updateBand(band.id, 'maxSalary', Number(e.target.value))}
-                          data-testid={`input-max-salary-${band.id}`}
-                        />
+                        <Input type="number" value={role.maxSalary} onChange={(e) => updateRole(role.id, 'maxSalary', Number(e.target.value))} data-testid={`input-max-${role.id}`} />
                       </div>
 
                       <div>
                         <label className="text-xs text-muted-foreground block mb-1">Equity (%)</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={band.equity}
-                          onChange={(e) => updateBand(band.id, 'equity', Number(e.target.value))}
-                          data-testid={`input-equity-${band.id}`}
-                        />
+                        <Input type="number" step="0.1" value={role.equity} onChange={(e) => updateRole(role.id, 'equity', Number(e.target.value))} data-testid={`input-equity-${role.id}`} />
                       </div>
 
                       <div>
                         <label className="text-xs text-muted-foreground block mb-1">Bonus Target (%)</label>
-                        <Input
-                          type="number"
-                          value={band.bonusTarget}
-                          onChange={(e) => updateBand(band.id, 'bonusTarget', Number(e.target.value))}
-                          data-testid={`input-bonus-${band.id}`}
-                        />
+                        <Input type="number" value={role.bonusTarget} onChange={(e) => updateRole(role.id, 'bonusTarget', Number(e.target.value))} data-testid={`input-bonus-${role.id}`} />
                       </div>
 
                       <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Cost-per-Hire (£)</label>
-                        <Input
-                          type="number"
-                          value={band.costPerHire}
-                          onChange={(e) => updateBand(band.id, 'costPerHire', Number(e.target.value))}
-                          data-testid={`input-cost-hire-${band.id}`}
-                        />
+                        <label className="text-xs text-muted-foreground block mb-1">Hiring Month (1-36)</label>
+                        <Input type="number" min="1" max="36" value={role.hiringMonth} onChange={(e) => updateRole(role.id, 'hiringMonth', Number(e.target.value))} data-testid={`input-month-${role.id}`} />
                       </div>
 
-                      <div className="col-span-2">
-                        <label className="text-xs text-muted-foreground block mb-1">Visa Sponsorable Role</label>
-                        <Select value={band.isVisaSponsorable ? "yes" : "no"} onValueChange={(v) => updateBand(band.id, 'isVisaSponsorable', v === "yes")}>
-                          <SelectTrigger data-testid={`select-sponsorable-${band.id}`}><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="yes">Yes</SelectItem>
-                            <SelectItem value="no">No</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Cost Per Hire (£)</label>
+                        <Input type="number" value={role.costPerHire} onChange={(e) => updateRole(role.id, 'costPerHire', Number(e.target.value))} data-testid={`input-cost-${role.id}`} />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          checked={role.isFullTime}
+                          onCheckedChange={(checked) => updateRole(role.id, 'isFullTime', checked)}
+                          data-testid={`checkbox-fulltime-${role.id}`}
+                        />
+                        <label className="text-sm">Full-Time</label>
                       </div>
                     </div>
 
-                    {/* Live Visa Compliance Feedback */}
-                    <div className="bg-muted/50 dark:bg-muted/20 p-3 rounded-md space-y-1 text-sm">
-                      <div className="flex items-center gap-2">
-                        {visaCompliant ? <span className="text-green-600">✓</span> : <span className="text-red-600">✗</span>}
-                        <span>Skilled Worker Minimum (£25,600)</span>
+                    {/* Live ILR Eligibility Feedback */}
+                    <div className="bg-muted/50 dark:bg-muted/20 p-3 rounded-md">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium">ILR Eligibility</span>
+                        <span className={`text-lg font-bold ${countsForILR ? 'text-green-600' : 'text-orange-600'}`}>
+                          {countsForILR ? '✓ Counts' : '✗ Does not count'}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {sponsorReady ? <span className="text-green-600">✓</span> : <span className="text-orange-600">⚠</span>}
-                        <span>Sponsorship License Ready (£38,700+)</span>
-                      </div>
-                      <div className="mt-2 pt-2 border-t border-border">
-                        <span className="font-medium">Total Compensation: £{totalComp.toLocaleString()}</span>
-                        <span className="text-xs text-muted-foreground ml-2">(Salary + Bonus + 4yr Equity)</span>
+                      <div className="text-sm space-y-1">
+                        <div className="flex items-center gap-2">
+                          {role.isFullTime ? <span className="text-green-600">✓</span> : <span className="text-red-600">✗</span>}
+                          <span>Full-time employment</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {role.minSalary >= 25000 ? <span className="text-green-600">✓</span> : <span className="text-orange-600">⚠</span>}
+                          <span>Salary £25,000+ (avg: £{avgSalary.toLocaleString()})</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Total Compensation: £{Math.round(totalComp).toLocaleString()}/year (Base + Bonus + Equity)
+                        </p>
                       </div>
                     </div>
                   </Card>
@@ -627,10 +688,7 @@ Source: GOV.UK Home Office Guidance (2025)
           {/* File Upload */}
           <Card className="p-6 mb-6">
             <h3 className="font-semibold mb-4">Upload Supporting Documents</h3>
-            <FileUploadButton
-              onFileSelected={handleFileUpload}
-              config={fileUploadConfigs.companyDocuments}
-            />
+            <FileUploadButton onFileSelected={handleFileUpload} config={fileUploadConfigs.companyDocuments} />
             {uploadedFiles.length > 0 && (
               <div className="mt-4">
                 <FileList files={uploadedFiles} onRemove={handleRemoveFile} />
