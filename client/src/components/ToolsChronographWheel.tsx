@@ -451,9 +451,9 @@ export default function ToolsChronographWheel() {
           >
             <div className="space-y-1 sm:space-y-2">
               {tools.map((tool, idx) => {
-                // Render dummy tools as minimal spacers (1px each)
+                // Render dummy tools as spacers for scroll range (40px each = ~280px total)
                 if (tool.category === "dummy") {
-                  return <div key={tool.id} style={{ height: "1px" }} />;
+                  return <div key={tool.id} style={{ height: "40px" }} />;
                 }
                 
                 return (
