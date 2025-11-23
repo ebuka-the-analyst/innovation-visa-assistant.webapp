@@ -7,46 +7,41 @@ The UK Innovator Founder Visa Assistant is an AI-powered platform designed to as
 
 ## Recent Changes (November 23, 2025)
 
-### Replit Auth Migration Complete & Production-Ready ✅
-Successfully migrated from Google OAuth to Replit Auth white-labeled authentication system (architect-approved PASS rating):
+### Railway Deployment Configuration Complete ✅  
+Successfully configured app for Railway deployment with standard Google OAuth (removed Replit-specific authentication):
 
-**Database Schema:**
-- Created `sessions` table for Replit Auth session management (id, sid, sess JSONB, expire timestamp)
-- Updated `users` table: Added firstName, lastName, profileImageUrl fields for Replit Auth
-- Removed legacy Google OAuth fields: password, googleId, emailVerified columns
-- Preserved subscription tier infrastructure: subscriptionTier (free/basic/premium/enterprise/ultimate) and subscriptionStatus (active/inactive)
-- Pushed all schema changes to production database successfully via SQL
-
-**Backend Authentication:**
-- `server/replitAuth.ts` - Replit OpenID Connect integration with express-session and @replit/identity-node
-- `server/storage.ts` - Added getUser() and upsertUser() methods for Replit Auth user management
-- `server/routes.ts` - Updated all routes to use req.user.claims.sub instead of req.user.id for user identification
-- **Critical Payment Route Fix:** Updated 10 instances across payment, generation, and tool routes to correctly use user.claims.sub for ownership checks
-- Removed legacy files: server/auth.ts (bcrypt password hashing) and server/authRoutes.ts (Google OAuth)
+**Backend Authentication (Railway-Ready):**
+- `server/googleAuth.ts` - Standard Google OAuth 2.0 using passport-google-oauth20
+- Session management via PostgreSQL store (connect-pg-simple) - compatible with any Postgres database
+- Removed Replit-specific dependencies: openid-client, Replit OIDC
+- `server/routes.ts` - All routes updated to use req.user.id instead of req.user.claims.sub
+- User object structure: `{ id, email, displayName, firstName, lastName, profileImageUrl }`
+- **Critical Pattern Change:** req.user.id for standard Google OAuth (not req.user.claims.sub)
 
 **Frontend Authentication:**
-- `client/src/hooks/useAuth.ts` - New hook queries /api/auth/user endpoint, provides user data, loading state, and isAuthenticated boolean
-- `client/src/components/ProtectedRoute.tsx` - Updated to use useAuth hook, redirects to /api/login for Replit Auth flow
-- `client/src/pages/login.tsx` - Simplified to redirect users to /api/login (Replit Auth)
-- `client/src/pages/signup.tsx` - Simplified to redirect users to /api/login (Replit Auth)
-- All /api/auth/me references updated to /api/auth/user for consistency
+- `client/src/hooks/useAuth.ts` - Queries /api/auth/user endpoint (returns Google OAuth user)
+- `client/src/pages/login.tsx` - Redirects to /api/login (Google OAuth flow)
+- `client/src/pages/signup.tsx` - Redirects to /api/login (Google account creation)
+- Login/logout flows work identically but with standard OAuth instead of Replit Auth
 
-**Authentication Flow:**
+**Authentication Flow (Railway):**
 1. User visits protected route → ProtectedRoute checks authentication
 2. If unauthenticated → redirects to /api/login
-3. Replit Auth handles authentication (Google, GitHub, Twitter, Apple, Email)
-4. User redirected back with session → req.user.claims.sub contains user ID
-5. All ownership checks use claims.sub convention (businessPlan.userId === user.claims.sub)
+3. Google OAuth handles authentication
+4. User redirected to /api/auth/google/callback → session created
+5. Ownership checks use req.user.id (businessPlan.userId === user.id)
 
-**Route Protection:**
-- Protected all non-public routes at layout level in App.tsx (dashboard, tools, settings, questionnaire, etc.)
-- Public routes accessible: /, /login, /signup, /pricing
-- TierGate component ready for tool-level tier enforcement
+**Database Schema (Railway-Compatible):**
+- `sessions` table for express-session PostgreSQL store
+- `users` table: id, email, firstName, lastName, profileImageUrl, subscriptionTier, subscriptionStatus
+- Compatible with any PostgreSQL database (Neon, Railway Postgres, etc.)
 
-**Next Steps:**
-1. End-to-end checkout verification to confirm Stripe session creation works with authenticated users
-2. Integrate TierGate into individual tool pages to enforce minimum tier requirements
-3. Monitor logs during first few live transactions to ensure no authorization errors
+**Railway Deployment Guide:**
+- Created RAILWAY_DEPLOYMENT.md with complete setup instructions
+- Environment variables: DATABASE_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL, SESSION_SECRET, Stripe keys, OpenAI API key
+- Build command: `npm install && npm run build`
+- Start command: `npm start`
+- Google OAuth callback URL must be configured in Google Cloud Console
 
 ### Business Tools Batch Complete (13/13) - PhD-Level Exports Perfected
 All Business Tools completed with 100% UK Innovator Founder visa focus, architect-approved PASS rating, and PhD-level export quality matching compensation-planning.tsx benchmark:
@@ -132,6 +127,7 @@ The project follows a batch development approach, completing categories of tools
 - **ORM:** `Drizzle ORM` for database interactions.
 - **Charting Library:** `Recharts` for professional data visualizations.
 - **UI Framework:** `Shadcn UI` for frontend components.
-- **Authentication:** Replit Auth (white-labeled OpenID Connect with Google, GitHub, Twitter, Apple, Email login)
+- **Authentication:** Google OAuth 2.0 (passport-google-oauth20) - Railway compatible
 - **Session Management:** Express-session with PostgreSQL session store (connect-pg-simple)
-- **HMAC Security:** Used for session handoff token security.
+- **HMAC Security:** Used for session handoff token security
+- **Deployment:** Configured for Railway deployment (standard OAuth, external database)
