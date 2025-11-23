@@ -50,7 +50,7 @@ export async function setupAuth(app: Express) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID!,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL || "/api/auth/google/callback",
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || "/api/auth/callback/google",
         scope: ["profile", "email"],
       },
       async (accessToken, refreshToken, profile, done) => {
@@ -99,7 +99,7 @@ export async function setupAuth(app: Express) {
   app.get("/api/login", passport.authenticate("google", { prompt: "select_account" }));
 
   app.get(
-    "/api/auth/google/callback",
+    "/api/auth/callback/google",
     passport.authenticate("google", { failureRedirect: "/login" }),
     (req, res) => {
       // Explicitly save session before redirecting
