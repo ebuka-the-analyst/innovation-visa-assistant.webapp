@@ -14,7 +14,7 @@ export default function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm the UK Innovator Founder Visa Assistant. I can help you with Innovator Founder Visa strategy, business plan advice, and answers to all your visa questions. What would you like to know?"
+      content: "Hi! I'm your UK Innovator Founder Visa assistant. Ask me about visa requirements, endorsers, or business planning."
     }
   ]);
   const [input, setInput] = useState("");
