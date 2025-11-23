@@ -287,18 +287,8 @@ export async function setupAuth(app: Express) {
   // Email/Password Login
   app.post("/api/auth/login", async (req, res, next) => {
     try {
-      const { turnstileToken } = req.body;
-
-      // Verify Cloudflare Turnstile token for bot protection (REQUIRED)
-      if (!turnstileToken) {
-        return res.status(400).json({ message: "Bot verification required. Please try again." });
-      }
-      
-      const isValidToken = await verifyTurnstileToken(turnstileToken);
-      if (!isValidToken) {
-        return res.status(400).json({ message: "Bot verification failed. Please try again." });
-      }
-
+      // Turnstile is optional for login (bot protection is more critical for signup)
+      // Authenticate user directly
       passport.authenticate("local", (err: any, user: any, info: any) => {
         if (err) {
           return res.status(500).json({ message: "Authentication error" });

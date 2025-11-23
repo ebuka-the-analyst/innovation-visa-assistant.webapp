@@ -8,14 +8,12 @@ import { LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function Login() {
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -40,10 +38,7 @@ export default function Login() {
       await apiRequest("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          turnstileToken,
-        }),
+        body: JSON.stringify(formData),
       });
 
       toast({
@@ -110,18 +105,10 @@ export default function Login() {
               />
             </div>
 
-            {/* Cloudflare Turnstile Bot Protection */}
-            <div className="flex justify-center" data-testid="turnstile-widget">
-              <Turnstile
-                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
-                onSuccess={setTurnstileToken}
-              />
-            </div>
-
             <Button
               type="submit"
               className="w-full"
-              disabled={isSubmitting || !turnstileToken}
+              disabled={isSubmitting}
               data-testid="button-login"
             >
               {isSubmitting ? "Signing in..." : "Sign In"}
