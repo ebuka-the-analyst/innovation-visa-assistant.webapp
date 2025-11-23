@@ -7,13 +7,14 @@ The UK Innovator Founder Visa Assistant is an AI-powered platform designed to as
 
 ## Recent Changes (November 23, 2025)
 
-### Dual Authentication System Complete ✅  
-Successfully implemented flexible authentication supporting both email/password and Google OAuth:
+### Intelligent Dual Authentication System Complete ✅  
+Successfully implemented PhD-level flexible authentication with smart conflict detection:
 
 **Backend Authentication (Railway-Ready):**
 - `server/auth.ts` - Dual authentication: email/password (passport-local) + Google OAuth 2.0 (passport-google-oauth20)
 - **Email/Password Security:** bcrypt hashing (cost factor 10), email normalization (lowercase), password validation (6+ chars), case-insensitive lookups
-- **Session Security:** Only userId stored in session (not full user object), password never exposed in responses/sessions
+- **Session Security:** Only userId stored in session via serializeUser({ id }), deserializeUser fetches from DB, password never exposed ({ password: _, ...safeUser })
+- **Smart Conflict Detection:** All 6 authentication scenarios handled with helpful error messages
 - Session management via PostgreSQL store (connect-pg-simple) - compatible with any Postgres database
 - Removed Replit-specific dependencies: openid-client, Replit OIDC
 - `server/routes.ts` - All routes updated to use req.user.id instead of req.user.claims.sub
@@ -39,6 +40,14 @@ Successfully implemented flexible authentication supporting both email/password 
 2. Google OAuth handles authentication
 3. User redirected to /api/auth/callback/google → session created
 4. Upsert user (preserves UUID, links googleId) → Redirect to dashboard
+
+**All 6 Authentication Scenarios Handled:**
+1. ✅ **New email signup** → Hash password, create user, establish session
+2. ✅ **New Google signup** → Create user with googleId, establish session
+3. ✅ **Email signup + existing Google account** → Error: "You signed up using Google. Please use 'Continue with Google'" + auto-redirect to login after 3s
+4. ✅ **Email signup + existing password account** → Error: "Email already registered. Please sign in"
+5. ✅ **Email login + Google-only account** → Error: "This account uses Google sign-in. Please use 'Continue with Google'"
+6. ✅ **Google login + existing email/password account** → Smart account linking (auto-link googleId to existing account, preserve data)
 
 5. Ownership checks use req.user.id (businessPlan.userId === user.id)
 
