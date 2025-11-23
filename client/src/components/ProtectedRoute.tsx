@@ -1,14 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
-
-type User = {
-  id: string;
-  email: string;
-  displayName?: string;
-  subscriptionTier: string;
-  subscriptionStatus?: string;
-};
+import { useAuth } from "@/hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,17 +8,14 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [, setLocation] = useLocation();
-
-  const { data: user, isLoading, isError } = useQuery<User>({
-    queryKey: ['/api/auth/me'],
-    retry: false,
-  });
+  const { user, isLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && (isError || !user)) {
-      setLocation("/login");
+    if (!isLoading && !isAuthenticated) {
+      // Redirect to Replit Auth login
+      window.location.href = "/api/login";
     }
-  }, [user, isLoading, isError, setLocation]);
+  }, [isLoading, isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -39,7 +28,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (isError || !user) {
+  if (!isAuthenticated) {
     return null;
   }
 

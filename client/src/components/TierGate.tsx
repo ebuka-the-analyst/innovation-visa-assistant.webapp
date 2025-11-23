@@ -43,7 +43,7 @@ const TIER_NAMES = {
 
 export function TierGate({ children, requiredTier, toolName }: TierGateProps) {
   const { data: user } = useQuery<User>({
-    queryKey: ['/api/auth/me'],
+    queryKey: ['/api/auth/user'],
     retry: false,
   });
 

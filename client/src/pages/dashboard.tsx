@@ -324,7 +324,7 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
 
   const { data: user, isLoading: userLoading } = useQuery<{ id: string; email: string; displayName?: string }>({
-    queryKey: ['/api/auth/me'],
+    queryKey: ['/api/auth/user'],
     retry: false,
   });
 

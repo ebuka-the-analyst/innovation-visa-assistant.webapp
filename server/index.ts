@@ -1,5 +1,4 @@
 import express, { type Request, Response, NextFunction } from "express";
-import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite as originalSetupVite, serveStatic as originalServeStatic, log } from "./vite";
 import type { Express as ExpressType } from "express";
@@ -41,13 +40,7 @@ function serveStatic(app: ExpressType) {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
-import { setupAuth } from "./auth";
-import { setupAuthRoutes } from "./authRoutes";
-
 const app = express();
-
-// Trust proxy for Replit (required for OAuth and secure cookies)
-app.set('trust proxy', 1);
 
 declare module 'http' {
   interface IncomingMessage {
@@ -66,24 +59,6 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
-
-// Session configuration
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'visaprep-secret-change-in-production',
-  resave: false,
-  saveUninitialized: false,
-  proxy: true, // Trust the reverse proxy
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    sameSite: 'lax', // Required for OAuth redirects
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  },
-}));
-
-// Setup authentication
-setupAuth(app);
-setupAuthRoutes(app);
 
 app.use((req, res, next) => {
   const start = Date.now();

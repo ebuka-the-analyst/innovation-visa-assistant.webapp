@@ -49,7 +49,7 @@ type NavGroup = {
 export function AppSidebar() {
   const [location, setLocation] = useLocation();
   const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
-    queryKey: ["/api/auth/me"],
+    queryKey: ["/api/auth/user"],
     retry: false,
   });
 

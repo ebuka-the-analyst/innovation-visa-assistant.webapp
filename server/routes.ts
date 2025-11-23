@@ -8,9 +8,8 @@ import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
 import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
-import passport from "passport";
-import bcrypt from "bcrypt";
 import crypto from "crypto";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
@@ -26,22 +25,34 @@ const PRICING = {
   enterprise: { amount: 7900, name: "Enterprise Plan" },
 };
 
-import { requireAuth } from "./auth";
-
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup Replit Auth (must be before routes)
+  await setupAuth(app);
+
+  // Auth endpoint for getting current user
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
   
   app.get("/api/health", async (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
-  // Note: All authentication endpoints are handled in server/authRoutes.ts
-  // This includes: /api/auth/login, /api/auth/signup, /api/auth/google, 
-  // /api/auth/callback/google, /api/auth/logout, /api/auth/me
-
-  app.get("/api/dashboard/plans", requireAuth, async (req, res) => {
+  app.get("/api/dashboard/plans", isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      const plans = await storage.getUserBusinessPlans(user.id);
+      const userId = user.claims.sub;
+      const plans = await storage.getUserBusinessPlans(userId);
       res.json(plans);
     } catch (error) {
       console.error("Dashboard plans error:", error);
@@ -49,15 +60,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/questionnaire/submit", requireAuth, async (req, res) => {
+  app.post("/api/questionnaire/submit", isAuthenticated, async (req, res) => {
     try {
       console.log("Questionnaire submission received:", JSON.stringify(req.body, null, 2));
       const data = questionnaireSchema.parse(req.body);
       const user = req.user as any;
+      const userId = user.claims.sub;
       
       const businessPlan = await storage.createBusinessPlan({
         ...data,
-        userId: user.id,
+        userId,
       });
       
       res.json({ 
@@ -87,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payment/create-checkout", requireAuth, async (req, res) => {
+  app.post("/api/payment/create-checkout", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.body;
       const user = req.user as any;
@@ -97,7 +109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
+      if (!businessPlan || businessPlan.userId !== user.claims.sub) {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
@@ -142,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payment/verify", requireAuth, async (req, res) => {
+  app.post("/api/payment/verify", isAuthenticated, async (req, res) => {
     try {
       const { sessionId, planId } = req.body;
       const user = req.user as any;
@@ -152,7 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
+      if (!businessPlan || businessPlan.userId !== user.claims.sub) {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
@@ -179,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/generate/start", requireAuth, async (req, res) => {
+  app.post("/api/generate/start", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.body;
       const user = req.user as any;
@@ -189,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
+      if (!businessPlan || businessPlan.userId !== user.claims.sub) {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
@@ -228,13 +240,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/generate/status/:planId", requireAuth, async (req, res) => {
+  app.get("/api/generate/status/:planId", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.params;
       const user = req.user as any;
       
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
+      if (!businessPlan || businessPlan.userId !== user.claims.sub) {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
@@ -413,13 +425,13 @@ ${generatedSections.join('\n\n---\n\n')}`;
     });
   }
 
-  app.get("/api/download/pdf/:planId", requireAuth, async (req, res) => {
+  app.get("/api/download/pdf/:planId", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.params;
       const user = req.user as any;
       
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
+      if (!businessPlan || businessPlan.userId !== user.claims.sub) {
         return res.status(404).send(`
           <html><body style="font-family: sans-serif; padding: 40px; text-align: center;">
             <h1>Business Plan Not Found</h1>
@@ -465,12 +477,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
 
   // ============ ADVANCED FEATURES API ENDPOINTS ============
 
-  app.get("/api/endorser/simulate/:planId", requireAuth, async (req, res) => {
+  app.get("/api/endorser/simulate/:planId", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.params;
       const user = req.user as any;
       const plan = await storage.getBusinessPlan(planId);
-      if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
+      if (!plan || plan.userId !== user.claims.sub) return res.status(404).json({ error: "Plan not found" });
 
       const { getAllEndorsers, scoreBusinessPlanForEndorser } = await import("./calculators/endorserSimulator");
       
@@ -484,12 +496,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
-  app.get("/api/routes/analyze/:planId", requireAuth, async (req, res) => {
+  app.get("/api/routes/analyze/:planId", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.params;
       const user = req.user as any;
       const plan = await storage.getBusinessPlan(planId);
-      if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
+      if (!plan || plan.userId !== user.claims.sub) return res.status(404).json({ error: "Plan not found" });
 
       const { compareRoutes } = await import("./calculators/routePlanner");
       
@@ -501,12 +513,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
-  app.get("/api/team/model/:planId", requireAuth, async (req, res) => {
+  app.get("/api/team/model/:planId", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.params;
       const user = req.user as any;
       const plan = await storage.getBusinessPlan(planId);
-      if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
+      if (!plan || plan.userId !== user.claims.sub) return res.status(404).json({ error: "Plan not found" });
 
       const { generateTeamPlan, assessTeamSkills } = await import("./calculators/teamModeller");
       
@@ -520,12 +532,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
-  app.get("/api/traction/forecast/:planId", requireAuth, async (req, res) => {
+  app.get("/api/traction/forecast/:planId", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.params;
       const user = req.user as any;
       const plan = await storage.getBusinessPlan(planId);
-      if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
+      if (!plan || plan.userId !== user.claims.sub) return res.status(404).json({ error: "Plan not found" });
 
       const { forecastTraction } = await import("./calculators/tractionForecaster");
       
@@ -537,12 +549,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
-  app.get("/api/rules/check/:planId", requireAuth, async (req, res) => {
+  app.get("/api/rules/check/:planId", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.params;
       const user = req.user as any;
       const plan = await storage.getBusinessPlan(planId);
-      if (!plan || plan.userId !== user.id) return res.status(404).json({ error: "Plan not found" });
+      if (!plan || plan.userId !== user.claims.sub) return res.status(404).json({ error: "Plan not found" });
 
       const { getRuleEngineStatus } = await import("./calculators/ruleChangeEngine");
       

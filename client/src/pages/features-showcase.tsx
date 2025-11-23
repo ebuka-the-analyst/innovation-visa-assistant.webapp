@@ -35,7 +35,7 @@ const MAIN_FEATURES = [
 
 export default function FeaturesShowcase() {
   const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
-    queryKey: ["/api/auth/me"],
+    queryKey: ["/api/auth/user"],
     retry: false,
   });
 

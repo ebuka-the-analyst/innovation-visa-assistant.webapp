@@ -111,7 +111,7 @@ export default function Pricing() {
     subscriptionTier?: string;
     subscriptionStatus?: string;
   }>({
-    queryKey: ['/api/auth/me'],
+    queryKey: ['/api/auth/user'],
     retry: false,
   });
 

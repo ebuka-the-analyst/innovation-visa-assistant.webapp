@@ -1,24 +1,32 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, jsonb, boolean, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// Users table - compatible with Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: text("email").notNull().unique(),
-  password: text("password"), // Null for Google OAuth users
-  googleId: text("google_id").unique(), // For Google OAuth
-  displayName: text("display_name"),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  verificationCode: text("verification_code"),
-  codeExpiresAt: timestamp("code_expires_at"),
-  lastCodeSentAt: timestamp("last_code_sent_at"),
-  verificationAttempts: integer("verification_attempts").notNull().default(0),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
   subscriptionTier: varchar("subscription_tier", { length: 20 }).notNull().default('free'), // free, basic, premium, enterprise, ultimate
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   subscriptionStatus: varchar("subscription_status", { length: 20 }).default('inactive'), // active, inactive, cancelled, past_due
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const businessPlans = pgTable("business_plans", {
@@ -90,20 +98,19 @@ export const businessPlans = pgTable("business_plans", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Replit Auth user upsert schema
+export const upsertUserSchema = createInsertSchema(users).pick({
+  id: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  profileImageUrl: true,
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
-});
-
-export const signupSchema = z.object({
-  email: z.string().email("Valid email required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  displayName: z.string().min(2, "Name required"),
-});
-
-export const loginSchema = z.object({
-  email: z.string().email("Valid email required"),
-  password: z.string().min(1, "Password required"),
+  updatedAt: true,
 });
 
 export const insertBusinessPlanSchema = createInsertSchema(businessPlans).omit({
@@ -177,6 +184,7 @@ export const questionnaireSchema = z.object({
   supportingEvidence: z.string().optional(),
 });
 
+export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertBusinessPlan = z.infer<typeof insertBusinessPlanSchema>;
