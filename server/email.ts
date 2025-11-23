@@ -50,6 +50,98 @@ export function generateVerificationCode(): string {
   return crypto.randomInt(100000, 999999).toString();
 }
 
+// New token-based verification utilities
+export function generateVerificationToken(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+export function getTokenExpiry(): Date {
+  const expiry = new Date();
+  expiry.setHours(expiry.getHours() + 24); // 24 hour expiry
+  return expiry;
+}
+
+const BASE_URL = process.env.NODE_ENV === 'production' 
+  ? process.env.BASE_URL || 'https://innovatorfoundervisaassistant.co.uk'
+  : 'http://localhost:5000';
+
+export async function sendVerificationEmail(
+  email: string,
+  firstName: string,
+  token: string
+): Promise<{ success: boolean; error?: string }> {
+  const verificationUrl = `${BASE_URL}/verify-email?token=${token}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to UK Visa Assistant! 🇬🇧</h1>
+      </div>
+      
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${firstName},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          Thank you for signing up! You're one step closer to your UK Innovator Founder Visa journey.
+        </p>
+        
+        <p style="font-size: 16px; margin-bottom: 30px;">
+          Please verify your email address by clicking the button below:
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${verificationUrl}" 
+             style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); 
+                    color: white; 
+                    padding: 15px 40px; 
+                    text-decoration: none; 
+                    border-radius: 5px; 
+                    font-size: 18px; 
+                    font-weight: bold;
+                    display: inline-block;">
+            ✅ Verify Email Address
+          </a>
+        </div>
+        
+        <p style="font-size: 14px; color: #666; margin-top: 30px;">
+          Or copy and paste this link into your browser:<br>
+          <a href="${verificationUrl}" style="color: #11b6e9; word-break: break-all;">${verificationUrl}</a>
+        </p>
+        
+        <div style="background: #fff3cd; border-left: 4px solid #ffa536; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p style="margin: 0; font-size: 14px; color: #856404;">
+            ⏰ <strong>This link expires in 24 hours</strong>
+          </p>
+        </div>
+        
+        <p style="font-size: 14px; color: #666; margin-top: 30px;">
+          If you didn't create an account, you can safely ignore this email.
+        </p>
+        
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          Your trusted partner in visa success
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: '🎉 Verify your email - UK Innovator Founder Visa Assistant',
+    html
+  });
+}
+
 export function generateVerificationEmail(code: string, displayName: string): string {
   return `
 <!DOCTYPE html>

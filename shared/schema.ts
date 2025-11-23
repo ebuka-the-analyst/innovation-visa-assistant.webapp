@@ -113,6 +113,7 @@ export const upsertUserSchema = createInsertSchema(users).pick({
   firstName: true,
   lastName: true,
   profileImageUrl: true,
+  isEmailVerified: true,
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({

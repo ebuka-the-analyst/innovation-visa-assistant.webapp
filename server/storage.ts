@@ -6,9 +6,12 @@ export interface IStorage {
   // User management (supports both Google OAuth and email/password auth)
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserGoogleId(userId: string, googleId: string, profileData: { firstName?: string | null, lastName?: string | null, profileImageUrl?: string | null }): Promise<User>;
+  verifyUserEmail(userId: string): Promise<void>;
+  updateVerificationToken(userId: string, token: string, expiry: Date): Promise<void>;
   getUserBusinessPlans(userId: string): Promise<BusinessPlan[]>;
   
   // Business plan management
@@ -37,6 +40,34 @@ export class DatabaseStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
     return result[0];
+  }
+
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.verificationToken, token)).limit(1);
+    return result[0];
+  }
+
+  async verifyUserEmail(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        isEmailVerified: true,
+        verificationToken: null,
+        tokenExpiry: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateVerificationToken(userId: string, token: string, expiry: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        verificationToken: token,
+        tokenExpiry: expiry,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
   }
 
   async createUser(userData: InsertUser): Promise<User> {
@@ -77,6 +108,7 @@ export class DatabaseStorage implements IStorage {
             firstName: userData.firstName,
             lastName: userData.lastName,
             profileImageUrl: userData.profileImageUrl,
+            isEmailVerified: userData.isEmailVerified ?? existingByGoogleId[0].isEmailVerified,
             updatedAt: new Date(),
           })
           .where(eq(users.id, existingByGoogleId[0].id))
@@ -101,6 +133,7 @@ export class DatabaseStorage implements IStorage {
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
+          isEmailVerified: userData.isEmailVerified ?? existingByEmail[0].isEmailVerified,
           updatedAt: new Date(),
         })
         .where(eq(users.id, existingByEmail[0].id))

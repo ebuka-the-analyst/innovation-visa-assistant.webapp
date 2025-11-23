@@ -6,6 +6,8 @@ import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
+import { verifyTurnstileToken } from "./turnstile";
+import { generateVerificationToken, getTokenExpiry, sendVerificationEmail } from "./email";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -133,13 +135,14 @@ export async function setupAuth(app: Express) {
             }
           }
 
-          // New user - create with Google OAuth
+          // New user - create with Google OAuth (auto-verify Google accounts)
           const user = await storage.upsertUser({
             email: normalizedEmail,
             googleId: profile.id,
             firstName: profile.name?.givenName || "",
             lastName: profile.name?.familyName || "",
             profileImageUrl: profile.photos?.[0]?.value || "",
+            isEmailVerified: true, // Google accounts are pre-verified
           });
 
           // Return user for session serialization (passport will store only ID)
@@ -181,7 +184,15 @@ export async function setupAuth(app: Express) {
   // Email/Password Registration with validation
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { email, password, firstName, lastName } = req.body;
+      const { email, password, firstName, lastName, turnstileToken } = req.body;
+
+      // Verify Cloudflare Turnstile token for bot protection
+      if (turnstileToken) {
+        const isValidToken = await verifyTurnstileToken(turnstileToken);
+        if (!isValidToken) {
+          return res.status(400).json({ message: "Bot verification failed. Please try again." });
+        }
+      }
 
       // Validate required fields
       if (!email || !password) {
@@ -224,13 +235,28 @@ export async function setupAuth(app: Express) {
       // Hash password with bcrypt (cost factor 10)
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Create user
+      // Generate email verification token
+      const verificationToken = generateVerificationToken();
+      const tokenExpiry = getTokenExpiry();
+
+      // Create user with verification token
       const newUser = await storage.createUser({
         email: normalizedEmail,
         password: hashedPassword,
         firstName: firstName?.trim() || "",
         lastName: lastName?.trim() || "",
+        verificationToken,
+        tokenExpiry,
+        isEmailVerified: false,
       });
+
+      // Send verification email
+      try {
+        await sendVerificationEmail(normalizedEmail, firstName || "there", verificationToken);
+      } catch (emailError) {
+        console.error("Failed to send verification email:", emailError);
+        // Continue with registration even if email fails
+      }
 
       // Log user in automatically after registration (pass object with id for serializeUser)
       req.login({ id: newUser.id }, (err) => {
@@ -243,7 +269,11 @@ export async function setupAuth(app: Express) {
           }
           // Return user without password
           const { password: _, ...safeUser } = newUser;
-          res.json({ success: true, user: safeUser });
+          res.json({ 
+            success: true, 
+            user: safeUser,
+            message: "Account created! Please check your email to verify your account."
+          });
         });
       });
     } catch (error: any) {
@@ -253,28 +283,43 @@ export async function setupAuth(app: Express) {
   });
 
   // Email/Password Login
-  app.post("/api/auth/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: any, info: any) => {
-      if (err) {
-        return res.status(500).json({ message: "Authentication error" });
-      }
-      if (!user) {
-        return res.status(401).json({ message: info?.message || "Invalid credentials" });
-      }
-      req.login({ id: user.id }, (err) => {
-        if (err) {
-          return res.status(500).json({ message: "Login failed" });
+  app.post("/api/auth/login", async (req, res, next) => {
+    try {
+      const { turnstileToken } = req.body;
+
+      // Verify Cloudflare Turnstile token for bot protection
+      if (turnstileToken) {
+        const isValidToken = await verifyTurnstileToken(turnstileToken);
+        if (!isValidToken) {
+          return res.status(400).json({ message: "Bot verification failed. Please try again." });
         }
-        req.session.save((err) => {
+      }
+
+      passport.authenticate("local", (err: any, user: any, info: any) => {
+        if (err) {
+          return res.status(500).json({ message: "Authentication error" });
+        }
+        if (!user) {
+          return res.status(401).json({ message: info?.message || "Invalid credentials" });
+        }
+        req.login({ id: user.id }, (err) => {
           if (err) {
-            console.error("Session save error:", err);
+            return res.status(500).json({ message: "Login failed" });
           }
-          // Return user without password
-          const { password: _, ...safeUser } = user;
-          res.json({ success: true, user: safeUser });
+          req.session.save((err) => {
+            if (err) {
+              console.error("Session save error:", err);
+            }
+            // Return user without password
+            const { password: _, ...safeUser } = user;
+            res.json({ success: true, user: safeUser });
+          });
         });
-      });
-    })(req, res, next);
+      })(req, res, next);
+    } catch (error: any) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
   });
 
   // Google OAuth routes
@@ -322,6 +367,80 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/logout", handleLogout);
   app.post("/api/auth/logout", handleLogout);
+
+  // Email Verification Route
+  app.get("/api/auth/verify-email/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+
+      if (!token) {
+        return res.status(400).json({ message: "Verification token required" });
+      }
+
+      // Find user by verification token
+      const user = await storage.getUserByVerificationToken(token);
+
+      if (!user) {
+        return res.status(400).json({ message: "Invalid or expired verification link" });
+      }
+
+      // Check if token is expired
+      if (user.tokenExpiry && new Date() > new Date(user.tokenExpiry)) {
+        return res.status(400).json({ message: "Verification link expired. Please request a new one." });
+      }
+
+      // Verify the user
+      await storage.verifyUserEmail(user.id);
+
+      res.json({ 
+        success: true, 
+        message: "Email verified successfully! You can now access all features."
+      });
+    } catch (error: any) {
+      console.error("Email verification error:", error);
+      res.status(500).json({ message: "Verification failed" });
+    }
+  });
+
+  // Resend Verification Email
+  app.post("/api/auth/resend-verification", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      // Get full user data from storage
+      const fullUser = await storage.getUser(user.id);
+
+      if (!fullUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (fullUser.isEmailVerified) {
+        return res.status(400).json({ message: "Email already verified" });
+      }
+
+      // Generate new verification token
+      const verificationToken = generateVerificationToken();
+      const tokenExpiry = getTokenExpiry();
+
+      // Update user with new token
+      await storage.updateVerificationToken(fullUser.id, verificationToken, tokenExpiry);
+
+      // Send verification email
+      await sendVerificationEmail(
+        fullUser.email!,
+        fullUser.firstName || "there",
+        verificationToken
+      );
+
+      res.json({ 
+        success: true, 
+        message: "Verification email sent! Please check your inbox."
+      });
+    } catch (error: any) {
+      console.error("Resend verification error:", error);
+      res.status(500).json({ message: "Failed to resend verification email" });
+    }
+  });
 }
 
 export const isAuthenticated: RequestHandler = (req, res, next) => {
