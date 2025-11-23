@@ -474,6 +474,24 @@ export default function ToolsChronographWheel() {
             onScroll={handleScroll}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
+            onWheel={(e) => {
+              // Prevent page scroll when scrolling inside widget
+              e.stopPropagation();
+              const element = scrollRef.current;
+              if (element) {
+                const isAtTop = element.scrollTop === 0;
+                const isAtBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 1;
+                
+                // Only prevent default if we're not at the boundaries
+                if ((e.deltaY < 0 && !isAtTop) || (e.deltaY > 0 && !isAtBottom)) {
+                  e.preventDefault();
+                }
+              }
+            }}
+            onTouchMove={(e) => {
+              // Prevent page scroll on mobile when scrolling inside widget
+              e.stopPropagation();
+            }}
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
