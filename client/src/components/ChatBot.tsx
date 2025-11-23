@@ -107,13 +107,12 @@ export default function ChatBot() {
       {/* Chat Window */}
       {isOpen && (
         <div
-          className="flex flex-col rounded-2xl shadow-2xl border border-border overflow-hidden"
+          className="flex flex-col rounded-2xl shadow-2xl border border-border overflow-hidden w-[380px] sm:w-[420px] md:w-[480px] lg:w-[520px]"
           style={{
             position: "fixed",
             bottom: "112px",
             right: "24px",
             zIndex: 9999,
-            width: "380px",
             height: "580px",
             background: "white"
           }}
