@@ -488,13 +488,12 @@ export default function ToolsChronographWheel() {
                 }
               }
             }}
-            onTouchMove={(e) => {
-              // Prevent page scroll on mobile when scrolling inside widget
-              e.stopPropagation();
-            }}
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
+              overscrollBehavior: "contain",
+              WebkitOverflowScrolling: "touch",
+              touchAction: "pan-y"
             }}
           >
             <div className="space-y-1 sm:space-y-2">
