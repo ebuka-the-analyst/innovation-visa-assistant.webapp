@@ -428,13 +428,15 @@ export default function ToolsChronographWheel() {
           {/* Scrollable tool list background */}
           <div
             ref={scrollRef}
-            className="absolute inset-0 overflow-y-auto overflow-x-hidden px-2 sm:px-3 py-2 sm:py-3"
+            className="absolute inset-0 overflow-y-auto overflow-x-hidden px-2 sm:px-3"
             onScroll={handleScroll}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
+              paddingTop: "90px",
+              paddingBottom: "90px",
             }}
           >
             <div className="space-y-1 sm:space-y-2">
