@@ -34,27 +34,6 @@ export default function ToolsChronographWheel() {
     lastActivityRef.current = Date.now();
   };
 
-  // Prevent body scroll when widget is open on mobile
-  useEffect(() => {
-    if (!isMinimized) {
-      // Save original styles and scroll position
-      const originalOverflow = document.body.style.overflow;
-      const scrollY = window.scrollY;
-      
-      // Prevent body scrolling without position fixed (which breaks touch)
-      document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '0px'; // Prevent layout shift
-      
-      return () => {
-        // Restore original body overflow
-        document.body.style.overflow = originalOverflow;
-        document.body.style.paddingRight = '';
-        // Restore scroll position
-        window.scrollTo(0, scrollY);
-      };
-    }
-  }, [isMinimized]);
-
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
     return Icon ? <Icon className="w-8 h-8" /> : <Icons.Zap className="w-8 h-8" />;
@@ -511,12 +490,7 @@ export default function ToolsChronographWheel() {
             }}
             style={{
               scrollbarWidth: "thin",
-              scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
-              overscrollBehavior: "contain",
-              WebkitOverflowScrolling: "touch",
-              touchAction: "pan-y",
-              position: "relative",
-              zIndex: 1
+              scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)"
             }}
           >
             <div className="space-y-1 sm:space-y-2">
