@@ -1,75 +1,256 @@
-import { Card } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
-import { FileUploadButton } from "@/components/FileUploadButton";
-import { FileList } from "@/components/FileList";
-import { fileUploadConfigs } from "@/lib/fileUploadConfigs";
-import { useState, useEffect } from "react";
-import { TrendingUp, DollarSign, AlertCircle, Award, Target } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, AreaChart, Area } from "recharts";
+import { CheckCircle2, AlertTriangle, TrendingUp, DollarSign, Users, Calendar } from "lucide-react";
+import {
+  LineChart, Line, BarChart, Bar, AreaChart, Area,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
 
-// UK Innovator Founder Visa Context (November 2025)
-// Viability Criterion: Revenue growth demonstrates business sustainability
+type RevenueStream = {
+  name: string;
+  monthlyRevenue: number;
+  growthRate: number;
+  pricingModel: 'subscription' | 'one-time' | 'usage-based' | 'freemium' | 'tiered';
+  customers: number;
+  seasonalityFactor: number;
+};
+
+type GrowthScenario = 'conservative' | 'base' | 'optimistic';
 
 export default function RevenueForecast() {
-  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
-  const [savedDate, setSavedDate] = useState("");
-  const [currentRevenue, setCurrentRevenue] = useState(100000);
-  const [growthRate, setGrowthRate] = useState(30);
-  const [customers, setCustomers] = useState(50);
-  const [arpu, setArpu] = useState(2000);
+  const [streams, setStreams] = useState<RevenueStream[]>([
+    { 
+      name: 'SaaS Subscriptions', 
+      monthlyRevenue: 8000, 
+      growthRate: 30, 
+      pricingModel: 'subscription',
+      customers: 40,
+      seasonalityFactor: 1.0
+    }
+  ]);
+  const [scenario, setScenario] = useState<GrowthScenario>('base');
+  const [cac, setCAC] = useState(500);
+  const [ltv, setLTV] = useState(3000);
+  const [activeTab, setActiveTab] = useState('forecast');
+  const [savedDate, setSavedDate] = useState('');
 
-  const saveProgress = () => {
-    localStorage.setItem('revenueForecastFiles', JSON.stringify(uploadedFiles));
-    localStorage.setItem('revenueForecastData', JSON.stringify({ currentRevenue, growthRate, customers, arpu }));
-    localStorage.setItem('revenueForecastDate', new Date().toLocaleDateString());
-    setSavedDate(new Date().toLocaleDateString());
+  const addStream = () => {
+    setStreams([...streams, { 
+      name: '', 
+      monthlyRevenue: 0, 
+      growthRate: 20, 
+      pricingModel: 'subscription',
+      customers: 0,
+      seasonalityFactor: 1.0
+    }]);
   };
 
-  const handleFileUpload = (file: any) => setUploadedFiles(prev => [...prev, file]);
-  const handleRemoveFile = (id: string) => setUploadedFiles(prev => prev.filter(f => f.id !== id));
+  const updateStream = (index: number, field: keyof RevenueStream, value: any) => {
+    const updated = [...streams];
+    updated[index] = { ...updated[index], [field]: value };
+    setStreams(updated);
+  };
 
-  const getProjections = () => {
+  const removeStream = (index: number) => {
+    setStreams(streams.filter((_, i) => i !== index));
+  };
+
+  const getScenarioMultiplier = (scenario: GrowthScenario) => {
+    const multipliers = {
+      conservative: { revenue: 0.7, growth: 0.6, customers: 0.75 },
+      base: { revenue: 1.0, growth: 1.0, customers: 1.0 },
+      optimistic: { revenue: 1.3, growth: 1.5, customers: 1.4 }
+    };
+    return multipliers[scenario];
+  };
+
+  const getSeasonalityMultiplier = (month: number, baseFactor: number) => {
+    const seasonalPattern = [
+      0.85, 0.88, 0.95, 1.0, 1.05, 1.08,
+      1.1, 1.12, 1.08, 1.05, 1.15, 1.25
+    ];
+    return baseFactor * seasonalPattern[month % 12];
+  };
+
+  const generateMonthlyProjections = (selectedScenario: GrowthScenario = scenario) => {
     const months = 36;
-    const monthlyGrowth = Math.pow(1 + growthRate / 100, 1 / 12) - 1;
-    return Array.from({ length: months + 1 }, (_, i) => {
-      const revenue = currentRevenue * Math.pow(1 + monthlyGrowth, i);
-      return {
-        month: i,
+    const mult = getScenarioMultiplier(selectedScenario);
+    const projections = [];
+
+    for (let month = 0; month <= months; month++) {
+      let totalRevenue = 0;
+      let totalCustomers = 0;
+      const streamData: { [key: string]: number } = {};
+
+      streams.forEach((stream, idx) => {
+        const adjustedGrowth = stream.growthRate * mult.growth / 100;
+        const monthlyGrowth = Math.pow(1 + adjustedGrowth, 1 / 12) - 1;
+        const growthFactor = Math.pow(1 + monthlyGrowth, month);
+        const seasonality = getSeasonalityMultiplier(month, stream.seasonalityFactor);
+        
+        const revenue = stream.monthlyRevenue * mult.revenue * growthFactor * seasonality;
+        const customers = Math.round(stream.customers * mult.customers * growthFactor);
+
+        totalRevenue += revenue;
+        totalCustomers += customers;
+        streamData[`stream${idx}`] = Math.round(revenue);
+      });
+
+      projections.push({
+        month: `M${month}`,
+        monthIndex: month,
+        totalRevenue: Math.round(totalRevenue),
+        totalCustomers,
+        ...streamData,
+        quarter: Math.floor(month / 3),
+        year: Math.floor(month / 12)
+      });
+    }
+
+    return projections;
+  };
+
+  const generateQuarterlyProjections = () => {
+    const monthly = generateMonthlyProjections();
+    const quarterly = [];
+    
+    for (let q = 0; q <= 11; q++) {
+      const quarterMonths = monthly.slice(q * 3, q * 3 + 3);
+      if (quarterMonths.length === 0) break;
+      
+      const revenue = quarterMonths.reduce((sum, m) => sum + m.totalRevenue, 0);
+      const customers = Math.round(
+        quarterMonths.reduce((sum, m) => sum + m.totalCustomers, 0) / quarterMonths.length
+      );
+
+      quarterly.push({
+        quarter: `Q${q + 1}`,
+        quarterIndex: q,
         revenue: Math.round(revenue),
-        customers: Math.round(customers * Math.pow(1 + monthlyGrowth, i)),
-        year: `M${i}`
-      };
-    });
+        customers,
+        year: Math.floor(q / 4)
+      });
+    }
+
+    return quarterly;
   };
 
-  const getYearlyProjections = () => {
-    const years = [0, 1, 2, 3];
-    return years.map(year => {
-      const revenue = currentRevenue * Math.pow(1 + growthRate / 100, year);
-      return {
+  const generateAnnualProjections = () => {
+    const monthly = generateMonthlyProjections();
+    const annual = [];
+
+    for (let year = 0; year <= 3; year++) {
+      const yearMonths = monthly.slice(year * 12, year * 12 + 12);
+      if (yearMonths.length === 0) break;
+
+      const revenue = yearMonths.reduce((sum, m) => sum + m.totalRevenue, 0);
+      const customers = Math.round(
+        yearMonths.reduce((sum, m) => sum + m.totalCustomers, 0) / yearMonths.length
+      );
+
+      annual.push({
         year: year === 0 ? 'Current' : `Year ${year}`,
-        revenue: Math.round(revenue / 1000),
-        target: Math.round((currentRevenue * 2 * year) / 1000) || currentRevenue / 1000
+        yearIndex: year,
+        revenue: Math.round(revenue),
+        customers,
+        mrr: Math.round(revenue / 12),
+        arr: Math.round(revenue)
+      });
+    }
+
+    return annual;
+  };
+
+  const generateScenarioComparison = () => {
+    const scenarios: GrowthScenario[] = ['conservative', 'base', 'optimistic'];
+    return scenarios.map(scen => {
+      const projections = generateMonthlyProjections(scen);
+      const year3 = projections.slice(36, 37)[0] || projections[projections.length - 1];
+      const totalRevenue = projections.slice(0, 37).reduce((sum, p) => sum + p.totalRevenue, 0);
+
+      return {
+        scenario: scen.charAt(0).toUpperCase() + scen.slice(1),
+        year3Revenue: year3.totalRevenue,
+        totalRevenue,
+        customers: year3.totalCustomers,
+        arr: Math.round(year3.totalRevenue * 12)
       };
     });
   };
 
-  const getGrowthHealth = (): { score: number; grade: string } => {
-    let score = 0;
-    if (growthRate >= 50) score += 50;
-    else if (growthRate >= 30) score += 40;
-    else if (growthRate >= 20) score += 25;
-    else score += 10;
+  const getMetrics = () => {
+    const monthly = generateMonthlyProjections();
+    const current = monthly[0];
+    const year1 = monthly[12];
+    const year2 = monthly[24];
+    const year3 = monthly[36];
+    
+    const totalRevenue3Years = monthly.slice(0, 37).reduce((sum, p) => sum + p.totalRevenue, 0);
+    const currentARR = current.totalRevenue * 12;
+    const year3ARR = year3.totalRevenue * 12;
+    const revenueMultiple = year3ARR / currentARR;
+    const cagr = (Math.pow(year3ARR / currentARR, 1/3) - 1) * 100;
 
-    const year3Revenue = currentRevenue * Math.pow(1 + growthRate / 100, 3);
-    if (year3Revenue >= 1000000) score += 50;
-    else if (year3Revenue >= 500000) score += 35;
-    else score += 15;
+    const customerAcquisitionCost = cac;
+    const lifetimeValue = ltv;
+    const ltvCacRatio = lifetimeValue / customerAcquisitionCost;
+    const paybackMonths = customerAcquisitionCost / (currentARR / 12 / current.totalCustomers);
+
+    return {
+      current,
+      year1,
+      year2,
+      year3,
+      totalRevenue3Years,
+      currentARR,
+      year3ARR,
+      revenueMultiple,
+      cagr,
+      ltvCacRatio,
+      paybackMonths,
+      currentMRR: current.totalRevenue,
+      year3MRR: year3.totalRevenue
+    };
+  };
+
+  const getViabilityScore = () => {
+    const metrics = getMetrics();
+    let score = 0;
+
+    if (metrics.cagr >= 100) score += 25;
+    else if (metrics.cagr >= 50) score += 20;
+    else if (metrics.cagr >= 30) score += 15;
+    else if (metrics.cagr >= 20) score += 10;
+    else score += 5;
+
+    if (metrics.year3ARR >= 1000000) score += 25;
+    else if (metrics.year3ARR >= 500000) score += 20;
+    else if (metrics.year3ARR >= 250000) score += 15;
+    else score += 5;
+
+    if (metrics.ltvCacRatio >= 5) score += 25;
+    else if (metrics.ltvCacRatio >= 3) score += 20;
+    else if (metrics.ltvCacRatio >= 2) score += 10;
+    else score += 5;
+
+    if (streams.length >= 3) score += 15;
+    else if (streams.length >= 2) score += 10;
+    else score += 5;
+
+    if (metrics.revenueMultiple >= 5) score += 10;
+    else if (metrics.revenueMultiple >= 3) score += 7;
+    else if (metrics.revenueMultiple >= 2) score += 5;
+    else score += 2;
 
     let grade = 'F - Poor';
     if (score >= 85) grade = 'A - Excellent';
@@ -80,383 +261,881 @@ export default function RevenueForecast() {
     return { score, grade };
   };
 
-  const exportReport = () => {
-    const projections = getProjections();
-    const year1 = projections[12];
-    const year2 = projections[24];
-    const year3 = projections[36];
-    const { score, grade } = getGrowthHealth();
-    const totalRevenue3Years = projections.slice(0, 37).reduce((sum, p) => sum + p.revenue, 0);
-
-    const content = `UK INNOVATOR FOUNDER VISA - REVENUE FORECAST (3-YEAR)
-Generated: ${new Date().toLocaleDateString()}
-
-═══════════════════════════════════════════════════════════
-EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
-═══════════════════════════════════════════════════════════
-Revenue Growth Health Score: ${score}% (${grade})
-Annual Growth Rate (CAGR): ${growthRate}%
-
-Current Revenue: £${currentRevenue.toLocaleString()}
-Year 3 Projection: £${year3.revenue.toLocaleString()}
-3-Year Total Revenue: £${totalRevenue3Years.toLocaleString()}
-Revenue Multiple: ${(year3.revenue / currentRevenue).toFixed(1)}x
-
-${score >= 70 ? '✓ STRONG REVENUE GROWTH - Supports viability and scalability criteria for UK Innovator Founder visa' : score >= 55 ? '⚠ MODERATE GROWTH - Strengthen for endorsement' : '✗ WEAK GROWTH - Critical improvements needed'}
-
-═══════════════════════════════════════════════════════════
-CURRENT STATE (BASELINE)
-═══════════════════════════════════════════════════════════
-Monthly Recurring Revenue (MRR): £${(currentRevenue / 12).toFixed(2).toLocaleString()}
-Annual Recurring Revenue (ARR): £${currentRevenue.toLocaleString()}
-Customer Base: ${customers} customers
-Average Revenue Per User (ARPU): £${arpu.toLocaleString()} per customer per year
-Monthly ARPU: £${(arpu / 12).toFixed(2).toLocaleString()}
-
-═══════════════════════════════════════════════════════════
-3-YEAR REVENUE PROJECTION
-═══════════════════════════════════════════════════════════
-Formula: Future Revenue = Current Revenue × (1 + Growth Rate)^Years
-Growth Rate: ${growthRate}% CAGR
-
-YEAR 1 PROJECTION (Month 12):
-  Calculation: £${currentRevenue.toLocaleString()} × (1 + ${growthRate}%)¹
-  Calculation: £${currentRevenue.toLocaleString()} × ${(1 + growthRate / 100).toFixed(3)}
-  Year 1 Revenue: £${year1.revenue.toLocaleString()}
-  Year 1 Customers: ${year1.customers}
-  YoY Growth: £${(year1.revenue - currentRevenue).toLocaleString()} (+${growthRate}%)
-
-YEAR 2 PROJECTION (Month 24):
-  Calculation: £${currentRevenue.toLocaleString()} × (1 + ${growthRate}%)²
-  Calculation: £${currentRevenue.toLocaleString()} × ${Math.pow(1 + growthRate / 100, 2).toFixed(3)}
-  Year 2 Revenue: £${year2.revenue.toLocaleString()}
-  Year 2 Customers: ${year2.customers}
-  YoY Growth: £${(year2.revenue - year1.revenue).toLocaleString()} (+${growthRate}%)
-
-YEAR 3 PROJECTION (Month 36 - End of Visa Period):
-  Calculation: £${currentRevenue.toLocaleString()} × (1 + ${growthRate}%)³
-  Calculation: £${currentRevenue.toLocaleString()} × ${Math.pow(1 + growthRate / 100, 3).toFixed(3)}
-  Year 3 Revenue: £${year3.revenue.toLocaleString()}
-  Year 3 Customers: ${year3.customers}
-  YoY Growth: £${(year3.revenue - year2.revenue).toLocaleString()} (+${growthRate}%)
-
-3-YEAR CUMULATIVE REVENUE:
-  Year 1: £${year1.revenue.toLocaleString()}
-  Year 2: £${year2.revenue.toLocaleString()}
-  Year 3: £${year3.revenue.toLocaleString()}
-  ────────────────────────────
-  Total 3-Year Revenue: £${totalRevenue3Years.toLocaleString()}
-
-Revenue Growth Multiple:
-  End-to-End Growth: ${(year3.revenue / currentRevenue).toFixed(1)}x in 3 years
-  ${(year3.revenue / currentRevenue) >= 2 ? '✓ Strong revenue multiplication' : '⚠ Limited revenue growth'}
-
-═══════════════════════════════════════════════════════════
-QUARTERLY REVENUE BREAKDOWN (12 Quarters)
-═══════════════════════════════════════════════════════════
-${[0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33].map((month, i) => {
-  const quarter = projections[month];
-  return `Q${i + 1} (Month ${month}):
-  Revenue: £${quarter.revenue.toLocaleString()}
-  Customers: ${quarter.customers}
-  MRR: £${(quarter.revenue / 12).toFixed(0).toLocaleString()}`;
-}).join('\n\n')}
-
-═══════════════════════════════════════════════════════════
-REVENUE GROWTH HEALTH SCORE CALCULATION
-═══════════════════════════════════════════════════════════
-Formula: Score = Growth Rate Component (50pts) + Year 3 Revenue Component (50pts)
-
-Component 1: Annual Growth Rate Assessment
-  Your Growth Rate: ${growthRate}% CAGR
-  Scoring:
-    - ≥50% CAGR: 50 points (Hypergrowth)
-    - 30-50% CAGR: 40 points (High growth)
-    - 20-30% CAGR: 25 points (Moderate growth)
-    - <20% CAGR: 10 points (Slow growth)
-  ${growthRate >= 50 ? '50/50 points (Hypergrowth)' :
-    growthRate >= 30 ? '40/50 points (High growth)' :
-    growthRate >= 20 ? '25/50 points (Moderate growth)' :
-    '10/50 points (Slow growth)'}
-
-Component 2: Year 3 Revenue Target Assessment
-  Your Year 3 Revenue: £${year3.revenue.toLocaleString()}
-  Scoring:
-    - ≥£1M: 50 points (Excellent scale)
-    - £500k-£1M: 35 points (Good scale)
-    - <£500k: 15 points (Limited scale)
-  ${year3.revenue >= 1000000 ? '50/50 points (£1M+ revenue achieved)' :
-    year3.revenue >= 500000 ? '35/50 points (£500k-£1M revenue)' :
-    '15/50 points (Revenue <£500k)'}
-
-Final Growth Health Score: ${score}/100 (${grade})
-
-═══════════════════════════════════════════════════════════
-UK INNOVATOR FOUNDER VISA: VIABILITY & SCALABILITY CRITERIA
-═══════════════════════════════════════════════════════════
-
-GOV.UK Viability Assessment Factors:
-• Realistic revenue projections based on current traction
-• Sustainable growth rate supported by market opportunity
-• Path to profitability and financial independence
-• Evidence validating revenue assumptions
-
-GOV.UK Scalability Assessment Factors:
-• High growth potential (>30% CAGR preferred)
-• Clear path to £1M+ annual revenue within 3 years
-• Revenue model supports job creation (5 jobs at £25k+ OR 10 jobs)
-• Addressable market sufficient for continued expansion
-
-CURRENT REVENUE GROWTH STATUS:
-
-Growth Rate: ${growthRate}% CAGR
-  ${growthRate >= 50 ? '✓ HYPERGROWTH (50%+) - Exceptional scalability for UK Innovator Founder visa' :
-    growthRate >= 30 ? '✓ HIGH GROWTH (30%+) - Strong scalability narrative' :
-    growthRate >= 20 ? '⚠ MODERATE GROWTH (20-30%) - Acceptable but strengthen for strong endorsement' :
-    '✗ SLOW GROWTH (<20%) - Insufficient for scalability criterion'}
-
-Year 3 Revenue Target: £${year3.revenue.toLocaleString()}
-  ${year3.revenue >= 1000000 ? '✓ EXCELLENT (£1M+) - Meets ILR revenue criterion (1 of 7 achievement criteria)' :
-    year3.revenue >= 500000 ? '✓ GOOD (£500k-£1M) - Strong viability demonstration' :
-    '⚠ LIMITED (<£500k) - May not demonstrate sufficient scalability'}
-
-Revenue Multiple: ${(year3.revenue / currentRevenue).toFixed(1)}x growth
-  ${(year3.revenue / currentRevenue) >= 5 ? '✓ EXCEPTIONAL (5x+) - Demonstrates hypergrowth potential' :
-    (year3.revenue / currentRevenue) >= 3 ? '✓ STRONG (3-5x) - Clear scaling trajectory' :
-    (year3.revenue / currentRevenue) >= 2 ? '⚠ MODERATE (2-3x) - Viable but could be stronger' :
-    '✗ WEAK (<2x) - Limited growth demonstrates scaling challenges'}
-
-Overall Growth Health: ${score}%
-  ${score >= 70 ? '✓ STRONG REVENUE FORECAST - Demonstrates clear viability and scalability' :
-    score >= 55 ? '⚠ MODERATE FORECAST - Viable but strengthening growth rate would improve case' :
-    '✗ WEAK FORECAST - Requires fundamental improvements to revenue projections'}
-
-GOV.UK ILR Achievement Criteria:
-${year3.revenue >= 1000000 ? 
-`✓ REVENUE CRITERION MET - Achieving £1M+ annual revenue is one of 7 ILR achievement criteria
-  (Applicants must meet 2 of 7 criteria for settlement after 3 years)` :
-`⚠ Revenue projection £${year3.revenue.toLocaleString()} falls short of £1M ILR criterion
-  Consider other ILR pathways: job creation (5 jobs at £25k+), investment (£50k), or IP development`}
-
-Visa Criterion Alignment:
-${score >= 70 && year3.revenue >= 500000 ? 
-`✓ Revenue forecast demonstrates strong viability and scalability for UK Innovator Founder visa endorsement. ${growthRate}% CAGR and £${year3.revenue.toLocaleString()} Year 3 projection show realistic path to significant scale${year3.revenue >= 1000000 ? ' and meet the £1M revenue ILR criterion' : ''}.` :
-score >= 55 ?
-`⚠ Revenue forecast is acceptable but strengthening growth rate (aim for 30%+ CAGR) and Year 3 target (aim for £1M+) would create stronger endorsement case. Focus on demonstrating traction and market validation to support projections.` :
-`✗ Revenue forecast needs significant strengthening. Current ${growthRate}% growth and £${year3.revenue.toLocaleString()} Year 3 projection may not demonstrate sufficient viability and scalability. Revisit market opportunity, pricing strategy, and customer acquisition plan.`}
-
-═══════════════════════════════════════════════════════════
-Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
-https://www.gov.uk/innovator-founder-visa
-Immigration Rules Appendix Innovator Founder
-Viability Criterion: Realistic financial projections and sustainable growth
-Scalability Criterion: High growth potential and path to significant revenue
-ILR Achievement Criteria: £1M annual revenue (1 of 7 criteria, need 2 total)
-Endorsing Bodies: Envestors, UKES, Innovator International, GEP
-Revenue Forecasting Methodology: Compound annual growth rate (CAGR) modeling
-`;
-
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'innovator-founder-revenue-forecast.txt';
-    a.click();
+  const getSerializedState = () => {
+    return {
+      streams,
+      scenario,
+      cac,
+      ltv,
+      activeTab,
+      savedDate: new Date().toLocaleString('en-GB')
+    };
   };
 
-  const getSmartRecommendations = () => {
-    const tips: string[] = [];
-    if (growthRate < 20) tips.push("⚠️ Growth rate <20% - consider strategies to accelerate revenue");
-    if (currentRevenue < 50000) tips.push("📊 Low current revenue - focus on customer acquisition");
-    const { score } = getGrowthHealth();
-    if (score >= 75) tips.push("✅ Strong revenue growth supports viability criterion");
-    return tips.length ? tips : ["✅ Revenue forecast is healthy"];
-  };
-
-  const getMonthlyTrend = () => getProjections().slice(0, 36);
-
-  const getQuarterlyBreakdown = () => {
-    const projections = getProjections();
-    return [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33].map((month, i) => ({
-      quarter: `Q${i + 1}`,
-      revenue: Math.round(projections[month].revenue / 1000),
-      customers: projections[month].customers
-    }));
+  const restoreSerializedState = (state: any) => {
+    if ('streams' in state) setStreams(state.streams);
+    if ('scenario' in state) setScenario(state.scenario);
+    if ('cac' in state) setCAC(state.cac);
+    if ('ltv' in state) setLTV(state.ltv);
+    if ('activeTab' in state) setActiveTab(state.activeTab);
+    if ('savedDate' in state) setSavedDate(state.savedDate || '');
   };
 
   useEffect(() => {
-    const s = localStorage.getItem('revenueForecastData');
-    if (s) {
-      const data = JSON.parse(s);
-      setCurrentRevenue(data.currentRevenue || 100000);
-      setGrowthRate(data.growthRate || 30);
-      setCustomers(data.customers || 50);
-      setArpu(data.arpu || 2000);
+    const saved = localStorage.getItem('revenue-forecast-state');
+    if (saved) {
+      const state = JSON.parse(saved);
+      restoreSerializedState(state);
     }
-    const f = localStorage.getItem('revenueForecastFiles');
-    if (f) setUploadedFiles(JSON.parse(f));
-    const d = localStorage.getItem('revenueForecastDate');
-    if (d) setSavedDate(d);
   }, []);
 
-  const { score: healthScore, grade } = getGrowthHealth();
-  const year3Revenue = currentRevenue * Math.pow(1 + growthRate / 100, 3);
+  const handleSave = () => {
+    const state = getSerializedState();
+    localStorage.setItem('revenue-forecast-state', JSON.stringify(state));
+    setSavedDate(state.savedDate);
+  };
+
+  const handleRestore = () => {
+    const saved = localStorage.getItem('revenue-forecast-state');
+    if (saved) {
+      const state = JSON.parse(saved);
+      restoreSerializedState(state);
+    }
+  };
+
+  const getSmartTips = () => {
+    const tips = [];
+    const metrics = getMetrics();
+
+    if (metrics.year3ARR < 1000000) {
+      tips.push("Target £1M ARR by Year 3 to meet one of seven ILR achievement criteria for UK Innovator Founder visa settlement");
+    }
+
+    if (metrics.cagr < 30) {
+      tips.push("Revenue growth below 30% CAGR may not demonstrate sufficient scalability - endorsing bodies favor high-growth ventures");
+    }
+
+    if (metrics.ltvCacRatio < 3) {
+      tips.push("LTV:CAC ratio below 3:1 signals inefficient customer economics - optimize pricing or reduce acquisition costs");
+    }
+
+    if (streams.length < 2) {
+      tips.push("Diversify revenue streams to demonstrate business resilience and multiple paths to scale");
+    }
+
+    if (metrics.paybackMonths > 12) {
+      tips.push("Customer payback period exceeds 12 months - consider improving unit economics or pricing strategy");
+    }
+
+    if (streams.some(s => s.pricingModel === 'one-time')) {
+      tips.push("One-time revenue models lack predictability - highlight recurring revenue streams for stronger viability case");
+    }
+
+    if (metrics.revenueMultiple < 3) {
+      tips.push("Revenue growth multiple below 3x over 3 years may signal limited scaling potential - strengthen growth drivers");
+    }
+
+    if (streams.some(s => s.seasonalityFactor > 1.3 || s.seasonalityFactor < 0.7)) {
+      tips.push("High seasonality can impact cash flow - document mitigation strategies and maintain adequate reserves");
+    }
+
+    if (metrics.year3ARR >= 1000000 && metrics.cagr >= 50) {
+      tips.push("Exceptional revenue trajectory - ensure projections are backed by market validation and realistic assumptions");
+    }
+
+    tips.push("Document all revenue assumptions with customer interviews, market sizing, and competitor benchmarks");
+    tips.push("Include sensitivity analysis showing impact of 20-30% variance in growth rates and customer acquisition");
+    tips.push("Prepare detailed cohort analysis demonstrating improving unit economics and customer retention over time");
+
+    return tips.slice(0, 8);
+  };
+
+  const generateActionPlan = () => {
+    return [
+      { week: "Week 1", action: "Build detailed revenue model with monthly granularity for 36 months across all revenue streams", priority: "Critical" },
+      { week: "Week 1", action: "Document pricing strategy with market comparisons and willingness-to-pay research", priority: "Critical" },
+      { week: "Week 1-2", action: "Create customer acquisition plan with CAC calculations by channel and cohort analysis", priority: "Critical" },
+      { week: "Week 2", action: "Develop three-scenario forecast (conservative, base, optimistic) with clear assumption triggers", priority: "High" },
+      { week: "Week 2", action: "Calculate and validate key metrics: LTV, CAC, payback period, churn rate, expansion revenue", priority: "Critical" },
+      { week: "Week 2-3", action: "Build seasonality model based on industry benchmarks or early traction data", priority: "High" },
+      { week: "Week 3", action: "Prepare revenue bridge analysis showing month-over-month drivers of growth", priority: "High" },
+      { week: "Week 3", action: "Document evidence supporting each revenue assumption (LOIs, pilot customers, market research)", priority: "Critical" },
+      { week: "Week 3-4", action: "Create sensitivity tables testing impact of growth rate, pricing, and churn variations", priority: "High" },
+      { week: "Week 4", action: "Have financial advisor or accountant review model for realism and compliance with UK GAAP", priority: "Critical" },
+      { week: "Week 4", action: "Build visual dashboard highlighting path to £1M ARR and key inflection points", priority: "Medium" },
+      { week: "Ongoing", action: "Update model monthly with actual results and refine projections based on traction", priority: "High" },
+    ];
+  };
+
+  const handleExport = () => {
+    const metrics = getMetrics();
+    const { score, grade } = getViabilityScore();
+    const monthly = generateMonthlyProjections();
+    const quarterly = generateQuarterlyProjections();
+    const annual = generateAnnualProjections();
+    const scenarioComp = generateScenarioComparison();
+
+    const report = `UK INNOVATOR FOUNDER VISA - COMPREHENSIVE REVENUE FORECAST
+Generated: ${new Date().toLocaleString('en-GB')}
+${'='.repeat(80)}
+
+EXECUTIVE SUMMARY
+${'-'.repeat(80)}
+Viability Score: ${score}/100 (${grade})
+Selected Scenario: ${scenario.charAt(0).toUpperCase() + scenario.slice(1)}
+
+Current ARR: £${metrics.currentARR.toLocaleString()}
+Year 3 ARR: £${metrics.year3ARR.toLocaleString()}
+3-Year CAGR: ${metrics.cagr.toFixed(1)}%
+Revenue Multiple: ${metrics.revenueMultiple.toFixed(1)}x
+
+Total 3-Year Revenue: £${metrics.totalRevenue3Years.toLocaleString()}
+LTV:CAC Ratio: ${metrics.ltvCacRatio.toFixed(1)}:1
+Customer Payback Period: ${metrics.paybackMonths.toFixed(1)} months
+
+${score >= 70 ? 'STRONG REVENUE FORECAST - Demonstrates viability and scalability for UK Innovator Founder visa' : 
+  score >= 55 ? 'MODERATE FORECAST - Strengthen growth metrics and diversify revenue streams' :
+  'WEAK FORECAST - Significant improvements needed in revenue projections and unit economics'}
+
+REVENUE STREAMS BREAKDOWN
+${'-'.repeat(80)}
+${streams.map((stream, i) => `
+Stream ${i + 1}: ${stream.name || 'Unnamed Stream'}
+  Pricing Model: ${stream.pricingModel}
+  Monthly Revenue: £${stream.monthlyRevenue.toLocaleString()}
+  Growth Rate: ${stream.growthRate}% CAGR
+  Current Customers: ${stream.customers}
+  Seasonality Factor: ${stream.seasonalityFactor.toFixed(2)}x
+`).join('')}
+
+ANNUAL PROJECTIONS (${scenario.toUpperCase()} SCENARIO)
+${'-'.repeat(80)}
+${annual.map(a => `
+${a.year}:
+  ARR: £${a.arr.toLocaleString()}
+  MRR: £${a.mrr.toLocaleString()}
+  Customers: ${a.customers}
+  ${a.yearIndex > 0 ? `YoY Growth: ${(((a.arr / annual[a.yearIndex - 1].arr) - 1) * 100).toFixed(1)}%` : ''}
+`).join('')}
+
+QUARTERLY BREAKDOWN (FIRST 12 QUARTERS)
+${'-'.repeat(80)}
+${quarterly.map(q => `
+${q.quarter} (Year ${q.year + 1}):
+  Revenue: £${q.revenue.toLocaleString()}
+  Customers: ${q.customers}
+  QoQ Growth: ${q.quarterIndex > 0 ? `${(((q.revenue / quarterly[q.quarterIndex - 1].revenue) - 1) * 100).toFixed(1)}%` : 'N/A'}
+`).join('')}
+
+MONTHLY PROJECTIONS (FIRST 12 MONTHS)
+${'-'.repeat(80)}
+${monthly.slice(0, 13).map(m => `
+${m.month}:
+  Total Revenue: £${m.totalRevenue.toLocaleString()}
+  Customers: ${m.totalCustomers}
+  ${m.monthIndex > 0 ? `MoM Growth: ${(((m.totalRevenue / monthly[m.monthIndex - 1].totalRevenue) - 1) * 100).toFixed(1)}%` : ''}
+`).join('')}
+
+SCENARIO ANALYSIS COMPARISON
+${'-'.repeat(80)}
+${scenarioComp.map(s => `
+${s.scenario} Scenario:
+  Year 3 MRR: £${(s.year3Revenue).toLocaleString()}
+  Year 3 ARR: £${s.arr.toLocaleString()}
+  3-Year Total: £${s.totalRevenue.toLocaleString()}
+  Year 3 Customers: ${s.customers}
+`).join('')}
+
+UNIT ECONOMICS ANALYSIS
+${'-'.repeat(80)}
+Customer Acquisition Cost (CAC): £${cac.toLocaleString()}
+Customer Lifetime Value (LTV): £${ltv.toLocaleString()}
+LTV:CAC Ratio: ${metrics.ltvCacRatio.toFixed(2)}:1
+Payback Period: ${metrics.paybackMonths.toFixed(1)} months
+
+Current ARPU (Annual): £${metrics.currentARR > 0 && metrics.current.totalCustomers > 0 ? 
+  (metrics.currentARR / metrics.current.totalCustomers).toFixed(0) : '0'}
+Year 3 ARPU (Annual): £${metrics.year3ARR > 0 && metrics.year3.totalCustomers > 0 ? 
+  (metrics.year3ARR / metrics.year3.totalCustomers).toFixed(0) : '0'}
+
+VIABILITY SCORE CALCULATION
+${'-'.repeat(80)}
+Formula: Score = CAGR (25pts) + Year 3 ARR (25pts) + Unit Economics (25pts) + 
+         Diversification (15pts) + Growth Multiple (10pts)
+
+CAGR Assessment (${metrics.cagr.toFixed(1)}%):
+  >= 100%: 25 points | 50-100%: 20 points | 30-50%: 15 points | 20-30%: 10 points | <20%: 5 points
+  ${metrics.cagr >= 100 ? '25/25 points' : metrics.cagr >= 50 ? '20/25 points' : 
+    metrics.cagr >= 30 ? '15/25 points' : metrics.cagr >= 20 ? '10/25 points' : '5/25 points'}
+
+Year 3 ARR Target (£${metrics.year3ARR.toLocaleString()}):
+  >= £1M: 25 points | £500k-£1M: 20 points | £250k-£500k: 15 points | <£250k: 5 points
+  ${metrics.year3ARR >= 1000000 ? '25/25 points (ILR criterion met)' : 
+    metrics.year3ARR >= 500000 ? '20/25 points' :
+    metrics.year3ARR >= 250000 ? '15/25 points' : '5/25 points'}
+
+LTV:CAC Ratio (${metrics.ltvCacRatio.toFixed(1)}:1):
+  >= 5:1: 25 points | 3-5:1: 20 points | 2-3:1: 10 points | <2:1: 5 points
+  ${metrics.ltvCacRatio >= 5 ? '25/25 points' : metrics.ltvCacRatio >= 3 ? '20/25 points' :
+    metrics.ltvCacRatio >= 2 ? '10/25 points' : '5/25 points'}
+
+Revenue Streams (${streams.length}):
+  >= 3 streams: 15 points | 2 streams: 10 points | 1 stream: 5 points
+  ${streams.length >= 3 ? '15/15 points' : streams.length >= 2 ? '10/15 points' : '5/15 points'}
+
+Growth Multiple (${metrics.revenueMultiple.toFixed(1)}x):
+  >= 5x: 10 points | 3-5x: 7 points | 2-3x: 5 points | <2x: 2 points
+  ${metrics.revenueMultiple >= 5 ? '10/10 points' : metrics.revenueMultiple >= 3 ? '7/10 points' :
+    metrics.revenueMultiple >= 2 ? '5/10 points' : '2/10 points'}
+
+Final Viability Score: ${score}/100 (${grade})
+
+UK INNOVATOR FOUNDER VISA ALIGNMENT
+${'-'.repeat(80)}
+
+GOV.UK Viability Criterion:
+${metrics.year3ARR >= 250000 && metrics.cagr >= 20 ? 
+  '✓ Revenue forecast demonstrates realistic path to sustainable business with positive unit economics' :
+  '⚠ Strengthen revenue projections and validate assumptions with market evidence'}
+
+GOV.UK Scalability Criterion:
+${metrics.cagr >= 30 && metrics.year3ARR >= 500000 ?
+  '✓ High growth trajectory (${metrics.cagr.toFixed(1)}% CAGR) demonstrates clear scalability potential' :
+  '⚠ Growth rate or revenue scale may not meet endorsing body expectations for high-growth venture'}
+
+ILR Achievement Criteria (£1M ARR):
+${metrics.year3ARR >= 1000000 ?
+  '✓ CRITERION MET - £1M+ ARR achieved (1 of 7 ILR criteria, need 2 total for settlement)' :
+  `Current projection: £${metrics.year3ARR.toLocaleString()} ARR - £${(1000000 - metrics.year3ARR).toLocaleString()} short of £1M criterion`}
+
+SMART RECOMMENDATIONS
+${'-'.repeat(80)}
+${getSmartTips().map((tip, i) => `${i + 1}. ${tip}`).join('\n')}
+
+4-WEEK ACTION PLAN
+${'-'.repeat(80)}
+${generateActionPlan().map(item => `[${item.priority}] ${item.week}: ${item.action}`).join('\n')}
+
+CRITICAL ASSUMPTIONS TO VALIDATE
+${'-'.repeat(80)}
+1. Customer acquisition channels and conversion rates by channel
+2. Pricing validation through willingness-to-pay research and competitor analysis
+3. Churn rate assumptions based on industry benchmarks or early cohort data
+4. Seasonality patterns validated against sector norms or pilot data
+5. Market size sufficient to support projected customer acquisition targets
+6. Competitive positioning enabling sustained growth at projected rates
+7. Operational capacity to deliver and support at projected scale
+8. Capital requirements to fund growth before achieving cash flow breakeven
+
+ENDORSING BODY PRESENTATION NOTES
+${'-'.repeat(80)}
+- Emphasize ${metrics.cagr.toFixed(1)}% CAGR demonstrating high-growth potential
+- Highlight path to £${metrics.year3ARR >= 1000000 ? '1M+' : (metrics.year3ARR/1000).toFixed(0) + 'k'} ARR within 3-year visa period
+- Present ${streams.length} revenue stream${streams.length > 1 ? 's' : ''} showing business model resilience
+- Document LTV:CAC ratio of ${metrics.ltvCacRatio.toFixed(1)}:1 demonstrating sustainable economics
+- Include scenario analysis showing business viability even in conservative case
+- Back all projections with market research, customer validation, and realistic assumptions
+- Prepare sensitivity analysis for key variables (growth rate, pricing, CAC, churn)
+- Show month-over-month revenue bridge explaining growth drivers
+
+${'='.repeat(80)}
+Report generated by UK Innovator Founder Visa Assistant
+www.innovatorfoundervisaassistant.co.uk
+`;
+
+    const blob = new Blob([report], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `revenue-forecast-${scenario}-${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const metrics = getMetrics();
+  const { score, grade } = getViabilityScore();
+  const monthlyData = generateMonthlyProjections();
+  const quarterlyData = generateQuarterlyProjections();
+  const annualData = generateAnnualProjections();
+  const scenarioData = generateScenarioComparison();
 
   return (
     <>
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <ToolNavigation />
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Revenue Forecast</h1>
-          <p className="text-muted-foreground mb-6">Project revenue growth for viability (Innovator Founder Visa)</p>
-
-          <ToolUtilityBar toolId="revenue-forecast" toolName="Revenue Forecast" onSave={saveProgress} onExport={exportReport} getSerializedState={() => ({ uploadedFiles, currentRevenue, growthRate, customers, arpu, savedDate })} />
-
-          {savedDate && <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950"><AlertCircle className="h-4 w-4 text-green-600" /><AlertDescription className="text-green-700 dark:text-green-300">Last saved: {savedDate}</AlertDescription></Alert>}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card className="p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <Award className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Growth Health</span>
-              </div>
-              <p className="text-3xl font-bold">{healthScore}%</p>
-              <p className="text-xs text-muted-foreground mt-1">{grade}</p>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <DollarSign className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Current Revenue</span>
-              </div>
-              <p className="text-3xl font-bold">£{Math.round(currentRevenue / 1000)}k</p>
-              <p className="text-xs text-muted-foreground mt-1">Annual</p>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Growth Rate</span>
-              </div>
-              <p className="text-3xl font-bold">{growthRate}%</p>
-              <p className="text-xs text-muted-foreground mt-1">Annual</p>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <Target className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Year 3</span>
-              </div>
-              <p className="text-3xl font-bold">£{Math.round(year3Revenue / 1000)}k</p>
-              <p className="text-xs text-muted-foreground mt-1">Projected</p>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">3-Year Revenue Projection</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <AreaChart data={getMonthlyTrend()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" label={{ value: 'Month', position: 'insideBottom', offset: -5 }} />
-                  <YAxis label={{ value: 'Revenue £', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip formatter={(value: number) => `£${value.toLocaleString()}`} />
-                  <Area type="monotone" dataKey="revenue" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Yearly Growth Trajectory</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={getYearlyProjections()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="year" />
-                  <YAxis label={{ value: '£ Thousands', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip formatter={(value: number) => `£${value}k`} />
-                  <Legend />
-                  <Bar dataKey="revenue" fill="#ffa536" name="Projected Revenue" />
-                  <Bar dataKey="target" fill="#10b981" fillOpacity={0.3} name="Conservative Target" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Quarterly Breakdown</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={getQuarterlyBreakdown()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="quarter" />
-                  <YAxis label={{ value: '£ Thousands', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip formatter={(value: number) => `£${value}k`} />
-                  <Bar dataKey="revenue" fill="#ffa536" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Customer Growth</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={getMonthlyTrend()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" label={{ value: 'Month', position: 'insideBottom', offset: -5 }} />
-                  <YAxis label={{ value: 'Customers', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="customers" stroke="#11b6e9" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </Card>
-          </div>
-
-          <Card className="p-6 mb-6">
-            <h3 className="font-semibold mb-4">Recommendations</h3>
-            <div className="space-y-3">
-              {getSmartRecommendations().map((tip, i) => {
-                const isWarning = tip.includes('⚠️');
-                return (
-                  <Alert key={i} className={isWarning ? "border-orange-200 bg-orange-50 dark:bg-orange-950" : "border-blue-200 bg-blue-50 dark:bg-blue-950"}>
-                    <AlertDescription className={isWarning ? "text-orange-700 dark:text-orange-300" : "text-blue-700 dark:text-blue-300"}>{tip}</AlertDescription>
-                  </Alert>
-                );
-              })}
-            </div>
-          </Card>
-
-          <Card className="p-6 mb-6">
-            <h3 className="font-semibold mb-4">Forecast Parameters</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="text-sm font-medium block mb-2">Current Annual Revenue (£)</label>
-                <Input type="number" value={currentRevenue} onChange={(e) => setCurrentRevenue(Number(e.target.value))} data-testid="input-revenue" />
-              </div>
-              <div>
-                <label className="text-sm font-medium block mb-2">Current Customers</label>
-                <Input type="number" value={customers} onChange={(e) => setCustomers(Number(e.target.value))} data-testid="input-customers" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium block mb-2">Annual Growth Rate: {growthRate}%</label>
-                <Slider value={[growthRate]} onValueChange={(v) => setGrowthRate(v[0])} max={100} step={5} data-testid="slider-growth" />
-              </div>
-              <div>
-                <label className="text-sm font-medium block mb-2">ARPU (£)</label>
-                <Input type="number" value={arpu} onChange={(e) => setArpu(Number(e.target.value))} data-testid="input-arpu" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 mb-6">
-            <h3 className="font-semibold mb-4">Upload Financial Projections</h3>
-            <FileUploadButton onFileSelected={handleFileUpload} config={fileUploadConfigs.companyDocuments} />
-            {uploadedFiles.length > 0 && (
-              <div className="mt-4">
-                <FileList files={uploadedFiles} onRemove={handleRemoveFile} />
-              </div>
+          <ToolNavigation />
+          
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2" data-testid="heading-revenue-forecast">Revenue Forecast</h1>
+            <p className="text-lg text-muted-foreground">Multi-stream revenue projections with growth scenarios and unit economics</p>
+            {savedDate && (
+              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
             )}
-          </Card>
+          </div>
+
+          <ToolUtilityBar
+            toolId="revenue-forecast"
+            onSave={handleSave}
+            onRestore={handleRestore}
+            onExport={handleExport}
+            getSerializedState={getSerializedState}
+            toolName="Revenue Forecast"
+          />
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4" data-testid="tabs-revenue-forecast">
+              <TabsTrigger value="forecast" data-testid="tab-forecast">Forecast</TabsTrigger>
+              <TabsTrigger value="analysis" data-testid="tab-analysis">Analysis</TabsTrigger>
+              <TabsTrigger value="tips" data-testid="tab-tips">Smart Tips</TabsTrigger>
+              <TabsTrigger value="action" data-testid="tab-action">Action Plan</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="forecast" className="space-y-6">
+              <div className="grid md:grid-cols-4 gap-4">
+                <Card className={score >= 70 ? "border-green-500" : score >= 55 ? "border-orange-500" : "border-destructive"}>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground mb-2">Viability Score</p>
+                      <p className="text-3xl font-bold" data-testid="text-viability-score">{score}%</p>
+                      <p className="text-sm mt-2">{grade}</p>
+                      <Progress value={score} className="mt-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground mb-2">Current ARR</p>
+                      <p className="text-3xl font-bold text-primary" data-testid="text-current-arr">£{(metrics.currentARR/1000).toFixed(0)}k</p>
+                      <p className="text-sm mt-2">MRR: £{(metrics.currentMRR/1000).toFixed(1)}k</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground mb-2">Year 3 ARR</p>
+                      <p className="text-3xl font-bold text-green-600" data-testid="text-year3-arr">£{(metrics.year3ARR/1000).toFixed(0)}k</p>
+                      <div className="flex items-center justify-center gap-2 mt-2">
+                        {metrics.year3ARR >= 1000000 ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4 text-orange-500" />
+                        )}
+                        <span className="text-sm">{metrics.year3ARR >= 1000000 ? '£1M+ Target Met' : 'Below £1M Target'}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground mb-2">3-Year CAGR</p>
+                      <p className="text-3xl font-bold" data-testid="text-cagr">{metrics.cagr.toFixed(1)}%</p>
+                      <div className="flex items-center justify-center gap-2 mt-2">
+                        <TrendingUp className="h-4 w-4 text-green-500" />
+                        <span className="text-sm">{metrics.revenueMultiple.toFixed(1)}x Multiple</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {metrics.year3ARR >= 1000000 && (
+                <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-600 dark:text-green-400">
+                    Excellent! Your Year 3 ARR projection meets the £1M revenue criterion for ILR (1 of 7 achievement criteria).
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {score < 55 && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    Revenue forecast needs strengthening. Current projections may not demonstrate sufficient viability and scalability for endorsement.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Growth Scenario</CardTitle>
+                      <CardDescription>Select projection scenario</CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      {(['conservative', 'base', 'optimistic'] as GrowthScenario[]).map(scen => (
+                        <Button
+                          key={scen}
+                          variant={scenario === scen ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setScenario(scen)}
+                          data-testid={`button-scenario-${scen}`}
+                        >
+                          {scen.charAt(0).toUpperCase() + scen.slice(1)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="cac">Customer Acquisition Cost (CAC)</Label>
+                        <Input
+                          id="cac"
+                          type="number"
+                          value={cac}
+                          onChange={(e) => setCAC(parseFloat(e.target.value) || 0)}
+                          data-testid="input-cac"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="ltv">Customer Lifetime Value (LTV)</Label>
+                        <Input
+                          id="ltv"
+                          type="number"
+                          value={ltv}
+                          onChange={(e) => setLTV(parseFloat(e.target.value) || 0)}
+                          data-testid="input-ltv"
+                        />
+                      </div>
+                      <div className="p-4 bg-muted rounded-lg">
+                        <p className="text-sm font-medium mb-2">Unit Economics</p>
+                        <div className="space-y-1 text-sm">
+                          <p>LTV:CAC Ratio: <span className="font-bold">{metrics.ltvCacRatio.toFixed(2)}:1</span></p>
+                          <p>Payback Period: <span className="font-bold">{metrics.paybackMonths.toFixed(1)} months</span></p>
+                          <div className="flex items-center gap-2 mt-2">
+                            {metrics.ltvCacRatio >= 3 ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <AlertTriangle className="h-4 w-4 text-orange-500" />
+                            )}
+                            <span className="text-xs text-muted-foreground">
+                              {metrics.ltvCacRatio >= 3 ? 'Healthy unit economics' : 'Improve CAC or LTV'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium mb-4">Scenario Multipliers</p>
+                      <div className="space-y-3 text-sm">
+                        <div className="p-3 bg-muted/50 rounded">
+                          <p className="font-medium">Conservative</p>
+                          <p className="text-xs text-muted-foreground">70% revenue, 60% growth, 75% customers</p>
+                        </div>
+                        <div className="p-3 bg-primary/10 rounded border border-primary">
+                          <p className="font-medium">Base (Realistic)</p>
+                          <p className="text-xs text-muted-foreground">100% revenue, 100% growth, 100% customers</p>
+                        </div>
+                        <div className="p-3 bg-muted/50 rounded">
+                          <p className="font-medium">Optimistic</p>
+                          <p className="text-xs text-muted-foreground">130% revenue, 150% growth, 140% customers</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Revenue Streams</CardTitle>
+                    <Button onClick={addStream} size="sm" data-testid="button-add-stream">
+                      Add Stream
+                    </Button>
+                  </div>
+                  <CardDescription>Configure multiple revenue sources with different growth rates and pricing models</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {streams.map((stream, index) => (
+                    <Card key={index} className="p-4">
+                      <div className="space-y-4">
+                        <div className="grid md:grid-cols-3 gap-4">
+                          <div>
+                            <Label htmlFor={`stream-name-${index}`}>Stream Name</Label>
+                            <Input
+                              id={`stream-name-${index}`}
+                              value={stream.name}
+                              onChange={(e) => updateStream(index, 'name', e.target.value)}
+                              placeholder="e.g., SaaS Subscriptions"
+                              data-testid={`input-stream-name-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`stream-revenue-${index}`}>Monthly Revenue (£)</Label>
+                            <Input
+                              id={`stream-revenue-${index}`}
+                              type="number"
+                              value={stream.monthlyRevenue || ''}
+                              onChange={(e) => updateStream(index, 'monthlyRevenue', parseFloat(e.target.value) || 0)}
+                              data-testid={`input-stream-revenue-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`stream-customers-${index}`}>Customers</Label>
+                            <Input
+                              id={`stream-customers-${index}`}
+                              type="number"
+                              value={stream.customers || ''}
+                              onChange={(e) => updateStream(index, 'customers', parseInt(e.target.value) || 0)}
+                              data-testid={`input-stream-customers-${index}`}
+                            />
+                          </div>
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-4">
+                          <div>
+                            <Label htmlFor={`stream-growth-${index}`}>Growth Rate (% CAGR)</Label>
+                            <div className="space-y-2">
+                              <Slider
+                                id={`stream-growth-${index}`}
+                                min={0}
+                                max={200}
+                                step={5}
+                                value={[stream.growthRate]}
+                                onValueChange={(val) => updateStream(index, 'growthRate', val[0])}
+                                data-testid={`slider-stream-growth-${index}`}
+                              />
+                              <p className="text-sm text-center font-medium">{stream.growthRate}%</p>
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor={`stream-pricing-${index}`}>Pricing Model</Label>
+                            <select
+                              id={`stream-pricing-${index}`}
+                              value={stream.pricingModel}
+                              onChange={(e) => updateStream(index, 'pricingModel', e.target.value)}
+                              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+                              data-testid={`select-stream-pricing-${index}`}
+                            >
+                              <option value="subscription">Subscription</option>
+                              <option value="one-time">One-time</option>
+                              <option value="usage-based">Usage-based</option>
+                              <option value="freemium">Freemium</option>
+                              <option value="tiered">Tiered</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label htmlFor={`stream-seasonality-${index}`}>Seasonality Factor</Label>
+                            <div className="space-y-2">
+                              <Slider
+                                id={`stream-seasonality-${index}`}
+                                min={0.5}
+                                max={1.5}
+                                step={0.1}
+                                value={[stream.seasonalityFactor]}
+                                onValueChange={(val) => updateStream(index, 'seasonalityFactor', val[0])}
+                                data-testid={`slider-stream-seasonality-${index}`}
+                              />
+                              <p className="text-sm text-center font-medium">{stream.seasonalityFactor.toFixed(1)}x</p>
+                            </div>
+                          </div>
+                        </div>
+                        {streams.length > 1 && (
+                          <div className="flex justify-end">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeStream(index)}
+                              data-testid={`button-remove-stream-${index}`}
+                            >
+                              Remove Stream
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="analysis" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Revenue Trend (36 Months)</CardTitle>
+                  <CardDescription>Monthly revenue progression with seasonality</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={350}>
+                    <LineChart data={monthlyData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="month" className="text-xs" />
+                      <YAxis className="text-xs" tickFormatter={(val) => `£${(val/1000).toFixed(0)}k`} />
+                      <Tooltip 
+                        formatter={(value: number) => [`£${value.toLocaleString()}`, 'Revenue']}
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
+                      />
+                      <Legend />
+                      <Line 
+                        type="monotone" 
+                        dataKey="totalRevenue" 
+                        stroke="hsl(var(--primary))" 
+                        strokeWidth={2}
+                        name="Total Revenue"
+                        dot={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Revenue Streams Breakdown</CardTitle>
+                  <CardDescription>Stacked area chart showing contribution by stream</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={350}>
+                    <AreaChart data={monthlyData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="month" className="text-xs" />
+                      <YAxis className="text-xs" tickFormatter={(val) => `£${(val/1000).toFixed(0)}k`} />
+                      <Tooltip 
+                        formatter={(value: number) => `£${value.toLocaleString()}`}
+                        contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
+                      />
+                      <Legend />
+                      {streams.map((stream, idx) => (
+                        <Area
+                          key={idx}
+                          type="monotone"
+                          dataKey={`stream${idx}`}
+                          stackId="1"
+                          stroke={`hsl(${(idx * 60) % 360}, 70%, 50%)`}
+                          fill={`hsl(${(idx * 60) % 360}, 70%, 50%)`}
+                          fillOpacity={0.6}
+                          name={stream.name || `Stream ${idx + 1}`}
+                        />
+                      ))}
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Quarterly Revenue</CardTitle>
+                    <CardDescription>Quarter-over-quarter performance</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={quarterlyData}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis dataKey="quarter" className="text-xs" />
+                        <YAxis className="text-xs" tickFormatter={(val) => `£${(val/1000).toFixed(0)}k`} />
+                        <Tooltip 
+                          formatter={(value: number) => [`£${value.toLocaleString()}`, 'Revenue']}
+                          contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
+                        />
+                        <Bar dataKey="revenue" fill="hsl(var(--primary))" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Scenario Comparison</CardTitle>
+                    <CardDescription>Year 3 ARR across scenarios</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={scenarioData}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis dataKey="scenario" className="text-xs" />
+                        <YAxis className="text-xs" tickFormatter={(val) => `£${(val/1000).toFixed(0)}k`} />
+                        <Tooltip 
+                          formatter={(value: number) => [`£${value.toLocaleString()}`, 'ARR']}
+                          contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
+                        />
+                        <Bar dataKey="arr" fill="hsl(var(--chart-2))" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Annual Summary</CardTitle>
+                  <CardDescription>Year-over-year revenue and customer growth</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {annualData.map((year, idx) => (
+                      <div key={idx} className="p-4 bg-muted/50 rounded-lg">
+                        <div className="grid md:grid-cols-4 gap-4">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Period</p>
+                            <p className="text-lg font-bold">{year.year}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">ARR</p>
+                            <p className="text-lg font-bold" data-testid={`text-arr-year-${idx}`}>£{year.arr.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">MRR</p>
+                            <p className="text-lg font-bold">£{year.mrr.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Customers</p>
+                            <p className="text-lg font-bold">{year.customers}</p>
+                          </div>
+                        </div>
+                        {idx > 0 && (
+                          <div className="mt-2 flex items-center gap-2 text-sm">
+                            <TrendingUp className="h-4 w-4 text-green-500" />
+                            <span>YoY Growth: {(((year.arr / annualData[idx - 1].arr) - 1) * 100).toFixed(1)}%</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="tips" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Smart Recommendations</CardTitle>
+                  <CardDescription>AI-powered tips for strengthening your revenue forecast</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {getSmartTips().map((tip, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                          <span className="text-xs font-bold text-primary">{idx + 1}</span>
+                        </div>
+                        <p className="text-sm flex-1" data-testid={`text-tip-${idx}`}>{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Key Metrics Summary</CardTitle>
+                  <CardDescription>Critical KPIs for endorsing body review</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-3 bg-muted/50 rounded">
+                        <span className="text-sm">Current ARR</span>
+                        <span className="font-bold">£{metrics.currentARR.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-muted/50 rounded">
+                        <span className="text-sm">Year 3 ARR</span>
+                        <span className="font-bold">£{metrics.year3ARR.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-muted/50 rounded">
+                        <span className="text-sm">3-Year CAGR</span>
+                        <span className="font-bold">{metrics.cagr.toFixed(1)}%</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-muted/50 rounded">
+                        <span className="text-sm">Revenue Multiple</span>
+                        <span className="font-bold">{metrics.revenueMultiple.toFixed(1)}x</span>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-3 bg-muted/50 rounded">
+                        <span className="text-sm">LTV:CAC Ratio</span>
+                        <span className="font-bold">{metrics.ltvCacRatio.toFixed(2)}:1</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-muted/50 rounded">
+                        <span className="text-sm">Payback Period</span>
+                        <span className="font-bold">{metrics.paybackMonths.toFixed(1)} mo</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-muted/50 rounded">
+                        <span className="text-sm">Revenue Streams</span>
+                        <span className="font-bold">{streams.length}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-muted/50 rounded">
+                        <span className="text-sm">Year 3 Customers</span>
+                        <span className="font-bold">{metrics.year3.totalCustomers}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="action" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>4-Week Action Plan</CardTitle>
+                  <CardDescription>Prioritized timeline for revenue model development</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {generateActionPlan().map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg border">
+                        <div className="flex-shrink-0">
+                          <div className={`px-2 py-1 rounded text-xs font-bold ${
+                            item.priority === 'Critical' ? 'bg-red-500 text-white' :
+                            item.priority === 'High' ? 'bg-orange-500 text-white' :
+                            'bg-blue-500 text-white'
+                          }`}>
+                            {item.priority}
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm font-medium">{item.week}</span>
+                          </div>
+                          <p className="text-sm" data-testid={`text-action-${idx}`}>{item.action}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Documentation Requirements</CardTitle>
+                  <CardDescription>Evidence needed to support revenue projections</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      'Detailed financial model (Excel/Google Sheets) with monthly granularity',
+                      'Market research validating TAM, SAM, SOM assumptions',
+                      'Customer acquisition plan with CAC by channel',
+                      'Pricing strategy with competitor analysis and willingness-to-pay research',
+                      'Cohort analysis showing customer retention and expansion revenue',
+                      'Sensitivity analysis testing key variables (growth, pricing, CAC, churn)',
+                      'Letters of intent or pilot customer commitments',
+                      'Revenue bridge analysis explaining month-over-month drivers',
+                    ].map((req, idx) => (
+                      <div key={idx} className="flex items-start gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm">{req}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </>
