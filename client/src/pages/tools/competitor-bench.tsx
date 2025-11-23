@@ -88,43 +88,144 @@ export default function CompetitorBench() {
 
   const exportReport = () => {
     const { score, grade, advantages } = getCompetitiveAdvantage();
-    const avgInnovation = competitors.reduce((s, c) => s + c.innovation, 0) / (competitors.length || 1);
+    const avgComp = {
+      innovation: competitors.reduce((s, c) => s + c.innovation, 0) / (competitors.length || 1),
+      pricing: competitors.reduce((s, c) => s + c.pricing, 0) / (competitors.length || 1),
+      customerSat: competitors.reduce((s, c) => s + c.customerSat, 0) / (competitors.length || 1),
+      funding: competitors.reduce((s, c) => s + c.funding, 0) / (competitors.length || 1)
+    };
+    
+    const innovationGap = yourScores.innovation - avgComp.innovation;
+    const pricingGap = yourScores.pricing - avgComp.pricing;
+    const satisfactionGap = yourScores.customerSat - avgComp.customerSat;
+    const totalMarketShare = yourScores.marketShare + competitors.reduce((s, c) => s + c.marketShare, 0);
 
     const content = `UK INNOVATOR FOUNDER VISA - COMPETITIVE POSITIONING
 Generated: ${new Date().toLocaleDateString()}
 
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
 Competitive Advantage Score: ${score}% (${grade})
-Competitive Advantages: ${advantages}/3
-Market Position: ${yourScores.marketShare}% market share
+Competitive Advantages Identified: ${advantages}/3 dimensions
+Your Market Position: ${yourScores.marketShare}% market share
+Competitors Analyzed: ${competitors.length}
 
-YOUR SCORES:
-Innovation: ${yourScores.innovation}/100
+${score >= 70 ? '✓ STRONG COMPETITIVE POSITION - Supports innovation criterion for UK Innovator Founder visa' : score >= 55 ? '⚠ COMPETITIVE POSITION - Strengthen differentiation for endorsement' : '✗ WEAK POSITION - Critical improvements needed'}
+
+═══════════════════════════════════════════════════════════
+YOUR COMPETITIVE PROFILE
+═══════════════════════════════════════════════════════════
+Innovation Score: ${yourScores.innovation}/100
+  ${yourScores.innovation >= 75 ? '✓ Strong innovation capability' : yourScores.innovation >= 60 ? '⚠ Moderate innovation' : '✗ Innovation needs strengthening'}
+  
 Pricing Competitiveness: ${yourScores.pricing}/100
+  ${yourScores.pricing >= 75 ? '✓ Strong pricing advantage' : yourScores.pricing >= 60 ? '⚠ Competitive pricing' : '✗ Pricing disadvantage'}
+  
 Customer Satisfaction: ${yourScores.customerSat}/100
-Funding: ${yourScores.funding}/100
+  ${yourScores.customerSat >= 75 ? '✓ High customer satisfaction' : yourScores.customerSat >= 60 ? '⚠ Moderate satisfaction' : '✗ Customer satisfaction needs improvement'}
+  
+Funding Level: ${yourScores.funding}/100
+  ${yourScores.funding >= 75 ? '✓ Well-funded position' : yourScores.funding >= 60 ? '⚠ Moderate funding' : '✗ Limited funding'}
+  
+Market Share: ${yourScores.marketShare}%
+  ${yourScores.marketShare >= 10 ? '✓ Significant market presence' : yourScores.marketShare >= 5 ? '⚠ Growing market position' : '✗ Limited market penetration'}
 
-COMPETITIVE LANDSCAPE:
-Total Competitors: ${competitors.length}
-Average Competitor Innovation: ${Math.round(avgInnovation)}/100
+═══════════════════════════════════════════════════════════
+COMPETITIVE LANDSCAPE ANALYSIS
+═══════════════════════════════════════════════════════════
+Total Competitors Tracked: ${competitors.length}
+Combined Market Share (You + Competitors): ${totalMarketShare.toFixed(1)}%
+Remaining Market Opportunity: ${(100 - totalMarketShare).toFixed(1)}%
 
-${competitors.map(c => `
-${c.name}:
-- Market Share: ${c.marketShare}%
-- Innovation: ${c.innovation}/100
-- Pricing: ${c.pricing}/100
-- Customer Satisfaction: ${c.customerSat}/100
-- Funding: ${c.funding}/100
-- Key Weaknesses: ${c.weaknesses}
+Average Competitor Metrics:
+  Innovation: ${Math.round(avgComp.innovation)}/100
+  Pricing: ${Math.round(avgComp.pricing)}/100
+  Customer Satisfaction: ${Math.round(avgComp.customerSat)}/100
+  Funding: ${Math.round(avgComp.funding)}/100
+
+${competitors.map((c, idx) => `
+═══════════════════════════════════════════════════════════
+COMPETITOR ${idx + 1}: ${c.name}
+═══════════════════════════════════════════════════════════
+Market Share: ${c.marketShare}%
+Innovation Score: ${c.innovation}/100 ${c.innovation > yourScores.innovation ? '⚠ AHEAD of you' : '✓ Behind you'}
+Pricing Score: ${c.pricing}/100 ${c.pricing > yourScores.pricing ? '⚠ AHEAD of you' : '✓ Behind you'}
+Customer Satisfaction: ${c.customerSat}/100 ${c.customerSat > yourScores.customerSat ? '⚠ AHEAD of you' : '✓ Behind you'}
+Funding Level: ${c.funding}/100 ${c.funding > yourScores.funding ? '⚠ AHEAD of you' : '✓ Behind you'}
+
+Key Weaknesses Identified:
+${c.weaknesses}
+
+Competitive Gaps You Can Exploit:
+${c.innovation < yourScores.innovation ? `✓ Innovation gap: You lead by ${yourScores.innovation - c.innovation} points` : ''}
+${c.pricing < yourScores.pricing ? `✓ Pricing gap: You lead by ${yourScores.pricing - c.pricing} points` : ''}
+${c.customerSat < yourScores.customerSat ? `✓ Satisfaction gap: You lead by ${yourScores.customerSat - c.customerSat} points` : ''}
 `).join('\n')}
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Innovation: ${yourScores.innovation > avgInnovation ? `Innovation score ${yourScores.innovation} exceeds market avg (${Math.round(avgInnovation)}) - demonstrates innovative approach` : 'Innovation needs strengthening vs competitors'}
-Viability: ${advantages >= 2 ? `${advantages} competitive advantages validate market position` : 'Competitive position needs strengthening for viability criterion'}
-Scalability: ${score >= 70 ? 'Strong competitive position enables market expansion' : 'Competitive gaps may limit scalability assessment'}
+═══════════════════════════════════════════════════════════
+COMPETITIVE ADVANTAGE SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: Advantage Score = 50 (baseline) + Average(Innovation Gap + Pricing Gap + Satisfaction Gap) / 3
 
-Source: Competitive analysis, market research
-Formula: Advantage Score = 50 + Avg(Innovation Gap + Pricing Gap + Satisfaction Gap)
-GOV.UK: Innovator Founder Visa innovation criterion (November 2025)
+Step 1: Calculate Performance Gaps vs Market Average
+  Innovation Gap: Your ${yourScores.innovation} - Market Avg ${Math.round(avgComp.innovation)} = ${innovationGap.toFixed(1)} points
+  ${innovationGap > 0 ? '✓ You LEAD in innovation' : '✗ You LAG in innovation'}
+  
+  Pricing Gap: Your ${yourScores.pricing} - Market Avg ${Math.round(avgComp.pricing)} = ${pricingGap.toFixed(1)} points
+  ${pricingGap > 0 ? '✓ You LEAD in pricing' : '✗ You LAG in pricing'}
+  
+  Satisfaction Gap: Your ${yourScores.customerSat} - Market Avg ${Math.round(avgComp.customerSat)} = ${satisfactionGap.toFixed(1)} points
+  ${satisfactionGap > 0 ? '✓ You LEAD in customer satisfaction' : '✗ You LAG in customer satisfaction'}
+
+Step 2: Calculate Average Gap
+  Average Gap = (${innovationGap.toFixed(1)} + ${pricingGap.toFixed(1)} + ${satisfactionGap.toFixed(1)}) / 3
+  Average Gap = ${((innovationGap + pricingGap + satisfactionGap) / 3).toFixed(1)} points
+
+Step 3: Calculate Final Score
+  Final Score = 50 (baseline) + ${((innovationGap + pricingGap + satisfactionGap) / 3).toFixed(1)}
+  Final Score = ${score}% (${grade})
+
+Competitive Advantages Summary:
+${innovationGap > 0 ? '✓' : '✗'} Innovation Advantage: ${innovationGap > 0 ? 'YES' : 'NO'}
+${pricingGap > 0 ? '✓' : '✗'} Pricing Advantage: ${pricingGap > 0 ? 'YES' : 'NO'}
+${satisfactionGap > 0 ? '✓' : '✗'} Satisfaction Advantage: ${satisfactionGap > 0 ? 'YES' : 'NO'}
+────────────────────────────
+Total Competitive Advantages: ${advantages}/3
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: INNOVATION CRITERION
+═══════════════════════════════════════════════════════════
+GOV.UK Innovation Assessment Factors:
+• Demonstrated differentiation from existing market solutions
+• Novel approach or significant improvement over competitors
+• Clear competitive advantages in product/service delivery
+• Evidence of unique value proposition
+• Defensible market position through innovation
+
+CURRENT COMPETITIVE STATUS:
+Innovation vs Market: ${innovationGap > 0 ? `+${innovationGap.toFixed(1)} points AHEAD` : `${innovationGap.toFixed(1)} points BEHIND`}
+  ${innovationGap >= 10 ? '✓ STRONG innovation differentiation for UK Innovator Founder visa' : innovationGap > 0 ? '⚠ Moderate innovation lead - strengthen for endorsement' : '✗ Innovation below market average - CRITICAL to address'}
+
+Competitive Advantages: ${advantages}/3
+  ${advantages >= 2 ? '✓ Multiple advantages demonstrate viable competitive position' : '⚠ Limited advantages - strengthen differentiation'}
+
+Market Position: ${yourScores.marketShare}% share
+  ${yourScores.marketShare >= 10 ? '✓ Significant market validation' : yourScores.marketShare >= 5 ? '⚠ Growing traction' : '✗ Limited market penetration'}
+
+Overall Competitive Score: ${score}%
+  ${score >= 70 ? '✓ Strong competitive position supports innovation and viability criteria' : score >= 55 ? '⚠ Competitive but needs strengthening for strong endorsement case' : '✗ Weak competitive position - focus on differentiation and innovation'}
+
+Visa Criterion Alignment:
+${score >= 70 && innovationGap > 0 ? '✓ Competitive analysis demonstrates clear innovation and differentiation for UK Innovator Founder visa endorsement' : score >= 55 ? '⚠ Competitive position is acceptable but strengthening innovation differentiation (aim for 10+ point lead) would improve endorsement prospects' : '✗ Competitive position needs significant strengthening - demonstrate unique innovation that differentiates from existing market solutions'}
+
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Innovation Criterion: Demonstrated differentiation and novel approach
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+Competitive Analysis Methodology: Market research, competitor benchmarking
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

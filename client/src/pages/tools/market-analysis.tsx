@@ -107,43 +107,142 @@ export default function MarketAnalysis() {
     const samPercent = ((sam / tam) * 100).toFixed(1);
     const somPercent = ((som / sam) * 100).toFixed(1);
     
+    // Detailed score calculation breakdown
+    const tamScore = tam >= 100000000 ? 40 : tam >= 50000000 ? 30 : tam >= 10000000 ? 20 : 10;
+    const growthScore = marketGrowth >= 20 ? 30 : marketGrowth >= 15 ? 25 : marketGrowth >= 10 ? 20 : 15;
+    const maturityScore = marketMaturity === "growing" ? 30 : marketMaturity === "emerging" ? 25 : marketMaturity === "mature" ? 20 : 10;
+    
     const content = `UK INNOVATOR FOUNDER VISA - MARKET ANALYSIS
 Generated: ${new Date().toLocaleDateString()}
 
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
 Market Opportunity Score: ${score}% (${grade})
 Market Maturity: ${marketMaturity.charAt(0).toUpperCase() + marketMaturity.slice(1)}
-Annual Market Growth: ${marketGrowth}%
+Annual Market Growth (CAGR): ${marketGrowth}%
 Competitor Count: ${competitorCount}
+Market Sizing Validation: ${isValid ? '✓ VALID' : '✗ NEEDS ADJUSTMENT'}
 
-MARKET SIZING (TAM/SAM/SOM):
+${score >= 75 ? '✓ STRONG MARKET - Supports scalability criterion for UK Innovator Founder visa' : score >= 60 ? '⚠ MODERATE MARKET - Strengthen for endorsement' : '✗ WEAK MARKET - Critical improvements needed'}
+
+═══════════════════════════════════════════════════════════
+MARKET SIZING FRAMEWORK (TAM/SAM/SOM)
+═══════════════════════════════════════════════════════════
 Total Addressable Market (TAM): £${(tam / 1000000).toFixed(1)}M
-Serviceable Addressable Market (SAM): £${(sam / 1000000).toFixed(1)}M (${samPercent}% of TAM)
-Serviceable Obtainable Market (SOM): £${(som / 1000000).toFixed(1)}M (${somPercent}% of SAM)
+  Definition: Total demand for product/service globally or in defined geographic region
+  Input Value: £${tam.toLocaleString()}
 
-Market Sizing Validation: ${isValid ? '✅ VALID' : '⚠️ NEEDS ADJUSTMENT'}
-${issues.length > 0 ? issues.map(i => `- ${i}`).join('\n') : '✅ Market sizing ratios are realistic'}
+Serviceable Addressable Market (SAM): £${(sam / 1000000).toFixed(1)}M
+  Definition: Portion of TAM you can realistically serve with your business model
+  Input Value: £${sam.toLocaleString()}
+  Calculation: (£${sam.toLocaleString()} ÷ £${tam.toLocaleString()}) × 100 = ${samPercent}% of TAM
+  ${parseFloat(samPercent) >= 5 && parseFloat(samPercent) <= 50 ? '✓ Realistic SAM range (5-50% of TAM)' : '⚠ SAM-to-TAM ratio outside recommended bounds'}
 
-TARGET SEGMENTS:
+Serviceable Obtainable Market (SOM): £${(som / 1000000).toFixed(1)}M
+  Definition: Realistic market share achievable in first 1-3 years
+  Input Value: £${som.toLocaleString()}
+  Calculation: (£${som.toLocaleString()} ÷ £${sam.toLocaleString()}) × 100 = ${somPercent}% of SAM
+  ${parseFloat(somPercent) >= 1 && parseFloat(somPercent) <= 15 ? '✓ Realistic SOM range (1-15% of SAM)' : '⚠ SOM-to-SAM ratio outside recommended bounds'}
+
+Market Sizing Health Check:
+${issues.length > 0 ? issues.map(i => `✗ ${i}`).join('\n') : '✓ All market sizing ratios are within realistic bounds'}
+
+═══════════════════════════════════════════════════════════
+MARKET OPPORTUNITY SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: Market Score = TAM Component (40pts) + Growth Component (30pts) + Maturity Component (30pts)
+
+Component 1: TAM Size Assessment
+  Input TAM: £${(tam / 1000000).toFixed(1)}M
+  Scoring:
+    - £100M+: 40 points (Excellent)
+    - £50M-£100M: 30 points (Strong)
+    - £10M-£50M: 20 points (Moderate)
+    - <£10M: 10 points (Weak)
+  TAM Score: ${tamScore}/40 points
+  ${tam >= 100000000 ? '✓ Large TAM demonstrates significant UK Innovator Founder visa scalability potential' : '⚠ Limited TAM may restrict scalability narrative'}
+
+Component 2: Market Growth Assessment
+  Input Growth Rate: ${marketGrowth}% CAGR
+  Scoring:
+    - 20%+: 30 points (High growth)
+    - 15-20%: 25 points (Strong growth)
+    - 10-15%: 20 points (Moderate growth)
+    - <10%: 15 points (Slow growth)
+  Growth Score: ${growthScore}/30 points
+  ${marketGrowth >= 15 ? '✓ High growth rate supports innovative solution narrative for UK Innovator Founder visa' : '⚠ Market growth could be stronger'}
+
+Component 3: Market Maturity Assessment
+  Input Maturity: ${marketMaturity.charAt(0).toUpperCase() + marketMaturity.slice(1)}
+  Scoring:
+    - Growing: 30 points (Optimal)
+    - Emerging: 25 points (Good)
+    - Mature: 20 points (Acceptable)
+    - Declining: 10 points (Risky)
+  Maturity Score: ${maturityScore}/30 points
+  ${marketMaturity === "growing" ? '✓ Growing market ideal for scaling business' : marketMaturity === "emerging" ? '✓ Emerging market offers early-mover advantage' : marketMaturity === "declining" ? '✗ Declining market poses viability risk' : '⚠ Mature market requires strong differentiation'}
+
+Final Market Opportunity Score:
+  TAM Component: ${tamScore} pts
+  Growth Component: ${growthScore} pts
+  Maturity Component: ${maturityScore} pts
+  ────────────────────────────
+  Total Score: ${score}/100 (${grade})
+
+═══════════════════════════════════════════════════════════
+TARGET MARKET SEGMENTS
+═══════════════════════════════════════════════════════════
 ${targetSegments}
 
-KEY MARKET TRENDS:
+Competitive Landscape: ${competitorCount} competitors identified
+${competitorCount > 50 ? '⚠ High competition requires strong differentiation for innovation criterion' : competitorCount > 20 ? '✓ Moderate competition - focus on unique value proposition' : '✓ Low competition - opportunity for market leadership'}
+
+═══════════════════════════════════════════════════════════
+KEY MARKET TRENDS
+═══════════════════════════════════════════════════════════
 ${keyTrends}
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Scalability: ${tam >= 100000000 ? `Large TAM (£${(tam / 1000000).toFixed(0)}M) demonstrates significant growth potential` : 'Limited TAM may restrict scalability assessment'}
-Viability: ${score >= 70 ? 'Strong market opportunity validates business viability' : 'Market opportunity needs strengthening for viability criterion'}
-Innovation: ${marketGrowth >= 15 ? `High growth rate (${marketGrowth}%) supports innovative solution narrative` : 'Market growth supports innovation but could be stronger'}
+═══════════════════════════════════════════════════════════
+5-YEAR MARKET PROJECTION
+═══════════════════════════════════════════════════════════
+Formula: Future Value = SOM × (1 + Growth Rate)^Years
+Base SOM: £${(som / 1000000).toFixed(1)}M
+Growth Rate: ${marketGrowth}% CAGR
 
-5-YEAR MARKET PROJECTION:
-Year 1: £${(som / 1000000).toFixed(1)}M (baseline SOM)
-Year 2: £${(som * (1 + marketGrowth/100) / 1000000).toFixed(1)}M
-Year 3: £${(som * Math.pow(1 + marketGrowth/100, 2) / 1000000).toFixed(1)}M
-Year 4: £${(som * Math.pow(1 + marketGrowth/100, 3) / 1000000).toFixed(1)}M
-Year 5: £${(som * Math.pow(1 + marketGrowth/100, 4) / 1000000).toFixed(1)}M
+Year 1 (Baseline): £${(som / 1000000).toFixed(1)}M
+Year 2: £${som.toLocaleString()} × 1.${(marketGrowth/100).toFixed(2).split('.')[1]} = £${(som * (1 + marketGrowth/100) / 1000000).toFixed(1)}M
+Year 3: £${som.toLocaleString()} × (1.${(marketGrowth/100).toFixed(2).split('.')[1]})² = £${(som * Math.pow(1 + marketGrowth/100, 2) / 1000000).toFixed(1)}M
+Year 4: £${som.toLocaleString()} × (1.${(marketGrowth/100).toFixed(2).split('.')[1]})³ = £${(som * Math.pow(1 + marketGrowth/100, 3) / 1000000).toFixed(1)}M
+Year 5: £${som.toLocaleString()} × (1.${(marketGrowth/100).toFixed(2).split('.')[1]})⁴ = £${(som * Math.pow(1 + marketGrowth/100, 4) / 1000000).toFixed(1)}M
 
-Source: Industry market research, GOV.UK Innovator Founder visa criteria
-Formula: Market Score = TAM Size (40pts) + Growth (30pts) + Maturity (30pts)
-GOV.UK: Innovator Founder Visa scalability criterion (November 2025)
+5-Year Total Market Opportunity: £${((som + som*(1+marketGrowth/100) + som*Math.pow(1+marketGrowth/100,2) + som*Math.pow(1+marketGrowth/100,3) + som*Math.pow(1+marketGrowth/100,4)) / 1000000).toFixed(1)}M cumulative
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: SCALABILITY CRITERION
+═══════════════════════════════════════════════════════════
+GOV.UK Scalability Assessment Factors:
+• Significant market opportunity (TAM >£50M preferred, >£100M ideal)
+• High growth potential (CAGR >15% preferred)
+• Clear path to substantial market share
+• Realistic revenue scaling plan
+• Addressable market supports job creation (5 jobs at £25k+ OR 10 jobs for ILR)
+
+CURRENT MARKET POSITION:
+TAM: £${(tam/1000000).toFixed(1)}M ${tam >= 100000000 ? '✓ EXCELLENT (>£100M)' : tam >= 50000000 ? '✓ STRONG (>£50M)' : '⚠ BELOW RECOMMENDED'}
+Growth Rate: ${marketGrowth}% CAGR ${marketGrowth >= 20 ? '✓ HIGH GROWTH' : marketGrowth >= 15 ? '✓ STRONG GROWTH' : '⚠ MODERATE GROWTH'}
+Market Maturity: ${marketMaturity.charAt(0).toUpperCase() + marketMaturity.slice(1)} ${marketMaturity === "growing" || marketMaturity === "emerging" ? '✓ FAVORABLE' : '⚠ REQUIRES STRATEGY'}
+Opportunity Score: ${score}% ${score >= 75 ? '✓ MEETS SCALABILITY BAR' : score >= 60 ? '⚠ NEEDS STRENGTHENING' : '✗ CRITICAL IMPROVEMENTS NEEDED'}
+
+Visa Criterion Alignment:
+${score >= 75 && tam >= 50000000 ? '✓ Strong market opportunity clearly demonstrates scalability for UK Innovator Founder visa endorsement' : score >= 60 ? '⚠ Market opportunity is acceptable but strengthening TAM (aim for £100M+) and growth rate (aim for 20%+) would improve endorsement chances' : '✗ Market opportunity needs significant strengthening - consider broader TAM definition or faster-growing market segments'}
+
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+Market Analysis Methodology: Industry market research, TAM/SAM/SOM framework
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

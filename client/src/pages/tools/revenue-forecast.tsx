@@ -82,31 +82,178 @@ export default function RevenueForecast() {
 
   const exportReport = () => {
     const projections = getProjections();
+    const year1 = projections[12];
+    const year2 = projections[24];
     const year3 = projections[36];
     const { score, grade } = getGrowthHealth();
+    const totalRevenue3Years = projections.slice(0, 37).reduce((sum, p) => sum + p.revenue, 0);
 
-    const content = `UK INNOVATOR FOUNDER VISA - REVENUE FORECAST
+    const content = `UK INNOVATOR FOUNDER VISA - REVENUE FORECAST (3-YEAR)
 Generated: ${new Date().toLocaleDateString()}
 
-Growth Health: ${score}% (${grade})
-Annual Growth Rate: ${growthRate}%
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+Revenue Growth Health Score: ${score}% (${grade})
+Annual Growth Rate (CAGR): ${growthRate}%
 
-CURRENT STATE:
-Revenue: £${currentRevenue.toLocaleString()}
-Customers: ${customers}
-ARPU: £${arpu.toLocaleString()}
+Current Revenue: £${currentRevenue.toLocaleString()}
+Year 3 Projection: £${year3.revenue.toLocaleString()}
+3-Year Total Revenue: £${totalRevenue3Years.toLocaleString()}
+Revenue Multiple: ${(year3.revenue / currentRevenue).toFixed(1)}x
 
-3-YEAR PROJECTIONS:
-Year 1: £${projections[12].revenue.toLocaleString()}
-Year 2: £${projections[24].revenue.toLocaleString()}
-Year 3: £${year3.revenue.toLocaleString()}
+${score >= 70 ? '✓ STRONG REVENUE GROWTH - Supports viability and scalability criteria for UK Innovator Founder visa' : score >= 55 ? '⚠ MODERATE GROWTH - Strengthen for endorsement' : '✗ WEAK GROWTH - Critical improvements needed'}
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Viability: ${score >= 70 ? 'Strong revenue growth demonstrates business viability' : 'Revenue growth needs improvement'}
-Scalability: ${growthRate >= 30 ? `${growthRate}% annual growth supports scaling narrative` : 'Growth rate should exceed 30% for strong scalability'}
+═══════════════════════════════════════════════════════════
+CURRENT STATE (BASELINE)
+═══════════════════════════════════════════════════════════
+Monthly Recurring Revenue (MRR): £${(currentRevenue / 12).toFixed(2).toLocaleString()}
+Annual Recurring Revenue (ARR): £${currentRevenue.toLocaleString()}
+Customer Base: ${customers} customers
+Average Revenue Per User (ARPU): £${arpu.toLocaleString()} per customer per year
+Monthly ARPU: £${(arpu / 12).toFixed(2).toLocaleString()}
 
-Formula: Future Revenue = Current × (1 + Growth Rate) ^ Years
-GOV.UK: Innovator Founder Visa viability criterion (November 2025)
+═══════════════════════════════════════════════════════════
+3-YEAR REVENUE PROJECTION
+═══════════════════════════════════════════════════════════
+Formula: Future Revenue = Current Revenue × (1 + Growth Rate)^Years
+Growth Rate: ${growthRate}% CAGR
+
+YEAR 1 PROJECTION (Month 12):
+  Calculation: £${currentRevenue.toLocaleString()} × (1 + ${growthRate}%)¹
+  Calculation: £${currentRevenue.toLocaleString()} × ${(1 + growthRate / 100).toFixed(3)}
+  Year 1 Revenue: £${year1.revenue.toLocaleString()}
+  Year 1 Customers: ${year1.customers}
+  YoY Growth: £${(year1.revenue - currentRevenue).toLocaleString()} (+${growthRate}%)
+
+YEAR 2 PROJECTION (Month 24):
+  Calculation: £${currentRevenue.toLocaleString()} × (1 + ${growthRate}%)²
+  Calculation: £${currentRevenue.toLocaleString()} × ${Math.pow(1 + growthRate / 100, 2).toFixed(3)}
+  Year 2 Revenue: £${year2.revenue.toLocaleString()}
+  Year 2 Customers: ${year2.customers}
+  YoY Growth: £${(year2.revenue - year1.revenue).toLocaleString()} (+${growthRate}%)
+
+YEAR 3 PROJECTION (Month 36 - End of Visa Period):
+  Calculation: £${currentRevenue.toLocaleString()} × (1 + ${growthRate}%)³
+  Calculation: £${currentRevenue.toLocaleString()} × ${Math.pow(1 + growthRate / 100, 3).toFixed(3)}
+  Year 3 Revenue: £${year3.revenue.toLocaleString()}
+  Year 3 Customers: ${year3.customers}
+  YoY Growth: £${(year3.revenue - year2.revenue).toLocaleString()} (+${growthRate}%)
+
+3-YEAR CUMULATIVE REVENUE:
+  Year 1: £${year1.revenue.toLocaleString()}
+  Year 2: £${year2.revenue.toLocaleString()}
+  Year 3: £${year3.revenue.toLocaleString()}
+  ────────────────────────────
+  Total 3-Year Revenue: £${totalRevenue3Years.toLocaleString()}
+
+Revenue Growth Multiple:
+  End-to-End Growth: ${(year3.revenue / currentRevenue).toFixed(1)}x in 3 years
+  ${(year3.revenue / currentRevenue) >= 2 ? '✓ Strong revenue multiplication' : '⚠ Limited revenue growth'}
+
+═══════════════════════════════════════════════════════════
+QUARTERLY REVENUE BREAKDOWN (12 Quarters)
+═══════════════════════════════════════════════════════════
+${[0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33].map((month, i) => {
+  const quarter = projections[month];
+  return `Q${i + 1} (Month ${month}):
+  Revenue: £${quarter.revenue.toLocaleString()}
+  Customers: ${quarter.customers}
+  MRR: £${(quarter.revenue / 12).toFixed(0).toLocaleString()}`;
+}).join('\n\n')}
+
+═══════════════════════════════════════════════════════════
+REVENUE GROWTH HEALTH SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: Score = Growth Rate Component (50pts) + Year 3 Revenue Component (50pts)
+
+Component 1: Annual Growth Rate Assessment
+  Your Growth Rate: ${growthRate}% CAGR
+  Scoring:
+    - ≥50% CAGR: 50 points (Hypergrowth)
+    - 30-50% CAGR: 40 points (High growth)
+    - 20-30% CAGR: 25 points (Moderate growth)
+    - <20% CAGR: 10 points (Slow growth)
+  ${growthRate >= 50 ? '50/50 points (Hypergrowth)' :
+    growthRate >= 30 ? '40/50 points (High growth)' :
+    growthRate >= 20 ? '25/50 points (Moderate growth)' :
+    '10/50 points (Slow growth)'}
+
+Component 2: Year 3 Revenue Target Assessment
+  Your Year 3 Revenue: £${year3.revenue.toLocaleString()}
+  Scoring:
+    - ≥£1M: 50 points (Excellent scale)
+    - £500k-£1M: 35 points (Good scale)
+    - <£500k: 15 points (Limited scale)
+  ${year3.revenue >= 1000000 ? '50/50 points (£1M+ revenue achieved)' :
+    year3.revenue >= 500000 ? '35/50 points (£500k-£1M revenue)' :
+    '15/50 points (Revenue <£500k)'}
+
+Final Growth Health Score: ${score}/100 (${grade})
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: VIABILITY & SCALABILITY CRITERIA
+═══════════════════════════════════════════════════════════
+
+GOV.UK Viability Assessment Factors:
+• Realistic revenue projections based on current traction
+• Sustainable growth rate supported by market opportunity
+• Path to profitability and financial independence
+• Evidence validating revenue assumptions
+
+GOV.UK Scalability Assessment Factors:
+• High growth potential (>30% CAGR preferred)
+• Clear path to £1M+ annual revenue within 3 years
+• Revenue model supports job creation (5 jobs at £25k+ OR 10 jobs)
+• Addressable market sufficient for continued expansion
+
+CURRENT REVENUE GROWTH STATUS:
+
+Growth Rate: ${growthRate}% CAGR
+  ${growthRate >= 50 ? '✓ HYPERGROWTH (50%+) - Exceptional scalability for UK Innovator Founder visa' :
+    growthRate >= 30 ? '✓ HIGH GROWTH (30%+) - Strong scalability narrative' :
+    growthRate >= 20 ? '⚠ MODERATE GROWTH (20-30%) - Acceptable but strengthen for strong endorsement' :
+    '✗ SLOW GROWTH (<20%) - Insufficient for scalability criterion'}
+
+Year 3 Revenue Target: £${year3.revenue.toLocaleString()}
+  ${year3.revenue >= 1000000 ? '✓ EXCELLENT (£1M+) - Meets ILR revenue criterion (1 of 7 achievement criteria)' :
+    year3.revenue >= 500000 ? '✓ GOOD (£500k-£1M) - Strong viability demonstration' :
+    '⚠ LIMITED (<£500k) - May not demonstrate sufficient scalability'}
+
+Revenue Multiple: ${(year3.revenue / currentRevenue).toFixed(1)}x growth
+  ${(year3.revenue / currentRevenue) >= 5 ? '✓ EXCEPTIONAL (5x+) - Demonstrates hypergrowth potential' :
+    (year3.revenue / currentRevenue) >= 3 ? '✓ STRONG (3-5x) - Clear scaling trajectory' :
+    (year3.revenue / currentRevenue) >= 2 ? '⚠ MODERATE (2-3x) - Viable but could be stronger' :
+    '✗ WEAK (<2x) - Limited growth demonstrates scaling challenges'}
+
+Overall Growth Health: ${score}%
+  ${score >= 70 ? '✓ STRONG REVENUE FORECAST - Demonstrates clear viability and scalability' :
+    score >= 55 ? '⚠ MODERATE FORECAST - Viable but strengthening growth rate would improve case' :
+    '✗ WEAK FORECAST - Requires fundamental improvements to revenue projections'}
+
+GOV.UK ILR Achievement Criteria:
+${year3.revenue >= 1000000 ? 
+`✓ REVENUE CRITERION MET - Achieving £1M+ annual revenue is one of 7 ILR achievement criteria
+  (Applicants must meet 2 of 7 criteria for settlement after 3 years)` :
+`⚠ Revenue projection £${year3.revenue.toLocaleString()} falls short of £1M ILR criterion
+  Consider other ILR pathways: job creation (5 jobs at £25k+), investment (£50k), or IP development`}
+
+Visa Criterion Alignment:
+${score >= 70 && year3.revenue >= 500000 ? 
+`✓ Revenue forecast demonstrates strong viability and scalability for UK Innovator Founder visa endorsement. ${growthRate}% CAGR and £${year3.revenue.toLocaleString()} Year 3 projection show realistic path to significant scale${year3.revenue >= 1000000 ? ' and meet the £1M revenue ILR criterion' : ''}.` :
+score >= 55 ?
+`⚠ Revenue forecast is acceptable but strengthening growth rate (aim for 30%+ CAGR) and Year 3 target (aim for £1M+) would create stronger endorsement case. Focus on demonstrating traction and market validation to support projections.` :
+`✗ Revenue forecast needs significant strengthening. Current ${growthRate}% growth and £${year3.revenue.toLocaleString()} Year 3 projection may not demonstrate sufficient viability and scalability. Revisit market opportunity, pricing strategy, and customer acquisition plan.`}
+
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Viability Criterion: Realistic financial projections and sustainable growth
+Scalability Criterion: High growth potential and path to significant revenue
+ILR Achievement Criteria: £1M annual revenue (1 of 7 criteria, need 2 total)
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+Revenue Forecasting Methodology: Compound annual growth rate (CAGR) modeling
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

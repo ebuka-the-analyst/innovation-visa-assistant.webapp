@@ -69,39 +69,195 @@ export default function CACCalculator() {
   const exportReport = () => {
     const { cac, ltv, ltvCacRatio, paybackMonths } = getMetrics();
     const { score, grade } = getUnitEconomicsHealth();
+    const monthlyGrossProfit = (avgRevenue * (grossMargin / 100));
     
-    const content = `UK INNOVATOR FOUNDER VISA - CUSTOMER ACQUISITION COST (CAC)
+    const content = `UK INNOVATOR FOUNDER VISA - CUSTOMER ACQUISITION COST (CAC) ANALYSIS
 Generated: ${new Date().toLocaleDateString()}
 
-Unit Economics Health: ${score}% (${grade})
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+Unit Economics Health Score: ${score}% (${grade})
 
-KEY METRICS:
-Customer Acquisition Cost (CAC): £${cac.toFixed(2)}
-Customer Lifetime Value (LTV): £${ltv.toFixed(2)}
+Key Metrics:
+  Customer Acquisition Cost (CAC): £${cac.toFixed(2)}
+  Customer Lifetime Value (LTV): £${ltv.toFixed(2)}
+  LTV:CAC Ratio: ${ltvCacRatio.toFixed(2)}x ${ltvCacRatio >= 3 ? '✓ EXCELLENT' : ltvCacRatio >= 2 ? '✓ GOOD' : ltvCacRatio >= 1 ? '⚠ VIABLE' : '✗ UNSUSTAINABLE'}
+  Payback Period: ${paybackMonths.toFixed(1)} months ${paybackMonths <= 12 ? '✓ FAST' : paybackMonths <= 18 ? '⚠ MODERATE' : '✗ SLOW'}
+
+${score >= 70 ? '✓ HEALTHY UNIT ECONOMICS - Supports viability criterion for UK Innovator Founder visa' : score >= 50 ? '⚠ VIABLE BUT NEEDS IMPROVEMENT' : '✗ UNSUSTAINABLE - Critical improvements needed'}
+
+═══════════════════════════════════════════════════════════
+INPUT PARAMETERS
+═══════════════════════════════════════════════════════════
+Acquisition Costs:
+  Marketing Spend: £${marketingSpend.toLocaleString()}
+  Sales Spend: £${salesSpend.toLocaleString()}
+  Total Acquisition Investment: £${(marketingSpend + salesSpend).toLocaleString()}
+
+Customer Metrics:
+  New Customers Acquired: ${newCustomers}
+  Average Revenue per Customer (Annual): £${avgRevenue.toLocaleString()}
+  Monthly Churn Rate: ${churnRate}%
+  Gross Margin: ${grossMargin}%
+
+═══════════════════════════════════════════════════════════
+CAC CALCULATION (Customer Acquisition Cost)
+═══════════════════════════════════════════════════════════
+Formula: CAC = (Marketing Spend + Sales Spend) / New Customers
+
+Step-by-Step Calculation:
+  Marketing Spend: £${marketingSpend.toLocaleString()}
+  Sales Spend: £${salesSpend.toLocaleString()}
+  ────────────────────────────
+  Total Acquisition Cost: £${(marketingSpend + salesSpend).toLocaleString()}
+  
+  New Customers: ${newCustomers}
+  
+  CAC = £${(marketingSpend + salesSpend).toLocaleString()} ÷ ${newCustomers}
+  CAC = £${cac.toFixed(2)}
+
+Benchmark Analysis:
+${cac <= 500 ? '✓ CAC £' + cac.toFixed(2) + ' is efficient (under £500 per customer)' : 
+  cac <= 1000 ? '⚠ CAC £' + cac.toFixed(2) + ' is moderate (£500-£1,000 range)' : 
+  '✗ CAC £' + cac.toFixed(2) + ' is high (over £1,000) - optimize acquisition channels'}
+
+═══════════════════════════════════════════════════════════
+LTV CALCULATION (Customer Lifetime Value)
+═══════════════════════════════════════════════════════════
+Formula: LTV = (Average Revenue × Gross Margin) / Monthly Churn Rate
+
+Step-by-Step Calculation:
+  Average Annual Revenue per Customer: £${avgRevenue.toLocaleString()}
+  Gross Margin: ${grossMargin}%
+  
+  Annual Gross Profit = £${avgRevenue.toLocaleString()} × ${grossMargin}%
+  Annual Gross Profit = £${(avgRevenue * (grossMargin / 100)).toFixed(2)}
+  
+  Monthly Gross Profit = £${(avgRevenue * (grossMargin / 100)).toFixed(2)} ÷ 12
+  Monthly Gross Profit = £${monthlyGrossProfit.toFixed(2)}
+  
+  Monthly Churn Rate: ${churnRate}%
+  
+  LTV = £${monthlyGrossProfit.toFixed(2)} ÷ ${churnRate}%
+  LTV = £${monthlyGrossProfit.toFixed(2)} ÷ ${(churnRate / 100).toFixed(3)}
+  LTV = £${ltv.toFixed(2)}
+
+Benchmark Analysis:
+${ltv >= cac * 3 ? '✓ LTV £' + ltv.toFixed(2) + ' is healthy (>3x CAC)' : 
+  ltv >= cac * 2 ? '⚠ LTV £' + ltv.toFixed(2) + ' is acceptable (2-3x CAC) - optimize retention' : 
+  ltv >= cac ? '⚠ LTV £' + ltv.toFixed(2) + ' is marginal (<2x CAC) - critical to improve' :
+  '✗ LTV £' + ltv.toFixed(2) + ' < CAC - business model unsustainable'}
+
+═══════════════════════════════════════════════════════════
+LTV:CAC RATIO ANALYSIS
+═══════════════════════════════════════════════════════════
+Formula: LTV:CAC Ratio = LTV / CAC
+
+Calculation:
+  LTV: £${ltv.toFixed(2)}
+  CAC: £${cac.toFixed(2)}
+  
+  LTV:CAC Ratio = £${ltv.toFixed(2)} ÷ £${cac.toFixed(2)}
+  LTV:CAC Ratio = ${ltvCacRatio.toFixed(2)}x
+
+Industry Benchmarks:
+  >3.0x = Excellent unit economics
+  2.0-3.0x = Good unit economics
+  1.0-2.0x = Viable but needs improvement
+  <1.0x = Unsustainable (CAC exceeds LTV)
+
+Your Ratio: ${ltvCacRatio.toFixed(2)}x
+${ltvCacRatio >= 3 ? '✓ EXCELLENT - Each customer generates 3x+ their acquisition cost' :
+  ltvCacRatio >= 2 ? '✓ GOOD - Healthy return on acquisition investment' :
+  ltvCacRatio >= 1 ? '⚠ VIABLE - But needs optimization to reach 3x benchmark' :
+  '✗ UNSUSTAINABLE - Losing money on each customer acquired'}
+
+═══════════════════════════════════════════════════════════
+PAYBACK PERIOD CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: Payback Period (Months) = CAC / Monthly Gross Profit
+
+Calculation:
+  CAC: £${cac.toFixed(2)}
+  Monthly Gross Profit per Customer: £${monthlyGrossProfit.toFixed(2)}
+  
+  Payback Period = £${cac.toFixed(2)} ÷ £${monthlyGrossProfit.toFixed(2)}
+  Payback Period = ${paybackMonths.toFixed(1)} months
+
+Industry Benchmarks:
+  ≤12 months = Fast payback (ideal for scaling)
+  12-18 months = Moderate payback (acceptable)
+  18-24 months = Slow payback (limits cash flow)
+  >24 months = Very slow (challenges scalability)
+
+Your Payback: ${paybackMonths.toFixed(1)} months
+${paybackMonths <= 12 ? '✓ FAST PAYBACK - Enables efficient capital recycling for growth' :
+  paybackMonths <= 18 ? '⚠ MODERATE PAYBACK - Acceptable but consider reducing CAC or increasing ARPU' :
+  paybackMonths <= 24 ? '⚠ SLOW PAYBACK - May limit scaling speed and cash flow' :
+  '✗ VERY SLOW PAYBACK - Critical challenge for business viability and scalability'}
+
+═══════════════════════════════════════════════════════════
+UNIT ECONOMICS HEALTH SCORE
+═══════════════════════════════════════════════════════════
+Formula: Score = LTV:CAC Component (50pts) + Payback Component (50pts)
+
+Component 1: LTV:CAC Ratio Assessment
+  Your Ratio: ${ltvCacRatio.toFixed(2)}x
+  ${ltvCacRatio >= 3 ? '50/50 points (Ratio ≥3x)' :
+    ltvCacRatio >= 2 ? '35/50 points (Ratio 2-3x)' :
+    ltvCacRatio >= 1 ? '15/50 points (Ratio 1-2x)' :
+    '0/50 points (Ratio <1x)'}
+
+Component 2: Payback Period Assessment
+  Your Payback: ${paybackMonths.toFixed(1)} months
+  ${paybackMonths <= 12 ? '50/50 points (Payback ≤12 months)' :
+    paybackMonths <= 18 ? '35/50 points (Payback 12-18 months)' :
+    paybackMonths <= 24 ? '15/50 points (Payback 18-24 months)' :
+    '0/50 points (Payback >24 months)'}
+
+Final Score: ${score}/100 (${grade})
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: VIABILITY CRITERION
+═══════════════════════════════════════════════════════════
+GOV.UK Viability Assessment Factors:
+• Sustainable unit economics (LTV must exceed CAC)
+• Realistic customer acquisition strategy
+• Evidence of repeatable sales process
+• Profitable path to growth
+• Financial model demonstrates business sustainability
+
+CURRENT UNIT ECONOMICS STATUS:
 LTV:CAC Ratio: ${ltvCacRatio.toFixed(2)}x
+  ${ltvCacRatio >= 3 ? '✓ EXCELLENT - Strong unit economics clearly demonstrate business viability for UK Innovator Founder visa' :
+    ltvCacRatio >= 2 ? '✓ GOOD - Healthy economics support viability criterion' :
+    ltvCacRatio >= 1 ? '⚠ VIABLE - But needs improvement to reach 3x benchmark for strong endorsement case' :
+    '✗ UNSUSTAINABLE - CAC exceeds LTV, critical viability concern for visa application'}
+
 Payback Period: ${paybackMonths.toFixed(1)} months
+  ${paybackMonths <= 12 ? '✓ FAST - Supports efficient scaling and capital recycling' :
+    paybackMonths <= 18 ? '⚠ MODERATE - Acceptable but slows growth velocity' :
+    '✗ SLOW - Long payback restricts cash flow and limits scalability potential'}
 
-INPUTS:
-Marketing Spend: £${marketingSpend.toLocaleString()}
-Sales Spend: £${salesSpend.toLocaleString()}
-New Customers Acquired: ${newCustomers}
-Average Revenue per Customer: £${avgRevenue.toLocaleString()}
-Monthly Churn Rate: ${churnRate}%
-Gross Margin: ${grossMargin}%
+Overall Health: ${score}%
+  ${score >= 70 ? '✓ STRONG UNIT ECONOMICS - Demonstrates clear path to profitability and business viability' :
+    score >= 50 ? '⚠ VIABLE - But needs optimization in acquisition efficiency or retention' :
+    '✗ WEAK ECONOMICS - Requires fundamental improvements to demonstrate viability'}
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Viability: ${ltvCacRatio >= 3 ? `Strong LTV:CAC ratio (${ltvCacRatio.toFixed(1)}x) demonstrates business viability` : ltvCacRatio >= 1 ? 'Unit economics viable but need improvement' : 'CAC exceeds LTV - viability concern'}
-Scalability: ${paybackMonths <= 12 ? `Fast payback (${paybackMonths.toFixed(0)} months) enables efficient scaling` : 'Long payback period may limit scaling speed'}
-${score >= 70 ? '✅ Healthy unit economics support visa criteria' : '⚠️ Unit economics need optimization for visa assessment'}
+Visa Criterion Alignment:
+${score >= 70 && ltvCacRatio >= 2 ? '✓ Unit economics analysis demonstrates strong business viability for UK Innovator Founder visa endorsement. The ${ltvCacRatio.toFixed(1)}x LTV:CAC ratio and ${paybackMonths.toFixed(0)}-month payback show sustainable customer acquisition model.' :
+  score >= 50 ? '⚠ Unit economics are viable but strengthening LTV:CAC ratio (aim for 3x+) and reducing payback period (aim for <12 months) would improve endorsement prospects.' :
+  '✗ Unit economics show viability concerns - focus on reducing CAC through more efficient channels OR increasing LTV through better retention/upsells before visa application.'}
 
-FORMULAS:
-CAC = (Marketing Spend + Sales Spend) / New Customers
-LTV = (Avg Revenue × Gross Margin) / (Monthly Churn Rate)
-LTV:CAC Ratio = LTV / CAC
-Payback Period = CAC / (Monthly Gross Profit per Customer)
-
-Benchmarks: LTV:CAC >3x ideal, Payback <12 months ideal
-GOV.UK: Innovator Founder Visa viability criterion (November 2025)
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Viability Criterion: Sustainable business model with realistic financials
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+CAC/LTV Methodology: SaaS metrics, unit economics framework
+Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

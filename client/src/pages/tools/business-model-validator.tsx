@@ -49,7 +49,23 @@ export default function BusinessModelValidator() {
     const content = `UK INNOVATOR FOUNDER VISA - BUSINESS MODEL CANVAS
 Generated: ${new Date().toLocaleDateString()}
 
-Overall Score: ${score}% (${grade})
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+Overall Business Model Score: ${score}% (${grade})
+
+Component Scores:
+  Innovation: ${scores.innovation}/100
+  Viability: ${scores.viability}/100
+  Scalability: ${scores.scalability}/100
+  Differentiation: ${scores.differentiation}/100
+  Market Fit: ${scores.marketFit}/100
+
+${score >= 75 ? '✓ STRONG BUSINESS MODEL - Supports all UK Innovator Founder visa criteria' : score >= 65 ? '⚠ VIABLE MODEL - Strengthen for endorsement' : '✗ WEAK MODEL - Critical improvements needed'}
+
+═══════════════════════════════════════════════════════════
+BUSINESS MODEL CANVAS COMPONENTS
+═══════════════════════════════════════════════════════════
 
 VALUE PROPOSITION:
 ${valueProps}
@@ -60,23 +76,104 @@ ${revenueStreams}
 CUSTOMER SEGMENTS:
 ${customerSegments}
 
-CHANNELS:
+CHANNELS & DISTRIBUTION:
 ${channels}
 
-ASSESSMENT SCORES:
-Innovation: ${scores.innovation}/100
-Viability: ${scores.viability}/100
-Scalability: ${scores.scalability}/100
-Differentiation: ${scores.differentiation}/100
-Market Fit: ${scores.marketFit}/100
+═══════════════════════════════════════════════════════════
+BUSINESS MODEL SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: Overall Score = (Innovation + Viability + Scalability + Differentiation + Market Fit) / 5
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Innovation: ${scores.innovation >= 75 ? 'Strong innovation score supports visa criterion' : 'Innovation needs strengthening'}
-Viability: ${scores.viability >= 70 ? 'Business model demonstrates viability' : 'Viability requires improvement'}
-Scalability: ${scores.scalability >= 75 ? 'Scalable business model' : 'Scaling challenges identified'}
+Component Breakdown:
+  Innovation Score: ${scores.innovation}/100
+    ${scores.innovation >= 75 ? '✓ Strong innovation demonstrates novel approach' : scores.innovation >= 60 ? '⚠ Moderate innovation - strengthen unique elements' : '✗ Innovation below minimum threshold'}
+    
+  Viability Score: ${scores.viability}/100
+    ${scores.viability >= 75 ? '✓ Business model demonstrates strong sustainability' : scores.viability >= 60 ? '⚠ Viable but needs optimization' : '✗ Viability concerns identified'}
+    
+  Scalability Score: ${scores.scalability}/100
+    ${scores.scalability >= 75 ? '✓ Clear path to significant growth' : scores.scalability >= 60 ? '⚠ Limited scalability - address growth barriers' : '✗ Scaling challenges require attention'}
+    
+  Differentiation Score: ${scores.differentiation}/100
+    ${scores.differentiation >= 75 ? '✓ Strong differentiation from competitors' : scores.differentiation >= 60 ? '⚠ Moderate differentiation' : '✗ Insufficient differentiation'}
+    
+  Market Fit Score: ${scores.marketFit}/100
+    ${scores.marketFit >= 75 ? '✓ Strong product-market fit validation' : scores.marketFit >= 60 ? '⚠ Market fit requires validation' : '✗ Product-market fit not demonstrated'}
 
-Formula: Overall Score = Avg(Innovation + Viability + Scalability + Differentiation + Market Fit)
-GOV.UK: Innovator Founder Visa criteria (November 2025)
+Calculation:
+  Total Points = ${scores.innovation} + ${scores.viability} + ${scores.scalability} + ${scores.differentiation} + ${scores.marketFit}
+  Total Points = ${scores.innovation + scores.viability + scores.scalability + scores.differentiation + scores.marketFit}
+  Overall Score = ${scores.innovation + scores.viability + scores.scalability + scores.differentiation + scores.marketFit} / 5 = ${score}% (${grade})
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: THREE CORE CRITERIA
+═══════════════════════════════════════════════════════════
+
+GOV.UK Assessment Framework:
+1. INNOVATION - Novel business model with clear differentiation
+2. VIABILITY - Sustainable revenue model and realistic financials
+3. SCALABILITY - Potential for significant growth and job creation
+
+CRITERION 1: INNOVATION
+Your Innovation Score: ${scores.innovation}/100
+Your Differentiation Score: ${scores.differentiation}/100
+Combined Innovation Assessment: ${((scores.innovation + scores.differentiation) / 2).toFixed(0)}/100
+
+${scores.innovation >= 70 && scores.differentiation >= 70 ? '✓ STRONG INNOVATION - Business model demonstrates clear differentiation and novel approach for UK Innovator Founder visa' : '⚠ INNOVATION NEEDS STRENGTHENING - Enhance unique value proposition and competitive differentiation'}
+
+Key Questions for Endorsement:
+• What makes this business model unique or innovative?
+• How does it differ from existing market solutions?
+• What novel approach or technology does it employ?
+
+CRITERION 2: VIABILITY
+Your Viability Score: ${scores.viability}/100
+Your Market Fit Score: ${scores.marketFit}/100
+Combined Viability Assessment: ${((scores.viability + scores.marketFit) / 2).toFixed(0)}/100
+
+${scores.viability >= 70 && scores.marketFit >= 70 ? '✓ STRONG VIABILITY - Business model demonstrates sustainability and market validation for UK Innovator Founder visa' : '⚠ VIABILITY NEEDS STRENGTHENING - Validate revenue model and market demand'}
+
+Key Questions for Endorsement:
+• Is the business model financially sustainable?
+• Have revenue streams been validated?
+• Is there evidence of market demand/traction?
+
+CRITERION 3: SCALABILITY
+Your Scalability Score: ${scores.scalability}/100
+Scalability Assessment: ${scores.scalability}/100
+
+${scores.scalability >= 70 ? '✓ STRONG SCALABILITY - Business model supports significant growth and job creation for UK Innovator Founder visa' : '⚠ SCALABILITY NEEDS STRENGTHENING - Demonstrate clear path to growth and employment'}
+
+Key Questions for Endorsement:
+• Can the business scale to create 5+ jobs at £25k+ within 3 years?
+• Is there a clear path to £1M+ revenue?
+• Does the model support international expansion?
+
+═══════════════════════════════════════════════════════════
+OVERALL VISA READINESS ASSESSMENT
+═══════════════════════════════════════════════════════════
+Business Model Score: ${score}%
+
+Innovation Criterion: ${scores.innovation >= 70 ? '✓ READY' : '✗ NEEDS WORK'}
+Viability Criterion: ${scores.viability >= 70 ? '✓ READY' : '✗ NEEDS WORK'}
+Scalability Criterion: ${scores.scalability >= 70 ? '✓ READY' : '✗ NEEDS WORK'}
+
+${score >= 75 && scores.innovation >= 70 && scores.viability >= 70 && scores.scalability >= 70 ? 
+`✓ Your business model is strong and ready for UK Innovator Founder visa application. All three core criteria (Innovation, Viability, Scalability) meet the endorsement threshold.` :
+score >= 65 ?
+`⚠ Your business model is viable but needs strengthening in the following areas:
+${scores.innovation < 70 ? '• Innovation - Enhance unique value proposition and differentiation' : ''}
+${scores.viability < 70 ? '• Viability - Validate revenue model and demonstrate sustainability' : ''}
+${scores.scalability < 70 ? '• Scalability - Show clear growth path and job creation potential' : ''}` :
+`✗ Your business model requires significant improvements across multiple criteria before visa application. Focus on strengthening innovation, viability, and scalability components.`}
+
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Three Core Criteria: Innovation, Viability, Scalability
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+Business Model Methodology: Business Model Canvas framework
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });
