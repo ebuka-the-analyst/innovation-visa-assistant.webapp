@@ -55,7 +55,10 @@ app.use(compression({
   threshold: 1024, // Only compress responses > 1KB
   filter: (req, res) => {
     // Skip compression for images (already compressed)
-    if (req.headers['accept']?.includes('image/')) return false;
+    const contentType = res.getHeader('Content-Type');
+    if (contentType && typeof contentType === 'string' && contentType.startsWith('image/')) {
+      return false;
+    }
     return compression.filter(req, res);
   }
 }));
