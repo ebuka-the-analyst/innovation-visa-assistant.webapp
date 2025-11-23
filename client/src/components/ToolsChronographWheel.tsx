@@ -403,7 +403,7 @@ export default function ToolsChronographWheel() {
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" - Hidden when minimized */}
         {!isMinimized && (
           <div className="px-3 py-2 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
-            <p className="text-sm font-black tracking-wide" style={{ color: "#000000", lineHeight: "1.2" }}>APPLICATION REQUIREMENT CHECKS</p>
+            <p className="font-black tracking-wide" style={{ color: "#000000", fontSize: "clamp(0.8rem, 2vw, 1.5rem)", lineHeight: "1.2" }}>APPLICATION REQUIREMENT CHECKS</p>
           </div>
         )}
 
