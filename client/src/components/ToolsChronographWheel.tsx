@@ -361,14 +361,25 @@ export default function ToolsChronographWheel() {
       {/* Text Label Above Widget */}
       {isMinimized && (
         <div className="absolute -top-16 left-0 right-0 flex items-center justify-center">
-          <p className="font-black text-center pulse-glow-orange px-4 py-2 rounded-full" style={{ 
-            color: "#000000", 
-            backgroundColor: "#ffa536",
-            fontSize: "clamp(0.8rem, 2vw, 1.5rem)", 
-            lineHeight: "1.2"
-          }}>
+          <button
+            onClick={() => {
+              recordActivity();
+              setIsMinimized(false);
+            }}
+            className="font-black text-center pulse-glow-orange px-4 py-2 rounded-full hover:opacity-90 transition-opacity cursor-pointer"
+            data-testid="button-toggle-text-label"
+            aria-label="Expand Tools Hub"
+            style={{ 
+              color: "#000000", 
+              backgroundColor: "#ffa536",
+              fontSize: "clamp(0.8rem, 2vw, 1.5rem)", 
+              lineHeight: "1.2",
+              border: "none",
+              boxShadow: "none"
+            }}
+          >
             100+<br/>Tools-Hub
-          </p>
+          </button>
         </div>
       )}
 
