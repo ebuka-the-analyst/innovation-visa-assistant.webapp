@@ -88,7 +88,7 @@ export default function ToolsChronographWheel() {
 
     // Calculate scroll speed based on distance
     const speedFactor = (distance - threshold) / (containerHeight / 2 - threshold);
-    const scrollSpeed = speedFactor * 20; // Max 20px per interval
+    const scrollSpeed = speedFactor * 10; // Max 10px per interval (50% of original)
 
     // Start continuous scrolling
     scrollIntervalRef.current = setInterval(() => {
@@ -116,7 +116,7 @@ export default function ToolsChronographWheel() {
 
       recordActivity();
       e.preventDefault();
-      const scrollDelta = e.deltaY > 0 ? 30 : -30;
+      const scrollDelta = e.deltaY > 0 ? 15 : -15; // 50% of original speed
       scrollRef.current.scrollTop = Math.max(
         0,
         Math.min(
@@ -208,7 +208,7 @@ export default function ToolsChronographWheel() {
   // Handle quick scroll on chevron hover
   useEffect(() => {
     if (isHoveringUp && scrollRef.current) {
-      scrollRef.current.scrollTop = Math.max(0, scrollRef.current.scrollTop - 15);
+      scrollRef.current.scrollTop = Math.max(0, scrollRef.current.scrollTop - 7.5);
     }
   }, [isHoveringUp]);
 
@@ -216,7 +216,7 @@ export default function ToolsChronographWheel() {
     if (isHoveringDown && scrollRef.current) {
       scrollRef.current.scrollTop = Math.min(
         scrollRef.current.scrollHeight - scrollRef.current.clientHeight,
-        scrollRef.current.scrollTop + 15
+        scrollRef.current.scrollTop + 7.5
       );
     }
   }, [isHoveringDown]);
@@ -229,7 +229,7 @@ export default function ToolsChronographWheel() {
 
     chevronScrollRef.current = setInterval(() => {
       if (scrollRef.current) {
-        scrollRef.current.scrollTop = Math.max(0, scrollRef.current.scrollTop - 12);
+        scrollRef.current.scrollTop = Math.max(0, scrollRef.current.scrollTop - 6); // 50% of original
       }
     }, 50);
 
@@ -247,7 +247,7 @@ export default function ToolsChronographWheel() {
       if (scrollRef.current) {
         scrollRef.current.scrollTop = Math.min(
           scrollRef.current.scrollHeight - scrollRef.current.clientHeight,
-          scrollRef.current.scrollTop + 12
+          scrollRef.current.scrollTop + 6 // 50% of original
         );
       }
     }, 50);
