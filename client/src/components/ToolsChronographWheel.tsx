@@ -450,12 +450,10 @@ export default function ToolsChronographWheel() {
             }}
           >
             <div className="space-y-1 sm:space-y-2">
-              {/* Top spacer to prevent fade mask from hiding first tools */}
-              <div style={{ height: "80px" }} />
               {tools.map((tool, idx) => {
-                // Skip rendering dummy tools - they're just for scroll space
+                // Render dummy tools as minimal spacers (1px each)
                 if (tool.category === "dummy") {
-                  return <div key={tool.id} style={{ height: "44px" }} />;
+                  return <div key={tool.id} style={{ height: "1px" }} />;
                 }
                 
                 return (
