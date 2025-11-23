@@ -7,40 +7,31 @@ import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
 import { fileUploadConfigs } from "@/lib/fileUploadConfigs";
 import { useState, useEffect } from "react";
-import { Plus, X, Target, Users, TrendingUp, AlertCircle, CheckCircle2, Award, ShieldCheck } from "lucide-react";
+import { Plus, X, Target, Users, TrendingUp, AlertCircle, Layers, Building2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, ScatterChart, Scatter, Cell } from "recharts";
+import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, Cell, PieChart, Pie } from "recharts";
 
-// UK SOC 2020 Codes for Visa Sponsorship (Common Tech Roles)
-const UK_SOC_CODES = {
-  "2136": { title: "Programmers and software development professionals", visaSponsorable: true, goingRate: 42000 },
-  "2137": "Web design and development professionals",
-  "2135": "IT business analysts, architects and systems designers",
-  "2139": "Information technology and telecommunications professionals n.e.c.",
-  "2133": "IT specialist managers",
-  "1136": "IT directors",
-  "2134": "IT project and programme managers",
-  "3131": "IT operations technicians",
-  "3132": "IT user support technicians"
-};
+// UK Innovator Founder Visa Context (November 2025)
+// Scalability Criterion: Clear organizational structure demonstrates growth potential
+// Viability Criterion: Realistic role definitions show capability to execute business plan
+// Key Focus: Job creation roadmap, team structure for scaling, skill requirements
 
 interface RoleDefinition {
   id: string;
   title: string;
   department: string;
-  socCode: string;
+  seniority: string; // Founder, C-Level, Senior, Mid, Junior
+  purpose: string; // Why this role exists
   responsibilities: string[];
-  kpis: string[];
-  skills: string[];
-  reportingTo: string;
-  minSalary: number;
-  maxSalary: number;
-  marketDemand: number; // 0-100
-  skillGapCost: number; // £ annual cost
-  timeToFill: number; // days
+  keySkills: string[];
+  hiringPriority: number; // 1-10 (1=hire first, 10=hire last)
+  hiringMonth: number; // Month 1-36 (3-year visa period)
+  fullTime: boolean;
+  estimatedSalary: number;
+  impactOnScaling: string; // How role contributes to scalability
 }
 
 export default function RoleDesigner() {
@@ -49,18 +40,17 @@ export default function RoleDesigner() {
   const [roles, setRoles] = useState<RoleDefinition[]>([
     {
       id: "1",
-      title: "Software Engineer",
+      title: "Lead Engineer",
       department: "Engineering",
-      socCode: "2136",
-      responsibilities: ["Design and implement features", "Code review and testing", "Collaborate with product team"],
-      kpis: ["Code quality score", "Sprint velocity", "Bug resolution time"],
-      skills: ["JavaScript", "React", "Node.js", "TypeScript", "Testing"],
-      reportingTo: "Engineering Manager",
-      minSalary: 60000,
-      maxSalary: 90000,
-      marketDemand: 85,
-      skillGapCost: 12000,
-      timeToFill: 45
+      seniority: "Senior",
+      purpose: "Build core product and technical infrastructure",
+      responsibilities: ["Design system architecture", "Lead technical development", "Code review and quality assurance", "Mentor junior engineers"],
+      keySkills: ["Full-stack development", "System design", "Team leadership", "Cloud infrastructure"],
+      hiringPriority: 1,
+      hiringMonth: 1,
+      fullTime: true,
+      estimatedSalary: 80000,
+      impactOnScaling: "Critical - enables product development and technical foundation for growth"
     }
   ]);
 
@@ -78,17 +68,16 @@ export default function RoleDesigner() {
     setRoles([...roles, {
       id: Date.now().toString(),
       title: "New Role",
-      department: "",
-      socCode: "",
+      department: "Operations",
+      seniority: "Mid",
+      purpose: "",
       responsibilities: [""],
-      kpis: [""],
-      skills: [""],
-      reportingTo: "",
-      minSalary: 40000,
-      maxSalary: 60000,
-      marketDemand: 50,
-      skillGapCost: 5000,
-      timeToFill: 30
+      keySkills: [""],
+      hiringPriority: 5,
+      hiringMonth: 6,
+      fullTime: true,
+      estimatedSalary: 50000,
+      impactOnScaling: ""
     }]);
   };
 
@@ -98,11 +87,11 @@ export default function RoleDesigner() {
     setRoles(roles.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
-  const addArrayItem = (id: string, field: 'responsibilities' | 'kpis' | 'skills') => {
+  const addArrayItem = (id: string, field: 'responsibilities' | 'keySkills') => {
     setRoles(roles.map(r => r.id === id ? { ...r, [field]: [...r[field], ""] } : r));
   };
 
-  const updateArrayItem = (id: string, field: 'responsibilities' | 'kpis' | 'skills', index: number, value: string) => {
+  const updateArrayItem = (id: string, field: 'responsibilities' | 'keySkills', index: number, value: string) => {
     setRoles(roles.map(r => {
       if (r.id === id) {
         const newArray = [...r[field]];
@@ -113,7 +102,7 @@ export default function RoleDesigner() {
     }));
   };
 
-  const removeArrayItem = (id: string, field: 'responsibilities' | 'kpis' | 'skills', index: number) => {
+  const removeArrayItem = (id: string, field: 'responsibilities' | 'keySkills', index: number) => {
     setRoles(roles.map(r => {
       if (r.id === id) {
         return { ...r, [field]: r[field].filter((_, i) => i !== index) };
@@ -122,232 +111,406 @@ export default function RoleDesigner() {
     }));
   };
 
-  // PhD-Level: Visa Eligibility Score
-  const getVisaEligibilityScore = (role: RoleDefinition): number => {
+  // PhD-Level: Organizational Clarity Score
+  // Formula: Measures how well-defined and scalable the organizational structure is
+  // Based on: Role definition completeness, clear hierarchy, balanced team structure
+  const getOrganizationalClarityScore = (): { score: number; wellDefinedRoles: number; scalabilityGrade: string } => {
     let score = 0;
+    let wellDefinedRoles = 0;
     
-    // SOC code registered (40 points)
-    if (role.socCode && UK_SOC_CODES[role.socCode as keyof typeof UK_SOC_CODES]) {
-      score += 40;
-    }
+    roles.forEach(role => {
+      let roleScore = 0;
+      
+      // Purpose clarity (20 points)
+      if (role.purpose && role.purpose.length > 20) roleScore += 20;
+      
+      // Responsibility definition (25 points)
+      const validResp = role.responsibilities.filter(r => r.trim().length > 0);
+      if (validResp.length >= 4) roleScore += 25;
+      else if (validResp.length >= 2) roleScore += 15;
+      
+      // Skill requirements (25 points)
+      const validSkills = role.keySkills.filter(s => s.trim().length > 0);
+      if (validSkills.length >= 4) roleScore += 25;
+      else if (validSkills.length >= 2) roleScore += 15;
+      
+      // Scalability impact (20 points)
+      if (role.impactOnScaling && role.impactOnScaling.length > 30) roleScore += 20;
+      
+      // Hiring strategy (10 points)
+      if (role.hiringPriority > 0 && role.hiringMonth > 0 && role.hiringMonth <= 36) roleScore += 10;
+      
+      if (roleScore >= 70) wellDefinedRoles++;
+      score += roleScore;
+    });
     
-    // Meets salary threshold (30 points)
-    if (role.minSalary >= 25600) score += 30;
+    const avgScore = roles.length > 0 ? score / roles.length : 0;
     
-    // Above going rate (20 points)
-    if (role.minSalary >= 45000) score += 20;
+    let scalabilityGrade = 'C - Needs Work';
+    if (avgScore >= 90) scalabilityGrade = 'A+ - Excellent';
+    else if (avgScore >= 80) scalabilityGrade = 'A - Very Good';
+    else if (avgScore >= 70) scalabilityGrade = 'B - Good';
+    else if (avgScore >= 60) scalabilityGrade = 'C - Acceptable';
     
-    // Job-ready definition (10 points)
-    if (role.responsibilities.filter(x => x).length >= 3 && role.skills.filter(x => x).length >= 3) {
-      score += 10;
-    }
-    
-    return score;
+    return { score: Math.round(avgScore), wellDefinedRoles, scalabilityGrade };
   };
 
-  // PhD-Level: Skill Gap ROI Calculator
-  const getSkillGapROI = (): { totalGapCost: number; avgTimeToFill: number; highDemandRoles: number } => {
-    const totalGapCost = roles.reduce((sum, r) => sum + r.skillGapCost, 0);
-    const avgTimeToFill = roles.length > 0 ? roles.reduce((sum, r) => sum + r.timeToFill, 0) / roles.length : 0;
-    const highDemandRoles = roles.filter(r => r.marketDemand >= 70).length;
+  // PhD-Level: Team Structure Balance Analysis
+  // Formula: Evaluates organizational hierarchy balance (too flat vs too hierarchical)
+  // Optimal balance: Mix of leadership (10-20%), senior (20-30%), mid (30-40%), junior (20-30%)
+  const getTeamStructureBalance = (): { balance: string; departmentCount: number; seniorityDistribution: Record<string, number> } => {
+    const depts = new Set(roles.filter(r => r.department).map(r => r.department));
+    const departmentCount = depts.size;
     
-    return { totalGapCost, avgTimeToFill, highDemandRoles };
+    const seniorityDistribution: Record<string, number> = {};
+    roles.forEach(role => {
+      seniorityDistribution[role.seniority] = (seniorityDistribution[role.seniority] || 0) + 1;
+    });
+    
+    const total = roles.length;
+    const leadershipCount = (seniorityDistribution['Founder'] || 0) + (seniorityDistribution['C-Level'] || 0);
+    const seniorCount = seniorityDistribution['Senior'] || 0;
+    const midCount = seniorityDistribution['Mid'] || 0;
+    const juniorCount = seniorityDistribution['Junior'] || 0;
+    
+    const leadershipPct = total > 0 ? (leadershipCount / total) * 100 : 0;
+    const seniorPct = total > 0 ? (seniorCount / total) * 100 : 0;
+    const midPct = total > 0 ? (midCount / total) * 100 : 0;
+    const juniorPct = total > 0 ? (juniorCount / total) * 100 : 0;
+    
+    let balance = 'Balanced';
+    if (leadershipPct > 30) balance = 'Top-heavy (too many leaders)';
+    else if (juniorPct > 50) balance = 'Junior-heavy (needs senior talent)';
+    else if (midPct < 20 && total > 5) balance = 'Missing mid-level bridge';
+    else if (total > 8 && departmentCount < 3) balance = 'Department consolidation needed';
+    
+    return { balance, departmentCount, seniorityDistribution };
+  };
+
+  // PhD-Level: Hiring Roadmap Analysis
+  // Formula: Analyzes hiring timeline feasibility and capacity planning
+  const getHiringRoadmapAnalysis = (): { monthlyHiring: { month: number; count: number }[]; peakMonth: number; phasing: string } => {
+    const monthlyHiring: { month: number; count: number }[] = [];
+    
+    for (let month = 1; month <= 36; month++) {
+      const hiresInMonth = roles.filter(r => r.hiringMonth === month).length;
+      if (hiresInMonth > 0) {
+        monthlyHiring.push({ month, count: hiresInMonth });
+      }
+    }
+    
+    const maxHires = Math.max(...monthlyHiring.map(m => m.count), 0);
+    const peakMonth = monthlyHiring.find(m => m.count === maxHires)?.month || 0;
+    
+    let phasing = 'Gradual (recommended)';
+    if (maxHires > 3) phasing = 'Aggressive (high risk)';
+    else if (maxHires === 0) phasing = 'No hiring planned';
+    else if (monthlyHiring.length < 4 && roles.length > 5) phasing = 'Front-loaded (risky)';
+    
+    return { monthlyHiring, peakMonth, phasing };
+  };
+
+  // PhD-Level: Skill Coverage Gap Analysis
+  // Formula: Identifies missing skills across team for comprehensive capability
+  const getSkillCoverageAnalysis = (): { totalUniqueSkills: number; skillFrequency: Record<string, number>; criticalGaps: string[] } => {
+    const skillFrequency: Record<string, number> = {};
+    
+    roles.forEach(role => {
+      role.keySkills.filter(s => s.trim().length > 0).forEach(skill => {
+        const normalized = skill.trim().toLowerCase();
+        skillFrequency[normalized] = (skillFrequency[normalized] || 0) + 1;
+      });
+    });
+    
+    const totalUniqueSkills = Object.keys(skillFrequency).length;
+    
+    // Identify critical startup skills often missing
+    const criticalSkillsToCheck = [
+      'sales', 'marketing', 'product management', 'finance', 'legal',
+      'customer support', 'data analysis', 'design', 'leadership', 'operations'
+    ];
+    
+    const criticalGaps = criticalSkillsToCheck.filter(skill => {
+      return !Object.keys(skillFrequency).some(s => s.includes(skill));
+    });
+    
+    return { totalUniqueSkills, skillFrequency, criticalGaps };
   };
 
   const exportPlan = () => {
-    const { totalGapCost, avgTimeToFill } = getSkillGapROI();
-    const avgVisaEligibility = roles.reduce((sum, r) => sum + getVisaEligibilityScore(r), 0) / roles.length;
+    const { score: orgScore, wellDefinedRoles, scalabilityGrade } = getOrganizationalClarityScore();
+    const { balance, departmentCount } = getTeamStructureBalance();
+    const { phasing } = getHiringRoadmapAnalysis();
+    const { totalUniqueSkills, criticalGaps } = getSkillCoverageAnalysis();
     
-    const content = `UK INNOVATOR FOUNDER VISA - ROLE & RESPONSIBILITY DESIGN
+    const content = `UK INNOVATOR FOUNDER VISA - ORGANIZATIONAL DESIGN & ROLE FRAMEWORK
 Generated: ${new Date().toLocaleDateString()}
 
 ═══════════════════════════════════════════════════════════
-EXECUTIVE SUMMARY
+EXECUTIVE SUMMARY (Innovator Founder Visa Context)
 ═══════════════════════════════════════════════════════════
-Total Roles: ${roles.length}
-Total Departments: ${new Set(roles.map(r => r.department)).size}
-Avg Visa Eligibility: ${avgVisaEligibility.toFixed(1)}%
-Total Skill Gap Cost: £${totalGapCost.toLocaleString()}
-Avg Time-to-Fill: ${avgTimeToFill.toFixed(0)} days
+Total Roles Defined: ${roles.length}
+Departments: ${departmentCount}
+Full-Time Positions: ${roles.filter(r => r.fullTime).length}
+
+SCALABILITY ASSESSMENT:
+Organizational Clarity Score: ${orgScore}%
+Scalability Grade: ${scalabilityGrade}
+Well-Defined Roles: ${wellDefinedRoles}/${roles.length}
+Team Structure: ${balance}
+
+HIRING ROADMAP:
+Hiring Phasing: ${phasing}
+Total Unique Skills: ${totalUniqueSkills}
+${criticalGaps.length > 0 ? `Critical Skill Gaps: ${criticalGaps.join(', ')}` : 'No critical skill gaps identified'}
 
 ═══════════════════════════════════════════════════════════
-UK SOC 2020 CODE COMPLIANCE
+INNOVATOR FOUNDER VISA: ORGANIZATIONAL SCALABILITY
 ═══════════════════════════════════════════════════════════
-${roles.filter(r => r.socCode).length} of ${roles.length} roles have assigned SOC codes
-Visa-sponsorable roles: ${roles.filter(r => r.socCode && UK_SOC_CODES[r.socCode as keyof typeof UK_SOC_CODES]).length}
+GOV.UK Endorsement Criteria - Scalability:
+• Evidence of potential to create jobs
+• Plans for expanding into national/international markets
+• Organizational structure demonstrates growth capability
+• Clear hiring roadmap with realistic timeline
 
-${roles.map(r => {
-  const visaEligibility = getVisaEligibilityScore(r);
-  const socInfo = r.socCode ? UK_SOC_CODES[r.socCode as keyof typeof UK_SOC_CODES] : null;
-  const midSalary = (r.minSalary + r.maxSalary) / 2;
+CURRENT ORGANIZATIONAL STRUCTURE:
+${roles.map(r => `${r.title} (${r.department}) - ${r.seniority} - Month ${r.hiringMonth}`).join('\n')}
+
+SCALABILITY EVIDENCE:
+✓ ${roles.length} distinct roles demonstrate organizational planning
+✓ ${departmentCount} departments show functional specialization
+✓ Hiring timeline spans ${Math.max(...roles.map(r => r.hiringMonth), 0)} months (realistic growth)
+✓ ${roles.filter(r => r.fullTime && r.estimatedSalary >= 25000).length} roles contribute to ILR job creation criterion
+
+${roles.map((r, idx) => {
+  const validResp = r.responsibilities.filter(x => x.trim().length > 0);
+  const validSkills = r.keySkills.filter(x => x.trim().length > 0);
   
   return `
 ═══════════════════════════════════════════════════════════
-ROLE: ${r.title}
+ROLE ${idx + 1}: ${r.title}
 ═══════════════════════════════════════════════════════════
 Department: ${r.department}
-Reports To: ${r.reportingTo}
-SOC Code: ${r.socCode || 'Not assigned'} ${socInfo ? `(${socInfo.title})` : ''}
+Seniority: ${r.seniority}
+Employment: ${r.fullTime ? 'Full-Time' : 'Part-Time'}
+Estimated Salary: £${r.estimatedSalary.toLocaleString()}
 
-COMPENSATION:
-Salary Range: £${r.minSalary.toLocaleString()} - £${r.maxSalary.toLocaleString()}
-Mid-point: £${midSalary.toLocaleString()}
-
-VISA ELIGIBILITY:
-Score: ${visaEligibility}% ${visaEligibility >= 70 ? '✓ READY FOR SPONSORSHIP' : visaEligibility >= 50 ? '⚠ NEEDS IMPROVEMENT' : '✗ NOT ELIGIBLE'}
-${r.minSalary >= 25600 ? '✓' : '✗'} Meets UK skilled worker minimum (£25,600)
-${r.minSalary >= 45000 ? '✓' : '⚠'} Above UK going rate (£45,000)
-${r.socCode ? '✓' : '✗'} SOC 2020 code assigned
-
-MARKET INTELLIGENCE:
-Market Demand: ${r.marketDemand}% ${r.marketDemand >= 70 ? '(High)' : r.marketDemand >= 40 ? '(Medium)' : '(Low)'}
-Estimated Time-to-Fill: ${r.timeToFill} days
-Skill Gap Cost: £${r.skillGapCost.toLocaleString()}/year
+STRATEGIC PURPOSE:
+${r.purpose || 'Not defined'}
 
 KEY RESPONSIBILITIES:
-${r.responsibilities.filter(x => x).map((resp, i) => `${i + 1}. ${resp}`).join('\n')}
-
-KEY PERFORMANCE INDICATORS (KPIs):
-${r.kpis.filter(x => x).map((kpi, i) => `${i + 1}. ${kpi}`).join('\n')}
+${validResp.length > 0 ? validResp.map((resp, i) => `${i + 1}. ${resp}`).join('\n') : 'Not defined'}
 
 REQUIRED SKILLS:
-${r.skills.filter(x => x).map((skill, i) => `• ${skill}`).join('\n')}
+${validSkills.length > 0 ? validSkills.map(skill => `• ${skill}`).join('\n') : 'Not defined'}
+
+HIRING STRATEGY:
+Priority: ${r.hiringPriority}/10 ${r.hiringPriority <= 3 ? '(Critical hire)' : r.hiringPriority <= 6 ? '(Important)' : '(Later stage)'}
+Planned Hiring: Month ${r.hiringMonth} of 36-month visa period
+
+SCALABILITY CONTRIBUTION:
+${r.impactOnScaling || 'Not defined - consider adding scalability impact description'}
+${r.fullTime && r.estimatedSalary >= 25000 ? '\n✓ Counts toward ILR job creation criterion (full-time, £25k+)' : ''}
 `}).join('\n')}
 
 ═══════════════════════════════════════════════════════════
-GOV.UK COMPLIANCE RECOMMENDATIONS
+ORGANIZATIONAL VIABILITY RECOMMENDATIONS
 ═══════════════════════════════════════════════════════════
-${getGovUKRecommendations().join('\n')}
+${getViabilityRecommendations().join('\n')}
 
 ═══════════════════════════════════════════════════════════
-SKILL GAP & ROI ANALYSIS
+SCALABILITY EVIDENCE FOR ENDORSING BODY
 ═══════════════════════════════════════════════════════════
-${getSkillGapInsights().join('\n')}
+${getScalabilityEvidence().join('\n')}
 
-Reference: UK Immigration Rules - Standard Occupational Classification (SOC 2020)
-Source: GOV.UK Home Office Guidance (2025)
+Source: GOV.UK Innovator Founder Visa Guidance (November 2025)
+Criteria: Innovation, Viability, Scalability
+Endorsement: Required from approved body (Envestors, UKES, Innovator International, GEP)
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'uk-visa-role-design.txt';
+    a.download = 'innovator-founder-organizational-design.txt';
     a.click();
   };
 
-  // PhD-Level: GOV.UK-Aligned Recommendations
-  const getGovUKRecommendations = (): string[] => {
+  // GOV.UK-Aligned Viability Recommendations
+  const getViabilityRecommendations = (): string[] => {
     const tips: string[] = [];
+    const { score, wellDefinedRoles } = getOrganizationalClarityScore();
+    const { balance, departmentCount } = getTeamStructureBalance();
+    const { criticalGaps } = getSkillCoverageAnalysis();
     
-    // SOC code compliance
-    const rolesWithoutSOC = roles.filter(r => !r.socCode);
-    if (rolesWithoutSOC.length > 0) {
-      tips.push(`🚨 CRITICAL: ${rolesWithoutSOC.length} role(s) missing SOC 2020 code - CANNOT sponsor visa without valid classification`);
-      tips.push(`   Affected roles: ${rolesWithoutSOC.map(r => r.title).join(', ')}`);
-      tips.push(`   Action: Assign appropriate SOC codes from GOV.UK register`);
+    if (score < 70) {
+      tips.push(`🚨 CRITICAL: Organizational clarity score ${score}% below recommended 70% threshold`);
+      tips.push(`   Endorsing bodies assess organizational capability during application review`);
+      tips.push(`   Action: Complete role definitions with purpose, responsibilities, skills, scalability impact`);
     }
     
-    // Salary threshold
-    const belowMinimum = roles.filter(r => r.minSalary < 25600);
-    if (belowMinimum.length > 0) {
-      tips.push(`⚠️ WARNING: ${belowMinimum.length} role(s) below £25,600 minimum - not eligible for skilled worker visa`);
-      tips.push(`   Roles: ${belowMinimum.map(r => r.title).join(', ')}`);
+    if (wellDefinedRoles < roles.length * 0.7) {
+      tips.push(`⚠️ WARNING: Only ${wellDefinedRoles}/${roles.length} roles are well-defined (target: 70%+)`);
+      tips.push(`   Each role needs: clear purpose, 3+ responsibilities, 3+ skills, scalability description`);
     }
     
-    // Job definition completeness
-    const incompleteRoles = roles.filter(r => r.responsibilities.filter(x => x).length < 3 || r.skills.filter(x => x).length < 3);
-    if (incompleteRoles.length > 0) {
-      tips.push(`📋 ${incompleteRoles.length} role(s) with incomplete job descriptions - may face Home Office scrutiny`);
-      tips.push(`   Ensure minimum 3 responsibilities and 3 skills per role for sponsor license applications`);
+    if (departmentCount < 3 && roles.length > 5) {
+      tips.push(`📋 Consider adding functional specialization - currently ${departmentCount} departments for ${roles.length} roles`);
+      tips.push(`   Typical startup departments: Engineering, Product, Sales/Marketing, Operations, Finance`);
     }
     
-    // High-demand roles
-    const highDemand = roles.filter(r => r.marketDemand >= 70);
-    if (highDemand.length > 0) {
-      tips.push(`💡 ${highDemand.length} high-demand role(s) identified - consider competitive offers to reduce time-to-fill`);
+    if (balance.includes('heavy') || balance.includes('Missing')) {
+      tips.push(`⚠️ Team structure imbalance detected: ${balance}`);
+      tips.push(`   Optimal balance: 10-20% leadership, 20-30% senior, 30-40% mid, 20-30% junior`);
     }
     
-    return tips.length > 0 ? tips : ['✅ All roles meet UK visa eligibility requirements'];
+    if (criticalGaps.length > 0) {
+      tips.push(`💡 Critical skill gaps identified: ${criticalGaps.slice(0, 5).join(', ')}`);
+      tips.push(`   Consider adding roles to cover essential startup functions`);
+    }
+    
+    const fullTimeRoles = roles.filter(r => r.fullTime);
+    const ilrQualifyingJobs = fullTimeRoles.filter(r => r.estimatedSalary >= 25000).length;
+    if (ilrQualifyingJobs >= 5) {
+      tips.push(`✅ EXCELLENT: ${ilrQualifyingJobs} full-time jobs at £25k+ = meets ILR job creation criterion`);
+    } else if (fullTimeRoles.length >= 5) {
+      tips.push(`💡 ${fullTimeRoles.length} full-time roles planned - increase salaries to £25k+ for ILR eligibility`);
+    }
+    
+    return tips.length > 0 ? tips : ['✅ Organizational structure demonstrates viability and scalability'];
   };
 
-  // PhD-Level: Skill Gap Insights
-  const getSkillGapInsights = (): string[] => {
-    const insights: string[] = [];
-    const { totalGapCost, avgTimeToFill, highDemandRoles } = getSkillGapROI();
+  // Scalability Evidence for Endorsement Application
+  const getScalabilityEvidence = (): string[] => {
+    const evidence: string[] = [];
+    const { departmentCount } = getTeamStructureBalance();
+    const { monthlyHiring } = getHiringRoadmapAnalysis();
     
-    insights.push(`Total annual skill gap cost: £${totalGapCost.toLocaleString()}`);
-    insights.push(`Average time-to-fill: ${avgTimeToFill.toFixed(0)} days`);
-    insights.push(`High-demand roles (>70% market demand): ${highDemandRoles}`);
+    evidence.push(`1. ORGANIZATIONAL STRUCTURE:`);
+    evidence.push(`   • ${roles.length} distinct roles demonstrate planned growth`);
+    evidence.push(`   • ${departmentCount} functional departments show specialization`);
+    evidence.push(`   • ${roles.filter(r => r.fullTime).length} full-time positions create employment opportunities`);
     
-    if (avgTimeToFill > 60) {
-      insights.push(`\n⚠️ Extended hiring timelines detected - consider:`);
-      insights.push(`   • Upskilling existing team members (save £${(totalGapCost * 0.4).toLocaleString()})`);
-      insights.push(`   • International recruitment via visa sponsorship`);
-      insights.push(`   • Contractor/interim support while building team`);
+    evidence.push(`\n2. HIRING ROADMAP (36-Month Visa Period):`);
+    const sortedHiring = monthlyHiring.sort((a, b) => a.month - b.month);
+    sortedHiring.slice(0, 5).forEach(h => {
+      const rolesInMonth = roles.filter(r => r.hiringMonth === h.month);
+      evidence.push(`   • Month ${h.month}: ${h.count} hire(s) - ${rolesInMonth.map(r => r.title).join(', ')}`);
+    });
+    if (sortedHiring.length > 5) {
+      evidence.push(`   • ... and ${sortedHiring.length - 5} more hiring milestones`);
     }
     
-    if (totalGapCost > 50000) {
-      insights.push(`\n💰 Significant skill gap investment detected`);
-      insights.push(`   Training ROI potential: £${(totalGapCost * 0.6).toLocaleString()} over 2 years`);
-      insights.push(`   External recruitment cost: ~£${(roles.length * 8000).toLocaleString()} (industry avg)`);
-    }
+    evidence.push(`\n3. JOB CREATION FOR ILR:`);
+    const ilrJobs = roles.filter(r => r.fullTime && r.estimatedSalary >= 25000);
+    evidence.push(`   • ${ilrJobs.length} roles at £25k+ (ILR criterion: 5 needed)`);
+    evidence.push(`   • ${roles.filter(r => r.fullTime).length} total full-time jobs (ILR criterion: 10 needed)`);
     
-    return insights;
+    evidence.push(`\n4. SCALABILITY INDICATORS:`);
+    roles.filter(r => r.impactOnScaling).slice(0, 3).forEach(r => {
+      evidence.push(`   • ${r.title}: ${r.impactOnScaling.substring(0, 80)}...`);
+    });
+    
+    return evidence;
   };
 
   const getSerializedState = () => ({ uploadedFiles, roles, savedDate });
 
-  // Chart Data: Visa Eligibility Scores
-  const getVisaEligibilityData = () => {
-    return roles.map(r => ({
-      role: r.title.substring(0, 12),
-      score: getVisaEligibilityScore(r),
-      threshold: 70
-    }));
+  // Chart 1: Hiring Timeline by Department
+  const getHiringTimeline = () => {
+    const data: { month: number; Engineering: number; Product: number; Sales: number; Operations: number; Other: number }[] = [];
+    
+    for (let month = 0; month <= 36; month += 3) {
+      const byDept = { month, Engineering: 0, Product: 0, Sales: 0, Operations: 0, Other: 0 };
+      
+      roles.forEach(role => {
+        if (role.hiringMonth <= month) {
+          if (role.department === 'Engineering') byDept.Engineering++;
+          else if (role.department === 'Product') byDept.Product++;
+          else if (role.department === 'Sales' || role.department === 'Marketing') byDept.Sales++;
+          else if (role.department === 'Operations') byDept.Operations++;
+          else byDept.Other++;
+        }
+      });
+      
+      data.push(byDept);
+    }
+    
+    return data;
   };
 
-  // Chart Data: Market Demand vs Salary
-  const getMarketDemandData = () => {
-    return roles.map(r => ({
-      role: r.title.substring(0, 12),
-      demand: r.marketDemand,
-      salary: (r.minSalary + r.maxSalary) / 2
-    }));
+  // Chart 2: Seniority Distribution
+  const getSeniorityDistribution = () => {
+    const { seniorityDistribution } = getTeamStructureBalance();
+    return Object.entries(seniorityDistribution).map(([level, count]) => ({ level, count }));
   };
 
-  // Chart Data: Time-to-Fill vs Skill Gap Cost
-  const getTimeToFillData = () => {
-    return roles.map(r => ({
-      x: r.timeToFill,
-      y: r.skillGapCost,
-      name: r.title.substring(0, 10)
-    }));
+  // Chart 3: Role Clarity Scores
+  const getRoleClarityScores = () => {
+    return roles.map(role => {
+      const validResp = role.responsibilities.filter(r => r.trim().length > 0).length;
+      const validSkills = role.keySkills.filter(s => s.trim().length > 0).length;
+      const purposeScore = role.purpose && role.purpose.length > 20 ? 20 : 0;
+      const impactScore = role.impactOnScaling && role.impactOnScaling.length > 30 ? 20 : 0;
+      
+      const score = purposeScore + Math.min(25, validResp * 8) + Math.min(25, validSkills * 8) + impactScore;
+      
+      return {
+        role: role.title.substring(0, 12),
+        clarity: Math.round(score),
+        target: 80
+      };
+    });
   };
 
-  // Chart Data: Skill Requirements Radar
-  const getSkillRadarData = () => {
-    return roles.slice(0, 5).map(r => ({
-      role: r.title.substring(0, 12),
-      responsibilities: r.responsibilities.filter(x => x).length,
-      kpis: r.kpis.filter(x => x).length,
-      skills: r.skills.filter(x => x).length,
-      visaReady: getVisaEligibilityScore(r)
+  // Chart 4: Skill Coverage Radar
+  const getSkillCoverageRadar = () => {
+    const { skillFrequency } = getSkillCoverageAnalysis();
+    
+    // Categorize skills
+    const categories = {
+      Technical: 0,
+      Product: 0,
+      Sales: 0,
+      Operations: 0,
+      Leadership: 0
+    };
+    
+    Object.keys(skillFrequency).forEach(skill => {
+      const count = skillFrequency[skill];
+      if (skill.includes('engineer') || skill.includes('develop') || skill.includes('technical') || skill.includes('code')) {
+        categories.Technical += count;
+      } else if (skill.includes('product') || skill.includes('design') || skill.includes('ux')) {
+        categories.Product += count;
+      } else if (skill.includes('sales') || skill.includes('marketing') || skill.includes('customer')) {
+        categories.Sales += count;
+      } else if (skill.includes('operations') || skill.includes('finance') || skill.includes('legal')) {
+        categories.Operations += count;
+      } else if (skill.includes('leader') || skill.includes('management') || skill.includes('strategy')) {
+        categories.Leadership += count;
+      }
+    });
+    
+    return Object.entries(categories).map(([category, count]) => ({
+      category,
+      coverage: Math.min(100, count * 20),
+      fullMark: 100
     }));
   };
 
   useEffect(() => {
     const s = localStorage.getItem('roleDesignerData');
-    if (s) setRoles(JSON.parse(s).roles);
+    if (s) setRoles(JSON.parse(s).roles || []);
     const f = localStorage.getItem('roleDesignerFiles');
     if (f) setUploadedFiles(JSON.parse(f));
     const d = localStorage.getItem('roleDesignerDate');
     if (d) setSavedDate(d);
   }, []);
 
-  const { totalGapCost, avgTimeToFill, highDemandRoles } = getSkillGapROI();
-  const avgVisaEligibility = roles.reduce((sum, r) => sum + getVisaEligibilityScore(r), 0) / (roles.length || 1);
-  const visaSponsorableRoles = roles.filter(r => getVisaEligibilityScore(r) >= 70).length;
+  const { score: orgScore, wellDefinedRoles, scalabilityGrade } = getOrganizationalClarityScore();
+  const { balance, departmentCount } = getTeamStructureBalance();
+  const { phasing } = getHiringRoadmapAnalysis();
+  const { totalUniqueSkills } = getSkillCoverageAnalysis();
 
   const COLORS = ['#ffa536', '#11b6e9', '#8b5cf6', '#10b981', '#ef4444'];
 
@@ -357,12 +520,12 @@ Source: GOV.UK Home Office Guidance (2025)
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <ToolNavigation />
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Role & Responsibility Designer</h1>
-          <p className="text-muted-foreground mb-6">UK visa-compliant roles with SOC 2020 classification & skill gap analysis</p>
+          <h1 className="text-4xl font-bold mb-2">Organizational Design & Role Framework</h1>
+          <p className="text-muted-foreground mb-6">Build scalable team structure with clear roles (Innovator Founder Visa)</p>
 
           <ToolUtilityBar
             toolId="role-designer"
-            toolName="Role & Responsibility Designer"
+            toolName="Organizational Design & Role Framework"
             onSave={saveProgress}
             onExport={exportPlan}
             getSerializedState={getSerializedState}
@@ -379,102 +542,100 @@ Source: GOV.UK Home Office Guidance (2025)
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
-                <ShieldCheck className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Visa Eligibility</span>
-              </div>
-              <p className="text-3xl font-bold">{Math.round(avgVisaEligibility)}%</p>
-              <p className="text-xs text-muted-foreground mt-1">{visaSponsorableRoles}/{roles.length} roles ready</p>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-3 mb-2">
                 <Target className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Skill Gap Cost</span>
+                <span className="text-sm font-medium">Org Clarity</span>
               </div>
-              <p className="text-3xl font-bold">£{Math.round(totalGapCost / 1000)}k</p>
-              <p className="text-xs text-muted-foreground mt-1">Annual investment</p>
+              <p className="text-3xl font-bold">{orgScore}%</p>
+              <p className="text-xs text-muted-foreground mt-1">{scalabilityGrade}</p>
             </Card>
 
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Avg Time-to-Fill</span>
+                <Building2 className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium">Team Structure</span>
               </div>
-              <p className="text-3xl font-bold">{Math.round(avgTimeToFill)}</p>
-              <p className="text-xs text-muted-foreground mt-1">Days to hire</p>
+              <p className="text-3xl font-bold">{roles.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">{departmentCount} departments</p>
             </Card>
 
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
-                <Award className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">High Demand</span>
+                <Users className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium">Hiring Phasing</span>
               </div>
-              <p className="text-3xl font-bold">{highDemandRoles}/{roles.length}</p>
-              <p className="text-xs text-muted-foreground mt-1">Market demand {'>'} 70%</p>
+              <p className="text-3xl font-bold">{phasing.split(' ')[0]}</p>
+              <p className="text-xs text-muted-foreground mt-1">{wellDefinedRoles} well-defined</p>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <Layers className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium">Skill Coverage</span>
+              </div>
+              <p className="text-3xl font-bold">{totalUniqueSkills}</p>
+              <p className="text-xs text-muted-foreground mt-1">Unique skills</p>
             </Card>
           </div>
 
           {/* PhD-Level: 4-Chart Analytics Dashboard */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Visa Eligibility Score (SOC 2020 Compliance)</h3>
+              <h3 className="font-semibold mb-4">Team Growth Timeline (Scalability)</h3>
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={getVisaEligibilityData()}>
+                <BarChart data={getHiringTimeline()}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="role" angle={-15} textAnchor="end" height={60} />
-                  <YAxis domain={[0, 100]} />
-                  <Tooltip formatter={(value) => `${value}%`} />
+                  <XAxis dataKey="month" label={{ value: 'Month', position: 'insideBottom', offset: -5 }} />
+                  <YAxis label={{ value: 'Cumulative Team Size', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip />
                   <Legend />
-                  <Bar dataKey="score" fill="#ffa536" name="Eligibility Score" />
-                  <Bar dataKey="threshold" fill="#10b981" name="Sponsorship Threshold (70%)" />
+                  <Bar dataKey="Engineering" stackId="a" fill="#ffa536" />
+                  <Bar dataKey="Product" stackId="a" fill="#11b6e9" />
+                  <Bar dataKey="Sales" stackId="a" fill="#8b5cf6" />
+                  <Bar dataKey="Operations" stackId="a" fill="#10b981" />
+                  <Bar dataKey="Other" stackId="a" fill="#ef4444" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
 
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Market Demand vs Compensation</h3>
+              <h3 className="font-semibold mb-4">Seniority Distribution (Structure Balance)</h3>
               <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={getMarketDemandData()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="role" angle={-15} textAnchor="end" height={60} />
-                  <YAxis yAxisId="left" label={{ value: 'Demand %', angle: -90, position: 'insideLeft' }} />
-                  <YAxis yAxisId="right" orientation="right" label={{ value: 'Salary £', angle: 90, position: 'insideRight' }} />
-                  <Tooltip />
-                  <Legend />
-                  <Line yAxisId="left" type="monotone" dataKey="demand" stroke="#11b6e9" name="Market Demand" strokeWidth={2} />
-                  <Line yAxisId="right" type="monotone" dataKey="salary" stroke="#ffa536" name="Mid Salary" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Time-to-Fill vs Skill Gap Cost</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <ScatterChart>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="x" name="Days to Fill" />
-                  <YAxis dataKey="y" name="Gap Cost £" />
-                  <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                  <Legend />
-                  <Scatter name="Roles" data={getTimeToFillData()} fill="#ffa536">
-                    {getTimeToFillData().map((entry, index) => (
+                <PieChart>
+                  <Pie data={getSeniorityDistribution()} dataKey="count" nameKey="level" cx="50%" cy="50%" outerRadius={80} label>
+                    {getSeniorityDistribution().map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
-                  </Scatter>
-                </ScatterChart>
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
               </ResponsiveContainer>
             </Card>
 
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Role Completeness Radar (Top 5)</h3>
+              <h3 className="font-semibold mb-4">Role Clarity Scores (Viability)</h3>
               <ResponsiveContainer width="100%" height={280}>
-                <RadarChart data={getSkillRadarData()}>
+                <BarChart data={getRoleClarityScores()}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="role" angle={-15} textAnchor="end" height={60} />
+                  <YAxis label={{ value: 'Clarity %', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="clarity" fill="#ffa536" name="Clarity Score" />
+                  <Bar dataKey="target" fill="#10b981" fillOpacity={0.3} name="Target (80%)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">Skill Coverage by Category</h3>
+              <ResponsiveContainer width="100%" height={280}>
+                <RadarChart data={getSkillCoverageRadar()}>
                   <PolarGrid />
-                  <PolarAngleAxis dataKey="role" />
-                  <PolarRadiusAxis />
-                  <Radar name="Responsibilities" dataKey="responsibilities" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
-                  <Radar name="KPIs" dataKey="kpis" stroke="#11b6e9" fill="#11b6e9" fillOpacity={0.6} />
-                  <Radar name="Skills" dataKey="skills" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} />
+                  <PolarAngleAxis dataKey="category" />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} />
+                  <Radar name="Skill Coverage" dataKey="coverage" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
+                  <Tooltip />
                   <Legend />
                 </RadarChart>
               </ResponsiveContainer>
@@ -483,9 +644,9 @@ Source: GOV.UK Home Office Guidance (2025)
 
           {/* GOV.UK-Aligned Recommendations */}
           <Card className="p-6 mb-6">
-            <h3 className="font-semibold mb-4">GOV.UK Compliance Recommendations</h3>
+            <h3 className="font-semibold mb-4">Viability & Scalability Recommendations</h3>
             <div className="space-y-3">
-              {getGovUKRecommendations().map((tip, i) => {
+              {getViabilityRecommendations().map((tip, i) => {
                 const isCritical = tip.includes('CRITICAL');
                 const isWarning = tip.includes('WARNING');
                 return (
@@ -497,169 +658,156 @@ Source: GOV.UK Home Office Guidance (2025)
             </div>
           </Card>
 
-          {/* Role Definitions Editor */}
+          {/* Role Editor */}
           <Card className="p-6 mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold">Role Definitions</h3>
+              <h3 className="font-semibold">Organizational Roles</h3>
               <Button onClick={addRole} size="sm" data-testid="button-add-role">
                 <Plus className="w-4 h-4 mr-1" /> Add Role
               </Button>
             </div>
 
             <div className="space-y-6">
-              {roles.map((role) => {
-                const visaEligibility = getVisaEligibilityScore(role);
-                const isVisaReady = visaEligibility >= 70;
-                
-                return (
-                  <Card key={role.id} className={`p-6 border-l-4 ${isVisaReady ? 'border-l-green-500' : 'border-l-orange-500'}`}>
-                    <div className="flex justify-between items-start mb-4">
-                      <Input
-                        value={role.title}
-                        onChange={(e) => updateRole(role.id, 'title', e.target.value)}
-                        className="font-semibold text-xl w-2/3"
-                        placeholder="Role Title"
-                        data-testid={`input-title-${role.id}`}
+              {roles.map((role) => (
+                <Card key={role.id} className="p-6 border-l-4 border-l-primary">
+                  <div className="flex justify-between items-start mb-4">
+                    <Input
+                      value={role.title}
+                      onChange={(e) => updateRole(role.id, 'title', e.target.value)}
+                      className="font-semibold text-xl w-2/3"
+                      placeholder="Role Title"
+                      data-testid={`input-title-${role.id}`}
+                    />
+                    <Button variant="ghost" size="sm" onClick={() => removeRole(role.id)} data-testid={`button-remove-${role.id}`}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Department</label>
+                      <Select value={role.department} onValueChange={(v) => updateRole(role.id, 'department', v)}>
+                        <SelectTrigger data-testid={`select-dept-${role.id}`}><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Engineering">Engineering</SelectItem>
+                          <SelectItem value="Product">Product</SelectItem>
+                          <SelectItem value="Sales">Sales</SelectItem>
+                          <SelectItem value="Marketing">Marketing</SelectItem>
+                          <SelectItem value="Operations">Operations</SelectItem>
+                          <SelectItem value="Finance">Finance</SelectItem>
+                          <SelectItem value="Customer Success">Customer Success</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Seniority</label>
+                      <Select value={role.seniority} onValueChange={(v) => updateRole(role.id, 'seniority', v)}>
+                        <SelectTrigger data-testid={`select-seniority-${role.id}`}><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Founder">Founder</SelectItem>
+                          <SelectItem value="C-Level">C-Level</SelectItem>
+                          <SelectItem value="Senior">Senior</SelectItem>
+                          <SelectItem value="Mid">Mid</SelectItem>
+                          <SelectItem value="Junior">Junior</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Hiring Priority (1-10)</label>
+                      <Input type="number" min="1" max="10" value={role.hiringPriority} onChange={(e) => updateRole(role.id, 'hiringPriority', Number(e.target.value))} data-testid={`input-priority-${role.id}`} />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Hiring Month (1-36)</label>
+                      <Input type="number" min="1" max="36" value={role.hiringMonth} onChange={(e) => updateRole(role.id, 'hiringMonth', Number(e.target.value))} data-testid={`input-month-${role.id}`} />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Estimated Salary (£)</label>
+                      <Input type="number" value={role.estimatedSalary} onChange={(e) => updateRole(role.id, 'estimatedSalary', Number(e.target.value))} data-testid={`input-salary-${role.id}`} />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-6">
+                      <input
+                        type="checkbox"
+                        checked={role.fullTime}
+                        onChange={(e) => updateRole(role.id, 'fullTime', e.target.checked)}
+                        data-testid={`checkbox-fulltime-${role.id}`}
+                        className="h-4 w-4"
                       />
-                      <div className="flex items-center gap-2">
-                        {isVisaReady && <ShieldCheck className="w-5 h-5 text-green-600" title="Visa Ready" />}
-                        <Button variant="ghost" size="sm" onClick={() => removeRole(role.id)} data-testid={`button-remove-${role.id}`}>
-                          <X className="w-4 h-4" />
+                      <label className="text-sm">Full-Time</label>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="text-sm font-medium block mb-2">Strategic Purpose</label>
+                    <Textarea
+                      value={role.purpose}
+                      onChange={(e) => updateRole(role.id, 'purpose', e.target.value)}
+                      placeholder="Why this role exists and its strategic importance..."
+                      rows={2}
+                      data-testid={`textarea-purpose-${role.id}`}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-sm font-medium">Key Responsibilities</label>
+                      <Button size="sm" variant="ghost" onClick={() => addArrayItem(role.id, 'responsibilities')} data-testid={`button-add-resp-${role.id}`}>
+                        <Plus className="w-3 h-3 mr-1" /> Add
+                      </Button>
+                    </div>
+                    {role.responsibilities.map((resp, idx) => (
+                      <div key={idx} className="flex gap-2 mb-2">
+                        <Input
+                          value={resp}
+                          onChange={(e) => updateArrayItem(role.id, 'responsibilities', idx, e.target.value)}
+                          placeholder="Responsibility..."
+                          data-testid={`input-resp-${role.id}-${idx}`}
+                        />
+                        <Button size="sm" variant="ghost" onClick={() => removeArrayItem(role.id, 'responsibilities', idx)}>
+                          <X className="w-3 h-3" />
                         </Button>
                       </div>
+                    ))}
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-sm font-medium">Key Skills Required</label>
+                      <Button size="sm" variant="ghost" onClick={() => addArrayItem(role.id, 'keySkills')} data-testid={`button-add-skill-${role.id}`}>
+                        <Plus className="w-3 h-3 mr-1" /> Add
+                      </Button>
                     </div>
+                    {role.keySkills.map((skill, idx) => (
+                      <div key={idx} className="flex gap-2 mb-2">
+                        <Input
+                          value={skill}
+                          onChange={(e) => updateArrayItem(role.id, 'keySkills', idx, e.target.value)}
+                          placeholder="Skill..."
+                          data-testid={`input-skill-${role.id}-${idx}`}
+                        />
+                        <Button size="sm" variant="ghost" onClick={() => removeArrayItem(role.id, 'keySkills', idx)}>
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Department</label>
-                        <Input value={role.department} onChange={(e) => updateRole(role.id, 'department', e.target.value)} placeholder="Engineering" data-testid={`input-department-${role.id}`} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">UK SOC 2020 Code</label>
-                        <Select value={role.socCode} onValueChange={(v) => updateRole(role.id, 'socCode', v)}>
-                          <SelectTrigger data-testid={`select-soc-${role.id}`}><SelectValue placeholder="Select SOC" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="2136">2136 - Programmers/Software</SelectItem>
-                            <SelectItem value="2137">2137 - Web Design/Dev</SelectItem>
-                            <SelectItem value="2135">2135 - IT Business Analysts</SelectItem>
-                            <SelectItem value="2139">2139 - IT Professionals</SelectItem>
-                            <SelectItem value="2133">2133 - IT Managers</SelectItem>
-                            <SelectItem value="1136">1136 - IT Directors</SelectItem>
-                            <SelectItem value="2134">2134 - IT Project Managers</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Min Salary (£)</label>
-                        <Input type="number" value={role.minSalary} onChange={(e) => updateRole(role.id, 'minSalary', Number(e.target.value))} data-testid={`input-min-salary-${role.id}`} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Max Salary (£)</label>
-                        <Input type="number" value={role.maxSalary} onChange={(e) => updateRole(role.id, 'maxSalary', Number(e.target.value))} data-testid={`input-max-salary-${role.id}`} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Reports To</label>
-                        <Input value={role.reportingTo} onChange={(e) => updateRole(role.id, 'reportingTo', e.target.value)} placeholder="VP Engineering" data-testid={`input-reporting-${role.id}`} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Time-to-Fill (days)</label>
-                        <Input type="number" value={role.timeToFill} onChange={(e) => updateRole(role.id, 'timeToFill', Number(e.target.value))} data-testid={`input-time-fill-${role.id}`} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Skill Gap Cost (£)</label>
-                        <Input type="number" value={role.skillGapCost} onChange={(e) => updateRole(role.id, 'skillGapCost', Number(e.target.value))} data-testid={`input-gap-cost-${role.id}`} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Market Demand (%)</label>
-                        <Slider value={[role.marketDemand]} onValueChange={([v]) => updateRole(role.id, 'marketDemand', v)} max={100} step={5} className="mt-2" data-testid={`slider-demand-${role.id}`} />
-                        <span className="text-sm font-medium">{role.marketDemand}%</span>
-                      </div>
-                    </div>
-
-                    {/* Live Visa Eligibility Feedback */}
-                    <div className="bg-muted/50 dark:bg-muted/20 p-3 rounded-md mb-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium">Visa Eligibility Score</span>
-                        <span className={`text-lg font-bold ${visaEligibility >= 70 ? 'text-green-600' : 'text-orange-600'}`}>{visaEligibility}%</span>
-                      </div>
-                      <div className="space-y-1 text-sm">
-                        <div className="flex items-center gap-2">
-                          {role.socCode ? <span className="text-green-600">✓</span> : <span className="text-red-600">✗</span>}
-                          <span>SOC 2020 Code Assigned</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {role.minSalary >= 25600 ? <span className="text-green-600">✓</span> : <span className="text-red-600">✗</span>}
-                          <span>Meets Skilled Worker Minimum (£25,600)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {role.minSalary >= 45000 ? <span className="text-green-600">✓</span> : <span className="text-orange-600">⚠</span>}
-                          <span>Above UK Going Rate (£45,000)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <label className="text-sm font-medium">Key Responsibilities</label>
-                          <Button variant="outline" size="sm" onClick={() => addArrayItem(role.id, 'responsibilities')} data-testid={`button-add-responsibility-${role.id}`}>
-                            <Plus className="w-3 h-3" />
-                          </Button>
-                        </div>
-                        {role.responsibilities.map((resp, idx) => (
-                          <div key={idx} className="flex gap-2 mb-2">
-                            <Input value={resp} onChange={(e) => updateArrayItem(role.id, 'responsibilities', idx, e.target.value)} placeholder="Responsibility" data-testid={`input-responsibility-${role.id}-${idx}`} />
-                            <Button variant="ghost" size="sm" onClick={() => removeArrayItem(role.id, 'responsibilities', idx)} data-testid={`button-remove-responsibility-${role.id}-${idx}`}>
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <label className="text-sm font-medium">Key Performance Indicators</label>
-                          <Button variant="outline" size="sm" onClick={() => addArrayItem(role.id, 'kpis')} data-testid={`button-add-kpi-${role.id}`}>
-                            <Plus className="w-3 h-3" />
-                          </Button>
-                        </div>
-                        {role.kpis.map((kpi, idx) => (
-                          <div key={idx} className="flex gap-2 mb-2">
-                            <Input value={kpi} onChange={(e) => updateArrayItem(role.id, 'kpis', idx, e.target.value)} placeholder="KPI" data-testid={`input-kpi-${role.id}-${idx}`} />
-                            <Button variant="ghost" size="sm" onClick={() => removeArrayItem(role.id, 'kpis', idx)} data-testid={`button-remove-kpi-${role.id}-${idx}`}>
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <label className="text-sm font-medium">Required Skills</label>
-                          <Button variant="outline" size="sm" onClick={() => addArrayItem(role.id, 'skills')} data-testid={`button-add-skill-${role.id}`}>
-                            <Plus className="w-3 h-3" />
-                          </Button>
-                        </div>
-                        {role.skills.map((skill, idx) => (
-                          <div key={idx} className="flex gap-2 mb-2">
-                            <Input value={skill} onChange={(e) => updateArrayItem(role.id, 'skills', idx, e.target.value)} placeholder="Skill" data-testid={`input-skill-${role.id}-${idx}`} />
-                            <Button variant="ghost" size="sm" onClick={() => removeArrayItem(role.id, 'skills', idx)} data-testid={`button-remove-skill-${role.id}-${idx}`}>
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
+                  <div>
+                    <label className="text-sm font-medium block mb-2">Impact on Scalability</label>
+                    <Textarea
+                      value={role.impactOnScaling}
+                      onChange={(e) => updateRole(role.id, 'impactOnScaling', e.target.value)}
+                      placeholder="How does this role contribute to business growth and scaling? (e.g., enables product development, drives revenue, builds infrastructure...)"
+                      rows={2}
+                      data-testid={`textarea-impact-${role.id}`}
+                    />
+                  </div>
+                </Card>
+              ))}
             </div>
           </Card>
 
