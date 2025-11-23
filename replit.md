@@ -7,6 +7,45 @@ The UK Innovator Founder Visa Assistant is an AI-powered platform designed to as
 
 ## Recent Changes (November 23, 2025)
 
+### Email Verification & Cloudflare Turnstile Complete ✅
+Successfully implemented production-ready email verification system and bot protection:
+
+**Email Verification System:**
+- `server/email.ts` - Resend integration for professional verification emails with HTML templates
+- Token-based verification (15-minute expiry, one-time use)
+- Verification routes: GET /api/auth/verify-email/:token (verify), POST /api/auth/resend-verification (resend)
+- `client/src/pages/verify-email.tsx` - Token-based verification page (loading/success/error states)
+- Database fields: isEmailVerified (boolean), verificationToken (text), tokenExpiry (timestamp)
+- Google OAuth users automatically verified (isEmailVerified: true)
+- Registration sends verification email but allows immediate dashboard access (features may be limited)
+
+**Cloudflare Turnstile Bot Protection:**
+- `server/turnstile.ts` - Backend verification utility using TURNSTILE_SECRET_KEY
+- Turnstile REQUIRED on both signup and login (blocks submission until verified)
+- Frontend widgets: @marsidev/react-turnstile in signup.tsx and login.tsx
+- Environment variables: VITE_TURNSTILE_SITE_KEY (frontend), TURNSTILE_SECRET_KEY (backend)
+- Critical security fix: Backend now REQUIRES turnstileToken and verifies it server-side
+
+**Security Improvements:**
+- Turnstile token required and verified server-side (prevents bot bypass)
+- Token expiry properly enforced in verification route
+- Password fields excluded from all API responses ({ password: _, ...safeUser })
+- Verification tokens reset on resend, one-time use only
+
+**Database Schema Changes:**
+- `users` table: Added isEmailVerified, verificationToken, tokenExpiry
+- `users` table: Added unique constraint on googleId
+- Pushed with `npm run db:push --force`
+
+**Complete Email Verification Flow:**
+1. User signs up with email/password → Turnstile verification → Account created
+2. Verification email sent with token link → User clicks link
+3. GET /api/auth/verify-email/:token → Email verified → Redirect to dashboard
+4. If expired: User can resend verification email (POST /api/auth/resend-verification)
+5. Google OAuth users skip verification (pre-verified)
+
+## Recent Changes (November 23, 2025)
+
 ### Intelligent Dual Authentication System Complete ✅  
 Successfully implemented PhD-level flexible authentication with smart conflict detection:
 

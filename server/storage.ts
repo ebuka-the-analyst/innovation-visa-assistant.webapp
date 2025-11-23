@@ -142,9 +142,13 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Create new user (UUID will be auto-generated)
+    // Google OAuth users should always be verified
     const [newUser] = await db
       .insert(users)
-      .values(userData)
+      .values({
+        ...userData,
+        isEmailVerified: userData.isEmailVerified ?? false,
+      })
       .returning();
     return newUser;
   }

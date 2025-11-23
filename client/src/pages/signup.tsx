@@ -64,10 +64,11 @@ export default function Signup() {
 
       toast({
         title: "Account created!",
-        description: "Welcome to the platform",
+        description: result.message || "Please check your email to verify your account",
       });
 
-      setLocation("/dashboard");
+      // Don't auto-redirect - user needs to verify email first
+      // They can still access dashboard but features may be limited
     } catch (error: any) {
       toast({
         title: "Connection error",

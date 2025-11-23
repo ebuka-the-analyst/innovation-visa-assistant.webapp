@@ -186,12 +186,14 @@ export async function setupAuth(app: Express) {
     try {
       const { email, password, firstName, lastName, turnstileToken } = req.body;
 
-      // Verify Cloudflare Turnstile token for bot protection
-      if (turnstileToken) {
-        const isValidToken = await verifyTurnstileToken(turnstileToken);
-        if (!isValidToken) {
-          return res.status(400).json({ message: "Bot verification failed. Please try again." });
-        }
+      // Verify Cloudflare Turnstile token for bot protection (REQUIRED)
+      if (!turnstileToken) {
+        return res.status(400).json({ message: "Bot verification required. Please try again." });
+      }
+      
+      const isValidToken = await verifyTurnstileToken(turnstileToken);
+      if (!isValidToken) {
+        return res.status(400).json({ message: "Bot verification failed. Please try again." });
       }
 
       // Validate required fields
@@ -287,12 +289,14 @@ export async function setupAuth(app: Express) {
     try {
       const { turnstileToken } = req.body;
 
-      // Verify Cloudflare Turnstile token for bot protection
-      if (turnstileToken) {
-        const isValidToken = await verifyTurnstileToken(turnstileToken);
-        if (!isValidToken) {
-          return res.status(400).json({ message: "Bot verification failed. Please try again." });
-        }
+      // Verify Cloudflare Turnstile token for bot protection (REQUIRED)
+      if (!turnstileToken) {
+        return res.status(400).json({ message: "Bot verification required. Please try again." });
+      }
+      
+      const isValidToken = await verifyTurnstileToken(turnstileToken);
+      if (!isValidToken) {
+        return res.status(400).json({ message: "Bot verification failed. Please try again." });
       }
 
       passport.authenticate("local", (err: any, user: any, info: any) => {

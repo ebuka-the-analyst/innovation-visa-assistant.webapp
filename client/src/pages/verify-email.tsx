@@ -1,241 +1,170 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { Mail, CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader2, Mail } from "lucide-react";
 
 export default function VerifyEmail() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [code, setCode] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [message, setMessage] = useState("");
   const [isResending, setIsResending] = useState(false);
-  const [attemptsLeft, setAttemptsLeft] = useState(5);
-  const [resendCooldown, setResendCooldown] = useState(0);
 
-  // Get email from URL params
+  // Get token from URL params
   const urlParams = new URLSearchParams(window.location.search);
-  const email = urlParams.get("email");
+  const token = urlParams.get("token");
 
   useEffect(() => {
-    if (!email) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Email address not found. Please sign up again.",
-      });
-      setLocation("/signup");
-    }
-  }, [email, setLocation, toast]);
-
-  useEffect(() => {
-    if (resendCooldown > 0) {
-      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [resendCooldown]);
-
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (code.length !== 6) {
-      toast({
-        variant: "destructive",
-        title: "Invalid code",
-        description: "Please enter a 6-digit verification code.",
-      });
-      return;
-    }
-
-    setIsVerifying(true);
-
-    try {
-      const response = await apiRequest('POST', '/api/auth/verify-code', { email, code });
-      const data = await response.json();
-
-      if (data.success) {
-        toast({
-          title: "Email verified!",
-          description: "Welcome to VisaPrep AI. Redirecting...",
-        });
-
-        setTimeout(() => {
-          setLocation("/dashboard");
-        }, 1000);
-      } else {
-        if (data.attemptsLeft !== undefined) {
-          setAttemptsLeft(data.attemptsLeft);
-        }
-
-        toast({
-          variant: "destructive",
-          title: "Verification failed",
-          description: data.error || "Verification failed",
-        });
+    const verifyEmail = async () => {
+      if (!token) {
+        setStatus("error");
+        setMessage("Invalid or missing verification link. Please check your email.");
+        return;
       }
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Verification failed",
-      });
-    } finally {
-      setIsVerifying(false);
-    }
-  };
 
-  const handleResendCode = async () => {
-    if (resendCooldown > 0) {
-      return;
-    }
+      try {
+        const response = await fetch(`/api/auth/verify-email/${token}`);
+        const result = await response.json();
 
+        if (response.ok) {
+          setStatus("success");
+          setMessage(result.message || "Email verified successfully!");
+          
+          // Redirect to dashboard after 3 seconds
+          setTimeout(() => {
+            setLocation("/dashboard");
+          }, 3000);
+        } else {
+          setStatus("error");
+          setMessage(result.message || "Verification failed");
+        }
+      } catch (error) {
+        setStatus("error");
+        setMessage("Unable to verify email. Please try again.");
+      }
+    };
+
+    verifyEmail();
+  }, [token, setLocation]);
+
+  const handleResendVerification = async () => {
     setIsResending(true);
-
+    
     try {
-      const response = await apiRequest('POST', '/api/auth/resend-code', { email });
-      const data = await response.json();
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        credentials: "include",
+      });
 
-      if (data.success) {
+      const result = await response.json();
+
+      if (response.ok) {
         toast({
-          title: "Code sent!",
-          description: "A new verification code has been sent to your email.",
+          title: "Verification email sent",
+          description: "Please check your inbox for a new verification link",
         });
-
-        setResendCooldown(120); // 2 minutes cooldown
-        setAttemptsLeft(5); // Reset attempts
-        setCode(""); // Clear input
       } else {
-        const errorMessage = data.error || "Failed to resend code";
-        
-        // Extract wait time from error message
-        const waitMatch = errorMessage.match(/wait (\d+) seconds/);
-        if (waitMatch) {
-          setResendCooldown(parseInt(waitMatch[1]));
-        }
-
         toast({
+          title: "Failed to send email",
+          description: result.message || "Please try again later",
           variant: "destructive",
-          title: "Failed to resend",
-          description: errorMessage,
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
+        title: "Connection error",
+        description: "Please check your internet connection",
         variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to resend code",
       });
     } finally {
       setIsResending(false);
     }
   };
 
-  if (!email) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-accent/5 p-4">
-      <Card className="w-full max-w-lg" data-testid="card-verify-email">
-        <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Mail className="w-8 h-8 text-primary" />
-          </div>
-          <CardTitle className="text-2xl font-serif">Verify Your Email</CardTitle>
-          <CardDescription className="text-base">
-            We've sent a 6-digit verification code to<br />
-            <strong className="text-foreground">{email}</strong>
-          </CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
+      <Card className="w-full max-w-md" data-testid="card-verify-email">
+        <CardHeader className="space-y-1 text-center">
+          {status === "loading" && (
+            <>
+              <div className="flex justify-center mb-4">
+                <Loader2 className="h-16 w-16 text-primary animate-spin" data-testid="icon-loading" />
+              </div>
+              <CardTitle className="text-2xl font-bold">Verifying your email</CardTitle>
+              <CardDescription>Please wait while we verify your account...</CardDescription>
+            </>
+          )}
+
+          {status === "success" && (
+            <>
+              <div className="flex justify-center mb-4">
+                <CheckCircle2 className="h-16 w-16 text-green-500" data-testid="icon-success" />
+              </div>
+              <CardTitle className="text-2xl font-bold">Email verified!</CardTitle>
+              <CardDescription>{message}</CardDescription>
+            </>
+          )}
+
+          {status === "error" && (
+            <>
+              <div className="flex justify-center mb-4">
+                <AlertCircle className="h-16 w-16 text-destructive" data-testid="icon-error" />
+              </div>
+              <CardTitle className="text-2xl font-bold">Verification failed</CardTitle>
+              <CardDescription>{message}</CardDescription>
+            </>
+          )}
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          {/* Status Indicators */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-accent/50 rounded-lg border border-border">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <Clock className="w-4 h-4" />
-                <span>Expires in</span>
-              </div>
-              <p className="text-lg font-semibold">15 minutes</p>
+        <CardContent className="space-y-3">
+          {status === "success" && (
+            <div className="space-y-3">
+              <p className="text-sm text-center text-muted-foreground">
+                Redirecting you to your dashboard in 3 seconds...
+              </p>
+              <Button
+                className="w-full"
+                onClick={() => setLocation("/dashboard")}
+                data-testid="button-dashboard"
+              >
+                Go to Dashboard Now
+              </Button>
             </div>
-            <div className="p-4 bg-accent/50 rounded-lg border border-border">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <AlertCircle className="w-4 h-4" />
-                <span>Attempts left</span>
-              </div>
-              <p className="text-lg font-semibold">{attemptsLeft}/5</p>
+          )}
+
+          {status === "error" && (
+            <div className="space-y-3">
+              <Button
+                className="w-full"
+                onClick={handleResendVerification}
+                disabled={isResending}
+                data-testid="button-resend"
+              >
+                {isResending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="mr-2 h-4 w-4" />
+                    Resend Verification Email
+                  </>
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setLocation("/login")}
+                data-testid="button-login"
+              >
+                Back to Login
+              </Button>
             </div>
-          </div>
-
-          {/* Verification Form */}
-          <form onSubmit={handleVerify} className="space-y-4">
-            <div>
-              <label htmlFor="code" className="text-sm font-medium mb-2 block">
-                Enter 6-digit code
-              </label>
-              <Input
-                id="code"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                placeholder="123456"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                className="text-center text-2xl tracking-widest font-mono"
-                disabled={isVerifying}
-                data-testid="input-verification-code"
-                autoFocus
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full" 
-              size="lg"
-              disabled={isVerifying || code.length !== 6}
-              data-testid="button-verify"
-            >
-              <CheckCircle2 className="w-5 h-5 mr-2" />
-              {isVerifying ? "Verifying..." : "Verify Email"}
-            </Button>
-          </form>
-
-          {/* Resend Code */}
-          <div className="text-center space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Didn't receive the code?
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleResendCode}
-              disabled={isResending || resendCooldown > 0}
-              data-testid="button-resend-code"
-              className="w-full"
-            >
-              {isResending ? (
-                "Sending..."
-              ) : resendCooldown > 0 ? (
-                `Resend in ${resendCooldown}s`
-              ) : (
-                "Resend Code"
-              )}
-            </Button>
-          </div>
-
-          {/* Help Text */}
-          <div className="p-4 bg-muted/50 rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground">
-              <strong>Troubleshooting:</strong>
-              <br />• Check your spam/junk folder
-              <br />• Make sure you entered the correct email address
-              <br />• Wait a few minutes for the email to arrive
-            </p>
-          </div>
+          )}
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-2">
@@ -248,15 +177,6 @@ export default function VerifyEmail() {
             >
               Contact support
             </a>
-          </p>
-          <p className="text-sm text-muted-foreground text-center">
-            <Link 
-              href="/login" 
-              className="text-primary hover:underline"
-              data-testid="link-back-login"
-            >
-              Back to login
-            </Link>
           </p>
         </CardFooter>
       </Card>
