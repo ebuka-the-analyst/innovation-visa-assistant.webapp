@@ -28,11 +28,34 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      await apiRequest("/api/auth/register", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Show user-friendly error message
+        const authMethod = result.authMethod;
+        
+        toast({
+          title: authMethod === "google" ? "Please use Google to sign in" : "Email already registered",
+          description: result.message || "This email is already in use",
+          variant: "destructive",
+        });
+
+        // Auto-redirect to login if they should use Google
+        if (authMethod === "google") {
+          setTimeout(() => {
+            setLocation("/login");
+          }, 3000);
+        }
+        
+        setIsLoading(false);
+        return;
+      }
 
       toast({
         title: "Account created!",
@@ -41,22 +64,11 @@ export default function Signup() {
 
       setLocation("/dashboard");
     } catch (error: any) {
-      const errorData = error.data || error;
-      const message = errorData.message || error.message || "Please try again";
-      const authMethod = errorData.authMethod;
-
       toast({
-        title: "Signup failed",
-        description: message,
+        title: "Connection error",
+        description: "Please check your internet connection and try again",
         variant: "destructive",
       });
-
-      // If error suggests using Google, redirect to login after showing message
-      if (authMethod === "google") {
-        setTimeout(() => {
-          setLocation("/login");
-        }, 3000);
-      }
     } finally {
       setIsLoading(false);
     }
