@@ -358,44 +358,15 @@ export default function ToolsChronographWheel() {
           borderRadius: isMinimized ? "50px" : "0.5rem 0.5rem 0 0",
           borderBottom: isMinimized ? "none" : "2px solid rgb(107, 114, 128)",
           height: isMinimized ? "100%" : "auto",
-          padding: isMinimized ? "0" : "6px 10px"
+          padding: isMinimized ? "0 20px" : "6px 10px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
         }}>
           {isMinimized ? (
-            <div className="flex flex-col items-center justify-center gap-1">
-              <div className="flex-shrink-0 shadow-lg" style={{ 
-                width: "40px", 
-                height: "40px", 
-                backgroundColor: "#b45309", 
-                borderRadius: "50%", 
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center"
-              }}>
-                <Icons.Zap className="text-white" style={{ 
-                  width: "20px", 
-                  height: "20px"
-                }} />
-              </div>
-              <p className="font-black whitespace-nowrap" style={{ color: "#000000", opacity: 1, fontSize: "clamp(0.8rem, 2vw, 1.5rem)" }}>100+ Tool-Hub</p>
-            </div>
+            <p className="font-black whitespace-nowrap" style={{ color: "#000000", opacity: 1, fontSize: "clamp(1.2rem, 3vw, 2.5rem)" }}>100+ Tools-Hub</p>
           ) : (
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="flex-shrink-0 shadow-lg" style={{ 
-                width: "56px", 
-                height: "56px", 
-                backgroundColor: "#b45309", 
-                borderRadius: "50%", 
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center"
-              }}>
-                <Icons.Zap className="text-white" style={{ 
-                  width: "28px", 
-                  height: "28px"
-                }} />
-              </div>
-              <h3 className="font-black whitespace-nowrap" style={{ color: "#000000", fontSize: "clamp(1rem, 2.5vw, 1.8rem)" }}>100+ TOOLS HUB</h3>
-            </div>
+            <h3 className="font-black whitespace-nowrap" style={{ color: "#000000", fontSize: "clamp(1.2rem, 3vw, 2.5rem)" }}>100+ TOOLS-HUB</h3>
           )}
         </div>
 
