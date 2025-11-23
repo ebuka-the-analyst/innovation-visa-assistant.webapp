@@ -167,6 +167,14 @@ export default function ToolsChronographWheel() {
 
   // Swipe hint continues indefinitely - no timeout
 
+  // Reset scroll to top when widget opens
+  useEffect(() => {
+    if (!isMinimized && scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+      setSelectedToolIdx(0);
+    }
+  }, [isMinimized]);
+
   // Inactivity timer - minimize widget after 10 seconds when mouse leaves and user scrolls main page
   useEffect(() => {
     if (isMinimized) {
