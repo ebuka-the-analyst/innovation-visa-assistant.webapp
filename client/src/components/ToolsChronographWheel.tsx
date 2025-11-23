@@ -318,17 +318,12 @@ export default function ToolsChronographWheel() {
   return (
     <div
       ref={widgetRef}
-      className="fixed bottom-8 left-8 z-40 cursor-pointer"
+      className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
       style={{ 
         scale: "0.375", 
         transformOrigin: "bottom left",
         animation: "widget-swipe-pulse 8s ease-in-out infinite"
-      }}
-      onClick={() => {
-        if (!isMinimized) return; // Only toggle if minimized
-        recordActivity();
-        setIsMinimized(!isMinimized);
       }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
@@ -340,35 +335,54 @@ export default function ToolsChronographWheel() {
         setIsHoveringWidget(false);
       }}
     >
-      {/* Outer metal bezel effect - Transparent like chat icon */}
-      <div className="border-4 shadow-lg relative flex flex-col" style={{ 
-        height: isMinimized ? "100px" : "640px", 
-        width: isMinimized ? "200px" : "480px", 
-        borderRadius: isMinimized ? "50px" : "1rem",
-        transition: "all 0.3s ease",
-        backgroundColor: "rgba(255, 255, 255, 0.05)",
-        borderColor: "rgba(156, 163, 175, 0.1)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)"
-      }}>
-        
-        {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="flex flex-col items-center justify-center gap-2 px-3 border-b-2 border-gray-400 pulse-glow-orange" style={{ 
-          backgroundColor: "#ffa536",
-          borderRadius: isMinimized ? "50px" : "0.5rem 0.5rem 0 0",
-          borderBottom: isMinimized ? "none" : "2px solid rgb(107, 114, 128)",
-          height: isMinimized ? "auto" : "auto",
-          padding: isMinimized ? "8px 20px" : "6px 10px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }}>
-          {isMinimized ? (
-            <p className="font-black text-center" style={{ color: "#000000", opacity: 1, fontSize: "clamp(0.8rem, 2vw, 1.5rem)", lineHeight: "1.2" }}>100+<br/>Tools-Hub</p>
-          ) : (
-            <h3 className="font-black text-center whitespace-nowrap" style={{ color: "#000000", fontSize: "clamp(0.8rem, 2vw, 1.5rem)", lineHeight: "1.2" }}>100+ TOOLS-HUB</h3>
-          )}
+      {/* Text Label Above Widget */}
+      {isMinimized && (
+        <div className="absolute -top-16 left-0 right-0 flex items-center justify-center">
+          <p className="font-black text-center pulse-glow-orange px-4 py-2 rounded-full" style={{ 
+            color: "#000000", 
+            backgroundColor: "#ffa536",
+            fontSize: "clamp(0.8rem, 2vw, 1.5rem)", 
+            lineHeight: "1.2"
+          }}>
+            100+<br/>Tools-Hub
+          </p>
         </div>
+      )}
+
+      {/* Outer metal bezel effect - Transparent like chat icon */}
+      <div 
+        className="border-4 shadow-lg relative flex flex-col cursor-pointer" 
+        style={{ 
+          height: isMinimized ? "100px" : "640px", 
+          width: isMinimized ? "200px" : "480px", 
+          borderRadius: isMinimized ? "50px" : "1rem",
+          transition: "all 0.3s ease",
+          backgroundColor: "rgba(255, 255, 255, 0.05)",
+          borderColor: "rgba(156, 163, 175, 0.1)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)"
+        }}
+        onClick={() => {
+          if (!isMinimized) return; // Only toggle if minimized
+          recordActivity();
+          setIsMinimized(!isMinimized);
+        }}
+      >
+        
+        {/* Static Header Section - "100+ TOOLS HUB" - Only when expanded */}
+        {!isMinimized && (
+          <div className="flex flex-col items-center justify-center gap-2 px-3 border-b-2 border-gray-400 pulse-glow-orange" style={{ 
+            backgroundColor: "#ffa536",
+            borderRadius: "0.5rem 0.5rem 0 0",
+            borderBottom: "2px solid rgb(107, 114, 128)",
+            padding: "6px 10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <h3 className="font-black text-center whitespace-nowrap" style={{ color: "#000000", fontSize: "clamp(0.8rem, 2vw, 1.5rem)", lineHeight: "1.2" }}>100+ TOOLS-HUB</h3>
+          </div>
+        )}
 
         {/* Floating Close/Open Button - Always top right */}
         <button
