@@ -336,7 +336,7 @@ export default function ToolsChronographWheel() {
       }}
     >
       {/* Expand/Collapse Indicator */}
-      <div className="absolute -top-24 left-0 right-0 flex items-center justify-center">
+      <div className="absolute -top-32 left-0 right-0 flex items-center justify-center">
         <button
           onClick={() => {
             recordActivity();
