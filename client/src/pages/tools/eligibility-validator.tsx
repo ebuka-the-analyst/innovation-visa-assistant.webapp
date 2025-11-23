@@ -85,10 +85,10 @@ export default function EligibilityValidator() {
     if (handoffData) {
       try {
         const payload = JSON.parse(handoffData);
-        if (payload.scores) setScores(payload.scores);
+        if ('scores' in payload) setScores(payload.scores);
         if (payload.dependents !== undefined) setDependents(payload.dependents);
-        if (payload.savedDate) setSavedDate(payload.savedDate);
-        if (payload.tab) setTab(payload.tab);
+        if ('savedDate' in payload) setSavedDate(payload.savedDate);
+        if ('tab' in payload) setTab(payload.tab);
         localStorage.removeItem(handoffKey);
       } catch (err) {
         console.error('Failed to restore handoff data:', err);

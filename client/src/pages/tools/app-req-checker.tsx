@@ -141,9 +141,9 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
       try {
         const payload = JSON.parse(handoffData);
         // Restore state from handoff payload
-        if (payload.checks) setChecks(payload.checks);
-        if (payload.savedDate) setSavedDate(payload.savedDate);
-        if (payload.tab) setTab(payload.tab);
+        if ('checks' in payload) setChecks(payload.checks);
+        if ('savedDate' in payload) setSavedDate(payload.savedDate);
+        if ('tab' in payload) setTab(payload.tab);
         
         // Clear handoff data after consumption
         localStorage.removeItem(handoffKey);

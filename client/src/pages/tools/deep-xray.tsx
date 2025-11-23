@@ -89,9 +89,9 @@ export default function DeepXRay() {
     if (handoffData) {
       try {
         const payload = JSON.parse(handoffData);
-        if (payload.checks) setChecks(payload.checks);
-        if (payload.savedDate) setSavedDate(payload.savedDate);
-        if (payload.tab) setTab(payload.tab);
+        if ('checks' in payload) setChecks(payload.checks);
+        if ('savedDate' in payload) setSavedDate(payload.savedDate);
+        if ('tab' in payload) setTab(payload.tab);
         localStorage.removeItem(handoffKey);
       } catch (err) {
         console.error('Failed to restore handoff data:', err);

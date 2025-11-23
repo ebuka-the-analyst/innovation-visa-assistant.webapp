@@ -87,9 +87,9 @@ export default function EvidenceValidator() {
     if (handoffData) {
       try {
         const payload = JSON.parse(handoffData);
-        if (payload.qualityRatings) setQualityRatings(payload.qualityRatings);
-        if (payload.savedDate) setSavedDate(payload.savedDate);
-        if (payload.tab) setTab(payload.tab);
+        if ('qualityRatings' in payload) setQualityRatings(payload.qualityRatings);
+        if ('savedDate' in payload) setSavedDate(payload.savedDate);
+        if ('tab' in payload) setTab(payload.tab);
         localStorage.removeItem(handoffKey);
       } catch (err) {
         console.error('Failed to restore handoff data:', err);
