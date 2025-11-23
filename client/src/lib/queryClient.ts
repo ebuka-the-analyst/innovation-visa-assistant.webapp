@@ -57,9 +57,17 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: Infinity,
       retry: false,
+      // PhD-level optimizations for better performance
+      gcTime: 1000 * 60 * 60 * 24, // Keep unused data in cache for 24 hours
+      refetchOnMount: false, // Don't refetch on component mount if data exists
+      refetchOnReconnect: false, // Don't refetch on network reconnect
+      networkMode: "online", // Only run queries when online
+      // Enable structural sharing for better React performance
+      structuralSharing: true,
     },
     mutations: {
       retry: false,
+      networkMode: "online",
     },
   },
 });

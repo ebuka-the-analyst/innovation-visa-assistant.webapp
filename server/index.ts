@@ -5,6 +5,7 @@ import type { Express as ExpressType } from "express";
 import type { Server } from "http";
 import path from "path";
 import fs from "fs";
+import compression from "compression";
 
 // Wrapper for setupVite that skips API routes
 async function setupVite(app: ExpressType, server: Server) {
@@ -47,6 +48,18 @@ declare module 'http' {
     rawBody: unknown
   }
 }
+
+// PhD-level optimization: Enable gzip/brotli compression for all responses
+app.use(compression({
+  level: 6, // Balanced compression level (0-9)
+  threshold: 1024, // Only compress responses > 1KB
+  filter: (req, res) => {
+    // Skip compression for images (already compressed)
+    if (req.headers['accept']?.includes('image/')) return false;
+    return compression.filter(req, res);
+  }
+}));
+
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
