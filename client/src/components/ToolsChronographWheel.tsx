@@ -357,8 +357,8 @@ export default function ToolsChronographWheel() {
           backgroundColor: "#ffa536",
           borderRadius: isMinimized ? "50px" : "0.5rem 0.5rem 0 0",
           borderBottom: isMinimized ? "none" : "2px solid rgb(107, 114, 128)",
-          height: isMinimized ? "100%" : "auto",
-          padding: isMinimized ? "0 20px" : "6px 10px",
+          height: isMinimized ? "auto" : "auto",
+          padding: isMinimized ? "8px 20px" : "6px 10px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center"
