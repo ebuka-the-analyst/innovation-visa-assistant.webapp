@@ -16,7 +16,7 @@ export default function Signup() {
   }, [isAuthenticated, isLoading]);
 
   const handleSignup = () => {
-    // Redirect to Replit Auth - users can create account via Google, GitHub, Email, etc.
+    // Redirect to Google OAuth for account creation
     window.location.href = "/api/login";
   };
 
@@ -50,9 +50,7 @@ export default function Signup() {
           </Button>
           
           <p className="text-sm text-center text-muted-foreground">
-            Secure registration with multiple options:
-            <br />
-            Google • GitHub • Email & more
+            Secure registration with Google
           </p>
         </CardContent>
         <div className="px-6 pb-6 flex flex-col space-y-2">

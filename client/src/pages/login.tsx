@@ -16,7 +16,7 @@ export default function Login() {
   }, [isAuthenticated, isLoading]);
 
   const handleLogin = () => {
-    // Redirect to Replit Auth which provides Google, GitHub, Email, etc.
+    // Redirect to Google OAuth for authentication
     window.location.href = "/api/login";
   };
 
@@ -50,9 +50,7 @@ export default function Login() {
           </Button>
           
           <p className="text-sm text-center text-muted-foreground">
-            Secure authentication with multiple options:
-            <br />
-            Google • GitHub • Email & more
+            Secure authentication with Google
           </p>
         </CardContent>
         <div className="px-6 pb-6 flex flex-col space-y-2">
