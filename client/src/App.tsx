@@ -106,6 +106,15 @@ import SuccessPredictor from "@/pages/tools/success-predictor";
 import SupplyChain from "@/pages/tools/supply-chain";
 import TeamAssessment from "@/pages/tools/team-assessment";
 import TeamScaling from "@/pages/tools/team-scaling";
+import CompensationPlanning from "@/pages/tools/compensation-planning";
+import RoleDesigner from "@/pages/tools/role-designer";
+import SuccessionPlanning from "@/pages/tools/succession-planning";
+import CultureFramework from "@/pages/tools/culture-framework";
+import DiversityInclusion from "@/pages/tools/diversity-inclusion";
+import LeadershipDevelopment from "@/pages/tools/leadership-development";
+import RetentionStrategy from "@/pages/tools/retention-strategy";
+import PerformanceManagement from "@/pages/tools/performance-management";
+import SkillsMatrix from "@/pages/tools/skills-matrix";
 import VisaTimeline from "@/pages/tools/visa-timeline";
 import AdvisorPrepGuide from "@/pages/tools/advisor-prep-guide";
 import AdvisoryBoardBuilder from "@/pages/tools/advisory-board-builder";
@@ -249,6 +258,15 @@ function Router() {
       <Route path="/tools/supply-chain" component={SupplyChain} />
       <Route path="/tools/team-assessment" component={TeamAssessment} />
       <Route path="/tools/team-scaling" component={TeamScaling} />
+      <Route path="/tools/compensation-planning" component={CompensationPlanning} />
+      <Route path="/tools/role-designer" component={RoleDesigner} />
+      <Route path="/tools/succession-planning" component={SuccessionPlanning} />
+      <Route path="/tools/culture-framework" component={CultureFramework} />
+      <Route path="/tools/diversity-inclusion" component={DiversityInclusion} />
+      <Route path="/tools/leadership-development" component={LeadershipDevelopment} />
+      <Route path="/tools/retention-strategy" component={RetentionStrategy} />
+      <Route path="/tools/performance-management" component={PerformanceManagement} />
+      <Route path="/tools/skills-matrix" component={SkillsMatrix} />
       <Route path="/tools/visa-timeline" component={VisaTimeline} />
       <Route path="/tools/advisor-prep-guide" component={AdvisorPrepGuide} />
       <Route path="/tools/advisory-board-builder" component={AdvisoryBoardBuilder} />

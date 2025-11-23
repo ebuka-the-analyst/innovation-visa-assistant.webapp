@@ -65,8 +65,8 @@ export default function SkillsMatrix() {
     a.click();
   };
 
-  const getSmartRecommendations = () => {
-    const tips = [];
+  const getSmartRecommendations = (): string[] => {
+    const tips: string[] = [];
     
     SKILL_CATEGORIES.forEach(skill => {
       const experts = skillEntries.filter(e => e.skills[skill] === "expert").length;
