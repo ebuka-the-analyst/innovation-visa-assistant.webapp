@@ -364,9 +364,9 @@ export default function ToolsChronographWheel() {
           justifyContent: "center"
         }}>
           {isMinimized ? (
-            <p className="font-black whitespace-nowrap" style={{ color: "#000000", opacity: 1, fontSize: "clamp(1.2rem, 3vw, 2.5rem)" }}>100+ Tools-Hub</p>
+            <p className="font-black text-center" style={{ color: "#000000", opacity: 1, fontSize: "clamp(0.8rem, 2vw, 1.5rem)", lineHeight: "1.2" }}>100+<br/>Tools-Hub</p>
           ) : (
-            <h3 className="font-black whitespace-nowrap" style={{ color: "#000000", fontSize: "clamp(1.2rem, 3vw, 2.5rem)" }}>100+ TOOLS-HUB</h3>
+            <h3 className="font-black text-center" style={{ color: "#000000", fontSize: "clamp(0.8rem, 2vw, 1.5rem)", lineHeight: "1.2" }}>100+<br/>TOOLS-HUB</h3>
           )}
         </div>
 
