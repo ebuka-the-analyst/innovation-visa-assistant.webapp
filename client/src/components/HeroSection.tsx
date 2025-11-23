@@ -15,7 +15,7 @@ export default function HeroSection() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-chart-2/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
       </div>
 
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
+      <div className="w-full px-4 md:px-6 lg:px-8 xl:px-12 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left: Content */}
           <div className="space-y-8">
