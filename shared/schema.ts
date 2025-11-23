@@ -23,6 +23,12 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  
+  // Email verification fields
+  isEmailVerified: boolean("is_email_verified").notNull().default(false),
+  verificationToken: text("verification_token"),
+  tokenExpiry: timestamp("token_expiry"),
+  
   subscriptionTier: varchar("subscription_tier", { length: 20 }).notNull().default('free'), // free, basic, premium, enterprise, ultimate
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
