@@ -357,10 +357,10 @@ export default function ToolsChronographWheel() {
           width: isMinimized ? "200px" : "480px", 
           borderRadius: isMinimized ? "50px" : "1rem",
           transition: "all 0.3s ease",
-          backgroundColor: "rgba(255, 255, 255, 0.05)",
-          borderColor: "rgba(156, 163, 175, 0.1)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)"
+          backgroundColor: isMinimized ? "transparent" : "rgba(255, 255, 255, 0.05)",
+          borderColor: isMinimized ? "transparent" : "rgba(156, 163, 175, 0.1)",
+          backdropFilter: isMinimized ? "none" : "blur(12px)",
+          WebkitBackdropFilter: isMinimized ? "none" : "blur(12px)"
         }}
         onClick={() => {
           if (!isMinimized) return; // Only toggle if minimized
