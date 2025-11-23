@@ -285,8 +285,8 @@ export default function ToolsChronographWheel() {
         {/* Static Header Section - "100+ TOOLS HUB" */}
         <div className="px-3 sm:px-4 pt-2 sm:pt-3 pb-1 sm:pb-2 border-b-2 border-gray-400 flex items-center gap-3 sm:gap-4 justify-between pulse-glow-orange rounded-t-2xl" style={{ backgroundColor: "#ffa536" }}>
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <div className="w-14 h-14 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-              <Icons.Zap className="w-7 h-7 text-white" />
+            <div className="flex-shrink-0 shadow-lg" style={{ width: "56px", height: "56px", backgroundColor: "#b45309", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icons.Zap className="text-white" style={{ width: "28px", height: "28px" }} />
             </div>
             <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
           </div>
