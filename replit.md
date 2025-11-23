@@ -7,6 +7,36 @@ The UK Innovator Founder Visa Assistant is an AI-powered platform designed to as
 
 ## Recent Changes (November 23, 2025)
 
+### Authentication & Tier-Based Access Control Complete
+Implemented production-ready authentication and subscription tier infrastructure (architect-approved PASS rating):
+
+**Database Schema:**
+- Added `subscriptionTier` (free/basic/premium/enterprise/ultimate, default: 'free') and `subscriptionStatus` (active/inactive, default: 'inactive') to users table
+- Pushed schema to production database successfully
+
+**Authentication Components:**
+- `ProtectedRoute` - Authentication guard that checks /api/auth/me and redirects unauthenticated users to /login with loading spinner
+- `TierGate` - Tier-based access control component with hierarchy-aware gating and upgrade CTA (ready for tool-level enforcement)
+
+**Route Protection:**
+- Protected all non-public routes at layout level in App.tsx (dashboard, tools, settings, questionnaire, etc.)
+- Public routes remain accessible: /, /login, /signup, /verify-email, /pricing
+- Clean separation between authenticated and public areas
+
+**API Updates:**
+- /api/auth/me endpoint returns subscriptionTier and subscriptionStatus fields
+- Backend sets default tier to 'free' on new user signup
+
+**Pricing Page:**
+- Displays user's current tier with "Current Plan" badge (green border)
+- Shows tier information from /api/auth/me query
+- Ready for Stripe integration for actual payment processing
+
+**Next Steps:**
+1. Integrate TierGate into individual tool pages to enforce minimum tier requirements
+2. Wire pricing page to Stripe for paid tier upgrades
+3. Add tier-based feature limits and usage tracking
+
 ### Business Tools Batch Complete (13/13) - PhD-Level Exports Perfected
 All Business Tools completed with 100% UK Innovator Founder visa focus, architect-approved PASS rating, and PhD-level export quality matching compensation-planning.tsx benchmark:
 
