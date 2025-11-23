@@ -49,36 +49,94 @@ export default function ProductRoadmap() {
 
   const exportReport = () => {
     const { score, grade } = getRoadmapHealth();
-    const content = `UK INNOVATOR FOUNDER VISA - PRODUCT ROADMAP
+    const content = `UK INNOVATOR FOUNDER VISA - PRODUCT ROADMAP (12-MONTH)
 Generated: ${new Date().toLocaleDateString()}
 
-Roadmap Health: ${score}% (${grade})
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+Roadmap Health Score: ${score}% (${grade})
 
-Q1 MILESTONES:
+Assessment Components:
+  Innovation Strength: ${scores.innovation}/100
+  Technical Feasibility: ${scores.feasibility}/100
+  Business Impact: ${scores.impact}/100
+  Strategic Alignment: ${scores.alignment}/100
+
+${score >= 75 ? '✓ STRONG ROADMAP - Supports innovation and scalability criteria for UK Innovator Founder visa' : score >= 65 ? '⚠ VIABLE ROADMAP - Strengthen for endorsement' : '✗ WEAK ROADMAP - Critical improvements needed'}
+
+═══════════════════════════════════════════════════════════
+12-MONTH PRODUCT ROADMAP
+═══════════════════════════════════════════════════════════
+
+Q1 MILESTONES (Months 1-3):
 ${q1Milestones}
 
-Q2 MILESTONES:
+Q2 MILESTONES (Months 4-6):
 ${q2Milestones}
 
-Q3 MILESTONES:
+Q3 MILESTONES (Months 7-9):
 ${q3Milestones}
 
-Q4 MILESTONES:
+Q4 MILESTONES (Months 10-12):
 ${q4Milestones}
 
-ROADMAP ASSESSMENT:
-Innovation Score: ${scores.innovation}/100
-Feasibility: ${scores.feasibility}/100
+═══════════════════════════════════════════════════════════
+ROADMAP HEALTH SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: Roadmap Health = (Innovation + Feasibility + Impact + Alignment) / 4
+
+Component Assessment:
+  Innovation Strength: ${scores.innovation}/100
+    ${scores.innovation >= 75 ? '✓ Strong innovative features planned' : scores.innovation >= 60 ? '⚠ Moderate innovation - add breakthrough features' : '✗ Limited innovation in roadmap'}
+    
+  Technical Feasibility: ${scores.feasibility}/100
+    ${scores.feasibility >= 75 ? '✓ Realistic delivery timeline' : scores.feasibility >= 60 ? '⚠ Feasibility concerns exist' : '✗ Unrealistic roadmap timeline'}
+    
+  Business Impact: ${scores.impact}/100
+    ${scores.impact >= 75 ? '✓ High-value features for growth' : scores.impact >= 60 ? '⚠ Limited business impact' : '✗ Low-impact feature set'}
+    
+  Strategic Alignment: ${scores.alignment}/100
+    ${scores.alignment >= 75 ? '✓ Features align with business goals' : scores.alignment >= 60 ? '⚠ Partial strategic alignment' : '✗ Poor strategic alignment'}
+
+Calculation:
+  Total Points = ${scores.innovation} + ${scores.feasibility} + ${scores.impact} + ${scores.alignment}
+  Total Points = ${scores.innovation + scores.feasibility + scores.impact + scores.alignment}
+  Roadmap Health = ${scores.innovation + scores.feasibility + scores.impact + scores.alignment} / 4 = ${score}% (${grade})
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: INNOVATION CRITERION
+═══════════════════════════════════════════════════════════
+GOV.UK Innovation Assessment Factors:
+• Novel features and functionality
+• Continuous product improvement trajectory
+• Clear differentiation from existing solutions
+• Technical innovation and IP development
+• Market-driven feature prioritization
+
+CURRENT ROADMAP STATUS:
+Innovation Strength: ${scores.innovation}/100
+  ${scores.innovation >= 75 ? '✓ STRONG - Roadmap demonstrates continuous innovation for UK Innovator Founder visa' : scores.innovation >= 60 ? '⚠ MODERATE - Add more innovative features' : '✗ WEAK - Innovation trajectory needs strengthening'}
+
 Business Impact: ${scores.impact}/100
-Strategic Alignment: ${scores.alignment}/100
+  ${scores.impact >= 75 ? '✓ HIGH-IMPACT - Features drive scalability and growth' : scores.impact >= 60 ? '⚠ MODERATE-IMPACT - Prioritize high-value features' : '✗ LOW-IMPACT - Roadmap lacks growth drivers'}
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Innovation: ${scores.innovation >= 75 ? `Strong innovation trajectory (${scores.innovation}) supports innovation criterion` : 'Innovation roadmap needs strengthening'}
-Scalability: ${scores.impact >= 75 ? 'High-impact features demonstrate growth potential' : 'Impact assessment requires improvement'}
-${score >= 75 ? '✅ Roadmap supports visa criteria' : '⚠️ Roadmap needs optimization'}
+Feasibility: ${scores.feasibility}/100
+  ${scores.feasibility >= 75 ? '✓ REALISTIC - Achievable within timeline' : scores.feasibility >= 60 ? '⚠ AMBITIOUS - Validate resource availability' : '✗ UNREALISTIC - Revise timeline or scope'}
 
-Formula: Roadmap Health = Avg(Innovation + Feasibility + Impact + Alignment)
-GOV.UK: Innovator Founder Visa innovation criterion (November 2025)
+Overall Roadmap Health: ${score}%
+  ${score >= 75 ? '✓ STRONG - Product roadmap demonstrates innovation and scalability' : score >= 65 ? '⚠ VIABLE - Roadmap acceptable but needs strengthening' : '✗ WEAK - Roadmap requires significant improvement'}
+
+Visa Criterion Alignment:
+${score >= 75 && scores.innovation >= 70 ? '✓ Product roadmap demonstrates clear innovation trajectory and business impact for UK Innovator Founder visa endorsement. ${score}% health score shows realistic execution plan.' : score >= 65 ? '⚠ Roadmap is viable but strengthening innovation component (aim for 75+) and adding more breakthrough features would improve endorsement case.' : '✗ Product roadmap needs significant work - focus on innovative features, realistic timelines, and high-impact deliverables that demonstrate differentiation.'}
+
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Innovation Criterion: Novel approach and continuous improvement
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+Roadmap Methodology: Quarterly milestone planning framework
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

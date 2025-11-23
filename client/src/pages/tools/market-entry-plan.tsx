@@ -53,7 +53,24 @@ export default function MarketEntryPlan() {
     const content = `UK INNOVATOR FOUNDER VISA - MARKET ENTRY PLAN
 Generated: ${new Date().toLocaleDateString()}
 
-Entry Readiness: ${score}% (${grade})
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+Market Entry Readiness Score: ${score}% (${grade})
+Investment Required: £${investmentRequired.toLocaleString()}
+
+Readiness Components:
+  Market Fit: ${scores.marketFit}/100
+  Regulatory Preparedness: ${scores.regulatory}/100
+  Competitive Position: ${scores.competition}/100
+  Resource Availability: ${scores.resources}/100
+  Market Timing: ${scores.timing}/100
+
+${score >= 75 ? '✓ READY FOR MARKET ENTRY - Supports scalability criterion for UK Innovator Founder visa' : score >= 65 ? '⚠ PREPARED - Strengthen for endorsement' : '✗ NOT READY - Critical gaps identified'}
+
+═══════════════════════════════════════════════════════════
+MARKET ENTRY STRATEGY
+═══════════════════════════════════════════════════════════
 
 TARGET MARKET:
 ${targetMarket}
@@ -61,28 +78,74 @@ ${targetMarket}
 ENTRY STRATEGY:
 ${entryStrategy}
 
-REGULATORY BARRIERS:
+REGULATORY BARRIERS & COMPLIANCE:
 ${regulatoryBarriers}
 
 LOCALIZATION PLAN:
 ${localizationPlan}
 
-INVESTMENT REQUIRED:
+CAPITAL INVESTMENT REQUIRED:
 £${investmentRequired.toLocaleString()}
+${investmentRequired >= 50000 ? `  ✓ Investment ≥£50k may qualify for ILR achievement criterion (1 of 7)` : `  ⚠ Investment <£50k does not meet ILR investment threshold`}
 
-READINESS SCORES:
-Market Fit: ${scores.marketFit}/100
-Regulatory Preparedness: ${scores.regulatory}/100
-Competitive Position: ${scores.competition}/100
-Resource Availability: ${scores.resources}/100
-Market Timing: ${scores.timing}/100
+═══════════════════════════════════════════════════════════
+ENTRY READINESS SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: Entry Readiness = (Market Fit + Regulatory + Competition + Resources + Timing) / 5
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Scalability: ${score >= 70 ? `International expansion readiness (${score}%) demonstrates scaling capability` : 'Market entry plan requires strengthening for scalability criterion'}
-Innovation: ${scores.marketFit >= 75 ? 'Strong product-market fit supports innovation criterion' : 'Product-market fit validation needed'}
+Component Assessment:
+  Market Fit: ${scores.marketFit}/100
+    ${scores.marketFit >= 75 ? '✓ Strong product-market fit validated' : scores.marketFit >= 60 ? '⚠ Market fit requires validation' : '✗ Weak product-market fit'}
+    
+  Regulatory Preparedness: ${scores.regulatory}/100
+    ${scores.regulatory >= 75 ? '✓ Compliance requirements addressed' : scores.regulatory >= 60 ? '⚠ Regulatory gaps identified' : '✗ Significant compliance barriers'}
+    
+  Competitive Position: ${scores.competition}/100
+    ${scores.competition >= 75 ? '✓ Strong competitive advantage' : scores.competition >= 60 ? '⚠ Competitive position needs strengthening' : '✗ Weak competitive position'}
+    
+  Resource Availability: ${scores.resources}/100
+    ${scores.resources >= 75 ? '✓ Resources secured for market entry' : scores.resources >= 60 ? '⚠ Resource constraints identified' : '✗ Insufficient resources'}
+    
+  Market Timing: ${scores.timing}/100
+    ${scores.timing >= 75 ? '✓ Optimal market entry window' : scores.timing >= 60 ? '⚠ Timing considerations exist' : '✗ Poor market timing'}
 
-Formula: Entry Readiness = Avg(Market Fit + Regulatory + Competition + Resources + Timing)
-GOV.UK: Innovator Founder Visa scalability criterion (November 2025)
+Calculation:
+  Total Points = ${scores.marketFit} + ${scores.regulatory} + ${scores.competition} + ${scores.resources} + ${scores.timing}
+  Total Points = ${scores.marketFit + scores.regulatory + scores.competition + scores.resources + scores.timing}
+  Entry Readiness = ${scores.marketFit + scores.regulatory + scores.competition + scores.resources + scores.timing} / 5 = ${score}% (${grade})
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: SCALABILITY CRITERION
+═══════════════════════════════════════════════════════════
+GOV.UK Scalability Assessment Factors:
+• International expansion potential
+• Market entry strategy demonstrates growth capability
+• Realistic resource and investment planning
+• Clear competitive advantage in new markets
+• Evidence of market validation
+
+CURRENT MARKET ENTRY STATUS:
+Entry Readiness: ${score}%
+  ${score >= 75 ? '✓ EXCELLENT - Market entry plan demonstrates strong international scalability for UK Innovator Founder visa' : score >= 65 ? '⚠ PREPARED - Entry plan viable but needs strengthening' : '✗ NOT READY - Significant gaps in entry strategy'}
+
+Investment Requirement: £${investmentRequired.toLocaleString()}
+  ${investmentRequired >= 50000 ? '✓ Meets £50k ILR investment criterion - actively investing in UK business growth' : '⚠ Below £50k ILR investment threshold'}
+  ${investmentRequired <= 100000 ? '✓ Realistic investment level' : investmentRequired <= 500000 ? '⚠ Significant capital required - ensure funding secured' : '⚠ Very high investment (£500k+) - validate resource availability'}
+
+Market Fit Score: ${scores.marketFit}/100
+  ${scores.marketFit >= 75 ? '✓ Strong validation supports scalability narrative' : '⚠ Market fit validation needed before expansion'}
+
+Visa Criterion Alignment:
+${score >= 75 && scores.marketFit >= 70 ? `✓ Market entry plan demonstrates clear international scalability for UK Innovator Founder visa endorsement. ${score}% readiness and £${investmentRequired.toLocaleString()} investment${investmentRequired >= 50000 ? ' (meets ILR criterion)' : ''} show realistic expansion capability.` : score >= 65 ? '⚠ Market entry plan is viable but strengthening regulatory preparedness and market validation would improve endorsement case.' : '✗ Market entry plan needs significant work - address regulatory barriers, validate market fit, and secure required resources before visa application.'}
+
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Scalability Criterion: International expansion and growth potential
+ILR Achievement Criteria: £50k active investment (1 of 7 criteria)
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+Market Entry Methodology: International expansion framework
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

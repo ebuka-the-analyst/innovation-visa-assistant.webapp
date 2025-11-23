@@ -46,34 +46,95 @@ export default function USPValidator() {
 
   const exportReport = () => {
     const { score, grade } = getUSPStrength();
-    const content = `UK INNOVATOR FOUNDER VISA - USP VALIDATOR
+    const content = `UK INNOVATOR FOUNDER VISA - UNIQUE SELLING PROPOSITION VALIDATOR
 Generated: ${new Date().toLocaleDateString()}
 
-USP Strength: ${score}% (${grade})
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+USP Strength Score: ${score}% (${grade})
+
+Component Scores:
+  Uniqueness: ${scores.uniqueness}/100
+  Customer Relevance: ${scores.relevance}/100
+  Defensibility: ${scores.defensibility}/100
+  Message Clarity: ${scores.clarity}/100
+
+${score >= 75 ? '✓ STRONG USP - Demonstrates clear differentiation for UK Innovator Founder visa' : score >= 65 ? '⚠ GOOD USP - Strengthen for endorsement' : '✗ WEAK USP - Critical improvements needed'}
+
+═══════════════════════════════════════════════════════════
+UNIQUE SELLING PROPOSITION
+═══════════════════════════════════════════════════════════
 
 USP STATEMENT:
 ${uspStatement}
 
-TARGET CUSTOMER:
+TARGET CUSTOMER SEGMENT:
 ${targetCustomer}
 
 KEY DIFFERENTIATORS:
 ${keyDifferentiators}
 
-USP ASSESSMENT:
-Uniqueness: ${scores.uniqueness}/100
+═══════════════════════════════════════════════════════════
+USP STRENGTH SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: USP Strength = (Uniqueness + Relevance + Defensibility + Clarity) / 4
+
+Component Assessment:
+  Uniqueness: ${scores.uniqueness}/100
+    ${scores.uniqueness >= 75 ? '✓ Highly differentiated - clear competitive advantage' : scores.uniqueness >= 60 ? '⚠ Moderately unique - strengthen differentiation' : '✗ Low uniqueness - lacks clear differentiation'}
+    
+  Customer Relevance: ${scores.relevance}/100
+    ${scores.relevance >= 75 ? '✓ Highly relevant - addresses critical customer needs' : scores.relevance >= 60 ? '⚠ Moderately relevant - validate with target customers' : '✗ Low relevance - misaligned with customer priorities'}
+    
+  Defensibility: ${scores.defensibility}/100
+    ${scores.defensibility >= 75 ? '✓ Strong barriers to entry - sustainable advantage' : scores.defensibility >= 60 ? '⚠ Some defensibility - build stronger moats' : '✗ Weak defensibility - easily copied by competitors'}
+    
+  Message Clarity: ${scores.clarity}/100
+    ${scores.clarity >= 75 ? '✓ Crystal clear - easy to understand and communicate' : scores.clarity >= 60 ? '⚠ Somewhat clear - simplify messaging' : '✗ Unclear - messaging confusing or jargon-heavy'}
+
+Calculation:
+  Total Points = ${scores.uniqueness} + ${scores.relevance} + ${scores.defensibility} + ${scores.clarity}
+  Total Points = ${scores.uniqueness + scores.relevance + scores.defensibility + scores.clarity}
+  USP Strength = ${scores.uniqueness + scores.relevance + scores.defensibility + scores.clarity} / 4 = ${score}% (${grade})
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: INNOVATION CRITERION
+═══════════════════════════════════════════════════════════
+GOV.UK Innovation Assessment Factors:
+• Clear differentiation from existing market solutions
+• Novel approach to customer problems
+• Sustainable competitive advantage
+• Defensible market position
+• Compelling value proposition
+
+CURRENT USP STATUS:
+Uniqueness Score: ${scores.uniqueness}/100
+  ${scores.uniqueness >= 75 ? '✓ STRONG - USP demonstrates clear innovation and differentiation for UK Innovator Founder visa' : scores.uniqueness >= 60 ? '⚠ MODERATE - Strengthen unique elements' : '✗ WEAK - Insufficient differentiation'}
+
+Defensibility Score: ${scores.defensibility}/100
+  ${scores.defensibility >= 75 ? '✓ STRONG - Sustainable competitive advantage supports scalability' : scores.defensibility >= 60 ? '⚠ MODERATE - Build stronger barriers to entry' : '✗ WEAK - Easily copied by competitors'}
+
 Customer Relevance: ${scores.relevance}/100
-Defensibility: ${scores.defensibility}/100
+  ${scores.relevance >= 75 ? '✓ HIGH RELEVANCE - Addresses critical customer pain points' : scores.relevance >= 60 ? '⚠ MODERATE - Validate with target customers' : '✗ LOW - Misaligned with customer priorities'}
+
 Message Clarity: ${scores.clarity}/100
+  ${scores.clarity >= 75 ? '✓ CLEAR - Easy to communicate to customers and endorsing bodies' : scores.clarity >= 60 ? '⚠ ADEQUATE - Simplify messaging' : '✗ UNCLEAR - Messaging needs work'}
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Innovation: ${scores.uniqueness >= 75 ? `Strong uniqueness (${scores.uniqueness}) demonstrates innovative approach` : 'Uniqueness needs strengthening for innovation criterion'}
-Scalability: ${scores.defensibility >= 70 ? 'Defensible USP enables sustainable competitive advantage' : 'Defensibility requires improvement for scaling'}
+Overall USP Strength: ${score}%
+  ${score >= 75 ? '✓ STRONG - USP demonstrates clear differentiation and innovation' : score >= 65 ? '⚠ GOOD - USP viable but strengthen uniqueness and defensibility' : '✗ WEAK - USP needs significant improvement'}
 
-${score >= 75 ? '✅ Strong USP supports innovation and scalability criteria' : '⚠️ USP needs strengthening'}
+Visa Criterion Alignment:
+${score >= 75 && scores.uniqueness >= 70 ? `✓ Strong USP (${score}%) with ${scores.uniqueness}/100 uniqueness demonstrates clear innovation and differentiation for UK Innovator Founder visa endorsement. Defensible competitive advantage (${scores.defensibility}/100) supports sustainable growth narrative.` : score >= 65 ? '⚠ USP is viable but strengthening uniqueness (aim for 75+) and adding defensible barriers to entry would improve innovation case.' : '✗ USP needs significant work - focus on truly differentiated features, validate customer relevance, and build defensible competitive moats before visa application.'}
 
-Formula: USP Strength = Avg(Uniqueness + Relevance + Defensibility + Clarity)
-GOV.UK: Innovator Founder Visa innovation criterion (November 2025)
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Innovation Criterion: Novel approach and clear differentiation
+Scalability Criterion: Defensible competitive advantage
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+USP Framework: Uniqueness + Relevance + Defensibility + Clarity
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

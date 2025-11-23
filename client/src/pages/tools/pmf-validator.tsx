@@ -48,35 +48,118 @@ export default function CustomerValidation() {
 
   const exportReport = () => {
     const { score, grade } = getPMFScore();
-    const content = `UK INNOVATOR FOUNDER VISA - CUSTOMER VALIDATION (PMF)
+    const content = `UK INNOVATOR FOUNDER VISA - CUSTOMER VALIDATION (PRODUCT-MARKET FIT)
 Generated: ${new Date().toLocaleDateString()}
 
-Product-Market Fit: ${score}% (${grade})
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+Product-Market Fit Score: ${score}% (${grade})
+
+Key PMF Metrics:
+  Net Promoter Score (NPS): ${nps}
+  Customer Retention: ${retentionRate}%
+  Referral Rate: ${referralRate}%
+
+Component Scores:
+  Problem-Solution Fit: ${scores.problemFit}/100
+  Solution Quality: ${scores.solutionFit}/100
+  Channel Effectiveness: ${scores.channels}/100
+  Customer Retention: ${scores.retention}/100
+  Willingness to Pay: ${scores.willingness}/100
+
+${score >= 75 ? '✓ STRONG PMF - Validates innovation and viability for UK Innovator Founder visa' : score >= 65 ? '⚠ EMERGING PMF - Strengthen validation' : '✗ WEAK PMF - Critical validation needed'}
+
+═══════════════════════════════════════════════════════════
+CUSTOMER VALIDATION DATA
+═══════════════════════════════════════════════════════════
 
 CUSTOMER FEEDBACK:
 ${customerFeedback}
 
-PMF METRICS:
+KEY PMF METRICS:
 Net Promoter Score (NPS): ${nps}
-Retention Rate: ${retentionRate}%
-Referral Rate: ${referralRate}%
+${nps >= 50 ? '✓ Excellent NPS (50+) - strong customer satisfaction' : nps >= 30 ? '✓ Good NPS (30-50) - positive customer sentiment' : nps >= 0 ? '⚠ Weak NPS (0-30) - improve customer experience' : '✗ Poor NPS (<0) - critical satisfaction issues'}
+Benchmark: NPS 50+ = world-class, 30-50 = good, 0-30 = needs improvement
 
-PMF ASSESSMENT SCORES:
+Customer Retention Rate: ${retentionRate}%
+${retentionRate >= 80 ? '✓ Strong retention (80%+) - sticky product' : retentionRate >= 70 ? '✓ Healthy retention (70-80%) - good product fit' : retentionRate >= 50 ? '⚠ Moderate retention (50-70%) - address churn' : '✗ Weak retention (<50%) - critical churn issues'}
+Benchmark: SaaS retention 80%+ = excellent, 70-80% = good, <70% = concerns
+
+Referral/Viral Rate: ${referralRate}%
+${referralRate >= 40 ? '✓ Viral growth (40%+) - strong word-of-mouth' : referralRate >= 25 ? '✓ Healthy referrals (25-40%) - organic growth' : '⚠ Limited referrals (<25%) - improve customer advocacy'}
+Benchmark: Referral 40%+ = viral, 25-40% = healthy, <25% = limited
+
+═══════════════════════════════════════════════════════════
+PRODUCT-MARKET FIT SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: PMF Score = (Problem Fit + Solution Fit + Channels + Retention + Willingness) / 5
+
+Component Assessment:
+  Problem-Solution Fit: ${scores.problemFit}/100
+    ${scores.problemFit >= 75 ? '✓ Strong validation - solves real customer pain' : scores.problemFit >= 60 ? '⚠ Moderate fit - validate problem severity' : '✗ Weak fit - problem-solution mismatch'}
+    
+  Solution Quality: ${scores.solutionFit}/100
+    ${scores.solutionFit >= 75 ? '✓ High-quality solution - meets customer needs' : scores.solutionFit >= 60 ? '⚠ Adequate solution - room for improvement' : '✗ Poor solution quality'}
+    
+  Channel Effectiveness: ${scores.channels}/100
+    ${scores.channels >= 75 ? '✓ Efficient acquisition channels identified' : scores.channels >= 60 ? '⚠ Moderate channel effectiveness' : '✗ Weak customer acquisition'}
+    
+  Customer Retention: ${scores.retention}/100
+    ${scores.retention >= 75 ? '✓ Strong retention - customers stay and engage' : scores.retention >= 60 ? '⚠ Moderate retention - address churn drivers' : '✗ High churn - critical retention issues'}
+    
+  Willingness to Pay: ${scores.willingness}/100
+    ${scores.willingness >= 75 ? '✓ Strong value perception - pricing power' : scores.willingness >= 60 ? '⚠ Moderate willingness - optimize pricing' : '✗ Weak willingness - value proposition issues'}
+
+Calculation:
+  Total Points = ${scores.problemFit} + ${scores.solutionFit} + ${scores.channels} + ${scores.retention} + ${scores.willingness}
+  Total Points = ${scores.problemFit + scores.solutionFit + scores.channels + scores.retention + scores.willingness}
+  PMF Score = ${scores.problemFit + scores.solutionFit + scores.channels + scores.retention + scores.willingness} / 5 = ${score}% (${grade})
+
+SEAN ELLIS PMF TEST:
+"How would customers feel if they could no longer use your product?"
+Target Benchmark: ≥40% respond "very disappointed" = strong PMF
+Your PMF Score: ${score}%
+${score >= 75 ? '✓ STRONG PMF - Likely exceeds 40% "very disappointed" threshold' : score >= 60 ? '⚠ EMERGING PMF - Approaching PMF threshold, validate with Sean Ellis test' : '✗ WEAK PMF - Below PMF threshold, conduct customer research'}
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: INNOVATION & VIABILITY
+═══════════════════════════════════════════════════════════
+GOV.UK Assessment Factors:
+• Customer validation demonstrates market need
+• Problem-solution fit validates innovative approach
+• Strong retention proves sustainable business model
+• Willingness to pay confirms viable revenue model
+• Efficient channels support scalable acquisition
+
+CURRENT PMF STATUS:
 Problem-Solution Fit: ${scores.problemFit}/100
-Solution Quality: ${scores.solutionFit}/100
-Channel Effectiveness: ${scores.channels}/100
+  ${scores.problemFit >= 75 ? '✓ STRONG - Validates innovative approach for UK Innovator Founder visa' : scores.problemFit >= 60 ? '⚠ MODERATE - Strengthen customer validation' : '✗ WEAK - Insufficient problem-solution validation'}
+
 Customer Retention: ${scores.retention}/100
+  ${scores.retention >= 75 ? '✓ HIGH RETENTION - Demonstrates viable, sustainable customer base' : scores.retention >= 60 ? '⚠ MODERATE RETENTION - Address churn to improve viability' : '✗ LOW RETENTION - Critical viability concern'}
+
+Net Promoter Score: ${nps}
+  ${nps >= 30 ? '✓ POSITIVE NPS - Strong customer satisfaction supports viability' : '⚠ NPS <30 - Improve customer experience'}
+
 Willingness to Pay: ${scores.willingness}/100
+  ${scores.willingness >= 70 ? '✓ STRONG - Validates sustainable revenue model' : '⚠ MODERATE - Optimize pricing and value proposition'}
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Innovation: ${scores.problemFit >= 75 ? 'Strong problem-solution fit validates innovative approach' : 'Problem-solution fit needs validation'}
-Viability: ${scores.retention >= 75 ? `High retention (${scores.retention}%) demonstrates sustainable customer base` : 'Customer retention requires improvement for viability'}
+Overall PMF Score: ${score}%
+  ${score >= 75 ? '✓ STRONG PMF - Customer validation demonstrates innovation and viability' : score >= 65 ? '⚠ EMERGING PMF - Viable but strengthen validation' : '✗ WEAK PMF - Insufficient customer validation'}
 
-${score >= 75 ? '✅ Strong PMF supports innovation and viability criteria' : '⚠️ PMF validation needs strengthening'}
+Visa Criterion Alignment:
+${score >= 75 && scores.problemFit >= 70 && scores.retention >= 70 ? `✓ Strong product-market fit (${score}%) with ${retentionRate}% retention validates both innovation and viability criteria for UK Innovator Founder visa. Customer validation demonstrates genuine market need and sustainable business model.` : score >= 65 ? '⚠ Emerging PMF is viable but strengthening problem-solution fit (aim for 75+) and retention (aim for 80%+) would improve endorsement case.' : '✗ Product-market fit needs significant validation work - conduct customer interviews, validate problem severity, and address retention/churn before visa application.'}
 
-Formula: PMF Score = Avg(Problem Fit + Solution Fit + Channels + Retention + Willingness to Pay)
-Benchmark: 40% "very disappointed" = strong PMF (Sean Ellis test)
-GOV.UK: Innovator Founder Visa innovation criterion (November 2025)
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Innovation Criterion: Customer validation and market need
+Viability Criterion: Sustainable customer base and retention
+PMF Methodology: Sean Ellis Test (40% "very disappointed" threshold)
+NPS Benchmark: 50+ excellent, 30-50 good, 0-30 needs work
+Retention Benchmark: 80%+ strong, 70-80% healthy, <70% concerns
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

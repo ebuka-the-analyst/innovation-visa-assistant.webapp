@@ -51,7 +51,23 @@ export default function GoToMarketStrategy() {
     const content = `UK INNOVATOR FOUNDER VISA - GO-TO-MARKET STRATEGY
 Generated: ${new Date().toLocaleDateString()}
 
-GTM Readiness: ${score}% (${grade})
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+GTM Readiness Score: ${score}% (${grade})
+
+Component Scores:
+  Messaging Clarity: ${scores.messaging}/100
+  Channel Strategy: ${scores.channels}/100
+  Market Positioning: ${scores.positioning}/100
+  Execution Plan: ${scores.execution}/100
+  Scalability: ${scores.scalability}/100
+
+${score >= 75 ? '✓ STRONG GTM STRATEGY - Supports scalability criterion for UK Innovator Founder visa' : score >= 65 ? '⚠ VIABLE GTM - Strengthen for endorsement' : '✗ WEAK GTM - Critical improvements needed'}
+
+═══════════════════════════════════════════════════════════
+GO-TO-MARKET STRATEGY COMPONENTS
+═══════════════════════════════════════════════════════════
 
 TARGET MARKET:
 ${targetMarket}
@@ -59,26 +75,68 @@ ${targetMarket}
 VALUE PROPOSITION:
 ${valueProposition}
 
-CHANNELS:
+DISTRIBUTION CHANNELS:
 ${channels}
 
 PRICING STRATEGY:
 ${pricing}
 
-GTM ASSESSMENT SCORES:
-Messaging Clarity: ${scores.messaging}/100
-Channel Strategy: ${scores.channels}/100
-Market Positioning: ${scores.positioning}/100
-Execution Plan: ${scores.execution}/100
-Scalability: ${scores.scalability}/100
+═══════════════════════════════════════════════════════════
+GTM READINESS SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: GTM Readiness = (Messaging + Channels + Positioning + Execution + Scalability) / 5
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Scalability: ${scores.scalability >= 70 ? `Strong GTM scalability (${scores.scalability}) supports growth criterion` : 'GTM scalability needs strengthening'}
-Viability: ${scores.execution >= 70 ? 'Clear execution plan demonstrates business viability' : 'Execution plan requires improvement'}
-${score >= 75 ? '✅ GTM strategy supports visa criteria' : '⚠️ GTM strategy needs optimization'}
+Component Breakdown:
+  Messaging Clarity: ${scores.messaging}/100
+    ${scores.messaging >= 75 ? '✓ Clear value communication' : scores.messaging >= 60 ? '⚠ Messaging needs refinement' : '✗ Unclear messaging'}
+    
+  Channel Strategy: ${scores.channels}/100
+    ${scores.channels >= 75 ? '✓ Well-defined distribution approach' : scores.channels >= 60 ? '⚠ Channel strategy needs optimization' : '✗ Weak channel plan'}
+    
+  Market Positioning: ${scores.positioning}/100
+    ${scores.positioning >= 75 ? '✓ Strong competitive positioning' : scores.positioning >= 60 ? '⚠ Positioning requires strengthening' : '✗ Unclear market position'}
+    
+  Execution Plan: ${scores.execution}/100
+    ${scores.execution >= 75 ? '✓ Detailed implementation roadmap' : scores.execution >= 60 ? '⚠ Execution plan needs detail' : '✗ Insufficient execution clarity'}
+    
+  Scalability: ${scores.scalability}/100
+    ${scores.scalability >= 75 ? '✓ Clear growth and scaling path' : scores.scalability >= 60 ? '⚠ Limited scalability plan' : '✗ Scaling challenges identified'}
 
-Formula: GTM Readiness = Avg(Messaging + Channels + Positioning + Execution + Scalability)
-GOV.UK: Innovator Founder Visa scalability criterion (November 2025)
+Calculation:
+  Total Points = ${scores.messaging} + ${scores.channels} + ${scores.positioning} + ${scores.execution} + ${scores.scalability}
+  Total Points = ${scores.messaging + scores.channels + scores.positioning + scores.execution + scores.scalability}
+  GTM Readiness = ${scores.messaging + scores.channels + scores.positioning + scores.execution + scores.scalability} / 5 = ${score}% (${grade})
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: SCALABILITY CRITERION
+═══════════════════════════════════════════════════════════
+GOV.UK Scalability Assessment Factors:
+• Clear path to significant market penetration
+• Scalable customer acquisition strategy
+• Multi-channel distribution approach
+• Evidence of market validation and traction
+• Realistic execution timeline for growth
+
+CURRENT GTM STATUS:
+Scalability Score: ${scores.scalability}/100
+  ${scores.scalability >= 75 ? '✓ STRONG - GTM strategy demonstrates clear scalability path for UK Innovator Founder visa' : scores.scalability >= 60 ? '⚠ MODERATE - Scalability plan needs strengthening for endorsement' : '✗ WEAK - Scalability concerns require addressing'}
+
+Execution Readiness: ${scores.execution}/100
+  ${scores.execution >= 75 ? '✓ STRONG - Detailed execution plan supports viability criterion' : scores.execution >= 60 ? '⚠ MODERATE - Execution plan needs more detail' : '✗ WEAK - Insufficient execution planning'}
+
+Overall GTM Readiness: ${score}%
+  ${score >= 75 ? '✓ STRONG - GTM strategy ready for market launch and supports visa criteria' : score >= 65 ? '⚠ VIABLE - GTM plan acceptable but needs refinement' : '✗ WEAK - GTM strategy requires significant improvement'}
+
+Visa Criterion Alignment:
+${score >= 75 && scores.scalability >= 70 ? '✓ Go-to-market strategy demonstrates clear scalability and execution readiness for UK Innovator Founder visa endorsement. Strong channel strategy and positioning support market penetration narrative.' : score >= 65 ? '⚠ GTM strategy is viable but strengthening scalability component (aim for 75+) and adding more execution detail would improve endorsement prospects.' : '✗ GTM strategy needs significant work - focus on defining clear distribution channels, scalable customer acquisition approach, and detailed execution roadmap.'}
+
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Scalability Criterion: Market penetration strategy and growth potential
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+GTM Methodology: Market entry and customer acquisition framework
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

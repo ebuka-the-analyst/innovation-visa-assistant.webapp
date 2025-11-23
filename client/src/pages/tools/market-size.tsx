@@ -68,33 +68,131 @@ export default function MarketSizing() {
 
   const exportReport = () => {
     const { score, grade } = getMarketHealth();
-    const content = `UK INNOVATOR FOUNDER VISA - MARKET SIZING
+    const samPercent = ((sam / tam) * 100).toFixed(1);
+    const somPercent = ((som / sam) * 100).toFixed(1);
+    
+    const content = `UK INNOVATOR FOUNDER VISA - MARKET SIZING ANALYSIS
 Generated: ${new Date().toLocaleDateString()}
 
-Market Opportunity: ${score}% (${grade})
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+Market Opportunity Score: ${score}% (${grade})
 
-MARKET SIZING (TAM/SAM/SOM):
-Total Addressable Market (TAM): £${(tam / 1000000000).toFixed(2)}B
-Serviceable Addressable Market (SAM): £${(sam / 1000000).toFixed(0)}M
-Serviceable Obtainable Market (SOM): £${(som / 1000000).toFixed(0)}M
+Market Size (TAM/SAM/SOM):
+  Total Addressable Market: £${(tam / 1000000000).toFixed(2)}B
+  Serviceable Addressable: £${(sam / 1000000).toFixed(0)}M
+  Serviceable Obtainable: £${(som / 1000000).toFixed(0)}M
 
-SAM as % of TAM: ${((sam / tam) * 100).toFixed(1)}%
-SOM as % of SAM: ${((som / sam) * 100).toFixed(1)}%
+Market Growth: ${growthRate}% annually
+
+${score >= 75 ? '✓ LARGE MARKET - Strong scalability potential for UK Innovator Founder visa' : score >= 60 ? '⚠ MODERATE MARKET - Strengthen for endorsement' : '✗ LIMITED MARKET - Expand addressable opportunity'}
+
+═══════════════════════════════════════════════════════════
+MARKET SIZING FRAMEWORK (TAM/SAM/SOM)
+═══════════════════════════════════════════════════════════
+
+TOTAL ADDRESSABLE MARKET (TAM):
+£${(tam / 1000000000).toFixed(2)}B (£${tam.toLocaleString()})
+Definition: Total market demand if 100% market share achieved globally
+${tam >= 5000000000 ? '✓ Very large TAM (£5B+) - excellent scalability narrative' : tam >= 1000000000 ? '✓ Large TAM (£1B-5B) - good market size' : '⚠ TAM <£1B - consider broader market definition'}
+
+SERVICEABLE ADDRESSABLE MARKET (SAM):
+£${(sam / 1000000).toFixed(0)}M (£${sam.toLocaleString()})
+Definition: Portion of TAM you can realistically target with your product/service
+SAM as % of TAM: ${samPercent}%
+${sam >= 500000000 ? '✓ Large SAM (£500M+) - strong addressable market' : sam >= 100000000 ? '✓ Moderate SAM (£100M-500M) - viable market' : '⚠ SAM <£100M - validate addressable market size'}
+
+SERVICEABLE OBTAINABLE MARKET (SOM):
+£${(som / 1000000).toFixed(0)}M (£${som.toLocaleString()})
+Definition: Realistic market share you can capture in 3-5 years
+SOM as % of SAM: ${somPercent}%
+${som >= 50000000 ? '✓ Large SOM (£50M+) - ambitious but achievable target' : som >= 10000000 ? '✓ Moderate SOM (£10M-50M) - realistic target' : '⚠ SOM <£10M - increase obtainable market estimate'}
 
 TARGET SEGMENT:
 ${targetSegment}
 
-MARKET GROWTH:
-Annual Growth Rate: ${growthRate}%
+═══════════════════════════════════════════════════════════
+MARKET OPPORTUNITY SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: Market Health = TAM Size (30pts) + SAM Ratio (25pts) + SOM Ratio (25pts) + Growth Rate (20pts)
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Scalability: ${score >= 70 ? `Large market opportunity (${score}%) demonstrates strong growth potential` : 'Market size should exceed £500M SAM for strong scalability narrative'}
-Viability: ${sam >= 100000000 ? 'Addressable market supports sustainable business model' : 'Market opportunity may limit viability'}
+COMPONENT 1: TAM SIZE (Maximum 30 points)
+Scoring Criteria:
+  • TAM ≥£10B: 30 points
+  • TAM £5B-10B: 25 points
+  • TAM £1B-5B: 20 points
+  • TAM <£1B: 10 points
 
-${score >= 75 ? '✅ Market size supports visa criteria' : '⚠️ Market opportunity needs strengthening'}
+Your TAM: £${(tam / 1000000000).toFixed(2)}B
+${tam >= 10000000000 ? 'Points Earned: 30/30 (TAM ≥£10B)' : tam >= 5000000000 ? 'Points Earned: 25/30 (TAM £5B-10B)' : tam >= 1000000000 ? 'Points Earned: 20/30 (TAM £1B-5B)' : 'Points Earned: 10/30 (TAM <£1B)'}
 
-Formula: Market Health = TAM Size (30) + SAM Ratio (25) + SOM Ratio (25) + Growth Rate (20)
-GOV.UK: Innovator Founder Visa scalability criterion (November 2025)
+COMPONENT 2: SAM RATIO (Maximum 25 points)
+Scoring Criteria:
+  • SAM/TAM ≥10%: 25 points
+  • SAM/TAM 5-10%: 15 points
+  • SAM/TAM <5%: 5 points
+
+Your SAM/TAM Ratio: ${samPercent}%
+Calculation: £${(sam / 1000000).toFixed(0)}M / £${(tam / 1000000000).toFixed(2)}B = ${samPercent}%
+${(sam / tam) >= 0.1 ? 'Points Earned: 25/25 (Ratio ≥10%)' : (sam / tam) >= 0.05 ? 'Points Earned: 15/25 (Ratio 5-10%)' : 'Points Earned: 5/25 (Ratio <5%)'}
+
+COMPONENT 3: SOM RATIO (Maximum 25 points)
+Scoring Criteria:
+  • SOM/SAM ≥10%: 25 points
+  • SOM/SAM 5-10%: 15 points
+  • SOM/SAM <5%: 5 points
+
+Your SOM/SAM Ratio: ${somPercent}%
+Calculation: £${(som / 1000000).toFixed(0)}M / £${(sam / 1000000).toFixed(0)}M = ${somPercent}%
+${(som / sam) >= 0.1 ? 'Points Earned: 25/25 (Ratio ≥10%)' : (som / sam) >= 0.05 ? 'Points Earned: 15/25 (Ratio 5-10%)' : 'Points Earned: 5/25 (Ratio <5%)'}
+
+COMPONENT 4: MARKET GROWTH RATE (Maximum 20 points)
+Scoring Criteria:
+  • Growth ≥30% annually: 20 points
+  • Growth 20-30% annually: 15 points
+  • Growth <20% annually: 5 points
+
+Your Annual Growth Rate: ${growthRate}%
+${growthRate >= 30 ? 'Points Earned: 20/20 (Growth ≥30%)' : growthRate >= 20 ? 'Points Earned: 15/20 (Growth 20-30%)' : 'Points Earned: 5/20 (Growth <20%)'}
+
+FINAL CALCULATION:
+Total Score: ${score}/100 (${grade})
+Market Opportunity: ${score >= 75 ? 'LARGE - Excellent scalability potential' : score >= 60 ? 'MODERATE - Viable but strengthen' : 'LIMITED - Expand market definition'}
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: SCALABILITY CRITERION
+═══════════════════════════════════════════════════════════
+GOV.UK Scalability Assessment Factors:
+• Significant market size to support growth
+• Clear path to substantial revenue and job creation
+• International expansion potential
+• Market growth rate validates opportunity
+• Realistic market share capture assumptions
+
+CURRENT MARKET ASSESSMENT:
+TAM: £${(tam / 1000000000).toFixed(2)}B
+${tam >= 1000000000 ? '✓ TAM ≥£1B demonstrates significant total market' : '⚠ TAM <£1B - consider broader market definition for scalability'}
+
+SAM: £${(sam / 1000000).toFixed(0)}M
+${sam >= 500000000 ? '✓ SAM ≥£500M supports strong scalability narrative' : sam >= 100000000 ? '✓ SAM ≥£100M viable for sustainable growth' : '⚠ SAM <£100M - validate addressable market for viability'}
+
+SOM: £${(som / 1000000).toFixed(0)}M (${somPercent}% of SAM)
+${som >= 50000000 ? '✓ SOM ≥£50M shows ambitious growth target' : som >= 10000000 ? '✓ SOM ≥£10M realistic for 3-5 year horizon' : '⚠ SOM <£10M - increase obtainable market estimate'}
+
+Growth Rate: ${growthRate}% annually
+${growthRate >= 20 ? '✓ High growth market (≥20%) validates opportunity' : '⚠ Growth <20% - highlight faster-growing segments'}
+
+Overall Market Opportunity: ${score}%
+${score >= 75 && sam >= 100000000 ? `✓ Large market opportunity (${score}%) with £${(sam / 1000000).toFixed(0)}M SAM strongly supports UK Innovator Founder visa scalability criterion. Market size demonstrates significant growth potential and sustainable revenue opportunity.` : score >= 60 ? '⚠ Market opportunity is viable but strengthening SAM (aim for £500M+) or TAM (aim for £5B+) would improve scalability narrative for endorsement.' : '✗ Market opportunity needs expansion - focus on larger TAM definition, broader addressable market (SAM), or higher growth rate to demonstrate scalability potential.'}
+
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Scalability Criterion: Significant market size and growth potential
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+TAM/SAM/SOM Methodology: Market sizing framework for growth planning
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

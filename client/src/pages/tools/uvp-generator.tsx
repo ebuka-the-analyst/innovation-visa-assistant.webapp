@@ -54,37 +54,110 @@ export default function ValuePropositionGenerator() {
 
   const exportReport = () => {
     const { score, grade } = getUVPQuality();
-    const content = `UK INNOVATOR FOUNDER VISA - VALUE PROPOSITION
+    const content = `UK INNOVATOR FOUNDER VISA - UNIQUE VALUE PROPOSITION GENERATOR
 Generated: ${new Date().toLocaleDateString()}
 
-UVP Quality: ${score}% (${grade})
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+UVP Quality Score: ${score}% (${grade})
 
-GENERATED VALUE PROPOSITION:
-${generatedUVP || "Click Generate to create UVP"}
+Component Scores:
+  Pain Severity: ${scores.painSeverity}/100
+  Solution Fit: ${scores.solutionFit}/100
+  Quantifiable Benefit: ${scores.quantifiableBenefit}/100
+  Emotional Appeal: ${scores.emotionalAppeal}/100
 
-CUSTOMER PAIN:
+${score >= 75 ? '✓ STRONG VALUE PROPOSITION - Clear innovation and customer value for UK Innovator Founder visa' : score >= 65 ? '⚠ GOOD VALUE PROPOSITION - Strengthen for endorsement' : '✗ WEAK VALUE PROPOSITION - Critical improvements needed'}
+
+═══════════════════════════════════════════════════════════
+GENERATED VALUE PROPOSITION
+═══════════════════════════════════════════════════════════
+
+${generatedUVP || "CLICK GENERATE BUTTON TO CREATE YOUR UNIQUE VALUE PROPOSITION"}
+
+═══════════════════════════════════════════════════════════
+VALUE PROPOSITION COMPONENTS
+═══════════════════════════════════════════════════════════
+
+CUSTOMER PAIN POINT:
 ${customerPain}
+${scores.painSeverity >= 75 ? '✓ Critical pain - high urgency to solve' : scores.painSeverity >= 60 ? '⚠ Moderate pain - validate severity' : '✗ Low pain - may not be urgent enough'}
 
-SOLUTION:
+YOUR SOLUTION:
 ${solution}
+${scores.solutionFit >= 75 ? '✓ Excellent solution fit - directly addresses pain' : scores.solutionFit >= 60 ? '⚠ Adequate solution - strengthen problem-solution match' : '✗ Weak solution fit - solution may not solve pain'}
 
 QUANTIFIABLE BENEFIT:
 ${benefit}
+${scores.quantifiableBenefit >= 75 ? '✓ Strong quantification - specific metrics and outcomes' : scores.quantifiableBenefit >= 60 ? '⚠ Some quantification - add more specific numbers' : '✗ Weak quantification - benefits too vague'}
 
-UVP ASSESSMENT:
-Pain Severity: ${scores.painSeverity}/100
+═══════════════════════════════════════════════════════════
+UVP QUALITY SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: UVP Quality = (Pain Severity + Solution Fit + Quantifiable Benefit + Emotional Appeal) / 4
+
+Component Assessment:
+  Pain Severity: ${scores.painSeverity}/100
+    ${scores.painSeverity >= 75 ? '✓ Critical customer pain - high urgency and willingness to pay' : scores.painSeverity >= 60 ? '⚠ Moderate pain - validate with customer research' : '✗ Low severity - problem may not be urgent enough'}
+    
+  Solution Fit: ${scores.solutionFit}/100
+    ${scores.solutionFit >= 75 ? '✓ Excellent match - solution directly solves customer pain' : scores.solutionFit >= 60 ? '⚠ Good fit - strengthen problem-solution alignment' : '✗ Weak fit - solution may not effectively address pain'}
+    
+  Quantifiable Benefit: ${scores.quantifiableBenefit}/100
+    ${scores.quantifiableBenefit >= 75 ? '✓ Strong quantification - specific metrics, timeframes, outcomes' : scores.quantifiableBenefit >= 60 ? '⚠ Some quantification - add more specificity and numbers' : '✗ Vague benefits - lacks concrete metrics and outcomes'}
+    
+  Emotional Appeal: ${scores.emotionalAppeal}/100
+    ${scores.emotionalAppeal >= 75 ? '✓ High emotional resonance - connects to customer aspirations' : scores.emotionalAppeal >= 60 ? '⚠ Moderate appeal - strengthen emotional connection' : '✗ Low emotional appeal - lacks compelling narrative'}
+
+Calculation:
+  Total Points = ${scores.painSeverity} + ${scores.solutionFit} + ${scores.quantifiableBenefit} + ${scores.emotionalAppeal}
+  Total Points = ${scores.painSeverity + scores.solutionFit + scores.quantifiableBenefit + scores.emotionalAppeal}
+  UVP Quality = ${scores.painSeverity + scores.solutionFit + scores.quantifiableBenefit + scores.emotionalAppeal} / 4 = ${score}% (${grade})
+
+VALUE PROPOSITION FORMULA:
+For [target customer with specific pain], our [unique solution] helps you [achieve quantifiable benefit with emotional appeal].
+
+Example:
+For UK Innovator Founder visa applicants struggling with compliance errors, our AI-powered real-time compliance checker helps you reduce rejection risk by 80% and save 40 hours per application, giving you peace of mind and confidence in your visa journey.
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: INNOVATION & VIABILITY
+═══════════════════════════════════════════════════════════
+GOV.UK Assessment Factors:
+• Clear customer pain point validates market need
+• Innovative solution demonstrates novel approach
+• Quantifiable benefits support market traction
+• Strong value proposition enables customer acquisition
+• Emotional appeal drives customer loyalty and retention
+
+CURRENT VALUE PROPOSITION STATUS:
 Solution Fit: ${scores.solutionFit}/100
+  ${scores.solutionFit >= 75 ? '✓ STRONG - Solution demonstrates innovative approach to customer pain for UK Innovator Founder visa' : scores.solutionFit >= 60 ? '⚠ MODERATE - Strengthen innovation narrative' : '✗ WEAK - Insufficient innovation differentiation'}
+
+Pain Severity: ${scores.painSeverity}/100
+  ${scores.painSeverity >= 75 ? '✓ CRITICAL PAIN - High market need validates viability' : scores.painSeverity >= 60 ? '⚠ MODERATE PAIN - Validate with customer research' : '✗ LOW PAIN - May not support viable business model'}
+
 Quantifiable Benefit: ${scores.quantifiableBenefit}/100
+  ${scores.quantifiableBenefit >= 75 ? '✓ STRONG QUANTIFICATION - Specific metrics support market traction narrative' : scores.quantifiableBenefit >= 60 ? '⚠ SOME QUANTIFICATION - Add more concrete numbers' : '✗ VAGUE BENEFITS - Lacks credibility without metrics'}
+
 Emotional Appeal: ${scores.emotionalAppeal}/100
+  ${scores.emotionalAppeal >= 70 ? '✓ COMPELLING - Emotional connection drives customer loyalty' : '⚠ MODERATE - Strengthen emotional narrative'}
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Innovation: ${scores.solutionFit >= 75 ? `Strong solution fit (${scores.solutionFit}) demonstrates innovative approach` : 'Solution fit needs strengthening'}
-Viability: ${scores.quantifiableBenefit >= 70 ? 'Quantifiable benefits support market traction narrative' : 'Benefits need better quantification'}
+Overall UVP Quality: ${score}%
+  ${score >= 75 ? '✓ STRONG - Value proposition demonstrates innovation and market viability' : score >= 65 ? '⚠ GOOD - UVP viable but strengthen quantification and emotional appeal' : '✗ WEAK - UVP needs significant improvement'}
 
-${score >= 75 ? '✅ Strong value proposition supports visa criteria' : '⚠️ Value proposition needs strengthening'}
+Visa Criterion Alignment:
+${score >= 75 && scores.solutionFit >= 70 && scores.quantifiableBenefit >= 70 ? `✓ Strong value proposition (${score}%) with ${scores.solutionFit}/100 solution fit and ${scores.quantifiableBenefit}/100 quantifiable benefits demonstrates clear innovation and viability for UK Innovator Founder visa. Pain severity (${scores.painSeverity}/100) validates genuine market need.` : score >= 65 ? '⚠ Value proposition is viable but strengthening solution innovation (aim for 75+) and adding specific quantifiable metrics would improve endorsement case.' : '✗ Value proposition needs significant work - validate critical customer pain, demonstrate innovative solution approach, and quantify specific benefits with metrics before visa application.'}
 
-Formula: UVP Quality = Avg(Pain Severity + Solution Fit + Quantifiable Benefit + Emotional Appeal)
-GOV.UK: Innovator Founder Visa innovation criterion (November 2025)
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Innovation Criterion: Novel solution to customer problem
+Viability Criterion: Market need and customer acquisition capability
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+UVP Framework: Pain + Solution + Benefit + Emotion
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });

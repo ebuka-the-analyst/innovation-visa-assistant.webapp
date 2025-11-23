@@ -47,34 +47,118 @@ export default function BusinessViabilityScorecard() {
   const exportReport = () => {
     const { score, grade } = getViabilityScore();
     const burnMonths = currentRevenue / monthlyBurn;
+    const annualRevenue = currentRevenue * 12;
+    const annualBurn = monthlyBurn * 12;
     
     const content = `UK INNOVATOR FOUNDER VISA - BUSINESS VIABILITY SCORECARD
 Generated: ${new Date().toLocaleDateString()}
 
-Overall Viability: ${score}% (${grade})
+═══════════════════════════════════════════════════════════
+EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
+═══════════════════════════════════════════════════════════
+Overall Viability Score: ${score}% (${grade})
 
-FINANCIAL METRICS:
-Current Revenue: £${currentRevenue.toLocaleString()}
-Monthly Burn: £${monthlyBurn.toLocaleString()}
-Runway: ${runway} months
-Burn Coverage: ${burnMonths.toFixed(1)} months
+Financial Health:
+  Annual Revenue: £${annualRevenue.toLocaleString()}
+  Cash Runway: ${runway} months
+  Revenue Coverage: ${burnMonths.toFixed(1)} months
 
-VISA CRITERIA ASSESSMENT:
-Innovation: ${scores.innovation}/100
-Viability: ${scores.viability}/100
-Scalability: ${scores.scalability}/100
-Market Opportunity: ${scores.market}/100
-Execution Capability: ${scores.execution}/100
+Visa Criteria Scores:
+  Innovation: ${scores.innovation}/100
+  Viability: ${scores.viability}/100
+  Scalability: ${scores.scalability}/100
+  Market Opportunity: ${scores.market}/100
+  Execution Capability: ${scores.execution}/100
 
-INNOVATOR FOUNDER VISA CONTEXT:
-Innovation: ${scores.innovation >= 75 ? 'Strong innovation score supports visa criterion' : 'Innovation needs strengthening'}
-Viability: ${scores.viability >= 70 ? 'Business model demonstrates viability' : 'Viability requires improvement'}
-Scalability: ${scores.scalability >= 75 ? 'Scalable business model' : 'Scaling challenges identified'}
+${score >= 75 ? '✓ STRONG VIABILITY - Supports all UK Innovator Founder visa criteria' : score >= 65 ? '⚠ VIABLE - Strengthen for endorsement' : '✗ WEAK VIABILITY - Critical improvements needed'}
 
-${score >= 75 ? '✅ Business demonstrates strong viability for visa assessment' : '⚠️ Viability scorecard requires improvement'}
+═══════════════════════════════════════════════════════════
+FINANCIAL VIABILITY METRICS
+═══════════════════════════════════════════════════════════
+Monthly Revenue: £${currentRevenue.toLocaleString()}
+Annual Revenue Run Rate: £${annualRevenue.toLocaleString()}
+${annualRevenue >= 1000000 ? '✓ Revenue ≥£1M meets ILR achievement criterion (1 of 7)' : `⚠ Revenue £${annualRevenue.toLocaleString()} below £1M ILR threshold`}
 
-Formula: Overall Viability = Avg(Innovation + Viability + Scalability + Market + Execution)
-GOV.UK: Innovator Founder Visa viability criterion (November 2025)
+Monthly Burn Rate: £${monthlyBurn.toLocaleString()}
+Annual Burn Rate: £${annualBurn.toLocaleString()}
+
+Cash Runway: ${runway} months
+${runway >= 18 ? '✓ Excellent runway (18+ months)' : runway >= 12 ? '✓ Healthy runway (12-18 months)' : runway >= 6 ? '⚠ Limited runway (6-12 months)' : '✗ Critical runway (<6 months)'}
+
+Revenue Burn Coverage:
+  Calculation: Monthly Revenue / Monthly Burn
+  Coverage: £${currentRevenue.toLocaleString()} / £${monthlyBurn.toLocaleString()} = ${burnMonths.toFixed(1)} months
+  ${burnMonths >= 1 ? '✓ Revenue covers burn rate' : '✗ Burn exceeds revenue - funding dependency'}
+
+═══════════════════════════════════════════════════════════
+VIABILITY SCORE CALCULATION
+═══════════════════════════════════════════════════════════
+Formula: Overall Viability = (Innovation + Viability + Scalability + Market + Execution) / 5
+
+Component Assessment:
+  Innovation: ${scores.innovation}/100
+    ${scores.innovation >= 75 ? '✓ Strong innovation demonstrates novel approach' : scores.innovation >= 60 ? '⚠ Moderate innovation - strengthen unique elements' : '✗ Limited innovation'}
+    
+  Viability: ${scores.viability}/100
+    ${scores.viability >= 75 ? '✓ Business model demonstrates sustainability' : scores.viability >= 60 ? '⚠ Viability concerns - validate revenue model' : '✗ Weak business viability'}
+    
+  Scalability: ${scores.scalability}/100
+    ${scores.scalability >= 75 ? '✓ Clear path to significant growth' : scores.scalability >= 60 ? '⚠ Limited scalability - address growth barriers' : '✗ Scaling challenges identified'}
+    
+  Market Opportunity: ${scores.market}/100
+    ${scores.market >= 75 ? '✓ Large addressable market' : scores.market >= 60 ? '⚠ Moderate market opportunity' : '✗ Limited market size'}
+    
+  Execution Capability: ${scores.execution}/100
+    ${scores.execution >= 75 ? '✓ Strong execution track record' : scores.execution >= 60 ? '⚠ Execution concerns exist' : '✗ Weak execution capability'}
+
+Calculation:
+  Total Points = ${scores.innovation} + ${scores.viability} + ${scores.scalability} + ${scores.market} + ${scores.execution}
+  Total Points = ${scores.innovation + scores.viability + scores.scalability + scores.market + scores.execution}
+  Overall Viability = ${scores.innovation + scores.viability + scores.scalability + scores.market + scores.execution} / 5 = ${score}% (${grade})
+
+═══════════════════════════════════════════════════════════
+UK INNOVATOR FOUNDER VISA: THREE CORE CRITERIA
+═══════════════════════════════════════════════════════════
+
+CRITERION 1: INNOVATION
+Your Innovation Score: ${scores.innovation}/100
+${scores.innovation >= 70 ? '✓ READY - Demonstrates novel approach and differentiation' : '✗ NEEDS WORK - Strengthen innovative elements'}
+
+CRITERION 2: VIABILITY  
+Your Viability Score: ${scores.viability}/100
+Your Execution Score: ${scores.execution}/100
+Combined Viability: ${((scores.viability + scores.execution) / 2).toFixed(0)}/100
+${scores.viability >= 70 && scores.execution >= 70 ? '✓ READY - Sustainable business model with execution capability' : '✗ NEEDS WORK - Strengthen financial sustainability or execution'}
+
+Annual Revenue: £${annualRevenue.toLocaleString()}
+Cash Runway: ${runway} months
+${annualRevenue >= 100000 && runway >= 12 ? '✓ Financial metrics support viability narrative' : '⚠ Strengthen revenue or extend runway'}
+
+CRITERION 3: SCALABILITY
+Your Scalability Score: ${scores.scalability}/100
+Your Market Score: ${scores.market}/100
+Combined Scalability: ${((scores.scalability + scores.market) / 2).toFixed(0)}/100
+${scores.scalability >= 70 && scores.market >= 70 ? '✓ READY - Clear growth potential in significant market' : '✗ NEEDS WORK - Demonstrate scalability path or market size'}
+
+Overall Viability Assessment:
+${score >= 75 && scores.innovation >= 70 && scores.viability >= 70 && scores.scalability >= 70 ? 
+`✓ Your business is ready for UK Innovator Founder visa application. All three core criteria (Innovation ${scores.innovation}%, Viability ${scores.viability}%, Scalability ${scores.scalability}%) meet endorsement thresholds.` :
+score >= 65 ?
+`⚠ Your business is viable but needs strengthening:
+${scores.innovation < 70 ? '• Innovation - Enhance novel approach and differentiation' : ''}
+${scores.viability < 70 ? '• Viability - Strengthen financial sustainability' : ''}
+${scores.scalability < 70 ? '• Scalability - Demonstrate clear growth path' : ''}
+${runway < 12 ? '• Cash Runway - Extend to 12+ months' : ''}` :
+`✗ Your business requires significant improvements across multiple criteria before visa application. Focus on strengthening innovation, viability, and scalability scores above 70%.`}
+
+═══════════════════════════════════════════════════════════
+Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+https://www.gov.uk/innovator-founder-visa
+Immigration Rules Appendix Innovator Founder
+Three Core Criteria: Innovation, Viability, Scalability
+ILR Achievement Criteria: £1M annual revenue (1 of 7 criteria)
+Endorsing Bodies: Envestors, UKES, Innovator International, GEP
+Viability Methodology: Multi-dimensional business assessment framework
 `;
 
     const blob = new Blob([content], { type: 'text/plain' });
