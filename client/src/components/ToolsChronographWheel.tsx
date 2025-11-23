@@ -273,13 +273,15 @@ export default function ToolsChronographWheel() {
       }}
     >
       {/* Outer metal bezel effect - Transparent like chat icon */}
-      <div className="border-4 shadow-2xl relative flex flex-col backdrop-blur-md" style={{ 
+      <div className="border-4 shadow-lg relative flex flex-col" style={{ 
         height: isMinimized ? "100px" : "640px", 
         width: isMinimized ? "200px" : "480px", 
         borderRadius: isMinimized ? "50px" : "1rem",
         transition: "all 0.3s ease",
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        borderColor: "rgba(156, 163, 175, 0.2)"
+        backgroundColor: "rgba(255, 255, 255, 0.05)",
+        borderColor: "rgba(156, 163, 175, 0.1)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)"
       }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
