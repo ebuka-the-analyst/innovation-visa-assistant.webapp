@@ -285,10 +285,12 @@ export default function ToolsChronographWheel() {
       }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-1 px-3 border-b-2 border-gray-400 pulse-glow-orange" style={{ 
+        <div className="flex flex-col items-center justify-center gap-0 px-2 border-b-2 border-gray-400 pulse-glow-orange" style={{ 
           backgroundColor: "#ffa536",
           borderRadius: isMinimized ? "50px" : "0.5rem 0.5rem 0 0",
-          borderBottom: isMinimized ? "none" : "2px solid rgb(107, 114, 128)"
+          borderBottom: isMinimized ? "none" : "2px solid rgb(107, 114, 128)",
+          height: isMinimized ? "100%" : "auto",
+          padding: isMinimized ? "0" : "4px 8px"
         }}>
           {isMinimized ? (
             <div className="flex flex-col items-center justify-center gap-1">
@@ -361,8 +363,8 @@ export default function ToolsChronographWheel() {
 
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" - Hidden when minimized */}
         {!isMinimized && (
-          <div className="px-3 sm:px-4 py-1 sm:py-2 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
-            <p className="text-xs sm:text-sm md:text-base font-black tracking-wide" style={{ color: "#000000" }}>APPLICATION REQUIREMENT CHECKS</p>
+          <div className="px-2 py-1 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
+            <p className="text-xs font-black tracking-wide" style={{ color: "#000000", lineHeight: "1" }}>APPLICATION REQUIREMENT CHECKS</p>
           </div>
         )}
 
