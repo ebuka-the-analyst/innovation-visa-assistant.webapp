@@ -165,14 +165,7 @@ export default function ToolsChronographWheel() {
     };
   }, []);
 
-  // Animate swipe hint on mount
-  useEffect(() => {
-    if (!showSwipeHint) return;
-    const timer = setTimeout(() => {
-      setShowSwipeHint(false);
-    }, 8000); // Show hint for 8 seconds
-    return () => clearTimeout(timer);
-  }, [showSwipeHint]);
+  // Swipe hint continues indefinitely - no timeout
 
   // Inactivity timer - close widget after 8 seconds of inactivity when open
   useEffect(() => {
@@ -267,7 +260,7 @@ export default function ToolsChronographWheel() {
       style={{ 
         scale: "0.375", 
         transformOrigin: "bottom left",
-        animation: showSwipeHint ? "widget-swipe-pulse 8s ease-in-out" : "none"
+        animation: "widget-swipe-pulse 8s ease-in-out infinite"
       }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
@@ -280,11 +273,13 @@ export default function ToolsChronographWheel() {
       }}
     >
       {/* Outer metal bezel effect */}
-      <div className="border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ 
+      <div className="border-4 shadow-2xl relative flex flex-col backdrop-blur-sm" style={{ 
         height: isMinimized ? "100px" : "640px", 
         width: isMinimized ? "200px" : "480px", 
         borderRadius: isMinimized ? "50px" : "1rem",
-        transition: "all 0.3s ease" 
+        transition: "all 0.3s ease",
+        backgroundColor: "rgba(255, 255, 255, 0.85)",
+        borderColor: "rgba(156, 163, 175, 0.5)"
       }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
