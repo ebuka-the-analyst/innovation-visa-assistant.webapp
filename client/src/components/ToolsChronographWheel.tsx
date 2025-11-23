@@ -280,15 +280,37 @@ export default function ToolsChronographWheel() {
       }}
     >
       {/* Outer metal bezel effect */}
-      <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "480px", transition: "height 0.3s ease" }}>
+      <div className="border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ 
+        height: isMinimized ? "60px" : "640px", 
+        width: isMinimized ? "200px" : "480px", 
+        borderRadius: isMinimized ? "50px" : "1rem",
+        transition: "all 0.3s ease" 
+      }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="px-3 sm:px-4 pt-2 sm:pt-3 pb-1 sm:pb-2 border-b-2 border-gray-400 flex items-center gap-3 sm:gap-4 justify-between pulse-glow-orange rounded-t-2xl" style={{ backgroundColor: "#ffa536" }}>
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <div className="flex-shrink-0 shadow-lg" style={{ width: "56px", height: "56px", backgroundColor: "#b45309", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icons.Zap className="text-white" style={{ width: "28px", height: "28px" }} />
+        <div className="flex-1 flex items-center gap-2 px-3 border-b-2 border-gray-400 pulse-glow-orange" style={{ 
+          backgroundColor: "#ffa536",
+          borderRadius: isMinimized ? "50px" : "0.5rem 0.5rem 0 0",
+          borderBottom: isMinimized ? "none" : "2px solid rgb(107, 114, 128)"
+        }}>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex-shrink-0 shadow-lg" style={{ 
+              width: isMinimized ? "40px" : "56px", 
+              height: isMinimized ? "40px" : "56px", 
+              backgroundColor: "#b45309", 
+              borderRadius: "50%", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center",
+              transition: "all 0.3s ease"
+            }}>
+              <Icons.Zap className="text-white" style={{ 
+                width: isMinimized ? "20px" : "28px", 
+                height: isMinimized ? "20px" : "28px",
+                transition: "all 0.3s ease"
+              }} />
             </div>
-            <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
+            {!isMinimized && <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>}
           </div>
         </div>
 
