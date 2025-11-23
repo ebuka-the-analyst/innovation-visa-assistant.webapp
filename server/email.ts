@@ -24,7 +24,7 @@ export async function sendEmail({ to, subject, html }: SendEmailParams) {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "VisaPrep <onboarding@resend.dev>",
+        from: "UK Innovator Visa Assistant <hello@innovatorfoundervisaassistant.co.uk>",
         to: [to],
         subject,
         html,
