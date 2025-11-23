@@ -296,7 +296,9 @@ export function setupAuthRoutes(app: Express) {
     res.json({ 
       id: user.id, 
       email: user.email, 
-      displayName: user.displayName 
+      displayName: user.displayName,
+      subscriptionTier: user.subscriptionTier || 'free',
+      subscriptionStatus: user.subscriptionStatus || 'inactive'
     });
   });
 }

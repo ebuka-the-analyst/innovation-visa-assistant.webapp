@@ -14,6 +14,10 @@ export const users = pgTable("users", {
   codeExpiresAt: timestamp("code_expires_at"),
   lastCodeSentAt: timestamp("last_code_sent_at"),
   verificationAttempts: integer("verification_attempts").notNull().default(0),
+  subscriptionTier: varchar("subscription_tier", { length: 20 }).notNull().default('free'), // free, basic, premium, enterprise, ultimate
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionStatus: varchar("subscription_status", { length: 20 }).default('inactive'), // active, inactive, cancelled, past_due
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
