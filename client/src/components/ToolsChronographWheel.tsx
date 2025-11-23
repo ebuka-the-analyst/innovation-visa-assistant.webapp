@@ -335,6 +335,20 @@ export default function ToolsChronographWheel() {
         setIsHoveringWidget(false);
       }}
     >
+      {/* Expand/Collapse Indicator */}
+      <div className="absolute -top-24 left-0 right-0 flex items-center justify-center">
+        <div className="font-black text-center px-4 py-2 rounded-full" style={{ 
+          color: "#ffffff", 
+          backgroundColor: isMinimized ? "#11b6e9" : "#e63946",
+          fontSize: "clamp(1.5rem, 3vw, 2.5rem)", 
+          lineHeight: "1",
+          boxShadow: "none",
+          border: "none"
+        }}>
+          {isMinimized ? "+" : "−"}
+        </div>
+      </div>
+
       {/* Text Label Above Widget */}
       {isMinimized && (
         <div className="absolute -top-16 left-0 right-0 flex items-center justify-center">
