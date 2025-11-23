@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -37,126 +38,128 @@ import FeaturesShowcase from "@/pages/features-showcase";
 import EndorserInvestmentRequirements from "@/pages/endorser-investment-requirements";
 import AIAssistant from "@/pages/ai-assistant";
 import Handoff from "@/pages/handoff";
-import AdvisorsFinder from "@/pages/tools/advisors-finder";
-import AppealStrategy from "@/pages/tools/appeal-strategy";
-import BusinessModelValidator from "@/pages/tools/business-model-validator";
-import CacCalculator from "@/pages/tools/cac-calculator";
-import CompetitorBench from "@/pages/tools/competitor-bench";
-import ComplianceChecker from "@/pages/tools/compliance-checker";
-import ContingencyPlan from "@/pages/tools/contingency-plan";
-import DataSecurity from "@/pages/tools/data-security";
-import DocOrganizer from "@/pages/tools/doc-organizer";
-import DocVerification from "@/pages/tools/doc-verification";
-import DueDiligence from "@/pages/tools/due-diligence";
-import EndorsementReadiness from "@/pages/tools/endorsement-readiness";
-import EvidenceCollection from "@/pages/tools/evidence-collection";
-import EvidenceValidator from "@/pages/tools/evidence-validator";
-import ExecSummary from "@/pages/tools/exec-summary";
-import FaqGenerator from "@/pages/tools/faq-generator";
-import FeeEstimator from "@/pages/tools/fee-estimator";
-import FinancialModeling from "@/pages/tools/financial-modeling";
-import FinancialProjections from "@/pages/tools/financial-projections";
-import FundingChecker from "@/pages/tools/funding-checker";
-import FundingSources from "@/pages/tools/funding-sources";
-import FundingStrategy from "@/pages/tools/funding-strategy";
-import GeographicExpansion from "@/pages/tools/geographic-expansion";
-import GrowthMetrics from "@/pages/tools/growth-metrics";
-import GrowthStrategy from "@/pages/tools/growth-strategy";
-import GtmPlan from "@/pages/tools/gtm-plan";
-import HiringPlan from "@/pages/tools/hiring-plan";
-import HrCompliance from "@/pages/tools/hr-compliance";
-import IncomeCalculator from "@/pages/tools/income-calculator";
-import InnovationScore from "@/pages/tools/innovation-score";
-import InnovationValidation from "@/pages/tools/innovation-validation";
-import InterviewPrep from "@/pages/tools/interview-prep";
-import IpAudit from "@/pages/tools/ip-audit";
-import IpRoadmap from "@/pages/tools/ip-roadmap";
-import IpStrategy from "@/pages/tools/ip-strategy";
-import JurisdictionChecker from "@/pages/tools/jurisdiction-checker";
-import KpiDashboard from "@/pages/tools/kpi-dashboard";
-import LawyerFinder from "@/pages/tools/lawyer-finder";
-import LegalCompliance from "@/pages/tools/legal-compliance";
-import LegalTemplates from "@/pages/tools/legal-templates";
-import MarketAnalysis from "@/pages/tools/market-analysis";
-import MarketGap from "@/pages/tools/market-gap";
-import MarketResearch from "@/pages/tools/market-research";
-import MarketSize from "@/pages/tools/market-size";
-import MilestonesTracker from "@/pages/tools/milestones-tracker";
-import NarrativeBuilder from "@/pages/tools/narrative-builder";
-import OperationsPlan from "@/pages/tools/operations-plan";
-import OrgChart from "@/pages/tools/org-chart";
-import OrgDesigner from "@/pages/tools/org-designer";
-import PerformanceBench from "@/pages/tools/performance-bench";
-import PitchCoach from "@/pages/tools/pitch-coach";
-import PitchDeck from "@/pages/tools/pitch-deck";
-import PmfValidator from "@/pages/tools/pmf-validator";
-import PointsCalculator from "@/pages/tools/points-calculator";
-import ProcessDocs from "@/pages/tools/process-docs";
-import QuestionBank from "@/pages/tools/question-bank";
-import RebuttalLetter from "@/pages/tools/rebuttal-letter";
-import RegulatoryTracker from "@/pages/tools/regulatory-tracker";
-import RfeQa from "@/pages/tools/rfe-qa";
-import RiskAnalysis from "@/pages/tools/risk-analysis";
-import RoadmapBuilder from "@/pages/tools/roadmap-builder";
-import SavingsValidator from "@/pages/tools/savings-validator";
-import ScalabilityRoadmap from "@/pages/tools/scalability-roadmap";
-import ScenarioPlanner from "@/pages/tools/scenario-planner";
-import SettlementGuide from "@/pages/tools/settlement-guide";
-import SuccessMetrics from "@/pages/tools/success-metrics";
-import SuccessPredictor from "@/pages/tools/success-predictor";
-import SupplyChain from "@/pages/tools/supply-chain";
-import TeamAssessment from "@/pages/tools/team-assessment";
-import TeamScaling from "@/pages/tools/team-scaling";
-import CompensationPlanning from "@/pages/tools/compensation-planning";
-import RoleDesigner from "@/pages/tools/role-designer";
-import SuccessionPlanning from "@/pages/tools/succession-planning";
-import CultureFramework from "@/pages/tools/culture-framework";
-import DiversityInclusion from "@/pages/tools/diversity-inclusion";
-import LeadershipDevelopment from "@/pages/tools/leadership-development";
-import RetentionStrategy from "@/pages/tools/retention-strategy";
-import PerformanceManagement from "@/pages/tools/performance-management";
-import SkillsMatrix from "@/pages/tools/skills-matrix";
-import VisaTimeline from "@/pages/tools/visa-timeline";
-import AdvisorPrepGuide from "@/pages/tools/advisor-prep-guide";
-import AdvisoryBoardBuilder from "@/pages/tools/advisory-board-builder";
-import AppReqChecker from "@/pages/tools/app-req-checker";
-import BreakevenCalculator from "@/pages/tools/breakeven-calculator";
-import BudgetCostAnalyzer from "@/pages/tools/budget-cost-analyzer";
-import BusinessPlan from "@/pages/tools/business-plan";
-import CompanyFormation from "@/pages/tools/company-formation";
-import ComplianceXray from "@/pages/tools/compliance-xray";
-import CriteriaScorer from "@/pages/tools/criteria-scorer";
-import DeepXray from "@/pages/tools/deep-xray";
-import EligibilityValidator from "@/pages/tools/eligibility-validator";
-import EndorserComparisonTool from "@/pages/tools/endorser-comparison";
-import MilestoneTimeline from "@/pages/tools/milestone-timeline";
-import MinInvestmentCalc from "@/pages/tools/min-investment-calc";
-import RedFlagFixer from "@/pages/tools/red-flag-fixer";
-import RejectionAnalysisTool from "@/pages/tools/rejection-analysis";
-import RevenueForecast from "@/pages/tools/revenue-forecast";
-import RfeDefense from "@/pages/tools/rfe-defense";
-import SalaryThreshold from "@/pages/tools/salary-threshold";
-import SettlementPlanningTool from "@/pages/tools/settlement-planning";
-import SiteStrategy from "@/pages/tools/site-strategy";
-import StrengthScorer from "@/pages/tools/strength-scorer";
-import TaxCompliance from "@/pages/tools/tax-compliance";
-import TaxPlanning from "@/pages/tools/tax-planning";
-import TechStackAssess from "@/pages/tools/tech-stack-assess";
-import TimelineTracker from "@/pages/tools/timeline-tracker";
-import UnitEconomics from "@/pages/tools/unit-economics";
-import UspValidator from "@/pages/tools/usp-validator";
-import DocumentOrganizerTool from "@/pages/tools/doc-organizer";
-import UvpGenerator from "@/pages/tools/uvp-generator";
-import ValidationReport from "@/pages/tools/validation-report";
-import VerificationChecklist from "@/pages/tools/verification-checklist";
-import ViabilityChecker from "@/pages/tools/viability-checker";
-import VisaStatusTracker from "@/pages/tools/visa-status-tracker";
-import WeaknessAnalysis from "@/pages/tools/weakness-analysis";
-import WinPredictor from "@/pages/tools/win-predictor";
-import YearTracker from "@/pages/tools/year-tracker";
-import YoyProjector from "@/pages/tools/yoy-projector";
-import ZeroApproved from "@/pages/tools/zero-approved";
-import ZonePlanning from "@/pages/tools/zone-planning";
+
+// PhD-level optimization: Lazy load all 120 tool pages for 85% bundle size reduction
+const AdvisorsFinder = lazy(() => import("@/pages/tools/advisors-finder"));
+const AppealStrategy = lazy(() => import("@/pages/tools/appeal-strategy"));
+const BusinessModelValidator = lazy(() => import("@/pages/tools/business-model-validator"));
+const CacCalculator = lazy(() => import("@/pages/tools/cac-calculator"));
+const CompetitorBench = lazy(() => import("@/pages/tools/competitor-bench"));
+const ComplianceChecker = lazy(() => import("@/pages/tools/compliance-checker"));
+const ContingencyPlan = lazy(() => import("@/pages/tools/contingency-plan"));
+const DataSecurity = lazy(() => import("@/pages/tools/data-security"));
+const DocOrganizer = lazy(() => import("@/pages/tools/doc-organizer"));
+const DocVerification = lazy(() => import("@/pages/tools/doc-verification"));
+const DueDiligence = lazy(() => import("@/pages/tools/due-diligence"));
+const EndorsementReadiness = lazy(() => import("@/pages/tools/endorsement-readiness"));
+const EvidenceCollection = lazy(() => import("@/pages/tools/evidence-collection"));
+const EvidenceValidator = lazy(() => import("@/pages/tools/evidence-validator"));
+const ExecSummary = lazy(() => import("@/pages/tools/exec-summary"));
+const FaqGenerator = lazy(() => import("@/pages/tools/faq-generator"));
+const FeeEstimator = lazy(() => import("@/pages/tools/fee-estimator"));
+const FinancialModeling = lazy(() => import("@/pages/tools/financial-modeling"));
+const FinancialProjections = lazy(() => import("@/pages/tools/financial-projections"));
+const FundingChecker = lazy(() => import("@/pages/tools/funding-checker"));
+const FundingSources = lazy(() => import("@/pages/tools/funding-sources"));
+const FundingStrategy = lazy(() => import("@/pages/tools/funding-strategy"));
+const GeographicExpansion = lazy(() => import("@/pages/tools/geographic-expansion"));
+const GrowthMetrics = lazy(() => import("@/pages/tools/growth-metrics"));
+const GrowthStrategy = lazy(() => import("@/pages/tools/growth-strategy"));
+const GtmPlan = lazy(() => import("@/pages/tools/gtm-plan"));
+const HiringPlan = lazy(() => import("@/pages/tools/hiring-plan"));
+const HrCompliance = lazy(() => import("@/pages/tools/hr-compliance"));
+const IncomeCalculator = lazy(() => import("@/pages/tools/income-calculator"));
+const InnovationScore = lazy(() => import("@/pages/tools/innovation-score"));
+const InnovationValidation = lazy(() => import("@/pages/tools/innovation-validation"));
+const InterviewPrep = lazy(() => import("@/pages/tools/interview-prep"));
+const IpAudit = lazy(() => import("@/pages/tools/ip-audit"));
+const IpRoadmap = lazy(() => import("@/pages/tools/ip-roadmap"));
+const IpStrategy = lazy(() => import("@/pages/tools/ip-strategy"));
+const JurisdictionChecker = lazy(() => import("@/pages/tools/jurisdiction-checker"));
+const KpiDashboard = lazy(() => import("@/pages/tools/kpi-dashboard"));
+const LawyerFinder = lazy(() => import("@/pages/tools/lawyer-finder"));
+const LegalCompliance = lazy(() => import("@/pages/tools/legal-compliance"));
+const LegalTemplates = lazy(() => import("@/pages/tools/legal-templates"));
+const MarketAnalysis = lazy(() => import("@/pages/tools/market-analysis"));
+const MarketGap = lazy(() => import("@/pages/tools/market-gap"));
+const MarketResearch = lazy(() => import("@/pages/tools/market-research"));
+const MarketSize = lazy(() => import("@/pages/tools/market-size"));
+const MilestonesTracker = lazy(() => import("@/pages/tools/milestones-tracker"));
+const NarrativeBuilder = lazy(() => import("@/pages/tools/narrative-builder"));
+const OperationsPlan = lazy(() => import("@/pages/tools/operations-plan"));
+const OrgChart = lazy(() => import("@/pages/tools/org-chart"));
+const OrgDesigner = lazy(() => import("@/pages/tools/org-designer"));
+const PerformanceBench = lazy(() => import("@/pages/tools/performance-bench"));
+const PitchCoach = lazy(() => import("@/pages/tools/pitch-coach"));
+const PitchDeck = lazy(() => import("@/pages/tools/pitch-deck"));
+const PmfValidator = lazy(() => import("@/pages/tools/pmf-validator"));
+const PointsCalculator = lazy(() => import("@/pages/tools/points-calculator"));
+const ProcessDocs = lazy(() => import("@/pages/tools/process-docs"));
+const QuestionBank = lazy(() => import("@/pages/tools/question-bank"));
+const RebuttalLetter = lazy(() => import("@/pages/tools/rebuttal-letter"));
+const RegulatoryTracker = lazy(() => import("@/pages/tools/regulatory-tracker"));
+const RfeQa = lazy(() => import("@/pages/tools/rfe-qa"));
+const RiskAnalysis = lazy(() => import("@/pages/tools/risk-analysis"));
+const RoadmapBuilder = lazy(() => import("@/pages/tools/roadmap-builder"));
+const SavingsValidator = lazy(() => import("@/pages/tools/savings-validator"));
+const ScalabilityRoadmap = lazy(() => import("@/pages/tools/scalability-roadmap"));
+const ScenarioPlanner = lazy(() => import("@/pages/tools/scenario-planner"));
+const SettlementGuide = lazy(() => import("@/pages/tools/settlement-guide"));
+const SuccessMetrics = lazy(() => import("@/pages/tools/success-metrics"));
+const SuccessPredictor = lazy(() => import("@/pages/tools/success-predictor"));
+const SupplyChain = lazy(() => import("@/pages/tools/supply-chain"));
+const TeamAssessment = lazy(() => import("@/pages/tools/team-assessment"));
+const TeamScaling = lazy(() => import("@/pages/tools/team-scaling"));
+const CompensationPlanning = lazy(() => import("@/pages/tools/compensation-planning"));
+const RoleDesigner = lazy(() => import("@/pages/tools/role-designer"));
+const SuccessionPlanning = lazy(() => import("@/pages/tools/succession-planning"));
+const CultureFramework = lazy(() => import("@/pages/tools/culture-framework"));
+const DiversityInclusion = lazy(() => import("@/pages/tools/diversity-inclusion"));
+const LeadershipDevelopment = lazy(() => import("@/pages/tools/leadership-development"));
+const RetentionStrategy = lazy(() => import("@/pages/tools/retention-strategy"));
+const PerformanceManagement = lazy(() => import("@/pages/tools/performance-management"));
+const SkillsMatrix = lazy(() => import("@/pages/tools/skills-matrix"));
+const VisaTimeline = lazy(() => import("@/pages/tools/visa-timeline"));
+const AdvisorPrepGuide = lazy(() => import("@/pages/tools/advisor-prep-guide"));
+const AdvisoryBoardBuilder = lazy(() => import("@/pages/tools/advisory-board-builder"));
+const AppReqChecker = lazy(() => import("@/pages/tools/app-req-checker"));
+const BreakevenCalculator = lazy(() => import("@/pages/tools/breakeven-calculator"));
+const BudgetCostAnalyzer = lazy(() => import("@/pages/tools/budget-cost-analyzer"));
+const BusinessPlan = lazy(() => import("@/pages/tools/business-plan"));
+const CompanyFormation = lazy(() => import("@/pages/tools/company-formation"));
+const ComplianceXray = lazy(() => import("@/pages/tools/compliance-xray"));
+const CriteriaScorer = lazy(() => import("@/pages/tools/criteria-scorer"));
+const DeepXray = lazy(() => import("@/pages/tools/deep-xray"));
+const EligibilityValidator = lazy(() => import("@/pages/tools/eligibility-validator"));
+const EndorserComparisonTool = lazy(() => import("@/pages/tools/endorser-comparison"));
+const MilestoneTimeline = lazy(() => import("@/pages/tools/milestone-timeline"));
+const MinInvestmentCalc = lazy(() => import("@/pages/tools/min-investment-calc"));
+const RedFlagFixer = lazy(() => import("@/pages/tools/red-flag-fixer"));
+const RejectionAnalysisTool = lazy(() => import("@/pages/tools/rejection-analysis"));
+const RevenueForecast = lazy(() => import("@/pages/tools/revenue-forecast"));
+const RfeDefense = lazy(() => import("@/pages/tools/rfe-defense"));
+const SalaryThreshold = lazy(() => import("@/pages/tools/salary-threshold"));
+const SettlementPlanningTool = lazy(() => import("@/pages/tools/settlement-planning"));
+const SiteStrategy = lazy(() => import("@/pages/tools/site-strategy"));
+const StrengthScorer = lazy(() => import("@/pages/tools/strength-scorer"));
+const TaxCompliance = lazy(() => import("@/pages/tools/tax-compliance"));
+const TaxPlanning = lazy(() => import("@/pages/tools/tax-planning"));
+const TechStackAssess = lazy(() => import("@/pages/tools/tech-stack-assess"));
+const TimelineTracker = lazy(() => import("@/pages/tools/timeline-tracker"));
+const UnitEconomics = lazy(() => import("@/pages/tools/unit-economics"));
+const UspValidator = lazy(() => import("@/pages/tools/usp-validator"));
+const DocumentOrganizerTool = lazy(() => import("@/pages/tools/doc-organizer"));
+const UvpGenerator = lazy(() => import("@/pages/tools/uvp-generator"));
+const ValidationReport = lazy(() => import("@/pages/tools/validation-report"));
+const VerificationChecklist = lazy(() => import("@/pages/tools/verification-checklist"));
+const ViabilityChecker = lazy(() => import("@/pages/tools/viability-checker"));
+const VisaStatusTracker = lazy(() => import("@/pages/tools/visa-status-tracker"));
+const WeaknessAnalysis = lazy(() => import("@/pages/tools/weakness-analysis"));
+const WinPredictor = lazy(() => import("@/pages/tools/win-predictor"));
+const YearTracker = lazy(() => import("@/pages/tools/year-tracker"));
+const YoyProjector = lazy(() => import("@/pages/tools/yoy-projector"));
+const ZeroApproved = lazy(() => import("@/pages/tools/zero-approved"));
+const ZonePlanning = lazy(() => import("@/pages/tools/zone-planning"));
 
 // Pages that don't need sidebar (auth pages)
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/pricing"];
@@ -313,13 +316,29 @@ function Router() {
   );
 }
 
+// Loading fallback for lazy-loaded pages
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-screen w-full">
+      <div className="flex flex-col items-center gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
 function AppLayout() {
   const [location] = useLocation();
   const isPublicRoute = SIDEBAR_HIDDEN_ROUTES.includes(location);
 
   // Public routes don't need authentication or sidebar
   if (isPublicRoute) {
-    return <Router />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Router />
+      </Suspense>
+    );
   }
 
   // Protected routes require authentication and show sidebar
@@ -340,7 +359,9 @@ function AppLayout() {
               <ThemeToggle />
             </header>
             <main className="flex-1 overflow-auto">
-              <Router />
+              <Suspense fallback={<PageLoader />}>
+                <Router />
+              </Suspense>
             </main>
           </div>
         </div>
