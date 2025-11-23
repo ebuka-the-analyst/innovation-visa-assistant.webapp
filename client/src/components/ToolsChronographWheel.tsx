@@ -309,7 +309,7 @@ export default function ToolsChronographWheel() {
                   height: "20px"
                 }} />
               </div>
-              <p className="text-xs font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ Tool-Hub</p>
+              <p className="text-sm font-black whitespace-nowrap" style={{ color: "#000000", opacity: 1 }}>100+ Tool-Hub</p>
             </div>
           ) : (
             <div className="flex items-center gap-2 min-w-0">
