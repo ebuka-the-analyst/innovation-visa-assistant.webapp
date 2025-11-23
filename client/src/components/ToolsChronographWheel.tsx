@@ -24,6 +24,8 @@ export default function ToolsChronographWheel() {
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
   const checkInactivityRef = useRef<NodeJS.Timeout | null>(null);
+  const isInGracePeriodRef = useRef<boolean>(false);
+  const graceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const tools = ALL_TOOLS;
   const selectedTool = tools[selectedToolIdx];
 
@@ -65,6 +67,11 @@ export default function ToolsChronographWheel() {
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     recordActivity();
     if (!scrollRef.current) return;
+
+    // Skip scrolling during grace period (right after opening)
+    if (isInGracePeriodRef.current) {
+      return;
+    }
 
     const containerRect = scrollRef.current.getBoundingClientRect();
     const mouseY = e.clientY - containerRect.top;
@@ -173,6 +180,36 @@ export default function ToolsChronographWheel() {
       scrollRef.current.scrollTop = 0;
       setSelectedToolIdx(0);
     }
+  }, [isMinimized]);
+
+  // Grace period: Disable automatic mouse scrolling for 300ms after opening to prevent unintended scrolling
+  useEffect(() => {
+    if (!isMinimized) {
+      // Enable grace period when widget opens
+      isInGracePeriodRef.current = true;
+      
+      // Clear any existing grace timer
+      if (graceTimerRef.current) {
+        clearTimeout(graceTimerRef.current);
+      }
+      
+      // Disable grace period after 300ms
+      graceTimerRef.current = setTimeout(() => {
+        isInGracePeriodRef.current = false;
+      }, 300);
+    } else {
+      // Clear timer when widget minimizes
+      if (graceTimerRef.current) {
+        clearTimeout(graceTimerRef.current);
+      }
+      isInGracePeriodRef.current = false;
+    }
+
+    return () => {
+      if (graceTimerRef.current) {
+        clearTimeout(graceTimerRef.current);
+      }
+    };
   }, [isMinimized]);
 
   // Inactivity timer - minimize widget after 10 seconds when mouse leaves and user scrolls main page
