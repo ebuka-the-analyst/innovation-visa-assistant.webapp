@@ -34,22 +34,25 @@ export default function ToolsChronographWheel() {
     lastActivityRef.current = Date.now();
   };
 
-  // Prevent body scroll when widget is open - mobile fix
+  // Prevent body scroll when widget is open - proper mobile fix
   useEffect(() => {
     if (!isMinimized) {
-      const preventBodyScroll = (e: TouchEvent) => {
-        // Only prevent if touch is outside the widget's scrollable area
-        const target = e.target as HTMLElement;
-        if (scrollRef.current && !scrollRef.current.contains(target)) {
-          e.preventDefault();
-        }
-      };
-
-      // Add passive: false to allow preventDefault
-      document.addEventListener('touchmove', preventBodyScroll, { passive: false });
+      const scrollY = window.scrollY;
+      const body = document.body;
+      
+      // Lock body scroll position
+      body.style.position = 'fixed';
+      body.style.top = `-${scrollY}px`;
+      body.style.width = '100%';
+      body.style.overflow = 'hidden';
       
       return () => {
-        document.removeEventListener('touchmove', preventBodyScroll);
+        // Restore body scroll
+        body.style.position = '';
+        body.style.top = '';
+        body.style.width = '';
+        body.style.overflow = '';
+        window.scrollTo(0, scrollY);
       };
     }
   }, [isMinimized]);
