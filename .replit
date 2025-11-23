@@ -57,3 +57,4 @@ integrations = ["javascript_stripe:1.0.0", "javascript_openai:1.0.0", "javascrip
 
 [userenv.shared]
 GOOGLE_CALLBACK_URL = "https://innovatorfoundervisaassistant.co.uk/api/auth/callback/google"
+VITE_TURNSTILE_SITE_KEY = "placeholder_site_key_pending_user_input"
