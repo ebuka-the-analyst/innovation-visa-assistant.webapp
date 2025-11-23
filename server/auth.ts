@@ -59,7 +59,20 @@ export async function setupAuth(app: Express) {
           const normalizedEmail = email.toLowerCase().trim();
           const user = await storage.getUserByEmail(normalizedEmail);
           
-          if (!user || !user.password) {
+          if (!user) {
+            return done(null, false, { message: "Invalid email or password" });
+          }
+
+          // Check if user only has Google OAuth (no password set)
+          if (user.googleId && !user.password) {
+            return done(null, false, { 
+              message: "This account uses Google sign-in. Please use 'Continue with Google' to sign in.",
+              authMethod: "google"
+            });
+          }
+
+          // Check if user has password
+          if (!user.password) {
             return done(null, false, { message: "Invalid email or password" });
           }
 
@@ -94,10 +107,36 @@ export async function setupAuth(app: Express) {
             return done(new Error("No email found in Google profile"));
           }
 
-          // Upsert user in database (preserves UUID, links Google ID)
+          const normalizedEmail = email.toLowerCase().trim();
+
+          // Check if user already exists
+          const existingUser = await storage.getUserByEmail(normalizedEmail);
+
+          if (existingUser) {
+            // User exists - link Google account if not already linked
+            if (!existingUser.googleId) {
+              // Link Google account to existing email/password account
+              const updatedUser = await storage.updateUserGoogleId(existingUser.id, profile.id, {
+                firstName: profile.name?.givenName || existingUser.firstName,
+                lastName: profile.name?.familyName || existingUser.lastName,
+                profileImageUrl: profile.photos?.[0]?.value || existingUser.profileImageUrl,
+              });
+              return done(null, updatedUser);
+            } else {
+              // Already has Google linked - just update profile info
+              const updatedUser = await storage.updateUserGoogleId(existingUser.id, profile.id, {
+                firstName: profile.name?.givenName || existingUser.firstName,
+                lastName: profile.name?.familyName || existingUser.lastName,
+                profileImageUrl: profile.photos?.[0]?.value || existingUser.profileImageUrl,
+              });
+              return done(null, updatedUser);
+            }
+          }
+
+          // New user - create with Google OAuth
           const user = await storage.upsertUser({
-            email: email,
-            googleId: profile.id, // Store Google OAuth ID separately
+            email: normalizedEmail,
+            googleId: profile.id,
             firstName: profile.name?.givenName || "",
             lastName: profile.name?.familyName || "",
             profileImageUrl: profile.photos?.[0]?.value || "",
@@ -166,7 +205,20 @@ export async function setupAuth(app: Express) {
       // Check if user exists (case-insensitive email check)
       const existingUser = await storage.getUserByEmail(normalizedEmail);
       if (existingUser) {
-        return res.status(400).json({ message: "Email already registered" });
+        // User exists - check which auth method they used
+        if (existingUser.googleId && !existingUser.password) {
+          // User signed up with Google only
+          return res.status(400).json({ 
+            message: "An account with this email already exists. You signed up using Google. Please use 'Continue with Google' to sign in.",
+            authMethod: "google"
+          });
+        } else if (existingUser.password) {
+          // User has password (might also have Google)
+          return res.status(400).json({ 
+            message: "Email already registered. Please sign in instead.",
+            authMethod: "password"
+          });
+        }
       }
 
       // Hash password with bcrypt (cost factor 10)
@@ -180,8 +232,8 @@ export async function setupAuth(app: Express) {
         lastName: lastName?.trim() || "",
       });
 
-      // Log user in automatically after registration
-      req.login(newUser.id, (err) => {
+      // Log user in automatically after registration (pass object with id for serializeUser)
+      req.login({ id: newUser.id }, (err) => {
         if (err) {
           return res.status(500).json({ message: "Registration successful but login failed" });
         }
@@ -209,7 +261,7 @@ export async function setupAuth(app: Express) {
       if (!user) {
         return res.status(401).json({ message: info?.message || "Invalid credentials" });
       }
-      req.login(user.id, (err) => {
+      req.login({ id: user.id }, (err) => {
         if (err) {
           return res.status(500).json({ message: "Login failed" });
         }

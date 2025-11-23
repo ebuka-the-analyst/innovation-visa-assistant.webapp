@@ -8,6 +8,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUserGoogleId(userId: string, googleId: string, profileData: { firstName?: string | null, lastName?: string | null, profileImageUrl?: string | null }): Promise<User>;
   getUserBusinessPlans(userId: string): Promise<BusinessPlan[]>;
   
   // Business plan management
@@ -41,6 +42,21 @@ export class DatabaseStorage implements IStorage {
   async createUser(userData: InsertUser): Promise<User> {
     const [newUser] = await db.insert(users).values(userData).returning();
     return newUser;
+  }
+
+  async updateUserGoogleId(userId: string, googleId: string, profileData: { firstName?: string | null, lastName?: string | null, profileImageUrl?: string | null }): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set({
+        googleId,
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        profileImageUrl: profileData.profileImageUrl,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updated;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {

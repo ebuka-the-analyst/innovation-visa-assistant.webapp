@@ -48,9 +48,12 @@ export default function Login() {
 
       setLocation("/dashboard");
     } catch (error: any) {
+      const errorData = error.data || error;
+      const message = errorData.message || error.message || "Invalid email or password";
+      
       toast({
         title: "Login failed",
-        description: error.message || "Invalid email or password",
+        description: message,
         variant: "destructive",
       });
     } finally {

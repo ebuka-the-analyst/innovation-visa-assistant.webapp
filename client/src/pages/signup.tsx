@@ -41,11 +41,22 @@ export default function Signup() {
 
       setLocation("/dashboard");
     } catch (error: any) {
+      const errorData = error.data || error;
+      const message = errorData.message || error.message || "Please try again";
+      const authMethod = errorData.authMethod;
+
       toast({
         title: "Signup failed",
-        description: error.message || "Please try again",
+        description: message,
         variant: "destructive",
       });
+
+      // If error suggests using Google, redirect to login after showing message
+      if (authMethod === "google") {
+        setTimeout(() => {
+          setLocation("/login");
+        }, 3000);
+      }
     } finally {
       setIsLoading(false);
     }
