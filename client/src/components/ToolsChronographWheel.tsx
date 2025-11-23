@@ -61,8 +61,8 @@ export default function ToolsChronographWheel() {
     const containerHeight = scrollRef.current.clientHeight;
     // Item height is ~48px (44px item + 4px spacing from space-y-1)
     const itemHeight = 48;
-    const centerPosition = scrollTop + containerHeight / 2;
-    const newSelectedIdx = Math.floor(centerPosition / itemHeight);
+    // Calculate which tool is at the center, accounting for first tool starting at 0
+    const newSelectedIdx = Math.round(scrollTop / itemHeight);
     
     if (newSelectedIdx >= 0 && newSelectedIdx < tools.length && newSelectedIdx !== selectedToolIdx) {
       setSelectedToolIdx(newSelectedIdx);
