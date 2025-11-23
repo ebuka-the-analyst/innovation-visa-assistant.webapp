@@ -14,11 +14,12 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Users table - compatible with Google OAuth (Railway deployment)
+// Users table - supports both Google OAuth and email/password authentication
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
-  googleId: varchar("google_id").unique(), // Google OAuth ID for Railway deployment
+  password: text("password"), // For email/password auth (hashed with bcrypt)
+  googleId: varchar("google_id").unique(), // Google OAuth ID (optional)
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),

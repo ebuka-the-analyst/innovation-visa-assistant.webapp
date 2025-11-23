@@ -7,33 +7,45 @@ The UK Innovator Founder Visa Assistant is an AI-powered platform designed to as
 
 ## Recent Changes (November 23, 2025)
 
-### Railway Deployment Configuration Complete ✅  
-Successfully configured app for Railway deployment with standard Google OAuth (removed Replit-specific authentication):
+### Dual Authentication System Complete ✅  
+Successfully implemented flexible authentication supporting both email/password and Google OAuth:
 
 **Backend Authentication (Railway-Ready):**
-- `server/googleAuth.ts` - Standard Google OAuth 2.0 using passport-google-oauth20
+- `server/auth.ts` - Dual authentication: email/password (passport-local) + Google OAuth 2.0 (passport-google-oauth20)
+- **Email/Password Security:** bcrypt hashing (cost factor 10), email normalization (lowercase), password validation (6+ chars), case-insensitive lookups
+- **Session Security:** Only userId stored in session (not full user object), password never exposed in responses/sessions
 - Session management via PostgreSQL store (connect-pg-simple) - compatible with any Postgres database
 - Removed Replit-specific dependencies: openid-client, Replit OIDC
 - `server/routes.ts` - All routes updated to use req.user.id instead of req.user.claims.sub
 - User object structure: `{ id, email, displayName, firstName, lastName, profileImageUrl }`
-- **Critical Pattern Change:** req.user.id for standard Google OAuth (not req.user.claims.sub)
+- **Critical Pattern Change:** req.user.id for standard authentication (not req.user.claims.sub)
 
 **Frontend Authentication:**
-- `client/src/hooks/useAuth.ts` - Queries /api/auth/user endpoint (returns Google OAuth user)
-- `client/src/pages/login.tsx` - Redirects to /api/login (Google OAuth flow)
-- `client/src/pages/signup.tsx` - Redirects to /api/login (Google account creation)
-- Login/logout flows work identically but with standard OAuth instead of Replit Auth
+- `client/src/hooks/useAuth.ts` - Queries /api/auth/user endpoint (returns authenticated user)
+- `client/src/pages/login.tsx` - Email/password form + "Continue with Google" button
+- `client/src/pages/signup.tsx` - Full registration form (email, password, names) + "Sign up with Google" option
+- Both methods create identical session structure for seamless user experience
 
-**Authentication Flow (Railway):**
-1. User visits protected route → ProtectedRoute checks authentication
-2. If unauthenticated → redirects to /api/login
-3. Google OAuth handles authentication
-4. User redirected to /api/auth/google/callback → session created
+**Authentication Flows (Railway):**
+
+*Email/Password Flow:*
+1. User fills form → POST /api/auth/register or /api/auth/login
+2. Backend validates input (email format, password strength, duplicate check)
+3. Password hashed with bcrypt → User created/authenticated
+4. Session created with userId only → Redirect to dashboard
+
+*Google OAuth Flow:*
+1. User clicks "Continue with Google" → /api/auth/google
+2. Google OAuth handles authentication
+3. User redirected to /api/auth/callback/google → session created
+4. Upsert user (preserves UUID, links googleId) → Redirect to dashboard
+
 5. Ownership checks use req.user.id (businessPlan.userId === user.id)
 
 **Database Schema (Railway-Compatible):**
 - `sessions` table for express-session PostgreSQL store
-- `users` table: id, email, firstName, lastName, profileImageUrl, subscriptionTier, subscriptionStatus
+- `users` table: id (UUID), email (unique, lowercase), password (bcrypt hash, optional), googleId (optional), firstName, lastName, profileImageUrl, subscriptionTier, subscriptionStatus
+- Supports both authentication methods: users can have password OR googleId OR both
 - Compatible with any PostgreSQL database (Neon, Railway Postgres, etc.)
 
 **Railway Deployment Guide:**

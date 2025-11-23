@@ -3,8 +3,10 @@ import { db } from "./db";
 import { eq, and, gt, lt } from "drizzle-orm";
 
 export interface IStorage {
-  // User management (Replit Auth)
+  // User management (supports both Google OAuth and email/password auth)
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   getUserBusinessPlans(userId: string): Promise<BusinessPlan[]>;
   
@@ -25,10 +27,20 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // Replit Auth methods
+  // User methods (supports both Google OAuth and email/password auth)
   async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
     return result[0];
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
+  }
+
+  async createUser(userData: InsertUser): Promise<User> {
+    const [newUser] = await db.insert(users).values(userData).returning();
+    return newUser;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
