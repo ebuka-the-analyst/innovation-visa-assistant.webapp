@@ -400,7 +400,11 @@ export default function ToolsChronographWheel() {
             backgroundColor: isMinimized ? "#11b6e9" : "#e63946",
             color: "#ffffff",
             scale: "0.7",
-            transformOrigin: "top right"
+            transformOrigin: "top right",
+            boxShadow: "none",
+            filter: "none",
+            border: "none",
+            outline: "none"
           }}
         >
           {isMinimized ? (
