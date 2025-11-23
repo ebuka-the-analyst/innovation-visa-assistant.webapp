@@ -167,7 +167,7 @@ export default function ToolsChronographWheel() {
 
   // Swipe hint continues indefinitely - no timeout
 
-  // Inactivity timer - close widget after 8 seconds of inactivity when open
+  // Inactivity timer - minimize widget after 10 seconds when mouse leaves and user scrolls main page
   useEffect(() => {
     if (isMinimized) {
       // Clear timer if widget is minimized
@@ -177,14 +177,23 @@ export default function ToolsChronographWheel() {
       return;
     }
 
-    // Start activity check when widget is opened
+    // Only set up timer if mouse is NOT hovering over widget
+    if (isHoveringWidget) {
+      // Clear timer if hovering
+      if (checkInactivityRef.current) {
+        clearInterval(checkInactivityRef.current);
+      }
+      return;
+    }
+
+    // Start activity check when widget is opened AND mouse has left
     recordActivity();
     
     checkInactivityRef.current = setInterval(() => {
       const timeSinceLastActivity = Date.now() - lastActivityRef.current;
       
-      // Close widget if 8 seconds of inactivity
-      if (timeSinceLastActivity > 8000) {
+      // Minimize widget if 10 seconds of inactivity (mouse away from widget)
+      if (timeSinceLastActivity > 10000 && !isMouseOverWidgetRef.current) {
         setIsMinimized(true);
       }
     }, 500); // Check every 500ms
@@ -194,7 +203,7 @@ export default function ToolsChronographWheel() {
         clearInterval(checkInactivityRef.current);
       }
     };
-  }, [isMinimized]);
+  }, [isMinimized, isHoveringWidget]);
 
   // Handle quick scroll on chevron hover
   useEffect(() => {
