@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-border bg-gradient-to-b from-background to-accent/5">
       <div className="container mx-auto px-4 md:px-6 py-16">
-        <div className="grid md:grid-cols-4 gap-12 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -37,7 +37,24 @@ export default function Footer() {
               <li><a href="#" className="hover:text-primary transition-colors">Documentation</a></li>
               <li><a href="#faq" className="hover:text-primary transition-colors">FAQ</a></li>
               <li><a href="#" className="hover:text-primary transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Support</a></li>
+              <li><a href="mailto:support@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">Support</a></li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="font-semibold mb-4">Contact</h3>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li>
+                <a href="mailto:hello@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">
+                  hello@innovatorfoundervisaassistant.co.uk
+                </a>
+              </li>
+              <li>
+                <a href="mailto:support@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">
+                  support@innovatorfoundervisaassistant.co.uk
+                </a>
+              </li>
             </ul>
           </div>
 

@@ -273,7 +273,7 @@ export async function setupAuth(app: Express) {
         user: safeUser,
         message: emailSent 
           ? "Account created! Please check your email to verify your account before logging in."
-          : "Account created! However, we couldn't send the verification email. Please contact support.",
+          : "Account created! However, we couldn't send the verification email. Please contact support@innovatorfoundervisaassistant.co.uk for assistance.",
         requiresVerification: true
       });
     } catch (error: any) {
