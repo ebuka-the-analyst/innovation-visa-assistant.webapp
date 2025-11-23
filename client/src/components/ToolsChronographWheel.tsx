@@ -34,6 +34,27 @@ export default function ToolsChronographWheel() {
     lastActivityRef.current = Date.now();
   };
 
+  // Prevent body scroll when widget is open on mobile
+  useEffect(() => {
+    if (!isMinimized) {
+      // Save original body overflow
+      const originalOverflow = document.body.style.overflow;
+      const originalPosition = document.body.style.position;
+      
+      // Prevent body scrolling
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      
+      return () => {
+        // Restore original body overflow
+        document.body.style.overflow = originalOverflow;
+        document.body.style.position = originalPosition;
+        document.body.style.width = '';
+      };
+    }
+  }, [isMinimized]);
+
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
     return Icon ? <Icon className="w-8 h-8" /> : <Icons.Zap className="w-8 h-8" />;
