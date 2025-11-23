@@ -14,10 +14,11 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Users table - compatible with Replit Auth
+// Users table - compatible with Google OAuth (Railway deployment)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
+  googleId: varchar("google_id").unique(), // Google OAuth ID for Railway deployment
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -98,10 +99,10 @@ export const businessPlans = pgTable("business_plans", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-// Replit Auth user upsert schema
+// Google OAuth user upsert schema for Railway deployment
 export const upsertUserSchema = createInsertSchema(users).pick({
-  id: true,
   email: true,
+  googleId: true,
   firstName: true,
   lastName: true,
   profileImageUrl: true,

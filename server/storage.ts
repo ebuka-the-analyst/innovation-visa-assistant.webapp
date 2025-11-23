@@ -32,18 +32,60 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
+    // First, try to find user by googleId (Railway OAuth)
+    if (userData.googleId) {
+      const existingByGoogleId = await db
+        .select()
+        .from(users)
+        .where(eq(users.googleId, userData.googleId))
+        .limit(1);
+      
+      if (existingByGoogleId[0]) {
+        // Update existing user found by googleId
+        const [updated] = await db
+          .update(users)
+          .set({
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            profileImageUrl: userData.profileImageUrl,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, existingByGoogleId[0].id))
+          .returning();
+        return updated;
+      }
+    }
+
+    // If not found by googleId, try to find by email and update googleId
+    const existingByEmail = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, userData.email!))
+      .limit(1);
+    
+    if (existingByEmail[0]) {
+      // Update existing user with new googleId
+      const [updated] = await db
+        .update(users)
+        .set({
+          googleId: userData.googleId,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, existingByEmail[0].id))
+        .returning();
+      return updated;
+    }
+
+    // Create new user (UUID will be auto-generated)
+    const [newUser] = await db
       .insert(users)
       .values(userData)
-      .onConflictDoUpdate({
-        target: users.email,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
       .returning();
-    return user;
+    return newUser;
   }
 
   async getUserBusinessPlans(userId: string): Promise<BusinessPlan[]> {

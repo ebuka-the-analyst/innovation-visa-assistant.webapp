@@ -60,17 +60,18 @@ export async function setupAuth(app: Express) {
             return done(new Error("No email found in Google profile"));
           }
 
-          // Upsert user in database
+          // Upsert user in database (preserves UUID, links Google ID)
           const user = await storage.upsertUser({
-            id: profile.id,
             email: email,
+            googleId: profile.id, // Store Google OAuth ID separately
             firstName: profile.name?.givenName || "",
             lastName: profile.name?.familyName || "",
             profileImageUrl: profile.photos?.[0]?.value || "",
           });
 
+          // Serialize UUID-based user object for session
           const googleUser: GoogleUser = {
-            id: user.id || profile.id,
+            id: user.id, // Use UUID, not Google ID
             email: user.email || email,
             displayName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || email,
             firstName: user.firstName,
