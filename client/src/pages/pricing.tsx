@@ -104,10 +104,18 @@ const tiers = [
 export default function Pricing() {
   const [, setLocation] = useLocation();
   
-  const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
+  const { data: user } = useQuery<{ 
+    id: string; 
+    email: string; 
+    displayName?: string;
+    subscriptionTier?: string;
+    subscriptionStatus?: string;
+  }>({
     queryKey: ['/api/auth/me'],
     retry: false,
   });
+
+  const currentTier = user?.subscriptionTier || 'free';
 
   const handleSelectTier = (tierId: string) => {
     if (!user) {
@@ -130,23 +138,32 @@ export default function Pricing() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
-          {tiers.map((tier) => (
-            <Card 
-              key={tier.id} 
-              className={`relative hover-elevate ${tier.popular ? 'border-primary shadow-lg' : ''}`}
-              data-testid={`card-tier-${tier.id}`}
-            >
-              {tier.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground px-4 py-1">
-                    Most Popular
-                  </Badge>
-                </div>
-              )}
-              
-              <CardHeader className="pb-4">
-                <CardTitle className="text-2xl">{tier.name}</CardTitle>
-                <CardDescription>{tier.description}</CardDescription>
+          {tiers.map((tier) => {
+            const isCurrentTier = user && tier.id === currentTier;
+            return (
+              <Card 
+                key={tier.id} 
+                className={`relative hover-elevate ${tier.popular ? 'border-primary shadow-lg' : ''} ${isCurrentTier ? 'border-green-500 shadow-md' : ''}`}
+                data-testid={`card-tier-${tier.id}`}
+              >
+                {tier.popular && !isCurrentTier && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-primary text-primary-foreground px-4 py-1">
+                      Most Popular
+                    </Badge>
+                  </div>
+                )}
+                {isCurrentTier && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-green-500 text-white px-4 py-1" data-testid={`badge-current-tier-${tier.id}`}>
+                      Current Plan
+                    </Badge>
+                  </div>
+                )}
+                
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-2xl">{tier.name}</CardTitle>
+                  <CardDescription>{tier.description}</CardDescription>
                 <div className="mt-4">
                   <span className="text-4xl font-bold">{tier.price}</span>
                   <span className="text-muted-foreground ml-2">one-time</span>
@@ -179,7 +196,8 @@ export default function Pricing() {
                 </Button>
               </CardFooter>
             </Card>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-12 text-center text-sm text-muted-foreground">
