@@ -35,8 +35,8 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>Sign in to your account to continue</CardDescription>
+          <CardTitle className="text-2xl font-bold">Sign in to continue</CardTitle>
+          <CardDescription>Use your Google account to sign in or create an account</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Button 
@@ -46,20 +46,14 @@ export default function Login() {
             size="lg"
           >
             <LogIn className="mr-2 h-5 w-5" />
-            Sign In
+            Continue with Google
           </Button>
           
           <p className="text-sm text-center text-muted-foreground">
-            Secure authentication with Google
+            New users: Your account will be created automatically
           </p>
         </CardContent>
-        <div className="px-6 pb-6 flex flex-col space-y-2">
-          <p className="text-sm text-muted-foreground text-center">
-            New to the platform?{" "}
-            <span className="text-primary font-medium">
-              Sign up during login
-            </span>
-          </p>
+        <div className="px-6 pb-6">
           <p className="text-sm text-muted-foreground text-center">
             <Link 
               href="/" 

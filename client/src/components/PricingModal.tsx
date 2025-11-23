@@ -116,7 +116,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
   const handleSelectTier = (tierId: string) => {
     onClose();
     if (!user) {
-      setLocation(`/signup?tier=${tierId}`);
+      setLocation(`/login?tier=${tierId}`);
     } else {
       setLocation(`/questionnaire?tier=${tierId}`);
     }
