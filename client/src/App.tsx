@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ThemeToggle from "@/components/ThemeToggle";
 import ChatBot from "@/components/ChatBot";
 import CookieConsent from "@/components/CookieConsent";
@@ -314,33 +315,37 @@ function Router() {
 
 function AppLayout() {
   const [location] = useLocation();
-  const showSidebar = !SIDEBAR_HIDDEN_ROUTES.includes(location);
+  const isPublicRoute = SIDEBAR_HIDDEN_ROUTES.includes(location);
 
-  if (!showSidebar) {
+  // Public routes don't need authentication or sidebar
+  if (isPublicRoute) {
     return <Router />;
   }
 
+  // Protected routes require authentication and show sidebar
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full">
-        <AppSidebar />
-        <div className="flex flex-col flex-1 w-full">
-          <header className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 md:py-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <SidebarTrigger data-testid="button-sidebar-toggle" className="-ml-1 md:-ml-2 h-8 md:h-9 w-8 md:w-9 flex items-center justify-center" />
-              </TooltipTrigger>
-              <TooltipContent>Toggle sidebar menu</TooltipContent>
-            </Tooltip>
-            <div className="flex-1" />
-            <ThemeToggle />
-          </header>
-          <main className="flex-1 overflow-auto">
-            <Router />
-          </main>
+    <ProtectedRoute>
+      <SidebarProvider>
+        <div className="flex h-screen w-full">
+          <AppSidebar />
+          <div className="flex flex-col flex-1 w-full">
+            <header className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 md:py-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <SidebarTrigger data-testid="button-sidebar-toggle" className="-ml-1 md:-ml-2 h-8 md:h-9 w-8 md:w-9 flex items-center justify-center" />
+                </TooltipTrigger>
+                <TooltipContent>Toggle sidebar menu</TooltipContent>
+              </Tooltip>
+              <div className="flex-1" />
+              <ThemeToggle />
+            </header>
+            <main className="flex-1 overflow-auto">
+              <Router />
+            </main>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </ProtectedRoute>
   );
 }
 
