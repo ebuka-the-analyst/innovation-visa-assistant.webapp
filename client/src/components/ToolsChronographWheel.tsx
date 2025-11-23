@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
+import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 type IconName = keyof typeof Icons;
 
@@ -34,27 +35,26 @@ export default function ToolsChronographWheel() {
     lastActivityRef.current = Date.now();
   };
 
-  // Prevent body scroll when widget is open - proper mobile fix
+  // Prevent body scroll when widget is open - using body-scroll-lock library
   useEffect(() => {
-    if (!isMinimized) {
-      const scrollY = window.scrollY;
-      const body = document.body;
-      
-      // Lock body scroll position
-      body.style.position = 'fixed';
-      body.style.top = `-${scrollY}px`;
-      body.style.width = '100%';
-      body.style.overflow = 'hidden';
+    const scrollElement = scrollRef.current;
+    
+    if (!isMinimized && scrollElement) {
+      // Enable widget scroll while disabling body scroll
+      disableBodyScroll(scrollElement, {
+        reserveScrollBarGap: true,
+      });
       
       return () => {
-        // Restore body scroll
-        body.style.position = '';
-        body.style.top = '';
-        body.style.width = '';
-        body.style.overflow = '';
-        window.scrollTo(0, scrollY);
+        enableBodyScroll(scrollElement);
       };
     }
+    
+    return () => {
+      if (scrollElement) {
+        enableBodyScroll(scrollElement);
+      }
+    };
   }, [isMinimized]);
 
   const GetIconComponent = ({ name }: { name: string }) => {
