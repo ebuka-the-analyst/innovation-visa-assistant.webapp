@@ -12,7 +12,7 @@ export default function ToolsChronographWheel() {
   const isMouseOverWidgetRef = useRef(false);
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
-  const [selectedToolIdx, setSelectedToolIdx] = useState(0);
+  const [selectedToolIdx, setSelectedToolIdx] = useState(7); // Start at tool 001 (index 7 after 7 dummy tools)
   const [isMinimized, setIsMinimized] = useState(true);
   const [isHoveringUp, setIsHoveringUp] = useState(false);
   const [isHoveringDown, setIsHoveringDown] = useState(false);
@@ -26,7 +26,19 @@ export default function ToolsChronographWheel() {
   const checkInactivityRef = useRef<NodeJS.Timeout | null>(null);
   const blockMouseScrollRef = useRef<boolean>(false);
   const blockScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const tools = ALL_TOOLS;
+  
+  // Add 7 dummy tools at the beginning for scroll space
+  const dummyTools = Array(7).fill(null).map((_, i) => ({
+    id: `dummy-${i}`,
+    name: "",
+    description: "",
+    category: "dummy",
+    stage: "before" as const,
+    tier: "free" as const,
+    icon: "Zap",
+  }));
+  
+  const tools = [...dummyTools, ...ALL_TOOLS];
   const selectedTool = tools[selectedToolIdx];
 
   // Record user activity
@@ -440,7 +452,13 @@ export default function ToolsChronographWheel() {
             <div className="space-y-1 sm:space-y-2">
               {/* Top spacer to prevent fade mask from hiding first tools */}
               <div style={{ height: "80px" }} />
-              {tools.map((tool, idx) => (
+              {tools.map((tool, idx) => {
+                // Skip rendering dummy tools - they're just for scroll space
+                if (tool.category === "dummy") {
+                  return <div key={tool.id} style={{ height: "44px" }} />;
+                }
+                
+                return (
                 <div
                   key={tool.id}
                   onClick={() => setSelectedToolIdx(idx)}
@@ -455,7 +473,7 @@ export default function ToolsChronographWheel() {
                   <div className={`text-xs font-bold w-6 sm:w-8 flex-shrink-0 pt-0.5 ${
                     idx === selectedToolIdx ? "text-primary" : "text-gray-500"
                   }`}>
-                    {String(idx + 1).padStart(3, "0")}
+                    {String(idx + 1 - 7).padStart(3, "0")}
                   </div>
 
                   {/* Tool info */}
@@ -475,7 +493,8 @@ export default function ToolsChronographWheel() {
                     {tool.tier.charAt(0).toUpperCase()}
                   </div>
                 </div>
-              ))}
+              );
+              })}
               {/* Bottom spacer to prevent fade mask from hiding last tools */}
               <div style={{ height: "80px" }} />
             </div>
@@ -506,6 +525,7 @@ export default function ToolsChronographWheel() {
           </div>
 
           {/* Featured Tool Box - Centered Behind */}
+          {selectedTool.category !== "dummy" && (
           <div 
             className="absolute inset-0 flex items-center justify-center px-0.5 sm:px-1 z-5"
             onMouseMove={handleMouseMove}
@@ -520,7 +540,7 @@ export default function ToolsChronographWheel() {
             >
               <div className="flex flex-col gap-1 sm:gap-2">
                 <p className="text-sm sm:text-base md:text-2xl text-black font-black">
-                  {String(selectedToolIdx + 1).padStart(3, "0")}
+                  {String(selectedToolIdx + 1 - 7).padStart(3, "0")}
                 </p>
                 <h2 className="text-2xl sm:text-4xl md:text-6xl font-black text-black leading-tight w-full">
                   {selectedTool.name.toUpperCase()}
@@ -536,6 +556,7 @@ export default function ToolsChronographWheel() {
               </div>
             </a>
           </div>
+          )}
         </div>
         )}
 
