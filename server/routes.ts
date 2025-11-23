@@ -10,6 +10,7 @@ import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
 import crypto from "crypto";
 import { setupAuth, isAuthenticated } from "./auth";
+import { sendPaymentReceiptEmail } from "./email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
@@ -171,6 +172,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.updateBusinessPlan(planId, { status: 'paid' });
+
+      // Send payment receipt email
+      try {
+        const fullUser = await storage.getUser(user.id);
+        if (fullUser && fullUser.email) {
+          const pricing = PRICING[businessPlan.tier as keyof typeof PRICING];
+          await sendPaymentReceiptEmail(
+            fullUser.email,
+            fullUser.firstName || 'Customer',
+            pricing?.name || businessPlan.tier,
+            pricing?.amount || 0,
+            sessionId
+          );
+        }
+      } catch (emailError) {
+        console.error("Failed to send payment receipt email:", emailError);
+        // Don't fail the request if email fails
+      }
 
       res.json({ success: true, verified: true });
     } catch (error) {

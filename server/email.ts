@@ -142,6 +142,110 @@ export async function sendVerificationEmail(
   });
 }
 
+// Payment receipt email
+export async function sendPaymentReceiptEmail(
+  email: string,
+  firstName: string,
+  planName: string,
+  amount: number,
+  sessionId: string
+): Promise<{ success: boolean; error?: string }> {
+  const formattedAmount = (amount / 100).toFixed(2); // Convert from pence to pounds
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Payment Received! ✅</h1>
+      </div>
+      
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${firstName},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          Thank you for your payment! Your business plan generation is now in progress.
+        </p>
+        
+        <div style="background: #fff; border: 2px solid #ffa536; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h2 style="margin: 0 0 15px 0; color: #333; font-size: 20px;">Payment Details</h2>
+          <table style="width: 100%; font-size: 15px;">
+            <tr>
+              <td style="padding: 8px 0; color: #666;">Plan:</td>
+              <td style="padding: 8px 0; text-align: right; font-weight: bold;">${planName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;">Amount Paid:</td>
+              <td style="padding: 8px 0; text-align: right; font-weight: bold;">£${formattedAmount} GBP</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;">Transaction ID:</td>
+              <td style="padding: 8px 0; text-align: right; font-family: monospace; font-size: 12px;">${sessionId}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;">Date:</td>
+              <td style="padding: 8px 0; text-align: right;">${new Date().toLocaleDateString('en-GB')}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <p style="font-size: 14px; color: #666; margin-top: 30px;">
+          For billing inquiries, please contact <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">billing@innovatorfoundervisaassistant.co.uk</a>
+        </p>
+        
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          Questions? Contact <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Send from billing@ for payment-related emails
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  
+  if (!RESEND_API_KEY) {
+    console.error("RESEND_API_KEY not configured. Email not sent.");
+    return { success: false, error: "Email service not configured" };
+  }
+
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: "UK Innovator Visa Assistant <billing@innovatorfoundervisaassistant.co.uk>",
+        to: [email],
+        subject: '✅ Payment Receipt - UK Innovator Founder Visa Assistant',
+        html,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Resend API error:", data);
+      return { success: false, error: data.message || "Failed to send email" };
+    }
+
+    console.log("Payment receipt email sent successfully to:", email);
+    return { success: true, messageId: data.id };
+  } catch (error) {
+    console.error("Email send error:", error);
+    return { success: false, error: "Failed to send email" };
+  }
+}
+
 export function generateVerificationEmail(code: string, displayName: string): string {
   return `
 <!DOCTYPE html>

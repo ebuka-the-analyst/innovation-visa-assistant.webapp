@@ -47,12 +47,22 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li>
                 <a href="mailto:hello@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">
-                  hello@innovatorfoundervisaassistant.co.uk
+                  General Inquiries
                 </a>
               </li>
               <li>
                 <a href="mailto:support@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">
-                  support@innovatorfoundervisaassistant.co.uk
+                  Customer Support
+                </a>
+              </li>
+              <li>
+                <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">
+                  Billing & Payments
+                </a>
+              </li>
+              <li>
+                <a href="mailto:team@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">
+                  Partnership Inquiries
                 </a>
               </li>
             </ul>
@@ -62,7 +72,7 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Stay Updated</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Get visa tips and updates
+              Get visa tips and updates to updates@innovatorfoundervisaassistant.co.uk
             </p>
             <div className="flex gap-2">
               <Input 
@@ -75,6 +85,9 @@ export default function Footer() {
                 Subscribe
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              We'll send updates from updates@innovatorfoundervisaassistant.co.uk
+            </p>
           </div>
         </div>
 
