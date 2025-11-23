@@ -81,7 +81,7 @@ export async function sendVerificationEmail(
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to UK Visa Assistant! 🇬🇧</h1>
+        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to UK Innovator Founder Visa Assistant! 🇬🇧</h1>
       </div>
       
       <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
