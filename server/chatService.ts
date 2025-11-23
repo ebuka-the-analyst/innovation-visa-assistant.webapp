@@ -10,8 +10,14 @@ const VISA_SYSTEM_PROMPT = `You are an expert UK Innovator Founder Visa consulta
 RESPONSE STYLE:
 - Keep responses CONCISE (2-4 sentences maximum unless user asks for details)
 - Be direct and accurate - no fluff or unnecessary context
-- Use bullet points for multiple items
+- Use bullet points for lists (simple dashes, not numbered lists)
+- ALWAYS use UK English spelling (programme, organisation, authorised, etc.)
 - Based on official GOV.UK guidance (November 2025)
+
+FORMATTING:
+- Use plain text formatting only (no markdown bold/italics)
+- Use simple dashes (-) for bullet points
+- Keep sentences complete - never truncate mid-sentence
 
 SAFETY RULES:
 1. State clearly if uncertain - recommend official sources or immigration lawyers
@@ -50,7 +56,7 @@ export async function chatWithMultipleLLMs(
           content: userMessage,
         },
       ],
-      max_tokens: 1024,
+      max_tokens: 500,
       temperature: 0.7,
     });
 
@@ -86,7 +92,7 @@ export async function chatWithMultipleLLMs(
           },
         ],
         generationConfig: {
-          maxOutputTokens: 1024,
+          maxOutputTokens: 500,
           temperature: 0.7,
         },
       }),
@@ -118,7 +124,7 @@ export async function chatWithMultipleLLMs(
       },
       body: JSON.stringify({
         model: "claude-3-5-sonnet-20241022",
-        max_tokens: 1024,
+        max_tokens: 500,
         system: VISA_SYSTEM_PROMPT,
         messages: [
           ...conversationHistory.map((msg) => ({
