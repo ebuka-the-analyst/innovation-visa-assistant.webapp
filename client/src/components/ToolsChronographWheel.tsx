@@ -281,37 +281,55 @@ export default function ToolsChronographWheel() {
     >
       {/* Outer metal bezel effect */}
       <div className="border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ 
-        height: isMinimized ? "60px" : "640px", 
+        height: isMinimized ? "100px" : "640px", 
         width: isMinimized ? "200px" : "480px", 
         borderRadius: isMinimized ? "50px" : "1rem",
         transition: "all 0.3s ease" 
       }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="flex-1 flex items-center gap-2 px-3 border-b-2 border-gray-400 pulse-glow-orange" style={{ 
+        <div className="flex-1 flex flex-col items-center justify-center gap-1 px-3 border-b-2 border-gray-400 pulse-glow-orange" style={{ 
           backgroundColor: "#ffa536",
           borderRadius: isMinimized ? "50px" : "0.5rem 0.5rem 0 0",
           borderBottom: isMinimized ? "none" : "2px solid rgb(107, 114, 128)"
         }}>
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="flex-shrink-0 shadow-lg" style={{ 
-              width: isMinimized ? "40px" : "56px", 
-              height: isMinimized ? "40px" : "56px", 
-              backgroundColor: "#b45309", 
-              borderRadius: "50%", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center",
-              transition: "all 0.3s ease"
-            }}>
-              <Icons.Zap className="text-white" style={{ 
-                width: isMinimized ? "20px" : "28px", 
-                height: isMinimized ? "20px" : "28px",
-                transition: "all 0.3s ease"
-              }} />
+          {isMinimized ? (
+            <div className="flex flex-col items-center justify-center gap-1">
+              <div className="flex-shrink-0 shadow-lg" style={{ 
+                width: "40px", 
+                height: "40px", 
+                backgroundColor: "#b45309", 
+                borderRadius: "50%", 
+                display: "flex", 
+                alignItems: "center", 
+                justifyContent: "center"
+              }}>
+                <Icons.Zap className="text-white" style={{ 
+                  width: "20px", 
+                  height: "20px"
+                }} />
+              </div>
+              <p className="text-xs font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ Tool-Hub</p>
             </div>
-            {!isMinimized && <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>}
-          </div>
+          ) : (
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex-shrink-0 shadow-lg" style={{ 
+                width: "56px", 
+                height: "56px", 
+                backgroundColor: "#b45309", 
+                borderRadius: "50%", 
+                display: "flex", 
+                alignItems: "center", 
+                justifyContent: "center"
+              }}>
+                <Icons.Zap className="text-white" style={{ 
+                  width: "28px", 
+                  height: "28px"
+                }} />
+              </div>
+              <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
+            </div>
+          )}
         </div>
 
         {/* Swipe Instruction - Bold visual guide (above widget when closed) */}
