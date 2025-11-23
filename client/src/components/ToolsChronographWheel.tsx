@@ -34,6 +34,18 @@ export default function ToolsChronographWheel() {
     lastActivityRef.current = Date.now();
   };
 
+  // Prevent body scroll when widget is open - mobile fix
+  useEffect(() => {
+    if (!isMinimized) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isMinimized]);
+
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
     return Icon ? <Icon className="w-8 h-8" /> : <Icons.Zap className="w-8 h-8" />;
@@ -490,7 +502,10 @@ export default function ToolsChronographWheel() {
             }}
             style={{
               scrollbarWidth: "thin",
-              scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)"
+              scrollbarColor: "rgba(255, 165, 54, 0.5) rgba(0, 0, 0, 0.1)",
+              overscrollBehavior: "contain",
+              WebkitOverflowScrolling: "touch",
+              touchAction: "pan-y"
             }}
           >
             <div className="space-y-1 sm:space-y-2">
