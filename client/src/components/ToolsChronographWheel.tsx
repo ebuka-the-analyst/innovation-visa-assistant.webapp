@@ -353,9 +353,9 @@ export default function ToolsChronographWheel() {
       <div 
         className="relative flex flex-col cursor-pointer" 
         style={{ 
-          height: isMinimized ? "100px" : "640px", 
-          width: isMinimized ? "200px" : "480px", 
-          borderRadius: isMinimized ? "50px" : "1rem",
+          height: isMinimized ? "0" : "640px", 
+          width: isMinimized ? "0" : "480px", 
+          borderRadius: isMinimized ? "0" : "1rem",
           transition: "all 0.3s ease",
           backgroundColor: isMinimized ? "transparent" : "rgba(255, 255, 255, 0.05)",
           borderColor: isMinimized ? "transparent" : "rgba(156, 163, 175, 0.1)",
@@ -363,7 +363,9 @@ export default function ToolsChronographWheel() {
           borderStyle: "solid",
           boxShadow: isMinimized ? "none" : "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
           backdropFilter: isMinimized ? "none" : "blur(12px)",
-          WebkitBackdropFilter: isMinimized ? "none" : "blur(12px)"
+          WebkitBackdropFilter: isMinimized ? "none" : "blur(12px)",
+          opacity: isMinimized ? "0" : "1",
+          pointerEvents: isMinimized ? "none" : "auto"
         }}
         onClick={() => {
           if (!isMinimized) return; // Only toggle if minimized
