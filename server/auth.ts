@@ -84,6 +84,14 @@ export async function setupAuth(app: Express) {
             return done(null, false, { message: "Invalid email or password" });
           }
 
+          // Check if email is verified
+          if (!user.isEmailVerified) {
+            return done(null, false, { 
+              message: "Please verify your email address to log in. Check your inbox for the verification link.",
+              verificationRequired: true
+            });
+          }
+
           // Return user ID for session serialization (passport will call serializeUser)
           return done(null, user);
         } catch (error) {
@@ -246,30 +254,27 @@ export async function setupAuth(app: Express) {
       });
 
       // Send verification email
+      let emailSent = false;
       try {
-        await sendVerificationEmail(normalizedEmail, firstName || "there", verificationToken);
+        const result = await sendVerificationEmail(normalizedEmail, firstName || "there", verificationToken);
+        emailSent = result.success;
+        if (!result.success) {
+          console.error("Failed to send verification email:", result.error);
+        }
       } catch (emailError) {
         console.error("Failed to send verification email:", emailError);
-        // Continue with registration even if email fails
       }
 
-      // Log user in automatically after registration (pass object with id for serializeUser)
-      req.login({ id: newUser.id }, (err) => {
-        if (err) {
-          return res.status(500).json({ message: "Registration successful but login failed" });
-        }
-        req.session.save((err) => {
-          if (err) {
-            console.error("Session save error:", err);
-          }
-          // Return user without password
-          const { password: _, ...safeUser } = newUser;
-          res.json({ 
-            success: true, 
-            user: safeUser,
-            message: "Account created! Please check your email to verify your account."
-          });
-        });
+      // DO NOT log user in - they must verify email first
+      // Return success without creating a session
+      const { password: _, ...safeUser } = newUser;
+      res.json({ 
+        success: true, 
+        user: safeUser,
+        message: emailSent 
+          ? "Account created! Please check your email to verify your account before logging in."
+          : "Account created! However, we couldn't send the verification email. Please contact support.",
+        requiresVerification: true
       });
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -430,9 +435,26 @@ export async function setupAuth(app: Express) {
   });
 }
 
-export const isAuthenticated: RequestHandler = (req, res, next) => {
-  if (req.isAuthenticated() && req.user) {
-    return next();
+export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  if (!req.isAuthenticated() || !req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
-  res.status(401).json({ message: "Unauthorized" });
+  
+  // Get full user data to check email verification status
+  const userId = (req.user as any).id;
+  const fullUser = await storage.getUser(userId);
+  
+  if (!fullUser) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  // Check if email is verified (Google accounts are auto-verified)
+  if (!fullUser.isEmailVerified) {
+    return res.status(401).json({ 
+      message: "Please verify your email address to access this feature.",
+      verificationRequired: true
+    });
+  }
+  
+  return next();
 };
