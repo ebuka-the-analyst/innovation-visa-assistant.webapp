@@ -19,9 +19,14 @@ export function AuthHeader() {
       const response = await apiRequest('POST', '/api/auth/logout', {});
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.clear();
-      setLocation("/login");
+      // Redirect to Replit Auth logout if provided, otherwise go to login
+      if (data?.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        setLocation("/login");
+      }
     },
   });
 

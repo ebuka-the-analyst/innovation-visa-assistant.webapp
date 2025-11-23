@@ -137,16 +137,26 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  app.get("/api/logout", (req, res) => {
+  // Support both GET and POST for logout
+  const handleLogout = (req: any, res: any) => {
     req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
+      const logoutUrl = client.buildEndSessionUrl(config, {
+        client_id: process.env.REPL_ID!,
+        post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+      }).href;
+      
+      // For POST requests (from API calls), return JSON
+      if (req.method === 'POST') {
+        res.json({ success: true, redirectUrl: logoutUrl });
+      } else {
+        // For GET requests, redirect directly
+        res.redirect(logoutUrl);
+      }
     });
-  });
+  };
+
+  app.get("/api/logout", handleLogout);
+  app.post("/api/auth/logout", handleLogout);
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
