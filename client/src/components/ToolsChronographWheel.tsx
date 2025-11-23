@@ -283,10 +283,10 @@ export default function ToolsChronographWheel() {
       <div className="rounded-2xl border-4 border-gray-400 bg-gradient-to-b from-gray-100 to-gray-200 shadow-2xl relative flex flex-col" style={{ height: isMinimized ? "80px" : "640px", width: "480px", transition: "height 0.3s ease" }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="px-3 sm:px-4 pt-2 sm:pt-3 pb-1 sm:pb-2 border-b-2 border-gray-400 flex items-center gap-2 sm:gap-3 justify-between pulse-glow-orange rounded-t-2xl" style={{ backgroundColor: "#ffa536" }}>
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-7 h-7 sm:w-9 sm:h-9 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-              <Icons.Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+        <div className="px-3 sm:px-4 pt-2 sm:pt-3 pb-1 sm:pb-2 border-b-2 border-gray-400 flex items-center gap-3 sm:gap-4 justify-between pulse-glow-orange rounded-t-2xl" style={{ backgroundColor: "#ffa536" }}>
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="w-14 h-14 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+              <Icons.Zap className="w-7 h-7 text-white" />
             </div>
             <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
           </div>
