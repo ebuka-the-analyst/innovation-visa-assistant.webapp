@@ -321,7 +321,7 @@ export default function ToolsChronographWheel() {
       className="fixed bottom-8 left-8 z-40"
       data-testid="chronograph-wheel-container"
       style={{ 
-        scale: window.innerWidth < 768 ? "0.35" : window.innerWidth < 1024 ? "0.45" : window.innerWidth < 1440 ? "0.55" : "0.65",
+        scale: window.innerWidth < 768 ? "0.55" : window.innerWidth < 1024 ? "0.45" : window.innerWidth < 1440 ? "0.55" : "0.65",
         transformOrigin: "bottom left",
         animation: "widget-swipe-pulse 8s ease-in-out infinite"
       }}
