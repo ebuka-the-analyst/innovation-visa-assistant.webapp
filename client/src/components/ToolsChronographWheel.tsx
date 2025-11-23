@@ -255,12 +255,17 @@ export default function ToolsChronographWheel() {
   return (
     <div
       ref={widgetRef}
-      className="fixed bottom-8 left-8 z-40"
+      className="fixed bottom-8 left-8 z-40 cursor-pointer"
       data-testid="chronograph-wheel-container"
       style={{ 
         scale: "0.375", 
         transformOrigin: "bottom left",
         animation: "widget-swipe-pulse 8s ease-in-out infinite"
+      }}
+      onClick={() => {
+        if (!isMinimized) return; // Only toggle if minimized
+        recordActivity();
+        setIsMinimized(!isMinimized);
       }}
       onMouseEnter={() => {
         isMouseOverWidgetRef.current = true;
@@ -285,12 +290,12 @@ export default function ToolsChronographWheel() {
       }}>
         
         {/* Static Header Section - "100+ TOOLS HUB" */}
-        <div className="flex flex-col items-center justify-center gap-0 px-2 border-b-2 border-gray-400 pulse-glow-orange" style={{ 
+        <div className="flex flex-col items-center justify-center gap-2 px-3 border-b-2 border-gray-400 pulse-glow-orange" style={{ 
           backgroundColor: "#ffa536",
           borderRadius: isMinimized ? "50px" : "0.5rem 0.5rem 0 0",
           borderBottom: isMinimized ? "none" : "2px solid rgb(107, 114, 128)",
           height: isMinimized ? "100%" : "auto",
-          padding: isMinimized ? "0" : "4px 8px"
+          padding: isMinimized ? "0" : "6px 10px"
         }}>
           {isMinimized ? (
             <div className="flex flex-col items-center justify-center gap-1">
@@ -326,7 +331,7 @@ export default function ToolsChronographWheel() {
                   height: "28px"
                 }} />
               </div>
-              <h3 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black whitespace-nowrap" style={{ color: "#000000" }}>100+ TOOLS HUB</h3>
+              <h3 className="font-black whitespace-nowrap" style={{ color: "#000000", fontSize: "clamp(1rem, 2.5vw, 1.8rem)" }}>100+ TOOLS HUB</h3>
             </div>
           )}
         </div>
@@ -363,8 +368,8 @@ export default function ToolsChronographWheel() {
 
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" - Hidden when minimized */}
         {!isMinimized && (
-          <div className="px-2 py-1 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
-            <p className="text-xs font-black tracking-wide" style={{ color: "#000000", lineHeight: "1" }}>APPLICATION REQUIREMENT CHECKS</p>
+          <div className="px-3 py-2 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
+            <p className="text-sm font-black tracking-wide" style={{ color: "#000000", lineHeight: "1.2" }}>APPLICATION REQUIREMENT CHECKS</p>
           </div>
         )}
 
