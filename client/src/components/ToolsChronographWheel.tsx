@@ -370,23 +370,20 @@ export default function ToolsChronographWheel() {
           )}
         </div>
 
-        {/* Floating Close/Open Button - Always on top */}
+        {/* Floating Close/Open Button - Always top right */}
         <button
           onClick={() => {
             recordActivity();
             setIsMinimized(!isMinimized);
           }}
-          className="absolute flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-4 px-6 py-3 rounded-full font-bold text-xl"
+          className="absolute top-2 right-2 flex-shrink-0 hover:opacity-80 transition-opacity z-50 flex items-center gap-4 px-6 py-3 rounded-full font-bold text-xl"
           data-testid="button-toggle-tools-hub"
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
             backgroundColor: isMinimized ? "#11b6e9" : "#e63946",
             color: "#ffffff",
             scale: "0.7",
-            transformOrigin: isMinimized ? "bottom right" : "top right",
-            bottom: isMinimized ? "2px" : "auto",
-            top: isMinimized ? "auto" : "2px",
-            right: "2px"
+            transformOrigin: "top right"
           }}
         >
           {isMinimized ? (
