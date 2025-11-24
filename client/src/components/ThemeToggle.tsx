@@ -50,7 +50,7 @@ export default function ThemeToggle() {
           ) : (
             <Sun className="w-5 h-5" />
           )}
-          <div className="absolute -right-1 -top-1 w-2 h-2 bg-primary rounded-full animate-ping" />
+          <div className="absolute -right-1 -top-1 w-2 h-2 bg-primary rounded-full animate-ping-slow" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>

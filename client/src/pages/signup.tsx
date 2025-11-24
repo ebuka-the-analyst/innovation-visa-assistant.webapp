@@ -147,7 +147,7 @@ export default function Signup() {
 
             <Button
               type="submit"
-              className="w-full relative overflow-visible"
+              className="w-full"
               disabled={isLoading}
               data-testid="button-signup"
             >
@@ -158,9 +158,6 @@ export default function Signup() {
                   <UserPlus className="mr-2 h-5 w-5" />
                   Create Account
                 </>
-              )}
-              {!isLoading && (
-                <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-primary rounded-full animate-ping-slow" />
               )}
             </Button>
           </form>

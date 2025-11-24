@@ -86,9 +86,8 @@ export default function Header() {
             </Button>
           </Link>
           <Link href="/pricing">
-            <Button className="relative overflow-visible" data-testid="button-header-cta">
+            <Button data-testid="button-header-cta">
               Get Started
-              <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-orange-500 dark:bg-orange-400 rounded-full animate-ping-slow" />
             </Button>
           </Link>
         </div>
@@ -139,9 +138,8 @@ export default function Header() {
                 </Button>
               </Link>
               <Link href="/pricing" className="w-full">
-                <Button className="w-full relative overflow-visible">
+                <Button className="w-full">
                   Get Started
-                  <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-orange-500 dark:bg-orange-400 rounded-full animate-ping-slow" />
                 </Button>
               </Link>
             </div>

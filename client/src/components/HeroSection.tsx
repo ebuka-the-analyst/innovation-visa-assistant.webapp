@@ -56,12 +56,11 @@ export default function HeroSection() {
               <Link href="/pricing">
                 <Button 
                   size="lg" 
-                  className="group relative overflow-visible"
+                  className="group"
                   data-testid="button-generate-plan"
                 >
                   Generate My Business Plan
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  <div className="absolute -right-1 -top-1 w-3 h-3 bg-orange-500 dark:bg-orange-400 rounded-full animate-ping-slow" />
                 </Button>
               </Link>
               <Button 

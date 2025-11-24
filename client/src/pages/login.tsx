@@ -139,14 +139,11 @@ export default function Login() {
 
             <Button
               type="submit"
-              className="w-full relative overflow-visible"
+              className="w-full"
               disabled={isSubmitting}
               data-testid="button-login"
             >
               {isSubmitting ? "Signing in..." : "Sign In"}
-              {!isSubmitting && (
-                <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-primary rounded-full animate-ping-slow" />
-              )}
             </Button>
           </form>
 

@@ -77,9 +77,8 @@ export default function Footer() {
                 className="flex-1"
                 data-testid="input-newsletter"
               />
-              <Button className="relative overflow-visible" onClick={() => console.log('Newsletter subscribed')}>
+              <Button onClick={() => console.log('Newsletter subscribed')}>
                 Subscribe
-                <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-orange-500 dark:bg-orange-400 rounded-full animate-ping-slow" />
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
