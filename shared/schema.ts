@@ -103,6 +103,7 @@ export const businessPlans = pgTable("business_plans", {
   currentGenerationStage: text("current_generation_stage"),
   stripeSessionId: text("stripe_session_id"),
   userId: varchar("user_id"),
+  isDemoData: boolean("is_demo_data").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
