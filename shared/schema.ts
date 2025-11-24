@@ -29,6 +29,10 @@ export const users = pgTable("users", {
   verificationToken: text("verification_token"),
   tokenExpiry: timestamp("token_expiry"),
   
+  // Password reset fields
+  resetToken: text("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
+  
   // Admin flag
   isAdmin: boolean("is_admin").notNull().default(false),
   

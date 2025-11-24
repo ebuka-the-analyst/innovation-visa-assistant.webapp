@@ -7,11 +7,15 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByVerificationToken(token: string): Promise<User | undefined>;
+  getUserByResetToken(token: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserGoogleId(userId: string, googleId: string, profileData: { firstName?: string | null, lastName?: string | null, profileImageUrl?: string | null }): Promise<User>;
   verifyUserEmail(userId: string): Promise<void>;
   updateVerificationToken(userId: string, token: string, expiry: Date): Promise<void>;
+  updateResetToken(userId: string, token: string, expiry: Date): Promise<void>;
+  clearResetToken(userId: string): Promise<void>;
+  updatePassword(userId: string, hashedPassword: string): Promise<void>;
   getUserBusinessPlans(userId: string): Promise<BusinessPlan[]>;
   getDemoBusinessPlans(): Promise<BusinessPlan[]>;
   
@@ -60,6 +64,11 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.resetToken, token)).limit(1);
+    return result[0];
+  }
+
   async verifyUserEmail(userId: string): Promise<void> {
     await db
       .update(users)
@@ -78,6 +87,38 @@ export class DatabaseStorage implements IStorage {
       .set({
         verificationToken: token,
         tokenExpiry: expiry,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateResetToken(userId: string, token: string, expiry: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        resetToken: token,
+        resetTokenExpiry: expiry,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async clearResetToken(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        resetToken: null,
+        resetTokenExpiry: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updatePassword(userId: string, hashedPassword: string): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        password: hashedPassword,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));

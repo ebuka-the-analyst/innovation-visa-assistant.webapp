@@ -65,6 +65,91 @@ const BASE_URL = process.env.NODE_ENV === 'production'
   ? process.env.BASE_URL || 'https://innovatorfoundervisaassistant.co.uk'
   : 'http://localhost:5000';
 
+export async function sendPasswordResetEmail(
+  email: string,
+  firstName: string,
+  token: string
+): Promise<{ success: boolean; error?: string }> {
+  const resetUrl = `${BASE_URL}/reset-password?token=${token}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">🔐 Password Reset Request</h1>
+      </div>
+      
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${firstName},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          We received a request to reset your password for your UK Innovator Founder Visa Assistant account.
+        </p>
+        
+        <p style="font-size: 16px; margin-bottom: 30px;">
+          Click the button below to reset your password:
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" 
+             style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); 
+                    color: white; 
+                    padding: 15px 40px; 
+                    text-decoration: none; 
+                    border-radius: 5px; 
+                    font-size: 18px; 
+                    font-weight: bold;
+                    display: inline-block;">
+            🔑 Reset Password
+          </a>
+        </div>
+        
+        <p style="font-size: 14px; color: #666; margin-top: 30px;">
+          Or copy and paste this link into your browser:<br>
+          <a href="${resetUrl}" style="color: #11b6e9; word-break: break-all;">${resetUrl}</a>
+        </p>
+        
+        <div style="background: #fff3cd; border-left: 4px solid #ffa536; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p style="margin: 0; font-size: 14px; color: #856404;">
+            ⏰ <strong>This link expires in 1 hour</strong>
+          </p>
+        </div>
+        
+        <div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p style="margin: 0; font-size: 14px; color: #721c24;">
+            🛡️ <strong>Security Notice:</strong> If you didn't request a password reset, please ignore this email. Your password will remain unchanged.
+          </p>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          Questions? Contact <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: '🔐 Password Reset Request - UK Innovator Founder Visa Assistant',
+    html
+  });
+}
+
+export function getResetTokenExpiry(): Date {
+  const expiry = new Date();
+  expiry.setHours(expiry.getHours() + 1); // 1 hour expiry for password resets
+  return expiry;
+}
+
 export async function sendVerificationEmail(
   email: string,
   firstName: string,

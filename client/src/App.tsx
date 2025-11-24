@@ -18,6 +18,8 @@ import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import VerifyEmail from "@/pages/verify-email";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 import Dashboard from "@/pages/dashboard";
 import Pricing from "@/pages/pricing";
 import Questionnaire from "@/pages/questionnaire";
@@ -43,7 +45,7 @@ import Handoff from "@/pages/handoff";
 import AdminDashboard from "@/pages/admin-dashboard";
 import InterviewPrep from "@/pages/interview-prep";
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/pricing"];
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing"];
 
 function AnimatedSidebarTrigger() {
   const { state, toggleSidebar } = useSidebar();
@@ -81,6 +83,8 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/verify-email" component={VerifyEmail} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/questionnaire" component={Questionnaire} />
