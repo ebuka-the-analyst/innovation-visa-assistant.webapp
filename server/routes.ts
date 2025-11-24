@@ -10,7 +10,8 @@ import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
 import crypto from "crypto";
 import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
-import { sendPaymentReceiptEmail } from "./email";
+import { sendPaymentReceiptEmail, sendPasswordResetEmail, generateVerificationToken, getResetTokenExpiry } from "./email";
+import bcrypt from "bcrypt";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
@@ -32,6 +33,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth endpoint - user object already includes all fields from Google OAuth
   // No need to fetch from database again since it's already in req.user
+
+  // Password Reset Flow
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email || typeof email !== "string") {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      // Always return success to prevent email enumeration attacks
+      const user = await storage.getUserByEmail(email.toLowerCase());
+      
+      if (user) {
+        // Generate reset token (1 hour expiry)
+        const resetToken = generateVerificationToken();
+        const tokenExpiry = getResetTokenExpiry();
+
+        await storage.updateResetToken(user.id, resetToken, tokenExpiry);
+
+        // Send password reset email
+        await sendPasswordResetEmail(
+          user.email!,
+          user.firstName || "User",
+          resetToken
+        );
+      }
+
+      // Always return success message (security best practice)
+      res.json({ 
+        success: true, 
+        message: "If an account exists with this email, you will receive password reset instructions." 
+      });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ error: "Failed to process password reset request" });
+    }
+  });
+
+  app.get("/api/auth/verify-reset-token/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+
+      if (!token) {
+        return res.status(400).json({ valid: false, message: "Token is required" });
+      }
+
+      // Find user by reset token
+      const user = await storage.getUserByResetToken(token);
+      
+      if (!user || !user.resetTokenExpiry) {
+        return res.json({ valid: false, message: "Invalid reset token" });
+      }
+
+      // Check if token is expired
+      if (new Date() > user.resetTokenExpiry) {
+        await storage.clearResetToken(user.id);
+        return res.json({ valid: false, message: "Reset token has expired" });
+      }
+
+      res.json({ 
+        valid: true, 
+        email: user.email 
+      });
+    } catch (error) {
+      console.error("Verify reset token error:", error);
+      res.status(500).json({ valid: false, message: "Failed to verify token" });
+    }
+  });
+
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+
+      if (!token || typeof token !== "string") {
+        return res.status(400).json({ error: "Reset token is required" });
+      }
+
+      if (!newPassword || typeof newPassword !== "string" || newPassword.length < 6) {
+        return res.status(400).json({ error: "Password must be at least 6 characters" });
+      }
+
+      // Find user by reset token
+      const user = await storage.getUserByResetToken(token);
+      
+      if (!user || !user.resetTokenExpiry) {
+        return res.status(400).json({ error: "Invalid or expired reset token" });
+      }
+
+      // Check if token is expired
+      if (new Date() > user.resetTokenExpiry) {
+        await storage.clearResetToken(user.id);
+        return res.status(400).json({ error: "Reset token has expired. Please request a new one." });
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password and clear reset token
+      await storage.updatePassword(user.id, hashedPassword);
+      await storage.clearResetToken(user.id);
+
+      res.json({ 
+        success: true, 
+        message: "Password reset successful. You can now log in with your new password." 
+      });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ error: "Failed to reset password" });
+    }
+  });
   
   app.get("/api/health", async (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
