@@ -6,9 +6,20 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useState, useEffect } from "react";
 
 export function AuthHeader() {
   const [, setLocation] = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
     queryKey: ['/api/auth/user'],
@@ -35,31 +46,31 @@ export function AuthHeader() {
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="container mx-auto px-2 md:px-4 py-1.5">
+      <div className={`container mx-auto px-4 transition-all duration-300 ${isScrolled ? 'py-1.5' : 'py-3'}`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center transition-all duration-300 ${isScrolled ? 'gap-3' : 'gap-6'}`}>
             <Link href="/">
               <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-auth-logo">
                 <div className="logo-container overflow-hidden flex items-center">
-                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-8 md:h-10' : 'h-16 md:h-18'}`} />
+                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-8 md:h-10' : 'h-16 md:h-18'}`} />
                 </div>
               </div>
             </Link>
-            <nav className="hidden md:flex gap-2">
+            <nav className={`hidden md:flex transition-all duration-300 ${isScrolled ? 'gap-2' : 'gap-4'}`}>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation("/dashboard")}
                 data-testid="button-nav-dashboard"
               >
-                <Home className="h-3 w-3 mr-1" />
+                <Home className={`mr-1 transition-all duration-300 ${isScrolled ? 'h-3 w-3' : 'h-4 w-4'}`} />
                 Dashboard
               </Button>
             </nav>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:block text-xs text-muted-foreground">
+          <div className={`flex items-center transition-all duration-300 ${isScrolled ? 'gap-2' : 'gap-4'}`}>
+            <div className={`hidden sm:block text-muted-foreground transition-all duration-300 ${isScrolled ? 'text-xs' : 'text-sm'}`}>
               {user.displayName || user.email}
             </div>
             <ThemeToggle />
@@ -70,7 +81,7 @@ export function AuthHeader() {
               disabled={logoutMutation.isPending}
               data-testid="button-logout"
             >
-              <LogOut className="h-3 w-3 mr-1" />
+              <LogOut className={`mr-1 transition-all duration-300 ${isScrolled ? 'h-3 w-3' : 'h-4 w-4'}`} />
               Logout
             </Button>
           </div>

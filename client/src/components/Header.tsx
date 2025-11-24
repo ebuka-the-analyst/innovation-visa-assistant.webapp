@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
@@ -6,12 +6,21 @@ import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
 import ThemeToggle from "./ThemeToggle";
 import { useQuery } from "@tanstack/react-query";
-import { useState as useStateDisclaimer } from "react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [disclaimerDismissed, setDisclaimerDismissed] = useStateDisclaimer(false);
+  const [disclaimerDismissed, setDisclaimerDismissed] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [location, setLocation] = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleNavigation = (sectionId: string) => {
     setMobileMenuOpen(false);
@@ -47,35 +56,35 @@ export default function Header() {
         </div>
       )}
       
-      <nav className="container mx-auto px-2 md:px-4 h-12 md:h-14 flex items-center justify-between border-b border-border/40">
+      <nav className={`container mx-auto px-3 md:px-6 flex items-center justify-between border-b border-border/40 transition-all duration-300 ${isScrolled ? 'h-12 md:h-14' : 'h-24 md:h-36'}`}>
         {/* Logo */}
         <Link href="/">
           <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
             <div className="logo-container overflow-hidden flex items-center">
-              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-8 md:h-10' : 'h-20 md:h-28'}`} />
+              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-8 md:h-10' : 'h-20 md:h-28'}`} />
             </div>
           </div>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-4">
-          <Link href="/features" className="text-xs font-medium hover:text-primary transition-colors" data-testid="link-all-features">
+        <div className={`hidden md:flex items-center transition-all duration-300 ${isScrolled ? 'gap-4' : 'gap-8'}`}>
+          <Link href="/features" className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`} data-testid="link-all-features">
             All Features
           </Link>
-          <Link href="/tools-hub" className="text-xs font-medium hover:text-primary transition-colors" data-testid="link-tools-hub">
+          <Link href="/tools-hub" className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`} data-testid="link-tools-hub">
             Tools
           </Link>
           <button
             onClick={() => handleNavigation('pricing')}
-            className="text-xs font-medium hover:text-primary transition-colors"
+            className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`}
             data-testid="button-nav-pricing"
           >
             Pricing
           </button>
           <button
             onClick={() => handleNavigation('faq')}
-            className="text-xs font-medium hover:text-primary transition-colors"
+            className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`}
             data-testid="button-nav-faq"
           >
             FAQ
@@ -83,15 +92,15 @@ export default function Header() {
         </div>
 
         {/* CTA Buttons & Theme Toggle */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className={`hidden md:flex items-center transition-all duration-300 ${isScrolled ? 'gap-1' : 'gap-2'}`}>
           <ThemeToggle />
           <Link href="/login">
-            <Button variant="ghost" size="sm" data-testid="button-header-signin">
+            <Button variant="ghost" size={isScrolled ? "sm" : "default"} data-testid="button-header-signin">
               Sign In
             </Button>
           </Link>
           <Link href="/pricing">
-            <Button size="sm" data-testid="button-header-cta">
+            <Button size={isScrolled ? "sm" : "default"} data-testid="button-header-cta">
               Get Started
             </Button>
           </Link>
