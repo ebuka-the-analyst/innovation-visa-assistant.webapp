@@ -96,6 +96,23 @@ Authentication features a dual system with email/password and Google OAuth, incl
 - ✅ Smart Tips (6-22 per tool) and Action Plans (8-16 items per tool)
 - ✅ Platform value: 128 tools × £80-100 = £10,240-12,800 total value
 
+### Demo Business Plans Feature (November 24, 2025)
+**Comprehensive demonstration data for new users:**
+- **3 Complete Demo Plans**: Database-stored business plans showing 100% completion across all industries
+  - AI SaaS (NeuralFlow AI) - Premium tier
+  - Green Energy (SolarGrid UK) - Basic tier
+  - FinTech (PayFlow) - Premium tier
+- **All 52+ Fields Complete**: Each demo plan includes full data for all business plan fields including traction, team details, financials, compliance info
+- **Visible to All Users**: Demo plans appear on dashboard for all authenticated users
+- **"Demo" Badge**: Clear visual indicator distinguishing demo plans from user plans
+- **Hide/Show Controls**: Users can hide demo plans for cleaner dashboard view
+  - Eye/EyeOff toggle buttons on each demo plan card
+  - "Show X Hidden Demo Plans" button appears when plans are hidden
+  - State persists via localStorage (key: `hiddenDemoPlans`)
+- **Informational Banner**: Users without personal plans see banner explaining demo plans showcase 100% completion
+- **Schema Addition**: `isDemoData` boolean column in businessPlans table flags demo content
+- **Backend Integration**: `/api/dashboard/plans` returns both user and demo plans combined
+
 ## External Dependencies
 - **Database:** `PostgreSQL` managed by `Neon`.
 - **ORM:** `Drizzle ORM`.
