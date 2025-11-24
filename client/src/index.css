@@ -413,3 +413,12 @@
     }
   }
 }
+
+/* Logo dark mode adaptation */
+.logo-dark-mode {
+  filter: none;
+}
+
+.dark .logo-dark-mode {
+  filter: invert(1) hue-rotate(180deg);
+}

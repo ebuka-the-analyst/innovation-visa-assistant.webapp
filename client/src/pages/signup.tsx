@@ -80,7 +80,7 @@ export default function Signup() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
       <Card className="w-full max-w-md">
         <div className="flex justify-center pt-8 pb-4">
-          <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto" />
+          <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark-mode" />
         </div>
         <CardHeader className="space-y-1 pt-4">
           <CardTitle className="text-2xl font-bold text-center">Create your account</CardTitle>

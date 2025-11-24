@@ -39,7 +39,7 @@ export function AuthHeader() {
           <div className="flex items-center gap-6">
             <Link href="/">
               <div className="flex items-center cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-auth-logo">
-                <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto" />
+                <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark-mode" />
               </div>
             </Link>
             <nav className="hidden md:flex gap-4">

@@ -50,7 +50,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/">
           <div className="flex items-center cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
-            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-12 md:h-16 w-auto" />
+            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-12 md:h-16 w-auto logo-dark-mode" />
           </div>
         </Link>
 

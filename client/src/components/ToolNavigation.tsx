@@ -18,7 +18,7 @@ export function ToolNavigation() {
       <div className="flex items-center justify-between mb-6">
         <Link href="/">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-nav-logo">
-            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-8 w-auto" />
+            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-8 w-auto logo-dark-mode" />
           </div>
         </Link>
       </div>
