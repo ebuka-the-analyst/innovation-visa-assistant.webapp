@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import logoImg from "@assets/generated_images/professional_visa_assistant_logo_design.png";
+import { Logo } from "./Logo";
 import ThemeToggle from "./ThemeToggle";
 import { useQuery } from "@tanstack/react-query";
 import { useState as useStateDisclaimer } from "react";
@@ -49,8 +49,8 @@ export default function Header() {
       <nav className="container mx-auto px-3 md:px-6 h-20 md:h-28 flex items-center justify-between border-b border-border/40">
         {/* Logo */}
         <Link href="/">
-          <div className="flex flex-col items-start cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
-            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-16 md:h-24 w-auto max-w-none object-contain" />
+          <div className="flex items-center cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
+            <Logo className="h-16 md:h-24" />
           </div>
         </Link>
 

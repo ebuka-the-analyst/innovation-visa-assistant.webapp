@@ -8,7 +8,7 @@ import { LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import logoImg from "@assets/generated_images/professional_visa_assistant_logo_design.png";
+import { Logo } from "@/components/Logo";
 
 export default function Login() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -90,11 +90,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
       <Card className="w-full max-w-md">
         <div className="flex justify-center pt-8 pb-4">
-          <img 
-            src={logoImg} 
-            alt="UK Innovator Founder Visa Assistant" 
-            className="h-24 w-auto"
-          />
+          <Logo className="h-24" />
         </div>
         <CardHeader className="space-y-1 pt-4">
           <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
