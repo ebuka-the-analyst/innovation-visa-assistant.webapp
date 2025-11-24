@@ -41,8 +41,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as any;
       const userId = user.id;
-      const plans = await storage.getUserBusinessPlans(userId);
-      res.json(plans);
+      
+      // Fetch both user's own plans AND demo plans
+      const [userPlans, demoPlans] = await Promise.all([
+        storage.getUserBusinessPlans(userId),
+        storage.getDemoBusinessPlans(),
+      ]);
+      
+      // Combine user plans with demo plans (user plans first)
+      const allPlans = [...userPlans, ...demoPlans];
+      
+      res.json(allPlans);
     } catch (error) {
       console.error("Dashboard plans error:", error);
       res.status(500).json({ error: "Failed to fetch business plans" });

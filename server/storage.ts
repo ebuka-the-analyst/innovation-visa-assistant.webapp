@@ -13,6 +13,7 @@ export interface IStorage {
   verifyUserEmail(userId: string): Promise<void>;
   updateVerificationToken(userId: string, token: string, expiry: Date): Promise<void>;
   getUserBusinessPlans(userId: string): Promise<BusinessPlan[]>;
+  getDemoBusinessPlans(): Promise<BusinessPlan[]>;
   
   // Business plan management
   getBusinessPlan(id: string): Promise<BusinessPlan | undefined>;
@@ -155,6 +156,11 @@ export class DatabaseStorage implements IStorage {
 
   async getUserBusinessPlans(userId: string): Promise<BusinessPlan[]> {
     const result = await db.select().from(businessPlans).where(eq(businessPlans.userId, userId));
+    return result;
+  }
+
+  async getDemoBusinessPlans(): Promise<BusinessPlan[]> {
+    const result = await db.select().from(businessPlans).where(eq(businessPlans.isDemoData, true));
     return result;
   }
 
