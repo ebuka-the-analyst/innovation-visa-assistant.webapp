@@ -52,8 +52,8 @@ export function AuthHeader() {
             <Link href="/">
               <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-auth-logo">
                 <div className="logo-container overflow-hidden flex items-center">
-                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-8 md:h-10' : 'h-16 md:h-18'}`} />
-                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-8 md:h-10' : 'h-16 md:h-18'}`} />
+                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-8 md:h-10' : 'h-11 md:h-13'}`} />
+                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-8 md:h-10' : 'h-11 md:h-13'}`} />
                 </div>
               </div>
             </Link>
