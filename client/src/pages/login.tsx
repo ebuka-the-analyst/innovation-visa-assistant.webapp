@@ -11,7 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import logoImg from "@assets/generated_images/professional_visa_assistant_logo_design.png";
 
 export default function Login() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,11 +21,15 @@ export default function Login() {
   });
 
   useEffect(() => {
-    // If already authenticated, redirect to dashboard
+    // If already authenticated, redirect to appropriate dashboard
     if (!isLoading && isAuthenticated) {
-      window.location.href = "/dashboard";
+      if (user?.isAdmin) {
+        window.location.href = "/admin-dashboard";
+      } else {
+        window.location.href = "/dashboard";
+      }
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, user]);
 
   const handleGoogleLogin = () => {
     window.location.href = "/api/auth/google";
@@ -46,12 +50,19 @@ export default function Login() {
         throw new Error("Login failed");
       }
 
+      const userData = await response.json();
+
       toast({
         title: "Welcome back!",
         description: "Successfully signed in",
       });
 
-      setLocation("/dashboard");
+      // Redirect admin users to admin dashboard
+      if (userData.user?.isAdmin) {
+        window.location.href = "/admin-dashboard";
+      } else {
+        window.location.href = "/dashboard";
+      }
     } catch (error: any) {
       // Show user-friendly error message
       toast({

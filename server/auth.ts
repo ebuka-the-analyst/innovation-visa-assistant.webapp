@@ -40,6 +40,8 @@ interface User {
   firstName?: string | null;
   lastName?: string | null;
   profileImageUrl?: string | null;
+  isAdmin?: boolean;
+  isEmailVerified?: boolean;
 }
 
 export async function setupAuth(app: Express) {
@@ -180,6 +182,8 @@ export async function setupAuth(app: Express) {
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
+        isAdmin: user.isAdmin || false,
+        isEmailVerified: user.isEmailVerified || false,
       };
       done(null, sessionUser);
     } catch (error) {
