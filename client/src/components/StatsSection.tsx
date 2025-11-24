@@ -42,7 +42,7 @@ export default function StatsSection() {
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Card key={index} className="p-6 text-center hover-elevate">
+              <Card key={index} className="p-6 text-center hover-elevate border-border shadow-sm">
                 <div className="flex justify-center mb-4">
                   <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Icon className="w-6 h-6 text-primary" />
@@ -53,7 +53,7 @@ export default function StatsSection() {
                   <p className="text-sm font-semibold text-foreground">{stat.label}</p>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">{stat.subtext}</p>
-                <p className="text-xs font-medium text-primary/70">{stat.source}</p>
+                <p className="text-xs font-medium text-primary">{stat.source}</p>
               </Card>
             );
           })}
