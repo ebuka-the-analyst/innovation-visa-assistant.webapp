@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import logoUrl from "@assets/BhenMedia0_1763977195062.png";
+import logoUrl from "@assets/BhenMedia_1763977941642.png";
 
 export default function Footer() {
   return (
@@ -8,11 +8,9 @@ export default function Footer() {
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <img src={logoUrl} alt="BhenMedia Logo" className="w-10 h-10 object-contain" />
-              <span className="font-bold text-xl">UK Innovator Founder Visa Assistant</span>
-            </div>
+          <div className="space-y-4 lg:col-span-2">
+            <img src={logoUrl} alt="BhenMedia Logo" className="h-8 w-auto object-contain mb-3" />
+            <h3 className="font-bold text-lg">UK Innovator Founder Visa Assistant</h3>
             <p className="text-sm text-muted-foreground">
               AI-powered business plans and official GOV.UK guidance for UK Innovator Founder Visa applicants.
             </p>
@@ -92,9 +90,12 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            © 2025 UK Innovator Founder Visa Assistant. All rights reserved.
-          </p>
+          <div className="flex flex-col md:flex-row items-center gap-3">
+            <img src={logoUrl} alt="BhenMedia" className="h-6 w-auto object-contain opacity-70" />
+            <p className="text-sm text-muted-foreground">
+              © 2025 UK Innovator Founder Visa Assistant. All rights reserved.
+            </p>
+          </div>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
