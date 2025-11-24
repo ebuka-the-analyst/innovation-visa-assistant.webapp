@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -338,7 +339,7 @@ qualified legal and immigration advisors before submitting visa applications.
   };
 
   return (
-    <>
+    <ToolAccessGuard requiredTier="basic" toolName="Business Plan Generator">
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-7xl mx-auto">
@@ -677,6 +678,6 @@ qualified legal and immigration advisors before submitting visa applications.
           </Tabs>
         </div>
       </div>
-    </>
+    </ToolAccessGuard>
   );
 }

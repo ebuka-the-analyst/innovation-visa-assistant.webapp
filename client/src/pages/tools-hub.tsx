@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -11,12 +12,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ALL_TOOLS, Tool } from "@shared/tools-data";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Lock, CheckCircle } from "lucide-react";
 import * as Icons from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import Footer from "@/components/Footer";
+import { useTierAccess, type ToolTier } from "@/hooks/useTierAccess";
 
 type IconName = keyof typeof Icons;
 
@@ -31,6 +33,8 @@ export default function ToolsHub() {
     queryKey: ["/api/auth/me"],
     retry: false,
   });
+
+  const { canAccessTool, userTier } = useTierAccess();
 
   const filteredTools = useMemo(() => {
     return ALL_TOOLS.filter((tool) => {
@@ -197,52 +201,65 @@ export default function ToolsHub() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredTools.map((tool) => (
-                <Card
-                  key={tool.id}
-                  onClick={() => setLocation(`/tools/${tool.id}`)}
-                  className={`p-6 hover-elevate cursor-pointer transition-all border-2 ${
-                    tierColors[tool.tier as keyof typeof tierColors]
-                  }`}
-                  data-testid={`card-tool-${tool.id}`}
-                >
-                  <div className="space-y-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-1" data-testid={`title-${tool.id}`}>
-                          {tool.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">{tool.description}</p>
+              {filteredTools.map((tool) => {
+                const hasAccess = canAccessTool(tool.tier as ToolTier);
+                return (
+                  <Card
+                    key={tool.id}
+                    onClick={() => setLocation(`/tools/${tool.id}`)}
+                    className={`p-6 hover-elevate cursor-pointer transition-all border-2 relative ${
+                      tierColors[tool.tier as keyof typeof tierColors]
+                    } ${!hasAccess ? 'opacity-75' : ''}`}
+                    data-testid={`card-tool-${tool.id}`}
+                  >
+                    {!hasAccess && (
+                      <div className="absolute top-3 right-3 bg-orange-500 text-white p-1.5 rounded-full" data-testid={`lock-${tool.id}`}>
+                        <Lock className="w-3 h-3" />
                       </div>
-                      <div className="flex-shrink-0 text-primary">
-                        <GetIconComponent name={tool.icon} />
+                    )}
+                    {hasAccess && (
+                      <div className="absolute top-3 right-3 bg-green-500 text-white p-1.5 rounded-full" data-testid={`unlocked-${tool.id}`}>
+                        <CheckCircle className="w-3 h-3" />
                       </div>
-                    </div>
+                    )}
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg mb-1 flex items-center gap-2" data-testid={`title-${tool.id}`}>
+                            {tool.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">{tool.description}</p>
+                        </div>
+                        <div className="flex-shrink-0 text-primary">
+                          <GetIconComponent name={tool.icon} />
+                        </div>
+                      </div>
 
-                    <div className="flex flex-wrap gap-2 pt-3 border-t">
-                      <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-xs font-medium text-primary">
-                        {stageLabels[tool.stage as keyof typeof stageLabels]}
-                      </div>
-                      <div
-                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                          tool.tier === "free"
-                            ? "bg-gray-100 text-gray-700"
-                            : tool.tier === "basic"
-                              ? "bg-blue-100 text-blue-700"
-                              : tool.tier === "premium"
-                                ? "bg-purple-100 text-purple-700"
-                                : tool.tier === "enterprise"
-                                  ? "bg-orange-100 text-orange-700"
-                                  : "bg-amber-100 text-amber-700"
-                        }`}
-                        data-testid={`badge-tier-${tool.id}`}
-                      >
-                        {tierLabels[tool.tier as keyof typeof tierLabels]}
+                      <div className="flex flex-wrap gap-2 pt-3 border-t">
+                        <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-xs font-medium text-primary">
+                          {stageLabels[tool.stage as keyof typeof stageLabels]}
+                        </div>
+                        <div
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                            tool.tier === "free"
+                              ? "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                              : tool.tier === "basic"
+                                ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                                : tool.tier === "premium"
+                                  ? "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300"
+                                  : tool.tier === "enterprise"
+                                    ? "bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300"
+                                    : "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300"
+                          }`}
+                          data-testid={`badge-tier-${tool.id}`}
+                        >
+                          {tierLabels[tool.tier as keyof typeof tierLabels]}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>

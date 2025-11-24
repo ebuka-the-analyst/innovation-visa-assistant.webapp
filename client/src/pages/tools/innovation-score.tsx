@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -371,7 +372,7 @@ Performance vs Sector: ${benchmarkData.find(b => b.sector === selectedSector)?.g
 Percentile Estimate: ${innovationScore > (benchmarkData.find(b => b.sector === selectedSector)?.industryAvg ?? 0) + 10 ? 'Top 25%' : innovationScore > (benchmarkData.find(b => b.sector === selectedSector)?.industryAvg ?? 0) ? 'Top 50%' : 'Bottom 50%'}
 ` : ''}
 Cross-Sector Comparison:
-${benchmarkData.map(b => `  ${b.sector}: Industry Avg ${b.avgScore}% | Your Score ${b.yourScore}% | Gap: ${b.gap >= 0 ? '+' : ''}${b.gap}%`).join('\n')}
+${benchmarkData.map(b => `  ${b.sector}: Industry Avg ${b.industryAvg}% | Your Score ${b.yourScore}% | Gap: ${b.gap >= 0 ? '+' : ''}${b.gap}%`).join('\n')}
 
 ENDORSING BODY INNOVATION CRITERION ALIGNMENT
 ${'-'.repeat(80)}
@@ -495,7 +496,7 @@ for official assessment and application preparation.
   };
 
   return (
-    <>
+    <ToolAccessGuard requiredTier="premium" toolName="Innovation Score Calculator">
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-7xl mx-auto">
@@ -1073,6 +1074,6 @@ for official assessment and application preparation.
           </Tabs>
         </div>
       </div>
-    </>
+    </ToolAccessGuard>
   );
 }
