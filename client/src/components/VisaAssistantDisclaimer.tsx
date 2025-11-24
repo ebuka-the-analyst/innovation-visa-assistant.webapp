@@ -21,11 +21,11 @@ export default function VisaAssistantDisclaimer() {
         </span>
         <button
           onClick={() => setIsDismissed(true)}
-          className="text-white hover:opacity-75 transition-opacity flex-shrink-0 relative"
+          className="text-white hover:opacity-75 transition-opacity flex-shrink-0 relative overflow-visible"
           data-testid="button-dismiss-disclaimer"
         >
           <X className="h-4 w-4" />
-          <div className="absolute -right-0.5 -top-0.5 w-1.5 h-1.5 bg-red-500 rounded-full animate-ping-slow-red" />
+          <div className="absolute -right-1 -top-1 w-2 h-2 rounded-full animate-ping-slow-red" style={{ backgroundColor: '#ef4444' }} />
         </button>
       </div>
     </div>
