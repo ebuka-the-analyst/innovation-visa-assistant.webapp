@@ -61,8 +61,8 @@ export default function Header() {
         <Link href="/">
           <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
             <div className="logo-container overflow-hidden flex items-center">
-              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-8 md:h-10' : 'h-14 md:h-20'}`} />
-              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-8 md:h-10' : 'h-14 md:h-20'}`} />
+              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-16 md:h-20' : 'h-14 md:h-20'}`} />
+              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-16 md:h-20' : 'h-14 md:h-20'}`} />
             </div>
           </div>
         </Link>
