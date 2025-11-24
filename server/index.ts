@@ -31,6 +31,18 @@ function serveStatic(app: ExpressType) {
     );
   }
 
+  // Serve robots.txt with correct content-type
+  app.get("/robots.txt", (req, res) => {
+    res.type("text/plain");
+    res.sendFile(path.resolve(distPath, "robots.txt"));
+  });
+
+  // Serve sitemap.xml with correct content-type
+  app.get("/sitemap.xml", (req, res) => {
+    res.type("application/xml");
+    res.sendFile(path.resolve(distPath, "sitemap.xml"));
+  });
+
   app.use(express.static(distPath));
 
   // fall through to index.html ONLY for non-API routes

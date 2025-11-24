@@ -1,0 +1,84 @@
+Crawling and Indexing
+robots.txt is not valid 26 errors found
+If your robots.txt file is malformed, crawlers may not be able to understand how you want your website to be crawled or indexed. Learn more about robots.txt.
+Line #
+Content
+Error
+1
+<!DOCTYPE html>
+Syntax not understood
+2
+<html lang="en">
+Syntax not understood
+3
+<head>
+Syntax not understood
+4
+<meta charset="UTF-8" />
+Syntax not understood
+5
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+Syntax not understood
+6
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=3" />
+Syntax not understood
+7
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=3" />
+Syntax not understood
+8
+<link rel="shortcut icon" href="/favicon.png?v=3" />
+Syntax not understood
+9
+<title>UK-Innovation Visa Assistant - AI-Powered Visa & Business Plan Generator</title>
+Syntax not understood
+10
+<meta name="description" content="UK-Innovation Visa Assistant: AI-powered business plan generator for UK Innovator Founder visa applicants. Professional, endorsing body-ready plans from official GOV.UK guidance." />
+Unknown directive
+12
+<!-- PhD-level performance: Resource hints for faster loading -->
+Unknown directive
+13
+<link rel="preconnect" href="https://fonts.googleapis.com">
+Unknown directive
+14
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+Unknown directive
+15
+<link rel="dns-prefetch" href="https://fonts.googleapis.com">
+Unknown directive
+16
+<link rel="dns-prefetch" href="https://fonts.gstatic.com">
+Unknown directive
+18
+<!-- Preconnect to likely API endpoints for faster requests -->
+Syntax not understood
+19
+<link rel="dns-prefetch" href="https://api.resend.com">
+Unknown directive
+20
+<link rel="dns-prefetch" href="https://accounts.google.com">
+Unknown directive
+22
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+Unknown directive
+23
+<script type="module" crossorigin src="/assets/index-BBEdfExV.js"></script>
+Syntax not understood
+24
+<link rel="stylesheet" crossorigin href="/assets/index-4-St0j7r.css">
+Syntax not understood
+25
+</head>
+Syntax not understood
+26
+<body>
+Syntax not understood
+27
+<div id="root"></div>
+Syntax not understood
+28
+</body>
+Syntax not understood
+29
+</html>
+Syntax not understood
