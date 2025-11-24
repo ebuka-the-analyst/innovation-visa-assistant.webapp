@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Logo } from "./Logo";
+import logoImg from "@assets/official_logo.png";
 
 export default function Footer() {
   return (
@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4 lg:col-span-2">
-            <Logo className="h-16 mb-3" />
+            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-12 w-auto mb-3" />
             <p className="text-sm text-muted-foreground">
               AI-powered business plans and official GOV.UK guidance for UK Innovator Founder Visa applicants.
             </p>
@@ -90,7 +90,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-col md:flex-row items-center gap-3">
-            <Logo className="h-6 opacity-70" />
+            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-6 w-auto opacity-70" />
             <p className="text-sm text-muted-foreground">
               © 2025 UK Innovator Founder Visa Assistant. All rights reserved.
             </p>

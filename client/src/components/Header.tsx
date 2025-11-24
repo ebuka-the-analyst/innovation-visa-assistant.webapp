@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { Logo } from "./Logo";
+import logoImg from "@assets/official_logo.png";
 import ThemeToggle from "./ThemeToggle";
 import { useQuery } from "@tanstack/react-query";
 import { useState as useStateDisclaimer } from "react";
@@ -50,7 +50,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/">
           <div className="flex items-center cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
-            <Logo className="h-16 md:h-24" />
+            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-12 md:h-16 w-auto" />
           </div>
         </Link>
 

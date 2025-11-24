@@ -3,7 +3,7 @@ import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { LogOut, Home } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Logo } from "./Logo";
+import logoImg from "@assets/official_logo.png";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export function AuthHeader() {
@@ -39,7 +39,7 @@ export function AuthHeader() {
           <div className="flex items-center gap-6">
             <Link href="/">
               <div className="flex items-center cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-auth-logo">
-                <Logo className="h-14" />
+                <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto" />
               </div>
             </Link>
             <nav className="hidden md:flex gap-4">
