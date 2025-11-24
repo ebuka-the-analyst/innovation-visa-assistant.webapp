@@ -9,7 +9,7 @@ import { z } from "zod";
 import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
 import crypto from "crypto";
-import { setupAuth, isAuthenticated } from "./auth";
+import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
 import { sendPaymentReceiptEmail } from "./email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -758,6 +758,571 @@ ${generatedSections.join('\n\n---\n\n')}`;
     } catch (error) {
       console.error("Referral tracking error:", error);
       res.status(500).json({ error: "Failed to track referral" });
+    }
+  });
+
+  // ============ ADMIN API ENDPOINTS ============
+  
+  // Analytics Endpoints
+  app.get("/api/admin/analytics/overview", requireAdmin, async (req, res) => {
+    try {
+      // Get all users and plans
+      const allUsers = await storage.getAllUsers();
+      const allPlans = await storage.getAllBusinessPlans();
+      
+      // Calculate user metrics
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const totalUsers = allUsers.length;
+      const newUsers = allUsers.filter(u => new Date(u.createdAt) >= thirtyDaysAgo).length;
+      const activeUsers = allUsers.filter(u => u.isEmailVerified).length;
+      
+      // Calculate plan metrics
+      const totalPlans = allPlans.length;
+      const completedPlans = allPlans.filter(p => p.status === 'completed').length;
+      const demoPlans = allPlans.filter(p => p.isDemoData).length;
+      
+      // Get tool usage stats
+      const toolUsageStats = await storage.getToolUsageStats(10);
+      
+      // System health
+      const uptime = process.uptime();
+      const databaseStatus = await storage.checkDatabaseHealth();
+      
+      res.json({
+        users: {
+          total: totalUsers,
+          new: newUsers,
+          active: activeUsers,
+        },
+        plans: {
+          total: totalPlans,
+          completed: completedPlans,
+          demo: demoPlans,
+        },
+        topTools: toolUsageStats,
+        system: {
+          uptime: Math.floor(uptime),
+          uptimeFormatted: `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m`,
+          database: databaseStatus ? 'healthy' : 'degraded',
+        },
+      });
+    } catch (error) {
+      console.error("Admin analytics overview error:", error);
+      res.status(500).json({ error: "Failed to fetch analytics overview" });
+    }
+  });
+
+  app.get("/api/admin/analytics/users", requireAdmin, async (req, res) => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      
+      // Users by subscription tier
+      const tierCounts = {
+        free: 0,
+        basic: 0,
+        premium: 0,
+        enterprise: 0,
+        ultimate: 0,
+      };
+      
+      allUsers.forEach(user => {
+        const tier = user.subscriptionTier || 'free';
+        if (tier in tierCounts) {
+          tierCounts[tier as keyof typeof tierCounts]++;
+        }
+      });
+      
+      // New registrations per day (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const registrationsByDay: { [key: string]: number } = {};
+      allUsers
+        .filter(u => new Date(u.createdAt) >= thirtyDaysAgo)
+        .forEach(user => {
+          const dateKey = new Date(user.createdAt).toISOString().split('T')[0];
+          registrationsByDay[dateKey] = (registrationsByDay[dateKey] || 0) + 1;
+        });
+      
+      // Login activity (verified users as proxy for active users)
+      const verifiedUsers = allUsers.filter(u => u.isEmailVerified).length;
+      const unverifiedUsers = allUsers.filter(u => !u.isEmailVerified).length;
+      
+      res.json({
+        byTier: tierCounts,
+        registrationsByDay,
+        loginActivity: {
+          verified: verifiedUsers,
+          unverified: unverifiedUsers,
+          verificationRate: allUsers.length > 0 ? Math.round((verifiedUsers / allUsers.length) * 100) : 0,
+        },
+      });
+    } catch (error) {
+      console.error("Admin analytics users error:", error);
+      res.status(500).json({ error: "Failed to fetch user analytics" });
+    }
+  });
+
+  app.get("/api/admin/analytics/plans", requireAdmin, async (req, res) => {
+    try {
+      const allPlans = await storage.getAllBusinessPlans();
+      
+      // Plans by tier
+      const tierCounts = {
+        basic: 0,
+        premium: 0,
+        enterprise: 0,
+      };
+      
+      allPlans.forEach(plan => {
+        const tier = plan.tier;
+        if (tier in tierCounts) {
+          tierCounts[tier as keyof typeof tierCounts]++;
+        }
+      });
+      
+      // Plans by status
+      const statusCounts: { [key: string]: number } = {};
+      allPlans.forEach(plan => {
+        const status = plan.status || 'pending';
+        statusCounts[status] = (statusCounts[status] || 0) + 1;
+      });
+      
+      // Completion rate
+      const completedCount = allPlans.filter(p => p.status === 'completed').length;
+      const completionRate = allPlans.length > 0 ? Math.round((completedCount / allPlans.length) * 100) : 0;
+      
+      // Plans created per day (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const plansByDay: { [key: string]: number } = {};
+      allPlans
+        .filter(p => new Date(p.createdAt) >= thirtyDaysAgo)
+        .forEach(plan => {
+          const dateKey = new Date(plan.createdAt).toISOString().split('T')[0];
+          plansByDay[dateKey] = (plansByDay[dateKey] || 0) + 1;
+        });
+      
+      res.json({
+        byTier: tierCounts,
+        byStatus: statusCounts,
+        completionRate,
+        createdByDay: plansByDay,
+      });
+    } catch (error) {
+      console.error("Admin analytics plans error:", error);
+      res.status(500).json({ error: "Failed to fetch plan analytics" });
+    }
+  });
+
+  app.get("/api/admin/analytics/tools", requireAdmin, async (req, res) => {
+    try {
+      const toolUsageStats = await storage.getToolUsageStats();
+      
+      // Group by action type
+      const byActionType: { [key: string]: number } = {};
+      toolUsageStats.forEach(stat => {
+        byActionType[stat.action] = (byActionType[stat.action] || 0) + stat.count;
+      });
+      
+      // Most popular tools overall
+      const topTools = toolUsageStats
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+      
+      // Usage by time period (last 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const usageByDay: { [key: string]: number } = {};
+      toolUsageStats
+        .filter(stat => stat.timestamp && new Date(stat.timestamp) >= sevenDaysAgo)
+        .forEach(stat => {
+          if (stat.timestamp) {
+            const dateKey = new Date(stat.timestamp).toISOString().split('T')[0];
+            usageByDay[dateKey] = (usageByDay[dateKey] || 0) + stat.count;
+          }
+        });
+      
+      res.json({
+        byActionType,
+        topTools,
+        usageByDay,
+      });
+    } catch (error) {
+      console.error("Admin analytics tools error:", error);
+      res.status(500).json({ error: "Failed to fetch tool analytics" });
+    }
+  });
+
+  // User Management Endpoints
+  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+    try {
+      const { page = '1', limit = '20', search = '', tier = '' } = req.query;
+      
+      const pageNum = parseInt(page as string);
+      const limitNum = parseInt(limit as string);
+      const offset = (pageNum - 1) * limitNum;
+      
+      let allUsers = await storage.getAllUsers();
+      
+      // Filter by search (email, name)
+      if (search) {
+        const searchLower = (search as string).toLowerCase();
+        allUsers = allUsers.filter(u => 
+          u.email?.toLowerCase().includes(searchLower) ||
+          u.firstName?.toLowerCase().includes(searchLower) ||
+          u.lastName?.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      // Filter by tier
+      if (tier) {
+        allUsers = allUsers.filter(u => u.subscriptionTier === tier);
+      }
+      
+      const total = allUsers.length;
+      const users = allUsers.slice(offset, offset + limitNum);
+      
+      // Remove passwords from response
+      const safeUsers = users.map(({ password, ...user }) => user);
+      
+      res.json({
+        users: safeUsers,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          totalPages: Math.ceil(total / limitNum),
+        },
+      });
+    } catch (error) {
+      console.error("Admin users list error:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  app.get("/api/admin/users/:userId", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Get user's business plans
+      const plans = await storage.getUserBusinessPlans(userId);
+      
+      // Remove password from response
+      const { password, ...safeUser } = user;
+      
+      res.json({
+        user: safeUser,
+        plans,
+      });
+    } catch (error) {
+      console.error("Admin user details error:", error);
+      res.status(500).json({ error: "Failed to fetch user details" });
+    }
+  });
+
+  app.patch("/api/admin/users/:userId", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const updates = req.body;
+      
+      // Validate user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Only allow specific fields to be updated
+      const allowedFields = [
+        'subscriptionTier',
+        'isAdmin',
+        'subscriptionStatus',
+        'firstName',
+        'lastName',
+      ];
+      
+      const filteredUpdates: any = {};
+      Object.keys(updates).forEach(key => {
+        if (allowedFields.includes(key)) {
+          filteredUpdates[key] = updates[key];
+        }
+      });
+      
+      // Add updatedAt
+      filteredUpdates.updatedAt = new Date();
+      
+      const updatedUser = await storage.updateUser(userId, filteredUpdates);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ error: "Failed to update user" });
+      }
+      
+      // Remove password from response
+      const { password, ...safeUser } = updatedUser;
+      
+      res.json({ success: true, user: safeUser });
+    } catch (error) {
+      console.error("Admin user update error:", error);
+      res.status(500).json({ error: "Failed to update user" });
+    }
+  });
+
+  app.delete("/api/admin/users/:userId", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const adminUser = req.user as any;
+      
+      // Prevent self-deletion
+      if (userId === adminUser.id) {
+        return res.status(400).json({ error: "Cannot delete your own account" });
+      }
+      
+      // Validate user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Soft delete by deactivating
+      await storage.updateUser(userId, {
+        subscriptionStatus: 'cancelled',
+        updatedAt: new Date(),
+      });
+      
+      res.json({ success: true, message: "User deactivated successfully" });
+    } catch (error) {
+      console.error("Admin user delete error:", error);
+      res.status(500).json({ error: "Failed to delete user" });
+    }
+  });
+
+  // Business Plan Management Endpoints
+  app.get("/api/admin/plans", requireAdmin, async (req, res) => {
+    try {
+      const { page = '1', limit = '20', status = '', tier = '' } = req.query;
+      
+      const pageNum = parseInt(page as string);
+      const limitNum = parseInt(limit as string);
+      const offset = (pageNum - 1) * limitNum;
+      
+      let allPlans = await storage.getAllBusinessPlans();
+      
+      // Filter by status
+      if (status) {
+        allPlans = allPlans.filter(p => p.status === status);
+      }
+      
+      // Filter by tier
+      if (tier) {
+        allPlans = allPlans.filter(p => p.tier === tier);
+      }
+      
+      const total = allPlans.length;
+      const plans = allPlans.slice(offset, offset + limitNum);
+      
+      res.json({
+        plans,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          totalPages: Math.ceil(total / limitNum),
+        },
+      });
+    } catch (error) {
+      console.error("Admin plans list error:", error);
+      res.status(500).json({ error: "Failed to fetch plans" });
+    }
+  });
+
+  app.get("/api/admin/plans/:planId", requireAdmin, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      
+      const plan = await storage.getBusinessPlan(planId);
+      
+      if (!plan) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+      
+      // Get plan owner details
+      let owner = null;
+      if (plan.userId) {
+        const user = await storage.getUser(plan.userId);
+        if (user) {
+          const { password, ...safeUser } = user;
+          owner = safeUser;
+        }
+      }
+      
+      res.json({
+        plan,
+        owner,
+      });
+    } catch (error) {
+      console.error("Admin plan details error:", error);
+      res.status(500).json({ error: "Failed to fetch plan details" });
+    }
+  });
+
+  app.patch("/api/admin/plans/:planId", requireAdmin, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const updates = req.body;
+      
+      // Validate plan exists
+      const plan = await storage.getBusinessPlan(planId);
+      if (!plan) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+      
+      // Only allow specific fields to be updated
+      const allowedFields = [
+        'status',
+        'isDemoData',
+        'tier',
+        'currentGenerationStage',
+      ];
+      
+      const filteredUpdates: any = {};
+      Object.keys(updates).forEach(key => {
+        if (allowedFields.includes(key)) {
+          filteredUpdates[key] = updates[key];
+        }
+      });
+      
+      const updatedPlan = await storage.updateBusinessPlan(planId, filteredUpdates);
+      
+      if (!updatedPlan) {
+        return res.status(500).json({ error: "Failed to update plan" });
+      }
+      
+      res.json({ success: true, plan: updatedPlan });
+    } catch (error) {
+      console.error("Admin plan update error:", error);
+      res.status(500).json({ error: "Failed to update plan" });
+    }
+  });
+
+  app.delete("/api/admin/plans/:planId", requireAdmin, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      
+      // Validate plan exists
+      const plan = await storage.getBusinessPlan(planId);
+      if (!plan) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+      
+      // Delete the plan
+      await storage.deleteBusinessPlan(planId);
+      
+      res.json({ success: true, message: "Business plan deleted successfully" });
+    } catch (error) {
+      console.error("Admin plan delete error:", error);
+      res.status(500).json({ error: "Failed to delete plan" });
+    }
+  });
+
+  // System Control Endpoints
+  app.post("/api/admin/system/cache-clear", requireAdmin, async (req, res) => {
+    try {
+      // In a real implementation, this would clear React Query caches on the client side
+      // For now, we just send a success message that the frontend can use to invalidate caches
+      res.json({ 
+        success: true, 
+        message: "Cache clear signal sent. Client-side caches will be invalidated.",
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Admin cache clear error:", error);
+      res.status(500).json({ error: "Failed to clear cache" });
+    }
+  });
+
+  app.get("/api/admin/system/config", requireAdmin, async (req, res) => {
+    try {
+      const config = {
+        environment: process.env.NODE_ENV || 'production',
+        database: {
+          connected: await storage.checkDatabaseHealth(),
+          url: process.env.DATABASE_URL ? 'Configured' : 'Not configured',
+        },
+        stripe: {
+          secretKey: process.env.STRIPE_SECRET_KEY ? 'Configured' : 'Not configured',
+        },
+        openai: {
+          apiKey: process.env.OPENAI_API_KEY ? 'Configured' : 'Not configured',
+        },
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID ? 'Configured' : 'Not configured',
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET ? 'Configured' : 'Not configured',
+        },
+        session: {
+          secret: process.env.SESSION_SECRET ? 'Configured' : 'Not configured',
+        },
+        system: {
+          uptime: process.uptime(),
+          memory: process.memoryUsage(),
+          nodeVersion: process.version,
+        },
+      };
+      
+      res.json(config);
+    } catch (error) {
+      console.error("Admin system config error:", error);
+      res.status(500).json({ error: "Failed to fetch system config" });
+    }
+  });
+
+  app.post("/api/admin/system/export", requireAdmin, async (req, res) => {
+    try {
+      const { type } = req.body;
+      
+      if (!type || !['users', 'plans'].includes(type)) {
+        return res.status(400).json({ error: "Invalid export type. Must be 'users' or 'plans'" });
+      }
+      
+      let csvData = '';
+      
+      if (type === 'users') {
+        const users = await storage.getAllUsers();
+        
+        // CSV header
+        csvData = 'ID,Email,First Name,Last Name,Subscription Tier,Subscription Status,Email Verified,Admin,Created At\n';
+        
+        // CSV rows
+        users.forEach(user => {
+          csvData += `"${user.id}","${user.email || ''}","${user.firstName || ''}","${user.lastName || ''}","${user.subscriptionTier || 'free'}","${user.subscriptionStatus || 'inactive'}","${user.isEmailVerified}","${user.isAdmin}","${new Date(user.createdAt).toISOString()}"\n`;
+        });
+      } else if (type === 'plans') {
+        const plans = await storage.getAllBusinessPlans();
+        
+        // CSV header
+        csvData = 'ID,Business Name,Industry,Tier,Status,User ID,Is Demo,Created At\n';
+        
+        // CSV rows
+        plans.forEach(plan => {
+          csvData += `"${plan.id}","${plan.businessName}","${plan.industry}","${plan.tier}","${plan.status || 'pending'}","${plan.userId || ''}","${plan.isDemoData}","${new Date(plan.createdAt).toISOString()}"\n`;
+        });
+      }
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${type}-export-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvData);
+    } catch (error) {
+      console.error("Admin export error:", error);
+      res.status(500).json({ error: "Failed to export data" });
     }
   });
 

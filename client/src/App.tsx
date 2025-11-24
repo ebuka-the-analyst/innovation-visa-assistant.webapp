@@ -38,6 +38,7 @@ import FeaturesShowcase from "@/pages/features-showcase";
 import EndorserInvestmentRequirements from "@/pages/endorser-investment-requirements";
 import AIAssistant from "@/pages/ai-assistant";
 import Handoff from "@/pages/handoff";
+import AdminDashboard from "@/pages/admin-dashboard";
 
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/pricing"];
 
@@ -69,6 +70,7 @@ function Router() {
       <Route path="/endorser-investment" component={EndorserInvestmentRequirements} />
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/handoff" component={Handoff} />
+      <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

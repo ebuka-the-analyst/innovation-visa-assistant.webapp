@@ -15,11 +15,19 @@ export interface IStorage {
   getUserBusinessPlans(userId: string): Promise<BusinessPlan[]>;
   getDemoBusinessPlans(): Promise<BusinessPlan[]>;
   
+  // Admin user management
+  getAllUsers(): Promise<User[]>;
+  updateUser(userId: string, updates: Partial<User>): Promise<User | undefined>;
+  
   // Business plan management
   getBusinessPlan(id: string): Promise<BusinessPlan | undefined>;
   createBusinessPlan(plan: InsertBusinessPlan): Promise<BusinessPlan>;
   updateBusinessPlan(id: string, updates: Partial<BusinessPlan>): Promise<BusinessPlan | undefined>;
   getBusinessPlanByStripeSession(sessionId: string): Promise<BusinessPlan | undefined>;
+  
+  // Admin business plan management
+  getAllBusinessPlans(): Promise<BusinessPlan[]>;
+  deleteBusinessPlan(id: string): Promise<void>;
   
   // Session handoff for QR mobile upload
   createSessionHandoff(handoff: InsertSessionHandoff): Promise<SessionHandoff>;
@@ -29,6 +37,10 @@ export interface IStorage {
   
   // Referral tracking
   createReferral(referral: InsertReferral): Promise<Referral>;
+  
+  // Analytics and monitoring
+  getToolUsageStats(limit?: number): Promise<Array<{ toolId: string; action: string; count: number; timestamp?: Date }>>;
+  checkDatabaseHealth(): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -229,6 +241,70 @@ export class DatabaseStorage implements IStorage {
   async createReferral(insertReferral: InsertReferral): Promise<Referral> {
     const result = await db.insert(referrals).values(insertReferral).returning();
     return result[0]!;
+  }
+
+  // Admin methods
+  async getAllUsers(): Promise<User[]> {
+    const result = await db.select().from(users);
+    return result;
+  }
+
+  async updateUser(userId: string, updates: Partial<User>): Promise<User | undefined> {
+    const result = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, userId))
+      .returning();
+    return result[0];
+  }
+
+  async getAllBusinessPlans(): Promise<BusinessPlan[]> {
+    const result = await db.select().from(businessPlans);
+    return result;
+  }
+
+  async deleteBusinessPlan(id: string): Promise<void> {
+    await db.delete(businessPlans).where(eq(businessPlans.id, id));
+  }
+
+  async getToolUsageStats(limit?: number): Promise<Array<{ toolId: string; action: string; count: number; timestamp?: Date }>> {
+    // For now, return mock data from referrals as a proxy for tool usage
+    // In a real implementation, you would have a separate tool_usage_logs table
+    const result = await db
+      .select()
+      .from(referrals)
+      .limit(limit || 100);
+    
+    // Aggregate by toolId and channel (action)
+    const stats: { [key: string]: { toolId: string; action: string; count: number; timestamp?: Date } } = {};
+    
+    result.forEach(referral => {
+      const key = `${referral.toolId}-${referral.channel}`;
+      if (!stats[key]) {
+        stats[key] = {
+          toolId: referral.toolId,
+          action: referral.channel,
+          count: 0,
+          timestamp: referral.createdAt,
+        };
+      }
+      stats[key].count++;
+    });
+    
+    return Object.values(stats)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit || 100);
+  }
+
+  async checkDatabaseHealth(): Promise<boolean> {
+    try {
+      // Simple health check - try to query the database
+      await db.select().from(users).limit(1);
+      return true;
+    } catch (error) {
+      console.error("Database health check failed:", error);
+      return false;
+    }
   }
 }
 
