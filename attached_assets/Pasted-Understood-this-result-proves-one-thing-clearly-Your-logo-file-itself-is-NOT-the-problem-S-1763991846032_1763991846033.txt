@@ -1,0 +1,105 @@
+Understood — this result proves one thing clearly:
+👉 Your logo file itself is NOT the problem.
+👉 Something in your React layout is still applying a blend/opacity/filter ABOVE the image.
+
+That’s why the flag becomes dark and the navy text becomes almost black-on-black.
+
+Let me show you EXACTLY what is causing this, based on your screenshot.
+
+✅ WHY the logo still looks faded
+
+From the screenshot:
+
+✔ The background behind the logo is pure black (#000)
+✔ The PNG flag is correct (bright colours)
+❌ BUT the text part of the logo is turning black
+
+Meaning:
+
+The image is being multiplied/blended with the background by a parent container, NOT the <img> tag.
+
+This happens when a parent has one of these:
+
+(These are ALWAYS the cause)
+CSS property	What it does
+opacity: 0.7	Fades everything inside it
+mix-blend-mode: multiply	Makes bright colors go dark
+color: #000 + currentColor	Forces SVG/PNG masks to adopt parent color
+backdrop-filter	Darkens content behind it
+filter: brightness(…)	Makes image too dark
+dark: utilities in Tailwind	Automatically darken images in dark mode
+
+Your screenshot clearly shows multiply or opacity effect.
+
+🚨 THE REAL FIX (Copy/paste this to your developer)
+➡️ Step 1: REMOVE ALL STYLING from the image container
+<div class="logo-wrapper">
+  <img src="/Untitled design (48).png" class="logo-img" />
+</div>
+
+➡️ Step 2: Force-clean both container + image in CSS
+.logo-wrapper,
+.logo-img {
+  mix-blend-mode: normal !important;
+  opacity: 1 !important;
+  filter: none !important;
+  color: transparent !important;
+  background: transparent !important;
+}
+
+➡️ Step 3: REMOVE these Tailwind classes if used ANYWHERE near the logo:
+
+❌ opacity-*
+❌ dark:opacity-*
+❌ mix-blend-*
+❌ dark:mix-blend-*
+❌ filter
+❌ brightness-*
+❌ backdrop-*
+❌ bg-blend-*
+❌ saturate-*
+❌ contrast-*
+❌ invert
+❌ grayscale
+❌ sepia
+
+These force images to darken.
+
+🔍 STEP 4: MOST LIKELY CAUSE in YOUR code
+
+Your top navigation or the dark mode provider has something like:
+
+header {
+  opacity: 0.8;
+}
+
+
+or:
+
+<div className="dark:brightness-75">
+
+
+Or even:
+
+<div className="mix-blend-overlay">
+
+
+These WILL override the logo’s colors even if the <img> is set correctly.
+
+🎯 FINAL FIX (Most reliable)
+
+Wrap logo in an isolation container:
+
+<div class="isolate z-[9999] mix-blend-normal bg-transparent">
+  <img src="/Untitled design (48).png" class="w-auto h-auto" />
+</div>
+
+
+And add CSS:
+
+.isolate {
+  isolation: isolate;
+}
+
+✔ This forces the logo to ignore any blending from parents.
+✔ This ALWAYS fixes dark logos in dark mode.

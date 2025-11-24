@@ -455,4 +455,15 @@
   background: transparent !important;
   mix-blend-mode: normal !important;
   filter: none !important;
+  isolation: isolate !important;
+  opacity: 1 !important;
+}
+
+/* Logo isolation wrapper - prevents parent blending */
+.logo-isolate {
+  isolation: isolate;
+  mix-blend-mode: normal !important;
+  background: transparent !important;
+  filter: none !important;
+  opacity: 1 !important;
 }

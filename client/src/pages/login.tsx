@@ -91,9 +91,11 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
       <Card className="w-full max-w-md">
         <div className="flex justify-center pt-8 pb-4">
-          <div className="logo-container overflow-hidden">
-            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-32 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-32 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+          <div className="isolate z-[9999] mix-blend-normal bg-transparent">
+            <div className="logo-container overflow-hidden">
+              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-32 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
+              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-32 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+            </div>
           </div>
         </div>
         <CardHeader className="space-y-1 pt-4">
