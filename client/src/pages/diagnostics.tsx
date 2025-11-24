@@ -89,7 +89,12 @@ export default function DiagnosticsPage() {
   const errors = [endorserError, routeError, teamError, tractionError, ruleError].filter(Boolean);
   const isLoading = endorserLoading || routeLoading || teamLoading || tractionLoading || ruleLoading;
 
-  console.log("Diagnostics: isLoading =", isLoading, "errors =", errors.length, "data =", { endorserData, routeData, teamData, tractionData, ruleData });
+  console.log("Diagnostics: isLoading =", isLoading, "errors =", errors.length);
+  console.log("Diagnostics: endorserData =", endorserData, "isArray?", Array.isArray(endorserData));
+  console.log("Diagnostics: ruleData =", ruleData, "criteria isArray?", ruleData ? Array.isArray(ruleData.criteria) : "no ruleData");
+  console.log("Diagnostics: routeData =", routeData, "viableRoutes isArray?", routeData ? Array.isArray(routeData.viableRoutes) : "no routeData");
+  console.log("Diagnostics: teamData =", teamData);
+  console.log("Diagnostics: tractionData =", tractionData);
 
   useEffect(() => {
     if (!planId) {
