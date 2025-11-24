@@ -45,12 +45,119 @@ function serveStatic(app: ExpressType) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html ONLY for non-API routes
+  // Cache the base HTML template to avoid repeated file reads
+  const indexPath = path.resolve(distPath, "index.html");
+  let baseHtmlTemplate: string | null = null;
+  
+  function getBaseHtml(): string {
+    if (!baseHtmlTemplate) {
+      baseHtmlTemplate = fs.readFileSync(indexPath, 'utf8');
+    }
+    return baseHtmlTemplate;
+  }
+
+  // Route-specific meta tags for SEO (server-side injection)
+  const routeMeta: Record<string, { title: string; description: string; schema?: any }> = {
+    '/faq': {
+      title: 'UK Innovator Founder Visa FAQ | Common Questions Answered',
+      description: 'Get answers to 25+ frequently asked questions about the UK Innovator Founder Visa. Expert guidance on endorsement, requirements, costs, timeline, and settlement.',
+      schema: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is the UK Innovator Founder Visa?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The UK Innovator Founder Visa is a visa route for experienced businesspeople seeking to establish an innovative, viable and scalable business in the UK."
+            }
+          }
+        ]
+      }
+    },
+    '/guide': {
+      title: 'UK Innovator Founder Visa Complete Guide 2025 | Requirements, Process & Timeline',
+      description: 'Comprehensive PhD-level guide to the UK Innovator Founder Visa. Learn requirements, endorsement process, innovation criteria, financial planning, and path to settlement.',
+      schema: {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "UK Innovator Founder Visa Complete Guide 2025",
+        "description": "Comprehensive guide covering all aspects of the UK Innovator Founder Visa application process",
+        "author": {
+          "@type": "Organization",
+          "name": "UK Innovator Founder Visa Assistant Team"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "UK Innovator Founder Visa Assistant"
+        },
+        "datePublished": "2025-01-01"
+      }
+    }
+  };
+
+  // fall through to index.html ONLY for non-API routes with SEO injection
   app.use("*", (req, res, next) => {
     if (req.path.startsWith("/api/")) {
       return next(); // Skip for API routes
     }
-    res.sendFile(path.resolve(distPath, "index.html"));
+
+    let html = getBaseHtml();
+    
+    // Check if this route has specific meta tags  
+    const meta = routeMeta[req.path];
+    if (meta) {
+      console.log(`[SEO] Injecting meta for route: ${req.path}`);
+      // Inject route-specific title
+      if (html.includes('<title>')) {
+        html = html.replace(
+          /<title>.*?<\/title>/,
+          `<title>${meta.title}</title>`
+        );
+      } else {
+        html = html.replace('</head>', `    <title>${meta.title}</title>\n  </head>`);
+      }
+      
+      // Inject route-specific description
+      if (html.includes('name="description"')) {
+        html = html.replace(
+          /<meta name="description" content=".*?"\/>/,
+          `<meta name="description" content="${meta.description}"/>`
+        );
+      } else {
+        html = html.replace('</head>', `    <meta name="description" content="${meta.description}"/>\n  </head>`);
+      }
+      
+      // Inject canonical URL (handle whitespace variations)
+      const canonicalUrl = `https://innovatorfoundervisaassistant.co.uk${req.path}`;
+      if (html.includes('rel="canonical"')) {
+        html = html.replace(
+          /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/,
+          `<link rel="canonical" href="${canonicalUrl}" />`
+        );
+      } else {
+        html = html.replace('</head>', `    <link rel="canonical" href="${canonicalUrl}" />\n  </head>`);
+      }
+      
+      // Inject OG URL (handle whitespace variations)
+      if (html.includes('property="og:url"')) {
+        html = html.replace(
+          /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/,
+          `<meta property="og:url" content="${canonicalUrl}" />`
+        );
+      } else {
+        html = html.replace('</head>', `    <meta property="og:url" content="${canonicalUrl}" />\n  </head>`);
+      }
+      
+      // Inject route-specific schema if available
+      if (meta.schema) {
+        const schemaScript = `\n    <script type="application/ld+json" class="seo-schema">\n    ${JSON.stringify(meta.schema, null, 2)}\n    </script>`;
+        html = html.replace('</head>', `${schemaScript}\n  </head>`);
+      }
+    }
+    
+    res.send(html);
   });
 }
 const app = express();
@@ -135,14 +242,14 @@ app.use((req, res, next) => {
   // Permissions policy (formerly Feature-Policy)
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   
-  // Content Security Policy (CSP) - allows Google Analytics and fonts
+  // Content Security Policy (CSP) - allows Google Analytics, fonts, and APIs
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://challenges.cloudflare.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://www.google-analytics.com https://accounts.google.com https://api.resend.com",
+    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://accounts.google.com https://api.resend.com wss:",
     "frame-src 'self' https://challenges.cloudflare.com https://accounts.google.com",
     "base-uri 'self'",
     "form-action 'self'"
