@@ -9,6 +9,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { Download, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { SEOHead } from "@/components/SEOHead";
+import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from "@/lib/seo-schemas";
 
 export default function FinancialProjections() {
   const [initial, setInitial] = useState(50000);
@@ -136,8 +138,32 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
     }
   }, []);
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "https://innovatorfoundervisaassistant.co.uk/" },
+    { name: "Tools Hub", url: "https://innovatorfoundervisaassistant.co.uk/tools-hub" },
+    { name: "Financial Projections", url: "https://innovatorfoundervisaassistant.co.uk/tools/financial-projections" }
+  ]);
+
+  const articleSchema = createArticleSchema(
+    "Financial Projections Tool for UK Innovator Founder Visa",
+    "Create 12-month financial projections for your UK Innovator Founder Visa application. Calculate cash runway, burn rate, break-even point, and ensure GOV.UK compliance.",
+    "2025-11-24"
+  );
+
+  const combinedSchema = {
+    "@context": "https://schema.org",
+    "@graph": [organizationSchema, breadcrumbSchema, articleSchema]
+  };
+
   return (
     <>
+      <SEOHead
+        title="Financial Projections Tool | UK Innovator Founder Visa Compliance"
+        description="Generate GOV.UK-compliant 12-month financial projections for your UK Innovator Founder Visa. Calculate cash runway, burn rate, profitability, and demonstrate viability criteria."
+        canonical="https://innovatorfoundervisaassistant.co.uk/tools/financial-projections"
+        keywords="financial projections UK visa, innovator visa financials, cash flow projections, business viability calculator, startup financial planning"
+        schema={combinedSchema}
+      />
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <ToolNavigation />

@@ -15,6 +15,8 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, LineChart, Line
 } from 'recharts';
+import { SEOHead } from "@/components/SEOHead";
+import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from "@/lib/seo-schemas";
 
 type InnovationFactors = {
   novelty: number;
@@ -495,8 +497,32 @@ for official assessment and application preparation.
     URL.revokeObjectURL(url);
   };
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "https://innovatorfoundervisaassistant.co.uk/" },
+    { name: "Tools Hub", url: "https://innovatorfoundervisaassistant.co.uk/tools-hub" },
+    { name: "Innovation Score Calculator", url: "https://innovatorfoundervisaassistant.co.uk/tools/innovation-score" }
+  ]);
+
+  const articleSchema = createArticleSchema(
+    "Innovation Score Calculator for UK Innovator Founder Visa",
+    "Comprehensive innovation assessment tool measuring novelty, technical advancement, market disruption, IP protection, and R&D investment for your UK Innovator Founder Visa application.",
+    "2025-11-24"
+  );
+
+  const combinedSchema = {
+    "@context": "https://schema.org",
+    "@graph": [organizationSchema, breadcrumbSchema, articleSchema]
+  };
+
   return (
     <ToolAccessGuard requiredTier="premium" toolName="Innovation Score Calculator">
+      <SEOHead
+        title="Innovation Score Calculator | UK Innovator Founder Visa Assessment"
+        description="Calculate your innovation score for UK Innovator Founder Visa applications. Assess novelty, technical advancement, market disruption, IP protection, and R&D investment with industry benchmarks."
+        canonical="https://innovatorfoundervisaassistant.co.uk/tools/innovation-score"
+        keywords="innovation score calculator, UK visa innovation assessment, innovator visa criteria, innovation evaluation tool, visa innovation requirements"
+        schema={combinedSchema}
+      />
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-7xl mx-auto">
