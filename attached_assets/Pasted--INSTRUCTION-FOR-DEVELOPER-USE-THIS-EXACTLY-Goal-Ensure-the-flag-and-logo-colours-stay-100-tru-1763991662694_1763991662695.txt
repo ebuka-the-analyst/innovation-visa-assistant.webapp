@@ -1,0 +1,122 @@
+✅ INSTRUCTION FOR DEVELOPER (USE THIS EXACTLY)
+Goal:
+
+Ensure the flag and logo colours stay 100% true (red, white, blue, orange, navy) in both dark mode and light mode, using the current PNG file.
+
+1️⃣ STOP any blending, opacity, filter, or shading from affecting the logo
+
+In the logo component CSS, add:
+
+.logo-img {
+  mix-blend-mode: normal !important;
+  filter: none !important;
+  opacity: 1 !important;
+  display: block;
+}
+
+
+In Tailwind, apply:
+
+<img 
+  src="/Untitled design (48).png"
+  class="logo-img w-full h-auto !mix-blend-normal !filter-none !opacity-100"
+/>
+
+2️⃣ ENSURE NO PARENT CONTAINER affects the colors
+
+The parent container must not apply blending, opacity, shadows, or filters.
+
+Add this:
+
+.logo-container {
+  background: transparent !important;
+  mix-blend-mode: normal !important;
+  filter: none !important;
+}
+
+
+Tailwind version:
+
+<div class="logo-container bg-transparent mix-blend-normal">
+  <img ... />
+</div>
+
+3️⃣ REMOVE Tailwind utilities that break the colour accuracy
+
+These classes must NOT be used on the logo or its container:
+
+❌ opacity-*
+❌ mix-blend-*
+❌ filter
+❌ brightness-*
+❌ contrast-*
+❌ saturate-*
+❌ backdrop-*
+❌ dark:opacity-*
+❌ dark:mix-blend-*
+
+If any of these are applied to the container, they will darken the flag.
+
+4️⃣ NO shadow/gloW overlays over the logo
+
+If you added a glow or shadow using:
+
+shadow-*
+
+drop-shadow-*
+
+CSS blur
+
+background gradients
+
+❌ remove those from the logo container.
+
+If needed, add the shadow behind the container, not on the logo:
+
+<div class="shadow-xl">
+  <img ... />
+</div>
+
+5️⃣ ENSURE the logo PNG stays unmodified
+
+Do NOT apply:
+
+transform: scale() together with clip-path (causes color distortion)
+
+object-fit cover combined with filters
+
+dark-mode utilities on the image itself
+
+Only use:
+
+object-fit: contain;
+object-position: center;
+
+6️⃣ FINAL WORKING EXAMPLE
+<div class="logo-container bg-transparent mix-blend-normal p-0 m-0">
+  <img 
+    src="/Untitled design (48).png" 
+    class="logo-img w-full h-auto object-contain 
+    !mix-blend-normal !filter-none !opacity-100 
+    p-0 m-0"
+  />
+</div>
+
+
+This guarantees:
+
+Flag stays red/white/blue
+
+Arrow stays orange
+
+Text stays navy/orange
+
+Dark mode does NOT darken it
+
+White mode does NOT brighten it
+
+👍 THIS IS THE CORRECT DEVELOPER INSTRUCTION
+
+Just send this message to him exactly as written.
+
+If you want, I can also generate a cleaned flat version of the logo with zero baked-in shadows for maximum color accuracy.

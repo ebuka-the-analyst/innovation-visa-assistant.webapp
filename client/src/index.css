@@ -417,26 +417,24 @@
 /* Logo dark mode - show/hide based on theme */
 .logo-light {
   display: block;
-  filter: none;
-  -webkit-filter: none;
-  object-fit: cover;
+  mix-blend-mode: normal !important;
+  filter: none !important;
+  opacity: 1 !important;
+  object-fit: contain;
   object-position: center;
   padding: 0;
   margin: 0;
-  clip-path: inset(18% 3% 20% 3%);
-  transform: scale(1.5);
 }
 
 .logo-dark {
   display: none;
-  filter: none;
-  -webkit-filter: none;
-  object-fit: cover;
+  mix-blend-mode: normal !important;
+  filter: none !important;
+  opacity: 1 !important;
+  object-fit: contain;
   object-position: center;
   padding: 0;
   margin: 0;
-  clip-path: inset(18% 3% 20% 3%);
-  transform: scale(1.5);
 }
 
 .dark .logo-light {
@@ -445,10 +443,16 @@
 
 .dark .logo-dark {
   display: block;
+  mix-blend-mode: normal !important;
   filter: none !important;
-  -webkit-filter: none !important;
-  object-fit: cover;
+  opacity: 1 !important;
+  object-fit: contain;
   object-position: center;
-  clip-path: inset(18% 3% 20% 3%);
-  transform: scale(1.5);
+}
+
+/* Logo container - no color interference */
+.logo-container {
+  background: transparent !important;
+  mix-blend-mode: normal !important;
+  filter: none !important;
 }

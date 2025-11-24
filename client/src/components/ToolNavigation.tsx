@@ -18,9 +18,9 @@ export function ToolNavigation() {
       {/* Header with Logo and Branding */}
       <div className="flex items-center justify-between mb-6">
         <Link href="/">
-          <div className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-nav-logo">
-            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-14 w-auto logo-light scale-110" />
-            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-14 w-auto logo-dark scale-110" />
+          <div className="logo-container overflow-hidden flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-nav-logo">
+            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-14 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
+            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-14 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
           </div>
         </Link>
       </div>
