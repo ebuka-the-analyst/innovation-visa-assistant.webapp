@@ -423,8 +423,8 @@
   object-position: center;
   padding: 0;
   margin: 0;
-  clip-path: inset(15% 0 15% 0);
-  transform: scaleY(1.4);
+  clip-path: inset(18% 3% 20% 3%);
+  transform: scale(1.5);
 }
 
 .logo-dark {
@@ -435,8 +435,8 @@
   object-position: center;
   padding: 0;
   margin: 0;
-  clip-path: inset(15% 0 15% 0);
-  transform: scaleY(1.4);
+  clip-path: inset(18% 3% 20% 3%);
+  transform: scale(1.5);
 }
 
 .dark .logo-light {
@@ -449,6 +449,6 @@
   -webkit-filter: none !important;
   object-fit: cover;
   object-position: center;
-  clip-path: inset(15% 0 15% 0);
-  transform: scaleY(1.4);
+  clip-path: inset(18% 3% 20% 3%);
+  transform: scale(1.5);
 }
