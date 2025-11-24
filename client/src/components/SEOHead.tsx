@@ -4,20 +4,24 @@ interface SEOHeadProps {
   title: string;
   description: string;
   canonical?: string;
+  path?: string;
   ogImage?: string;
   ogType?: 'website' | 'article';
   keywords?: string;
   schema?: object;
+  schemas?: object[];
 }
 
 export function SEOHead({
   title,
   description,
   canonical,
+  path,
   ogImage = 'https://innovatorfoundervisaassistant.co.uk/og-image.png',
   ogType = 'website',
   keywords,
-  schema
+  schema,
+  schemas
 }: SEOHeadProps) {
   useEffect(() => {
     // Set title
@@ -66,19 +70,25 @@ export function SEOHead({
       canonicalLink.rel = 'canonical';
       document.head.appendChild(canonicalLink);
     }
-    canonicalLink.href = canonical || window.location.href;
+    const fullCanonical = canonical || (path ? `https://innovatorfoundervisaassistant.co.uk${path}` : window.location.href);
+    canonicalLink.href = fullCanonical;
 
     // Schema.org structured data
-    if (schema) {
-      let schemaScript = document.querySelector('script[type="application/ld+json"]') as HTMLScriptElement;
-      if (!schemaScript) {
-        schemaScript = document.createElement('script');
-        schemaScript.type = 'application/ld+json';
-        document.head.appendChild(schemaScript);
-      }
-      schemaScript.textContent = JSON.stringify(schema);
-    }
-  }, [title, description, canonical, ogImage, ogType, keywords, schema]);
+    const schemaData = schemas || (schema ? [schema] : []);
+    
+    // Remove existing schema scripts
+    const existingSchemas = document.querySelectorAll('script[type="application/ld+json"].dynamic-schema');
+    existingSchemas.forEach(s => s.remove());
+    
+    // Add new schema scripts
+    schemaData.forEach((schemaItem, index) => {
+      const schemaScript = document.createElement('script');
+      schemaScript.type = 'application/ld+json';
+      schemaScript.className = 'dynamic-schema';
+      schemaScript.textContent = JSON.stringify(schemaItem);
+      document.head.appendChild(schemaScript);
+    });
+  }, [title, description, canonical, path, ogImage, ogType, keywords, schema, schemas]);
 
   return null;
 }

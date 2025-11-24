@@ -147,3 +147,17 @@ export const createArticleSchema = (title: string, description: string, datePubl
   "datePublished": datePublished,
   "dateModified": new Date().toISOString().split('T')[0]
 });
+
+// FAQ Schema generator for dynamic FAQ pages
+export const createFAQSchema = (faqs: Array<{ question: string; answer: string }>) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+});

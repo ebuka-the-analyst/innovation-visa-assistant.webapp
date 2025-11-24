@@ -44,8 +44,10 @@ import AIAssistant from "@/pages/ai-assistant";
 import Handoff from "@/pages/handoff";
 import AdminDashboard from "@/pages/admin-dashboard";
 import InterviewPrep from "@/pages/interview-prep";
+import FAQ from "@/pages/faq";
+import Guide from "@/pages/guide";
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing"];
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide"];
 
 function AnimatedSidebarTrigger() {
   const { state, toggleSidebar } = useSidebar();
@@ -106,6 +108,8 @@ function Router() {
       <Route path="/handoff" component={Handoff} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/interview-prep" component={InterviewPrep} />
+      <Route path="/faq" component={FAQ} />
+      <Route path="/guide" component={Guide} />
       <Route component={NotFound} />
     </Switch>
   );
