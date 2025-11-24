@@ -32,7 +32,7 @@ const tierColors = {
 };
 
 const tierBenefits: Record<ToolTier, string[]> = {
-  free: ["13 essential tools", "Basic visa guidance", "Email support"],
+  free: ["13 essential tools", "Basic Innovator Founder Visa guidance", "Email support"],
   basic: ["20 tools access", "Standard business planning", "48-hour delivery", "PDF downloads"],
   premium: ["83 tools access", "Comprehensive analysis", "24-hour delivery", "Industry frameworks", "Market research"],
   enterprise: ["109 advanced tools", "Expert modeling", "12-hour priority", "Risk analysis", "Global roadmaps"],

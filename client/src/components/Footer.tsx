@@ -74,7 +74,7 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Stay Updated</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Get visa tips and updates to updates@innovatorfoundervisaassistant.co.uk
+              Get UK Innovator Founder Visa tips and updates to updates@innovatorfoundervisaassistant.co.uk
             </p>
             <div className="flex gap-2">
               <Input 
@@ -88,7 +88,7 @@ export default function Footer() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              We'll send updates from updates@innovatorfoundervisaassistant.co.uk
+              We'll send Innovator Founder Visa updates from updates@innovatorfoundervisaassistant.co.uk
             </p>
           </div>
         </div>
