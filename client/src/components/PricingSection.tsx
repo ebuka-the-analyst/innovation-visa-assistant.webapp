@@ -124,7 +124,7 @@ export default function PricingSection() {
                 >
                   {tier.cta}
                   {tier.popular && (
-                    <div className="absolute -right-1 -top-1 w-3 h-3 bg-orange-500 dark:bg-orange-400 rounded-full animate-ping" />
+                    <div className="absolute -right-1 -top-1 w-3 h-3 bg-orange-500 dark:bg-orange-400 rounded-full animate-ping-slow" />
                   )}
                 </Button>
               </Link>

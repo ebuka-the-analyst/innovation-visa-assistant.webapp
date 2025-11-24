@@ -77,14 +77,15 @@ export default function BlackNovemberBanner() {
                 data-testid="button-black-november-cta"
               >
                 Claim
-                <div className="absolute -right-1 -top-1 w-2 h-2 bg-yellow-300 rounded-full animate-ping" />
+                <div className="absolute -right-1 -top-1 w-2 h-2 bg-yellow-300 rounded-full animate-ping-slow" />
               </Button>
               <button
                 onClick={() => setIsVisible(false)}
-                className="p-1 md:p-2 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0"
+                className="p-1 md:p-2 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0 relative"
                 data-testid="button-close-black-november"
               >
                 <X className="w-4 md:w-5 h-4 md:h-5 text-gray-400 hover:text-white transition-colors" />
+                <div className="absolute -right-0.5 -top-0.5 w-1.5 h-1.5 bg-orange-400 rounded-full animate-ping-slow" />
               </button>
             </div>
           </div>

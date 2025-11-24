@@ -13,7 +13,7 @@ import CookieConsent from "@/components/CookieConsent";
 import ToolsChronographWheel from "@/components/ToolsChronographWheel";
 import BlackNovemberBanner from "@/components/BlackNovemberBanner";
 import { Button } from "@/components/ui/button";
-import { HandIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
@@ -61,11 +61,9 @@ function AnimatedSidebarTrigger() {
           data-testid="button-sidebar-toggle"
           className="-ml-1 md:-ml-2 h-8 md:h-9 w-8 md:w-9 flex items-center justify-center group relative overflow-visible"
         >
-          <div className={`transition-all duration-500 ease-in-out ${isOpen ? '-scale-x-100' : 'scale-x-100'}`}>
-            <HandIcon className={`w-5 h-5 ${isOpen ? 'animate-pulse' : 'animate-bounce'}`} />
-          </div>
+          <ChevronRight className={`w-5 h-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`} />
           {!isOpen && (
-            <div className="absolute -right-1 -top-1 w-2 h-2 bg-primary rounded-full animate-ping" />
+            <div className="absolute -right-1 -top-1 w-2 h-2 bg-primary rounded-full animate-ping-slow" />
           )}
         </Button>
       </TooltipTrigger>

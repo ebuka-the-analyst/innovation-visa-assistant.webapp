@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4 lg:col-span-2">
-            <img src={logoUrl} alt="UK Innovator Founder Visa Assistant" className="h-12 w-auto object-contain mb-3" />
+            <img src={logoUrl} alt="UK Innovator Founder Visa Assistant" className="h-16 w-auto object-contain mb-3" />
             <p className="text-sm text-muted-foreground">
               AI-powered business plans and official GOV.UK guidance for UK Innovator Founder Visa applicants.
             </p>
@@ -79,7 +79,7 @@ export default function Footer() {
               />
               <Button className="relative overflow-visible" onClick={() => console.log('Newsletter subscribed')}>
                 Subscribe
-                <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-orange-500 dark:bg-orange-400 rounded-full animate-ping" />
+                <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-orange-500 dark:bg-orange-400 rounded-full animate-ping-slow" />
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">

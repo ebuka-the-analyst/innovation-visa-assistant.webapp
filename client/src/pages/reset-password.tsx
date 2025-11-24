@@ -293,7 +293,7 @@ export default function ResetPassword() {
             >
               {isSubmitting ? "Resetting..." : "Reset Password"}
               {!isSubmitting && (
-                <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-primary rounded-full animate-ping" />
+                <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-primary rounded-full animate-ping-slow" />
               )}
             </Button>
             <Link href="/login" className="w-full">

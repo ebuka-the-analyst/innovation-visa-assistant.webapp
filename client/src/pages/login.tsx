@@ -90,13 +90,11 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
       <Card className="w-full max-w-md">
         <div className="flex justify-center pt-8 pb-4">
-          <div className="bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 dark:from-orange-950/20 dark:via-blue-950/20 dark:to-purple-950/20 p-6 rounded-2xl shadow-lg border-2 border-primary/20">
-            <img 
-              src={logoImg} 
-              alt="UK Innovator Founder Visa Assistant" 
-              className="h-20 w-auto"
-            />
-          </div>
+          <img 
+            src={logoImg} 
+            alt="UK Innovator Founder Visa Assistant" 
+            className="h-24 w-auto"
+          />
         </div>
         <CardHeader className="space-y-1 pt-4">
           <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
@@ -147,7 +145,7 @@ export default function Login() {
             >
               {isSubmitting ? "Signing in..." : "Sign In"}
               {!isSubmitting && (
-                <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-primary rounded-full animate-ping" />
+                <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-primary rounded-full animate-ping-slow" />
               )}
             </Button>
           </form>
