@@ -32,7 +32,7 @@ const TIER_TOOL_COUNTS: Record<UserTier, number> = {
   basic: 20,
   premium: 83,
   enterprise: 109,
-  ultimate: 108,
+  ultimate: 109,
 };
 
 export function useTierAccess() {

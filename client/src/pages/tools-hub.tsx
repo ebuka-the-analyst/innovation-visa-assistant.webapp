@@ -92,7 +92,7 @@ export default function ToolsHub() {
             UK Innovator Founder Visa Tools
           </h1>
           <p className="text-lg text-muted-foreground">
-            88 powerful tools to help you from application to approval and beyond
+            109 powerful tools to help you from application to approval and beyond
           </p>
         </div>
 

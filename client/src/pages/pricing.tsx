@@ -90,7 +90,7 @@ const tiers = [
     description: "Everything you need for guaranteed approval",
     pages: "80+ pages",
     features: [
-      "ALL 108+ tools - complete access",
+      "ALL 109 tools - complete access",
       "All Enterprise features included",
       "24/7 VIP support & live chat",
       "Personal visa strategist",
@@ -204,7 +204,7 @@ export default function Pricing() {
         </div>
 
         <div className="mt-12 text-center text-sm text-muted-foreground">
-          <p>All plans include AI-powered generation that answers all 475 expert framework questions</p>
+          <p>All plans include AI-powered generation that answers comprehensive expert framework questions</p>
           <p className="mt-2">Optimized for UK Innovator Founder Visa endorsing body approval • 99.9% target approval rate</p>
         </div>
       </main>

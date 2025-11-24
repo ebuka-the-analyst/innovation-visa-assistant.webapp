@@ -36,7 +36,7 @@ const tierBenefits: Record<ToolTier, string[]> = {
   basic: ["20 tools access", "Standard business planning", "48-hour delivery", "PDF downloads"],
   premium: ["83 tools access", "Comprehensive analysis", "24-hour delivery", "Industry frameworks", "Market research"],
   enterprise: ["109 advanced tools", "Expert modeling", "12-hour priority", "Risk analysis", "Global roadmaps"],
-  ultimate: ["ALL 108+ tools", "24/7 VIP support", "Personal strategist", "Unlimited revisions", "Success guarantee"],
+  ultimate: ["ALL 109 tools", "24/7 VIP support", "Personal strategist", "Unlimited revisions", "Success guarantee"],
 };
 
 export function PremiumUpgradeOverlay({

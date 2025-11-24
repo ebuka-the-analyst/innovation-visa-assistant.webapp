@@ -1,7 +1,7 @@
 # UK Innovator Founder Visa Assistant
 
 ## Overview
-The UK Innovator Founder Visa Assistant is an AI-powered platform designed to guide applicants through the UK Innovator Founder Visa process. It provides comprehensive tools and guidance across compliance, documentation, team management, business planning, financial modeling, and growth strategies. The project aims to deliver PhD-level quality tools, ensuring 100% accuracy with UK Innovator Founder visa requirements. The ambition is to become the UK's #1 Visa AI Assistant. The platform currently features 128 production-ready, PhD-level tools across 8 categories.
+The UK Innovator Founder Visa Assistant is an AI-powered platform designed to guide applicants through the UK Innovator Founder Visa process. It provides comprehensive tools and guidance across compliance, documentation, team management, business planning, financial modeling, and growth strategies. The project aims to deliver PhD-level quality tools, ensuring 100% accuracy with UK Innovator Founder visa requirements. The ambition is to become the UK's #1 Visa AI Assistant. The platform currently features 109 production-ready, PhD-level tools across 8 categories.
 
 ## User Preferences
 - **Preferred Language:** Everyday English
@@ -26,7 +26,7 @@ The platform features a production-ready, bulletproof tier-based access control 
 - **Basic (£29):** 20 tools total - all Free + 7 Basic tier tools for straightforward applications
 - **Premium (£49):** 83 tools total - Most Popular tier with comprehensive coverage
 - **Enterprise (£89):** 109 tools total - maximum detail with advanced IP & patent strategy
-- **Ultimate (£129):** ALL 108+ tools with VIP support, personal strategist, and success guarantee
+- **Ultimate (£129):** ALL 109 tools with VIP support, personal strategist, and success guarantee
 
 Access control is enforced at multiple levels:
 1. **ToolAccessGuard Component:** Wraps protected tools to verify user tier before rendering content
