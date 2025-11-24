@@ -7,16 +7,17 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user, isLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      // Redirect to Replit Auth login
-      window.location.href = "/api/login";
+      // Redirect to login with return URL
+      setLocation(`/login?return=${encodeURIComponent(location)}`);
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, location, setLocation]);
 
+  // While loading auth status
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -28,6 +29,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
+  // If not authenticated, show message while redirecting
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -39,5 +41,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
+  // Authenticated - render children
   return <>{children}</>;
 }
