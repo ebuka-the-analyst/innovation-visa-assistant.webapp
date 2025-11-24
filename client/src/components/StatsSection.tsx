@@ -17,6 +17,13 @@ const stats = [
     source: "UKVI Processing Times 2026"
   },
   {
+    icon: PoundSterling,
+    value: "£50k",
+    label: "per founder",
+    subtext: "Investment requirement for team applications (new business)",
+    source: "UK Home Office 2026"
+  },
+  {
     icon: Calendar,
     value: "3",
     label: "years",
