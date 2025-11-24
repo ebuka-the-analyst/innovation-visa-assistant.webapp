@@ -62,27 +62,27 @@ export default function DiagnosticsPage() {
 
   // Fetch all diagnostic data in parallel
   const { data: endorserData, isLoading: endorserLoading, error: endorserError } = useQuery<EndorserResult[]>({
-    queryKey: ["/api/endorser/simulate", planId],
+    queryKey: [`/api/endorser/simulate/${planId}`],
     enabled: !!planId,
   });
 
   const { data: routeData, isLoading: routeLoading, error: routeError } = useQuery<RouteAnalysis>({
-    queryKey: ["/api/routes/analyze", planId],
+    queryKey: [`/api/routes/analyze/${planId}`],
     enabled: !!planId,
   });
 
   const { data: teamData, isLoading: teamLoading, error: teamError } = useQuery<{ teamPlan: TeamPlan; skillAssessment: any }>({
-    queryKey: ["/api/team/model", planId],
+    queryKey: [`/api/team/model/${planId}`],
     enabled: !!planId,
   });
 
   const { data: tractionData, isLoading: tractionLoading, error: tractionError } = useQuery<TractionForecast>({
-    queryKey: ["/api/traction/forecast", planId],
+    queryKey: [`/api/traction/forecast/${planId}`],
     enabled: !!planId,
   });
 
   const { data: ruleData, isLoading: ruleLoading, error: ruleError } = useQuery<RuleStatus>({
-    queryKey: ["/api/rules/check", planId],
+    queryKey: [`/api/rules/check/${planId}`],
     enabled: !!planId,
   });
 
