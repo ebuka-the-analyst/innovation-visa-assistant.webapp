@@ -48,7 +48,7 @@ type NavGroup = {
 
 export function AppSidebar() {
   const [location, setLocation] = useLocation();
-  const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
+  const { data: user } = useQuery<{ id: string; email: string; displayName?: string; isAdmin?: boolean }>({
     queryKey: ["/api/auth/user"],
     retry: false,
   });
@@ -72,6 +72,22 @@ export function AppSidebar() {
   if (!user) return null;
 
   const navGroups: NavGroup[] = [
+    ...(user?.isAdmin
+      ? [
+          {
+            label: "Admin",
+            items: [
+              {
+                title: "Admin Dashboard",
+                url: "/admin-dashboard",
+                icon: Shield,
+                description: "System analytics & management",
+                badge: "ADMIN",
+              },
+            ],
+          },
+        ]
+      : []),
     {
       label: "Core Platform",
       items: [
@@ -240,7 +256,11 @@ export function AppSidebar() {
                               </div>
                             </div>
                             {item.badge && (
-                              <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                item.badge === "ADMIN"
+                                  ? "bg-orange-500 text-white"
+                                  : "text-primary bg-primary/10"
+                              }`}>
                                 {item.badge}
                               </span>
                             )}
