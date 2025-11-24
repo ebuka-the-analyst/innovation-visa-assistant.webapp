@@ -420,12 +420,12 @@
   mix-blend-mode: normal !important;
   filter: none !important;
   opacity: 1 !important;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   padding: 0;
   margin: 0;
-  clip-path: inset(28% 3% 28% 3%);
-  transform: scale(1.65);
+  clip-path: inset(28% 0% 28% 0%);
+  transform: scale(1.55);
 }
 
 .logo-dark {
@@ -433,12 +433,12 @@
   mix-blend-mode: normal !important;
   filter: none !important;
   opacity: 1 !important;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   padding: 0;
   margin: 0;
-  clip-path: inset(28% 3% 28% 3%);
-  transform: scale(1.65);
+  clip-path: inset(28% 0% 28% 0%);
+  transform: scale(1.55);
 }
 
 .dark .logo-light {
@@ -450,10 +450,10 @@
   mix-blend-mode: normal !important;
   filter: none !important;
   opacity: 1 !important;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
-  clip-path: inset(28% 3% 28% 3%);
-  transform: scale(1.65);
+  clip-path: inset(28% 0% 28% 0%);
+  transform: scale(1.55);
 }
 
 /* Logo container - no color interference */
