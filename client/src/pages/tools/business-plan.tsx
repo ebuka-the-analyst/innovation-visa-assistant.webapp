@@ -16,6 +16,8 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { SEOHead } from "@/components/SEOHead";
+import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from "@/lib/seo-schemas";
 
 type BusinessPlanSection = {
   id: string;
@@ -338,8 +340,32 @@ qualified legal and immigration advisors before submitting visa applications.
     URL.revokeObjectURL(url);
   };
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "https://innovatorfoundervisaassistant.co.uk/" },
+    { name: "Tools Hub", url: "https://innovatorfoundervisaassistant.co.uk/tools-hub" },
+    { name: "Business Plan Generator", url: "https://innovatorfoundervisaassistant.co.uk/tools/business-plan" }
+  ]);
+
+  const articleSchema = createArticleSchema(
+    "Business Plan Generator for UK Innovator Founder Visa",
+    "Create a comprehensive, GOV.UK-compliant business plan for your UK Innovator Founder Visa application. Covers Innovation, Viability, and Scalability criteria with expert guidance.",
+    "2025-11-24"
+  );
+
+  const combinedSchema = {
+    "@context": "https://schema.org",
+    "@graph": [organizationSchema, breadcrumbSchema, articleSchema]
+  };
+
   return (
     <ToolAccessGuard requiredTier="basic" toolName="Business Plan Generator">
+      <SEOHead
+        title="Business Plan Generator | UK Innovator Founder Visa Assistant"
+        description="Create a professional, GOV.UK-compliant business plan for your UK Innovator Founder Visa. Covers all Innovation, Viability, and Scalability criteria. Used by 1,000+ successful applicants."
+        canonical="https://innovatorfoundervisaassistant.co.uk/tools/business-plan"
+        keywords="business plan for UK visa, innovator visa business plan, UK visa business plan template, endorsement business plan, visa application business plan"
+        schema={combinedSchema}
+      />
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-7xl mx-auto">

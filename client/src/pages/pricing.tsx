@@ -7,6 +7,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { SEOHead } from "@/components/SEOHead";
+import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
 
 const tiers = [
   {
@@ -128,8 +130,27 @@ export default function Pricing() {
     }
   };
 
+  const pricingSchemas = tiers.map(tier => 
+    createPricingSchema(tier.name, tier.price, tier.features)
+  );
+
+  const combinedSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      organizationSchema,
+      ...pricingSchemas
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
+      <SEOHead
+        title="Pricing Plans | UK Innovator Founder Visa Assistant - £0 to £129"
+        description="Choose from 5 pricing tiers for your UK Innovator Founder Visa application. Free (13 tools), Basic £29, Premium £49 (most popular), Enterprise £89, Ultimate £129. All plans include business plan generation and expert guidance."
+        canonical="https://innovatorfoundervisaassistant.co.uk/pricing"
+        keywords="UK innovator visa cost, visa application pricing, business plan cost, innovator founder visa fees, visa assistance pricing"
+        schema={combinedSchema}
+      />
       {user ? <AuthHeader /> : <Header />}
       
       <main className="container mx-auto px-4 py-12">

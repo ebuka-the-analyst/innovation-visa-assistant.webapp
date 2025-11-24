@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://innovatorfoundervisaassistant.co.uk/sitemap.xml
+
+# Block admin and API endpoints
+Disallow: /admin/
+Disallow: /api/
+
+# Allow search engines to crawl all tools
+Allow: /tools/
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

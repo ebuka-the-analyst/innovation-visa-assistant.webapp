@@ -19,6 +19,8 @@ import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import Footer from "@/components/Footer";
 import { useTierAccess, type ToolTier } from "@/hooks/useTierAccess";
+import { SEOHead } from "@/components/SEOHead";
+import { organizationSchema, createBreadcrumbSchema } from "@/lib/seo-schemas";
 
 type IconName = keyof typeof Icons;
 
@@ -80,8 +82,28 @@ export default function ToolsHub() {
     return Icon ? <Icon className="w-5 h-5" /> : <Icons.Zap className="w-5 h-5" />;
   };
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: "Home", url: "https://innovatorfoundervisaassistant.co.uk/" },
+    { name: "Tools Hub", url: "https://innovatorfoundervisaassistant.co.uk/tools-hub" }
+  ]);
+
+  const combinedSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      organizationSchema,
+      breadcrumbSchema
+    ]
+  };
+
   return (
     <>
+      <SEOHead
+        title="109 UK Innovator Founder Visa Tools | Expert Application Assistant"
+        description="Access 109 professional tools for your UK Innovator Founder Visa application. From compliance checkers to business plan generators, financial modeling to pitch coaching. Free to £129 tiers available."
+        canonical="https://innovatorfoundervisaassistant.co.uk/tools-hub"
+        keywords="UK innovator visa tools, business plan generator, compliance checker, financial projections, market analysis, visa application tools"
+        schema={combinedSchema}
+      />
       {user && <AuthHeader />}
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="w-full px-4 md:px-8 lg:px-12">
