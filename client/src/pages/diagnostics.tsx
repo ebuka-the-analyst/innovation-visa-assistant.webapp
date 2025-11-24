@@ -57,6 +57,8 @@ export default function DiagnosticsPage() {
 
   // Get planId from URL or localStorage
   const planId = new URLSearchParams(window.location.search).get("planId") || localStorage.getItem("lastPlanId");
+  
+  console.log("Diagnostics: planId =", planId);
 
   // Fetch all diagnostic data in parallel
   const { data: endorserData, isLoading: endorserLoading, error: endorserError } = useQuery<EndorserResult[]>({
@@ -85,14 +87,15 @@ export default function DiagnosticsPage() {
   });
 
   const errors = [endorserError, routeError, teamError, tractionError, ruleError].filter(Boolean);
+  const isLoading = endorserLoading || routeLoading || teamLoading || tractionLoading || ruleLoading;
+
+  console.log("Diagnostics: isLoading =", isLoading, "errors =", errors.length, "data =", { endorserData, routeData, teamData, tractionData, ruleData });
 
   useEffect(() => {
     if (!planId) {
       setLocation("/dashboard");
     }
   }, [planId, setLocation]);
-
-  const isLoading = endorserLoading || routeLoading || teamLoading || tractionLoading || ruleLoading;
 
   if (!planId) {
     return (
@@ -142,6 +145,7 @@ export default function DiagnosticsPage() {
             <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
             <h2 className="text-xl font-bold">No Diagnostic Data Available</h2>
             <p className="text-muted-foreground">This business plan may not have complete information yet. Please ensure your business plan is fully populated before running diagnostics.</p>
+            <button onClick={() => setLocation("/dashboard")} className="mt-4 px-4 py-2 bg-primary text-white rounded">Back to Dashboard</button>
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
