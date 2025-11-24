@@ -73,10 +73,11 @@ export default function BlackNovemberBanner() {
             <div className="flex items-center gap-2 flex-shrink-0">
               <Button
                 onClick={() => setLocation("/pricing")}
-                className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap h-auto"
+                className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap h-auto relative overflow-visible"
                 data-testid="button-black-november-cta"
               >
                 Claim
+                <div className="absolute -right-1 -top-1 w-2 h-2 bg-yellow-300 rounded-full animate-ping" />
               </Button>
               <button
                 onClick={() => setIsVisible(false)}

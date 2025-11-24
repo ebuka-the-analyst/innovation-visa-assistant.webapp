@@ -117,12 +117,15 @@ export default function PricingSection() {
 
               <Link href="/pricing">
                 <Button
-                  className="w-full"
+                  className={`w-full ${tier.popular ? 'relative overflow-visible' : ''}`}
                   variant={tier.popular ? "default" : "outline"}
                   size="lg"
                   data-testid={`button-select-${tier.name.toLowerCase()}`}
                 >
                   {tier.cta}
+                  {tier.popular && (
+                    <div className="absolute -right-1 -top-1 w-3 h-3 bg-orange-500 dark:bg-orange-400 rounded-full animate-ping" />
+                  )}
                 </Button>
               </Link>
             </Card>

@@ -287,11 +287,14 @@ export default function ResetPassword() {
           <CardFooter className="flex-col gap-2">
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full relative overflow-visible" 
               disabled={isSubmitting}
               data-testid="button-reset-password"
             >
               {isSubmitting ? "Resetting..." : "Reset Password"}
+              {!isSubmitting && (
+                <div className="absolute -right-1 -top-1 w-2.5 h-2.5 bg-primary rounded-full animate-ping" />
+              )}
             </Button>
             <Link href="/login" className="w-full">
               <Button variant="outline" type="button" className="w-full" data-testid="button-back-to-login">
