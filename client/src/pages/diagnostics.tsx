@@ -59,30 +59,32 @@ export default function DiagnosticsPage() {
   const planId = new URLSearchParams(window.location.search).get("planId") || localStorage.getItem("lastPlanId");
 
   // Fetch all diagnostic data in parallel
-  const { data: endorserData, isLoading: endorserLoading } = useQuery<EndorserResult[]>({
+  const { data: endorserData, isLoading: endorserLoading, error: endorserError } = useQuery<EndorserResult[]>({
     queryKey: ["/api/endorser/simulate", planId],
     enabled: !!planId,
   });
 
-  const { data: routeData, isLoading: routeLoading } = useQuery<RouteAnalysis>({
+  const { data: routeData, isLoading: routeLoading, error: routeError } = useQuery<RouteAnalysis>({
     queryKey: ["/api/routes/analyze", planId],
     enabled: !!planId,
   });
 
-  const { data: teamData, isLoading: teamLoading } = useQuery<{ teamPlan: TeamPlan; skillAssessment: any }>({
+  const { data: teamData, isLoading: teamLoading, error: teamError } = useQuery<{ teamPlan: TeamPlan; skillAssessment: any }>({
     queryKey: ["/api/team/model", planId],
     enabled: !!planId,
   });
 
-  const { data: tractionData, isLoading: tractionLoading } = useQuery<TractionForecast>({
+  const { data: tractionData, isLoading: tractionLoading, error: tractionError } = useQuery<TractionForecast>({
     queryKey: ["/api/traction/forecast", planId],
     enabled: !!planId,
   });
 
-  const { data: ruleData, isLoading: ruleLoading } = useQuery<RuleStatus>({
+  const { data: ruleData, isLoading: ruleLoading, error: ruleError } = useQuery<RuleStatus>({
     queryKey: ["/api/rules/check", planId],
     enabled: !!planId,
   });
+
+  const errors = [endorserError, routeError, teamError, tractionError, ruleError].filter(Boolean);
 
   useEffect(() => {
     if (!planId) {
@@ -120,8 +122,21 @@ export default function DiagnosticsPage() {
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="w-12 h-12 text-primary animate-spin" />
               <p className="text-muted-foreground">Analyzing your business plan...</p>
+              <p className="text-xs text-muted-foreground/60">This may take a moment...</p>
             </div>
           </div>
+        ) : errors.length > 0 ? (
+          <Card className="p-6 border-destructive/50 bg-destructive/5">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-6 h-6 text-destructive" />
+              <div>
+                <h3 className="font-semibold text-destructive">Failed to Load Analysis</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {errors[0] instanceof Error ? errors[0].message : "Please try again or contact support."}
+                </p>
+              </div>
+            </div>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Rule Engine Status */}
