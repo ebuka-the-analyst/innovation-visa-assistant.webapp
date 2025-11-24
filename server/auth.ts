@@ -458,3 +458,25 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   
   return next();
 };
+
+// Admin-only middleware - requires authentication and admin flag
+export const requireAdmin: RequestHandler = async (req, res, next) => {
+  if (!req.isAuthenticated() || !req.user) {
+    return res.status(403).json({ message: "Forbidden: Admin access required" });
+  }
+  
+  // Get full user data to check admin status
+  const userId = (req.user as any).id;
+  const fullUser = await storage.getUser(userId);
+  
+  if (!fullUser) {
+    return res.status(403).json({ message: "Forbidden: Admin access required" });
+  }
+  
+  // Check if user is admin
+  if (!fullUser.isAdmin) {
+    return res.status(403).json({ message: "Forbidden: Admin access required" });
+  }
+  
+  return next();
+};

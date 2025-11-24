@@ -29,6 +29,9 @@ export const users = pgTable("users", {
   verificationToken: text("verification_token"),
   tokenExpiry: timestamp("token_expiry"),
   
+  // Admin flag
+  isAdmin: boolean("is_admin").notNull().default(false),
+  
   subscriptionTier: varchar("subscription_tier", { length: 20 }).notNull().default('free'), // free, basic, premium, enterprise, ultimate
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
