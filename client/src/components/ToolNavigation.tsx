@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Gauge, DollarSign, HelpCircle } from "lucide-react";
 import { useLocation, Link } from "wouter";
-import logoImg from "@assets/official_logo.png";
+import logoLightImg from "@assets/official_logo.png";
+import logoDarkImg from "@assets/logo_dark.png";
 import { useState } from "react";
 import PricingModal from "./PricingModal";
 import FAQModal from "./FAQModal";
@@ -18,7 +19,8 @@ export function ToolNavigation() {
       <div className="flex items-center justify-between mb-6">
         <Link href="/">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-nav-logo">
-            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-8 w-auto logo-dark-mode" />
+            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 w-auto logo-light" />
+            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 w-auto logo-dark" />
           </div>
         </Link>
       </div>

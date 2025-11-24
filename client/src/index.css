@@ -414,11 +414,19 @@
   }
 }
 
-/* Logo dark mode adaptation */
-.logo-dark-mode {
-  filter: none;
+/* Logo dark mode - show/hide based on theme */
+.logo-light {
+  display: block;
 }
 
-.dark .logo-dark-mode {
-  filter: invert(1) hue-rotate(180deg);
+.logo-dark {
+  display: none;
+}
+
+.dark .logo-light {
+  display: none;
+}
+
+.dark .logo-dark {
+  display: block;
 }

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import logoImg from "@assets/official_logo.png";
+import logoLightImg from "@assets/official_logo.png";
+import logoDarkImg from "@assets/logo_dark.png";
 import ThemeToggle from "./ThemeToggle";
 import { useQuery } from "@tanstack/react-query";
 import { useState as useStateDisclaimer } from "react";
@@ -50,7 +51,8 @@ export default function Header() {
         {/* Logo */}
         <Link href="/">
           <div className="flex items-center cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
-            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-12 md:h-16 w-auto logo-dark-mode" />
+            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-12 md:h-16 w-auto logo-light" />
+            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-12 md:h-16 w-auto logo-dark" />
           </div>
         </Link>
 
