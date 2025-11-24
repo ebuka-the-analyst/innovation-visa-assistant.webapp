@@ -109,7 +109,7 @@ export default function FounderBio() {
             </div>
           </Card>
 
-          {bio && <Card className="p-6 mb-6 bg-purple-50"><p className="text-sm whitespace-pre-wrap">{bio}</p></Card>}
+          {bio && <Card className="p-6 mb-6 bg-purple-50 dark:bg-purple-950"><p className="text-sm whitespace-pre-wrap">{bio}</p></Card>}
 
           <Button className="w-full gap-2 bg-primary" onClick={exportBio} data-testid="button-export-bio">
             <Download className="w-4 h-4" />

@@ -231,7 +231,7 @@ export default function DeepXRay() {
                     <p className="text-sm font-semibold">Approved Applications</p>
                     <p className="text-xs">Average score: 70%, 16 criteria met</p>
                   </div>
-                  <div className="p-3 border-l-4 border-red-500 bg-red-50">
+                  <div className="p-3 border-l-4 border-red-500 bg-red-50 dark:bg-red-950">
                     <p className="text-sm font-semibold">Rejected Applications</p>
                     <p className="text-xs">Average score: 35%, 8 criteria met</p>
                   </div>

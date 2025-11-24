@@ -1157,7 +1157,7 @@ for personalized guidance and HMRC compliance verification.
                         <p className="text-sm text-muted-foreground">Tax return deadline: 31 January following tax year. Payment on account may be required if tax liability exceeds £1,000</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3 p-3 bg-orange-500/10 rounded-lg">
+                    <div className="flex items-start gap-3 p-3 bg-orange-50 dark:bg-orange-9500/10 rounded-lg">
                       <Info className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium">Annual Accounts</p>

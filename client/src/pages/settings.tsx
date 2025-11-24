@@ -90,13 +90,13 @@ export default function Settings() {
                 <StatusBadge status={config?.google?.clientId ? "active" : "missing"} />
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-                <h3 className="font-medium text-sm text-blue-900">Setup Instructions</h3>
-                <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-3">
+                <h3 className="font-medium text-sm text-blue-900 dark:text-blue-100">Setup Instructions</h3>
+                <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-2 list-decimal list-inside">
                   <li>Go to Google Cloud Console → Your Project → Credentials</li>
                   <li>Edit your OAuth 2.0 Client ID credential</li>
                   <li>Add this callback URI to "Authorized redirect URIs":
-                    <code className="block mt-1 bg-white p-2 rounded text-xs font-mono border">
+                    <code className="block mt-1 bg-background p-2 rounded text-xs font-mono border">
                       {config?.google?.callbackUrl || "https://workspace.ebukaumeh40.repl.co/api/auth/callback/google"}
                     </code>
                   </li>
@@ -122,8 +122,8 @@ export default function Settings() {
                 />
               </div>
 
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-sm text-green-800">
+              <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <p className="text-sm text-green-800 dark:text-green-200">
                   ✓ Google Sign-In is {config?.google?.clientId ? "configured and ready to use" : "not yet configured"}
                 </p>
               </div>

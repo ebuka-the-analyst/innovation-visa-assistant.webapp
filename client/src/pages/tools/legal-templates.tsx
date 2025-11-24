@@ -1102,21 +1102,21 @@ All statutory references and penalty amounts are current as of 2025 but may chan
                       </div>
                     </div>
                     <div className="flex items-start gap-2" data-testid="deadline-data-breach">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <div className="w-2 h-2 bg-orange-50 dark:bg-orange-9500 rounded-full mt-1.5 flex-shrink-0"></div>
                       <div>
                         <p className="font-medium">UK GDPR Data Breach Notification: Within 72 hours to ICO</p>
                         <p className="text-muted-foreground">High-risk breaches must also notify affected individuals without undue delay - max penalty £17.5m or 4% turnover</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2" data-testid="deadline-dsar">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <div className="w-2 h-2 bg-orange-50 dark:bg-orange-9500 rounded-full mt-1.5 flex-shrink-0"></div>
                       <div>
                         <p className="font-medium">DSAR Response: Within 1 month of receipt</p>
                         <p className="text-muted-foreground">Data Subject Access Requests under UK GDPR Art.15 - extendable by 2 months if complex</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2" data-testid="deadline-annual-accounts">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <div className="w-2 h-2 bg-orange-50 dark:bg-orange-9500 rounded-full mt-1.5 flex-shrink-0"></div>
                       <div>
                         <p className="font-medium">Annual Accounts Filing: Within 9 months of year-end</p>
                         <p className="text-muted-foreground">Companies House penalties: £150-£7,500 depending on delay, director disqualification for persistent offenders</p>

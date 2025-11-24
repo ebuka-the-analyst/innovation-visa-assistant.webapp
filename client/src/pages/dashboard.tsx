@@ -200,7 +200,7 @@ export default function Dashboard() {
       case 'generating':
         return <Badge className="bg-blue-500"><Clock className="h-3 w-3 mr-1" />Generating</Badge>;
       case 'paid':
-        return <Badge className="bg-yellow-500"><Clock className="h-3 w-3 mr-1" />Paid</Badge>;
+        return <Badge className="bg-yellow-50 dark:bg-yellow-9500"><Clock className="h-3 w-3 mr-1" />Paid</Badge>;
       case 'failed':
         return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" />Failed</Badge>;
       default:

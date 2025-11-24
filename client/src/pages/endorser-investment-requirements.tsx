@@ -76,7 +76,7 @@ export default function EndorserInvestmentRequirements() {
         </div>
 
         {/* Critical Alert - Team Funding */}
-        <Alert className="mb-8 border-orange-500/20 bg-orange-500/5">
+        <Alert className="mb-8 border-orange-500/20 bg-orange-50 dark:bg-orange-9500/5">
           <AlertCircle className="h-4 w-4 text-orange-600" />
           <AlertDescription>
             <strong>Team Applicants:</strong> If co-founders are applying for endorsement as co-directors of the same company under "New Business" criteria, each applicant must independently demonstrate they have £50,000 available to invest (per Home Office guidance). These are NOT linked applications - each person needs separate endorsement.
@@ -131,7 +131,7 @@ export default function EndorserInvestmentRequirements() {
         </Card>
 
         {/* Team Funding Section */}
-        <Card className="mb-8 border-orange-500/30 bg-orange-500/5">
+        <Card className="mb-8 border-orange-500/30 bg-orange-50 dark:bg-orange-9500/5">
           <CardHeader>
             <CardTitle>Business Funding Requirements - Team Applicants</CardTitle>
             <CardDescription>For multiple co-founders</CardDescription>

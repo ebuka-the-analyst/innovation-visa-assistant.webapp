@@ -830,7 +830,7 @@ This tool provides educational guidance only and does not constitute legal advic
                       <span className="font-medium">Critical Weakness Penalty</span>
                       <span className="text-2xl font-bold text-destructive">+{criticalCount * 10} pts</span>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-orange-500/10 rounded">
+                    <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-9500/10 rounded">
                       <span className="font-medium">High-Risk Weakness Penalty</span>
                       <span className="text-2xl font-bold text-orange-600">+{highCount * 5} pts</span>
                     </div>

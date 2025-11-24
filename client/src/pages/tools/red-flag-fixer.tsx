@@ -916,7 +916,7 @@ Do not submit application until risk score is below 30 and all critical flags ar
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
-                          <div className="w-20 h-2 bg-orange-500 rounded mt-1.5 flex-shrink-0"></div>
+                          <div className="w-20 h-2 bg-orange-50 dark:bg-orange-9500 rounded mt-1.5 flex-shrink-0"></div>
                           <div>
                             <p className="font-medium">30-69: Medium Risk (Improvements Needed)</p>
                             <p className="text-muted-foreground">Application has identifiable weaknesses. Address all high-priority flags to improve approval probability from ~40% to 70%+.</p>
@@ -1142,7 +1142,7 @@ Do not submit application until risk score is below 30 and all critical flags ar
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 rounded-md bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 rounded-md bg-orange-50 dark:bg-orange-9500/10 flex items-center justify-center flex-shrink-0">
                         <span className="text-lg font-bold text-orange-600">65%</span>
                       </div>
                       <div>
@@ -1151,7 +1151,7 @@ Do not submit application until risk score is below 30 and all critical flags ar
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 rounded-md bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 rounded-md bg-orange-50 dark:bg-orange-9500/10 flex items-center justify-center flex-shrink-0">
                         <span className="text-lg font-bold text-orange-600">60%</span>
                       </div>
                       <div>

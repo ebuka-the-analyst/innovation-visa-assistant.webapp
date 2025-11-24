@@ -86,11 +86,11 @@ export default function AnalyticsDashboard() {
               <p className="text-sm text-muted-foreground flex gap-2"><TrendingUp className="w-4 h-4" />Sessions</p>
               <p className="text-3xl font-bold text-green-600">{analytics.totalSessions}</p>
             </Card>
-            <Card className="p-4 bg-purple-50">
+            <Card className="p-4 bg-purple-50 dark:bg-purple-950">
               <p className="text-sm text-muted-foreground flex gap-2"><Clock className="w-4 h-4" />Avg Time</p>
               <p className="text-3xl font-bold text-purple-600">{analytics.averageSessionTime}</p>
             </Card>
-            <Card className="p-4 bg-orange-50">
+            <Card className="p-4 bg-orange-50 dark:bg-orange-950">
               <p className="text-sm text-muted-foreground flex gap-2"><Target className="w-4 h-4" />Completion</p>
               <p className="text-3xl font-bold text-primary">{analytics.completionRate}</p>
             </Card>

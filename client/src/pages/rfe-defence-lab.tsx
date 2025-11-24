@@ -50,8 +50,8 @@ export default function RFEDefenceLab() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-900 mb-1">High-Risk Issues</p>
+            <div className="p-6 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-900 dark:text-red-100 mb-1">High-Risk Issues</p>
               <p className="text-3xl font-bold text-red-600">2</p>
             </div>
             <div className="p-6 bg-amber-50 border border-amber-200 rounded-lg">

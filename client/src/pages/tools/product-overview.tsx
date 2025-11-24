@@ -112,7 +112,7 @@ export default function ProductOverview() {
             </div>
           </Card>
 
-          {overview && <Card className="p-6 mb-6 bg-orange-50"><p className="text-sm whitespace-pre-wrap">{overview}</p></Card>}
+          {overview && <Card className="p-6 mb-6 bg-orange-50 dark:bg-orange-950"><p className="text-sm whitespace-pre-wrap">{overview}</p></Card>}
 
           <Button className="w-full gap-2 bg-primary" onClick={exportOverview} data-testid="button-export-overview">
             <Download className="w-4 h-4" />

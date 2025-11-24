@@ -1404,7 +1404,7 @@ on specific facts and circumstances. No guarantee of success is provided or impl
                             <span>Completed</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 bg-orange-500 rounded"></div>
+                            <div className="w-4 h-4 bg-orange-50 dark:bg-orange-9500 rounded"></div>
                             <span>In Progress</span>
                           </div>
                           <div className="flex items-center gap-2">

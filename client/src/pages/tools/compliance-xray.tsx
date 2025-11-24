@@ -274,11 +274,11 @@ export default function ComplianceXRay() {
               <Card className="p-4">
                 <h3 className="font-bold mb-3">Risk Mitigation Strategy</h3>
                 <div className="space-y-2">
-                  <div className="p-2 border-l-4 border-red-500 bg-red-50"><p className="text-sm font-semibold">Market Risk</p>
+                  <div className="p-2 border-l-4 border-red-500 bg-red-50 dark:bg-red-950"><p className="text-sm font-semibold">Market Risk</p>
                     <p className="text-xs">Validate product-market fit with 20+ customer interviews</p></div>
-                  <div className="p-2 border-l-4 border-orange-500 bg-orange-50"><p className="text-sm font-semibold">Execution Risk</p>
+                  <div className="p-2 border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-950"><p className="text-sm font-semibold">Execution Risk</p>
                     <p className="text-xs">Hire experienced CTOs and ops leads with proven track records</p></div>
-                  <div className="p-2 border-l-4 border-purple-500 bg-purple-50"><p className="text-sm font-semibold">Funding Risk</p>
+                  <div className="p-2 border-l-4 border-purple-500 bg-purple-50 dark:bg-purple-950"><p className="text-sm font-semibold">Funding Risk</p>
                     <p className="text-xs">Build 18-month runway; secure bridge financing options</p></div>
                 </div>
               </Card>

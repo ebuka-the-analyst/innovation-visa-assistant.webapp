@@ -738,7 +738,7 @@ industry-specific requirements.
                       <span className="text-sm">Low Risk (Score 1-5)</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-orange-500 rounded"></div>
+                      <div className="w-4 h-4 bg-orange-50 dark:bg-orange-9500 rounded"></div>
                       <span className="text-sm">Medium Risk (Score 6-11)</span>
                     </div>
                     <div className="flex items-center gap-2">

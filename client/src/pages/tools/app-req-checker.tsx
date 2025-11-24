@@ -343,7 +343,7 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
               </Card>
 
               {totalScore < 70 && (
-                <Alert className="border-red-200 bg-red-50">
+                <Alert className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950">
                   <AlertTriangle className="h-4 w-4 text-red-600" />
                   <AlertDescription className="text-red-700">
                     {totalScore < 50 ? "Significant work needed. Focus on business criteria development." : "Nearly ready. Complete remaining business criteria items."}

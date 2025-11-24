@@ -96,8 +96,8 @@ export default function EvidenceGraph() {
                     </div>
                   </div>
                   {item.gap && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-sm text-red-900"><strong>Gap:</strong> {item.gap}</p>
+                    <div className="p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+                      <p className="text-sm text-red-900 dark:text-red-100"><strong>Gap:</strong> {item.gap}</p>
                     </div>
                   )}
                 </div>

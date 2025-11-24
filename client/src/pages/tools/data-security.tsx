@@ -221,7 +221,7 @@ export default function DataSecurity() {
               </Card>
 
               {complianceScore < 70 && (
-                <Alert className="border-red-200 bg-red-50">
+                <Alert className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950">
                   <AlertTriangle className="h-4 w-4 text-red-600" />
                   <AlertDescription className="text-red-700">
                     GDPR non-compliance detected. Implement critical controls to avoid penalties.
@@ -270,7 +270,7 @@ export default function DataSecurity() {
                     <p className="font-semibold text-sm text-amber-700">Penalty Calculation</p>
                     <p className="text-xs text-amber-600 mt-1">Up to 4% of global turnover for violations</p>
                   </div>
-                  <div className="p-3 bg-red-50 rounded border-l-4 border-red-500">
+                  <div className="p-3 bg-red-50 dark:bg-red-950 rounded border-l-4 border-red-500">
                     <p className="font-semibold text-sm text-red-700">Breach Notification</p>
                     <p className="text-xs text-red-600 mt-1">Notify ICO within 72 hours of discovery</p>
                   </div>
