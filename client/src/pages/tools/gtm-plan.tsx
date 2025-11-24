@@ -1,380 +1,1315 @@
-import { Card } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
-import { FileUploadButton } from "@/components/FileUploadButton";
-import { FileList } from "@/components/FileList";
-import { fileUploadConfigs } from "@/lib/fileUploadConfigs";
-import { useState, useEffect } from "react";
-import { Target, Users, TrendingUp, AlertCircle, Award, Rocket } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import { CheckCircle2, AlertTriangle, TrendingUp, Target, Users, Rocket, DollarSign, Calendar, BarChart3 } from "lucide-react";
+import {
+  BarChart, Bar, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, ComposedChart, Area
+} from 'recharts';
 
-// UK Innovator Founder Visa Context (November 2025)
-// Scalability Criterion: GTM strategy demonstrates growth execution capability
-// Viability Criterion: Clear customer acquisition plan supports business sustainability
+type ChannelStrategy = {
+  channel: string;
+  investment: number;
+  expectedROI: number;
+  timeline: string;
+};
+
+type LaunchPhase = {
+  phase: string;
+  startWeek: number;
+  duration: number;
+  activities: string[];
+  status: 'planned' | 'in-progress' | 'completed';
+};
 
 export default function GoToMarketStrategy() {
-  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
-  const [savedDate, setSavedDate] = useState("");
-  const [targetMarket, setTargetMarket] = useState("SMB SaaS buyers in UK, US, EU markets");
-  const [valueProposition, setValueProposition] = useState("10x faster workflow automation");
-  const [channels, setChannels] = useState("Direct sales, Content marketing, Partners");
-  const [pricing, setPricing] = useState("£99/mo starter, £299/mo pro, £999/mo enterprise");
-  const [scores, setScores] = useState({ messaging: 75, channels: 70, positioning: 80, execution: 75, scalability: 70 });
+  // Core GTM Strategy Fields
+  const [businessName, setBusinessName] = useState('');
+  const [targetMarket, setTargetMarket] = useState('');
+  const [valueProposition, setValueProposition] = useState('');
+  const [competitiveAdvantage, setCompetitiveAdvantage] = useState('');
+  const [pricingStrategy, setPricingStrategy] = useState('');
+  const [customerSegments, setCustomerSegments] = useState('');
+  const [distributionChannels, setDistributionChannels] = useState('');
+  const [launchTimeline, setLaunchTimeline] = useState('');
+  const [successMetrics, setSuccessMetrics] = useState('');
+  const [marketingBudget, setMarketingBudget] = useState('');
+  
+  // Advanced GTM Components
+  const [channels, setChannels] = useState<ChannelStrategy[]>([
+    { channel: 'Direct Sales', investment: 0, expectedROI: 0, timeline: 'Month 1-3' },
+    { channel: 'Content Marketing', investment: 0, expectedROI: 0, timeline: 'Month 1-6' },
+    { channel: 'Partnerships', investment: 0, expectedROI: 0, timeline: 'Month 2-4' },
+  ]);
 
-  const saveProgress = () => {
-    localStorage.setItem('gtmPlanFiles', JSON.stringify(uploadedFiles));
-    localStorage.setItem('gtmPlanData', JSON.stringify({ targetMarket, valueProposition, channels, pricing, scores }));
-    localStorage.setItem('gtmPlanDate', new Date().toLocaleDateString());
-    setSavedDate(new Date().toLocaleDateString());
+  const [launchPhases, setLaunchPhases] = useState<LaunchPhase[]>([
+    { phase: 'Pre-Launch', startWeek: 0, duration: 4, activities: ['Market validation', 'Beta testing', 'Partner recruitment'], status: 'planned' },
+    { phase: 'Soft Launch', startWeek: 4, duration: 4, activities: ['Limited release', 'Early adopter program', 'Feedback collection'], status: 'planned' },
+    { phase: 'Market Entry', startWeek: 8, duration: 8, activities: ['Full product launch', 'Marketing campaigns', 'Channel activation'], status: 'planned' },
+    { phase: 'Scale & Optimize', startWeek: 16, duration: 12, activities: ['Performance optimization', 'Market expansion', 'Revenue scaling'], status: 'planned' },
+  ]);
+
+  // Scoring Metrics (0-100 scale)
+  const [messagingClarity, setMessagingClarity] = useState(70);
+  const [channelFit, setChannelFit] = useState(65);
+  const [marketPositioning, setMarketPositioning] = useState(75);
+  const [executionReadiness, setExecutionReadiness] = useState(70);
+  const [scalabilityPotential, setScalabilityPotential] = useState(68);
+  const [competitiveStrength, setCompetitiveStrength] = useState(72);
+
+  const [activeTab, setActiveTab] = useState('strategy');
+  const [savedDate, setSavedDate] = useState('');
+
+  // Calculate GTM Readiness Score
+  const calculateGTMReadiness = (): number => {
+    return Math.round((messagingClarity + channelFit + marketPositioning + executionReadiness + scalabilityPotential + competitiveStrength) / 6);
   };
 
-  const handleFileUpload = (file: any) => setUploadedFiles(prev => [...prev, file]);
-  const handleRemoveFile = (id: string) => setUploadedFiles(prev => prev.filter(f => f.id !== id));
-
-  const getGTMReadiness = (): { score: number; grade: string } => {
-    const avgScore = Math.round((scores.messaging + scores.channels + scores.positioning + scores.execution + scores.scalability) / 5);
-    let grade = 'F - Unprepared';
-    if (avgScore >= 85) grade = 'A - Excellent';
-    else if (avgScore >= 75) grade = 'B - Strong';
-    else if (avgScore >= 65) grade = 'C - Ready';
-    else if (avgScore >= 55) grade = 'D - Developing';
-    return { score: avgScore, grade };
+  const getReadinessGrade = (score: number): string => {
+    if (score >= 85) return 'A - Market Ready';
+    if (score >= 75) return 'B - Strong Position';
+    if (score >= 65) return 'C - Viable Strategy';
+    if (score >= 55) return 'D - Needs Improvement';
+    return 'F - Critical Gaps';
   };
 
-  const exportReport = () => {
-    const { score, grade } = getGTMReadiness();
-    const content = `UK INNOVATOR FOUNDER VISA - GO-TO-MARKET STRATEGY
-Generated: ${new Date().toLocaleDateString()}
+  const gtmReadiness = calculateGTMReadiness();
+  const readinessGrade = getReadinessGrade(gtmReadiness);
 
-═══════════════════════════════════════════════════════════
-EXECUTIVE SUMMARY (UK Innovator Founder Visa Context)
-═══════════════════════════════════════════════════════════
-GTM Readiness Score: ${score}% (${grade})
+  // State Management Functions with 'if (field in state)' pattern
+  const getSerializedState = () => {
+    return {
+      businessName,
+      targetMarket,
+      valueProposition,
+      competitiveAdvantage,
+      pricingStrategy,
+      customerSegments,
+      distributionChannels,
+      launchTimeline,
+      successMetrics,
+      marketingBudget,
+      channels,
+      launchPhases,
+      messagingClarity,
+      channelFit,
+      marketPositioning,
+      executionReadiness,
+      scalabilityPotential,
+      competitiveStrength,
+      activeTab,
+      savedDate: new Date().toLocaleString('en-GB')
+    };
+  };
+
+  const restoreSerializedState = (state: any) => {
+    if ('businessName' in state) setBusinessName(state.businessName);
+    if ('targetMarket' in state) setTargetMarket(state.targetMarket);
+    if ('valueProposition' in state) setValueProposition(state.valueProposition);
+    if ('competitiveAdvantage' in state) setCompetitiveAdvantage(state.competitiveAdvantage);
+    if ('pricingStrategy' in state) setPricingStrategy(state.pricingStrategy);
+    if ('customerSegments' in state) setCustomerSegments(state.customerSegments);
+    if ('distributionChannels' in state) setDistributionChannels(state.distributionChannels);
+    if ('launchTimeline' in state) setLaunchTimeline(state.launchTimeline);
+    if ('successMetrics' in state) setSuccessMetrics(state.successMetrics);
+    if ('marketingBudget' in state) setMarketingBudget(state.marketingBudget);
+    if ('channels' in state) setChannels(state.channels);
+    if ('launchPhases' in state) setLaunchPhases(state.launchPhases);
+    if ('messagingClarity' in state) setMessagingClarity(state.messagingClarity);
+    if ('channelFit' in state) setChannelFit(state.channelFit);
+    if ('marketPositioning' in state) setMarketPositioning(state.marketPositioning);
+    if ('executionReadiness' in state) setExecutionReadiness(state.executionReadiness);
+    if ('scalabilityPotential' in state) setScalabilityPotential(state.scalabilityPotential);
+    if ('competitiveStrength' in state) setCompetitiveStrength(state.competitiveStrength);
+    if ('activeTab' in state) setActiveTab(state.activeTab);
+    if ('savedDate' in state) setSavedDate(state.savedDate || '');
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem('gtm-plan-state');
+    if (saved) {
+      const state = JSON.parse(saved);
+      restoreSerializedState(state);
+    }
+  }, []);
+
+  const handleSave = () => {
+    const state = getSerializedState();
+    localStorage.setItem('gtm-plan-state', JSON.stringify(state));
+    setSavedDate(state.savedDate);
+  };
+
+  const handleRestore = () => {
+    const saved = localStorage.getItem('gtm-plan-state');
+    if (saved) {
+      const state = JSON.parse(saved);
+      restoreSerializedState(state);
+    }
+  };
+
+  // Channel Management
+  const updateChannel = (index: number, field: keyof ChannelStrategy, value: any) => {
+    const updated = [...channels];
+    updated[index] = { ...updated[index], [field]: value };
+    setChannels(updated);
+  };
+
+  const addChannel = () => {
+    setChannels([...channels, { channel: '', investment: 0, expectedROI: 0, timeline: 'Month 1-3' }]);
+  };
+
+  const removeChannel = (index: number) => {
+    if (channels.length > 1) {
+      setChannels(channels.filter((_, i) => i !== index));
+    }
+  };
+
+  // Smart Tips (6+ recommendations without emojis)
+  const getSmartTips = () => {
+    const tips = [];
+    
+    if (gtmReadiness < 65) {
+      tips.push("GTM readiness below 65 percent - strengthen core strategy components before market entry");
+    }
+    
+    if (messagingClarity < 70) {
+      tips.push("Messaging clarity needs improvement - ensure value proposition is immediately understood by target customers");
+    }
+    
+    if (channelFit < 65) {
+      tips.push("Channel strategy requires optimization - align distribution channels with customer acquisition costs and segment preferences");
+    }
+    
+    if (scalabilityPotential < 70) {
+      tips.push("CRITICAL: Scalability score below 70 percent - UK Innovator Founder Visa emphasizes growth potential in assessment criteria");
+    }
+    
+    if (executionReadiness < 70) {
+      tips.push("Execution readiness needs strengthening - develop detailed implementation roadmap with measurable milestones");
+    }
+    
+    if (competitiveStrength < 70) {
+      tips.push("Competitive positioning requires reinforcement - clearly articulate differentiation and defensible advantages");
+    }
+    
+    if (!targetMarket || targetMarket.length < 50) {
+      tips.push("Target market definition insufficient - specify customer segments, geographic focus, and total addressable market size");
+    }
+    
+    if (!valueProposition || valueProposition.length < 50) {
+      tips.push("Value proposition underdeveloped - articulate specific customer problems solved and quantifiable benefits delivered");
+    }
+    
+    if (channels.filter(c => c.investment > 0).length < 2) {
+      tips.push("Diversify distribution channels - multi-channel strategy demonstrates market reach and reduces dependency risk");
+    }
+    
+    if (gtmReadiness >= 75 && scalabilityPotential >= 70) {
+      tips.push("Strong GTM foundation - focus on execution metrics and early traction evidence to support visa scalability criterion");
+    }
+    
+    if (marketingBudget && parseFloat(marketingBudget) < 10000) {
+      tips.push("Marketing budget may be insufficient for UK market entry - endorsing bodies assess resource adequacy for growth plans");
+    }
+    
+    tips.push("GOV.UK guidance emphasizes realistic market entry strategy - ensure timeline and resource allocation are evidence-based and achievable");
+    
+    return tips.slice(0, 8);
+  };
+
+  // 4-Week Action Plan
+  const generateActionPlan = () => {
+    return [
+      { week: "Week 1", action: "Finalize target customer segments with specific demographics, pain points, and buying behaviors", priority: "Critical", responsible: "Founder/Marketing Lead" },
+      { week: "Week 1", action: "Complete competitive analysis and positioning strategy with differentiation framework", priority: "Critical", responsible: "Founder/Strategy" },
+      { week: "Week 1-2", action: "Develop messaging framework including value proposition, key messages, and proof points", priority: "Critical", responsible: "Marketing Lead" },
+      { week: "Week 2", action: "Define distribution channel strategy with investment allocation and ROI projections", priority: "High", responsible: "Sales/Marketing Lead" },
+      { week: "Week 2", action: "Create pricing strategy with tier structure, competitive benchmarking, and margin analysis", priority: "High", responsible: "Founder/Finance" },
+      { week: "Week 2-3", action: "Build launch timeline with phase gates, milestones, and resource requirements", priority: "High", responsible: "Operations Lead" },
+      { week: "Week 3", action: "Establish success metrics and KPI framework for measuring GTM performance", priority: "High", responsible: "Founder/Analytics" },
+      { week: "Week 3", action: "Develop customer acquisition playbook with tactics, scripts, and conversion funnels", priority: "Medium", responsible: "Sales Lead" },
+      { week: "Week 3-4", action: "Create marketing collateral including website copy, sales deck, and campaign assets", priority: "Medium", responsible: "Marketing/Design" },
+      { week: "Week 4", action: "Conduct pre-launch validation with target customers and iterate based on feedback", priority: "High", responsible: "Product/Marketing" },
+      { week: "Week 4", action: "Finalize partnership strategy and initiate outreach to strategic channel partners", priority: "Medium", responsible: "Business Development" },
+      { week: "Ongoing", action: "Document GTM strategy comprehensively for UK Innovator Founder Visa endorsement submission", priority: "Critical", responsible: "Founder" },
+    ];
+  };
+
+  // Export Report (Comprehensive)
+  const handleExport = () => {
+    const report = `UK INNOVATOR FOUNDER VISA - GO-TO-MARKET STRATEGY
+Generated: ${new Date().toLocaleString('en-GB')}
+${'='.repeat(80)}
+
+EXECUTIVE SUMMARY
+${'-'.repeat(80)}
+Business: ${businessName || 'Not specified'}
+GTM Readiness Score: ${gtmReadiness}% (${readinessGrade})
 
 Component Scores:
-  Messaging Clarity: ${scores.messaging}/100
-  Channel Strategy: ${scores.channels}/100
-  Market Positioning: ${scores.positioning}/100
-  Execution Plan: ${scores.execution}/100
-  Scalability: ${scores.scalability}/100
+  Messaging Clarity: ${messagingClarity}/100
+  Channel Fit: ${channelFit}/100
+  Market Positioning: ${marketPositioning}/100
+  Execution Readiness: ${executionReadiness}/100
+  Scalability Potential: ${scalabilityPotential}/100
+  Competitive Strength: ${competitiveStrength}/100
 
-${score >= 75 ? '✓ STRONG GTM STRATEGY - Supports scalability criterion for UK Innovator Founder visa' : score >= 65 ? '⚠ VIABLE GTM - Strengthen for endorsement' : '✗ WEAK GTM - Critical improvements needed'}
+${gtmReadiness >= 75 ? 'ASSESSMENT: Strong GTM strategy supporting UK visa scalability criterion' : gtmReadiness >= 65 ? 'ASSESSMENT: Viable GTM strategy with improvement opportunities' : 'ASSESSMENT: GTM strategy requires significant strengthening'}
 
-═══════════════════════════════════════════════════════════
-GO-TO-MARKET STRATEGY COMPONENTS
-═══════════════════════════════════════════════════════════
+MARKET ENTRY STRATEGY
+${'-'.repeat(80)}
 
-TARGET MARKET:
-${targetMarket}
+Target Market:
+${targetMarket || 'Not defined'}
 
-VALUE PROPOSITION:
-${valueProposition}
+Customer Segments:
+${customerSegments || 'Not defined'}
 
-DISTRIBUTION CHANNELS:
-${channels}
+Value Proposition:
+${valueProposition || 'Not defined'}
 
-PRICING STRATEGY:
-${pricing}
+Competitive Advantage:
+${competitiveAdvantage || 'Not defined'}
 
-═══════════════════════════════════════════════════════════
-GTM READINESS SCORE CALCULATION
-═══════════════════════════════════════════════════════════
-Formula: GTM Readiness = (Messaging + Channels + Positioning + Execution + Scalability) / 5
+DISTRIBUTION & PRICING STRATEGY
+${'-'.repeat(80)}
 
-Component Breakdown:
-  Messaging Clarity: ${scores.messaging}/100
-    ${scores.messaging >= 75 ? '✓ Clear value communication' : scores.messaging >= 60 ? '⚠ Messaging needs refinement' : '✗ Unclear messaging'}
-    
-  Channel Strategy: ${scores.channels}/100
-    ${scores.channels >= 75 ? '✓ Well-defined distribution approach' : scores.channels >= 60 ? '⚠ Channel strategy needs optimization' : '✗ Weak channel plan'}
-    
-  Market Positioning: ${scores.positioning}/100
-    ${scores.positioning >= 75 ? '✓ Strong competitive positioning' : scores.positioning >= 60 ? '⚠ Positioning requires strengthening' : '✗ Unclear market position'}
-    
-  Execution Plan: ${scores.execution}/100
-    ${scores.execution >= 75 ? '✓ Detailed implementation roadmap' : scores.execution >= 60 ? '⚠ Execution plan needs detail' : '✗ Insufficient execution clarity'}
-    
-  Scalability: ${scores.scalability}/100
-    ${scores.scalability >= 75 ? '✓ Clear growth and scaling path' : scores.scalability >= 60 ? '⚠ Limited scalability plan' : '✗ Scaling challenges identified'}
+Distribution Channels:
+${distributionChannels || 'Not defined'}
 
-Calculation:
-  Total Points = ${scores.messaging} + ${scores.channels} + ${scores.positioning} + ${scores.execution} + ${scores.scalability}
-  Total Points = ${scores.messaging + scores.channels + scores.positioning + scores.execution + scores.scalability}
-  GTM Readiness = ${scores.messaging + scores.channels + scores.positioning + scores.execution + scores.scalability} / 5 = ${score}% (${grade})
+Channel Investment Allocation:
+${channels.map((c, i) => `  ${i + 1}. ${c.channel || 'Unnamed Channel'}
+     Investment: £${c.investment.toLocaleString()}
+     Expected ROI: ${c.expectedROI}%
+     Timeline: ${c.timeline}`).join('\n')}
 
-═══════════════════════════════════════════════════════════
-UK INNOVATOR FOUNDER VISA: SCALABILITY CRITERION
-═══════════════════════════════════════════════════════════
-GOV.UK Scalability Assessment Factors:
-• Clear path to significant market penetration
-• Scalable customer acquisition strategy
-• Multi-channel distribution approach
-• Evidence of market validation and traction
-• Realistic execution timeline for growth
+Pricing Strategy:
+${pricingStrategy || 'Not defined'}
 
-CURRENT GTM STATUS:
-Scalability Score: ${scores.scalability}/100
-  ${scores.scalability >= 75 ? '✓ STRONG - GTM strategy demonstrates clear scalability path for UK Innovator Founder visa' : scores.scalability >= 60 ? '⚠ MODERATE - Scalability plan needs strengthening for endorsement' : '✗ WEAK - Scalability concerns require addressing'}
+Marketing Budget:
+${marketingBudget ? `£${parseFloat(marketingBudget).toLocaleString()}` : 'Not specified'}
 
-Execution Readiness: ${scores.execution}/100
-  ${scores.execution >= 75 ? '✓ STRONG - Detailed execution plan supports viability criterion' : scores.execution >= 60 ? '⚠ MODERATE - Execution plan needs more detail' : '✗ WEAK - Insufficient execution planning'}
+LAUNCH TIMELINE & PHASES
+${'-'.repeat(80)}
+${launchPhases.map(phase => `
+${phase.phase} (Week ${phase.startWeek + 1}-${phase.startWeek + phase.duration})
+Status: ${phase.status.toUpperCase()}
+Key Activities:
+${phase.activities.map(a => `  - ${a}`).join('\n')}
+`).join('')}
 
-Overall GTM Readiness: ${score}%
-  ${score >= 75 ? '✓ STRONG - GTM strategy ready for market launch and supports visa criteria' : score >= 65 ? '⚠ VIABLE - GTM plan acceptable but needs refinement' : '✗ WEAK - GTM strategy requires significant improvement'}
+Launch Timeline Overview:
+${launchTimeline || 'Not defined'}
 
-Visa Criterion Alignment:
-${score >= 75 && scores.scalability >= 70 ? '✓ Go-to-market strategy demonstrates clear scalability and execution readiness for UK Innovator Founder visa endorsement. Strong channel strategy and positioning support market penetration narrative.' : score >= 65 ? '⚠ GTM strategy is viable but strengthening scalability component (aim for 75+) and adding more execution detail would improve endorsement prospects.' : '✗ GTM strategy needs significant work - focus on defining clear distribution channels, scalable customer acquisition approach, and detailed execution roadmap.'}
+SUCCESS METRICS & KPIs
+${'-'.repeat(80)}
+${successMetrics || 'Not defined'}
 
-═══════════════════════════════════════════════════════════
-Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+SMART RECOMMENDATIONS
+${'-'.repeat(80)}
+${getSmartTips().map((tip, i) => `${i + 1}. ${tip}`).join('\n\n')}
+
+4-WEEK ACTION PLAN
+${'-'.repeat(80)}
+${generateActionPlan().map((item, i) => `
+${i + 1}. [${item.priority}] ${item.week}
+   Action: ${item.action}
+   Responsible: ${item.responsible}
+`).join('')}
+
+GTM READINESS ASSESSMENT
+${'-'.repeat(80)}
+Formula: GTM Readiness = (Messaging + Channel + Positioning + Execution + Scalability + Competitive) / 6
+
+Detailed Component Analysis:
+
+1. Messaging Clarity (${messagingClarity}/100):
+   ${messagingClarity >= 75 ? 'STRONG - Value proposition clearly articulated' : messagingClarity >= 60 ? 'MODERATE - Messaging needs refinement for target audience' : 'WEAK - Value communication requires significant improvement'}
+
+2. Channel Fit (${channelFit}/100):
+   ${channelFit >= 75 ? 'STRONG - Distribution strategy well-aligned with market segments' : channelFit >= 60 ? 'MODERATE - Channel strategy needs optimization' : 'WEAK - Distribution approach misaligned with customer preferences'}
+
+3. Market Positioning (${marketPositioning}/100):
+   ${marketPositioning >= 75 ? 'STRONG - Clear competitive differentiation established' : marketPositioning >= 60 ? 'MODERATE - Positioning requires strengthening' : 'WEAK - Unclear market position and competitive advantage'}
+
+4. Execution Readiness (${executionReadiness}/100):
+   ${executionReadiness >= 75 ? 'STRONG - Detailed implementation roadmap with resources allocated' : executionReadiness >= 60 ? 'MODERATE - Execution plan needs more detail and milestones' : 'WEAK - Insufficient execution planning and resource definition'}
+
+5. Scalability Potential (${scalabilityPotential}/100):
+   ${scalabilityPotential >= 75 ? 'STRONG - Clear growth path supporting UK visa scalability criterion' : scalabilityPotential >= 60 ? 'MODERATE - Scalability plan needs strengthening for endorsement' : 'WEAK - Limited evidence of scaling capability - CRITICAL for visa'}
+
+6. Competitive Strength (${competitiveStrength}/100):
+   ${competitiveStrength >= 75 ? 'STRONG - Defensible competitive advantages identified' : competitiveStrength >= 60 ? 'MODERATE - Competitive position needs reinforcement' : 'WEAK - Insufficient competitive differentiation'}
+
+Overall GTM Readiness: ${gtmReadiness}%
+${gtmReadiness >= 75 ? 'VERDICT: Market-ready GTM strategy demonstrating execution capability and scalability for UK Innovator Founder Visa' : gtmReadiness >= 65 ? 'VERDICT: Viable GTM strategy requiring optimization before market entry' : 'VERDICT: GTM strategy needs substantial development before endorsement submission'}
+
+UK INNOVATOR FOUNDER VISA ALIGNMENT
+${'-'.repeat(80)}
+Scalability Criterion Assessment:
+${scalabilityPotential >= 70 && gtmReadiness >= 70 ? 
+`MEETS REQUIREMENTS - GTM strategy demonstrates:
+  - Clear path to market penetration
+  - Scalable customer acquisition approach
+  - Multi-channel distribution strategy
+  - Evidence-based growth projections
+  - Realistic execution timeline` :
+`NEEDS IMPROVEMENT - Strengthen:
+  - Market penetration strategy detail
+  - Scalability evidence and projections
+  - Resource allocation and timeline realism
+  - Customer acquisition cost assumptions`}
+
+Viability Criterion Assessment:
+${executionReadiness >= 70 && channelFit >= 65 ?
+`MEETS REQUIREMENTS - GTM plan demonstrates:
+  - Viable customer acquisition strategy
+  - Resource-appropriate channel selection
+  - Realistic budget and timeline
+  - Measurable success metrics` :
+`NEEDS IMPROVEMENT - Address:
+  - Execution plan detail and milestones
+  - Channel strategy optimization
+  - Budget adequacy for market entry
+  - Success metric definition`}
+
+ENDORSING BODY CONSIDERATIONS
+${'-'.repeat(80)}
+Endorsing bodies (Envestors, UKES, Innovator International, GEP) assess:
+
+1. Market Understanding:
+   - Target customer segments clearly defined
+   - Market size and growth potential quantified
+   - Competitive landscape thoroughly analyzed
+
+2. Go-to-Market Execution:
+   - Distribution channels appropriate for market
+   - Pricing strategy competitive and sustainable
+   - Marketing budget adequate for customer acquisition
+
+3. Scalability Evidence:
+   - Clear path from launch to scale
+   - Resource requirements mapped to growth phases
+   - Metrics for measuring success defined
+
+4. Competitive Position:
+   - Unique value proposition articulated
+   - Defensible competitive advantages identified
+   - Market positioning strategy coherent
+
+Current Status: ${gtmReadiness >= 75 ? 'STRONG position for endorsement' : gtmReadiness >= 65 ? 'VIABLE with optimization needed' : 'REQUIRES significant strengthening'}
+
+NEXT STEPS
+${'-'.repeat(80)}
+1. Address any critical gaps identified in Smart Recommendations
+2. Complete 4-week action plan to strengthen GTM components
+3. Gather supporting evidence: market research, customer validation, pilot results
+4. Document assumptions and validate with UK market data
+5. Prepare GTM section of business plan for endorsement submission
+6. Consider advisor review for market entry strategy validation
+
+${'='.repeat(80)}
+Report generated by UK Innovator Founder Visa Assistant
+© 2025 - For endorsement application preparation
+Reference: GOV.UK Innovator Founder Visa Guidance (November 2025)
 https://www.gov.uk/innovator-founder-visa
-Immigration Rules Appendix Innovator Founder
-Scalability Criterion: Market penetration strategy and growth potential
-Endorsing Bodies: Envestors, UKES, Innovator International, GEP
-GTM Methodology: Market entry and customer acquisition framework
 `;
 
-    const blob = new Blob([content], { type: 'text/plain' });
+    const blob = new Blob([report], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'innovator-founder-gtm-strategy.txt';
+    a.download = `gtm-strategy-report-${Date.now()}.txt`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
-  const getSmartRecommendations = () => {
-    const tips: string[] = [];
-    if (scores.scalability < 70) tips.push("🚨 Scalability score <70 - strengthen GTM scaling plan for visa criterion");
-    if (scores.messaging < 65) tips.push("⚠️ Messaging clarity needs improvement for market penetration");
-    if (scores.channels < 65) tips.push("📊 Channel strategy requires diversification");
-    if (scores.execution < 70) tips.push("💡 Execution plan needs more detail for credibility");
-    const { score } = getGTMReadiness();
-    if (score >= 80) tips.push("✅ Strong GTM strategy supports scalability and viability criteria");
-    return tips.length ? tips : ["✅ GTM strategy is solid"];
-  };
-
+  // Chart Data Generators
   const getRadarData = () => [
-    { metric: "Messaging", score: scores.messaging, target: 75 },
-    { metric: "Channels", score: scores.channels, target: 75 },
-    { metric: "Positioning", score: scores.positioning, target: 75 },
-    { metric: "Execution", score: scores.execution, target: 75 },
-    { metric: "Scalability", score: scores.scalability, target: 75 }
+    { metric: 'Messaging', score: messagingClarity, fullMark: 100 },
+    { metric: 'Channels', score: channelFit, fullMark: 100 },
+    { metric: 'Positioning', score: marketPositioning, fullMark: 100 },
+    { metric: 'Execution', score: executionReadiness, fullMark: 100 },
+    { metric: 'Scalability', score: scalabilityPotential, fullMark: 100 },
+    { metric: 'Competitive', score: competitiveStrength, fullMark: 100 },
   ];
 
-  const getComponentBreakdown = () => Object.entries(scores).map(([key, value]) => ({
-    component: key.charAt(0).toUpperCase() + key.slice(1),
-    score: value
-  }));
-
-  const getChannelAllocation = () => [
-    { channel: "Direct Sales", allocation: 40 },
-    { channel: "Content Marketing", allocation: 30 },
-    { channel: "Partnerships", allocation: 20 },
-    { channel: "Paid Ads", allocation: 10 }
+  const getComponentScores = () => [
+    { component: 'Messaging', score: messagingClarity },
+    { component: 'Channels', score: channelFit },
+    { component: 'Positioning', score: marketPositioning },
+    { component: 'Execution', score: executionReadiness },
+    { component: 'Scalability', score: scalabilityPotential },
+    { component: 'Competitive', score: competitiveStrength },
   ];
 
-  const getPhaseTimeline = () => [
-    { phase: "Month 1-3", activities: 5, launched: 4 },
-    { phase: "Month 4-6", activities: 8, launched: 6 },
-    { phase: "Month 7-9", activities: 6, launched: 4 },
-    { phase: "Month 10-12", activities: 10, launched: 7 }
+  const getTimelineGanttData = () => {
+    return launchPhases.map(phase => ({
+      phase: phase.phase,
+      start: phase.startWeek,
+      duration: phase.duration,
+      end: phase.startWeek + phase.duration,
+    }));
+  };
+
+  const getRevenueProjection = () => [
+    { month: 'Month 1', revenue: 5000, customers: 10, target: 8000 },
+    { month: 'Month 2', revenue: 12000, customers: 24, target: 15000 },
+    { month: 'Month 3', revenue: 22000, customers: 45, target: 25000 },
+    { month: 'Month 4', revenue: 35000, customers: 68, target: 40000 },
+    { month: 'Month 5', revenue: 52000, customers: 95, target: 60000 },
+    { month: 'Month 6', revenue: 75000, customers: 130, target: 85000 },
+    { month: 'Month 7', revenue: 98000, customers: 165, target: 110000 },
+    { month: 'Month 8', revenue: 125000, customers: 205, target: 140000 },
+    { month: 'Month 9', revenue: 158000, customers: 250, target: 175000 },
+    { month: 'Month 10', revenue: 195000, customers: 300, target: 215000 },
+    { month: 'Month 11', revenue: 238000, customers: 355, target: 260000 },
+    { month: 'Month 12', revenue: 285000, customers: 415, target: 310000 },
   ];
 
-  useEffect(() => {
-    const s = localStorage.getItem('gtmPlanData');
-    if (s) {
-      const data = JSON.parse(s);
-      setTargetMarket(data.targetMarket || "");
-      setValueProposition(data.valueProposition || "");
-      setChannels(data.channels || "");
-      setPricing(data.pricing || "");
-      setScores(data.scores || scores);
-    }
-    const f = localStorage.getItem('gtmPlanFiles');
-    if (f) setUploadedFiles(JSON.parse(f));
-    const d = localStorage.getItem('gtmPlanDate');
-    if (d) setSavedDate(d);
-  }, []);
-
-  const { score: readinessScore, grade } = getGTMReadiness();
-  const COLORS = ['#ffa536', '#11b6e9', '#10b981', '#ef4444', '#8b5cf6'];
+  const COLORS = {
+    primary: '#ffa536',
+    secondary: '#11b6e9',
+    success: '#10b981',
+    warning: '#f59e0b',
+    danger: '#ef4444',
+    purple: '#8b5cf6',
+  };
 
   return (
     <>
       <AuthHeader />
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <ToolNavigation />
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Go-to-Market Strategy</h1>
-          <p className="text-muted-foreground mb-6">Build scalable GTM plan (Innovator Founder Visa)</p>
-
-          <ToolUtilityBar toolId="gtm-plan" toolName="Go-to-Market Strategy" onSave={saveProgress} onExport={exportReport} getSerializedState={() => ({ uploadedFiles, targetMarket, valueProposition, channels, pricing, scores, savedDate })} />
-
-          {savedDate && <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950"><AlertCircle className="h-4 w-4 text-green-600" /><AlertDescription className="text-green-700 dark:text-green-300">Last saved: {savedDate}</AlertDescription></Alert>}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card className="p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <Award className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">GTM Readiness</span>
-              </div>
-              <p className="text-3xl font-bold">{readinessScore}%</p>
-              <p className="text-xs text-muted-foreground mt-1">{grade}</p>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <Target className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Positioning</span>
-              </div>
-              <p className="text-3xl font-bold">{scores.positioning}</p>
-              <p className="text-xs text-muted-foreground mt-1">Market clarity</p>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <Rocket className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Execution</span>
-              </div>
-              <p className="text-3xl font-bold">{scores.execution}</p>
-              <p className="text-xs text-muted-foreground mt-1">Action readiness</p>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium">Scalability</span>
-              </div>
-              <p className="text-3xl font-bold">{scores.scalability}</p>
-              <p className="text-xs text-muted-foreground mt-1">Visa criterion</p>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">GTM Strategy Radar</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <RadarChart data={getRadarData()}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="metric" />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                  <Radar name="Score" dataKey="score" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
-                  <Radar name="Target" dataKey="target" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
-                  <Tooltip />
-                  <Legend />
-                </RadarChart>
-              </ResponsiveContainer>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Component Scores</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={getComponentBreakdown()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="component" angle={-15} textAnchor="end" height={80} />
-                  <YAxis label={{ value: 'Score', angle: -90, position: 'insideLeft' }} domain={[0, 100]} />
-                  <Tooltip />
-                  <Bar dataKey="score" fill="#ffa536">
-                    {getComponentBreakdown().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.score >= 75 ? '#10b981' : entry.score >= 60 ? '#ffa536' : '#ef4444'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Channel Allocation</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie data={getChannelAllocation()} dataKey="allocation" nameKey="channel" cx="50%" cy="50%" outerRadius={80} label={(entry) => `${entry.allocation}%`}>
-                    {getChannelAllocation().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Execution Timeline</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={getPhaseTimeline()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="phase" />
-                  <YAxis label={{ value: 'Activities', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="activities" fill="#11b6e9" name="Planned" />
-                  <Bar dataKey="launched" fill="#10b981" name="Launched" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-          </div>
-
-          <Card className="p-6 mb-6">
-            <h3 className="font-semibold mb-4">Recommendations</h3>
-            <div className="space-y-3">
-              {getSmartRecommendations().map((tip, i) => {
-                const isCritical = tip.includes('🚨');
-                const isWarning = tip.includes('⚠️');
-                return (
-                  <Alert key={i} className={isCritical ? "border-red-200 bg-red-50 dark:bg-red-950" : isWarning ? "border-orange-200 bg-orange-50 dark:bg-orange-950" : "border-blue-200 bg-blue-50 dark:bg-blue-950"}>
-                    <AlertDescription className={isCritical ? "text-red-700 dark:text-red-300" : isWarning ? "text-orange-700 dark:text-orange-300" : "text-blue-700 dark:text-blue-300"}>{tip}</AlertDescription>
-                  </Alert>
-                );
-              })}
-            </div>
-          </Card>
-
-          <Card className="p-6 mb-6">
-            <h3 className="font-semibold mb-4">GTM Strategy Details</h3>
-            <div className="grid grid-cols-1 gap-4 mb-4">
-              <div>
-                <label className="text-sm font-medium block mb-2">Target Market</label>
-                <Textarea value={targetMarket} onChange={(e) => setTargetMarket(e.target.value)} placeholder="Define your ideal customer segments..." rows={3} data-testid="textarea-market" />
-              </div>
-              <div>
-                <label className="text-sm font-medium block mb-2">Value Proposition</label>
-                <Textarea value={valueProposition} onChange={(e) => setValueProposition(e.target.value)} placeholder="What unique value do you deliver..." rows={3} data-testid="textarea-value" />
-              </div>
-              <div>
-                <label className="text-sm font-medium block mb-2">Distribution Channels</label>
-                <Textarea value={channels} onChange={(e) => setChannels(e.target.value)} placeholder="How will you reach customers..." rows={3} data-testid="textarea-channels" />
-              </div>
-              <div>
-                <label className="text-sm font-medium block mb-2">Pricing Strategy</label>
-                <Textarea value={pricing} onChange={(e) => setPricing(e.target.value)} placeholder="Pricing tiers and packages..." rows={3} data-testid="textarea-pricing" />
-              </div>
-            </div>
-
-            <h4 className="font-semibold mb-3 mt-6">Strategy Assessment</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.entries(scores).map(([key, value]) => (
-                <div key={key}>
-                  <label className="text-sm font-medium block mb-2">{key.charAt(0).toUpperCase() + key.slice(1)}: {value}</label>
-                  <Slider value={[value]} onValueChange={(v) => setScores({...scores, [key]: v[0]})} max={100} step={5} data-testid={`slider-${key}`} />
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="p-6 mb-6">
-            <h3 className="font-semibold mb-4">Upload GTM Documentation</h3>
-            <FileUploadButton onFileSelected={handleFileUpload} config={fileUploadConfigs.companyDocuments} />
-            {uploadedFiles.length > 0 && (
-              <div className="mt-4">
-                <FileList files={uploadedFiles} onRemove={handleRemoveFile} />
-              </div>
+          <ToolNavigation />
+          
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2" data-testid="heading-gtm-plan">Go-to-Market Strategy</h1>
+            <p className="text-lg text-muted-foreground">Build scalable market entry plan for UK Innovator Founder Visa</p>
+            {savedDate && (
+              <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
             )}
-          </Card>
+          </div>
+
+          <ToolUtilityBar
+            toolId="gtm-plan"
+            toolName="Go-to-Market Strategy"
+            onSave={handleSave}
+            onRestore={handleRestore}
+            onExport={handleExport}
+            getSerializedState={getSerializedState}
+          />
+
+          {/* KPI Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 my-6">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">GTM Readiness</span>
+                </div>
+                <p className="text-3xl font-bold" data-testid="text-gtm-readiness">{gtmReadiness}%</p>
+                <p className="text-xs text-muted-foreground mt-1">{readinessGrade}</p>
+                <Progress value={gtmReadiness} className="mt-2" />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <Rocket className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Scalability</span>
+                </div>
+                <p className="text-3xl font-bold" data-testid="text-scalability-score">{scalabilityPotential}</p>
+                <p className="text-xs text-muted-foreground mt-1">Visa criterion</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Execution</span>
+                </div>
+                <p className="text-3xl font-bold" data-testid="text-execution-score">{executionReadiness}</p>
+                <p className="text-xs text-muted-foreground mt-1">Implementation readiness</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Positioning</span>
+                </div>
+                <p className="text-3xl font-bold" data-testid="text-positioning-score">{marketPositioning}</p>
+                <p className="text-xs text-muted-foreground mt-1">Market clarity</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Status Alerts */}
+          {gtmReadiness < 65 && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription data-testid="alert-low-readiness">
+                GTM readiness below 65% - strengthen strategy components before market entry. Focus on scalability criterion for visa approval.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {scalabilityPotential < 70 && gtmReadiness >= 65 && (
+            <Alert className="mb-6">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription data-testid="alert-scalability-warning">
+                Scalability score below 70% - UK Innovator Founder Visa emphasizes growth potential. Strengthen market expansion strategy.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {gtmReadiness >= 75 && scalabilityPotential >= 70 && (
+            <Alert className="mb-6 border-green-500 bg-green-50 dark:bg-green-950">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-600 dark:text-green-400" data-testid="alert-strong-gtm">
+                Strong GTM strategy supporting scalability and viability criteria for UK Innovator Founder Visa endorsement.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4" data-testid="tabs-gtm-plan">
+              <TabsTrigger value="strategy" data-testid="tab-strategy">Strategy</TabsTrigger>
+              <TabsTrigger value="analysis" data-testid="tab-analysis">Analysis</TabsTrigger>
+              <TabsTrigger value="tips" data-testid="tab-tips">Smart Tips</TabsTrigger>
+              <TabsTrigger value="action" data-testid="tab-action">Action Plan</TabsTrigger>
+            </TabsList>
+
+            {/* Tab 1: Strategy Definition */}
+            <TabsContent value="strategy" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Market Entry Strategy</CardTitle>
+                  <CardDescription>Define your go-to-market approach for UK Innovator Founder Visa</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="business-name">Business Name</Label>
+                      <Input
+                        id="business-name"
+                        value={businessName}
+                        onChange={(e) => setBusinessName(e.target.value)}
+                        placeholder="Your registered business name"
+                        data-testid="input-business-name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="marketing-budget">Marketing Budget (£)</Label>
+                      <Input
+                        id="marketing-budget"
+                        type="number"
+                        value={marketingBudget}
+                        onChange={(e) => setMarketingBudget(e.target.value)}
+                        placeholder="e.g., 50000"
+                        data-testid="input-marketing-budget"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="target-market">Target Market</Label>
+                    <Textarea
+                      id="target-market"
+                      value={targetMarket}
+                      onChange={(e) => setTargetMarket(e.target.value)}
+                      placeholder="Define your primary target market, geographic focus, and total addressable market (TAM)"
+                      rows={3}
+                      data-testid="textarea-target-market"
+                    />
+                    <p className="text-xs text-muted-foreground">{targetMarket.length} characters (recommended: 100+)</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="customer-segments">Customer Segments</Label>
+                    <Textarea
+                      id="customer-segments"
+                      value={customerSegments}
+                      onChange={(e) => setCustomerSegments(e.target.value)}
+                      placeholder="Describe specific customer segments: demographics, pain points, buying behaviors"
+                      rows={3}
+                      data-testid="textarea-customer-segments"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="value-proposition">Value Proposition</Label>
+                    <Textarea
+                      id="value-proposition"
+                      value={valueProposition}
+                      onChange={(e) => setValueProposition(e.target.value)}
+                      placeholder="What unique value do you deliver? What problem do you solve better than alternatives?"
+                      rows={3}
+                      data-testid="textarea-value-proposition"
+                    />
+                    <p className="text-xs text-muted-foreground">{valueProposition.length} characters (recommended: 100+)</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="competitive-advantage">Competitive Advantage</Label>
+                    <Textarea
+                      id="competitive-advantage"
+                      value={competitiveAdvantage}
+                      onChange={(e) => setCompetitiveAdvantage(e.target.value)}
+                      placeholder="What defensible advantages differentiate you from competitors? Technology, IP, partnerships, expertise?"
+                      rows={3}
+                      data-testid="textarea-competitive-advantage"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="distribution-channels">Distribution Channels</Label>
+                    <Textarea
+                      id="distribution-channels"
+                      value={distributionChannels}
+                      onChange={(e) => setDistributionChannels(e.target.value)}
+                      placeholder="How will you reach customers? Direct sales, online, partners, marketplaces, retail?"
+                      rows={3}
+                      data-testid="textarea-distribution-channels"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="pricing-strategy">Pricing Strategy</Label>
+                    <Textarea
+                      id="pricing-strategy"
+                      value={pricingStrategy}
+                      onChange={(e) => setPricingStrategy(e.target.value)}
+                      placeholder="Define pricing model, tiers, and competitive positioning (e.g., premium, value, freemium)"
+                      rows={3}
+                      data-testid="textarea-pricing-strategy"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="success-metrics">Success Metrics & KPIs</Label>
+                    <Textarea
+                      id="success-metrics"
+                      value={successMetrics}
+                      onChange={(e) => setSuccessMetrics(e.target.value)}
+                      placeholder="Define measurable success criteria: customer acquisition cost, lifetime value, conversion rates, revenue targets"
+                      rows={3}
+                      data-testid="textarea-success-metrics"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="launch-timeline">Launch Timeline Overview</Label>
+                    <Textarea
+                      id="launch-timeline"
+                      value={launchTimeline}
+                      onChange={(e) => setLaunchTimeline(e.target.value)}
+                      placeholder="High-level timeline from pre-launch to market entry to scaling phase"
+                      rows={3}
+                      data-testid="textarea-launch-timeline"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Channel Investment Strategy */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Channel Investment Strategy</CardTitle>
+                  <CardDescription>Allocate resources across distribution channels</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm text-muted-foreground">Define investment and expected ROI for each channel</p>
+                    <Button onClick={addChannel} size="sm" data-testid="button-add-channel">
+                      Add Channel
+                    </Button>
+                  </div>
+
+                  {channels.map((channel, index) => (
+                    <Card key={index} className="p-4">
+                      <div className="grid md:grid-cols-4 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`channel-name-${index}`}>Channel Name</Label>
+                          <Input
+                            id={`channel-name-${index}`}
+                            value={channel.channel}
+                            onChange={(e) => updateChannel(index, 'channel', e.target.value)}
+                            placeholder="e.g., Direct Sales"
+                            data-testid={`input-channel-name-${index}`}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor={`channel-investment-${index}`}>Investment (£)</Label>
+                          <Input
+                            id={`channel-investment-${index}`}
+                            type="number"
+                            value={channel.investment}
+                            onChange={(e) => updateChannel(index, 'investment', parseFloat(e.target.value) || 0)}
+                            placeholder="0"
+                            data-testid={`input-channel-investment-${index}`}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor={`channel-roi-${index}`}>Expected ROI (%)</Label>
+                          <Input
+                            id={`channel-roi-${index}`}
+                            type="number"
+                            value={channel.expectedROI}
+                            onChange={(e) => updateChannel(index, 'expectedROI', parseFloat(e.target.value) || 0)}
+                            placeholder="0"
+                            data-testid={`input-channel-roi-${index}`}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor={`channel-timeline-${index}`}>Timeline</Label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              id={`channel-timeline-${index}`}
+                              value={channel.timeline}
+                              onChange={(e) => updateChannel(index, 'timeline', e.target.value)}
+                              placeholder="Month 1-3"
+                              data-testid={`input-channel-timeline-${index}`}
+                            />
+                            {channels.length > 1 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeChannel(index)}
+                                data-testid={`button-remove-channel-${index}`}
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+
+                  <div className="pt-4 border-t">
+                    <p className="text-sm font-medium">Total Channel Investment: £{channels.reduce((sum, c) => sum + c.investment, 0).toLocaleString()}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* GTM Component Scoring */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>GTM Component Assessment</CardTitle>
+                  <CardDescription>Rate each component of your go-to-market strategy (0-100)</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Messaging Clarity</Label>
+                        <span className="text-sm font-medium" data-testid="text-messaging-clarity">{messagingClarity}</span>
+                      </div>
+                      <Slider
+                        value={[messagingClarity]}
+                        onValueChange={(value) => setMessagingClarity(value[0])}
+                        max={100}
+                        step={1}
+                        data-testid="slider-messaging-clarity"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">How clear and compelling is your value message to target customers?</p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Channel Fit</Label>
+                        <span className="text-sm font-medium" data-testid="text-channel-fit">{channelFit}</span>
+                      </div>
+                      <Slider
+                        value={[channelFit]}
+                        onValueChange={(value) => setChannelFit(value[0])}
+                        max={100}
+                        step={1}
+                        data-testid="slider-channel-fit"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">How well do your distribution channels align with customer preferences?</p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Market Positioning</Label>
+                        <span className="text-sm font-medium" data-testid="text-market-positioning">{marketPositioning}</span>
+                      </div>
+                      <Slider
+                        value={[marketPositioning]}
+                        onValueChange={(value) => setMarketPositioning(value[0])}
+                        max={100}
+                        step={1}
+                        data-testid="slider-market-positioning"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">How clearly differentiated is your competitive position?</p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Execution Readiness</Label>
+                        <span className="text-sm font-medium" data-testid="text-execution-readiness">{executionReadiness}</span>
+                      </div>
+                      <Slider
+                        value={[executionReadiness]}
+                        onValueChange={(value) => setExecutionReadiness(value[0])}
+                        max={100}
+                        step={1}
+                        data-testid="slider-execution-readiness"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">How detailed and actionable is your implementation roadmap?</p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Scalability Potential</Label>
+                        <span className="text-sm font-medium" data-testid="text-scalability-potential">{scalabilityPotential}</span>
+                      </div>
+                      <Slider
+                        value={[scalabilityPotential]}
+                        onValueChange={(value) => setScalabilityPotential(value[0])}
+                        max={100}
+                        step={1}
+                        data-testid="slider-scalability-potential"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">How clear is your path to scaling customer acquisition and revenue?</p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Competitive Strength</Label>
+                        <span className="text-sm font-medium" data-testid="text-competitive-strength">{competitiveStrength}</span>
+                      </div>
+                      <Slider
+                        value={[competitiveStrength]}
+                        onValueChange={(value) => setCompetitiveStrength(value[0])}
+                        max={100}
+                        step={1}
+                        data-testid="slider-competitive-strength"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">How defensible are your competitive advantages?</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Tab 2: Analysis & Charts */}
+            <TabsContent value="analysis" className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>GTM Strategy Radar</CardTitle>
+                    <CardDescription>Multi-dimensional strategy assessment</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <RadarChart data={getRadarData()}>
+                        <PolarGrid />
+                        <PolarAngleAxis dataKey="metric" />
+                        <PolarRadiusAxis angle={90} domain={[0, 100]} />
+                        <Radar
+                          name="Current Score"
+                          dataKey="score"
+                          stroke={COLORS.primary}
+                          fill={COLORS.primary}
+                          fillOpacity={0.5}
+                        />
+                        <Radar
+                          name="Target (75)"
+                          dataKey="fullMark"
+                          stroke={COLORS.secondary}
+                          fill={COLORS.secondary}
+                          fillOpacity={0.1}
+                          strokeDasharray="5 5"
+                        />
+                        <Tooltip />
+                        <Legend />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Component Scores</CardTitle>
+                    <CardDescription>Individual GTM element performance</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={getComponentScores()}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="component" angle={-45} textAnchor="end" height={80} />
+                        <YAxis domain={[0, 100]} />
+                        <Tooltip />
+                        <Bar dataKey="score" fill={COLORS.primary}>
+                          {getComponentScores().map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.score >= 75 ? COLORS.success : entry.score >= 60 ? COLORS.warning : COLORS.danger} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Timeline Gantt Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Launch Timeline (Gantt Chart)</CardTitle>
+                  <CardDescription>Market entry phases and duration</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                      data={getTimelineGanttData()}
+                      layout="horizontal"
+                      margin={{ left: 100 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" domain={[0, 28]} label={{ value: 'Weeks', position: 'insideBottom', offset: -5 }} />
+                      <YAxis type="category" dataKey="phase" width={100} />
+                      <Tooltip
+                        formatter={(value: any, name: string) => {
+                          if (name === 'start') return [`Week ${value}`, 'Start'];
+                          if (name === 'duration') return [`${value} weeks`, 'Duration'];
+                          return [value, name];
+                        }}
+                      />
+                      <Legend />
+                      <Bar dataKey="start" stackId="a" fill="transparent" />
+                      <Bar dataKey="duration" stackId="a" fill={COLORS.primary} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <div className="mt-4 space-y-2">
+                    {launchPhases.map((phase, index) => (
+                      <div key={index} className="text-sm">
+                        <span className="font-medium">{phase.phase}:</span> {phase.activities.join(', ')}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Revenue Projection Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>12-Month Revenue Projection</CardTitle>
+                  <CardDescription>Expected revenue growth trajectory with targets</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={350}>
+                    <ComposedChart data={getRevenueProjection()}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" angle={-45} textAnchor="end" height={80} />
+                      <YAxis yAxisId="left" label={{ value: 'Revenue (£)', angle: -90, position: 'insideLeft' }} />
+                      <YAxis yAxisId="right" orientation="right" label={{ value: 'Customers', angle: 90, position: 'insideRight' }} />
+                      <Tooltip formatter={(value: number) => `£${value.toLocaleString()}`} />
+                      <Legend />
+                      <Area
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="target"
+                        fill={COLORS.secondary}
+                        stroke={COLORS.secondary}
+                        fillOpacity={0.2}
+                        name="Target Revenue"
+                      />
+                      <Line
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke={COLORS.primary}
+                        strokeWidth={3}
+                        name="Projected Revenue"
+                        dot={{ fill: COLORS.primary, r: 4 }}
+                      />
+                      <Bar
+                        yAxisId="right"
+                        dataKey="customers"
+                        fill={COLORS.success}
+                        fillOpacity={0.6}
+                        name="Customer Count"
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Channel Investment Distribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Channel Investment Distribution</CardTitle>
+                  <CardDescription>Budget allocation across distribution channels</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {channels.filter(c => c.investment > 0).map((channel, index) => {
+                      const totalInvestment = channels.reduce((sum, c) => sum + c.investment, 0);
+                      const percentage = totalInvestment > 0 ? (channel.investment / totalInvestment * 100) : 0;
+                      return (
+                        <div key={index}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium">{channel.channel || 'Unnamed Channel'}</span>
+                            <span className="text-sm text-muted-foreground">
+                              £{channel.investment.toLocaleString()} ({percentage.toFixed(1)}%) - ROI: {channel.expectedROI}%
+                            </span>
+                          </div>
+                          <Progress value={percentage} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Tab 3: Smart Tips */}
+            <TabsContent value="tips" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Smart Recommendations</CardTitle>
+                  <CardDescription>AI-powered insights to strengthen your GTM strategy for UK visa application</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {getSmartTips().map((tip, index) => (
+                      <Alert key={index} className={index === 0 && gtmReadiness < 70 ? "border-orange-500" : ""}>
+                        <div className="flex items-start gap-3">
+                          {tip.includes('CRITICAL') || tip.includes('GTM readiness below') ? (
+                            <AlertTriangle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                          ) : gtmReadiness >= 75 && tip.includes('Strong GTM') ? (
+                            <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                          ) : (
+                            <TrendingUp className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                          )}
+                          <div>
+                            <p className="font-medium">Recommendation {index + 1}</p>
+                            <p className="text-sm text-muted-foreground mt-1" data-testid={`tip-${index}`}>{tip}</p>
+                          </div>
+                        </div>
+                      </Alert>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>UK Innovator Founder Visa - Scalability Criterion</CardTitle>
+                  <CardDescription>How your GTM strategy aligns with visa requirements</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Clear Path to Market Penetration</p>
+                        <p className="text-sm text-muted-foreground">GTM strategy must demonstrate realistic route to significant market share</p>
+                        <p className="text-sm mt-1">
+                          <span className="font-medium">Your Status: </span>
+                          {marketPositioning >= 70 ? 'Strong positioning evidence' : 'Strengthen market positioning strategy'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Scalable Customer Acquisition</p>
+                        <p className="text-sm text-muted-foreground">Demonstrate ability to acquire customers efficiently at scale</p>
+                        <p className="text-sm mt-1">
+                          <span className="font-medium">Your Status: </span>
+                          {channelFit >= 70 ? 'Strong channel strategy' : 'Optimize distribution channels for scalability'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Multi-Channel Distribution</p>
+                        <p className="text-sm text-muted-foreground">Diversified channels reduce risk and demonstrate market reach</p>
+                        <p className="text-sm mt-1">
+                          <span className="font-medium">Your Status: </span>
+                          {channels.filter(c => c.investment > 0).length >= 2 ? `${channels.filter(c => c.investment > 0).length} active channels` : 'Add more distribution channels'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Evidence-Based Timeline</p>
+                        <p className="text-sm text-muted-foreground">Realistic execution timeline with measurable milestones</p>
+                        <p className="text-sm mt-1">
+                          <span className="font-medium">Your Status: </span>
+                          {executionReadiness >= 70 ? 'Detailed execution roadmap' : 'Add more implementation detail'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Measurable Success Criteria</p>
+                        <p className="text-sm text-muted-foreground">Clear KPIs and metrics to track market entry progress</p>
+                        <p className="text-sm mt-1">
+                          <span className="font-medium">Your Status: </span>
+                          {successMetrics && successMetrics.length > 50 ? 'KPIs defined' : 'Define specific success metrics'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 p-4 bg-muted rounded-lg">
+                      <p className="font-medium mb-2">Overall Visa Alignment</p>
+                      <Progress value={gtmReadiness} className="mb-2" />
+                      <p className="text-sm text-muted-foreground">
+                        {gtmReadiness >= 75 && scalabilityPotential >= 70 ? (
+                          'Your GTM strategy demonstrates strong alignment with UK Innovator Founder Visa scalability criterion. Focus on documenting evidence and early traction.'
+                        ) : gtmReadiness >= 65 ? (
+                          'Your GTM strategy meets basic viability requirements. Strengthen scalability components (aim for 75+) to improve endorsement prospects.'
+                        ) : (
+                          'Your GTM strategy needs significant development. Focus on clear market positioning, scalable channels, and detailed execution roadmap.'
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Tab 4: Action Plan */}
+            <TabsContent value="action" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>4-Week GTM Action Plan</CardTitle>
+                  <CardDescription>Prioritized implementation roadmap for market entry preparation</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1">
+                    {generateActionPlan().map((item, index) => (
+                      <div
+                        key={index}
+                        className="p-4 border rounded-lg hover-elevate"
+                        data-testid={`action-item-${index}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`flex-shrink-0 px-2 py-1 rounded text-xs font-medium ${
+                            item.priority === 'Critical' ? 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300' :
+                            item.priority === 'High' ? 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300' :
+                            'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                          }`}>
+                            {item.priority}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              <span className="font-medium text-sm">{item.week}</span>
+                            </div>
+                            <p className="text-sm mb-1">{item.action}</p>
+                            <p className="text-xs text-muted-foreground">Responsible: {item.responsible}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 p-4 bg-muted rounded-lg">
+                    <p className="font-medium mb-2">Implementation Notes</p>
+                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                      <li>Complete all Critical priority actions in Weeks 1-2 for strong foundation</li>
+                      <li>High priority actions strengthen GTM credibility for endorsing bodies</li>
+                      <li>Document all strategy decisions and assumptions for visa application</li>
+                      <li>Maintain evidence trail: market research, customer validation, pilot results</li>
+                      <li>Review with business advisor or mentor before endorsement submission</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Success Milestones</CardTitle>
+                  <CardDescription>Key achievements to target during GTM execution</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-medium">1</span>
+                      </div>
+                      <div>
+                        <p className="font-medium">Pre-Launch Validation (Month 0-1)</p>
+                        <p className="text-sm text-muted-foreground">Complete customer discovery, validate value proposition, finalize positioning</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-medium">2</span>
+                      </div>
+                      <div>
+                        <p className="font-medium">Soft Launch (Month 1-2)</p>
+                        <p className="text-sm text-muted-foreground">Acquire first 10-20 customers, validate pricing, refine messaging</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-medium">3</span>
+                      </div>
+                      <div>
+                        <p className="font-medium">Market Entry (Month 2-4)</p>
+                        <p className="text-sm text-muted-foreground">Full product launch, activate all channels, achieve £10k+ MRR</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-medium">4</span>
+                      </div>
+                      <div>
+                        <p className="font-medium">Scale & Optimize (Month 4-6)</p>
+                        <p className="text-sm text-muted-foreground">Optimize conversion funnels, scale winning channels, expand customer base</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-medium">5</span>
+                      </div>
+                      <div>
+                        <p className="font-medium">Growth Phase (Month 6-12)</p>
+                        <p className="text-sm text-muted-foreground">Achieve profitability, demonstrate scalability, prepare for expansion</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </>
