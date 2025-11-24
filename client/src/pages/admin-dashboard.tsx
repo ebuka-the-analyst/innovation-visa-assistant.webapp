@@ -85,7 +85,7 @@ import {
   UserX,
   Mail,
   DollarSign,
-  TrendingFlat
+  ArrowRight
 } from "lucide-react";
 import {
   BarChart as RechartsBarChart,

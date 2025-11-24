@@ -9,6 +9,7 @@ export interface NewsItem {
   content: string;
   source: string;
   category: string;
+  sourceUrl?: string;
 }
 
 interface NewsModalProps {
@@ -45,10 +46,22 @@ export default function NewsModal({ open, onOpenChange, article }: NewsModalProp
             <p className="text-xs text-muted-foreground mb-3">
               <strong>Source:</strong> {article.source}
             </p>
-            <Button variant="outline" className="w-full gap-2" data-testid="button-read-more">
-              <ExternalLink className="w-4 h-4" />
-              Read Full Article
-            </Button>
+            {article.sourceUrl ? (
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                onClick={() => window.open(article.sourceUrl, '_blank', 'noopener,noreferrer')}
+                data-testid="button-read-more"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Read Full Article
+              </Button>
+            ) : (
+              <Button variant="outline" className="w-full gap-2" disabled data-testid="button-read-more">
+                <ExternalLink className="w-4 h-4" />
+                Source Link Not Available
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>

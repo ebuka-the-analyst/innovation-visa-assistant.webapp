@@ -87,7 +87,8 @@ export const getOfficialNews = () => {
       date: "Nov 10, 2025",
       content: "Envestors endorsing body announces priority assessment for growth-stage companies with £500,000+ Annual Recurring Revenue. Standard endorsement fee £1,000. Check-in meetings £500 each. Sector focus: FinTech, CleanTech, AI/ML. Source: envestors-visa-endorsement.co.uk",
       source: "Envestors Limited",
-      category: "Endorser Announcement"
+      category: "Endorser Announcement",
+      sourceUrl: "https://envestors.co.uk/investor-products/investor-visa-endorsement"
     },
     {
       id: "official-12",
