@@ -2,24 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom ping animation - pulses every 5 seconds */
+/* Custom ping animation - flashes 2 times, waits 5 seconds, repeats */
 @keyframes ping-slow {
-  0%, 100% {
+  /* First flash */
+  0%, 5% {
     transform: scale(1);
     opacity: 1;
   }
-  20% {
+  7% {
     transform: scale(2);
     opacity: 0;
   }
-  21%, 100% {
+  
+  /* Second flash */
+  10%, 15% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  17% {
+    transform: scale(2);
+    opacity: 0;
+  }
+  
+  /* Wait 5 seconds */
+  18%, 100% {
     transform: scale(1);
     opacity: 0;
   }
 }
 
 .animate-ping-slow {
-  animation: ping-slow 5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  animation: ping-slow 7s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Red variant for disclaimer */
+.animate-ping-slow-red {
+  animation: ping-slow 7s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 /* LIGHT MODE - Innovator Founder Visa Assistant Brand Colors */
