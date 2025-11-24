@@ -41,8 +41,8 @@ export function AuthHeader() {
             <Link href="/">
               <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-auth-logo">
                 <div className="logo-container overflow-hidden flex items-center">
-                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-18 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-18 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-7 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
+                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-7 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
                 </div>
               </div>
             </Link>
