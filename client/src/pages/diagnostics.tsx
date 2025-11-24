@@ -71,26 +71,36 @@ export default function DiagnosticsPage() {
   const { data: endorserData, isLoading: endorserLoading, error: endorserError } = useQuery<{ endorsers: EndorserResult[]; scores: any[] }>({
     queryKey: [`/api/endorser/simulate/${planId}`],
     enabled: !!planId,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   const { data: routeData, isLoading: routeLoading, error: routeError } = useQuery<RouteAnalysis>({
     queryKey: [`/api/routes/analyze/${planId}`],
     enabled: !!planId,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   const { data: teamData, isLoading: teamLoading, error: teamError } = useQuery<{ teamPlan: TeamPlan; skillAssessment: any }>({
     queryKey: [`/api/team/model/${planId}`],
     enabled: !!planId,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   const { data: tractionData, isLoading: tractionLoading, error: tractionError } = useQuery<TractionForecast>({
     queryKey: [`/api/traction/forecast/${planId}`],
     enabled: !!planId,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   const { data: ruleData, isLoading: ruleLoading, error: ruleError } = useQuery<RuleStatus>({
     queryKey: [`/api/rules/check/${planId}`],
     enabled: !!planId,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   const errors = [endorserError, routeError, teamError, tractionError, ruleError].filter(Boolean);
