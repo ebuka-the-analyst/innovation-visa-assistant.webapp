@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { randomUUID } from "crypto";
+import { storage } from "./storage";
 
-// File upload handler - stores metadata in memory, binary in future (IndexedDB/S3)
+// File upload handler - stores metadata and base64 content in database
 export async function uploadFile(req: Request, res: Response) {
   try {
     const { toolId, userId } = req.body;
@@ -11,25 +11,28 @@ export async function uploadFile(req: Request, res: Response) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const fileId = randomUUID();
-    const fileMetadata = {
-      id: fileId,
+    // Convert file buffer to base64 for database storage (suitable for small files < 1MB)
+    const fileContent = file.buffer ? file.buffer.toString('base64') : null;
+
+    const uploadedFile = await storage.createUploadedFile({
       toolId,
       userId,
       fileName: file.originalname,
+      fileType: file.mimetype,
       fileSize: file.size,
-      mimeType: file.mimetype,
-      uploadedAt: new Date().toISOString(),
-      status: "uploaded" as const,
-    };
-
-    // TODO: Store binary in S3/IndexedDB
-    // For now: metadata stored in localStorage client-side
+      blobUrl: fileContent, // Store base64 content in blobUrl field for now
+    });
 
     return res.status(200).json({
       success: true,
-      fileId,
-      fileMetadata,
+      fileId: uploadedFile.id,
+      fileMetadata: {
+        id: uploadedFile.id,
+        fileName: uploadedFile.fileName,
+        fileSize: uploadedFile.fileSize,
+        fileType: uploadedFile.fileType,
+        uploadedAt: uploadedFile.uploadedAt,
+      },
       message: "File uploaded successfully",
     });
   } catch (error) {
@@ -48,12 +51,20 @@ export async function getToolFiles(req: Request, res: Response) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // TODO: Query from database
-    // For MVP: files stored in localStorage client-side
+    const files = await storage.getToolFiles(toolId, userId);
+
+    // Return files without base64 content for list view
+    const filesMetadata = files.map(file => ({
+      id: file.id,
+      fileName: file.fileName,
+      fileSize: file.fileSize,
+      fileType: file.fileType,
+      uploadedAt: file.uploadedAt,
+    }));
 
     return res.status(200).json({
       success: true,
-      files: [],
+      files: filesMetadata,
       message: "Files retrieved",
     });
   } catch (error) {
@@ -72,8 +83,13 @@ export async function deleteFile(req: Request, res: Response) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // TODO: Delete from database and S3
-    // For MVP: handled client-side with localStorage
+    // Verify file belongs to user before deleting
+    const file = await storage.getUploadedFile(fileId);
+    if (!file || file.userId !== userId) {
+      return res.status(403).json({ error: "Unauthorized to delete this file" });
+    }
+
+    await storage.deleteUploadedFile(fileId);
 
     return res.status(200).json({
       success: true,
@@ -88,26 +104,27 @@ export async function deleteFile(req: Request, res: Response) {
 // Track analytics
 export async function trackToolEvent(req: Request, res: Response) {
   try {
-    const { toolId, eventType, userId } = req.body;
+    const { toolId, action, userId } = req.body;
 
-    if (!toolId || !eventType || !userId) {
+    if (!toolId || !action || !userId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const analytics = {
-      id: randomUUID(),
+    const analytic = await storage.createToolAnalytic({
       toolId,
       userId,
-      eventType, // "save" | "export" | "share" | "upload" | "download"
-      timestamp: new Date().toISOString(),
+      action, // "save" | "export" | "share" | "upload" | "download"
       metadata: req.body.metadata || {},
-    };
-
-    // TODO: Store in database (toolAnalytics table)
+    });
 
     return res.status(200).json({
       success: true,
-      analytics,
+      analytic: {
+        id: analytic.id,
+        toolId: analytic.toolId,
+        action: analytic.action,
+        timestamp: analytic.createdAt,
+      },
       message: "Event tracked",
     });
   } catch (error) {
@@ -126,31 +143,45 @@ export async function getAnalyticsDashboard(req: Request, res: Response) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // TODO: Query analytics from database
+    // Parse dates
+    const start = startDate ? new Date(startDate as string) : undefined;
+    const end = endDate ? new Date(endDate as string) : undefined;
 
-    const mockAnalytics = {
-      totalSessions: 1250,
-      activeUsers: 342,
-      averageSessionTime: "12m 34s",
-      mostUsedTools: [
-        { name: "Org Chart", uses: 285, trend: "+12%" },
-        { name: "Hiring Plan", uses: 267, trend: "+8%" },
-        { name: "Compliance Checker", uses: 198, trend: "+15%" },
-      ],
-      eventBreakdown: {
-        saves: 1847,
-        exports: 523,
-        shares: 891,
-        uploads: 345,
-      },
-      completionRate: "67%",
-      userSatisfaction: "4.6/5",
-    };
+    // Get user analytics from database
+    const analytics = await storage.getUserAnalytics(userId, start, end);
+
+    // Aggregate analytics data
+    const eventBreakdown: { [key: string]: number } = {};
+    const toolUsage: { [key: string]: number } = {};
+
+    analytics.forEach(analytic => {
+      // Count by action type
+      eventBreakdown[analytic.action] = (eventBreakdown[analytic.action] || 0) + 1;
+      
+      // Count by tool
+      toolUsage[analytic.toolId] = (toolUsage[analytic.toolId] || 0) + 1;
+    });
+
+    // Get top 3 most used tools
+    const mostUsedTools = Object.entries(toolUsage)
+      .map(([toolId, count]) => ({ name: toolId, uses: count, trend: "+0%" }))
+      .sort((a, b) => b.uses - a.uses)
+      .slice(0, 3);
 
     return res.status(200).json({
       success: true,
-      analytics: mockAnalytics,
-      period: { startDate, endDate },
+      analytics: {
+        totalEvents: analytics.length,
+        mostUsedTools,
+        eventBreakdown: {
+          saves: eventBreakdown.save || 0,
+          exports: eventBreakdown.export || 0,
+          shares: eventBreakdown.share || 0,
+          uploads: eventBreakdown.upload || 0,
+          downloads: eventBreakdown.download || 0,
+        },
+      },
+      period: { startDate: start, endDate: end },
     });
   } catch (error) {
     console.error("Analytics dashboard error:", error);

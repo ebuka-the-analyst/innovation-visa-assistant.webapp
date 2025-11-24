@@ -1,4 +1,4 @@
-import { type User, type UpsertUser, type InsertUser, type BusinessPlan, type InsertBusinessPlan, type SessionHandoff, type InsertSessionHandoff, type Referral, type InsertReferral, users, businessPlans, sessionHandoffs, referrals } from "@shared/schema";
+import { type User, type UpsertUser, type InsertUser, type BusinessPlan, type InsertBusinessPlan, type SessionHandoff, type InsertSessionHandoff, type Referral, type InsertReferral, type UploadedFile, type InsertUploadedFile, type ToolAnalytic, type InsertToolAnalytics, users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gt, lt } from "drizzle-orm";
 
@@ -42,8 +42,17 @@ export interface IStorage {
   // Referral tracking
   createReferral(referral: InsertReferral): Promise<Referral>;
   
+  // File storage
+  createUploadedFile(file: InsertUploadedFile): Promise<UploadedFile>;
+  getUploadedFile(id: string): Promise<UploadedFile | undefined>;
+  getUserFiles(userId: string): Promise<UploadedFile[]>;
+  getToolFiles(toolId: string, userId: string): Promise<UploadedFile[]>;
+  deleteUploadedFile(id: string): Promise<void>;
+  
   // Analytics and monitoring
+  createToolAnalytic(analytic: InsertToolAnalytics): Promise<ToolAnalytic>;
   getToolUsageStats(limit?: number): Promise<Array<{ toolId: string; action: string; count: number; timestamp?: Date }>>;
+  getUserAnalytics(userId: string, startDate?: Date, endDate?: Date): Promise<ToolAnalytic[]>;
   checkDatabaseHealth(): Promise<boolean>;
 }
 
@@ -282,6 +291,57 @@ export class DatabaseStorage implements IStorage {
   async createReferral(insertReferral: InsertReferral): Promise<Referral> {
     const result = await db.insert(referrals).values(insertReferral).returning();
     return result[0]!;
+  }
+
+  // File storage methods
+  async createUploadedFile(file: InsertUploadedFile): Promise<UploadedFile> {
+    const result = await db.insert(uploadedFiles).values(file).returning();
+    return result[0]!;
+  }
+
+  async getUploadedFile(id: string): Promise<UploadedFile | undefined> {
+    const result = await db.select().from(uploadedFiles).where(eq(uploadedFiles.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserFiles(userId: string): Promise<UploadedFile[]> {
+    const result = await db
+      .select()
+      .from(uploadedFiles)
+      .where(eq(uploadedFiles.userId, userId));
+    return result;
+  }
+
+  async getToolFiles(toolId: string, userId: string): Promise<UploadedFile[]> {
+    const result = await db
+      .select()
+      .from(uploadedFiles)
+      .where(and(eq(uploadedFiles.toolId, toolId), eq(uploadedFiles.userId, userId)));
+    return result;
+  }
+
+  async deleteUploadedFile(id: string): Promise<void> {
+    await db.delete(uploadedFiles).where(eq(uploadedFiles.id, id));
+  }
+
+  // Analytics methods
+  async createToolAnalytic(analytic: InsertToolAnalytics): Promise<ToolAnalytic> {
+    const result = await db.insert(toolAnalytics).values(analytic).returning();
+    return result[0]!;
+  }
+
+  async getUserAnalytics(userId: string, startDate?: Date, endDate?: Date): Promise<ToolAnalytic[]> {
+    let query = db.select().from(toolAnalytics).where(eq(toolAnalytics.userId, userId));
+    
+    if (startDate && endDate) {
+      query = query.where(and(
+        gt(toolAnalytics.createdAt, startDate),
+        lt(toolAnalytics.createdAt, endDate)
+      )) as any;
+    }
+    
+    const result = await query;
+    return result;
   }
 
   // Admin methods
