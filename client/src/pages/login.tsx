@@ -8,6 +8,7 @@ import { LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import logoImg from "@assets/generated_images/professional_visa_assistant_logo_design.png";
 
 export default function Login() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -77,9 +78,18 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>Sign in to your account to continue</CardDescription>
+        <div className="flex justify-center pt-8 pb-4">
+          <div className="bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 dark:from-orange-950/20 dark:via-blue-950/20 dark:to-purple-950/20 p-6 rounded-2xl shadow-lg border-2 border-primary/20">
+            <img 
+              src={logoImg} 
+              alt="UK Innovator Founder Visa Assistant" 
+              className="h-20 w-auto"
+            />
+          </div>
+        </div>
+        <CardHeader className="space-y-1 pt-4">
+          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+          <CardDescription className="text-center">Sign in to your account to continue</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={handleEmailLogin} className="space-y-3">
