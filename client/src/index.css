@@ -417,10 +417,14 @@
 /* Logo dark mode - show/hide based on theme */
 .logo-light {
   display: block;
+  filter: none;
+  -webkit-filter: none;
 }
 
 .logo-dark {
   display: none;
+  filter: none;
+  -webkit-filter: none;
 }
 
 .dark .logo-light {
@@ -429,4 +433,6 @@
 
 .dark .logo-dark {
   display: block;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
