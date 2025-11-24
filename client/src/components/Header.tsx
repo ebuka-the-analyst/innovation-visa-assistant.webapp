@@ -47,35 +47,35 @@ export default function Header() {
         </div>
       )}
       
-      <nav className="container mx-auto px-3 md:px-6 h-24 md:h-36 flex items-center justify-between border-b border-border/40">
+      <nav className="container mx-auto px-2 md:px-4 h-12 md:h-14 flex items-center justify-between border-b border-border/40">
         {/* Logo */}
         <Link href="/">
           <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
             <div className="logo-container overflow-hidden flex items-center">
-              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 md:h-28 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 md:h-28 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
+              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
             </div>
           </div>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link href="/features" className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-all-features">
+        <div className="hidden md:flex items-center gap-4">
+          <Link href="/features" className="text-xs font-medium hover:text-primary transition-colors" data-testid="link-all-features">
             All Features
           </Link>
-          <Link href="/tools-hub" className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-tools-hub">
+          <Link href="/tools-hub" className="text-xs font-medium hover:text-primary transition-colors" data-testid="link-tools-hub">
             Tools
           </Link>
           <button
             onClick={() => handleNavigation('pricing')}
-            className="text-sm font-medium hover:text-primary transition-colors"
+            className="text-xs font-medium hover:text-primary transition-colors"
             data-testid="button-nav-pricing"
           >
             Pricing
           </button>
           <button
             onClick={() => handleNavigation('faq')}
-            className="text-sm font-medium hover:text-primary transition-colors"
+            className="text-xs font-medium hover:text-primary transition-colors"
             data-testid="button-nav-faq"
           >
             FAQ
@@ -83,15 +83,15 @@ export default function Header() {
         </div>
 
         {/* CTA Buttons & Theme Toggle */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-1">
           <ThemeToggle />
           <Link href="/login">
-            <Button variant="ghost" data-testid="button-header-signin">
+            <Button variant="ghost" size="sm" data-testid="button-header-signin">
               Sign In
             </Button>
           </Link>
           <Link href="/pricing">
-            <Button data-testid="button-header-cta">
+            <Button size="sm" data-testid="button-header-cta">
               Get Started
             </Button>
           </Link>
