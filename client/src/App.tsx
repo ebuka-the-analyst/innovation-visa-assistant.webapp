@@ -59,7 +59,7 @@ function AnimatedSidebarTrigger() {
           data-testid="button-sidebar-toggle"
           className="-ml-1 md:-ml-2 h-8 md:h-9 w-8 md:w-9 flex items-center justify-center group relative overflow-visible"
         >
-          <div className={`transition-all duration-500 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
+          <div className={`transition-all duration-500 ease-in-out ${isOpen ? '-scale-x-100' : 'scale-x-100'}`}>
             <HandIcon className={`w-5 h-5 ${isOpen ? 'animate-pulse' : 'animate-bounce'}`} />
           </div>
           {!isOpen && (
