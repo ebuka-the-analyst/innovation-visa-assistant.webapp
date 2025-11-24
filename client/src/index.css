@@ -419,12 +419,20 @@
   display: block;
   filter: none;
   -webkit-filter: none;
+  object-fit: cover;
+  object-position: center;
+  padding: 0;
+  margin: 0;
 }
 
 .logo-dark {
   display: none;
   filter: none;
   -webkit-filter: none;
+  object-fit: cover;
+  object-position: center;
+  padding: 0;
+  margin: 0;
 }
 
 .dark .logo-light {
@@ -435,4 +443,6 @@
   display: block;
   filter: none !important;
   -webkit-filter: none !important;
+  object-fit: cover;
+  object-position: center;
 }

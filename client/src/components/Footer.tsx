@@ -10,8 +10,8 @@ export default function Footer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4 lg:col-span-2">
-            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto mb-3 logo-light" />
-            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto mb-3 logo-dark" />
+            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto mb-3 logo-light scale-110" />
+            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto mb-3 logo-dark scale-110" />
             <p className="text-sm text-muted-foreground">
               AI-powered business plans and official GOV.UK guidance for UK Innovator Founder Visa applicants.
             </p>
@@ -92,8 +92,8 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-col md:flex-row items-center gap-3">
-            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto opacity-70 logo-light" />
-            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto opacity-70 logo-dark" />
+            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto opacity-70 logo-light scale-110" />
+            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto opacity-70 logo-dark scale-110" />
             <p className="text-sm text-muted-foreground">
               © 2025 UK Innovator Founder Visa Assistant. All rights reserved.
             </p>

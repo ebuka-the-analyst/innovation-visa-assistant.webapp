@@ -50,9 +50,9 @@ export default function Header() {
       <nav className="container mx-auto px-3 md:px-6 h-24 md:h-36 flex items-center justify-between border-b border-border/40">
         {/* Logo */}
         <Link href="/">
-          <div className="flex items-center cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
-            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 md:h-28 w-auto logo-light" />
-            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 md:h-28 w-auto logo-dark" />
+          <div className="flex items-center cursor-pointer hover:opacity-85 transition-opacity -my-2" data-testid="button-logo">
+            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 md:h-28 w-auto logo-light scale-110" />
+            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 md:h-28 w-auto logo-dark scale-110" />
           </div>
         </Link>
 
