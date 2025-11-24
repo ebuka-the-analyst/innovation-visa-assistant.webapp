@@ -3,7 +3,7 @@ import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { LogOut, Home } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import logoImg from "@assets/BhenMedia_1763690019470.png";
+import logoImg from "@assets/generated_images/professional_visa_assistant_logo_design.png";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export function AuthHeader() {
@@ -39,13 +39,7 @@ export function AuthHeader() {
           <div className="flex items-center gap-6">
             <Link href="/">
               <div className="flex flex-col items-start cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-auth-logo">
-                <img src={logoImg} alt="BhenMedia" className="h-12 w-44" />
-                <div className="relative -mt-1">
-                  <p className="text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
-                    UK's #1 Visa AI Assistant
-                  </p>
-                  <div className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-chart-3 to-primary rounded-full" />
-                </div>
+                <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-14 w-auto" />
               </div>
             </Link>
             <nav className="hidden md:flex gap-4">

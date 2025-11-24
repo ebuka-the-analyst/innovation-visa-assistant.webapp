@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Gauge, DollarSign, HelpCircle } from "lucide-react";
 import { useLocation, Link } from "wouter";
-import logoImg from "@assets/BhenMedia_1763690019470.png";
+import logoImg from "@assets/generated_images/professional_visa_assistant_logo_design.png";
 import { useState } from "react";
 import PricingModal from "./PricingModal";
 import FAQModal from "./FAQModal";
@@ -18,12 +18,7 @@ export function ToolNavigation() {
       <div className="flex items-center justify-between mb-6">
         <Link href="/">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-nav-logo">
-            <img src={logoImg} alt="BhenMedia" className="h-8 w-auto" />
-            <div className="flex flex-col items-start">
-              <p className="text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
-                UK's #1 Visa AI Assistant
-              </p>
-            </div>
+            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto" />
           </div>
         </Link>
       </div>

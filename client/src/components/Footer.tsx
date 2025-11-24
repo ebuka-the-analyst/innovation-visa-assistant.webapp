@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import logoUrl from "@assets/BhenMedia_1763977941642.png";
+import logoUrl from "@assets/generated_images/professional_visa_assistant_logo_design.png";
 
 export default function Footer() {
   return (
@@ -9,8 +9,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4 lg:col-span-2">
-            <img src={logoUrl} alt="BhenMedia Logo" className="h-8 w-auto object-contain mb-3" />
-            <h3 className="font-bold text-lg">UK Innovator Founder Visa Assistant</h3>
+            <img src={logoUrl} alt="UK Innovator Founder Visa Assistant" className="h-12 w-auto object-contain mb-3" />
             <p className="text-sm text-muted-foreground">
               AI-powered business plans and official GOV.UK guidance for UK Innovator Founder Visa applicants.
             </p>

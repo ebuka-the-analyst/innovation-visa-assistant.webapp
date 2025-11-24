@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import logoImg from "@assets/BhenMedia_1763690019470.png";
+import logoImg from "@assets/generated_images/professional_visa_assistant_logo_design.png";
 import ThemeToggle from "./ThemeToggle";
 import { useQuery } from "@tanstack/react-query";
 import { useState as useStateDisclaimer } from "react";
@@ -49,13 +49,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/">
           <div className="flex flex-col items-start cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
-            <img src={logoImg} alt="BhenMedia" className="h-8 md:h-14 w-auto md:w-48 max-w-xs" />
-            <div className="relative -mt-0.5 md:-mt-1">
-              <p className="text-xs md:text-xs font-bold bg-gradient-to-r from-primary via-chart-3 to-primary bg-clip-text text-transparent whitespace-nowrap">
-                UK's #1 Visa AI Assistant
-              </p>
-              <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-chart-3 to-primary rounded-full" />
-            </div>
+            <img src={logoImg} alt="UK Innovator Founder Visa Assistant" className="h-10 md:h-16 w-auto" />
           </div>
         </Link>
 
