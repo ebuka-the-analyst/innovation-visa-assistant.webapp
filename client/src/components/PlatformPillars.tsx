@@ -7,7 +7,7 @@ export default function PlatformPillars() {
   const pillars = [
     {
       icon: Brain,
-      name: "VisaPrep AI - Intelligence Engine",
+      name: "Innovator Founder Visa Assistant - Intelligence Engine",
       subtitle: "End-to-End Business Planning",
       description: "Advanced AI system that generates comprehensive, endorser-ready business plans. Evaluates your business across Innovation, Viability, and Scalability criteria with financial projections, competitive analysis, and job creation roadmaps—all internally consistent and submission-ready.",
       features: [
@@ -25,7 +25,7 @@ export default function PlatformPillars() {
     },
     {
       icon: Zap,
-      name: "VisaPrep AI - Diagnostics",
+      name: "Innovator Founder Visa Assistant - Diagnostics",
       subtitle: "Eligibility & Route Analysis",
       description: "Real-time AI diagnostic engine that tests your business against all UK Innovator Founder Visa requirements. Compares endorser routes, scores your viability for each endorser, models your team gaps, and forecasts realistic traction benchmarks—so you know your success probability before investing.",
       features: [
@@ -43,7 +43,7 @@ export default function PlatformPillars() {
     },
     {
       icon: Users,
-      name: "VisaPrep AI - Mentorship Hub",
+      name: "Innovator Founder Visa Assistant - Mentorship Hub",
       subtitle: "Interview Prep & Expert Network",
       description: "AI-powered coaching studio + expert network. Mock interview scenarios with Advanced feedback, document organization with submission checklists, expert immigration lawyer consultations, and settlement planning for post-visa growth. Guides you from application through to ILR eligibility.",
       features: [
@@ -69,7 +69,7 @@ export default function PlatformPillars() {
             One Platform. Three Power Tools.
           </h2>
           <p className="text-lg text-muted-foreground">
-            VisaPrep AI combines business planning, eligibility diagnostics, and expert mentorship into one unified platform for UK Innovator Founder Visa success
+            Innovator Founder Visa Assistant combines business planning, eligibility diagnostics, and expert mentorship into one unified platform for UK Innovator Founder Visa success
           </p>
         </div>
 
@@ -124,9 +124,9 @@ export default function PlatformPillars() {
         <div className="mt-16 p-8 bg-primary/5 border border-primary/20 rounded-lg text-center">
           <h3 className="font-semibold text-lg mb-3">Integrated Workflow</h3>
           <p className="text-muted-foreground mb-4 max-w-2xl mx-auto">
-            Generate your business plan with VisaPrep AI Intelligence Engine. Test your eligibility and compare routes with Diagnostics. Practice interviews and access expert consultants with the Mentorship Hub. All three tools work together seamlessly.
+            Generate your business plan with Innovator Founder Visa Assistant Intelligence Engine. Test your eligibility and compare routes with Diagnostics. Practice interviews and access expert consultants with the Mentorship Hub. All three tools work together seamlessly.
           </p>
-          <p className="text-sm font-semibold text-primary">Everything included in your VisaPrep AI subscription.</p>
+          <p className="text-sm font-semibold text-primary">Everything included in your Innovator Founder Visa Assistant subscription.</p>
         </div>
       </div>
     </section>

@@ -1,4 +1,4 @@
-# VisaPrep AI - Design Guidelines
+# Innovator Founder Visa Assistant - Design Guidelines
 
 ## Design Approach
 

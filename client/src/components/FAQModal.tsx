@@ -64,7 +64,7 @@ export default function FAQModal({ isOpen, onClose }: FAQModalProps) {
           <div>
             <h2 className="text-2xl font-bold">Frequently Asked Questions</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Everything you need to know about VisaPrep
+              Everything you need to know about Innovator Founder Visa Assistant
             </p>
           </div>
           <button

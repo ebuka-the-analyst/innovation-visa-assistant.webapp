@@ -70,7 +70,7 @@ export default function Settings() {
       <div className="container mx-auto py-8 px-4 md:px-6 max-w-2xl">
         <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2" data-testid="heading-settings">Settings & Configuration</h1>
-        <p className="text-muted-foreground">Manage your VisaPrep AI integrations and API configuration</p>
+        <p className="text-muted-foreground">Manage your Innovator Founder Visa Assistant integrations and API configuration</p>
       </div>
 
       <Tabs defaultValue="google" className="space-y-6" data-testid="tabs-settings">

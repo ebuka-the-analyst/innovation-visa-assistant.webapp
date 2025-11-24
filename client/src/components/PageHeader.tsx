@@ -30,7 +30,7 @@ export default function PageHeader({ title, description, breadcrumbs }: PageHead
             {/* Logo */}
             <Link href="/">
               <a className="font-serif text-2xl font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-                VisaPrep AI
+                Innovator Founder Visa Assistant
               </a>
             </Link>
 

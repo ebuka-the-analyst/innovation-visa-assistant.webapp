@@ -9,10 +9,10 @@ export default function Disclaimer() {
           <div className="text-sm text-muted-foreground">
             <p className="font-semibold text-foreground mb-2">Legal Disclaimer</p>
             <p className="mb-3">
-              VisaPrep AI provides automated business plan generation for the UK Innovator Founder Visa route. This service is NOT a substitute for professional legal advice. 
-              The information provided by VisaPrep AI is for informational and educational purposes only and does not constitute legal advice. 
+              Innovator Founder Visa Assistant provides automated business plan generation for the UK Innovator Founder Visa route. This service is NOT a substitute for professional legal advice. 
+              The information provided by Innovator Founder Visa Assistant is for informational and educational purposes only and does not constitute legal advice. 
               Immigration law is complex and requirements vary by individual circumstances. We strongly recommend consulting with a qualified immigration lawyer 
-              before submitting your Innovator Founder Visa application to the UK Home Office. VisaPrep AI and its team cannot be held responsible for visa rejections or 
+              before submitting your Innovator Founder Visa application to the UK Home Office. Innovator Founder Visa Assistant and its team cannot be held responsible for visa rejections or 
               immigration-related consequences resulting from the use of this platform.
             </p>
             <p className="text-xs">

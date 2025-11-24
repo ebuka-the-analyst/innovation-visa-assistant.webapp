@@ -127,7 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             price_data: {
               currency: "gbp",
               product_data: {
-                name: `VisaPrep AI - ${pricing.name}`,
+                name: `Innovator Founder Visa Assistant - ${pricing.name}`,
                 description: `AI-powered UK Innovation Visa business plan - ${businessPlan.tier} tier`,
               },
               unit_amount: pricing.amount,
