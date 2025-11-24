@@ -18,7 +18,6 @@ export default function ResetPassword() {
   const [isVerifying, setIsVerifying] = useState(true);
   const [isTokenValid, setIsTokenValid] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [userEmail, setUserEmail] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,7 +45,6 @@ export default function ResetPassword() {
 
       if (data.valid) {
         setIsTokenValid(true);
-        setUserEmail(data.email);
       } else {
         toast({
           title: "Invalid or Expired Link",
@@ -209,7 +207,7 @@ export default function ResetPassword() {
           </div>
           <CardTitle className="text-2xl" data-testid="text-reset-password-title">Create New Password</CardTitle>
           <CardDescription data-testid="text-reset-password-description">
-            Enter a new password for {userEmail}
+            Enter a strong new password for your account
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>

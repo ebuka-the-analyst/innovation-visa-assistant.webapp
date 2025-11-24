@@ -51,9 +51,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const resetToken = generateVerificationToken();
         const tokenExpiry = getResetTokenExpiry();
 
-        await storage.updateResetToken(user.id, resetToken, tokenExpiry);
+        // Hash the token before storing (security best practice)
+        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        await storage.updateResetToken(user.id, hashedToken, tokenExpiry);
 
-        // Send password reset email
+        // Send password reset email with the original (unhashed) token
         await sendPasswordResetEmail(
           user.email!,
           user.firstName || "User",
@@ -80,8 +82,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ valid: false, message: "Token is required" });
       }
 
-      // Find user by reset token
-      const user = await storage.getUserByResetToken(token);
+      // Hash the token to compare with stored hash
+      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+      // Find user by hashed reset token
+      const user = await storage.getUserByResetToken(hashedToken);
       
       if (!user || !user.resetTokenExpiry) {
         return res.json({ valid: false, message: "Invalid reset token" });
@@ -93,9 +98,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ valid: false, message: "Reset token has expired" });
       }
 
+      // Return valid without exposing email (security best practice)
       res.json({ 
-        valid: true, 
-        email: user.email 
+        valid: true
       });
     } catch (error) {
       console.error("Verify reset token error:", error);
@@ -115,8 +120,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Password must be at least 6 characters" });
       }
 
-      // Find user by reset token
-      const user = await storage.getUserByResetToken(token);
+      // Hash the token to compare with stored hash
+      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+      // Find user by hashed reset token
+      const user = await storage.getUserByResetToken(hashedToken);
       
       if (!user || !user.resetTokenExpiry) {
         return res.status(400).json({ error: "Invalid or expired reset token" });
