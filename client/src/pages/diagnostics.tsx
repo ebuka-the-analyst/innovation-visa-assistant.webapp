@@ -92,7 +92,17 @@ export default function DiagnosticsPage() {
 
   const isLoading = endorserLoading || routeLoading || teamLoading || tractionLoading || ruleLoading;
 
-  if (!planId) return null;
+  if (!planId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 flex items-center justify-center py-12 px-4">
+        <Card className="p-8 max-w-md text-center space-y-4">
+          <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
+          <h2 className="text-xl font-bold">No Business Plan Found</h2>
+          <p className="text-muted-foreground">Please select a business plan from your dashboard to view diagnostics.</p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 py-12 px-4">
