@@ -485,7 +485,7 @@ ${ltvCacRatio >= 3 ? 'STRONG - Healthy unit economics prove business can profita
 Cohort Retention: Month 6 average ${(cohortData.reduce((sum, c) => sum + c.month6, 0) / cohortData.length).toFixed(1)}%
 ${cohortData.reduce((sum, c) => sum + c.month6, 0) / cohortData.length >= 70 ? 'STRONG - High retention validates product-market fit and sticky customer base. Scalability indicator for endorsement.' : 'MODERATE - Improve retention to demonstrate sustainable growth potential and reduce churn concerns.'}
 
-Revenue Growth: ${monthlyGrowthRate}% monthly (${((1 + monthlyGrowthRate/100) ** 12 - 1) * 100).toFixed(1)}% annualized)
+Revenue Growth: ${monthlyGrowthRate}% monthly (${(((1 + monthlyGrowthRate/100) ** 12 - 1) * 100).toFixed(1)}}% annualized
 ${monthlyGrowthRate >= 15 ? 'STRONG - ' + monthlyGrowthRate + '% monthly growth demonstrates market demand and scaling ability. Provide detailed channel breakdown for endorsement.' : monthlyGrowthRate >= 10 ? 'MODERATE - Steady growth but accelerate to demonstrate high-growth potential required for visa approval.' : 'WEAK - Growth below investor/endorser expectations. Validate product-market fit and optimize acquisition before application.'}
 
 Overall Scalability Assessment: ${healthScore >= 70 && ltvCacRatio >= 3 && churnRate <= 5 ? 'READY - Strong metrics support scalability criterion for endorsement application' : healthScore >= 55 ? 'NEARLY READY - Strengthen key metrics before endorsement submission' : 'NOT READY - Significant optimization needed to demonstrate scalability'}

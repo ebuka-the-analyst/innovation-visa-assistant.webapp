@@ -137,7 +137,7 @@ export default function DocVerification() {
         if ('checks' in payload) setChecks(payload.checks);
         if ('savedDate' in payload) setSavedDate(payload.savedDate);
         if ('tab' in payload) setTab(payload.tab);
-        if ('\1' in payload) setUploadedFiles(payload.uploadedFiles);
+        if ('uploadedFiles' in payload) setUploadedFiles(payload.uploadedFiles);
         localStorage.removeItem(handoffKey);
       } catch (err) {
         console.error('Failed to restore handoff data:', err);
