@@ -150,7 +150,7 @@ export default function DiagnosticsPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Rule Engine Status */}
-            {ruleData && (
+            {ruleData && Array.isArray(ruleData.criteria) && (
               <Card className="p-6 col-span-1 lg:col-span-2">
                 <div className="flex items-center gap-3 mb-6">
                   <Zap className="w-6 h-6 text-primary" />
@@ -158,28 +158,32 @@ export default function DiagnosticsPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {ruleData.criteria.map((criterion: any, idx: number) => (
-                    <div key={idx} className="flex items-start gap-4 p-4 rounded-lg bg-muted/50 border border-border">
-                      {criterion.status === "pass" ? (
-                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      ) : (
-                        <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start gap-2">
-                          <h3 className="font-semibold">{criterion.name}</h3>
-                          <span className="text-sm font-semibold text-primary">{criterion.score}/100</span>
+                  {ruleData.criteria.length > 0 ? (
+                    ruleData.criteria.map((criterion: any, idx: number) => (
+                      <div key={idx} className="flex items-start gap-4 p-4 rounded-lg bg-muted/50 border border-border">
+                        {criterion.status === "pass" ? (
+                          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start gap-2">
+                            <h3 className="font-semibold">{criterion.name}</h3>
+                            <span className="text-sm font-semibold text-primary">{criterion.score}/100</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">{criterion.feedback}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">{criterion.feedback}</p>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">No compliance data available.</p>
+                  )}
                 </div>
               </Card>
             )}
 
             {/* Endorser Simulation */}
-            {endorserData && (
+            {Array.isArray(endorserData) && endorserData.length > 0 && (
               <Card className="p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <Target className="w-6 h-6 text-primary" />
@@ -205,15 +209,15 @@ export default function DiagnosticsPage() {
                       <div className="grid grid-cols-3 gap-2 mt-3 text-xs">
                         <div className="text-center">
                           <div className="text-muted-foreground">Innovation</div>
-                          <div className="font-semibold">{result.breakdown.innovationScore}</div>
+                          <div className="font-semibold">{result.breakdown?.innovationScore || 0}</div>
                         </div>
                         <div className="text-center">
                           <div className="text-muted-foreground">Viability</div>
-                          <div className="font-semibold">{result.breakdown.viabilityScore}</div>
+                          <div className="font-semibold">{result.breakdown?.viabilityScore || 0}</div>
                         </div>
                         <div className="text-center">
                           <div className="text-muted-foreground">Scalability</div>
-                          <div className="font-semibold">{result.breakdown.scalabilityScore}</div>
+                          <div className="font-semibold">{result.breakdown?.scalabilityScore || 0}</div>
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{result.feedback}</p>
@@ -224,7 +228,7 @@ export default function DiagnosticsPage() {
             )}
 
             {/* Visa Routes */}
-            {routeData && (
+            {routeData && Array.isArray(routeData.viableRoutes) && routeData.viableRoutes.length > 0 && (
               <Card className="p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <TrendingUp className="w-6 h-6 text-primary" />
@@ -232,17 +236,17 @@ export default function DiagnosticsPage() {
                 </div>
 
                 <div className="space-y-3">
-                  {routeData.viableRoutes?.slice(0, 3).map((route: any, idx: number) => (
+                  {routeData.viableRoutes.slice(0, 3).map((route: any, idx: number) => (
                     <div key={idx} className="p-4 rounded-lg bg-muted/50 border border-border">
                       <div className="flex justify-between items-start gap-2">
                         <h3 className="font-semibold text-sm">{route.name}</h3>
                         <span className="text-sm font-bold text-chart-3">
-                          {Math.round(route.successProbability * 100)}% fit
+                          {Math.round((route.successProbability || 0) * 100)}% fit
                         </span>
                       </div>
                       <div className="flex gap-2 mt-2 flex-wrap">
                         <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                          {route.timeline}
+                          {route.timeline || "TBD"}
                         </span>
                       </div>
                     </div>
@@ -268,20 +272,24 @@ export default function DiagnosticsPage() {
                   <div>
                     <h3 className="font-semibold text-sm mb-2">Key Roles</h3>
                     <div className="space-y-2">
-                      {teamData.teamPlan.keyRoles?.slice(0, 3).map((role: string, idx: number) => (
-                        <div key={idx} className="text-sm flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-primary" />
-                          {role}
-                        </div>
-                      ))}
+                      {Array.isArray(teamData.teamPlan.keyRoles) && teamData.teamPlan.keyRoles.length > 0 ? (
+                        teamData.teamPlan.keyRoles.slice(0, 3).map((role: string, idx: number) => (
+                          <div key={idx} className="text-sm flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-primary" />
+                            {role}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-muted-foreground">No key roles defined.</p>
+                      )}
                     </div>
                   </div>
 
-                  {teamData.teamPlan.skillGaps?.length > 0 && (
+                  {Array.isArray(teamData.teamPlan.skillGaps) && teamData.teamPlan.skillGaps.length > 0 && (
                     <div>
                       <h3 className="font-semibold text-sm mb-2 text-yellow-600">Skill Gaps</h3>
                       <div className="space-y-2">
-                        {teamData.teamPlan.skillGaps?.slice(0, 2).map((gap: string, idx: number) => (
+                        {teamData.teamPlan.skillGaps.slice(0, 2).map((gap: string, idx: number) => (
                           <div key={idx} className="text-sm text-muted-foreground flex items-center gap-2">
                             <AlertCircle className="w-3 h-3" />
                             {gap}
@@ -295,7 +303,7 @@ export default function DiagnosticsPage() {
             )}
 
             {/* Traction Forecast */}
-            {tractionData && (
+            {tractionData && tractionData.month1 && tractionData.month6 && tractionData.month12 && (
               <Card className="p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <TrendingUp className="w-6 h-6 text-primary" />
@@ -313,12 +321,12 @@ export default function DiagnosticsPage() {
                       <div className="space-y-1">
                         <div>
                           <div className="text-xs text-muted-foreground">MAU</div>
-                          <div className="font-bold text-sm">{Math.round(period.data.mau).toLocaleString()}</div>
+                          <div className="font-bold text-sm">{Math.round(period.data?.mau || 0).toLocaleString()}</div>
                         </div>
                         <div>
                           <div className="text-xs text-muted-foreground">ARR</div>
                           <div className="font-bold text-sm text-chart-3">
-                            £{Math.round(period.data.arr).toLocaleString()}
+                            £{Math.round(period.data?.arr || 0).toLocaleString()}
                           </div>
                         </div>
                       </div>
