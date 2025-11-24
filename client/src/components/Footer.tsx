@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import logoUrl from "@assets/BhenMedia0_1763977195062.png";
 
 export default function Footer() {
   return (
@@ -9,9 +10,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-chart-3 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">U</span>
-              </div>
+              <img src={logoUrl} alt="BhenMedia Logo" className="w-10 h-10 object-contain" />
               <span className="font-bold text-xl">UK Innovator Founder Visa Assistant</span>
             </div>
             <p className="text-sm text-muted-foreground">

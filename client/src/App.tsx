@@ -4,7 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -12,6 +12,8 @@ import ChatBot from "@/components/ChatBot";
 import CookieConsent from "@/components/CookieConsent";
 import ToolsChronographWheel from "@/components/ToolsChronographWheel";
 import BlackNovemberBanner from "@/components/BlackNovemberBanner";
+import { Button } from "@/components/ui/button";
+import { HandIcon } from "lucide-react";
 import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
@@ -42,6 +44,35 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import InterviewPrep from "@/pages/interview-prep";
 
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/pricing"];
+
+function AnimatedSidebarTrigger() {
+  const { state, toggleSidebar } = useSidebar();
+  const isOpen = state === "expanded";
+  
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          data-testid="button-sidebar-toggle"
+          className="-ml-1 md:-ml-2 h-8 md:h-9 w-8 md:w-9 flex items-center justify-center group relative overflow-visible"
+        >
+          <div className={`transition-all duration-500 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
+            <HandIcon className={`w-5 h-5 ${isOpen ? 'animate-pulse' : 'animate-bounce'}`} />
+          </div>
+          {!isOpen && (
+            <div className="absolute -right-1 -top-1 w-2 h-2 bg-primary rounded-full animate-ping" />
+          )}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {isOpen ? 'Close sidebar' : 'Open sidebar'}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 function Router() {
   return (
@@ -97,12 +128,7 @@ function AppLayout() {
           <AppSidebar />
           <div className="flex flex-col flex-1 w-full">
             <header className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 md:py-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <SidebarTrigger data-testid="button-sidebar-toggle" className="-ml-1 md:-ml-2 h-8 md:h-9 w-8 md:w-9 flex items-center justify-center" />
-                </TooltipTrigger>
-                <TooltipContent>Toggle sidebar menu</TooltipContent>
-              </Tooltip>
+              <AnimatedSidebarTrigger />
               <div className="flex-1" />
               <ThemeToggle />
             </header>
