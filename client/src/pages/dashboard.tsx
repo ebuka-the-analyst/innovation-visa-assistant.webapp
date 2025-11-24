@@ -152,7 +152,7 @@ function calculateRadarData(plan: BusinessPlan) {
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const { hiddenIds, hidePlan, showPlan } = useHiddenDemoPlans();
+  const { hiddenIds, hidePlan, showPlan, showAllPlans } = useHiddenDemoPlans();
 
   const { data: user, isLoading: userLoading } = useQuery<{ id: string; email: string; displayName?: string }>({
     queryKey: ['/api/auth/user'],
@@ -171,6 +171,11 @@ export default function Dashboard() {
     }
     return true;
   });
+
+  // Count demo plans and hidden demo plans
+  const demoPlansCount = businessPlans?.filter(p => p.isDemoData).length || 0;
+  const hiddenDemoPlansCount = businessPlans?.filter(p => p.isDemoData && hiddenIds.includes(p.id)).length || 0;
+  const hasUserPlans = businessPlans?.some(p => !p.isDemoData) || false;
 
   if (userLoading) {
     return (
@@ -210,6 +215,17 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
       <AuthHeader />
 
+      {/* Demo Plans Info Banner */}
+      {demoPlansCount > 0 && !hasUserPlans && (
+        <div className="bg-gradient-to-r from-primary/10 to-orange-500/10 border-b border-primary/20 px-4 py-3">
+          <div className="container mx-auto flex items-center justify-between gap-4">
+            <p className="text-sm text-foreground">
+              <span className="font-semibold">Demo Plans Available:</span> {demoPlansCount} sample business plan{demoPlansCount > 1 ? 's' : ''} showing what 100% completion looks like. Create your own plan to get started!
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -217,14 +233,26 @@ export default function Dashboard() {
             <h2 className="text-3xl font-bold mb-2">Dashboard</h2>
             <p className="text-muted-foreground">Track your UK Innovator Founder Visa applications</p>
           </div>
-          <Button 
-            size="lg"
-            onClick={() => setLocation("/pricing")}
-            data-testid="button-create-plan"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Create New Plan
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            {hiddenDemoPlansCount > 0 && (
+              <Button
+                variant="outline"
+                onClick={showAllPlans}
+                data-testid="button-show-hidden-demos"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Show {hiddenDemoPlansCount} Hidden Demo Plan{hiddenDemoPlansCount > 1 ? 's' : ''}
+              </Button>
+            )}
+            <Button 
+              size="lg"
+              onClick={() => setLocation("/pricing")}
+              data-testid="button-create-plan"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Create New Plan
+            </Button>
+          </div>
         </div>
 
         {plansLoading ? (
