@@ -5,10 +5,10 @@ import { Download, CheckCircle, Home, FileText, Mail, Share2, Send, Linkedin, Re
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
-import novaAvatar from "@assets/generated_images/Nova_innovation_agent_avatar_e5dc5701.png";
-import sterlingAvatar from "@assets/generated_images/Sterling_financial_agent_avatar_4fce3650.png";
-import atlasAvatar from "@assets/generated_images/Atlas_growth_agent_avatar_a0808a5e.png";
-import sageAvatar from "@assets/generated_images/Sage_compliance_agent_avatar_9dabb0a2.png";
+import novaAvatar from "@assets/generated_images/nova_innovation_agent_avatar.png";
+import sterlingAvatar from "@assets/generated_images/sterling_financial_agent_avatar.png";
+import atlasAvatar from "@assets/generated_images/atlas_growth_agent_avatar.png";
+import sageAvatar from "@assets/generated_images/sage_compliance_agent_avatar.png";
 
 // Helper to determine which agent and avatar to show based on stage text
 const getAgentForStage = (stageText: string) => {
