@@ -68,8 +68,7 @@ export async function setupAuth(app: Express) {
           // Check if user only has Google OAuth (no password set)
           if (user.googleId && !user.password) {
             return done(null, false, { 
-              message: "This account uses Google sign-in. Please use 'Continue with Google' to sign in.",
-              authMethod: "google"
+              message: "This account uses Google sign-in. Please use 'Continue with Google' to sign in."
             });
           }
 
@@ -87,8 +86,7 @@ export async function setupAuth(app: Express) {
           // Check if email is verified
           if (!user.isEmailVerified) {
             return done(null, false, { 
-              message: "Please verify your email address to log in. Check your inbox for the verification link.",
-              verificationRequired: true
+              message: "Please verify your email address to log in. Check your inbox for the verification link."
             });
           }
 
