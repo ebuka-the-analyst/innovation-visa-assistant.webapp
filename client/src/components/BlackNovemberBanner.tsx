@@ -5,7 +5,10 @@ import { useLocation } from "wouter";
 
 export default function BlackNovemberBanner() {
   const [, setLocation] = useLocation();
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(() => {
+    const dismissed = localStorage.getItem('blackNovemberBannerDismissed');
+    return dismissed !== 'true';
+  });
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -79,7 +82,10 @@ export default function BlackNovemberBanner() {
                 Claim
               </Button>
               <button
-                onClick={() => setIsVisible(false)}
+                onClick={() => {
+                  setIsVisible(false);
+                  localStorage.setItem('blackNovemberBannerDismissed', 'true');
+                }}
                 className="p-1 md:p-2 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0 relative"
                 data-testid="button-close-black-november"
               >
