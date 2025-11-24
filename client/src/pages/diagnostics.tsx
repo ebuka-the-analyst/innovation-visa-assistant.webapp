@@ -137,6 +137,12 @@ export default function DiagnosticsPage() {
               </div>
             </div>
           </Card>
+        ) : !ruleData && !endorserData && !routeData && !teamData && !tractionData ? (
+          <Card className="p-8 text-center space-y-4">
+            <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
+            <h2 className="text-xl font-bold">No Diagnostic Data Available</h2>
+            <p className="text-muted-foreground">This business plan may not have complete information yet. Please ensure your business plan is fully populated before running diagnostics.</p>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Rule Engine Status */}
