@@ -168,9 +168,9 @@ export default function Settings() {
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
-                <h3 className="font-medium text-sm text-blue-900">Need Help?</h3>
-                <p className="text-sm text-blue-800">
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30 rounded-lg p-4 space-y-2">
+                <h3 className="font-medium text-sm text-blue-900 dark:text-blue-100">Need Help?</h3>
+                <p className="text-sm text-blue-800 dark:text-blue-200">
                   If you need to update your Google OAuth credentials or other API keys, contact your administrator or visit the Replit Secrets panel.
                 </p>
               </div>

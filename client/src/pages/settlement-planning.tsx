@@ -180,8 +180,8 @@ export default function SettlementPlanning() {
                 ))}
               </div>
 
-              <Card className="p-8 bg-amber-50 border-amber-200">
-                <p className="text-sm text-amber-900">
+              <Card className="p-8 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30">
+                <p className="text-sm text-amber-900 dark:text-amber-100">
                   <strong>Recommendation:</strong> Consult with a UK tax advisor to optimize your personal and corporate tax structure. This can save significantly over time.
                 </p>
               </Card>

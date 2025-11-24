@@ -78,12 +78,12 @@ export default function RejectionAnalysis() {
           </div>
 
           <div className="space-y-8">
-            <Card className="p-8 bg-amber-50 border-amber-200">
+            <Card className="p-8 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30">
               <div className="flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
+                <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Reapplication Strategy</h3>
-                  <p className="text-sm text-amber-900">
+                  <p className="text-sm text-amber-900 dark:text-amber-100">
                     Receiving a rejection doesn't mean your business isn't viable. Most successful founders learn from their rejection and significantly improve their application the second time. Our analysis will help you identify exactly what to fix.
                   </p>
                 </div>
@@ -139,9 +139,9 @@ export default function RejectionAnalysis() {
                   <p className="whitespace-pre-wrap text-foreground">{analysis}</p>
                 </div>
 
-                <div className="mt-8 p-6 bg-green-50 border border-green-200 rounded-lg">
-                  <h4 className="font-semibold mb-3 text-green-900">Next Steps</h4>
-                  <ol className="text-sm space-y-2 text-green-900 list-decimal list-inside">
+                <div className="mt-8 p-6 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30 rounded-lg">
+                  <h4 className="font-semibold mb-3 text-green-900 dark:text-green-100">Next Steps</h4>
+                  <ol className="text-sm space-y-2 text-green-900 dark:text-green-100 list-decimal list-inside">
                     <li>Address each recommendation from the analysis above</li>
                     <li>Gather new evidence and market validation</li>
                     <li>Revise your business plan with specific improvements</li>
