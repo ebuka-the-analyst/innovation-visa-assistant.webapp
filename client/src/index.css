@@ -424,8 +424,8 @@
   object-position: center;
   padding: 0;
   margin: 0;
-  clip-path: inset(28% 10% 28% 10%);
-  transform: scale(1.85);
+  clip-path: inset(28% 3% 28% 3%);
+  transform: scale(1.65);
 }
 
 .logo-dark {
@@ -437,8 +437,8 @@
   object-position: center;
   padding: 0;
   margin: 0;
-  clip-path: inset(28% 10% 28% 10%);
-  transform: scale(1.85);
+  clip-path: inset(28% 3% 28% 3%);
+  transform: scale(1.65);
 }
 
 .dark .logo-light {
@@ -452,8 +452,8 @@
   opacity: 1 !important;
   object-fit: cover;
   object-position: center;
-  clip-path: inset(28% 10% 28% 10%);
-  transform: scale(1.85);
+  clip-path: inset(28% 3% 28% 3%);
+  transform: scale(1.65);
 }
 
 /* Logo container - no color interference */
