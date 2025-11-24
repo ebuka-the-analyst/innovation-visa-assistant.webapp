@@ -37,10 +37,11 @@ export default function Header() {
           </span>
           <button
             onClick={() => setDisclaimerDismissed(true)}
-            className="text-white dark:text-black hover:opacity-75 transition-opacity flex-shrink-0"
+            className="text-white dark:text-black hover:opacity-75 transition-opacity flex-shrink-0 relative overflow-visible"
             data-testid="button-dismiss-disclaimer"
           >
             <X className="h-3 w-3" />
+            <div className="absolute -right-0.5 -top-0.5 w-2 h-2 rounded-full animate-ping-slow-red" style={{ backgroundColor: '#ef4444' }} />
           </button>
         </div>
       )}
