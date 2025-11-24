@@ -43,13 +43,20 @@ interface TractionForecast {
 }
 
 interface RuleStatus {
-  overallCompliance: string;
-  criteria: Array<{
-    name: string;
+  lastChecked: string;
+  rulesCount: number;
+  applicableRules: Array<{
+    id: string;
+    title: string;
     status: string;
-    score: number;
-    feedback: string;
+    impact: string;
   }>;
+  criticalChanges: Array<{
+    rule: string;
+    description: string;
+    deadline: string;
+  }>;
+  recommendation: string;
 }
 
 export default function DiagnosticsPage() {
@@ -61,7 +68,7 @@ export default function DiagnosticsPage() {
   console.log("Diagnostics: planId =", planId);
 
   // Fetch all diagnostic data in parallel
-  const { data: endorserData, isLoading: endorserLoading, error: endorserError } = useQuery<EndorserResult[]>({
+  const { data: endorserData, isLoading: endorserLoading, error: endorserError } = useQuery<{ endorsers: EndorserResult[]; scores: any[] }>({
     queryKey: [`/api/endorser/simulate/${planId}`],
     enabled: !!planId,
   });
@@ -90,8 +97,8 @@ export default function DiagnosticsPage() {
   const isLoading = endorserLoading || routeLoading || teamLoading || tractionLoading || ruleLoading;
 
   console.log("Diagnostics: isLoading =", isLoading, "errors =", errors.length);
-  console.log("Diagnostics: endorserData =", endorserData, "isArray?", Array.isArray(endorserData));
-  console.log("Diagnostics: ruleData =", ruleData, "criteria isArray?", ruleData ? Array.isArray(ruleData.criteria) : "no ruleData");
+  console.log("Diagnostics: endorserData =", endorserData, "endorsers isArray?", endorserData ? Array.isArray(endorserData.endorsers) : "no endorserData");
+  console.log("Diagnostics: ruleData =", ruleData, "applicableRules isArray?", ruleData ? Array.isArray(ruleData.applicableRules) : "no ruleData");
   console.log("Diagnostics: routeData =", routeData, "viableRoutes isArray?", routeData ? Array.isArray(routeData.viableRoutes) : "no routeData");
   console.log("Diagnostics: teamData =", teamData);
   console.log("Diagnostics: tractionData =", tractionData);
@@ -155,7 +162,7 @@ export default function DiagnosticsPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Rule Engine Status */}
-            {ruleData && Array.isArray(ruleData.criteria) && (
+            {ruleData && Array.isArray(ruleData.applicableRules) && (
               <Card className="p-6 col-span-1 lg:col-span-2">
                 <div className="flex items-center gap-3 mb-6">
                   <Zap className="w-6 h-6 text-primary" />
@@ -163,8 +170,8 @@ export default function DiagnosticsPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {ruleData.criteria.length > 0 ? (
-                    ruleData.criteria.map((criterion: any, idx: number) => (
+                  {ruleData.applicableRules.length > 0 ? (
+                    ruleData.applicableRules.map((criterion: any, idx: number) => (
                       <div key={idx} className="flex items-start gap-4 p-4 rounded-lg bg-muted/50 border border-border">
                         {criterion.status === "pass" ? (
                           <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -188,7 +195,7 @@ export default function DiagnosticsPage() {
             )}
 
             {/* Endorser Simulation */}
-            {Array.isArray(endorserData) && endorserData.length > 0 && (
+            {Array.isArray(endorserData?.endorsers) && endorserData.endorsers.length > 0 && (
               <Card className="p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <Target className="w-6 h-6 text-primary" />
@@ -196,7 +203,7 @@ export default function DiagnosticsPage() {
                 </div>
 
                 <div className="space-y-3">
-                  {endorserData.slice(0, 3).map((result: EndorserResult, idx: number) => (
+                  {endorserData.endorsers.slice(0, 3).map((result: EndorserResult, idx: number) => (
                     <div
                       key={idx}
                       className={`p-4 rounded-lg border-2 ${
