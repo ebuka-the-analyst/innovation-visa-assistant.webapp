@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
+import { SEOHead } from "@/components/SEOHead";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
@@ -78,8 +79,14 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
-      <Card className="w-full max-w-md">
+    <>
+      <SEOHead
+        title="Sign Up | UK Innovator Founder Visa Assistant"
+        description="Create your free account and start your UK Innovator Founder Visa application journey. Access 109 PhD-level tools, business plan generator, and expert guidance."
+        path="/signup"
+      />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
+        <Card className="w-full max-w-md">
         <div className="flex justify-center pt-8 pb-4">
           <div className="isolate z-[9999] mix-blend-normal bg-transparent">
             <div className="logo-container overflow-hidden">
@@ -206,5 +213,6 @@ export default function Signup() {
         </div>
       </Card>
     </div>
+    </>
   );
 }

@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
+import { SEOHead } from "@/components/SEOHead";
 
 export default function Login() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -88,8 +89,14 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
-      <Card className="w-full max-w-md">
+    <>
+      <SEOHead
+        title="Sign In | UK Innovator Founder Visa Assistant"
+        description="Sign in to your UK Innovator Founder Visa Assistant account. Continue working on your business plan, innovation assessment, and visa application tools."
+        path="/login"
+      />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
+        <Card className="w-full max-w-md">
         <div className="flex justify-center pt-8 pb-4">
           <div className="isolate z-[9999] mix-blend-normal bg-transparent">
             <div className="logo-container overflow-hidden">
@@ -191,5 +198,6 @@ export default function Login() {
         </div>
       </Card>
     </div>
+    </>
   );
 }
