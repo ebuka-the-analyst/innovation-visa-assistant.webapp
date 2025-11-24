@@ -8,12 +8,12 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
-    // Check for saved theme preference or default to light
+    // Check for saved theme preference or default to dark
     const saved = localStorage.getItem("theme") as "light" | "dark" | null;
-    const initial = saved || "light";
+    const initial = saved || "dark";
     setTheme(initial);
     
     if (initial === "dark") {
