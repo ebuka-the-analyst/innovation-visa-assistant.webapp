@@ -1,10 +1,11 @@
 export function Logo({ className = "h-16" }: { className?: string }) {
   return (
     <svg 
-      viewBox="0 0 800 200" 
+      viewBox="0 0 1200 200" 
       className={className}
       style={{ width: 'auto' }}
       xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="xMinYMid meet"
     >
       {/* UK Flag */}
       <g transform="translate(10, 50)">
@@ -37,7 +38,7 @@ export function Logo({ className = "h-16" }: { className?: string }) {
         y="95" 
         className="fill-foreground"
         style={{ 
-          fontSize: '58px', 
+          fontSize: '56px', 
           fontWeight: '800',
           fontFamily: 'system-ui, -apple-system, sans-serif',
           letterSpacing: '1px'
@@ -49,10 +50,10 @@ export function Logo({ className = "h-16" }: { className?: string }) {
       {/* Text: VISA ASSISTANT */}
       <text 
         x="250" 
-        y="140" 
+        y="145" 
         fill="#ffa536"
         style={{ 
-          fontSize: '48px', 
+          fontSize: '46px', 
           fontWeight: '700',
           fontFamily: 'system-ui, -apple-system, sans-serif',
           letterSpacing: '1px'
