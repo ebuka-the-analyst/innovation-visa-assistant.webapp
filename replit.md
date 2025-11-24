@@ -37,6 +37,43 @@ Access control is enforced at multiple levels:
 
 The system is implemented with PhD-level attention to detail, ensuring zero loopholes for free users to access premium features. Tool pages include access guards (examples: business-plan.tsx, pitch-coach.tsx, innovation-score.tsx), and the pricing page displays accurate tool counts per tier with market-competitive pricing.
 
+### SEO Implementation (2025 Best Practices)
+The platform features comprehensive, production-ready SEO infrastructure targeting maximum search engine visibility for "UK Innovator Founder Visa" keywords. Implementation follows 2025 SEO best practices with focus on E-E-A-T signals, Core Web Vitals optimization, and AI search readiness.
+
+**Core Infrastructure:**
+- **robots.txt:** Allows all search engines, includes sitemap reference
+- **sitemap.xml:** 109 tool pages + main pages with monthly update frequency
+- **SEOHead Component:** Reusable component for meta tags, Open Graph, Twitter Cards, and structured data
+- **Schema Library:** Organization, SoftwareApplication, FAQ, Article, Breadcrumb schemas
+
+**Pages with Full SEO Implementation:**
+- Homepage (home.tsx): Combined Organization + SoftwareApplication + FAQ schemas, targeting "UK Innovator Founder Visa" primary keywords
+- Pricing (pricing.tsx): Offer schema with all 5 tiers, competitive pricing signals
+- Tools Hub (tools-hub.tsx): Breadcrumb schema, tool directory SEO
+- Business Plan Generator (business-plan.tsx): Article + Breadcrumb schemas
+- Innovation Score Calculator (innovation-score.tsx): Full meta tags + schemas
+- Pitch Practice Coach (pitch-coach.tsx): Interview prep targeting
+- Financial Projections (financial-projections.tsx): Viability tool SEO
+
+**SEO Features:**
+- Keyword-optimized titles and meta descriptions (150-160 chars)
+- Schema.org structured data (JSON-LD) for rich snippets
+- Open Graph tags for social sharing optimization
+- Twitter Card meta tags for Twitter/X visibility
+- Canonical URLs to prevent duplicate content issues
+- Breadcrumb navigation for improved crawlability
+- Long-tail keyword targeting in tool pages
+
+**Target Keywords:**
+- Primary: "UK Innovator Founder Visa", "Innovator Founder Visa Assistant"
+- Secondary: "UK visa innovation assessment", "business plan UK visa", "endorser pitch practice"
+- Long-tail: "financial projections UK visa compliance", "innovation score calculator visa"
+
+**Expected Results:**
+- 3-6 months for significant SERP rankings
+- Target: Top 3 for "innovator founder visa" + related terms
+- Core Web Vitals: LCP <2.5s, INP <200ms, CLS <0.1
+
 ## External Dependencies
 - **Database:** `PostgreSQL` managed by `Neon`.
 - **ORM:** `Drizzle ORM`.
