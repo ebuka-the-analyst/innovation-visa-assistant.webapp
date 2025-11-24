@@ -46,8 +46,11 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import InterviewPrep from "@/pages/interview-prep";
 import FAQ from "@/pages/faq";
 import Guide from "@/pages/guide";
+import Privacy from "@/pages/privacy";
+import Terms from "@/pages/terms";
+import Cookies from "@/pages/cookies";
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide"];
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies"];
 
 function AnimatedSidebarTrigger() {
   const { state, toggleSidebar } = useSidebar();
@@ -110,6 +113,9 @@ function Router() {
       <Route path="/interview-prep" component={InterviewPrep} />
       <Route path="/faq" component={FAQ} />
       <Route path="/guide" component={Guide} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/cookies" component={Cookies} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-border bg-gradient-to-b from-background to-accent/5">
       <div className="container mx-auto px-4 md:px-6 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4 lg:col-span-2">
             <div className="isolate z-[9999] mix-blend-normal bg-transparent">
@@ -71,24 +71,24 @@ export default function Footer() {
           </div>
 
           {/* Newsletter */}
-          <div>
+          <div className="lg:col-span-2">
             <h3 className="font-semibold mb-4">Stay Updated</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Get UK Innovator Founder Visa tips and updates to updates@innovatorfoundervisaassistant.co.uk
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 max-w-md">
               <Input 
                 type="email" 
-                placeholder="Enter email" 
-                className="flex-1"
+                placeholder="Enter your email address" 
+                className="flex-1 min-w-[200px]"
                 data-testid="input-newsletter"
               />
-              <Button onClick={() => console.log('Newsletter subscribed')}>
+              <Button onClick={() => console.log('Newsletter subscribed')} className="whitespace-nowrap">
                 Subscribe
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              We'll send Innovator Founder Visa updates from updates@innovatorfoundervisaassistant.co.uk
+              We'll send UK Innovator Founder Visa updates from updates@innovatorfoundervisaassistant.co.uk
             </p>
           </div>
         </div>
@@ -107,9 +107,9 @@ export default function Footer() {
             </p>
           </div>
           <div className="flex gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-primary transition-colors">Cookie Policy</a>
+            <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
+            <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
+            <a href="/cookies" className="hover:text-primary transition-colors">Cookie Policy</a>
           </div>
         </div>
       </div>
