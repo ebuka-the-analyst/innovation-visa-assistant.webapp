@@ -65,7 +65,7 @@ declare module 'http' {
 app.use(compression({
   level: 6, // Balanced compression level (0-9)
   threshold: 1024, // Only compress responses > 1KB
-  filter: (req, res) => {
+  filter: (req: Request, res: Response) => {
     // Skip compression for images (already compressed)
     const contentType = res.getHeader('Content-Type');
     if (contentType && typeof contentType === 'string' && contentType.startsWith('image/')) {
