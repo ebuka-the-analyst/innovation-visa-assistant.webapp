@@ -1,62 +1,76 @@
 export function Logo({ className = "h-16" }: { className?: string }) {
   return (
     <svg 
-      viewBox="0 0 1200 200" 
+      viewBox="0 0 550 100" 
       className={className}
       style={{ width: 'auto' }}
       xmlns="http://www.w3.org/2000/svg"
       preserveAspectRatio="xMinYMid meet"
     >
       {/* UK Flag */}
-      <g transform="translate(10, 50)">
+      <g transform="translate(5, 15)">
         {/* Blue background */}
-        <rect width="120" height="90" fill="#012169"/>
+        <rect width="80" height="60" fill="#012169"/>
         
         {/* White diagonal cross */}
-        <path d="M 0 0 L 120 90 M 120 0 L 0 90" stroke="white" strokeWidth="18"/>
+        <path d="M 0 0 L 80 60 M 80 0 L 0 60" stroke="white" strokeWidth="12"/>
         
         {/* Red diagonal cross */}
-        <path d="M 0 0 L 120 90 M 120 0 L 0 90" stroke="#C8102E" strokeWidth="10"/>
+        <path d="M 0 0 L 80 60 M 80 0 L 0 60" stroke="#C8102E" strokeWidth="7"/>
         
         {/* White cross */}
-        <path d="M 60 0 L 60 90 M 0 45 L 120 45" stroke="white" strokeWidth="30"/>
+        <path d="M 40 0 L 40 60 M 0 30 L 80 30" stroke="white" strokeWidth="20"/>
         
         {/* Red cross */}
-        <path d="M 60 0 L 60 90 M 0 45 L 120 45" stroke="#C8102E" strokeWidth="18"/>
+        <path d="M 40 0 L 40 60 M 0 30 L 80 30" stroke="#C8102E" strokeWidth="12"/>
       </g>
       
       {/* Orange Arrow */}
       <path 
-        d="M 70 100 Q 150 60 220 100 L 200 90 L 210 70 L 190 80 L 200 60 L 180 70 L 190 50 L 170 60 Z" 
+        d="M 50 45 Q 85 25 105 50 L 95 45 L 100 35 L 90 40 L 95 30 L 85 35 L 90 25 L 80 30 Z" 
         fill="#ffa536"
-        opacity="0.95"
       />
       
-      {/* Text: INNOVATOR FOUNDER */}
+      {/* Text: INNOVATOR */}
       <text 
-        x="250" 
-        y="95" 
+        x="120" 
+        y="42" 
         className="fill-foreground"
         style={{ 
-          fontSize: '56px', 
+          fontSize: '28px', 
           fontWeight: '800',
           fontFamily: 'system-ui, -apple-system, sans-serif',
-          letterSpacing: '1px'
+          letterSpacing: '0.5px'
         }}
       >
-        INNOVATOR FOUNDER
+        INNOVATOR
+      </text>
+      
+      {/* Text: FOUNDER */}
+      <text 
+        x="120" 
+        y="72" 
+        className="fill-foreground"
+        style={{ 
+          fontSize: '28px', 
+          fontWeight: '800',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          letterSpacing: '0.5px'
+        }}
+      >
+        FOUNDER
       </text>
       
       {/* Text: VISA ASSISTANT */}
       <text 
-        x="250" 
-        y="145" 
+        x="300" 
+        y="72" 
         fill="#ffa536"
         style={{ 
-          fontSize: '46px', 
+          fontSize: '24px', 
           fontWeight: '700',
           fontFamily: 'system-ui, -apple-system, sans-serif',
-          letterSpacing: '1px'
+          letterSpacing: '0.5px'
         }}
       >
         VISA ASSISTANT
