@@ -12,7 +12,6 @@ import ChatBot from "@/components/ChatBot";
 import CookieConsent from "@/components/CookieConsent";
 import ToolsChronographWheel from "@/components/ToolsChronographWheel";
 import BlackNovemberBanner from "@/components/BlackNovemberBanner";
-import OnboardingTour from "@/components/OnboardingTour";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, LogOut } from "lucide-react";
 import logoLightImg from "@assets/official_logo.png";
@@ -236,7 +235,6 @@ function App() {
         <BlackNovemberBanner />
         <ChatBot />
         <ToolsChronographWheel />
-        <OnboardingTour />
         <Toaster />
         <AppLayout />
         <CookieConsent />
