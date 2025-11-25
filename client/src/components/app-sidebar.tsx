@@ -37,6 +37,7 @@ import {
   HelpCircle,
   FolderOpen,
   Handshake,
+  Sparkles,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -243,6 +244,13 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           url: "/expert-booking",
           icon: Users,
           description: "Expert consultation",
+        },
+        {
+          title: "Premium Features",
+          url: "/premium-features",
+          icon: Sparkles,
+          description: "Achievements, templates & more",
+          badge: "NEW",
         },
       ],
     },

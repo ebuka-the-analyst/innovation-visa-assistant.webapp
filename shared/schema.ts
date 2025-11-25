@@ -638,3 +638,420 @@ export const insertUserDocumentSchema = createInsertSchema(userDocuments).omit({
 
 export type InsertUserDocument = z.infer<typeof insertUserDocumentSchema>;
 export type UserDocument = typeof userDocuments.$inferSelect;
+
+// ============================================
+// PREMIUM VALUE FEATURES - 8 New Systems
+// ============================================
+
+// 1. Notification Preferences & Scheduled Notifications
+export const notificationPreferences = pgTable("notification_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique(),
+  
+  // Email notification settings
+  weeklyDigest: boolean("weekly_digest").notNull().default(true),
+  deadlineReminders: boolean("deadline_reminders").notNull().default(true),
+  breakingNewsAlerts: boolean("breaking_news_alerts").notNull().default(true),
+  toolCompletionCelebrations: boolean("tool_completion_celebrations").notNull().default(true),
+  progressMilestones: boolean("progress_milestones").notNull().default(true),
+  
+  // Digest frequency: daily, weekly, monthly
+  digestFrequency: varchar("digest_frequency", { length: 20 }).notNull().default('weekly'),
+  
+  // Preferred time for digests (24h format)
+  preferredTime: varchar("preferred_time", { length: 5 }).default('09:00'),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_notif_pref_user").on(table.userId),
+]);
+
+export const scheduledNotifications = pgTable("scheduled_notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // deadline_reminder, weekly_digest, breaking_news, milestone
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  scheduledFor: timestamp("scheduled_for").notNull(),
+  sentAt: timestamp("sent_at"),
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // pending, sent, failed, cancelled
+  metadata: jsonb("metadata"), // Additional data like tool_id, milestone_id, etc.
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_sched_notif_user").on(table.userId),
+  index("idx_sched_notif_status").on(table.status),
+  index("idx_sched_notif_scheduled").on(table.scheduledFor),
+]);
+
+// 2. AI Document Reviews
+export const documentReviews = pgTable("document_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  documentId: varchar("document_id"), // Reference to userDocuments if uploaded
+  documentName: varchar("document_name", { length: 255 }).notNull(),
+  documentType: varchar("document_type", { length: 50 }).notNull(), // business_plan, personal_statement, evidence, etc.
+  documentContent: text("document_content"), // Extracted text for analysis
+  
+  // AI Analysis Results
+  overallScore: integer("overall_score"), // 0-100
+  strengthsFound: jsonb("strengths_found"), // Array of strengths
+  weaknessesFound: jsonb("weaknesses_found"), // Array of weaknesses
+  suggestions: jsonb("suggestions"), // Array of improvement suggestions
+  endorserAlignment: integer("endorser_alignment"), // 0-100 alignment with endorser criteria
+  
+  // Detailed category scores
+  innovationScore: integer("innovation_score"),
+  viabilityScore: integer("viability_score"),
+  scalabilityScore: integer("scalability_score"),
+  
+  aiProvider: varchar("ai_provider", { length: 50 }), // openai, gemini, claude
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // pending, processing, completed, failed
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => [
+  index("idx_doc_review_user").on(table.userId),
+  index("idx_doc_review_status").on(table.status),
+]);
+
+// 3. Voice Interview Practice Sessions
+export const interviewSessions = pgTable("interview_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  sessionType: varchar("session_type", { length: 50 }).notNull(), // endorser_pitch, home_office, investor
+  duration: integer("duration"), // Duration in seconds
+  
+  // Overall assessment
+  overallScore: integer("overall_score"), // 0-100
+  confidenceScore: integer("confidence_score"),
+  clarityScore: integer("clarity_score"),
+  contentScore: integer("content_score"),
+  
+  // Detailed feedback
+  feedback: jsonb("feedback"), // Structured feedback object
+  strengths: jsonb("strengths"),
+  areasForImprovement: jsonb("areas_for_improvement"),
+  
+  // Recording reference (if voice enabled)
+  recordingUrl: text("recording_url"),
+  transcript: text("transcript"),
+  
+  questionsAsked: jsonb("questions_asked"),
+  responsesGiven: jsonb("responses_given"),
+  
+  status: varchar("status", { length: 20 }).notNull().default('in_progress'), // in_progress, completed, reviewed
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => [
+  index("idx_interview_user").on(table.userId),
+  index("idx_interview_status").on(table.status),
+]);
+
+// 4. Success Stories Library
+export const successStories = pgTable("success_stories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Anonymized applicant info
+  applicantAlias: varchar("applicant_alias", { length: 100 }).notNull(), // e.g., "Tech Founder from London"
+  industry: varchar("industry", { length: 100 }).notNull(),
+  endorserBody: varchar("endorser_body", { length: 100 }).notNull(),
+  
+  // Story details
+  title: varchar("title", { length: 255 }).notNull(),
+  summary: text("summary").notNull(),
+  fullStory: text("full_story").notNull(),
+  
+  // Key metrics
+  timeToApproval: integer("time_to_approval"), // Days from application to approval
+  investmentAmount: varchar("investment_amount", { length: 50 }),
+  jobsCreated: integer("jobs_created"),
+  
+  // What they did right
+  keySuccessFactors: jsonb("key_success_factors"),
+  challengesOvercome: jsonb("challenges_overcome"),
+  adviceGiven: jsonb("advice_given"),
+  
+  // Timeline breakdown
+  timelineBreakdown: jsonb("timeline_breakdown"),
+  
+  // Tier access
+  requiredTier: varchar("required_tier", { length: 20 }).notNull().default('premium'),
+  
+  // Publishing
+  isPublished: boolean("is_published").notNull().default(false),
+  publishedAt: timestamp("published_at"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_success_industry").on(table.industry),
+  index("idx_success_endorser").on(table.endorserBody),
+  index("idx_success_published").on(table.isPublished),
+]);
+
+// 5. Calendar Integration & Synced Events
+export const calendarConnections = pgTable("calendar_connections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  provider: varchar("provider", { length: 50 }).notNull(), // google, apple, outlook
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  tokenExpiry: timestamp("token_expiry"),
+  calendarId: varchar("calendar_id", { length: 255 }),
+  isActive: boolean("is_active").notNull().default(true),
+  lastSyncAt: timestamp("last_sync_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_calendar_user").on(table.userId),
+]);
+
+export const calendarEvents = pgTable("calendar_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  connectionId: varchar("connection_id"),
+  externalEventId: varchar("external_event_id", { length: 255 }), // ID from external calendar
+  
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  eventType: varchar("event_type", { length: 50 }).notNull(), // deadline, milestone, reminder, appointment
+  
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  isAllDay: boolean("is_all_day").notNull().default(false),
+  
+  // Source reference
+  sourceType: varchar("source_type", { length: 50 }), // tool, milestone, visa_deadline
+  sourceId: varchar("source_id"),
+  
+  isSynced: boolean("is_synced").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_cal_event_user").on(table.userId),
+  index("idx_cal_event_date").on(table.startDate),
+]);
+
+// 6. Achievement System
+export const achievements = pgTable("achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code", { length: 50 }).notNull().unique(), // unique identifier
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  category: varchar("category", { length: 50 }).notNull(), // tools, progress, engagement, mastery
+  
+  // Badge styling
+  icon: varchar("icon", { length: 50 }).notNull(), // lucide icon name
+  color: varchar("color", { length: 20 }).notNull(), // tailwind color
+  
+  // Requirements
+  requirementType: varchar("requirement_type", { length: 50 }).notNull(), // tool_count, category_complete, streak, score
+  requirementValue: integer("requirement_value").notNull(),
+  requirementMeta: jsonb("requirement_meta"), // Additional requirements
+  
+  // Rewards
+  points: integer("points").notNull().default(0),
+  
+  // Tier restrictions
+  requiredTier: varchar("required_tier", { length: 20 }).notNull().default('free'),
+  
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  achievementId: varchar("achievement_id").notNull(),
+  earnedAt: timestamp("earned_at").notNull().defaultNow(),
+  progress: integer("progress").notNull().default(0), // Current progress towards achievement
+  isComplete: boolean("is_complete").notNull().default(false),
+  metadata: jsonb("metadata"), // Additional data about how it was earned
+}, (table) => [
+  index("idx_user_achievement_user").on(table.userId),
+  index("idx_user_achievement_complete").on(table.isComplete),
+]);
+
+export const certificates = pgTable("certificates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // visa_ready, tool_mastery, category_complete
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  
+  // Certificate data
+  issuedAt: timestamp("issued_at").notNull().defaultNow(),
+  certificateNumber: varchar("certificate_number", { length: 50 }).notNull().unique(),
+  
+  // Verification
+  verificationUrl: text("verification_url"),
+  isShareable: boolean("is_shareable").notNull().default(true),
+  
+  // LinkedIn integration
+  linkedinShareUrl: text("linkedin_share_url"),
+  
+  metadata: jsonb("metadata"),
+}, (table) => [
+  index("idx_certificate_user").on(table.userId),
+]);
+
+// 7. Priority Support Queue (extends existing supportTickets)
+export const supportSLA = pgTable("support_sla", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tier: varchar("tier", { length: 20 }).notNull().unique(), // basic, premium, enterprise, ultimate
+  
+  // Response time guarantees (in hours)
+  firstResponseTime: integer("first_response_time").notNull(), // Hours to first response
+  resolutionTime: integer("resolution_time").notNull(), // Hours to resolution
+  
+  // Features
+  priorityLevel: integer("priority_level").notNull(), // 1-5, 5 being highest
+  dedicatedAgent: boolean("dedicated_agent").notNull().default(false),
+  callbackAvailable: boolean("callback_available").notNull().default(false),
+  liveChat: boolean("live_chat").notNull().default(false),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// 8. Document Template Library
+export const documentTemplates = pgTable("document_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  name: varchar("name", { length: 255 }).notNull(),
+  category: varchar("category", { length: 50 }).notNull(), // business_plan, cover_letter, evidence, financial, legal
+  description: text("description").notNull(),
+  
+  // Template content
+  content: text("content").notNull(), // Template with placeholders
+  placeholders: jsonb("placeholders"), // List of placeholders to fill
+  
+  // Usage guidance
+  usageGuide: text("usage_guide"),
+  exampleFilled: text("example_filled"),
+  
+  // Tier access
+  requiredTier: varchar("required_tier", { length: 20 }).notNull().default('premium'),
+  
+  // Metadata
+  downloadCount: integer("download_count").notNull().default(0),
+  rating: integer("rating"), // 1-5 stars
+  
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_template_category").on(table.category),
+  index("idx_template_tier").on(table.requiredTier),
+]);
+
+export const userTemplateDownloads = pgTable("user_template_downloads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  templateId: varchar("template_id").notNull(),
+  downloadedAt: timestamp("downloaded_at").notNull().defaultNow(),
+  customizations: jsonb("customizations"), // User's filled placeholders
+}, (table) => [
+  index("idx_template_dl_user").on(table.userId),
+]);
+
+// Insert schemas for new tables
+export const insertNotificationPreferencesSchema = createInsertSchema(notificationPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertScheduledNotificationSchema = createInsertSchema(scheduledNotifications).omit({
+  id: true,
+  createdAt: true,
+  sentAt: true,
+});
+
+export const insertDocumentReviewSchema = createInsertSchema(documentReviews).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true,
+});
+
+export const insertInterviewSessionSchema = createInsertSchema(interviewSessions).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true,
+});
+
+export const insertSuccessStorySchema = createInsertSchema(successStories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  publishedAt: true,
+});
+
+export const insertCalendarConnectionSchema = createInsertSchema(calendarConnections).omit({
+  id: true,
+  createdAt: true,
+  lastSyncAt: true,
+});
+
+export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  earnedAt: true,
+});
+
+export const insertCertificateSchema = createInsertSchema(certificates).omit({
+  id: true,
+  issuedAt: true,
+});
+
+export const insertDocumentTemplateSchema = createInsertSchema(documentTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  downloadCount: true,
+});
+
+// Types
+export type NotificationPreferences = typeof notificationPreferences.$inferSelect;
+export type InsertNotificationPreferences = z.infer<typeof insertNotificationPreferencesSchema>;
+
+export type ScheduledNotification = typeof scheduledNotifications.$inferSelect;
+export type InsertScheduledNotification = z.infer<typeof insertScheduledNotificationSchema>;
+
+export type DocumentReview = typeof documentReviews.$inferSelect;
+export type InsertDocumentReview = z.infer<typeof insertDocumentReviewSchema>;
+
+export type InterviewSession = typeof interviewSessions.$inferSelect;
+export type InsertInterviewSession = z.infer<typeof insertInterviewSessionSchema>;
+
+export type SuccessStory = typeof successStories.$inferSelect;
+export type InsertSuccessStory = z.infer<typeof insertSuccessStorySchema>;
+
+export type CalendarConnection = typeof calendarConnections.$inferSelect;
+export type InsertCalendarConnection = z.infer<typeof insertCalendarConnectionSchema>;
+
+export type CalendarEvent = typeof calendarEvents.$inferSelect;
+export type InsertCalendarEvent = z.infer<typeof insertCalendarEventSchema>;
+
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+
+export type Certificate = typeof certificates.$inferSelect;
+export type InsertCertificate = z.infer<typeof insertCertificateSchema>;
+
+export type SupportSLA = typeof supportSLA.$inferSelect;
+
+export type DocumentTemplate = typeof documentTemplates.$inferSelect;
+export type InsertDocumentTemplate = z.infer<typeof insertDocumentTemplateSchema>;
+
+export type UserTemplateDownload = typeof userTemplateDownloads.$inferSelect;

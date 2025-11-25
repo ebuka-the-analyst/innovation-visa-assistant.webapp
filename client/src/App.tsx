@@ -70,6 +70,7 @@ const FeaturesDashboard = lazy(() => import("@/pages/features-dashboard"));
 const KPIDashboard = lazy(() => import("@/pages/kpi-dashboard"));
 const DataModal = lazy(() => import("@/pages/data-modal"));
 const ReferralDashboard = lazy(() => import("@/pages/referral-dashboard"));
+const PremiumFeatures = lazy(() => import("@/pages/premium-features"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
@@ -150,6 +151,7 @@ function Router() {
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/partner-dashboard" component={PartnerDashboard} />
       <Route path="/referral-dashboard" component={ReferralDashboard} />
+      <Route path="/premium-features" component={PremiumFeatures} />
       <Route path="/interview-prep" component={InterviewPrep} />
       <Route path="/faq" component={FAQ} />
       <Route path="/guide" component={Guide} />

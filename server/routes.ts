@@ -1,7 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { questionnaireSchema } from "@shared/schema";
+import { db } from "./db";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users } from "@shared/schema";
+import { eq, and, sql } from "drizzle-orm";
 import Stripe from "stripe";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -3224,6 +3226,453 @@ ${generatedSections.join('\n\n---\n\n')}`;
     } catch (error) {
       console.error("Get demo plans error:", error);
       res.status(500).json({ error: "Failed to get demo plans" });
+    }
+  });
+
+  // ============================================
+  // PREMIUM VALUE FEATURES API ROUTES
+  // ============================================
+
+  // Notification Preferences
+  app.get("/api/notifications/preferences", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { getNotificationPreferences } = await import("./services/notificationService");
+      const prefs = await getNotificationPreferences(user.id);
+      res.json(prefs || {
+        weeklyDigest: true,
+        deadlineReminders: true,
+        breakingNewsAlerts: true,
+        toolCompletionCelebrations: true,
+        progressMilestones: true,
+        digestFrequency: 'weekly',
+        preferredTime: '09:00'
+      });
+    } catch (error) {
+      console.error("Get notification preferences error:", error);
+      res.status(500).json({ error: "Failed to get preferences" });
+    }
+  });
+
+  app.put("/api/notifications/preferences", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { updateNotificationPreferences } = await import("./services/notificationService");
+      const updated = await updateNotificationPreferences(user.id, req.body);
+      res.json(updated);
+    } catch (error) {
+      console.error("Update notification preferences error:", error);
+      res.status(500).json({ error: "Failed to update preferences" });
+    }
+  });
+
+  // Achievements
+  app.get("/api/achievements", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { getUserAchievements, getAllAchievements, getUserPoints } = await import("./services/achievementService");
+      const [userAchievements, allAchievements, points] = await Promise.all([
+        getUserAchievements(user.id),
+        getAllAchievements(),
+        getUserPoints(user.id)
+      ]);
+      res.json({ userAchievements, allAchievements, totalPoints: points });
+    } catch (error) {
+      console.error("Get achievements error:", error);
+      res.status(500).json({ error: "Failed to get achievements" });
+    }
+  });
+
+  app.post("/api/achievements/check", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { checkAndAwardAchievements } = await import("./services/achievementService");
+      const newlyEarned = await checkAndAwardAchievements(user.id, req.body);
+      res.json({ newlyEarned, count: newlyEarned.length });
+    } catch (error) {
+      console.error("Check achievements error:", error);
+      res.status(500).json({ error: "Failed to check achievements" });
+    }
+  });
+
+  // Certificates
+  app.get("/api/certificates", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { getUserCertificates } = await import("./services/achievementService");
+      const certificates = await getUserCertificates(user.id);
+      res.json(certificates);
+    } catch (error) {
+      console.error("Get certificates error:", error);
+      res.status(500).json({ error: "Failed to get certificates" });
+    }
+  });
+
+  app.get("/api/certificates/verify/:number", async (req, res) => {
+    try {
+      const { verifyCertificate } = await import("./services/achievementService");
+      const result = await verifyCertificate(req.params.number);
+      if (!result) {
+        return res.status(404).json({ error: "Certificate not found" });
+      }
+      res.json(result);
+    } catch (error) {
+      console.error("Verify certificate error:", error);
+      res.status(500).json({ error: "Failed to verify certificate" });
+    }
+  });
+
+  // Document Reviews
+  app.post("/api/document-reviews", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { createDocumentReview } = await import("./services/documentReviewService");
+      const review = await createDocumentReview({
+        userId: user.id,
+        ...req.body
+      });
+      res.json(review);
+    } catch (error) {
+      console.error("Create document review error:", error);
+      res.status(500).json({ error: "Failed to create review" });
+    }
+  });
+
+  app.get("/api/document-reviews", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { getUserDocumentReviews, getDocumentReviewStats } = await import("./services/documentReviewService");
+      const [reviews, stats] = await Promise.all([
+        getUserDocumentReviews(user.id),
+        getDocumentReviewStats(user.id)
+      ]);
+      res.json({ reviews, stats });
+    } catch (error) {
+      console.error("Get document reviews error:", error);
+      res.status(500).json({ error: "Failed to get reviews" });
+    }
+  });
+
+  app.get("/api/document-reviews/:id", isAuthenticated, async (req, res) => {
+    try {
+      const { getDocumentReview } = await import("./services/documentReviewService");
+      const review = await getDocumentReview(req.params.id);
+      if (!review) {
+        return res.status(404).json({ error: "Review not found" });
+      }
+      res.json(review);
+    } catch (error) {
+      console.error("Get document review error:", error);
+      res.status(500).json({ error: "Failed to get review" });
+    }
+  });
+
+  // Interview Practice
+  app.post("/api/interview-sessions", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { createInterviewSession } = await import("./services/interviewService");
+      const session = await createInterviewSession({
+        userId: user.id,
+        sessionType: req.body.sessionType || 'endorser_pitch'
+      });
+      res.json(session);
+    } catch (error) {
+      console.error("Create interview session error:", error);
+      res.status(500).json({ error: "Failed to create session" });
+    }
+  });
+
+  app.get("/api/interview-sessions", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { getUserInterviewSessions, getInterviewStats } = await import("./services/interviewService");
+      const [sessions, stats] = await Promise.all([
+        getUserInterviewSessions(user.id),
+        getInterviewStats(user.id)
+      ]);
+      res.json({ sessions, stats });
+    } catch (error) {
+      console.error("Get interview sessions error:", error);
+      res.status(500).json({ error: "Failed to get sessions" });
+    }
+  });
+
+  app.get("/api/interview-sessions/:id", isAuthenticated, async (req, res) => {
+    try {
+      const { getInterviewSession } = await import("./services/interviewService");
+      const session = await getInterviewSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+      res.json(session);
+    } catch (error) {
+      console.error("Get interview session error:", error);
+      res.status(500).json({ error: "Failed to get session" });
+    }
+  });
+
+  app.post("/api/interview-sessions/:id/respond", isAuthenticated, async (req, res) => {
+    try {
+      const { submitResponse } = await import("./services/interviewService");
+      const result = await submitResponse(req.params.id, req.body.questionIndex, req.body.response);
+      res.json(result);
+    } catch (error) {
+      console.error("Submit response error:", error);
+      res.status(500).json({ error: "Failed to submit response" });
+    }
+  });
+
+  app.post("/api/interview-sessions/:id/complete", isAuthenticated, async (req, res) => {
+    try {
+      const { completeInterviewSession } = await import("./services/interviewService");
+      const session = await completeInterviewSession(req.params.id);
+      res.json(session);
+    } catch (error) {
+      console.error("Complete interview session error:", error);
+      res.status(500).json({ error: "Failed to complete session" });
+    }
+  });
+
+  // Success Stories - with tier-based access
+  app.get("/api/success-stories", async (req, res) => {
+    try {
+      let userTier = 'free';
+      if (req.isAuthenticated() && req.user) {
+        const user = req.user as any;
+        const [userInfo] = await db.select().from(users).where(eq(users.id, user.id));
+        userTier = userInfo?.subscriptionTier || 'free';
+      }
+      
+      const stories = await db.select()
+        .from(successStories)
+        .where(eq(successStories.isPublished, true))
+        .orderBy(successStories.publishedAt);
+      
+      const TIER_ORDER = ['free', 'basic', 'premium', 'enterprise', 'ultimate'];
+      const userTierIndex = TIER_ORDER.indexOf(userTier);
+      
+      const accessibleStories = stories.map(story => {
+        const storyTierIndex = TIER_ORDER.indexOf(story.requiredTier);
+        const hasAccess = userTierIndex >= storyTierIndex;
+        
+        return {
+          id: story.id,
+          title: story.title,
+          applicantAlias: story.applicantAlias,
+          industry: story.industry,
+          endorserBody: story.endorserBody,
+          timeToApproval: story.timeToApproval,
+          summary: story.summary,
+          requiredTier: story.requiredTier,
+          hasAccess,
+          fullStory: hasAccess ? story.fullStory : null,
+          keySuccessFactors: hasAccess ? story.keySuccessFactors : null,
+          adviceGiven: hasAccess ? story.adviceGiven : null,
+          lessonsLearned: hasAccess ? story.lessonsLearned : null,
+          challengesFaced: hasAccess ? story.challengesFaced : null,
+        };
+      });
+      
+      res.json(accessibleStories);
+    } catch (error) {
+      console.error("Get success stories error:", error);
+      res.status(500).json({ error: "Failed to get stories" });
+    }
+  });
+
+  app.get("/api/success-stories/:id", async (req, res) => {
+    try {
+      const [story] = await db.select()
+        .from(successStories)
+        .where(and(
+          eq(successStories.id, req.params.id),
+          eq(successStories.isPublished, true)
+        ));
+      if (!story) {
+        return res.status(404).json({ error: "Story not found" });
+      }
+      res.json(story);
+    } catch (error) {
+      console.error("Get success story error:", error);
+      res.status(500).json({ error: "Failed to get story" });
+    }
+  });
+
+  // Document Templates - with tier gating
+  app.get("/api/templates", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const [userInfo] = await db.select().from(users).where(eq(users.id, user.id));
+      const tier = userInfo?.subscriptionTier || 'free';
+      
+      const templates = await db.select()
+        .from(documentTemplates)
+        .where(eq(documentTemplates.isActive, true))
+        .orderBy(documentTemplates.category);
+      
+      const TIER_ORDER = ['free', 'basic', 'premium', 'enterprise', 'ultimate'];
+      const userTierIndex = TIER_ORDER.indexOf(tier);
+      
+      const accessibleTemplates = templates.map(template => {
+        const templateTierIndex = TIER_ORDER.indexOf(template.requiredTier);
+        return {
+          ...template,
+          isAccessible: userTierIndex >= templateTierIndex
+        };
+      });
+      
+      res.json(accessibleTemplates);
+    } catch (error) {
+      console.error("Get templates error:", error);
+      res.status(500).json({ error: "Failed to get templates" });
+    }
+  });
+
+  app.get("/api/templates/:id", isAuthenticated, async (req, res) => {
+    try {
+      const [template] = await db.select()
+        .from(documentTemplates)
+        .where(eq(documentTemplates.id, req.params.id));
+      if (!template) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+      res.json(template);
+    } catch (error) {
+      console.error("Get template error:", error);
+      res.status(500).json({ error: "Failed to get template" });
+    }
+  });
+
+  app.post("/api/templates/:id/download", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      await db.update(documentTemplates)
+        .set({ downloadCount: sql`${documentTemplates.downloadCount} + 1` })
+        .where(eq(documentTemplates.id, req.params.id));
+
+      await db.insert(userTemplateDownloads).values({
+        userId: user.id,
+        templateId: req.params.id,
+        customizations: req.body.customizations || null
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Download template error:", error);
+      res.status(500).json({ error: "Failed to record download" });
+    }
+  });
+
+  // Calendar Events (local tracking, not synced to external calendar)
+  app.get("/api/calendar-events", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const events = await db.select()
+        .from(calendarEvents)
+        .where(eq(calendarEvents.userId, user.id))
+        .orderBy(calendarEvents.startDate);
+      res.json(events);
+    } catch (error) {
+      console.error("Get calendar events error:", error);
+      res.status(500).json({ error: "Failed to get events" });
+    }
+  });
+
+  app.post("/api/calendar-events", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const [event] = await db.insert(calendarEvents).values({
+        userId: user.id,
+        ...req.body,
+        startDate: new Date(req.body.startDate),
+        endDate: req.body.endDate ? new Date(req.body.endDate) : null
+      }).returning();
+      res.json(event);
+    } catch (error) {
+      console.error("Create calendar event error:", error);
+      res.status(500).json({ error: "Failed to create event" });
+    }
+  });
+
+  app.delete("/api/calendar-events/:id", isAuthenticated, async (req, res) => {
+    try {
+      await db.delete(calendarEvents).where(eq(calendarEvents.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete calendar event error:", error);
+      res.status(500).json({ error: "Failed to delete event" });
+    }
+  });
+
+  // Generate ICS file for calendar export
+  app.get("/api/calendar-events/export", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const events = await db.select()
+        .from(calendarEvents)
+        .where(eq(calendarEvents.userId, user.id))
+        .orderBy(calendarEvents.startDate);
+
+      let icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//UK Innovator Founder Visa Assistant//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+`;
+
+      for (const event of events) {
+        const startDate = new Date(event.startDate);
+        const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 3600000);
+        
+        const formatDate = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        
+        icsContent += `BEGIN:VEVENT
+UID:${event.id}@innovatorfoundervisaassistant.co.uk
+DTSTAMP:${formatDate(new Date())}
+DTSTART:${formatDate(startDate)}
+DTEND:${formatDate(endDate)}
+SUMMARY:${event.title}
+DESCRIPTION:${(event.description || '').replace(/\n/g, '\\n')}
+END:VEVENT
+`;
+      }
+
+      icsContent += 'END:VCALENDAR';
+
+      res.setHeader('Content-Type', 'text/calendar');
+      res.setHeader('Content-Disposition', 'attachment; filename="visa-journey-calendar.ics"');
+      res.send(icsContent);
+    } catch (error) {
+      console.error("Export calendar error:", error);
+      res.status(500).json({ error: "Failed to export calendar" });
+    }
+  });
+
+  // Support SLA info
+  app.get("/api/support/sla", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const [userInfo] = await db.select().from(users).where(eq(users.id, user.id));
+      const tier = userInfo?.subscriptionTier || 'free';
+      
+      const [sla] = await db.select()
+        .from(supportSLA)
+        .where(eq(supportSLA.tier, tier));
+      
+      res.json(sla || {
+        tier: 'free',
+        firstResponseTime: 72,
+        resolutionTime: 168,
+        priorityLevel: 0,
+        dedicatedAgent: false,
+        callbackAvailable: false,
+        liveChat: false
+      });
+    } catch (error) {
+      console.error("Get SLA error:", error);
+      res.status(500).json({ error: "Failed to get SLA info" });
     }
   });
 
