@@ -336,9 +336,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
-        : 'http://localhost:5000';
+      // Get the correct base URL for redirects (production or development)
+      const getBaseUrl = () => {
+        // Production deployment - use REPLIT_DOMAINS (first domain)
+        if (process.env.REPLIT_DEPLOYMENT === '1' && process.env.REPLIT_DOMAINS) {
+          const prodDomain = process.env.REPLIT_DOMAINS.split(',')[0];
+          return `https://${prodDomain}`;
+        }
+        // Development - use REPLIT_DEV_DOMAIN
+        if (process.env.REPLIT_DEV_DOMAIN) {
+          return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+        }
+        // Fallback for local development
+        return 'http://localhost:5000';
+      };
+      const baseUrl = getBaseUrl();
 
       const stripe = await getUncachableStripeClient();
       const session = await stripe.checkout.sessions.create({
@@ -1064,14 +1076,17 @@ ${generatedSections.join('\n\n---\n\n')}`;
         consumed: false,
       });
       
-      // Return token for QR code
-      const domain = process.env.REPLIT_DOMAINS 
-        ? process.env.REPLIT_DOMAINS.split(",")[0].trim() 
-        : "localhost:5000";
-      
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
-        : `http://${domain}`;
+      // Return token for QR code - use correct URL for production or development
+      const getBaseUrl = () => {
+        if (process.env.REPLIT_DEPLOYMENT === '1' && process.env.REPLIT_DOMAINS) {
+          return `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+        }
+        if (process.env.REPLIT_DEV_DOMAIN) {
+          return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+        }
+        return 'http://localhost:5000';
+      };
+      const baseUrl = getBaseUrl();
       
       const handoffUrl = `${baseUrl}/handoff?token=${token}`;
       
