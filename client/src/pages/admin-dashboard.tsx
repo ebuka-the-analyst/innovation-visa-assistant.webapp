@@ -1607,39 +1607,101 @@ export default function AdminDashboard() {
                 transition={{ duration: 0.5 }}
                 className="space-y-6"
               >
-                {/* User Analytics Charts */}
-                {usersAnalytics && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* User Journey Funnel */}
-                    <Card data-testid="card-user-journey-funnel">
-                      <CardHeader>
-                        <CardTitle>User Journey Funnel</CardTitle>
-                        <CardDescription>Registration to active user conversion</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <ResponsiveContainer width="100%" height={300}>
-                          <FunnelChart>
-                            <RechartsTooltip
-                              contentStyle={{
-                                backgroundColor: 'hsl(var(--card))',
-                                border: '1px solid hsl(var(--border))',
-                                borderRadius: '8px'
-                              }}
-                            />
-                            <Funnel
-                              dataKey="count"
-                              data={usersAnalytics.userJourneyFunnel}
-                              isAnimationActive
-                            >
-                              {usersAnalytics.userJourneyFunnel.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                              ))}
-                            </Funnel>
-                          </FunnelChart>
-                        </ResponsiveContainer>
-                      </CardContent>
-                    </Card>
+                {/* User Journey Analytics - Show when users-journey or users-overview is selected */}
+                {(activeSection === 'users-journey' || activeSection === 'users-overview') && (
+                  <Card data-testid="card-user-journey-analytics">
+                    <CardHeader>
+                      <CardTitle>User Journey Analytics</CardTitle>
+                      <CardDescription>Track user progression from registration to active engagement</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {usersAnalytics?.userJourneyFunnel && usersAnalytics.userJourneyFunnel.length > 0 ? (
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* User Journey Funnel */}
+                            <div>
+                              <h4 className="text-sm font-medium mb-4">Conversion Funnel</h4>
+                              <ResponsiveContainer width="100%" height={350}>
+                                <FunnelChart>
+                                  <RechartsTooltip
+                                    contentStyle={{
+                                      backgroundColor: 'hsl(var(--card))',
+                                      border: '1px solid hsl(var(--border))',
+                                      borderRadius: '8px'
+                                    }}
+                                  />
+                                  <Funnel
+                                    dataKey="count"
+                                    data={usersAnalytics.userJourneyFunnel}
+                                    isAnimationActive
+                                  >
+                                    {usersAnalytics.userJourneyFunnel.map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                    ))}
+                                  </Funnel>
+                                </FunnelChart>
+                              </ResponsiveContainer>
+                            </div>
+                            
+                            {/* Funnel Stage Details */}
+                            <div className="space-y-4">
+                              <h4 className="text-sm font-medium">Funnel Stage Breakdown</h4>
+                              {usersAnalytics.userJourneyFunnel.map((stage, index) => {
+                                const prevCount = index > 0 ? usersAnalytics.userJourneyFunnel[index - 1].count : stage.count;
+                                const conversionRate = prevCount > 0 ? ((stage.count / prevCount) * 100).toFixed(1) : '100';
+                                return (
+                                  <div key={stage.stage} className="p-4 rounded-lg bg-muted/50">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
+                                        <span className="font-medium">{stage.stage}</span>
+                                      </div>
+                                      <Badge variant="secondary">{stage.count} users</Badge>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                                      <span>Conversion from previous stage</span>
+                                      <span className={index === 0 ? 'text-green-500' : parseFloat(conversionRate) >= 50 ? 'text-green-500' : 'text-amber-500'}>
+                                        {conversionRate}%
+                                      </span>
+                                    </div>
+                                    <Progress value={parseFloat(conversionRate)} className="h-2 mt-2" />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          
+                          {/* Growth Rate Summary */}
+                          {usersAnalytics.growthRate && (
+                            <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                              <div className="text-center p-4 rounded-lg bg-muted/30">
+                                <p className="text-2xl font-bold text-green-500">+{usersAnalytics.growthRate.daily}%</p>
+                                <p className="text-sm text-muted-foreground">Daily Growth</p>
+                              </div>
+                              <div className="text-center p-4 rounded-lg bg-muted/30">
+                                <p className="text-2xl font-bold text-blue-500">+{usersAnalytics.growthRate.weekly}%</p>
+                                <p className="text-sm text-muted-foreground">Weekly Growth</p>
+                              </div>
+                              <div className="text-center p-4 rounded-lg bg-muted/30">
+                                <p className="text-2xl font-bold text-purple-500">+{usersAnalytics.growthRate.monthly}%</p>
+                                <p className="text-sm text-muted-foreground">Monthly Growth</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center">
+                          <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                          <p className="text-muted-foreground">No user journey data available</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
+                {/* User Analytics Charts - Show for users-overview */}
+                {activeSection === 'users-overview' && usersAnalytics && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Users by Tier Over Time */}
                     <Card data-testid="card-users-by-tier">
                       <CardHeader>
