@@ -2692,6 +2692,19 @@ export default function AdminDashboard() {
                                           <Eye className="h-4 w-4 mr-2" />
                                           View Details
                                         </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() => {
+                                            const link = document.createElement('a');
+                                            link.href = `/api/admin/plans/${plan.id}/download`;
+                                            link.download = `${plan.businessName || 'Business-Plan'}-Submission.pdf`;
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            document.body.removeChild(link);
+                                          }}
+                                        >
+                                          <Download className="h-4 w-4 mr-2" />
+                                          Download PDF
+                                        </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => toggleDemoMutation.mutate(plan.id)}>
                                           <Sparkles className="h-4 w-4 mr-2" />
                                           Toggle Demo

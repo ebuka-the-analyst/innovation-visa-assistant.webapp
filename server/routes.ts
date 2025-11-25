@@ -14,6 +14,7 @@ import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
 import { sendPaymentReceiptEmail, sendPasswordResetEmail, generateVerificationToken, getResetTokenExpiry, sendPlanCompletionEmail, sendReferralRewardEmail, sendPromoCodeRewardEmail } from "./email";
 import bcrypt from "bcrypt";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import PDFDocument from "pdfkit";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -1810,6 +1811,205 @@ ${generatedSections.join('\n\n---\n\n')}`;
     } catch (error) {
       console.error("Admin plan delete error:", error);
       res.status(500).json({ error: "Failed to delete plan" });
+    }
+  });
+
+  // Download Business Plan Submission as PDF
+  app.get("/api/admin/plans/:planId/download", requireAdmin, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      
+      const plan = await storage.getBusinessPlan(planId);
+      if (!plan) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+      
+      // Get plan owner details
+      let owner = null;
+      if (plan.userId) {
+        const user = await storage.getUser(plan.userId);
+        if (user) {
+          owner = user;
+        }
+      }
+      
+      // Create PDF document
+      const doc = new PDFDocument({ margin: 50 });
+      
+      // Set response headers for PDF download
+      const sanitizedName = (plan.businessName || 'Business-Plan').replace(/[^a-zA-Z0-9]/g, '-');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${sanitizedName}-Submission.pdf"`);
+      
+      // Pipe PDF to response
+      doc.pipe(res);
+      
+      // Helper function to add sections
+      const addSection = (title: string, content: string | null | undefined) => {
+        if (content && content.trim()) {
+          doc.fontSize(14).fillColor('#ffa536').text(title, { underline: true });
+          doc.moveDown(0.5);
+          doc.fontSize(11).fillColor('#333333').text(content.trim(), { align: 'justify' });
+          doc.moveDown(1.5);
+        }
+      };
+      
+      // Header with gradient-style bar
+      doc.rect(0, 0, doc.page.width, 100).fill('#11b6e9');
+      doc.fontSize(28).fillColor('#ffffff').text('Business Plan Submission', 50, 35);
+      doc.fontSize(12).text('UK Innovator Founder Visa Assistant', 50, 70);
+      
+      doc.moveDown(4);
+      
+      // Business Overview Box
+      doc.rect(50, doc.y, doc.page.width - 100, 120).stroke('#11b6e9');
+      const boxY = doc.y + 15;
+      doc.fontSize(18).fillColor('#11b6e9').text('Business Overview', 70, boxY);
+      doc.fontSize(12).fillColor('#333333');
+      doc.text(`Business Name: ${plan.businessName || 'N/A'}`, 70, boxY + 30);
+      doc.text(`Industry: ${plan.industry || 'N/A'}`, 70, boxY + 50);
+      doc.text(`Selected Tier: ${(plan.tier || 'N/A').charAt(0).toUpperCase() + (plan.tier || '').slice(1)}`, 70, boxY + 70);
+      doc.text(`Status: ${(plan.status || 'N/A').charAt(0).toUpperCase() + (plan.status || '').slice(1)}`, 70, boxY + 90);
+      doc.text(`Submitted: ${plan.createdAt ? new Date(plan.createdAt).toLocaleDateString('en-GB') : 'N/A'}`, 350, boxY + 30);
+      doc.text(`Innovation Stage: ${(plan.innovationStage || 'N/A').charAt(0).toUpperCase() + (plan.innovationStage || '').slice(1)}`, 350, boxY + 50);
+      doc.text(`Funding Available: £${plan.funding?.toLocaleString() || 'N/A'}`, 350, boxY + 70);
+      doc.text(`Job Creation Target: ${plan.jobCreation || 'N/A'} jobs`, 350, boxY + 90);
+      
+      doc.moveDown(7);
+      
+      // Applicant Information
+      if (owner) {
+        doc.fontSize(16).fillColor('#11b6e9').text('Applicant Information');
+        doc.moveDown(0.5);
+        doc.fontSize(11).fillColor('#333333');
+        doc.text(`Name: ${owner.firstName || ''} ${owner.lastName || ''}`);
+        doc.text(`Email: ${owner.email || 'N/A'}`);
+        doc.text(`Account Created: ${owner.createdAt ? new Date(owner.createdAt).toLocaleDateString('en-GB') : 'N/A'}`);
+        doc.moveDown(1.5);
+      }
+      
+      // Problem & Solution
+      doc.addPage();
+      doc.fontSize(20).fillColor('#ffa536').text('Business Details', { underline: false });
+      doc.moveDown(1);
+      
+      addSection('Problem Being Solved', plan.problem);
+      addSection('Unique Value Proposition', plan.uniqueness);
+      addSection('Technology & Innovation', plan.technology);
+      addSection('Vision Statement', plan.vision);
+      
+      // Market & Competition
+      doc.addPage();
+      doc.fontSize(20).fillColor('#ffa536').text('Market Analysis');
+      doc.moveDown(1);
+      
+      addSection('Market Size', plan.marketSize);
+      addSection('Competitors', plan.competitors);
+      addSection('Competitive Differentiation', plan.competitiveDifferentiation);
+      addSection('Customer Interviews', plan.customerInterviews);
+      addSection('Letters of Intent', plan.lettersOfIntent);
+      addSection('Willingness to Pay', plan.willingnessToPay);
+      
+      // Founder Background
+      doc.addPage();
+      doc.fontSize(20).fillColor('#ffa536').text('Founder Background');
+      doc.moveDown(1);
+      
+      addSection('Education', plan.founderEducation);
+      addSection('Work History', plan.founderWorkHistory);
+      addSection('Achievements', plan.founderAchievements);
+      addSection('Relevant Experience', plan.experience);
+      addSection('Relevant Projects', plan.relevantProjects);
+      
+      // Product & Traction
+      doc.addPage();
+      doc.fontSize(20).fillColor('#ffa536').text('Product & Traction');
+      doc.moveDown(1);
+      
+      addSection('Product Status', plan.productStatus);
+      addSection('Existing Customers', plan.existingCustomers);
+      addSection('Beta Testers', plan.betaTesters);
+      addSection('Traction Evidence', plan.tractionEvidence);
+      
+      // Technical Details
+      if (plan.techStack || plan.dataArchitecture || plan.aiMethodology || plan.complianceDesign) {
+        doc.addPage();
+        doc.fontSize(20).fillColor('#ffa536').text('Technical Details');
+        doc.moveDown(1);
+        
+        addSection('Technology Stack', plan.techStack);
+        addSection('Data Architecture', plan.dataArchitecture);
+        addSection('AI Methodology', plan.aiMethodology);
+        addSection('Compliance Design', plan.complianceDesign);
+        addSection('Patent Status', plan.patentStatus);
+      }
+      
+      // Financial Details
+      doc.addPage();
+      doc.fontSize(20).fillColor('#ffa536').text('Financial Information');
+      doc.moveDown(1);
+      
+      addSection('Revenue Model', plan.revenue);
+      addSection('Monthly Projections', plan.monthlyProjections);
+      addSection('Funding Sources', plan.fundingSources);
+      addSection('Detailed Costs', plan.detailedCosts);
+      
+      if (plan.customerAcquisitionCost || plan.lifetimeValue || plan.paybackPeriod) {
+        doc.fontSize(14).fillColor('#ffa536').text('Key Metrics', { underline: true });
+        doc.moveDown(0.5);
+        doc.fontSize(11).fillColor('#333333');
+        if (plan.customerAcquisitionCost) doc.text(`Customer Acquisition Cost (CAC): £${plan.customerAcquisitionCost}`);
+        if (plan.lifetimeValue) doc.text(`Lifetime Value (LTV): £${plan.lifetimeValue}`);
+        if (plan.paybackPeriod) doc.text(`Payback Period: ${plan.paybackPeriod} months`);
+        doc.moveDown(1.5);
+      }
+      
+      // Expansion Plans
+      doc.addPage();
+      doc.fontSize(20).fillColor('#ffa536').text('Growth & Expansion');
+      doc.moveDown(1);
+      
+      addSection('Expansion Plans', plan.expansion);
+      addSection('Hiring Plan', plan.hiringPlan);
+      addSection('Specific Regions', plan.specificRegions);
+      addSection('International Plan', plan.internationalPlan);
+      
+      // Compliance & Endorser
+      doc.addPage();
+      doc.fontSize(20).fillColor('#ffa536').text('Visa Compliance & Endorser Strategy');
+      doc.moveDown(1);
+      
+      addSection('Regulatory Requirements', plan.regulatoryRequirements);
+      addSection('Compliance Timeline', plan.complianceTimeline);
+      if (plan.complianceBudget) {
+        doc.fontSize(14).fillColor('#ffa536').text('Compliance Budget', { underline: true });
+        doc.moveDown(0.5);
+        doc.fontSize(11).fillColor('#333333').text(`£${plan.complianceBudget?.toLocaleString() || 'N/A'}`);
+        doc.moveDown(1.5);
+      }
+      addSection('Target Endorser', plan.targetEndorser);
+      addSection('Contact Points Strategy', plan.contactPointsStrategy);
+      addSection('Supporting Evidence', plan.supportingEvidence);
+      
+      // Footer on each page
+      const pages = doc.bufferedPageRange();
+      for (let i = 0; i < pages.count; i++) {
+        doc.switchToPage(i);
+        doc.fontSize(9).fillColor('#999999');
+        doc.text(
+          `Generated by UK Innovator Founder Visa Assistant | Page ${i + 1} of ${pages.count}`,
+          50,
+          doc.page.height - 50,
+          { align: 'center', width: doc.page.width - 100 }
+        );
+      }
+      
+      // Finalize PDF
+      doc.end();
+      
+    } catch (error) {
+      console.error("Admin plan download error:", error);
+      res.status(500).json({ error: "Failed to generate PDF" });
     }
   });
 
