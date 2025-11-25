@@ -4242,6 +4242,218 @@ END:VEVENT
     }
   });
 
+  // ============================================
+  // NEWS FEED SYSTEM - Live UK Immigration News
+  // ============================================
+  
+  // Get latest news (public endpoint)
+  app.get("/api/news", async (req, res) => {
+    try {
+      const { category, limit = '20', search } = req.query;
+      let news;
+      
+      if (search && typeof search === 'string') {
+        news = await storage.searchNews(search, parseInt(limit as string));
+      } else if (category && typeof category === 'string') {
+        news = await storage.getNewsByCategory(category, parseInt(limit as string));
+      } else {
+        news = await storage.getLatestNews(parseInt(limit as string));
+      }
+      
+      res.json(news);
+    } catch (error) {
+      console.error("Get news error:", error);
+      res.status(500).json({ error: "Failed to fetch news" });
+    }
+  });
+
+  // Get featured news
+  app.get("/api/news/featured", async (req, res) => {
+    try {
+      const news = await storage.getFeaturedNews(5);
+      res.json(news);
+    } catch (error) {
+      console.error("Get featured news error:", error);
+      res.status(500).json({ error: "Failed to fetch featured news" });
+    }
+  });
+
+  // Get single news article
+  app.get("/api/news/:id", async (req, res) => {
+    try {
+      const article = await storage.getNewsArticle(req.params.id);
+      if (!article) {
+        return res.status(404).json({ error: "Article not found" });
+      }
+      res.json(article);
+    } catch (error) {
+      console.error("Get article error:", error);
+      res.status(500).json({ error: "Failed to fetch article" });
+    }
+  });
+
+  // Fetch news from external API (admin only or scheduled)
+  app.post("/api/news/fetch", requireAdmin, async (req, res) => {
+    try {
+      const NEWS_API_KEY = process.env.NEWS_API_KEY;
+      
+      if (!NEWS_API_KEY) {
+        return res.status(400).json({ error: "News API key not configured" });
+      }
+
+      // Check rate limit - don't fetch more than once per hour
+      const lastFetch = await storage.getLatestFetchLog('newsapi');
+      if (lastFetch) {
+        const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        if (new Date(lastFetch.fetchedAt) > hourAgo) {
+          return res.status(429).json({ 
+            error: "Rate limited - please wait before fetching again",
+            lastFetch: lastFetch.fetchedAt
+          });
+        }
+      }
+
+      // Fetch from NewsAPI
+      const queries = [
+        'UK immigration visa',
+        'UK Innovator Founder visa',
+        'Home Office UK visa',
+        'UK business immigration'
+      ];
+
+      let totalFound = 0;
+      let totalAdded = 0;
+      let totalDuplicate = 0;
+
+      for (const query of queries) {
+        try {
+          const response = await fetch(
+            `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${NEWS_API_KEY}`
+          );
+          
+          if (!response.ok) continue;
+          
+          const data = await response.json();
+          if (data.status !== 'ok' || !data.articles) continue;
+
+          totalFound += data.articles.length;
+
+          for (const article of data.articles) {
+            // Skip if URL already exists
+            const existing = await storage.getNewsArticleByUrl(article.url);
+            if (existing) {
+              totalDuplicate++;
+              continue;
+            }
+
+            // Determine category based on content
+            const titleLower = article.title?.toLowerCase() || '';
+            const descLower = article.description?.toLowerCase() || '';
+            let category = 'general';
+            
+            if (titleLower.includes('innovator') || titleLower.includes('founder') || titleLower.includes('startup')) {
+              category = 'visa';
+            } else if (titleLower.includes('immigration') || titleLower.includes('visa')) {
+              category = 'immigration';
+            } else if (titleLower.includes('home office') || titleLower.includes('policy')) {
+              category = 'policy';
+            } else if (titleLower.includes('business') || titleLower.includes('endorsement')) {
+              category = 'business';
+            }
+
+            // Calculate relevance score
+            let relevanceScore = 50;
+            if (titleLower.includes('innovator founder') || titleLower.includes('uk visa')) relevanceScore += 30;
+            if (titleLower.includes('immigration')) relevanceScore += 15;
+            if (descLower.includes('endorsement') || descLower.includes('tech nation')) relevanceScore += 20;
+            relevanceScore = Math.min(100, relevanceScore);
+
+            // Create article
+            await storage.createNewsArticle({
+              sourceId: article.source?.id || null,
+              sourceName: article.source?.name || 'Unknown',
+              sourceUrl: article.url,
+              title: article.title || 'Untitled',
+              description: article.description || null,
+              content: article.content || null,
+              author: article.author || null,
+              url: article.url,
+              imageUrl: article.urlToImage || null,
+              category,
+              tags: ['UK', 'immigration', 'visa'],
+              relevanceScore,
+              publishedAt: new Date(article.publishedAt),
+              isActive: true,
+              isFeatured: relevanceScore >= 80
+            });
+
+            totalAdded++;
+          }
+        } catch (fetchErr) {
+          console.error(`Error fetching for query "${query}":`, fetchErr);
+        }
+      }
+
+      // Log the fetch
+      await storage.createNewsFetchLog({
+        apiSource: 'newsapi',
+        endpoint: 'everything',
+        articlesFound: totalFound,
+        articlesAdded: totalAdded,
+        articlesDuplicate: totalDuplicate,
+        status: 'success'
+      });
+
+      res.json({
+        success: true,
+        articlesFound: totalFound,
+        articlesAdded: totalAdded,
+        articlesDuplicate: totalDuplicate
+      });
+    } catch (error) {
+      console.error("Fetch news error:", error);
+      
+      await storage.createNewsFetchLog({
+        apiSource: 'newsapi',
+        endpoint: 'everything',
+        articlesFound: 0,
+        articlesAdded: 0,
+        articlesDuplicate: 0,
+        status: 'error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      });
+
+      res.status(500).json({ error: "Failed to fetch news from external API" });
+    }
+  });
+
+  // Get news for AI chatbot context (recent relevant news summaries)
+  app.get("/api/news/context", async (req, res) => {
+    try {
+      // Get most recent and most relevant news for AI context
+      const recentNews = await storage.getLatestNews(10);
+      
+      // Format for AI context
+      const context = recentNews.map(article => ({
+        title: article.title,
+        summary: article.description || article.aiSummary,
+        source: article.sourceName,
+        date: article.publishedAt,
+        category: article.category,
+        keyPoints: article.keyPoints
+      }));
+
+      res.json({ 
+        newsContext: context,
+        lastUpdated: recentNews[0]?.fetchedAt || null,
+        articleCount: context.length
+      });
+    } catch (error) {
+      console.error("Get news context error:", error);
+      res.status(500).json({ error: "Failed to get news context" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

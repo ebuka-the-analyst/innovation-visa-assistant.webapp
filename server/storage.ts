@@ -18,9 +18,12 @@ import {
   type LawyerDocumentReview, type InsertLawyerDocumentReview,
   type LawyerReviewComment, type InsertLawyerReviewComment,
   type LawyerReviewStatusHistory, type InsertLawyerReviewStatusHistory,
+  type NewsArticle, type InsertNewsArticle,
+  type NewsFetchLog, type InsertNewsFetchLog,
   users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics,
   referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits, payoutRequests,
-  supportTickets, userDocuments, immigrationLawyers, lawyerDocumentReviews, lawyerReviewComments, lawyerReviewStatusHistory
+  supportTickets, userDocuments, immigrationLawyers, lawyerDocumentReviews, lawyerReviewComments, lawyerReviewStatusHistory,
+  newsArticles, newsFetchLog
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gt, lt, desc, sql, count } from "drizzle-orm";
@@ -270,6 +273,21 @@ export interface IStorage {
     averageRating: number;
     averageTurnaroundHours: number;
   }>;
+
+  // ============================================
+  // NEWS FEED SYSTEM
+  // ============================================
+  createNewsArticle(article: InsertNewsArticle): Promise<NewsArticle>;
+  getNewsArticle(id: string): Promise<NewsArticle | undefined>;
+  getNewsArticleByUrl(url: string): Promise<NewsArticle | undefined>;
+  getLatestNews(limit?: number): Promise<NewsArticle[]>;
+  getNewsByCategory(category: string, limit?: number): Promise<NewsArticle[]>;
+  getFeaturedNews(limit?: number): Promise<NewsArticle[]>;
+  searchNews(query: string, limit?: number): Promise<NewsArticle[]>;
+  updateNewsArticle(id: string, updates: Partial<NewsArticle>): Promise<NewsArticle | undefined>;
+  deleteNewsArticle(id: string): Promise<void>;
+  createNewsFetchLog(log: InsertNewsFetchLog): Promise<NewsFetchLog>;
+  getLatestFetchLog(apiSource: string): Promise<NewsFetchLog | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1376,6 +1394,87 @@ export class DatabaseStorage implements IStorage {
       averageRating: avgRating,
       averageTurnaroundHours: avgTurnaround
     };
+  }
+
+  // ============================================
+  // NEWS FEED SYSTEM
+  // ============================================
+  async createNewsArticle(article: InsertNewsArticle): Promise<NewsArticle> {
+    const [result] = await db.insert(newsArticles).values(article).returning();
+    return result;
+  }
+
+  async getNewsArticle(id: string): Promise<NewsArticle | undefined> {
+    const result = await db.select().from(newsArticles).where(eq(newsArticles.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getNewsArticleByUrl(url: string): Promise<NewsArticle | undefined> {
+    const result = await db.select().from(newsArticles).where(eq(newsArticles.url, url)).limit(1);
+    return result[0];
+  }
+
+  async getLatestNews(limit: number = 20): Promise<NewsArticle[]> {
+    return db.select().from(newsArticles)
+      .where(eq(newsArticles.isActive, true))
+      .orderBy(desc(newsArticles.publishedAt))
+      .limit(limit);
+  }
+
+  async getNewsByCategory(category: string, limit: number = 20): Promise<NewsArticle[]> {
+    return db.select().from(newsArticles)
+      .where(and(
+        eq(newsArticles.isActive, true),
+        eq(newsArticles.category, category)
+      ))
+      .orderBy(desc(newsArticles.publishedAt))
+      .limit(limit);
+  }
+
+  async getFeaturedNews(limit: number = 5): Promise<NewsArticle[]> {
+    return db.select().from(newsArticles)
+      .where(and(
+        eq(newsArticles.isActive, true),
+        eq(newsArticles.isFeatured, true)
+      ))
+      .orderBy(desc(newsArticles.publishedAt))
+      .limit(limit);
+  }
+
+  async searchNews(query: string, limit: number = 20): Promise<NewsArticle[]> {
+    const searchTerm = `%${query.toLowerCase()}%`;
+    return db.select().from(newsArticles)
+      .where(and(
+        eq(newsArticles.isActive, true),
+        sql`LOWER(${newsArticles.title}) LIKE ${searchTerm} OR LOWER(${newsArticles.description}) LIKE ${searchTerm}`
+      ))
+      .orderBy(desc(newsArticles.publishedAt))
+      .limit(limit);
+  }
+
+  async updateNewsArticle(id: string, updates: Partial<NewsArticle>): Promise<NewsArticle | undefined> {
+    const [result] = await db.update(newsArticles)
+      .set(updates)
+      .where(eq(newsArticles.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteNewsArticle(id: string): Promise<void> {
+    await db.delete(newsArticles).where(eq(newsArticles.id, id));
+  }
+
+  async createNewsFetchLog(log: InsertNewsFetchLog): Promise<NewsFetchLog> {
+    const [result] = await db.insert(newsFetchLog).values(log).returning();
+    return result;
+  }
+
+  async getLatestFetchLog(apiSource: string): Promise<NewsFetchLog | undefined> {
+    const result = await db.select().from(newsFetchLog)
+      .where(eq(newsFetchLog.apiSource, apiSource))
+      .orderBy(desc(newsFetchLog.fetchedAt))
+      .limit(1);
+    return result[0];
   }
 }
 
