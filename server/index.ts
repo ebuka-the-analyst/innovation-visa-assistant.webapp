@@ -43,7 +43,23 @@ function serveStatic(app: ExpressType) {
     res.sendFile(path.resolve(distPath, "sitemap.xml"));
   });
 
-  app.use(express.static(distPath));
+  // Serve static assets with aggressive caching (1 year for hashed assets)
+  app.use(express.static(distPath, {
+    maxAge: '1y', // Cache for 1 year (Vite adds hash to filenames for cache busting)
+    etag: true,
+    lastModified: true,
+    immutable: true, // Assets won't change (hash in filename ensures this)
+    setHeaders: (res, filePath) => {
+      // Apply aggressive caching for hashed assets (js, css, images with hash)
+      if (filePath.match(/\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|webp|avif|ico)$/)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+      // HTML files should not be cached as aggressively
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+      }
+    }
+  }));
 
   // Cache the base HTML template to avoid repeated file reads
   const indexPath = path.resolve(distPath, "index.html");
@@ -222,6 +238,22 @@ app.use((req, res, next) => {
     }
   });
 
+  next();
+});
+
+// PhD-level optimization: Add caching headers for API responses
+app.use((req, res, next) => {
+  // Only cache GET API responses, and be conservative about what's cacheable
+  if (req.method === 'GET' && req.path.startsWith('/api/')) {
+    // Auth endpoints - never cache (sensitive user data)
+    if (req.path.includes('/api/auth/') || req.path.includes('/api/user') || req.path.includes('/api/admin') || req.path.includes('/api/partner')) {
+      res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    }
+    // All other API endpoints - private cache only (user-specific data)
+    else {
+      res.setHeader('Cache-Control', 'private, max-age=60, stale-while-revalidate=30');
+    }
+  }
   next();
 });
 

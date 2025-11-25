@@ -12,8 +12,8 @@ export default function Footer() {
           <div className="space-y-4 lg:col-span-2">
             <div className="isolate z-[9999] mix-blend-normal bg-transparent">
               <div className="logo-container overflow-hidden mb-3">
-                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
+                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -98,8 +98,8 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center gap-3">
             <div className="isolate z-[9999] mix-blend-normal bg-transparent opacity-70">
               <div className="logo-container overflow-hidden">
-                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
+                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
               </div>
             </div>
             <p className="text-sm text-muted-foreground">

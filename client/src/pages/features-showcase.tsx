@@ -105,8 +105,8 @@ export default function FeaturesShowcase() {
               <AnimatedSidebarTrigger />
               <Link href="/">
                 <div className="logo-container h-8">
-                  <img src={logoLight} alt="Logo" className="h-8 w-auto logo-light" />
-                  <img src={logoDark} alt="Logo" className="h-8 w-auto logo-dark" />
+                  <img src={logoLight} alt="Logo" className="h-8 w-auto logo-light" loading="lazy" />
+                  <img src={logoDark} alt="Logo" className="h-8 w-auto logo-dark" loading="lazy" />
                 </div>
               </Link>
             </div>

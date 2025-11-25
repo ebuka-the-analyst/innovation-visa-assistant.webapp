@@ -8,57 +8,86 @@ import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ThemeToggle from "@/components/ThemeToggle";
-import ChatBot from "@/components/ChatBot";
-import CookieConsent from "@/components/CookieConsent";
-import ToolsChronographWheel from "@/components/ToolsChronographWheel";
-import BlackNovemberBanner from "@/components/BlackNovemberBanner";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, LogOut } from "lucide-react";
+import { ChevronRight, LogOut, Loader2 } from "lucide-react";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
-import Home from "@/pages/home";
-import Login from "@/pages/login";
-import Signup from "@/pages/signup";
-import VerifyEmail from "@/pages/verify-email";
-import ForgotPassword from "@/pages/forgot-password";
-import ResetPassword from "@/pages/reset-password";
-import Dashboard from "@/pages/dashboard";
-import Pricing from "@/pages/pricing";
-import Questionnaire from "@/pages/questionnaire";
-import Generation from "@/pages/generation";
-import NotFound from "@/pages/not-found";
-import EndorserComparison from "@/pages/endorser-comparison";
-import DocumentOrganizer from "@/pages/document-organizer";
-import ExpertBooking from "@/pages/expert-booking";
-import RejectionAnalysis from "@/pages/rejection-analysis";
-import SettlementPlanning from "@/pages/settlement-planning";
-import FeaturesDashboard from "@/pages/features-dashboard";
-import KPIDashboard from "@/pages/kpi-dashboard";
-import EvidenceGraph from "@/pages/evidence-graph";
-import RFEDefenceLab from "@/pages/rfe-defence-lab";
-import Diagnostics from "@/pages/diagnostics";
-import Settings from "@/pages/settings";
-import DataModal from "@/pages/data-modal";
-import ToolsHub from "@/pages/tools-hub";
-import FeaturesShowcase from "@/pages/features-showcase";
-import EndorserInvestmentRequirements from "@/pages/endorser-investment-requirements";
-import AIAssistant from "@/pages/ai-assistant";
-import Handoff from "@/pages/handoff";
-import AdminDashboard from "@/pages/admin-dashboard";
-import PartnerDashboard from "@/pages/partner-dashboard";
-import InterviewPrep from "@/pages/interview-prep";
-import FAQ from "@/pages/faq";
-import Guide from "@/pages/guide";
-import Privacy from "@/pages/privacy";
-import Terms from "@/pages/terms";
-import Cookies from "@/pages/cookies";
-import ReferralDashboard from "@/pages/referral-dashboard";
-import Progress from "@/pages/progress";
-import Support from "@/pages/support";
-import Documents from "@/pages/documents";
-import ToolPage from "@/pages/tool-page";
+
+// Lazy load ChatBot and other heavy components
+const ChatBot = lazy(() => import("@/components/ChatBot"));
+const CookieConsent = lazy(() => import("@/components/CookieConsent"));
+const ToolsChronographWheel = lazy(() => import("@/components/ToolsChronographWheel"));
+const BlackNovemberBanner = lazy(() => import("@/components/BlackNovemberBanner"));
+
+// ============ LAZY LOADED PAGES ============
+// Public pages (marketing/auth)
+const Home = lazy(() => import("@/pages/home"));
+const Login = lazy(() => import("@/pages/login"));
+const Signup = lazy(() => import("@/pages/signup"));
+const VerifyEmail = lazy(() => import("@/pages/verify-email"));
+const ForgotPassword = lazy(() => import("@/pages/forgot-password"));
+const ResetPassword = lazy(() => import("@/pages/reset-password"));
+const Pricing = lazy(() => import("@/pages/pricing"));
+const FAQ = lazy(() => import("@/pages/faq"));
+const Guide = lazy(() => import("@/pages/guide"));
+const Privacy = lazy(() => import("@/pages/privacy"));
+const Terms = lazy(() => import("@/pages/terms"));
+const Cookies = lazy(() => import("@/pages/cookies"));
+const FeaturesShowcase = lazy(() => import("@/pages/features-showcase"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+
+// Core authenticated pages
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Questionnaire = lazy(() => import("@/pages/questionnaire"));
+const Generation = lazy(() => import("@/pages/generation"));
+const Settings = lazy(() => import("@/pages/settings"));
+const Progress = lazy(() => import("@/pages/progress"));
+const Support = lazy(() => import("@/pages/support"));
+const Documents = lazy(() => import("@/pages/documents"));
+
+// Tools and resources
+const ToolsHub = lazy(() => import("@/pages/tools-hub"));
+const ToolPage = lazy(() => import("@/pages/tool-page"));
+const EndorserComparison = lazy(() => import("@/pages/endorser-comparison"));
+const EndorserInvestmentRequirements = lazy(() => import("@/pages/endorser-investment-requirements"));
+const DocumentOrganizer = lazy(() => import("@/pages/document-organizer"));
+const ExpertBooking = lazy(() => import("@/pages/expert-booking"));
+
+// Analysis and diagnostics
+const RejectionAnalysis = lazy(() => import("@/pages/rejection-analysis"));
+const Diagnostics = lazy(() => import("@/pages/diagnostics"));
+const EvidenceGraph = lazy(() => import("@/pages/evidence-graph"));
+const RFEDefenceLab = lazy(() => import("@/pages/rfe-defence-lab"));
+
+// Strategy and planning
+const SettlementPlanning = lazy(() => import("@/pages/settlement-planning"));
+const InterviewPrep = lazy(() => import("@/pages/interview-prep"));
+const AIAssistant = lazy(() => import("@/pages/ai-assistant"));
+const Handoff = lazy(() => import("@/pages/handoff"));
+
+// Dashboards and analytics
+const FeaturesDashboard = lazy(() => import("@/pages/features-dashboard"));
+const KPIDashboard = lazy(() => import("@/pages/kpi-dashboard"));
+const DataModal = lazy(() => import("@/pages/data-modal"));
+const ReferralDashboard = lazy(() => import("@/pages/referral-dashboard"));
+
+// Admin pages
+const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
+const PartnerDashboard = lazy(() => import("@/pages/partner-dashboard"));
 
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features"];
+
+// Optimized loading skeleton
+function PageLoadingSkeleton() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 function AnimatedSidebarTrigger() {
   const { state, toggleSidebar } = useSidebar();
@@ -165,8 +194,8 @@ function UnifiedHeader() {
       <Link href="/">
         <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-header-logo">
           <div className="logo-container overflow-hidden flex items-center">
-            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
+            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
           </div>
         </div>
       </Link>
@@ -203,7 +232,7 @@ function AppLayout() {
 
   if (isPublicRoute) {
     return (
-      <Suspense fallback={null}>
+      <Suspense fallback={<PageLoadingSkeleton />}>
         <Router />
       </Suspense>
     );
@@ -217,7 +246,7 @@ function AppLayout() {
           <div className="flex flex-col flex-1 w-full">
             <UnifiedHeader />
             <main className="flex-1 overflow-auto">
-              <Suspense fallback={null}>
+              <Suspense fallback={<PageLoadingSkeleton />}>
                 <Router />
               </Suspense>
             </main>
@@ -232,12 +261,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <BlackNovemberBanner />
-        <ChatBot />
-        <ToolsChronographWheel />
+        <Suspense fallback={null}>
+          <BlackNovemberBanner />
+          <ChatBot />
+          <ToolsChronographWheel />
+        </Suspense>
         <Toaster />
         <AppLayout />
-        <CookieConsent />
+        <Suspense fallback={null}>
+          <CookieConsent />
+        </Suspense>
       </TooltipProvider>
     </QueryClientProvider>
   );
