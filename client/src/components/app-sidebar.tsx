@@ -32,6 +32,7 @@ import {
   Award,
   Clock,
   DollarSign,
+  Gift,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -207,6 +208,13 @@ export function AppSidebar() {
     {
       label: "Account",
       items: [
+        {
+          title: "Referral Programme",
+          url: "/referral-dashboard",
+          icon: Gift,
+          description: "Earn money by referring others",
+          badge: "EARN",
+        },
         {
           title: "Settings",
           url: "/settings",

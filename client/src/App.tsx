@@ -49,6 +49,7 @@ import Guide from "@/pages/guide";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import Cookies from "@/pages/cookies";
+import ReferralDashboard from "@/pages/referral-dashboard";
 
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies"];
 
@@ -110,6 +111,7 @@ function Router() {
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/handoff" component={Handoff} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
+      <Route path="/referral-dashboard" component={ReferralDashboard} />
       <Route path="/interview-prep" component={InterviewPrep} />
       <Route path="/faq" component={FAQ} />
       <Route path="/guide" component={Guide} />
