@@ -59,6 +59,11 @@ export default function Login() {
         description: "Successfully signed in",
       });
 
+      // Trigger onboarding tour for new users who haven't completed it
+      if (userData.user && !userData.user.hasCompletedOnboarding) {
+        localStorage.setItem('trigger-onboarding-tour', 'true');
+      }
+
       // Redirect admin users to admin dashboard
       if (userData.user?.isAdmin) {
         window.location.href = "/admin-dashboard";

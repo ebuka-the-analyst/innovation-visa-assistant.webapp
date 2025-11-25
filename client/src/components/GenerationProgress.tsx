@@ -63,6 +63,10 @@ export default function GenerationProgress({ planId }: { planId: string }) {
           return;
         }
 
+        // Mark that tour should be triggered after plan activation
+        // This flag will be checked on the dashboard to start the tour
+        localStorage.setItem('trigger-onboarding-tour', 'true');
+
         await apiRequest('POST', '/api/generate/start', { planId });
       } catch (error) {
         console.error('Failed to start generation:', error);

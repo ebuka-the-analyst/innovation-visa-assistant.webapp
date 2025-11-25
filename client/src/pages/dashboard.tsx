@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award, Eye, EyeOff, RefreshCw } from "lucide-react";
 
 import ChatBot from "@/components/ChatBot";
+import { SpotlightTour, useSpotlightTour } from "@/components/SpotlightTour";
 import type { BusinessPlan } from "@shared/schema";
 import { format } from "date-fns";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip } from "recharts";
@@ -154,6 +155,9 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { hiddenIds, hidePlan, showPlan, showAllPlans } = useHiddenDemoPlans();
   const [redirecting, setRedirecting] = useState(false);
+  
+  // Spotlight tour integration - only shows once after plan activation
+  const { showTour, setShowTour, triggerTour, hasCompletedOnboarding, isLoading: tourLoading } = useSpotlightTour();
 
   const { data: user, isLoading: userLoading, isError: userError, refetch: refetchUser } = useQuery<{ id: string; email: string; displayName?: string }>({
     queryKey: ['/api/auth/user'],
@@ -174,6 +178,17 @@ export default function Dashboard() {
       setLocation("/login");
     }
   }, [userLoading, user, redirecting, setLocation]);
+
+  // Check for tour trigger flag after payment completion
+  useEffect(() => {
+    if (user && !tourLoading && !hasCompletedOnboarding) {
+      const shouldTriggerTour = localStorage.getItem('trigger-onboarding-tour');
+      if (shouldTriggerTour === 'true') {
+        localStorage.removeItem('trigger-onboarding-tour');
+        triggerTour();
+      }
+    }
+  }, [user, tourLoading, hasCompletedOnboarding, triggerTour]);
 
   // Filter out hidden demo plans
   const displayPlans = businessPlans?.filter(plan => {
@@ -561,6 +576,12 @@ export default function Dashboard() {
       
       {/* Floating Chatbot */}
       <ChatBot />
+      
+      {/* Spotlight Tour - only shows once after plan activation */}
+      <SpotlightTour 
+        isOpen={showTour} 
+        onComplete={() => setShowTour(false)} 
+      />
     </div>
   );
 }
