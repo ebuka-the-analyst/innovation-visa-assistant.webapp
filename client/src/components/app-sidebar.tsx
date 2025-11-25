@@ -317,18 +317,18 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
                           }`}
                           data-testid={`nav-button-${item.url}`}
                         >
-                          <div className="flex items-center gap-2">
-                            <Icon className="h-3.5 w-3.5 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <div className="text-xs font-medium leading-tight truncate">
+                          <div className="flex items-center gap-3 w-full">
+                            <Icon className="h-4 w-4 flex-shrink-0" />
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <div className="text-sm font-medium leading-tight truncate">
                                 {item.title}
                               </div>
-                              <div className="text-[10px] text-muted-foreground line-clamp-1 hidden sm:block">
+                              <div className="text-xs text-muted-foreground truncate">
                                 {item.description}
                               </div>
                             </div>
                             {item.badge && (
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
                                 item.badge === "ADMIN"
                                   ? "bg-orange-500 text-white"
                                   : item.badge === "PARTNER"
@@ -352,10 +352,10 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex flex-col gap-2 p-2 border-t">
-          <div className="px-1 py-1">
-            <div className="text-xs font-semibold text-foreground truncate">{currentUser?.displayName || "Demo User"}</div>
-            <div className="text-[10px] text-muted-foreground truncate">{currentUser?.email || "demo@example.com"}</div>
+        <div className="flex flex-col gap-2 p-3 border-t">
+          <div className="px-2 py-1.5">
+            <div className="text-sm font-semibold text-foreground truncate">{currentUser?.displayName || "Demo User"}</div>
+            <div className="text-xs text-muted-foreground truncate">{currentUser?.email || "demo@example.com"}</div>
           </div>
           {demoMode ? (
             <Button
