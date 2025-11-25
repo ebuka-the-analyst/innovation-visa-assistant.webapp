@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, Plus, Trash2, Download } from "lucide-react";
-import { AuthHeader } from "@/components/AuthHeader";
+
 
 interface DataItem {
   id: string;
@@ -52,7 +52,7 @@ export default function DataModal() {
 
   return (
     <>
-      <AuthHeader />
+      
       <div className="container mx-auto py-8 px-4 md:px-6 max-w-4xl">
         <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2" data-testid="heading-data-modal">Data Manager</h1>

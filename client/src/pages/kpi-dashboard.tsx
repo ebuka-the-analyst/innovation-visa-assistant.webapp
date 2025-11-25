@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, AlertCircle, CheckCircle2, BarChart3 } from "lucide-react";
-import { AuthHeader } from "@/components/AuthHeader";
+
 import FeatureNavigation from "@/components/FeatureNavigation";
 
 export default function KPIDashboard() {
@@ -16,7 +16,7 @@ export default function KPIDashboard() {
 
   return (
     <div className="min-h-screen">
-      <AuthHeader />
+      
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-6xl mx-auto">
           <FeatureNavigation currentPage="questionnaire" />

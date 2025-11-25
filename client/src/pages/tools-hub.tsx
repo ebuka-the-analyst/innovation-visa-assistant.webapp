@@ -14,9 +14,6 @@ import {
 import { ALL_TOOLS, Tool } from "@shared/tools-data";
 import { Search, Filter, Lock, CheckCircle } from "lucide-react";
 import * as Icons from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
 import Footer from "@/components/Footer";
 import { useTierAccess, type ToolTier } from "@/hooks/useTierAccess";
 import { SEOHead } from "@/components/SEOHead";
@@ -30,11 +27,6 @@ export default function ToolsHub() {
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [stageFilter, setStageFilter] = useState<string>("");
   const [tierFilter, setTierFilter] = useState<string>("");
-
-  const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
-    queryKey: ["/api/auth/me"],
-    retry: false,
-  });
 
   const { canAccessTool, userTier } = useTierAccess();
 
@@ -104,10 +96,8 @@ export default function ToolsHub() {
         keywords="UK innovator visa tools, business plan generator, compliance checker, financial projections, market analysis, visa application tools"
         schema={combinedSchema}
       />
-      {user && <AuthHeader />}
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="w-full px-4 md:px-8 lg:px-12">
-          <ToolNavigation />
           {/* Header */}
           <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-3" data-testid="heading-tools-hub">

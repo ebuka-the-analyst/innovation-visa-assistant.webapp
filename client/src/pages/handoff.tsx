@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Smartphone, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
-import { AuthHeader } from "@/components/AuthHeader";
+
 
 export default function Handoff() {
   const [, setLocation] = useLocation();
@@ -57,7 +57,7 @@ export default function Handoff() {
 
   return (
     <>
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 flex items-center justify-center p-6">
         <Card className="max-w-md w-full p-8 text-center">
           {status === 'loading' && (

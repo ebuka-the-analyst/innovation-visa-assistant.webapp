@@ -3,8 +3,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
+
+
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, LineChart as LineChartIcon, BarChart3, DollarSign } from "lucide-react";
@@ -366,10 +366,10 @@ Consult with qualified accountants and financial advisors before making business
 
   return (
     <>
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-7xl mx-auto">
-          <ToolNavigation />
+          
           
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2" data-testid="heading-financial-modeling">Financial Modeling</h1>

@@ -1,17 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
 import { SEOHead } from "@/components/SEOHead";
-import Header from "@/components/Header";
-import { AuthHeader } from "@/components/AuthHeader";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { FileText, Users, CreditCard, Shield, Scale, AlertTriangle, Mail } from "lucide-react";
 
 export default function TermsOfService() {
-  const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-  });
-
   return (
     <>
       <SEOHead
@@ -19,8 +11,6 @@ export default function TermsOfService() {
         description="UK Innovator Founder Visa Assistant terms of service. Understand your rights and responsibilities when using our professional-level visa application tools."
         canonical="https://innovatorfoundervisaassistant.co.uk/terms"
       />
-      
-      {user ? <AuthHeader /> : <Header />}
       
       <div className="min-h-screen bg-gradient-to-b from-background to-accent/5">
         <div className="border-b bg-primary/5">

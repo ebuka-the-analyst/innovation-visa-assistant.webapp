@@ -2,8 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
+
+
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -282,9 +282,9 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
         keywords="financial projections UK visa, innovator visa financials, cash flow projections, business viability calculator, startup financial planning"
         schema={combinedSchema}
       />
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <ToolNavigation />
+        
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Financial Projections</h1>
           <p className="text-muted-foreground mb-6">12-month financial projections for UK visa compliance</p>

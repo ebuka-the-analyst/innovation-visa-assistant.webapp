@@ -3,8 +3,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
+
+
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -492,10 +492,10 @@ This tool provides educational guidance only and does not constitute legal advic
 
   return (
     <>
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-7xl mx-auto">
-          <ToolNavigation />
+          
           
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2" data-testid="heading-weakness-analysis">Application Weakness Analysis</h1>

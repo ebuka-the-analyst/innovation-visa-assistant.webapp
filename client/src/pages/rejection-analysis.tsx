@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, TrendingUp, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
-import { AuthHeader } from "@/components/AuthHeader";
+
 import { useToast } from "@/hooks/use-toast";
 
 const commonRejectionReasons = [

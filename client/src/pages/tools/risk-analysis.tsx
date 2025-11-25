@@ -1,15 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
+
+
 
 export default function RiskAnalysis() {
   return (
     <>
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-6xl mx-auto">
-          <ToolNavigation />
+          
           <div className="mb-8">
             <h1 className="text-4xl font-bold">Risk Analysis</h1>
             <p className="text-lg text-muted-foreground">Advanced Strategic Analysis</p>

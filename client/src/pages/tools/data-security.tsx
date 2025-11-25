@@ -1,8 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
+
+
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -147,9 +147,9 @@ export default function DataSecurity() {
 
   return (
     <>
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <ToolNavigation />
+        
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Data Security Compliance</h1>
           <p className="text-muted-foreground mb-6">GDPR and UK data protection assessment</p>

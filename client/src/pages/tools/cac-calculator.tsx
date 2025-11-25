@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
+
+
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
@@ -347,9 +347,9 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
 
   return (
     <>
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <ToolNavigation />
+        
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Customer Acquisition Cost (CAC)</h1>
           <p className="text-muted-foreground mb-6">Analyze unit economics for viability (Innovator Founder Visa)</p>

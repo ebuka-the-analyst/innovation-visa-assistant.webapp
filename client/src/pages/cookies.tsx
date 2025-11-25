@@ -1,17 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
 import { SEOHead } from "@/components/SEOHead";
-import Header from "@/components/Header";
-import { AuthHeader } from "@/components/AuthHeader";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Cookie, Lock, BarChart3, Settings, Globe, Database, Mail } from "lucide-react";
 
 export default function CookiePolicy() {
-  const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-  });
-
   return (
     <>
       <SEOHead
@@ -19,8 +11,6 @@ export default function CookiePolicy() {
         description="Learn how we use cookies and tracking technologies. UK Innovator Founder Visa Assistant cookie policy explaining our use of essential, analytics, and marketing cookies."
         canonical="https://innovatorfoundervisaassistant.co.uk/cookies"
       />
-      
-      {user ? <AuthHeader /> : <Header />}
       
       <div className="min-h-screen bg-gradient-to-b from-background to-accent/5">
         <div className="border-b bg-primary/5">

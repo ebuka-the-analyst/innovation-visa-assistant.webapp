@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
+
+
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
@@ -62,9 +62,9 @@ export default function CompanyHistory() {
 
   return (
     <>
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <ToolNavigation />
+        
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Company History</h1>
           <p className="text-muted-foreground mb-6">Document your company's founding story and milestones</p>

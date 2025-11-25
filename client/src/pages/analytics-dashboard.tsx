@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
+
+
 import { useState, useEffect } from "react";
 import { Download, TrendingUp, Users, Clock, Target } from "lucide-react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -62,9 +62,9 @@ export default function AnalyticsDashboard() {
 
   return (
     <>
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <ToolNavigation />
+        
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Platform Analytics Dashboard</h1>
           <p className="text-muted-foreground mb-6">Track tool usage and user engagement across the platform</p>

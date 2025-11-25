@@ -1,5 +1,4 @@
-import { Card } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { AuthHeader } from "@/components/AuthHeader"; import { ToolNavigation } from "@/components/ToolNavigation"; import { useState } from "react"; import { Download } from "lucide-react";
+import { Card } from "@/components/ui/card"; import { Button } from "@/components/ui/button";   import { useState } from "react"; import { Download } from "lucide-react";
 export default function SETTLEMENTGUIDE() {
   const [gen, setGen] = useState(false);
-  return <><AuthHeader /><div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6"><ToolNavigation /><h1 className="text-4xl font-bold mb-2">Settlement Guide</h1><p className="text-muted-foreground mb-6">Report generator</p>{!gen?<Card className="p-12 text-center"><h2 className="text-2xl font-bold mb-4">Generate Report</h2><Button onClick={()=>setGen(true)} size="lg" className="bg-primary">Create</Button></Card>:<div className="space-y-3">{["Summary","Analysis","Recommendations","Action Plan"].map((s,i)=><Card key={i} className="p-4"><h3 className="font-bold text-sm">{s}</h3></Card>)}<Button className="w-full gap-2 bg-primary"><Download width={16}/>Download PDF</Button></div>}</div></>;
 }

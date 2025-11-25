@@ -1,17 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
 import { SEOHead } from "@/components/SEOHead";
-import Header from "@/components/Header";
-import { AuthHeader } from "@/components/AuthHeader";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Shield, Lock, Eye, Database, Globe, Mail } from "lucide-react";
 
 export default function PrivacyPolicy() {
-  const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-  });
-
   return (
     <>
       <SEOHead
@@ -19,8 +11,6 @@ export default function PrivacyPolicy() {
         description="Learn how we protect your data and privacy. UK Innovator Founder Visa Assistant privacy policy covering data collection, usage, and your rights under GDPR."
         canonical="https://innovatorfoundervisaassistant.co.uk/privacy"
       />
-      
-      {user ? <AuthHeader /> : <Header />}
       
       <div className="min-h-screen bg-gradient-to-b from-background to-accent/5">
         <div className="border-b bg-primary/5">

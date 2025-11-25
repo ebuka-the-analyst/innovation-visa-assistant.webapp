@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle2, TrendingUp, Home, Globe } from "lucide-react";
-import { AuthHeader } from "@/components/AuthHeader";
+
 
 const settlementSteps = [
   {
@@ -105,7 +105,7 @@ const expansionStrategies = [
 export default function SettlementPlanning() {
   return (
     <div className="min-h-screen">
-      <AuthHeader />
+      
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">

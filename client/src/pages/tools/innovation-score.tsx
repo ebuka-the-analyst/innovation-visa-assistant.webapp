@@ -3,8 +3,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
+
+
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -661,10 +661,10 @@ for official assessment and application preparation.
         keywords="innovation score calculator, UK visa innovation assessment, innovator visa criteria, innovation evaluation tool, visa innovation requirements"
         schema={combinedSchema}
       />
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-7xl mx-auto">
-          <ToolNavigation />
+          
           
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2" data-testid="heading-innovation-score">Innovation Score Assessment</h1>

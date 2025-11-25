@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { AuthHeader } from "@/components/AuthHeader";
+
 import Header from "@/components/Header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -151,7 +151,6 @@ export default function Pricing() {
         keywords="UK innovator visa cost, visa application pricing, business plan cost, innovator founder visa fees, visa assistance pricing"
         schema={combinedSchema}
       />
-      {user ? <AuthHeader /> : <Header />}
       
       <main className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">

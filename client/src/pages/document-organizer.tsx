@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CheckCircle2, Circle, Upload, Download, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { AuthHeader } from "@/components/AuthHeader";
+
 import FeatureNavigation from "@/components/FeatureNavigation";
 
 const documentCategories = [
@@ -86,7 +86,7 @@ export default function DocumentOrganizer() {
 
   return (
     <div className="min-h-screen">
-      <AuthHeader />
+      
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-4xl mx-auto">
           <FeatureNavigation currentPage="document-organizer" />

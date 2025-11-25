@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { AuthHeader } from "@/components/AuthHeader";
+
 import { CheckCircle2, Clock, Lock, BookOpen, Users, TrendingUp, Home, BarChart3 } from "lucide-react";
 
 const features = [
@@ -119,7 +119,7 @@ const advancedFeatures = [
 export default function FeaturesDashboard() {
   return (
     <div className="min-h-screen">
-      <AuthHeader />
+      
       <div className="container mx-auto px-4 md:px-6 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16">

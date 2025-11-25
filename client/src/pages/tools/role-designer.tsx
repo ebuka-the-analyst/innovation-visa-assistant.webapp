@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AuthHeader } from "@/components/AuthHeader";
-import { ToolNavigation } from "@/components/ToolNavigation";
+
+
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
@@ -516,9 +516,9 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
 
   return (
     <>
-      <AuthHeader />
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <ToolNavigation />
+        
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">Organizational Design & Role Framework</h1>
           <p className="text-muted-foreground mb-6">Build scalable team structure with clear roles (Innovator Founder Visa)</p>

@@ -1,12 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
 import { Check, ChevronRight } from "lucide-react";
-import Header from "@/components/Header";
-import { AuthHeader } from "@/components/AuthHeader";
 
 type IconName = keyof typeof Icons;
 
@@ -26,7 +23,7 @@ const MAIN_FEATURES = [
   { title: "5 Pricing Tiers", description: "Free to Ultimate with varying feature access" },
   { title: "Expert Dashboard", description: "Monitor your visa application progress" },
   { title: "Breaking News Ticker", description: "Real-time UK Innovator Founder Visa updates" },
-  { title: "Diagnostics Engine", description: "Application readiness scoring (88% benchmark)" },
+  { title: "Diagnostics Engine", description: "Application readiness scoring with comprehensive analysis" },
   { title: "AI Agent Assistants", description: "Nova, Sterling, Atlas, and Sage AI agents" },
   { title: "Endorser Comparison", description: "Compare and select approved endorsers" },
   { title: "Interview Preparation", description: "Prepare for visa officer interviews" },
@@ -34,11 +31,6 @@ const MAIN_FEATURES = [
 ];
 
 export default function FeaturesShowcase() {
-  const { data: user } = useQuery<{ id: string; email: string; displayName?: string }>({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-  });
-
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
     return Icon ? <Icon className="w-5 h-5" /> : <Icons.Zap className="w-5 h-5" />;
@@ -55,7 +47,6 @@ export default function FeaturesShowcase() {
 
   return (
     <>
-      {user ? <AuthHeader /> : <Header />}
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
         {/* Hero */}
         <div className="border-b">
@@ -83,7 +74,7 @@ export default function FeaturesShowcase() {
 
           {/* Tool Categories */}
           <section className="mb-20">
-            <h2 className="text-3xl font-bold mb-8">100+ Tools Across 8 Categories</h2>
+            <h2 className="text-3xl font-bold mb-8">100+ Professional-Level Tools</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {FEATURE_CATEGORIES.map((category, idx) => (
                 <Card key={idx} className="p-6 hover-elevate border-l-4 border-l-primary" data-testid={`card-category-${idx}`}>
