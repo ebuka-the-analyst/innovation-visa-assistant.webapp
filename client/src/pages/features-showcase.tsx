@@ -22,7 +22,7 @@ const FEATURE_CATEGORIES = [
 ];
 
 const MAIN_FEATURES = [
-  { title: "88 AI-Powered Tools", description: "Complete toolkit from application to approval" },
+  { title: "109 AI-Powered Tools", description: "Complete toolkit from application to approval" },
   { title: "5 Pricing Tiers", description: "Free to Ultimate with varying feature access" },
   { title: "Expert Dashboard", description: "Monitor your visa application progress" },
   { title: "Breaking News Ticker", description: "Real-time UK Innovator Founder Visa updates" },
@@ -62,7 +62,7 @@ export default function FeaturesShowcase() {
           <div className="container mx-auto px-4 md:px-6 py-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4" data-testid="heading-features">Everything You Need for UK Innovator Founder Visa Success</h1>
             <p className="text-xl text-muted-foreground max-w-2xl">
-              A complete platform with 88 tools, AI agents, expert guidance, and everything required to turn your innovation into a visa-approved business
+              A complete platform with 109 tools, AI agents, expert guidance, and everything required to turn your innovation into a visa-approved business
             </p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function FeaturesShowcase() {
 
           {/* Tool Categories */}
           <section className="mb-20">
-            <h2 className="text-3xl font-bold mb-8">88 Tools Across 8 Categories</h2>
+            <h2 className="text-3xl font-bold mb-8">109 Tools Across 8 Categories</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {FEATURE_CATEGORIES.map((category, idx) => (
                 <Card key={idx} className="p-6 hover-elevate border-l-4 border-l-primary" data-testid={`card-category-${idx}`}>
@@ -125,7 +125,7 @@ export default function FeaturesShowcase() {
                 { name: "Basic", price: "£49", color: "bg-blue-50", tools: "30", pages: "25-35" },
                 { name: "Premium", price: "£99", color: "bg-purple-50", tools: "60+", pages: "40-60", popular: true },
                 { name: "Enterprise", price: "£199", color: "bg-orange-50", tools: "82+", pages: "50-80" },
-                { name: "Ultimate", price: "£299", color: "bg-amber-50", tools: "All 88", pages: "80+", premium: true },
+                { name: "Ultimate", price: "£299", color: "bg-amber-50", tools: "All 109", pages: "80+", premium: true },
               ].map((tier, idx) => (
                 <Card key={idx} className={`p-6 hover-elevate border-2 ${tier.color} ${tier.premium ? "border-amber-300 shadow-lg" : ""}`} data-testid={`card-tier-${idx}`}>
                   {tier.popular && <div className="mb-3 text-xs font-bold text-purple-600">⭐ MOST POPULAR</div>}
@@ -154,7 +154,7 @@ export default function FeaturesShowcase() {
                 <Card className="p-6 hover-elevate cursor-pointer text-center" data-testid="card-link-tools">
                   <div className="text-3xl mb-3">🛠️</div>
                   <h3 className="font-semibold mb-2">All Tools</h3>
-                  <p className="text-sm text-muted-foreground">Explore 88 powerful tools</p>
+                  <p className="text-sm text-muted-foreground">Explore 109 powerful tools</p>
                 </Card>
               </Link>
 

@@ -19,11 +19,11 @@ const FEATURE_CATEGORIES = [
 ];
 
 const HIGHLIGHTS = [
-  { label: "88 AI Tools", value: "Complete A-Z toolkit" },
+  { label: "109 AI Tools", value: "Complete A-Z toolkit" },
   { label: "5 Pricing Tiers", value: "Free to Ultimate access" },
   { label: "Real-time Updates", value: "52 UK visa news items" },
   { label: "AI Agents", value: "Nova, Sterling, Atlas, Sage" },
-  { label: "88% Readiness", value: "Diagnostics scoring" },
+  { label: "PhD-Level Quality", value: "Expert-grade tools" },
   { label: "Expert Support", value: "Lawyer network access" },
 ];
 
@@ -40,7 +40,7 @@ export default function EverythingWeOfferSection() {
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">Everything You Need</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            A complete platform with 88 powerful AI tools, expert guidance, and everything required to get your UK Innovator Founder Visa approved
+            A complete platform with 109 powerful AI tools, expert guidance, and everything required to get your UK Innovator Founder Visa approved
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export default function EverythingWeOfferSection() {
         {/* Tool Categories */}
         <div className="mb-16">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl font-bold">88 Tools Across 8 Categories</h3>
+            <h3 className="text-2xl font-bold">109 Tools Across 8 Categories</h3>
             <Link href="/tools-hub">
               <Button variant="outline" size="sm" className="gap-2" data-testid="button-view-all-tools">
                 View All <ChevronRight className="w-4 h-4" />
@@ -121,7 +121,7 @@ export default function EverythingWeOfferSection() {
               { name: "Basic", price: "£49", color: "bg-blue-50", tools: "30" },
               { name: "Premium", price: "£99", color: "bg-purple-50", tools: "60+", popular: true },
               { name: "Enterprise", price: "£199", color: "bg-orange-50", tools: "82+" },
-              { name: "Ultimate", price: "£299", color: "bg-amber-50", tools: "All 88", premium: true },
+              { name: "Ultimate", price: "£299", color: "bg-amber-50", tools: "All 109", premium: true },
             ].map((tier, idx) => (
               <Card key={idx} className={`p-4 text-center hover-elevate border-2 ${tier.color}`} data-testid={`tier-card-${idx}`}>
                 {tier.popular && <div className="text-xs font-bold text-purple-600 mb-2">⭐ Most Popular</div>}
@@ -162,7 +162,7 @@ export default function EverythingWeOfferSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/tools-hub">
               <Button size="lg" data-testid="button-explore-tools">
-                View All 88 Tools
+                View All 109 Tools
               </Button>
             </Link>
             <Link href="/pricing">

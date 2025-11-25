@@ -52,7 +52,7 @@ export default function ToolsFlywheel() {
     >
       {/* Header - Compact */}
       <div className="text-center border-b border-primary/20 py-2 px-3">
-        <h3 className="font-bold text-xs text-primary">88 Tools</h3>
+        <h3 className="font-bold text-xs text-primary">109 Tools</h3>
       </div>
 
       {/* Tools List - Compact */}
