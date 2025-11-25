@@ -575,6 +575,36 @@ export default function AdminDashboard() {
     toast({ title: "Dashboard layout saved" });
   }, [toast]);
 
+  // Auto-filter when clicking specific subsections
+  useEffect(() => {
+    // Plans subsection auto-filtering
+    if (activeSection === 'plans-pending') {
+      setPlanFilters({ statusFilters: ['pending'] });
+      setPlansPage(1);
+    } else if (activeSection === 'plans-completed') {
+      setPlanFilters({ statusFilters: ['completed'] });
+      setPlansPage(1);
+    } else if (activeSection === 'plans-failed') {
+      setPlanFilters({ statusFilters: ['failed'] });
+      setPlansPage(1);
+    } else if (activeSection === 'plans-overview' || activeSection === 'plans-funnel') {
+      setPlanFilters({});
+      setPlansPage(1);
+    }
+
+    // Users subsection auto-filtering
+    if (activeSection === 'users-active') {
+      setUserFilters({ tierFilters: ['premium', 'enterprise', 'ultimate'] });
+      setUsersPage(1);
+    } else if (activeSection === 'users-new') {
+      setUserFilters({ verified: false });
+      setUsersPage(1);
+    } else if (activeSection === 'users-overview') {
+      setUserFilters({});
+      setUsersPage(1);
+    }
+  }, [activeSection]);
+
   // Check admin status
   const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ['/api/auth/user'],
