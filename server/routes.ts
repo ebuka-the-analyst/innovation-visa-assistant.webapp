@@ -2536,15 +2536,22 @@ ${generatedSections.join('\n\n---\n\n')}`;
         discountType, 
         discountValue, 
         eligibleTiers,
+        applicableTiers,
         minPurchaseAmount,
         maxTotalUses,
+        maxUses,
         maxUsesPerUser,
         validFrom,
         validUntil,
       } = req.body;
       
-      if (!name || !discountType || !discountValue) {
-        return res.status(400).json({ error: "Name, discount type, and discount value are required" });
+      // Use code as name if name not provided
+      const promoName = name || code;
+      const tiers = eligibleTiers || applicableTiers;
+      const totalUses = maxTotalUses || maxUses;
+      
+      if (!code || !discountType || discountValue === undefined) {
+        return res.status(400).json({ error: "Code, discount type, and discount value are required" });
       }
       
       // Generate code if not provided
@@ -2558,13 +2565,13 @@ ${generatedSections.join('\n\n---\n\n')}`;
       
       const promoCode = await storage.createPromoCode({
         code: promoCodeValue,
-        name,
+        name: promoName,
         description,
         discountType,
         discountValue,
-        eligibleTiers: eligibleTiers || null,
+        eligibleTiers: tiers || null,
         minPurchaseAmount: minPurchaseAmount || null,
-        maxTotalUses: maxTotalUses || null,
+        maxTotalUses: totalUses || null,
         maxUsesPerUser: maxUsesPerUser || 1,
         validFrom: validFrom ? new Date(validFrom) : new Date(),
         validUntil: validUntil ? new Date(validUntil) : null,
