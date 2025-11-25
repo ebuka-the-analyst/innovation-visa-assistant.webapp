@@ -411,6 +411,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await storage.updateBusinessPlan(planId, { status: 'paid' });
       
+      // CRITICAL: Update user's subscription tier after successful payment
+      // This unlocks premium tool access based on the tier they purchased
+      const newTier = businessPlan.tier || 'free';
+      await storage.updateUser(user.id, { 
+        subscriptionTier: newTier,
+        subscriptionStatus: 'active'
+      });
+      console.log(`[PAYMENT] User ${user.id} upgraded to ${newTier} tier after payment for plan ${planId}`);
+      
       const pricing = PRICING[businessPlan.tier as keyof typeof PRICING];
       const purchaseAmount = pricing?.amount || 0;
 
