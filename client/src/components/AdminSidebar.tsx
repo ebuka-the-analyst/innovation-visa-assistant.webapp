@@ -56,7 +56,12 @@ import {
   Lock,
   Eye,
   Search,
-  Filter
+  Filter,
+  Gift,
+  Tag,
+  Percent,
+  Link2,
+  Receipt,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -67,6 +72,7 @@ interface AdminSidebarProps {
     activeUsers?: number;
     pendingPlans?: number;
     errorCount?: number;
+    pendingRewards?: number;
   };
 }
 
@@ -148,6 +154,16 @@ const menuGroups = [
     ]
   },
   {
+    label: "Referrals & Promos",
+    items: [
+      { id: "referrals-overview", label: "Referral Overview", icon: Gift, badge: null },
+      { id: "referrals-codes", label: "Referral Codes", icon: Link2, badge: null },
+      { id: "referrals-rewards", label: "Pending Rewards", icon: Receipt, badge: "rewards" },
+      { id: "promos-overview", label: "Promo Codes", icon: Tag, badge: null },
+      { id: "promos-create", label: "Create Promo", icon: Percent, badge: null },
+    ]
+  },
+  {
     label: "Admin Settings",
     items: [
       { id: "settings-general", label: "General Settings", icon: Settings, badge: null },
@@ -173,6 +189,7 @@ export function AdminSidebar({ activeSection, onSectionChange, stats }: AdminSid
     if (badge === "live") return <Badge variant="destructive" className="text-[10px] px-1.5 py-0 animate-pulse">LIVE</Badge>;
     if (badge === "count" && stats?.pendingPlans) return <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{stats.pendingPlans}</Badge>;
     if (badge === "errors" && stats?.errorCount) return <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{stats.errorCount}</Badge>;
+    if (badge === "rewards" && stats?.pendingRewards) return <Badge className="text-[10px] px-1.5 py-0 bg-orange-500">{stats.pendingRewards}</Badge>;
     return null;
   };
 

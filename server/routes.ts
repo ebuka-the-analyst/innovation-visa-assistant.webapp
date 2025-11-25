@@ -2123,6 +2123,64 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // Delete promo code (admin)
+  app.delete("/api/admin/promos/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deletePromoCode(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Admin delete promo code error:", error);
+      res.status(500).json({ error: "Failed to delete promo code" });
+    }
+  });
+
+  // Approve reward (admin)
+  app.post("/api/admin/referrals/rewards/:id/approve", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const reward = await storage.updateReferralReward(id, { 
+        status: 'approved',
+      });
+      
+      if (!reward) {
+        return res.status(404).json({ error: "Reward not found" });
+      }
+      
+      res.json(reward);
+    } catch (error) {
+      console.error("Admin approve reward error:", error);
+      res.status(500).json({ error: "Failed to approve reward" });
+    }
+  });
+
+  // Reject reward (admin)
+  app.post("/api/admin/referrals/rewards/:id/reject", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+      
+      if (!reason) {
+        return res.status(400).json({ error: "Rejection reason is required" });
+      }
+      
+      const reward = await storage.updateReferralReward(id, { 
+        status: 'cancelled',
+        notes: `Rejected: ${reason}`,
+      });
+      
+      if (!reward) {
+        return res.status(404).json({ error: "Reward not found" });
+      }
+      
+      res.json(reward);
+    } catch (error) {
+      console.error("Admin reject reward error:", error);
+      res.status(500).json({ error: "Failed to reject reward" });
+    }
+  });
+
   // Get promo redemptions (admin)
   app.get("/api/admin/promos/redemptions", requireAdmin, async (req, res) => {
     try {

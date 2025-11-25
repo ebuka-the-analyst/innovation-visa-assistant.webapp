@@ -89,7 +89,18 @@ import {
   ArrowRight,
   CreditCard,
   ScrollText,
-  LockKeyhole
+  LockKeyhole,
+  Gift,
+  Tag,
+  Percent,
+  Link2,
+  Receipt,
+  Copy,
+  PoundSterling,
+  ExternalLink,
+  Ban,
+  ToggleLeft,
+  ToggleRight
 } from "lucide-react";
 import {
   BarChart as RechartsBarChart,
@@ -486,6 +497,22 @@ export default function AdminDashboard() {
     to: new Date()
   });
 
+  // Promo code modal state
+  const [showCreatePromoModal, setShowCreatePromoModal] = useState(false);
+  const [newPromoCode, setNewPromoCode] = useState<{
+    code: string;
+    discountType: 'percentage' | 'fixed';
+    discountValue: number;
+    maxUses: number | null;
+    validFrom: Date | null;
+    validUntil: Date | null;
+    minPurchaseAmount: number | null;
+    applicableTiers: string[] | null;
+  }>({ code: '', discountType: 'percentage', discountValue: 10, maxUses: null, validFrom: null, validUntil: null, minPurchaseAmount: null, applicableTiers: null });
+  const [deletingPromo, setDeletingPromo] = useState<string | null>(null);
+  const [rejectingReward, setRejectingReward] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+
   // Live refresh countdown
   const [refreshCountdown, setRefreshCountdown] = useState(30);
 
@@ -588,6 +615,62 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/system/metrics'],
     enabled: !!user?.isAdmin && activeSection.startsWith('system'),
     refetchInterval: REFRESH_INTERVAL,
+  });
+
+  // Referral analytics
+  const { data: referralAnalytics, isLoading: referralAnalyticsLoading, refetch: refetchReferralAnalytics } = useQuery<{
+    totalReferralCodes: number;
+    activeReferralCodes: number;
+    totalReferrals: number;
+    successfulReferrals: number;
+    pendingRewards: number;
+    totalRewardsPaid: number;
+    conversionRate: number;
+    topReferrers: Array<{ userId: string; email: string; code: string; referrals: number; earnings: number }>;
+    recentEvents: Array<{ id: string; referrerEmail: string; refereeEmail: string; status: string; createdAt: string }>;
+  }>({
+    queryKey: ['/api/admin/referrals/analytics'],
+    enabled: !!user?.isAdmin && (activeSection.startsWith('referrals') || activeSection.startsWith('promos')),
+    refetchInterval: REFRESH_INTERVAL,
+  });
+
+  // Promo codes
+  const { data: promoCodesData, isLoading: promoCodesLoading, refetch: refetchPromoCodes } = useQuery<{
+    promoCodes: Array<{
+      id: string;
+      code: string;
+      discountType: string;
+      discountValue: number;
+      maxUses: number | null;
+      usedCount: number;
+      validFrom: string | null;
+      validUntil: string | null;
+      isActive: boolean;
+      createdAt: string;
+    }>;
+    total: number;
+  }>({
+    queryKey: ['/api/admin/promos'],
+    enabled: !!user?.isAdmin && activeSection.startsWith('promos'),
+  });
+
+  // Pending rewards
+  const { data: pendingRewardsData, isLoading: pendingRewardsLoading, refetch: refetchPendingRewards } = useQuery<{
+    rewards: Array<{
+      id: string;
+      referrerId: string;
+      referrerEmail: string;
+      type: string;
+      amount: number;
+      status: string;
+      createdAt: string;
+      eventId: string;
+    }>;
+    total: number;
+    totalPendingAmount: number;
+  }>({
+    queryKey: ['/api/admin/referrals/rewards/pending'],
+    enabled: !!user?.isAdmin && activeSection === 'referrals-rewards',
   });
 
   // Refresh countdown timer
@@ -708,6 +791,89 @@ export default function AdminDashboard() {
     },
   });
 
+  // Create promo code mutation
+  const createPromoCodeMutation = useMutation({
+    mutationFn: async (data: {
+      code: string;
+      discountType: 'percentage' | 'fixed';
+      discountValue: number;
+      maxUses: number | null;
+      validFrom: Date | null;
+      validUntil: Date | null;
+      minPurchaseAmount: number | null;
+      applicableTiers: string[] | null;
+    }) => {
+      await apiRequest('POST', '/api/admin/promos', data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/promos'] });
+      toast({ title: "Promo code created successfully" });
+      setShowCreatePromoModal(false);
+      setNewPromoCode({ code: '', discountType: 'percentage', discountValue: 10, maxUses: null, validFrom: null, validUntil: null, minPurchaseAmount: null, applicableTiers: null });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to create promo code", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Toggle promo code status mutation
+  const togglePromoCodeMutation = useMutation({
+    mutationFn: async ({ promoId, isActive }: { promoId: string; isActive: boolean }) => {
+      await apiRequest('PATCH', `/api/admin/promos/${promoId}`, { isActive });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/promos'] });
+      toast({ title: "Promo code status updated" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update promo code", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Delete promo code mutation
+  const deletePromoCodeMutation = useMutation({
+    mutationFn: async (promoId: string) => {
+      await apiRequest('DELETE', `/api/admin/promos/${promoId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/promos'] });
+      toast({ title: "Promo code deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to delete promo code", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Approve reward mutation
+  const approveRewardMutation = useMutation({
+    mutationFn: async (rewardId: string) => {
+      await apiRequest('POST', `/api/admin/referrals/rewards/${rewardId}/approve`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/referrals/rewards/pending'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/referrals/analytics'] });
+      toast({ title: "Reward approved and marked for payout" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to approve reward", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Reject reward mutation
+  const rejectRewardMutation = useMutation({
+    mutationFn: async ({ rewardId, reason }: { rewardId: string; reason: string }) => {
+      await apiRequest('POST', `/api/admin/referrals/rewards/${rewardId}/reject`, { reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/referrals/rewards/pending'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/referrals/analytics'] });
+      toast({ title: "Reward rejected" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to reject reward", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Manual refresh handler
   const handleManualRefresh = useCallback(async () => {
     toast({ title: "Refreshing data..." });
@@ -820,6 +986,11 @@ export default function AdminDashboard() {
       'logs-security': 'Security Events',
       'comms-emails': 'Email Analytics',
       'comms-notifications': 'Notification Center',
+      'referrals-overview': 'Referral Programme Overview',
+      'referrals-codes': 'Referral Codes Management',
+      'referrals-rewards': 'Pending Rewards',
+      'promos-overview': 'Promo Codes Management',
+      'promos-create': 'Create Promo Code',
       'settings-general': 'General Settings',
       'settings-access': 'Access Control',
       'settings-maintenance': 'Maintenance Mode',
@@ -839,6 +1010,7 @@ export default function AdminDashboard() {
               activeUsers: overviewData?.kpiMetrics?.[1]?.value || 0,
               pendingPlans: plansData?.plans?.filter(p => p.status === 'pending').length || 0,
               errorCount: activityLog?.filter(a => a.severity === 'error').length || 0,
+              pendingRewards: pendingRewardsData?.total || referralAnalytics?.pendingRewards || 0,
             }}
           />
           
@@ -3092,6 +3264,380 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
+                {/* Referrals & Promos Section */}
+                {(activeSection.startsWith('referrals') || activeSection.startsWith('promos')) && (
+                  <div className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="space-y-6"
+                    >
+                      {/* Referral Overview */}
+                      {activeSection === 'referrals-overview' && (
+                        <>
+                          {/* KPI Cards */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <Card>
+                              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Total Referral Codes</CardTitle>
+                                <Link2 className="h-4 w-4 text-muted-foreground" />
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-2xl font-bold">{referralAnalytics?.totalReferralCodes || 0}</div>
+                                <p className="text-xs text-muted-foreground">{referralAnalytics?.activeReferralCodes || 0} active</p>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Total Referrals</CardTitle>
+                                <Users className="h-4 w-4 text-muted-foreground" />
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-2xl font-bold">{referralAnalytics?.totalReferrals || 0}</div>
+                                <p className="text-xs text-muted-foreground">{referralAnalytics?.successfulReferrals || 0} successful</p>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-2xl font-bold">{((referralAnalytics?.conversionRate || 0) * 100).toFixed(1)}%</div>
+                                <p className="text-xs text-muted-foreground">Click to purchase</p>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Total Rewards Paid</CardTitle>
+                                <PoundSterling className="h-4 w-4 text-muted-foreground" />
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-2xl font-bold text-green-500">
+                                  £{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(2)}
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  £{((referralAnalytics?.pendingRewards || 0) / 100).toFixed(2)} pending
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Top Referrers */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Gift className="h-5 w-5" />
+                                Top Referrers
+                              </CardTitle>
+                              <CardDescription>Users with the most successful referrals</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              {referralAnalyticsLoading ? (
+                                <div className="space-y-3">
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-12 w-full" />
+                                  ))}
+                                </div>
+                              ) : referralAnalytics?.topReferrers && referralAnalytics.topReferrers.length > 0 ? (
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead>Email</TableHead>
+                                      <TableHead>Code</TableHead>
+                                      <TableHead className="text-center">Referrals</TableHead>
+                                      <TableHead className="text-right">Earnings</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {referralAnalytics.topReferrers.map((referrer) => (
+                                      <TableRow key={referrer.userId}>
+                                        <TableCell className="font-medium">{referrer.email}</TableCell>
+                                        <TableCell>
+                                          <Badge variant="outline" className="font-mono">{referrer.code}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-center">{referrer.referrals}</TableCell>
+                                        <TableCell className="text-right text-green-500">
+                                          £{(referrer.earnings / 100).toFixed(2)}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              ) : (
+                                <div className="py-8 text-center text-muted-foreground">
+                                  <Gift className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                  <p>No referrers yet</p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          {/* Recent Referral Events */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Activity className="h-5 w-5" />
+                                Recent Referral Events
+                              </CardTitle>
+                              <CardDescription>Latest referral activity</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              {referralAnalytics?.recentEvents && referralAnalytics.recentEvents.length > 0 ? (
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead>Referrer</TableHead>
+                                      <TableHead>Referee</TableHead>
+                                      <TableHead>Status</TableHead>
+                                      <TableHead>Date</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {referralAnalytics.recentEvents.map((event) => (
+                                      <TableRow key={event.id}>
+                                        <TableCell>{event.referrerEmail}</TableCell>
+                                        <TableCell>{event.refereeEmail}</TableCell>
+                                        <TableCell>
+                                          <Badge variant={
+                                            event.status === 'rewarded' ? 'default' :
+                                            event.status === 'qualified' ? 'outline' :
+                                            'secondary'
+                                          } className={
+                                            event.status === 'rewarded' ? 'bg-green-500' :
+                                            event.status === 'qualified' ? 'border-orange-500 text-orange-500' : ''
+                                          }>
+                                            {event.status}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                          {format(new Date(event.createdAt), 'MMM d, yyyy')}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              ) : (
+                                <div className="py-8 text-center text-muted-foreground">
+                                  <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                  <p>No recent events</p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+
+                      {/* Pending Rewards */}
+                      {activeSection === 'referrals-rewards' && (
+                        <Card>
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle className="flex items-center gap-2">
+                                  <Receipt className="h-5 w-5" />
+                                  Pending Rewards
+                                </CardTitle>
+                                <CardDescription>
+                                  {pendingRewardsData?.total || 0} rewards pending approval
+                                  {pendingRewardsData?.totalPendingAmount ? ` (£${(pendingRewardsData.totalPendingAmount / 100).toFixed(2)} total)` : ''}
+                                </CardDescription>
+                              </div>
+                              <Button variant="outline" onClick={() => refetchPendingRewards()}>
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                Refresh
+                              </Button>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            {pendingRewardsLoading ? (
+                              <div className="space-y-3">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Skeleton key={i} className="h-16 w-full" />
+                                ))}
+                              </div>
+                            ) : pendingRewardsData?.rewards && pendingRewardsData.rewards.length > 0 ? (
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Referrer</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Created</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {pendingRewardsData.rewards.map((reward) => (
+                                    <TableRow key={reward.id}>
+                                      <TableCell className="font-medium">{reward.referrerEmail}</TableCell>
+                                      <TableCell className="capitalize">{reward.type}</TableCell>
+                                      <TableCell className="font-medium">£{(reward.amount / 100).toFixed(2)}</TableCell>
+                                      <TableCell className="text-muted-foreground">
+                                        {format(new Date(reward.createdAt), 'MMM d, yyyy')}
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <div className="flex items-center justify-end gap-2">
+                                          <Button
+                                            size="sm"
+                                            onClick={() => approveRewardMutation.mutate(reward.id)}
+                                            disabled={approveRewardMutation.isPending}
+                                          >
+                                            <CheckCircle className="h-4 w-4 mr-1" />
+                                            Approve
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => setRejectingReward(reward.id)}
+                                          >
+                                            <XCircle className="h-4 w-4 mr-1" />
+                                            Reject
+                                          </Button>
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            ) : (
+                              <div className="py-12 text-center text-muted-foreground">
+                                <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50 text-green-500" />
+                                <p className="text-lg font-medium">All caught up!</p>
+                                <p>No pending rewards to review</p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Promo Codes Overview */}
+                      {(activeSection === 'promos-overview' || activeSection === 'promos-create') && (
+                        <>
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Tag className="h-5 w-5" />
+                                    Promo Codes
+                                  </CardTitle>
+                                  <CardDescription>Manage promotional discount codes</CardDescription>
+                                </div>
+                                <Button onClick={() => setShowCreatePromoModal(true)}>
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Create Promo Code
+                                </Button>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              {promoCodesLoading ? (
+                                <div className="space-y-3">
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-16 w-full" />
+                                  ))}
+                                </div>
+                              ) : promoCodesData?.promoCodes && promoCodesData.promoCodes.length > 0 ? (
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead>Code</TableHead>
+                                      <TableHead>Discount</TableHead>
+                                      <TableHead>Usage</TableHead>
+                                      <TableHead>Valid Period</TableHead>
+                                      <TableHead>Status</TableHead>
+                                      <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {promoCodesData.promoCodes.map((promo) => (
+                                      <TableRow key={promo.id}>
+                                        <TableCell>
+                                          <Badge variant="outline" className="font-mono text-base">
+                                            {promo.code}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell className="font-medium">
+                                          {promo.discountType === 'percentage' 
+                                            ? `${promo.discountValue}%` 
+                                            : `£${promo.discountValue}`}
+                                        </TableCell>
+                                        <TableCell>
+                                          {promo.usedCount}{promo.maxUses ? `/${promo.maxUses}` : ''}
+                                        </TableCell>
+                                        <TableCell className="text-sm text-muted-foreground">
+                                          {promo.validFrom && promo.validUntil 
+                                            ? `${format(new Date(promo.validFrom), 'MMM d')} - ${format(new Date(promo.validUntil), 'MMM d, yyyy')}`
+                                            : promo.validUntil 
+                                              ? `Until ${format(new Date(promo.validUntil), 'MMM d, yyyy')}`
+                                              : 'No expiry'}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge variant={promo.isActive ? 'default' : 'secondary'}>
+                                            {promo.isActive ? 'Active' : 'Inactive'}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                              <Button variant="ghost" size="icon">
+                                                <MoreVertical className="h-4 w-4" />
+                                              </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                              <DropdownMenuItem
+                                                onClick={() => togglePromoCodeMutation.mutate({ 
+                                                  promoId: promo.id, 
+                                                  isActive: !promo.isActive 
+                                                })}
+                                              >
+                                                {promo.isActive ? (
+                                                  <>
+                                                    <ToggleLeft className="h-4 w-4 mr-2" />
+                                                    Deactivate
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <ToggleRight className="h-4 w-4 mr-2" />
+                                                    Activate
+                                                  </>
+                                                )}
+                                              </DropdownMenuItem>
+                                              <DropdownMenuSeparator />
+                                              <DropdownMenuItem
+                                                className="text-destructive"
+                                                onClick={() => setDeletingPromo(promo.id)}
+                                              >
+                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                Delete
+                                              </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                          </DropdownMenu>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              ) : (
+                                <div className="py-12 text-center text-muted-foreground">
+                                  <Tag className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                  <p className="text-lg font-medium">No promo codes yet</p>
+                                  <p className="mb-4">Create your first promotional code</p>
+                                  <Button onClick={() => setShowCreatePromoModal(true)}>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Create Promo Code
+                                  </Button>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+                    </motion.div>
+                  </div>
+                )}
+
                 {/* Settings Section */}
                 {activeSection.startsWith('settings') && (
                   <div className="space-y-6">
@@ -3391,6 +3937,209 @@ export default function AdminDashboard() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setViewingUserDetails(null)}>
                 Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Promo Code Dialog */}
+        <Dialog open={showCreatePromoModal} onOpenChange={setShowCreatePromoModal}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Tag className="h-5 w-5" />
+                Create Promo Code
+              </DialogTitle>
+              <DialogDescription>
+                Create a new promotional discount code for customers
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="promo-code">Promo Code</Label>
+                <Input
+                  id="promo-code"
+                  placeholder="e.g., WELCOME20"
+                  value={newPromoCode.code}
+                  onChange={(e) => setNewPromoCode({ ...newPromoCode, code: e.target.value.toUpperCase() })}
+                  className="font-mono"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="discount-type">Discount Type</Label>
+                  <Select
+                    value={newPromoCode.discountType}
+                    onValueChange={(value: 'percentage' | 'fixed') => 
+                      setNewPromoCode({ ...newPromoCode, discountType: value })
+                    }
+                  >
+                    <SelectTrigger id="discount-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="percentage">Percentage (%)</SelectItem>
+                      <SelectItem value="fixed">Fixed Amount (GBP)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="discount-value">Discount Value</Label>
+                  <Input
+                    id="discount-value"
+                    type="number"
+                    min="0"
+                    max={newPromoCode.discountType === 'percentage' ? 100 : undefined}
+                    value={newPromoCode.discountValue}
+                    onChange={(e) => setNewPromoCode({ ...newPromoCode, discountValue: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="max-uses">Max Uses (optional)</Label>
+                <Input
+                  id="max-uses"
+                  type="number"
+                  min="0"
+                  placeholder="Unlimited"
+                  value={newPromoCode.maxUses || ''}
+                  onChange={(e) => setNewPromoCode({ 
+                    ...newPromoCode, 
+                    maxUses: e.target.value ? Number(e.target.value) : null 
+                  })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Valid From</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {newPromoCode.validFrom 
+                          ? format(newPromoCode.validFrom, 'PPP') 
+                          : 'No start date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={newPromoCode.validFrom || undefined}
+                        onSelect={(date) => setNewPromoCode({ ...newPromoCode, validFrom: date || null })}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Valid Until</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {newPromoCode.validUntil 
+                          ? format(newPromoCode.validUntil, 'PPP') 
+                          : 'No expiry'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={newPromoCode.validUntil || undefined}
+                        onSelect={(date) => setNewPromoCode({ ...newPromoCode, validUntil: date || null })}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreatePromoModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => createPromoCodeMutation.mutate(newPromoCode)}
+                disabled={!newPromoCode.code || createPromoCodeMutation.isPending}
+              >
+                {createPromoCodeMutation.isPending ? 'Creating...' : 'Create Promo Code'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Promo Code Confirmation */}
+        <AlertDialog open={!!deletingPromo} onOpenChange={(open) => !open && setDeletingPromo(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Promo Code?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete this promo code. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (deletingPromo) {
+                    deletePromoCodeMutation.mutate(deletingPromo);
+                    setDeletingPromo(null);
+                  }
+                }}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Reject Reward Dialog */}
+        <Dialog open={!!rejectingReward} onOpenChange={(open) => !open && setRejectingReward(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reject Reward</DialogTitle>
+              <DialogDescription>
+                Please provide a reason for rejecting this reward. The referrer will be notified.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reject-reason">Rejection Reason</Label>
+                <Input
+                  id="reject-reason"
+                  placeholder="e.g., Suspected fraudulent activity"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setRejectingReward(null);
+                setRejectReason('');
+              }}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (rejectingReward && rejectReason) {
+                    rejectRewardMutation.mutate({ rewardId: rejectingReward, reason: rejectReason });
+                    setRejectingReward(null);
+                    setRejectReason('');
+                  }
+                }}
+                disabled={!rejectReason || rejectRewardMutation.isPending}
+              >
+                {rejectRewardMutation.isPending ? 'Rejecting...' : 'Reject Reward'}
               </Button>
             </DialogFooter>
           </DialogContent>

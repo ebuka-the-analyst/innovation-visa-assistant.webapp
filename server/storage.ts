@@ -111,6 +111,7 @@ export interface IStorage {
   getAllPromoCodes(): Promise<PromoCode[]>;
   getActivePromoCodes(): Promise<PromoCode[]>;
   updatePromoCode(id: string, updates: Partial<PromoCode>): Promise<PromoCode | undefined>;
+  deletePromoCode(id: string): Promise<void>;
   incrementPromoCodeUsage(id: string): Promise<void>;
   
   // Promo Redemptions
@@ -629,6 +630,10 @@ export class DatabaseStorage implements IStorage {
   async updatePromoCode(id: string, updates: Partial<PromoCode>): Promise<PromoCode | undefined> {
     const [result] = await db.update(promoCodes).set({ ...updates, updatedAt: new Date() }).where(eq(promoCodes.id, id)).returning();
     return result;
+  }
+
+  async deletePromoCode(id: string): Promise<void> {
+    await db.delete(promoCodes).where(eq(promoCodes.id, id));
   }
 
   async incrementPromoCodeUsage(id: string): Promise<void> {
