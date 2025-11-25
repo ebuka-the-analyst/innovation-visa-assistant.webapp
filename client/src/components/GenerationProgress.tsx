@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Download, CheckCircle, Home, FileText, Mail, Share2, Send, Linkedin, RefreshCw, LayoutDashboard } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Download, CheckCircle, Home, FileText, Mail, Send, Linkedin, RefreshCw, LayoutDashboard, Clock, Lightbulb, BookOpen, Shield, TrendingUp } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -10,19 +11,49 @@ import sterlingAvatar from "@assets/generated_images/sterling_financial_agent_av
 import atlasAvatar from "@assets/generated_images/atlas_growth_agent_avatar.png";
 import sageAvatar from "@assets/generated_images/sage_compliance_agent_avatar.png";
 
-// Helper to determine which agent and avatar to show based on stage text
 const getAgentForStage = (stageText: string) => {
   const stage = stageText.toLowerCase();
-  if (stage.includes('starting') || stage.includes('analyzing')) {
-    return { name: "Nova", avatar: novaAvatar };
-  } else if (stage.includes('building')) {
-    return { name: "Sterling", avatar: sterlingAvatar };
-  } else if (stage.includes('proofreading')) {
-    return { name: "Atlas", avatar: atlasAvatar };
-  } else if (stage.includes('finalizing') || stage.includes('complete')) {
-    return { name: "Sage", avatar: sageAvatar };
+  if (stage.includes('starting') || stage.includes('analyzing') || stage.includes('executive') || stage.includes('founder')) {
+    return { name: "Nova", avatar: novaAvatar, role: "Innovation Analyst" };
+  } else if (stage.includes('building') || stage.includes('financial') || stage.includes('market') || stage.includes('viability')) {
+    return { name: "Sterling", avatar: sterlingAvatar, role: "Financial Strategist" };
+  } else if (stage.includes('proofreading') || stage.includes('scalability') || stage.includes('growth') || stage.includes('team')) {
+    return { name: "Atlas", avatar: atlasAvatar, role: "Growth Expert" };
+  } else if (stage.includes('finalizing') || stage.includes('complete') || stage.includes('regulatory') || stage.includes('compliance') || stage.includes('risk') || stage.includes('endorsing')) {
+    return { name: "Sage", avatar: sageAvatar, role: "Compliance Specialist" };
   }
-  return { name: "Nova", avatar: novaAvatar };
+  return { name: "Nova", avatar: novaAvatar, role: "Innovation Analyst" };
+};
+
+const visaTips = [
+  { icon: Lightbulb, title: "Innovation Tip", text: "Endorsers look for genuinely new ideas that differ from existing market solutions. Highlight what makes your approach unique." },
+  { icon: Shield, title: "Compliance Note", text: "The UK removed the £50,000 minimum investment requirement in April 2023. Focus on demonstrating viable growth potential instead." },
+  { icon: TrendingUp, title: "Scalability Focus", text: "Job creation is a key success metric. Plan to create at least 10 skilled jobs within 3-5 years for a strong application." },
+  { icon: BookOpen, title: "Preparation Tip", text: "Gather supporting documents now: bank statements, letters of intent, market research, and any IP documentation." },
+  { icon: Lightbulb, title: "Endorser Insight", text: "Each endorsing body has different focus areas. Envestors specializes in tech, while others focus on social enterprise or manufacturing." },
+  { icon: Shield, title: "Interview Ready", text: "Endorsers will interview you. Practice explaining your innovation, market opportunity, and growth plans in 2-3 minutes." },
+  { icon: TrendingUp, title: "Financial Clarity", text: "Be prepared to explain your revenue model, customer acquisition costs, and path to profitability with specific numbers." },
+  { icon: BookOpen, title: "Evidence Pack", text: "Strong applications include customer testimonials, pilot results, or letters of support from industry experts." },
+  { icon: Lightbulb, title: "Market Research", text: "Cite credible sources for market size claims. Endorsers verify your TAM/SAM/SOM calculations." },
+  { icon: Shield, title: "Contact Points", text: "Plan 6+ touchpoints with your endorser over 3 years. This ongoing relationship is part of the visa requirements." },
+  { icon: TrendingUp, title: "Team Building", text: "Show a realistic hiring timeline aligned with revenue growth. Premature hiring is a red flag for endorsers." },
+  { icon: BookOpen, title: "IP Strategy", text: "Even if you don't have patents, document your proprietary methods, trade secrets, or unique processes." },
+];
+
+const tierSectionCounts: Record<string, number> = {
+  free: 6,
+  basic: 8,
+  premium: 10,
+  enterprise: 10,
+  ultimate: 14,
+};
+
+const tierPageTargets: Record<string, string> = {
+  free: "10-15",
+  basic: "25-35",
+  premium: "40-60",
+  enterprise: "50-80",
+  ultimate: "80+",
 };
 
 export default function GenerationProgress({ planId }: { planId: string }) {
@@ -30,6 +61,9 @@ export default function GenerationProgress({ planId }: { planId: string }) {
   const [currentStage, setCurrentStage] = useState<string>('Initializing...');
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [tier, setTier] = useState<string>('basic');
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [currentTipIndex, setCurrentTipIndex] = useState<number>(0);
+  const [sectionNumber, setSectionNumber] = useState<number>(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -41,7 +75,6 @@ export default function GenerationProgress({ planId }: { planId: string }) {
         const sessionId = urlParams.get('session_id');
         const isFree = urlParams.get('free') === 'true';
 
-        // Handle free tier - skip payment verification
         if (isFree) {
           localStorage.setItem('trigger-onboarding-tour', 'true');
           await apiRequest('POST', '/api/generate/start', { planId });
@@ -71,10 +104,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
           return;
         }
 
-        // Mark that tour should be triggered after plan activation
-        // This flag will be checked on the dashboard to start the tour
         localStorage.setItem('trigger-onboarding-tour', 'true');
-
         await apiRequest('POST', '/api/generate/start', { planId });
       } catch (error) {
         console.error('Failed to start generation:', error);
@@ -101,6 +131,10 @@ export default function GenerationProgress({ planId }: { planId: string }) {
         
         if (data.currentGenerationStage) {
           setCurrentStage(data.currentGenerationStage);
+          const match = data.currentGenerationStage.match(/Section (\d+)/);
+          if (match) {
+            setSectionNumber(parseInt(match[1]));
+          }
         }
         
         if (data.status === 'completed' && data.pdfUrl) {
@@ -117,84 +151,118 @@ export default function GenerationProgress({ planId }: { planId: string }) {
       } catch (error) {
         console.error('Status poll error:', error);
       }
-    }, 3000);
+    }, 2500);
 
     return () => clearInterval(pollInterval);
   }, [planId, toast]);
 
+  useEffect(() => {
+    if (status !== 'completed' && status !== 'failed') {
+      const timer = setInterval(() => {
+        setElapsedTime(prev => prev + 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [status]);
+
+  useEffect(() => {
+    const tipRotation = setInterval(() => {
+      setCurrentTipIndex(prev => (prev + 1) % visaTips.length);
+    }, 12000);
+    return () => clearInterval(tipRotation);
+  }, []);
+
   const agentInfo = getAgentForStage(currentStage);
+  const totalSections = tierSectionCounts[tier] || 8;
   
-  // Calculate progress based on stage text
-  const calculateProgress = (stage: string): number => {
-    if (stage.includes('Complete')) return 100;
-    if (stage.includes('Finalizing')) return 95;
-    if (stage.includes('Proofreading')) return 75;
-    if (stage.includes('Building')) return 50;
-    if (stage.includes('Analyzing')) return 25;
+  const calculateProgress = (): number => {
+    if (status === 'completed') return 100;
+    if (currentStage.includes('Finalizing') || currentStage.includes('PDF')) return 95;
+    if (sectionNumber > 0) {
+      return Math.min(90, Math.round((sectionNumber / totalSections) * 90) + 5);
+    }
+    if (currentStage.includes('Starting') || currentStage.includes('preparing')) return 5;
     return 10;
   };
   
-  const progress = calculateProgress(currentStage);
+  const progress = calculateProgress();
+  
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getEstimatedRemaining = (): string => {
+    if (progress >= 95) return "Almost there...";
+    if (progress === 0) return "Calculating...";
+    
+    const baseTimePerSection = tier === 'ultimate' ? 45 : tier === 'enterprise' ? 35 : tier === 'premium' ? 30 : 25;
+    const remainingSections = totalSections - sectionNumber;
+    const estimatedSecondsRemaining = remainingSections * baseTimePerSection;
+    
+    if (estimatedSecondsRemaining < 60) return "Less than a minute";
+    const mins = Math.ceil(estimatedSecondsRemaining / 60);
+    return `~${mins} minute${mins > 1 ? 's' : ''} remaining`;
+  };
+
+  const currentTip = visaTips[currentTipIndex];
+  const TipIcon = currentTip.icon;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4 relative overflow-hidden">
-      {/* Animated particles background */}
       <div className="absolute inset-0">
-        {[...Array(50)].map((_, i) => (
+        {[...Array(30)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-primary/30 rounded-full"
+            className="absolute w-1 h-1 bg-primary/20 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animation: `float ${5 + Math.random() * 10}s linear infinite`,
+              animation: `float ${8 + Math.random() * 12}s linear infinite`,
               animationDelay: `${Math.random() * 5}s`,
             }}
           />
         ))}
       </div>
 
-      <div className="relative w-full max-w-2xl">
-        {/* Main progress card */}
-        <div className="bg-card/80 backdrop-blur-xl border border-border rounded-3xl p-12 shadow-2xl">
-          {/* Circular progress with agent avatar */}
-          <div className="flex flex-col items-center mb-12">
-            <div className="relative w-64 h-64 mb-8">
-              {/* SVG circular progress */}
+      <div className="relative w-full max-w-3xl space-y-6">
+        <div className="bg-card/90 backdrop-blur-xl border border-border rounded-3xl p-8 md:p-12 shadow-2xl">
+          <div className="flex flex-col items-center mb-8">
+            <div className="relative w-48 h-48 md:w-56 md:h-56 mb-6">
               <svg className="transform -rotate-90 w-full h-full">
                 <circle
-                  cx="128"
-                  cy="128"
-                  r="120"
+                  cx="50%"
+                  cy="50%"
+                  r="45%"
                   stroke="currentColor"
-                  strokeWidth="8"
+                  strokeWidth="6"
                   fill="none"
                   className="text-muted/20"
                 />
                 <circle
-                  cx="128"
-                  cy="128"
-                  r="120"
-                  stroke="url(#gradient)"
-                  strokeWidth="8"
+                  cx="50%"
+                  cy="50%"
+                  r="45%"
+                  stroke="url(#progressGradient)"
+                  strokeWidth="6"
                   fill="none"
-                  strokeDasharray={`${2 * Math.PI * 120}`}
-                  strokeDashoffset={`${2 * Math.PI * 120 * (1 - progress / 100)}`}
-                  className="transition-all duration-500 ease-out"
+                  strokeDasharray={`${2 * Math.PI * 45}`}
+                  strokeDashoffset={`${2 * Math.PI * 45 * (1 - progress / 100)}`}
+                  className="transition-all duration-700 ease-out"
                   strokeLinecap="round"
                 />
                 <defs>
-                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#11b6e9" />
                     <stop offset="100%" stopColor="#10B981" />
                   </linearGradient>
                 </defs>
               </svg>
 
-              {/* Agent avatar in center */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative">
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-chart-3 p-1 animate-pulse">
+                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary to-chart-3 p-1 animate-pulse">
                     <div className="w-full h-full rounded-full bg-background/10 backdrop-blur-sm flex items-center justify-center overflow-hidden">
                       <img 
                         src={agentInfo.avatar} 
@@ -203,41 +271,53 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                       />
                     </div>
                   </div>
-                  
-                  {/* Percentage */}
-                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-4xl font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
-                    {Math.round(progress)}%
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Current task description - REAL stages from backend */}
-            <div className="text-center">
-              <p className="text-2xl font-semibold mb-2 min-h-[32px]">
-                {currentStage}
-                {status === 'generating' && <span className="animate-pulse">...</span>}
-              </p>
-              <p className="text-muted-foreground">
-                {agentInfo.name} is working on your plan
+            <div className="text-center space-y-2">
+              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
+                {Math.round(progress)}%
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {agentInfo.name} ({agentInfo.role}) is working
               </p>
             </div>
           </div>
 
-          {/* Progress bar */}
-          <Progress value={progress} className="h-2 mb-8" />
+          <div className="space-y-4 mb-8">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Section {sectionNumber || 1} of {totalSections}</span>
+              <span className="text-muted-foreground">{tierPageTargets[tier]} pages</span>
+            </div>
+            <Progress value={progress} className="h-3" />
+            <p className="text-center text-lg font-medium min-h-[28px]">
+              {currentStage}
+              {status === 'generating' && <span className="animate-pulse">...</span>}
+            </p>
+          </div>
 
-          {/* Time estimate or completion */}
+          <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground border-t border-border pt-6">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              <span>Elapsed: {formatTime(elapsedTime)}</span>
+            </div>
+            <div className="h-4 w-px bg-border" />
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              <span>{getEstimatedRemaining()}</span>
+            </div>
+          </div>
+
           {status === 'completed' && pdfUrl ? (
-            <div className="space-y-6">
+            <div className="space-y-6 mt-8 border-t border-border pt-8">
               <div className="flex items-center justify-center gap-2 text-chart-3">
                 <CheckCircle className="w-6 h-6" />
                 <p className="text-lg font-semibold">
-                  {tier === 'ultimate' ? 'Your Ultimate Business Plan Package is Complete!' : 'Business Plan Complete!'}
+                  {tier === 'ultimate' ? 'Your Ultimate Business Plan Package is Complete!' : 'Your Business Plan is Ready!'}
                 </p>
               </div>
               
-              {/* Primary action - Download */}
               <Button
                 size="lg"
                 className="w-full"
@@ -245,16 +325,15 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 data-testid="button-download-pdf"
               >
                 <Download className="w-5 h-5 mr-2" />
-                Download Your Business Plan
+                Download Your {tierPageTargets[tier]} Page Business Plan
               </Button>
 
-              {/* Share & Action Buttons */}
               <div className="grid grid-cols-2 gap-3">
                 <Button
                   variant="outline"
                   onClick={() => {
-                    const subject = `${tier.charAt(0).toUpperCase() + tier.slice(1)} Business Plan - ${pdfUrl.split('/').pop()}`;
-                    const body = `I've generated my UK Innovator Founder Visa business plan using Innovator Founder Visa Assistant.\n\nView it here: ${window.location.origin}${pdfUrl}\n\nBest regards`;
+                    const subject = `${tier.charAt(0).toUpperCase() + tier.slice(1)} Business Plan`;
+                    const body = `I've generated my UK Innovator Founder Visa business plan.\n\nView it here: ${window.location.origin}${pdfUrl}`;
                     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                   }}
                   data-testid="button-share-email"
@@ -266,7 +345,6 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    const text = `Just generated my UK Innovator Founder Visa business plan with Innovator Founder Visa Assistant! 🚀 #InnovationVisa #StartupUK`;
                     const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + pdfUrl)}`;
                     window.open(url, '_blank', 'width=600,height=600');
                   }}
@@ -281,9 +359,9 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                   onClick={() => {
                     toast({
                       title: "Request Revision",
-                      description: "Our team will review your request within 24 hours. Check your email for updates.",
+                      description: "Our team will review your request within 24 hours.",
                     });
-                    window.location.href = `mailto:support@innovatorfoundervisaassistant.co.uk?subject=Revision Request - Plan ${planId}&body=Please describe the changes you'd like to make to your business plan:`;
+                    window.location.href = `mailto:support@innovatorfoundervisaassistant.co.uk?subject=Revision Request - Plan ${planId}`;
                   }}
                   data-testid="button-request-revision"
                 >
@@ -292,11 +370,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 </Button>
                 
                 <Link href="/dashboard" className="w-full">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    data-testid="button-view-dashboard"
-                  >
+                  <Button variant="outline" className="w-full" data-testid="button-view-dashboard">
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     View Dashboard
                   </Button>
@@ -307,22 +381,14 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 <p className="text-sm font-medium text-muted-foreground mb-3 text-center">Quick Actions</p>
                 <div className="space-y-2">
                   <Link href="/questionnaire">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      data-testid="button-create-another"
-                    >
+                    <Button variant="outline" className="w-full justify-start" data-testid="button-create-another">
                       <FileText className="w-4 h-4 mr-2" />
                       Create Another Business Plan
                     </Button>
                   </Link>
                   
                   <Link href="/">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      data-testid="button-home"
-                    >
+                    <Button variant="outline" className="w-full justify-start" data-testid="button-home">
                       <Home className="w-4 h-4 mr-2" />
                       Return to Home
                     </Button>
@@ -331,7 +397,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                   <Button
                     variant="outline"
                     className="w-full justify-start"
-                    onClick={() => window.location.href = 'mailto:support@innovatorfoundervisaassistant.co.uk?subject=Business%20Plan%20Support'}
+                    onClick={() => window.location.href = 'mailto:support@innovatorfoundervisaassistant.co.uk'}
                     data-testid="button-support"
                   >
                     <Mail className="w-4 h-4 mr-2" />
@@ -351,8 +417,8 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 <div className="text-xs text-muted-foreground space-y-1">
                   {tier === 'free' && (
                     <>
-                      <p className="text-center">✓ 10-15 page business plan</p>
-                      <p className="text-center">✓ 13 essential tools</p>
+                      <p className="text-center">10-15 page business plan</p>
+                      <p className="text-center">13 essential tools</p>
                       <p className="text-center text-foreground font-medium mt-2">
                         Upgrade to Basic for 25-35 pages and 20 tools.
                       </p>
@@ -360,38 +426,35 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                   )}
                   {tier === 'basic' && (
                     <>
-                      <p className="text-center">✓ 25-35 page business plan</p>
-                      <p className="text-center">✓ 20 tools total</p>
-                      <p className="text-center">✓ 1 revision included</p>
-                      <p className="text-center text-foreground font-medium mt-2">
-                        Need more? Upgrade to Premium for 40-60 pages and 83 tools.
-                      </p>
+                      <p className="text-center">25-35 page business plan</p>
+                      <p className="text-center">20 tools total</p>
+                      <p className="text-center">1 revision included</p>
                     </>
                   )}
                   {tier === 'premium' && (
                     <>
-                      <p className="text-center">✓ 40-60 page business plan</p>
-                      <p className="text-center">✓ 83 tools total</p>
-                      <p className="text-center">✓ 3 revisions included</p>
-                      <p className="text-center">✓ Endorsing body selection guidance</p>
+                      <p className="text-center">40-60 page business plan</p>
+                      <p className="text-center">83 tools total</p>
+                      <p className="text-center">3 revisions included</p>
+                      <p className="text-center">Endorsing body selection guidance</p>
                     </>
                   )}
                   {tier === 'enterprise' && (
                     <>
-                      <p className="text-center">✓ 50-80 page business plan</p>
-                      <p className="text-center">✓ All 109 tools</p>
-                      <p className="text-center">✓ Unlimited revisions</p>
-                      <p className="text-center">✓ IP & patent strategy included</p>
+                      <p className="text-center">50-80 page business plan</p>
+                      <p className="text-center">All 109 tools</p>
+                      <p className="text-center">Unlimited revisions</p>
+                      <p className="text-center">IP & patent strategy included</p>
                     </>
                   )}
                   {tier === 'ultimate' && (
                     <>
-                      <p className="text-center">✓ 80+ page comprehensive business plan</p>
-                      <p className="text-center">✓ All 109 tools + VIP support</p>
-                      <p className="text-center">✓ RFE Defense Strategy included</p>
-                      <p className="text-center">✓ Appeal Strategy & Success Coaching</p>
-                      <p className="text-center">✓ Personal strategist access</p>
-                      <p className="text-center">✓ Success guarantee</p>
+                      <p className="text-center">80+ page comprehensive business plan</p>
+                      <p className="text-center">All 109 tools + VIP support</p>
+                      <p className="text-center">RFE Defense Strategy included</p>
+                      <p className="text-center">Appeal Strategy & Success Coaching</p>
+                      <p className="text-center">Personal strategist access</p>
+                      <p className="text-center">Success guarantee</p>
                     </>
                   )}
                 </div>
@@ -400,21 +463,43 @@ export default function GenerationProgress({ planId }: { planId: string }) {
               <div className="bg-primary/10 rounded-lg p-4 mt-3">
                 <p className="text-xs text-muted-foreground text-center">
                   <strong className="text-foreground">Next Steps for Your Visa:</strong><br />
-                  Review your business plan, gather supporting evidence (letters of support, financial documents, patent applications), and submit to your chosen endorsing body.
+                  Review your business plan, gather supporting evidence, and submit to your chosen endorsing body.
                 </p>
               </div>
             </div>
-          ) : (
-            <div className="text-center text-sm text-muted-foreground">
-              <p>Estimated time: {tier === 'ultimate' ? '8-12' : tier === 'enterprise' ? '6-8' : tier === 'premium' ? '5-7' : '3-5'} minutes</p>
-              <p className="text-xs mt-1">
-                {tier === 'ultimate' 
-                  ? 'Generating your comprehensive 80+ page Ultimate business plan package...' 
-                  : "We're generating a comprehensive business plan tailored to your needs"}
-              </p>
-            </div>
-          )}
+          ) : null}
         </div>
+
+        {status !== 'completed' && status !== 'failed' && (
+          <Card className="bg-card/80 backdrop-blur-xl border border-border p-6">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/10 rounded-full shrink-0">
+                <TipIcon className="w-5 h-5 text-primary" />
+              </div>
+              <div className="space-y-1 min-h-[60px]">
+                <p className="font-medium text-sm">{currentTip.title}</p>
+                <p className="text-sm text-muted-foreground">{currentTip.text}</p>
+              </div>
+            </div>
+            <div className="flex justify-center gap-1.5 mt-4">
+              {visaTips.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                    idx === currentTipIndex ? 'bg-primary' : 'bg-muted'
+                  }`}
+                />
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {status !== 'completed' && status !== 'failed' && (
+          <div className="text-center text-xs text-muted-foreground space-y-1">
+            <p>Your {tier.charAt(0).toUpperCase() + tier.slice(1)} plan is being crafted with care.</p>
+            <p>Please keep this page open. You'll be notified when it's ready.</p>
+          </div>
+        )}
       </div>
 
       <style>{`
@@ -424,13 +509,13 @@ export default function GenerationProgress({ planId }: { planId: string }) {
             opacity: 0;
           }
           10% {
-            opacity: 1;
+            opacity: 0.5;
           }
           90% {
-            opacity: 1;
+            opacity: 0.5;
           }
           100% {
-            transform: translateY(-100px) translateX(${Math.random() * 100 - 50}px);
+            transform: translateY(-100px) translateX(${Math.random() * 50 - 25}px);
             opacity: 0;
           }
         }
