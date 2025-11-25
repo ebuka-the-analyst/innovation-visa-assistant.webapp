@@ -95,7 +95,7 @@ export default function EverythingWeOfferSection() {
               { icon: "TrendingUp", title: "Growth Planning", desc: "Scalability roadmaps and market expansion" },
               { icon: "Users", title: "Team Scaling", desc: "Hiring plans and organizational structure" },
               { icon: "Award", title: "Endorser Comparison", desc: "Compare and select best endorsement body" },
-              { icon: "BarChart3", title: "Application Diagnostics", desc: "Real-time readiness scoring (88% benchmark)" },
+              { icon: "BarChart3", title: "Application Diagnostics", desc: "Real-time readiness scoring with comprehensive analysis" },
             ].map((feature, idx) => (
               <Card key={idx} className="p-5 hover-elevate" data-testid={`card-feature-home-${idx}`}>
                 <div className="flex gap-3">
