@@ -18,8 +18,16 @@ import Footer from "@/components/Footer";
 import { useTierAccess, type ToolTier } from "@/hooks/useTierAccess";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createBreadcrumbSchema } from "@/lib/seo-schemas";
+import { SoftUpgradeOverlay } from "@/components/SoftUpgradeOverlay";
 
 type IconName = keyof typeof Icons;
+
+interface LockedToolInfo {
+  id: string;
+  name: string;
+  description: string;
+  tier: ToolTier;
+}
 
 export default function ToolsHub() {
   const [, setLocation] = useLocation();
@@ -27,8 +35,23 @@ export default function ToolsHub() {
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [stageFilter, setStageFilter] = useState<string>("");
   const [tierFilter, setTierFilter] = useState<string>("");
+  const [lockedToolInfo, setLockedToolInfo] = useState<LockedToolInfo | null>(null);
 
   const { canAccessTool, userTier } = useTierAccess();
+
+  const handleToolClick = (tool: Tool) => {
+    const hasAccess = canAccessTool(tool.tier as ToolTier);
+    if (hasAccess) {
+      setLocation(`/tools/${tool.id}`);
+    } else {
+      setLockedToolInfo({
+        id: tool.id,
+        name: tool.name,
+        description: tool.description,
+        tier: tool.tier as ToolTier,
+      });
+    }
+  };
 
   const filteredTools = useMemo(() => {
     return ALL_TOOLS.filter((tool) => {
@@ -218,10 +241,10 @@ export default function ToolsHub() {
                 return (
                   <Card
                     key={tool.id}
-                    onClick={() => setLocation(`/tools/${tool.id}`)}
+                    onClick={() => handleToolClick(tool)}
                     className={`p-6 hover-elevate cursor-pointer transition-all border-2 relative ${
                       tierColors[tool.tier as keyof typeof tierColors]
-                    } ${!hasAccess ? 'opacity-75' : ''}`}
+                    } ${!hasAccess ? 'opacity-80' : ''}`}
                     data-testid={`card-tool-${tool.id}`}
                   >
                     {!hasAccess && (
@@ -310,6 +333,15 @@ export default function ToolsHub() {
         </div>
       </div>
       <Footer />
+
+      <SoftUpgradeOverlay
+        isOpen={!!lockedToolInfo}
+        onClose={() => setLockedToolInfo(null)}
+        requiredTier={lockedToolInfo?.tier || "free"}
+        toolName={lockedToolInfo?.name || ""}
+        toolDescription={lockedToolInfo?.description}
+        userTier={userTier}
+      />
     </>
   );
 }
