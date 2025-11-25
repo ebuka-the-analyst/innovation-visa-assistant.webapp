@@ -117,18 +117,18 @@ export default function EverythingWeOfferSection() {
           <h3 className="text-2xl font-bold mb-8">5 Pricing Tiers</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
             {[
-              { name: "Free", price: "£0", color: "bg-gray-50", tools: "10" },
-              { name: "Basic", price: "£49", color: "bg-blue-50", tools: "30" },
-              { name: "Premium", price: "£99", color: "bg-purple-50", tools: "60+", popular: true },
-              { name: "Enterprise", price: "£199", color: "bg-orange-50", tools: "82+" },
-              { name: "Ultimate", price: "£299", color: "bg-amber-50", tools: "All 100+", premium: true },
+              { name: "Free", price: "£0", color: "bg-gray-50", access: "Essential" },
+              { name: "Basic", price: "£49", color: "bg-blue-50", access: "Extended" },
+              { name: "Premium", price: "£99", color: "bg-purple-50", access: "Comprehensive", popular: true },
+              { name: "Enterprise", price: "£199", color: "bg-orange-50", access: "Full" },
+              { name: "Ultimate", price: "£299", color: "bg-amber-50", access: "Complete 100+", premium: true },
             ].map((tier, idx) => (
               <Card key={idx} className={`p-4 text-center hover-elevate border-2 ${tier.color}`} data-testid={`tier-card-${idx}`}>
-                {tier.popular && <div className="text-xs font-bold text-purple-600 mb-2">⭐ Most Popular</div>}
-                {tier.premium && <div className="text-xs font-bold text-amber-600 mb-2">👑 Everything</div>}
+                {tier.popular && <div className="text-xs font-bold text-purple-600 mb-2">Most Popular</div>}
+                {tier.premium && <div className="text-xs font-bold text-amber-600 mb-2">Everything</div>}
                 <h4 className="font-semibold">{tier.name}</h4>
                 <div className="text-lg font-bold text-primary my-1">{tier.price}</div>
-                <p className="text-xs text-muted-foreground">{tier.tools} tools</p>
+                <p className="text-xs text-muted-foreground">{tier.access} access</p>
               </Card>
             ))}
           </div>

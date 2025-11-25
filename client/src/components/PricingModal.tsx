@@ -86,7 +86,7 @@ const tiers = [
     pages: "80+ pages",
     features: [
       "All Enterprise features",
-      "Complete access to all 100+ tools",
+      "Complete access to 100+ professional-level tools",
       "24/7 VIP support",
       "Personal visa strategist",
       "Unlimited revisions",

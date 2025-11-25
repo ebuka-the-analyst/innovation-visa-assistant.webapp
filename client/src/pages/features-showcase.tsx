@@ -112,19 +112,19 @@ export default function FeaturesShowcase() {
             <h2 className="text-3xl font-bold mb-8">Simple, Transparent Pricing</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {[
-                { name: "Free", price: "£0", color: "bg-gray-50", tools: "10", pages: "10-15" },
-                { name: "Basic", price: "£49", color: "bg-blue-50", tools: "30", pages: "25-35" },
-                { name: "Premium", price: "£99", color: "bg-purple-50", tools: "60+", pages: "40-60", popular: true },
-                { name: "Enterprise", price: "£199", color: "bg-orange-50", tools: "82+", pages: "50-80" },
-                { name: "Ultimate", price: "£299", color: "bg-amber-50", tools: "All 100+", pages: "80+", premium: true },
+                { name: "Free", price: "£0", color: "bg-gray-50", access: "Essential", pages: "10-15" },
+                { name: "Basic", price: "£49", color: "bg-blue-50", access: "Extended", pages: "25-35" },
+                { name: "Premium", price: "£99", color: "bg-purple-50", access: "Comprehensive", pages: "40-60", popular: true },
+                { name: "Enterprise", price: "£199", color: "bg-orange-50", access: "Full", pages: "50-80" },
+                { name: "Ultimate", price: "£299", color: "bg-amber-50", access: "Complete 100+", pages: "80+", premium: true },
               ].map((tier, idx) => (
                 <Card key={idx} className={`p-6 hover-elevate border-2 ${tier.color} ${tier.premium ? "border-amber-300 shadow-lg" : ""}`} data-testid={`card-tier-${idx}`}>
-                  {tier.popular && <div className="mb-3 text-xs font-bold text-purple-600">⭐ MOST POPULAR</div>}
-                  {tier.premium && <div className="mb-3 text-xs font-bold text-amber-600">👑 EVERYTHING</div>}
+                  {tier.popular && <div className="mb-3 text-xs font-bold text-purple-600">MOST POPULAR</div>}
+                  {tier.premium && <div className="mb-3 text-xs font-bold text-amber-600">EVERYTHING</div>}
                   <h3 className="font-bold text-lg mb-1">{tier.name}</h3>
                   <div className="text-2xl font-bold mb-4">{tier.price}</div>
                   <div className="space-y-2 text-sm mb-4">
-                    <div><span className="font-semibold">{tier.tools}</span> tools</div>
+                    <div><span className="font-semibold">{tier.access}</span> access</div>
                     <div><span className="font-semibold">{tier.pages}</span> plan</div>
                   </div>
                   <Link href="/pricing">

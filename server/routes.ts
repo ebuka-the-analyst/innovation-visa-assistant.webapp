@@ -1039,20 +1039,35 @@ ${generatedSections.join('\n\n---\n\n')}`;
   });
 
   // Tool Analytics Logging API - Track tool access for admin dashboard
+  // Note: Intentionally allows anonymous tracking to capture all user engagement
+  const toolAnalyticsSchema = z.object({
+    toolId: z.string().min(1).max(100).trim(),
+    action: z.enum(['access', 'save', 'export', 'share', 'upload', 'download']).default('access'),
+  });
+  
   app.post("/api/analytics/tool-access", async (req, res) => {
     try {
-      const { toolId, action = 'access' } = req.body;
-      const user = req.user as any;
-      
-      if (!toolId) {
-        return res.status(400).json({ error: "toolId is required" });
+      // Validate request body with Zod schema
+      const parseResult = toolAnalyticsSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          error: "Invalid request body", 
+          details: parseResult.error.issues.map(i => i.message).join(', ')
+        });
       }
+      
+      const { toolId, action } = parseResult.data;
+      const user = req.user as any;
       
       await storage.createToolAnalytic({
         userId: user?.id || null,
         toolId,
         action,
-        metadata: { userAgent: req.headers['user-agent'], timestamp: new Date().toISOString() },
+        metadata: { 
+          userAgent: req.headers['user-agent']?.substring(0, 500), 
+          timestamp: new Date().toISOString(),
+          authenticated: !!user 
+        },
       });
       
       res.json({ success: true });

@@ -103,7 +103,7 @@ export default function TermsOfService() {
                     <li><strong>Basic (£29):</strong> Extended tools access</li>
                     <li><strong>Premium (£49):</strong> Comprehensive tools access (Most Popular)</li>
                     <li><strong>Enterprise (£89):</strong> Full tools access</li>
-                    <li><strong>Ultimate (£129):</strong> Complete access to all 100+ tools + VIP support</li>
+                    <li><strong>Ultimate (£129):</strong> Complete access to 100+ professional-level tools + VIP support</li>
                   </ul>
 
                   <h3 className="font-semibold mb-2">4.2 Payment Terms</h3>
