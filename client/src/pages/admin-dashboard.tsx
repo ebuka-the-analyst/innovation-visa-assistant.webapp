@@ -754,7 +754,25 @@ export default function AdminDashboard() {
   }
 
   if (!user || !user.isAdmin) {
-    return null;
+    return (
+      <motion.div
+        className="min-h-screen flex items-center justify-center bg-background"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <div className="text-center">
+          <Shield className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Admin Access Required</h2>
+          <p className="text-muted-foreground mb-4">Redirecting to home page...</p>
+          <motion.div
+            className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+        </div>
+      </motion.div>
+    );
   }
 
   const rowSpacing = dataDensity === 'compact' ? 'py-2' : dataDensity === 'comfortable' ? 'py-3' : 'py-4';
