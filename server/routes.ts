@@ -1467,10 +1467,10 @@ ${generatedSections.join('\n\n---\n\n')}`;
   // User Management Endpoints
   app.get("/api/admin/users", requireAdmin, async (req, res) => {
     try {
-      const { page = '1', limit = '20', search = '', tier = '' } = req.query;
+      const { page = '1', pageSize = '20', search = '', tier = '', tierFilters, verified } = req.query;
       
       const pageNum = parseInt(page as string);
-      const limitNum = parseInt(limit as string);
+      const limitNum = parseInt(pageSize as string) || 20;
       const offset = (pageNum - 1) * limitNum;
       
       let allUsers = await storage.getAllUsers();
@@ -1485,10 +1485,29 @@ ${generatedSections.join('\n\n---\n\n')}`;
         );
       }
       
-      // Filter by tier
+      // Filter by single tier
       if (tier) {
         allUsers = allUsers.filter(u => u.subscriptionTier === tier);
       }
+      
+      // Filter by multiple tiers (for Active Users view - premium tiers)
+      if (tierFilters) {
+        const tiers = Array.isArray(tierFilters) ? tierFilters : [tierFilters];
+        allUsers = allUsers.filter(u => tiers.includes(u.subscriptionTier || 'free'));
+      }
+      
+      // Filter by verified status (for New Registrations - unverified users)
+      if (verified !== undefined) {
+        const isVerifiedParam = verified === 'true';
+        allUsers = allUsers.filter(u => u.isEmailVerified === isVerifiedParam);
+      }
+      
+      // Sort by createdAt descending (newest first) for new registrations
+      allUsers.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
       
       const total = allUsers.length;
       const users = allUsers.slice(offset, offset + limitNum);
@@ -1498,6 +1517,9 @@ ${generatedSections.join('\n\n---\n\n')}`;
       
       res.json({
         users: safeUsers,
+        total,
+        page: pageNum,
+        pageSize: limitNum,
         pagination: {
           page: pageNum,
           limit: limitNum,
