@@ -140,7 +140,7 @@ export const insertBusinessPlanSchema = createInsertSchema(businessPlans).omit({
 });
 
 export const questionnaireSchema = z.object({
-  tier: z.enum(['basic', 'premium', 'enterprise']),
+  tier: z.enum(['free', 'basic', 'premium', 'enterprise', 'ultimate']),
   businessName: z.string().min(1, "Business name is required"),
   industry: z.string().min(1, "Industry is required"),
   problem: z.string().min(10, "Please provide more detail about the problem"),
