@@ -101,8 +101,13 @@ import {
   Ban,
   ToggleLeft,
   ToggleRight,
-  Globe
+  Globe,
+  LogOut
 } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
+import { Link } from "wouter";
+import logoLightImg from "@assets/official_logo.png";
+import logoDarkImg from "@assets/logo_dark.png";
 import {
   BarChart as RechartsBarChart,
   Bar,
@@ -935,6 +940,22 @@ export default function AdminDashboard() {
     },
   });
 
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/auth/logout', {});
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.clear();
+      if (data?.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        setLocation("/login");
+      }
+    },
+  });
+
   // Manual refresh handler
   const handleManualRefresh = useCallback(async () => {
     toast({ title: "Refreshing data..." });
@@ -1058,15 +1079,45 @@ export default function AdminDashboard() {
           />
           
           <SidebarInset className="flex-1 overflow-auto">
+            {/* Top Header Bar with Logo, Theme Toggle, Logout */}
+            <header className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 sticky top-0">
+              <SidebarTrigger data-testid="button-admin-sidebar-toggle" />
+              
+              <Link href="/">
+                <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-admin-logo">
+                  <div className="logo-container overflow-hidden flex items-center">
+                    <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-light object-contain" loading="lazy" />
+                    <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-dark object-contain" loading="lazy" />
+                  </div>
+                </div>
+              </Link>
+              
+              <div className="flex-1" />
+              
+              <span className="text-sm text-muted-foreground hidden md:inline">{user?.email}</span>
+              
+              <ThemeToggle />
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+                data-testid="button-admin-logout"
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
+            </header>
+            
             <div className="min-h-screen bg-background">
               <div className="p-6 space-y-6">
-                {/* Header */}
+                {/* Section Header */}
                 <div className="relative overflow-hidden rounded-lg border border-border/50 bg-card/80 backdrop-blur-sm p-4">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
                   
                   <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex items-center gap-4">
-                      <SidebarTrigger className="md:hidden" />
                       <div>
                         <h1 className="text-2xl font-bold tracking-tight" data-testid="heading-admin-dashboard">
                           {getSectionTitle()}
