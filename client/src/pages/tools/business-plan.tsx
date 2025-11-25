@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,8 @@ import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, AlertTriangle, TrendingUp, Calendar } from "lucide-react";
+import { CheckCircle2, AlertTriangle, TrendingUp, Calendar, Save } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer
@@ -39,6 +40,10 @@ type MilestoneData = {
 };
 
 export default function BusinessPlan() {
+  const { toast } = useToast();
+  const [showAutoSaveNotification, setShowAutoSaveNotification] = useState(false);
+  const lastSaveRef = useRef<string>('');
+  
   const [sections, setSections] = useState<BusinessPlanSection[]>([
     {
       id: 'executive-summary',
@@ -182,14 +187,31 @@ export default function BusinessPlan() {
     if (saved) {
       const state = JSON.parse(saved);
       restoreSerializedState(state);
+      lastSaveRef.current = saved;
     }
   }, []);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     const state = getSerializedState();
-    localStorage.setItem('business-plan-state', JSON.stringify(state));
+    const stateString = JSON.stringify(state);
+    localStorage.setItem('business-plan-state', stateString);
     setSavedDate(state.savedDate);
-  };
+    lastSaveRef.current = stateString;
+    return true;
+  }, [sections, milestones, activeTab]);
+
+  useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      const currentState = JSON.stringify(getSerializedState());
+      if (currentState !== lastSaveRef.current) {
+        handleSave();
+        setShowAutoSaveNotification(true);
+        setTimeout(() => setShowAutoSaveNotification(false), 3000);
+      }
+    }, 30000);
+
+    return () => clearInterval(autoSaveInterval);
+  }, [handleSave]);
 
   const handleRestore = () => {
     const saved = localStorage.getItem('business-plan-state');
@@ -367,6 +389,17 @@ qualified legal and immigration advisors before submitting visa applications.
         schema={combinedSchema}
       />
       <AuthHeader />
+      
+      {showAutoSaveNotification && (
+        <div 
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg animate-in slide-in-from-bottom-5 duration-300"
+          data-testid="notification-autosave"
+        >
+          <Save className="h-4 w-4" />
+          <span className="text-sm font-medium">Your work has been saved</span>
+        </div>
+      )}
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         <div className="max-w-7xl mx-auto">
           <ToolNavigation />
