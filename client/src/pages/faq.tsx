@@ -16,7 +16,7 @@ const faqs = [
       },
       {
         q: "What are the key requirements for the Innovator Founder Visa?",
-        a: "Key requirements include: (1) A genuine, innovative business idea that is viable and scalable. (2) Endorsement from an approved endorsing body confirming your business meets innovation, viability, and scalability criteria. (3) £50,000 investment funds unless you've been endorsed by the same body before. (4) English language proficiency at B2 level (CEFR). (5) Sufficient maintenance funds (£1,270 for 28 consecutive days). (6) Intent to work only on your endorsed business."
+        a: "Key requirements include: (1) A genuine, innovative business idea that is viable and scalable. (2) Endorsement from an approved endorsing body confirming your business meets innovation, viability, and scalability criteria. (3) Access to sufficient funds to establish and run your business (no fixed minimum amount required). (4) English language proficiency at B2 level (CEFR). (5) Sufficient maintenance funds (£1,270 for 28 consecutive days). (6) Intent to work only on your endorsed business."
       },
       {
         q: "How much does the UK Innovator Founder Visa cost?",
@@ -57,8 +57,8 @@ const faqs = [
     category: "Business Requirements",
     questions: [
       {
-        q: "Do I need £50,000 to invest in my business?",
-        a: "Yes, you must have access to at least £50,000 investment funds, unless you've received endorsement from the same endorsing body for a previous UK business visa. The funds can come from your own savings, third-party investment, or a combination. You must provide evidence that funds are available, held in a regulated financial institution, and freely transferable to the UK. You don't need to spend all £50,000 immediately - the requirement is having access to these funds."
+        q: "Is there a minimum investment amount required?",
+        a: "No, the Innovator Founder Visa (since April 2023) has NO fixed minimum investment requirement. Unlike the previous Innovator visa which required £50,000, you now only need to demonstrate sufficient funds to establish and operate your business as outlined in your business plan. The endorsing body will assess whether your funding is realistic for your specific business. You must still show £1,270 in personal maintenance funds held for 28 consecutive days."
       },
       {
         q: "Can I work for another company while on the Innovator Founder Visa?",
@@ -79,11 +79,11 @@ const faqs = [
     questions: [
       {
         q: "What financial documents do I need to provide?",
-        a: "Key financial documents include: (1) Bank statements showing £50,000 investment funds for 28+ days. (2) Maintenance funds evidence (£1,270 for 28 days). (3) Financial projections for 3-5 years. (4) Evidence of funding sources (savings, investment agreements, grants). (5) Business plan with detailed budget. (6) Personal bank statements. (7) Tax returns if applicable. All documents must be in English or professionally translated."
+        a: "Key financial documents include: (1) Bank statements showing sufficient investment funds for your business plan held for 28+ days. (2) Maintenance funds evidence (£1,270 for 28 days). (3) Financial projections for 3-5 years. (4) Evidence of funding sources (savings, investment agreements, grants). (5) Business plan with detailed budget. (6) Personal bank statements. (7) Tax returns if applicable. All documents must be in English or professionally translated."
       },
       {
         q: "Can I use investor funds instead of my own money?",
-        a: "Yes, you can use third-party investment to meet the £50,000 requirement. Investment can come from: (1) Angel investors or venture capital. (2) UK government grants. (3) Peer-to-peer lending platforms. (4) Corporate investment. (5) Friends and family. You must provide: investment agreements, proof funds are available, confirmation they're for your specific business, and evidence the investor is legitimate. The endorsing body will assess whether the investment is realistic."
+        a: "Yes, you can use third-party investment to fund your business. Investment can come from: (1) Angel investors or venture capital. (2) UK government grants. (3) Peer-to-peer lending platforms. (4) Corporate investment. (5) Friends and family. You must provide: investment agreements, proof funds are available, confirmation they're for your specific business, and evidence the investor is legitimate. The endorsing body will assess whether the investment is realistic for your business plan."
       },
       {
         q: "How should I structure my financial projections?",
@@ -100,7 +100,7 @@ const faqs = [
       },
       {
         q: "How do I extend my Innovator Founder Visa?",
-        a: "To extend your visa, you need: (1) Fresh endorsement from an approved body (can be different from original). (2) Evidence your business is making progress. (3) Continued compliance with visa conditions. (4) Meeting financial requirements. (5) English language and maintenance funds. Extensions are granted for 3 years at a time. You do NOT need another £50,000 for extensions if using the same endorsing body."
+        a: "To extend your visa, you need: (1) Fresh endorsement from an approved body (can be different from original). (2) Evidence your business is making progress. (3) Continued compliance with visa conditions. (4) Meeting financial requirements. (5) English language and maintenance funds. Extensions are granted for 3 years at a time. You must demonstrate continued business viability and progress toward your original business plan."
       },
       {
         q: "Can my family join me on this visa?",

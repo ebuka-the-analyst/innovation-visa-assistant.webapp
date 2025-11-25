@@ -47,7 +47,7 @@ const FAQ_CATEGORIES = [
     questions: [
       {
         q: "What are the main requirements for the Innovator Founder Visa?",
-        a: "Key requirements include: endorsement from an approved body, business idea that is innovative, viable, and scalable, minimum £50,000 investment funds, and English language proficiency at B2 level."
+        a: "Key requirements include: endorsement from an approved body, business idea that is innovative, viable, and scalable, sufficient funds to establish your business (no fixed minimum), £1,270 personal maintenance funds, and English language proficiency at B2 level."
       },
       {
         q: "How long does the visa process take?",

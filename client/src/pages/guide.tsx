@@ -176,14 +176,14 @@ export default function Guide() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <DollarSign className="w-6 h-6 text-primary" />
-                    2. £50,000 Investment Funds
+                    2. Business Funding (No Fixed Minimum)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-muted-foreground">
                   <p>
-                    You must have access to at least <strong>£50,000</strong> in investment funds to invest in your UK business. This requirement is waived if you have been endorsed by the same endorsing body for a previous UK business visa.
+                    <strong>Important Update (April 2023):</strong> The Innovator Founder Visa has <strong>NO fixed minimum investment requirement</strong>. Unlike the previous Innovator visa which required £50,000, you now only need to demonstrate sufficient funds to establish and operate your business as outlined in your business plan.
                   </p>
-                  <p><strong>Acceptable sources:</strong></p>
+                  <p><strong>Acceptable funding sources:</strong></p>
                   <ul className="list-disc pl-6 space-y-1">
                     <li>Personal savings held for 28+ consecutive days</li>
                     <li>Third-party investment (venture capital, angel investors)</li>
@@ -192,7 +192,7 @@ export default function Guide() {
                     <li>Corporate investment or strategic partnerships</li>
                   </ul>
                   <p className="italic bg-accent/20 p-3 rounded">
-                    <strong>Important:</strong> Funds must be held in a regulated financial institution, be freely transferable to the UK, and you must provide evidence of the source of funds. The endorsing body will verify the investment is realistic and aligned with your business plan.
+                    <strong>Practical guidance:</strong> While there's no fixed minimum, most endorsing bodies expect £50,000-£100,000 for credible business development and viability. Funds must be held in a regulated financial institution, be freely transferable to the UK, and you must provide evidence of the source. The endorsing body will assess whether your funding is realistic for your specific business plan.
                   </p>
                 </CardContent>
               </Card>
@@ -232,7 +232,7 @@ export default function Guide() {
                     You must show you have <strong>£1,270</strong> in personal savings, held for 28 consecutive days before your application. This demonstrates you can support yourself when you arrive in the UK without relying on public funds.
                   </p>
                   <p>
-                    This is separate from the £50,000 investment funds—so you need access to at least £51,270 total (unless you've been in the UK with valid leave for 12+ months).
+                    This is separate from your business investment funds. If you've been in the UK with valid leave for 12+ months, this requirement is waived.
                   </p>
                 </CardContent>
               </Card>
@@ -512,20 +512,21 @@ export default function Guide() {
                 
                 <div className="grid gap-4">
                   <div className="bg-primary/10 p-4 rounded">
-                    <h3 className="text-xl font-bold mb-2">Total Investment Required:</h3>
+                    <h3 className="text-xl font-bold mb-2">Visa & Administrative Costs:</h3>
                     <ul className="space-y-2">
                       <li className="flex justify-between"><span>Visa application fee (outside UK):</span><strong>£1,191</strong></li>
                       <li className="flex justify-between"><span>Visa application fee (inside UK):</span><strong>£1,486</strong></li>
                       <li className="flex justify-between"><span>Immigration Health Surcharge (3 years):</span><strong>£3,105</strong></li>
                       <li className="flex justify-between"><span>Endorsement body fee:</span><strong>£1,000 - £3,000</strong></li>
-                      <li className="flex justify-between"><span>Business investment funds:</span><strong>£50,000</strong></li>
+                      <li className="flex justify-between"><span>Business investment funds:</span><strong>No fixed minimum*</strong></li>
                       <li className="flex justify-between"><span>Maintenance funds:</span><strong>£1,270</strong></li>
                       <li className="flex justify-between"><span>Legal/consulting fees (optional):</span><strong>£4,000 - £13,000</strong></li>
                       <li className="border-t-2 border-primary pt-2 mt-2 flex justify-between text-lg">
-                        <span className="font-bold">Estimated Total:</span>
-                        <strong>£60,566 - £71,052</strong>
+                        <span className="font-bold">Estimated Admin Total:</span>
+                        <strong>£7,000 - £21,000</strong>
                       </li>
                     </ul>
+                    <p className="text-sm mt-2 italic">*Business funding assessed by endorsing body based on your specific business plan. Most expect £50,000-£100,000 for credibility.</p>
                   </div>
 
                   <div>
