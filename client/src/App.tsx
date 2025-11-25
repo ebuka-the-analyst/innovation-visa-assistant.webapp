@@ -76,6 +76,7 @@ const TemplateLibrary = lazy(() => import("@/pages/template-library"));
 const DocumentReviewPage = lazy(() => import("@/pages/document-review"));
 const SuccessStories = lazy(() => import("@/pages/success-stories"));
 const CalendarSync = lazy(() => import("@/pages/calendar-sync"));
+const News = lazy(() => import("@/pages/news"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
@@ -202,6 +203,7 @@ function Router() {
       <Route path="/document-review" component={DocumentReviewPage} />
       <Route path="/success-stories" component={SuccessStories} />
       <Route path="/calendar" component={CalendarSync} />
+      <Route path="/news" component={News} />
       <Route path="/interview-prep" component={InterviewPrep} />
       <Route path="/faq" component={FAQ} />
       <Route path="/guide" component={Guide} />

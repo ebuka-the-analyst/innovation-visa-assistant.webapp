@@ -40,6 +40,7 @@ import {
   Sparkles,
   Trophy,
   CalendarDays,
+  Newspaper,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -248,6 +249,13 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           url: "/success-stories",
           icon: Award,
           description: "Real visa success cases",
+        },
+        {
+          title: "Immigration News",
+          url: "/news",
+          icon: Newspaper,
+          description: "Live UK visa news updates",
+          badge: "LIVE",
         },
         {
           title: "Calendar & Deadlines",
