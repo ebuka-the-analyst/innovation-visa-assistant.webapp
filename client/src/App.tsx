@@ -56,6 +56,7 @@ import ReferralDashboard from "@/pages/referral-dashboard";
 import Progress from "@/pages/progress";
 import Support from "@/pages/support";
 import Documents from "@/pages/documents";
+import ToolPage from "@/pages/tool-page";
 
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies"];
 
@@ -112,6 +113,7 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/data-manager" component={DataModal} />
       <Route path="/tools-hub" component={ToolsHub} />
+      <Route path="/tools/:toolId" component={ToolPage} />
       <Route path="/features" component={FeaturesShowcase} />
       <Route path="/endorser-investment" component={EndorserInvestmentRequirements} />
       <Route path="/ai-assistant" component={AIAssistant} />
