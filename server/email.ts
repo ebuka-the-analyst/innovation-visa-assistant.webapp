@@ -685,6 +685,217 @@ export async function sendWeeklyProgressEmail(
 }
 
 // ============================================
+// DEADLINE REMINDER NOTIFICATIONS
+// ============================================
+
+export async function sendDeadlineReminderEmail(
+  email: string,
+  firstName: string,
+  deadline: {
+    name: string;
+    dueDate: Date;
+    daysRemaining: number;
+    description?: string;
+    actionUrl?: string;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  const actionUrl = deadline.actionUrl || `${BASE_URL}/progress`;
+  const urgencyColor = deadline.daysRemaining <= 3 ? '#f44336' : 
+                       deadline.daysRemaining <= 7 ? '#ff9800' : '#ffa536';
+  const urgencyLevel = deadline.daysRemaining <= 3 ? 'Urgent' : 
+                       deadline.daysRemaining <= 7 ? 'Important' : 'Upcoming';
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, ${urgencyColor} 0%, #11b6e9 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">Deadline Reminder</h1>
+          <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">${urgencyLevel}</p>
+        </div>
+        
+        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none;">
+          <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
+          
+          <p style="font-size: 16px; margin-bottom: 20px; color: #333;">
+            This is a reminder about an upcoming deadline for your visa application:
+          </p>
+          
+          <div style="background: #f8f9fa; border-left: 4px solid ${urgencyColor}; padding: 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
+            <h3 style="margin: 0 0 10px 0; color: #333; font-size: 18px;">${escapeHtml(deadline.name)}</h3>
+            <p style="margin: 0; font-size: 14px; color: #666;">
+              ${deadline.description ? escapeHtml(deadline.description) : 'Complete this task to stay on track with your visa application.'}
+            </p>
+          </div>
+
+          <div style="background: linear-gradient(135deg, ${urgencyColor}10 0%, ${urgencyColor}20 100%); padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <p style="font-size: 14px; color: #666; margin: 0 0 5px 0;">Time Remaining:</p>
+            <p style="font-size: 32px; font-weight: bold; color: ${urgencyColor}; margin: 0;">
+              ${deadline.daysRemaining} day${deadline.daysRemaining === 1 ? '' : 's'}
+            </p>
+            <p style="font-size: 14px; color: #666; margin: 5px 0 0 0;">
+              Due: ${deadline.dueDate.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${actionUrl}" 
+               style="background: linear-gradient(135deg, ${urgencyColor} 0%, #11b6e9 100%); 
+                      color: white; 
+                      padding: 15px 40px; 
+                      text-decoration: none; 
+                      border-radius: 5px; 
+                      font-size: 16px; 
+                      font-weight: bold;
+                      display: inline-block;">
+              Take Action Now
+            </a>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+          
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `${urgencyLevel}: ${deadline.name} - ${deadline.daysRemaining} day${deadline.daysRemaining === 1 ? '' : 's'} remaining`,
+    html
+  });
+}
+
+// ============================================
+// SUPPORT NOTIFICATION EMAILS
+// ============================================
+
+export async function sendSupportNotificationEmail(
+  userEmail: string,
+  userName: string,
+  topic: string,
+  subject: string,
+  message: string
+): Promise<{ success: boolean; error?: string }> {
+  const supportEmail = 'support@innovatorfoundervisaassistant.co.uk';
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">New Support Request</h1>
+        </div>
+        
+        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none;">
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #666; width: 100px;">From:</td>
+                <td style="padding: 8px 0; font-weight: bold;">${escapeHtml(userName)} (${escapeHtml(userEmail)})</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;">Topic:</td>
+                <td style="padding: 8px 0;">${escapeHtml(topic)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;">Subject:</td>
+                <td style="padding: 8px 0; font-weight: bold;">${escapeHtml(subject)}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <h3 style="margin: 0 0 15px 0; color: #333;">Message:</h3>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; white-space: pre-wrap; font-size: 14px; line-height: 1.6;">
+            ${escapeHtml(message)}
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+          
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            This is an automated notification from UK Innovator Founder Visa Assistant support system.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Send to support team
+  const supportResult = await sendEmail({
+    to: supportEmail,
+    subject: `[Support] ${topic}: ${subject}`,
+    html
+  });
+
+  // Also send confirmation to user
+  const userConfirmationHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">Support Request Received</h1>
+        </div>
+        
+        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none;">
+          <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(userName)},</p>
+          
+          <p style="font-size: 16px; margin-bottom: 20px; color: #333;">
+            Thank you for contacting us. We've received your support request and will respond within 24 hours.
+          </p>
+          
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0 0 10px 0;"><strong>Topic:</strong> ${escapeHtml(topic)}</p>
+            <p style="margin: 0;"><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+          </div>
+          
+          <p style="font-size: 14px; color: #666;">
+            In the meantime, you may find helpful information in our <a href="${BASE_URL}/faq" style="color: #11b6e9;">FAQ</a> or 
+            <a href="${BASE_URL}/guide" style="color: #11b6e9;">Ultimate Guide</a>.
+          </p>
+          
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+          
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  await sendEmail({
+    to: userEmail,
+    subject: 'Support Request Received - UK Innovator Founder Visa Assistant',
+    html: userConfirmationHtml
+  });
+
+  return supportResult;
+}
+
+// ============================================
 // REFERRAL EMAIL NOTIFICATIONS
 // ============================================
 

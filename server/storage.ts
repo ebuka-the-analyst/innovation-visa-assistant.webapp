@@ -12,8 +12,11 @@ import {
   type PromoRedemption, type InsertPromoRedemption,
   type ReferralVisit, type InsertReferralVisit,
   type PayoutRequest, type InsertPayoutRequest,
+  type SupportTicket, type InsertSupportTicket,
+  type UserDocument, type InsertUserDocument,
   users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics,
-  referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits, payoutRequests
+  referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits, payoutRequests,
+  supportTickets, userDocuments
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gt, lt, desc, sql, count } from "drizzle-orm";
@@ -161,6 +164,25 @@ export interface IStorage {
     successfulReferrals: number;
     totalEarnings: number;
   }>>;
+
+  // ============================================
+  // SUPPORT TICKETS
+  // ============================================
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  getSupportTicket(id: string): Promise<SupportTicket | undefined>;
+  getUserSupportTickets(userId: string): Promise<SupportTicket[]>;
+  getAllSupportTickets(): Promise<SupportTicket[]>;
+  updateSupportTicket(id: string, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined>;
+
+  // ============================================
+  // USER DOCUMENTS
+  // ============================================
+  createUserDocument(doc: InsertUserDocument): Promise<UserDocument>;
+  getUserDocument(id: string): Promise<UserDocument | undefined>;
+  getUserDocuments(userId: string): Promise<UserDocument[]>;
+  getUserDocumentsByCategory(userId: string, category: string): Promise<UserDocument[]>;
+  updateUserDocument(id: string, updates: Partial<UserDocument>): Promise<UserDocument | undefined>;
+  deleteUserDocument(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -818,6 +840,70 @@ export class DatabaseStorage implements IStorage {
     }
 
     return result;
+  }
+
+  // ============================================
+  // SUPPORT TICKETS
+  // ============================================
+  async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
+    const [result] = await db.insert(supportTickets).values(ticket).returning();
+    return result;
+  }
+
+  async getSupportTicket(id: string): Promise<SupportTicket | undefined> {
+    const [result] = await db.select().from(supportTickets).where(eq(supportTickets.id, id)).limit(1);
+    return result;
+  }
+
+  async getUserSupportTickets(userId: string): Promise<SupportTicket[]> {
+    return db.select().from(supportTickets).where(eq(supportTickets.userId, userId)).orderBy(desc(supportTickets.createdAt));
+  }
+
+  async getAllSupportTickets(): Promise<SupportTicket[]> {
+    return db.select().from(supportTickets).orderBy(desc(supportTickets.createdAt));
+  }
+
+  async updateSupportTicket(id: string, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined> {
+    const [result] = await db.update(supportTickets)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(supportTickets.id, id))
+      .returning();
+    return result;
+  }
+
+  // ============================================
+  // USER DOCUMENTS
+  // ============================================
+  async createUserDocument(doc: InsertUserDocument): Promise<UserDocument> {
+    const [result] = await db.insert(userDocuments).values(doc).returning();
+    return result;
+  }
+
+  async getUserDocument(id: string): Promise<UserDocument | undefined> {
+    const [result] = await db.select().from(userDocuments).where(eq(userDocuments.id, id)).limit(1);
+    return result;
+  }
+
+  async getUserDocuments(userId: string): Promise<UserDocument[]> {
+    return db.select().from(userDocuments).where(eq(userDocuments.userId, userId)).orderBy(desc(userDocuments.createdAt));
+  }
+
+  async getUserDocumentsByCategory(userId: string, category: string): Promise<UserDocument[]> {
+    return db.select().from(userDocuments)
+      .where(and(eq(userDocuments.userId, userId), eq(userDocuments.category, category)))
+      .orderBy(desc(userDocuments.createdAt));
+  }
+
+  async updateUserDocument(id: string, updates: Partial<UserDocument>): Promise<UserDocument | undefined> {
+    const [result] = await db.update(userDocuments)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userDocuments.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteUserDocument(id: string): Promise<void> {
+    await db.delete(userDocuments).where(eq(userDocuments.id, id));
   }
 }
 

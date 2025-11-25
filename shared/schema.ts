@@ -569,3 +569,64 @@ export const insertPayoutRequestSchema = createInsertSchema(payoutRequests).omit
 
 export type InsertPayoutRequest = z.infer<typeof insertPayoutRequestSchema>;
 export type PayoutRequest = typeof payoutRequests.$inferSelect;
+
+// Support Tickets Table
+export const supportTickets = pgTable("support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  email: varchar("email").notNull(),
+  topic: varchar("topic", { length: 50 }).notNull(),
+  subject: varchar("subject", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default('open'), // open, in_progress, resolved, closed
+  priority: varchar("priority", { length: 20 }).default('normal'), // low, normal, high, urgent
+  assignedTo: varchar("assigned_to"),
+  resolvedAt: timestamp("resolved_at"),
+  response: text("response"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_support_user").on(table.userId),
+  index("idx_support_status").on(table.status),
+]);
+
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  resolvedAt: true,
+  response: true,
+  assignedTo: true,
+});
+
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type SupportTicket = typeof supportTickets.$inferSelect;
+
+// User Documents Table (for visa document storage)
+export const userDocuments = pgTable("user_documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  category: varchar("category", { length: 50 }).notNull(), // passport, bank_statement, business_plan, endorsement, etc.
+  description: text("description"),
+  fileUrl: text("file_url").notNull(),
+  fileType: varchar("file_type", { length: 50 }).notNull(),
+  fileSize: integer("file_size").notNull(),
+  status: varchar("status", { length: 20 }).default('pending'), // pending, verified, rejected
+  notes: text("notes"),
+  expiryDate: timestamp("expiry_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_document_user").on(table.userId),
+  index("idx_document_category").on(table.category),
+]);
+
+export const insertUserDocumentSchema = createInsertSchema(userDocuments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUserDocument = z.infer<typeof insertUserDocumentSchema>;
+export type UserDocument = typeof userDocuments.$inferSelect;

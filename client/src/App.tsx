@@ -12,6 +12,7 @@ import ChatBot from "@/components/ChatBot";
 import CookieConsent from "@/components/CookieConsent";
 import ToolsChronographWheel from "@/components/ToolsChronographWheel";
 import BlackNovemberBanner from "@/components/BlackNovemberBanner";
+import OnboardingTour from "@/components/OnboardingTour";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import Home from "@/pages/home";
@@ -50,6 +51,9 @@ import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import Cookies from "@/pages/cookies";
 import ReferralDashboard from "@/pages/referral-dashboard";
+import Progress from "@/pages/progress";
+import Support from "@/pages/support";
+import Documents from "@/pages/documents";
 
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies"];
 
@@ -118,6 +122,9 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/cookies" component={Cookies} />
+      <Route path="/progress" component={Progress} />
+      <Route path="/support" component={Support} />
+      <Route path="/documents" component={Documents} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -165,6 +172,7 @@ function App() {
         <BlackNovemberBanner />
         <ChatBot />
         <ToolsChronographWheel />
+        <OnboardingTour />
         <Toaster />
         <AppLayout />
         <CookieConsent />

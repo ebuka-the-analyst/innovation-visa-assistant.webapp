@@ -265,7 +265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Check tier eligibility
-        if (promoCodeRecord.eligibleTiers?.length > 0 && !promoCodeRecord.eligibleTiers.includes(businessPlan.tier)) {
+        if (promoCodeRecord.eligibleTiers && promoCodeRecord.eligibleTiers.length > 0 && !promoCodeRecord.eligibleTiers.includes(businessPlan.tier)) {
           return res.status(400).json({ error: `This promo code is not valid for the ${businessPlan.tier} tier`, promoError: true });
         }
         
@@ -311,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           planId: businessPlan.id,
           promoCode: validPromoCode?.code || '',
           promoCodeId: validPromoCode?.id || '',
-          promoCodeCreatorId: validPromoCode?.creatorId || '',
+          promoCodeCreatorId: '',
           originalAmount: pricing.amount.toString(),
           discountAmount: (pricing.amount - finalAmount).toString(),
         },
@@ -447,7 +447,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.createPromoRedemption({
             promoCodeId,
             userId: user.id,
-            discountAmount,
+            originalAmount: 0,
+            discountApplied: discountAmount,
+            finalAmount: 0,
+            appliedAt: new Date().toISOString(),
           });
           
           console.log(`Promo code ${promoCodeUsed} used successfully. Discount: £${(discountAmount / 100).toFixed(2)}`);
@@ -2532,6 +2535,126 @@ ${generatedSections.join('\n\n---\n\n')}`;
     } catch (error) {
       console.error("Admin promo analytics error:", error);
       res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // ============================================
+  // SUPPORT SYSTEM
+  // ============================================
+
+  // Contact form submission
+  app.post("/api/support/contact", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { topic, subject, message } = req.body;
+
+      if (!topic || !subject || !message) {
+        return res.status(400).json({ error: "Topic, subject, and message are required" });
+      }
+
+      // Store the support ticket
+      const ticket = await storage.createSupportTicket({
+        userId: user.id,
+        email: user.email,
+        topic,
+        subject,
+        message,
+        status: 'open',
+      });
+
+      // Send notification email to support team
+      const { sendSupportNotificationEmail } = await import('./email');
+      await sendSupportNotificationEmail(
+        user.email,
+        user.firstName || 'User',
+        topic,
+        subject,
+        message
+      );
+
+      res.json({ success: true, ticketId: ticket.id });
+    } catch (error) {
+      console.error("Support contact error:", error);
+      res.status(500).json({ error: "Failed to submit support request" });
+    }
+  });
+
+  // Get user's support tickets
+  app.get("/api/support/tickets", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const tickets = await storage.getUserSupportTickets(user.id);
+      res.json(tickets);
+    } catch (error) {
+      console.error("Get support tickets error:", error);
+      res.status(500).json({ error: "Failed to fetch support tickets" });
+    }
+  });
+
+  // ============================================
+  // DOCUMENT STORAGE
+  // ============================================
+
+  // Get user's documents
+  app.get("/api/documents", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const documents = await storage.getUserDocuments(user.id);
+      res.json(documents);
+    } catch (error) {
+      console.error("Get documents error:", error);
+      res.status(500).json({ error: "Failed to fetch documents" });
+    }
+  });
+
+  // Upload document (placeholder - would need object storage integration)
+  app.post("/api/documents/upload", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      // For MVP, we'll store document metadata
+      // Full file storage would use Replit's Object Storage
+      const { name, category, description, fileUrl, fileType, fileSize } = req.body;
+      
+      if (!name || !category) {
+        return res.status(400).json({ error: "Name and category are required" });
+      }
+      
+      const document = await storage.createUserDocument({
+        userId: user.id,
+        name,
+        category,
+        description,
+        fileUrl: fileUrl || '/placeholder-document',
+        fileType: fileType || 'application/pdf',
+        fileSize: fileSize || 0,
+        status: 'pending',
+      });
+      
+      res.json(document);
+    } catch (error) {
+      console.error("Upload document error:", error);
+      res.status(500).json({ error: "Failed to upload document" });
+    }
+  });
+
+  // Delete document
+  app.delete("/api/documents/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      
+      // Verify ownership
+      const doc = await storage.getUserDocument(id);
+      if (!doc || doc.userId !== user.id) {
+        return res.status(404).json({ error: "Document not found" });
+      }
+      
+      await storage.deleteUserDocument(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete document error:", error);
+      res.status(500).json({ error: "Failed to delete document" });
     }
   });
 
