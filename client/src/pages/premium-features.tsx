@@ -136,7 +136,7 @@ function getIconComponent(iconName: string) {
 
 export default function PremiumFeatures() {
   const [activeTab, setActiveTab] = useState("overview");
-  const { userTier, hasAccess } = useTierAccess();
+  const { userTier, hasAccessToTier: hasAccess } = useTierAccess();
 
   const { data: achievementsData } = useQuery<AchievementsData>({
     queryKey: ['/api/achievements'],
