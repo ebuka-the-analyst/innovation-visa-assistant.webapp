@@ -3581,8 +3581,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
-  app.get("/api/success-stories/:id", async (req, res) => {
+  app.get("/api/success-stories/:id", isAuthenticated, async (req, res) => {
     try {
+      const user = req.user as any;
+      const [userInfo] = await db.select().from(users).where(eq(users.id, user.id));
+      const userTier = userInfo?.subscriptionTier || 'free';
+      
       const [story] = await db.select()
         .from(successStories)
         .where(and(
@@ -3592,6 +3596,15 @@ ${generatedSections.join('\n\n---\n\n')}`;
       if (!story) {
         return res.status(404).json({ error: "Story not found" });
       }
+      
+      const TIER_ORDER = ['free', 'basic', 'premium', 'enterprise', 'ultimate'];
+      const userTierIndex = TIER_ORDER.indexOf(userTier);
+      const storyTierIndex = TIER_ORDER.indexOf(story.requiredTier);
+      
+      if (userTierIndex < storyTierIndex) {
+        return res.status(403).json({ error: "Upgrade required to access this story" });
+      }
+      
       res.json(story);
     } catch (error) {
       console.error("Get success story error:", error);
