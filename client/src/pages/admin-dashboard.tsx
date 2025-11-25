@@ -2167,8 +2167,133 @@ export default function AdminDashboard() {
                   </Card>
                 )}
 
-                {/* Cohort Analysis - Show when users-cohorts is selected or users-overview */}
-                {(activeSection === 'users-cohorts' || activeSection === 'users-overview') && usersAnalytics?.cohortAnalysis && (
+                {/* Churn Analysis - Show only when users-churn is selected */}
+                {activeSection === 'users-churn' && (
+                  <Card data-testid="card-churn-analysis">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <UserX className="h-5 w-5 text-red-500" />
+                        Churn Risk Analysis
+                      </CardTitle>
+                      <CardDescription>Identify users at risk of churning and track retention metrics</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        {/* Churn Metrics */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <UserX className="h-4 w-4 text-red-500" />
+                              <span className="text-sm font-medium">At-Risk Users</span>
+                            </div>
+                            <p className="text-2xl font-bold text-red-500">
+                              {usersData?.users?.filter(u => {
+                                const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
+                                const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
+                                return daysSinceLogin > 14 && daysSinceLogin <= 30;
+                              }).length || 0}
+                            </p>
+                            <p className="text-xs text-muted-foreground">14-30 days inactive</p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertTriangle className="h-4 w-4 text-amber-500" />
+                              <span className="text-sm font-medium">Churned Users</span>
+                            </div>
+                            <p className="text-2xl font-bold text-amber-500">
+                              {usersData?.users?.filter(u => {
+                                const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
+                                const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
+                                return daysSinceLogin > 30;
+                              }).length || 0}
+                            </p>
+                            <p className="text-xs text-muted-foreground">30+ days inactive</p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <UserCheck className="h-4 w-4 text-green-500" />
+                              <span className="text-sm font-medium">Active Users</span>
+                            </div>
+                            <p className="text-2xl font-bold text-green-500">
+                              {usersData?.users?.filter(u => {
+                                const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
+                                const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
+                                return daysSinceLogin <= 7;
+                              }).length || 0}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Active in last 7 days</p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Target className="h-4 w-4 text-blue-500" />
+                              <span className="text-sm font-medium">Retention Rate</span>
+                            </div>
+                            <p className="text-2xl font-bold text-blue-500">
+                              {usersData?.users?.length ? 
+                                ((usersData.users.filter(u => {
+                                  const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
+                                  const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
+                                  return daysSinceLogin <= 30;
+                                }).length / usersData.users.length) * 100).toFixed(1) : 0}%
+                            </p>
+                            <p className="text-xs text-muted-foreground">30-day retention</p>
+                          </div>
+                        </div>
+
+                        {/* At-Risk Users List */}
+                        <div className="space-y-4">
+                          <h4 className="font-medium flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-amber-500" />
+                            Users Requiring Attention
+                          </h4>
+                          <div className="space-y-2">
+                            {usersData?.users?.filter(u => {
+                              const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
+                              const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
+                              return daysSinceLogin > 7;
+                            }).slice(0, 10).map(user => {
+                              const lastLogin = user.lastLogin ? new Date(user.lastLogin) : null;
+                              const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
+                              const riskLevel = daysSinceLogin > 30 ? 'high' : daysSinceLogin > 14 ? 'medium' : 'low';
+                              return (
+                                <div key={user.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover-elevate">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-2 h-2 rounded-full ${riskLevel === 'high' ? 'bg-red-500' : riskLevel === 'medium' ? 'bg-amber-500' : 'bg-yellow-500'}`} />
+                                    <div>
+                                      <p className="font-medium">{user.firstName || user.email.split('@')[0]}</p>
+                                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <Badge variant={riskLevel === 'high' ? 'destructive' : riskLevel === 'medium' ? 'secondary' : 'outline'}>
+                                      {riskLevel === 'high' ? 'High Risk' : riskLevel === 'medium' ? 'At Risk' : 'Dormant'}
+                                    </Badge>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {daysSinceLogin === 999 ? 'Never logged in' : `${daysSinceLogin} days ago`}
+                                    </p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {(!usersData?.users || usersData.users.filter(u => {
+                              const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
+                              const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
+                              return daysSinceLogin > 7;
+                            }).length === 0) && (
+                              <div className="py-8 text-center text-muted-foreground">
+                                <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                <p>All users are actively engaged!</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Cohort Analysis - Show only when users-cohorts is selected */}
+                {activeSection === 'users-cohorts' && usersAnalytics?.cohortAnalysis && (
                   <Card data-testid="card-cohort-analysis">
                     <CardHeader>
                       <CardTitle>User Retention Cohort Analysis</CardTitle>
