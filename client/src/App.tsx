@@ -9,7 +9,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, LogOut, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Loader2, LayoutDashboard, Wrench, FileText, HelpCircle } from "lucide-react";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
 
@@ -110,16 +110,54 @@ function AnimatedSidebarTrigger() {
           data-testid="button-sidebar-toggle"
           className="-ml-1 md:-ml-2 h-8 md:h-9 w-8 md:w-9 flex items-center justify-center group relative overflow-visible"
         >
-          <ChevronRight className={`w-5 h-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`} />
-          {!isOpen && (
-            <div className="absolute -right-1 -top-1 w-2 h-2 bg-primary rounded-full animate-ping-slow" />
+          {isOpen ? (
+            <ChevronLeft className="w-5 h-5 transition-transform duration-200" />
+          ) : (
+            <ChevronRight className="w-5 h-5 transition-transform duration-200" />
           )}
+          <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+          </span>
         </Button>
       </TooltipTrigger>
       <TooltipContent>
         {isOpen ? 'Close sidebar' : 'Open sidebar'}
       </TooltipContent>
     </Tooltip>
+  );
+}
+
+const navTabs = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Tools", href: "/tools-hub", icon: Wrench },
+  { label: "Documents", href: "/documents", icon: FileText },
+  { label: "Support", href: "/support", icon: HelpCircle },
+];
+
+function HeaderNavTabs() {
+  const [location] = useLocation();
+  
+  return (
+    <nav className="hidden md:flex items-center gap-1">
+      {navTabs.map((tab) => {
+        const isActive = location === tab.href || (tab.href !== "/dashboard" && location.startsWith(tab.href));
+        const Icon = tab.icon;
+        return (
+          <Link key={tab.href} href={tab.href}>
+            <Button
+              variant={isActive ? "secondary" : "ghost"}
+              size="sm"
+              className={`gap-1.5 ${isActive ? 'bg-primary/10 text-primary' : ''}`}
+              data-testid={`nav-tab-${tab.label.toLowerCase()}`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </Button>
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
 
@@ -214,10 +252,14 @@ function UnifiedHeader() {
         </div>
       </Link>
       
+      <div className="h-6 w-px bg-border mx-1 hidden md:block" />
+      
+      <HeaderNavTabs />
+      
       <div className="flex-1" />
       
       {user && (
-        <span className="hidden sm:block text-sm text-muted-foreground">
+        <span className="hidden lg:block text-sm text-muted-foreground">
           {user.firstName || user.displayName || user.email}
         </span>
       )}
