@@ -1620,6 +1620,531 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // ============================================
+  // REFERRAL & PROMO CODE SYSTEM ROUTES
+  // ============================================
+
+  // Generate unique referral code
+  function generateReferralCode(userId: string): string {
+    const prefix = 'REF';
+    const random = crypto.randomBytes(4).toString('hex').toUpperCase();
+    return `${prefix}${random}`;
+  }
+
+  function generatePromoCode(): string {
+    const prefix = 'PROMO';
+    const random = crypto.randomBytes(3).toString('hex').toUpperCase();
+    return `${prefix}${random}`;
+  }
+
+  // Hash visitor fingerprint for privacy
+  function hashVisitorFingerprint(ip: string, userAgent: string): string {
+    return crypto.createHash('sha256').update(`${ip}:${userAgent}`).digest('hex');
+  }
+
+  // ============================================
+  // USER REFERRAL ROUTES
+  // ============================================
+
+  // Get or create user's referral code
+  app.get("/api/referrals/my-code", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      // Check if user already has a referral code
+      let codes = await storage.getUserReferralCodes(user.id);
+      
+      if (codes.length === 0) {
+        // Create a new referral code for the user
+        const code = await storage.createReferralCode({
+          userId: user.id,
+          code: generateReferralCode(user.id),
+          rewardType: 'percentage',
+          rewardValue: 10, // 10% commission
+          refereeDiscount: 10, // 10% discount for referee
+          status: 'active',
+        });
+        codes = [code];
+      }
+      
+      res.json(codes[0]);
+    } catch (error) {
+      console.error("Get referral code error:", error);
+      res.status(500).json({ error: "Failed to get referral code" });
+    }
+  });
+
+  // Get user's referral dashboard data
+  app.get("/api/referrals/dashboard", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      const [codes, events, rewards] = await Promise.all([
+        storage.getUserReferralCodes(user.id),
+        storage.getReferralEventsByReferrer(user.id),
+        storage.getUserReferralRewards(user.id),
+      ]);
+      
+      const code = codes[0];
+      
+      // Calculate stats
+      const stats = {
+        totalClicks: events.length,
+        signups: events.filter(e => e.status !== 'visited').length,
+        qualified: events.filter(e => e.status === 'qualified' || e.status === 'rewarded').length,
+        pendingEarnings: rewards.filter(r => r.status === 'pending').reduce((sum, r) => sum + r.amount, 0) / 100,
+        totalEarnings: rewards.filter(r => r.status === 'paid').reduce((sum, r) => sum + r.amount, 0) / 100,
+      };
+      
+      res.json({
+        code,
+        stats,
+        events: events.slice(0, 50), // Last 50 events
+        rewards: rewards.slice(0, 20), // Last 20 rewards
+      });
+    } catch (error) {
+      console.error("Referral dashboard error:", error);
+      res.status(500).json({ error: "Failed to get referral dashboard" });
+    }
+  });
+
+  // Validate a referral code (public - for signup page)
+  app.get("/api/referrals/validate/:code", async (req, res) => {
+    try {
+      const { code } = req.params;
+      
+      const referralCode = await storage.getReferralCodeByCode(code.toUpperCase());
+      
+      if (!referralCode || referralCode.status !== 'active') {
+        return res.json({ valid: false, message: "Invalid or inactive referral code" });
+      }
+      
+      // Check max uses
+      if (referralCode.maxUses && referralCode.totalReferrals >= referralCode.maxUses) {
+        return res.json({ valid: false, message: "This referral code has reached its usage limit" });
+      }
+      
+      res.json({
+        valid: true,
+        discount: referralCode.refereeDiscount,
+        message: `You'll get ${referralCode.refereeDiscount}% off your first purchase!`,
+      });
+    } catch (error) {
+      console.error("Validate referral code error:", error);
+      res.status(500).json({ valid: false, message: "Failed to validate code" });
+    }
+  });
+
+  // Track referral visit (public - called when someone lands with ?ref=CODE)
+  app.post("/api/referrals/track-visit", async (req, res) => {
+    try {
+      const { code, source, landingPage } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ error: "Referral code is required" });
+      }
+      
+      const referralCode = await storage.getReferralCodeByCode(code.toUpperCase());
+      
+      if (!referralCode || referralCode.status !== 'active') {
+        return res.status(400).json({ error: "Invalid referral code" });
+      }
+      
+      // Generate visitor hash
+      const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+      const userAgent = req.headers['user-agent'] || 'unknown';
+      const visitorHash = hashVisitorFingerprint(ip, userAgent);
+      
+      // Create visit record
+      await storage.createReferralVisit({
+        referralCodeId: referralCode.id,
+        visitorHash,
+        source: source || 'direct',
+        landingPage,
+        userAgent,
+      });
+      
+      // Increment total referrals
+      await storage.incrementReferralStats(referralCode.id, 'totalReferrals');
+      
+      res.json({ success: true, visitorHash });
+    } catch (error) {
+      console.error("Track referral visit error:", error);
+      res.status(500).json({ error: "Failed to track visit" });
+    }
+  });
+
+  // Apply referral at signup (called after user registers)
+  app.post("/api/referrals/apply-signup", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { code, visitorHash } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ error: "Referral code is required" });
+      }
+      
+      const referralCode = await storage.getReferralCodeByCode(code.toUpperCase());
+      
+      if (!referralCode || referralCode.status !== 'active') {
+        return res.status(400).json({ error: "Invalid referral code" });
+      }
+      
+      // Prevent self-referral
+      if (referralCode.userId === user.id) {
+        return res.status(400).json({ error: "Cannot use your own referral code" });
+      }
+      
+      // Check if user already has a referral event
+      const existingEvent = await storage.getReferralEventByReferee(user.id);
+      if (existingEvent) {
+        return res.status(400).json({ error: "You have already used a referral code" });
+      }
+      
+      // Create referral event
+      const event = await storage.createReferralEvent({
+        referralCodeId: referralCode.id,
+        referrerId: referralCode.userId,
+        refereeId: user.id,
+        refereeEmail: user.email,
+        status: 'signed_up',
+        signedUpAt: new Date(),
+        landingPage: req.body.landingPage,
+        userAgent: req.headers['user-agent'],
+        ipHash: visitorHash,
+      });
+      
+      // Update visit conversion if visitorHash provided
+      if (visitorHash) {
+        await storage.updateReferralVisitConversion(visitorHash, user.id);
+      }
+      
+      // Increment pending referrals
+      await storage.incrementReferralStats(referralCode.id, 'pendingReferrals');
+      
+      res.json({ 
+        success: true, 
+        discount: referralCode.refereeDiscount,
+        message: `Referral applied! You'll get ${referralCode.refereeDiscount}% off your first purchase.`,
+      });
+    } catch (error) {
+      console.error("Apply referral signup error:", error);
+      res.status(500).json({ error: "Failed to apply referral" });
+    }
+  });
+
+  // ============================================
+  // PROMO CODE ROUTES
+  // ============================================
+
+  // Validate promo code (public - for checkout)
+  app.get("/api/promos/validate/:code", async (req, res) => {
+    try {
+      const { code } = req.params;
+      
+      const promoCode = await storage.getPromoCodeByCode(code.toUpperCase());
+      
+      if (!promoCode) {
+        return res.json({ valid: false, message: "Invalid promo code" });
+      }
+      
+      if (promoCode.status !== 'active') {
+        return res.json({ valid: false, message: "This promo code is no longer active" });
+      }
+      
+      // Check validity period
+      const now = new Date();
+      if (now < promoCode.validFrom) {
+        return res.json({ valid: false, message: "This promo code is not yet active" });
+      }
+      if (promoCode.validUntil && now > promoCode.validUntil) {
+        return res.json({ valid: false, message: "This promo code has expired" });
+      }
+      
+      // Check usage limits
+      if (promoCode.maxTotalUses && promoCode.currentUses >= promoCode.maxTotalUses) {
+        return res.json({ valid: false, message: "This promo code has reached its usage limit" });
+      }
+      
+      res.json({
+        valid: true,
+        discountType: promoCode.discountType,
+        discountValue: promoCode.discountValue,
+        name: promoCode.name,
+        message: promoCode.discountType === 'percentage' 
+          ? `${promoCode.discountValue}% off your purchase!`
+          : `£${promoCode.discountValue / 100} off your purchase!`,
+      });
+    } catch (error) {
+      console.error("Validate promo code error:", error);
+      res.status(500).json({ valid: false, message: "Failed to validate code" });
+    }
+  });
+
+  // Check if user can use promo code
+  app.post("/api/promos/check-eligibility", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { code, purchaseAmount } = req.body;
+      
+      const promoCode = await storage.getPromoCodeByCode(code.toUpperCase());
+      
+      if (!promoCode || promoCode.status !== 'active') {
+        return res.json({ eligible: false, message: "Invalid promo code" });
+      }
+      
+      // Check tier eligibility
+      if (promoCode.eligibleTiers && promoCode.eligibleTiers.length > 0) {
+        if (!promoCode.eligibleTiers.includes(user.subscriptionTier || 'free')) {
+          return res.json({ eligible: false, message: "This promo code is not available for your subscription tier" });
+        }
+      }
+      
+      // Check minimum purchase
+      if (promoCode.minPurchaseAmount && purchaseAmount < promoCode.minPurchaseAmount) {
+        return res.json({ 
+          eligible: false, 
+          message: `Minimum purchase of £${promoCode.minPurchaseAmount / 100} required` 
+        });
+      }
+      
+      // Check per-user usage limit
+      if (promoCode.maxUsesPerUser) {
+        const userRedemptions = await storage.getUserPromoRedemptionCount(user.id, promoCode.id);
+        if (userRedemptions >= promoCode.maxUsesPerUser) {
+          return res.json({ eligible: false, message: "You have already used this promo code" });
+        }
+      }
+      
+      res.json({
+        eligible: true,
+        discountType: promoCode.discountType,
+        discountValue: promoCode.discountValue,
+        discountAmount: promoCode.discountType === 'percentage'
+          ? Math.round(purchaseAmount * promoCode.discountValue / 100)
+          : promoCode.discountValue,
+      });
+    } catch (error) {
+      console.error("Check promo eligibility error:", error);
+      res.status(500).json({ eligible: false, message: "Failed to check eligibility" });
+    }
+  });
+
+  // ============================================
+  // ADMIN REFERRAL & PROMO ROUTES
+  // ============================================
+
+  // Get all referral codes (admin)
+  app.get("/api/admin/referrals/codes", requireAdmin, async (req, res) => {
+    try {
+      const codes = await storage.getAllReferralCodes();
+      res.json(codes);
+    } catch (error) {
+      console.error("Admin get referral codes error:", error);
+      res.status(500).json({ error: "Failed to fetch referral codes" });
+    }
+  });
+
+  // Get all referral events (admin)
+  app.get("/api/admin/referrals/events", requireAdmin, async (req, res) => {
+    try {
+      const events = await storage.getAllReferralEvents();
+      res.json(events);
+    } catch (error) {
+      console.error("Admin get referral events error:", error);
+      res.status(500).json({ error: "Failed to fetch referral events" });
+    }
+  });
+
+  // Get all referral rewards (admin)
+  app.get("/api/admin/referrals/rewards", requireAdmin, async (req, res) => {
+    try {
+      const rewards = await storage.getAllReferralRewards();
+      res.json(rewards);
+    } catch (error) {
+      console.error("Admin get referral rewards error:", error);
+      res.status(500).json({ error: "Failed to fetch referral rewards" });
+    }
+  });
+
+  // Get pending rewards for approval (admin)
+  app.get("/api/admin/referrals/pending-rewards", requireAdmin, async (req, res) => {
+    try {
+      const rewards = await storage.getPendingRewards();
+      res.json(rewards);
+    } catch (error) {
+      console.error("Admin get pending rewards error:", error);
+      res.status(500).json({ error: "Failed to fetch pending rewards" });
+    }
+  });
+
+  // Approve or reject reward (admin)
+  app.patch("/api/admin/referrals/rewards/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, payoutMethod, payoutReference } = req.body;
+      
+      if (!['approved', 'paid', 'cancelled'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      
+      const updates: any = { status };
+      if (payoutMethod) updates.payoutMethod = payoutMethod;
+      if (payoutReference) updates.payoutReference = payoutReference;
+      if (status === 'paid') updates.paidAt = new Date();
+      
+      const reward = await storage.updateReferralReward(id, updates);
+      
+      if (!reward) {
+        return res.status(404).json({ error: "Reward not found" });
+      }
+      
+      // Update referral code earnings if paid
+      if (status === 'paid') {
+        const event = await storage.getReferralEvent(reward.referralEventId);
+        if (event) {
+          const code = await storage.getReferralCode(event.referralCodeId);
+          if (code) {
+            await storage.updateReferralCode(code.id, {
+              paidEarnings: code.paidEarnings + reward.amount,
+            });
+          }
+        }
+      }
+      
+      res.json(reward);
+    } catch (error) {
+      console.error("Admin update reward error:", error);
+      res.status(500).json({ error: "Failed to update reward" });
+    }
+  });
+
+  // Get referral analytics (admin)
+  app.get("/api/admin/referrals/analytics", requireAdmin, async (req, res) => {
+    try {
+      const analytics = await storage.getReferralAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Admin referral analytics error:", error);
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // ============================================
+  // ADMIN PROMO CODE ROUTES
+  // ============================================
+
+  // Get all promo codes (admin)
+  app.get("/api/admin/promos", requireAdmin, async (req, res) => {
+    try {
+      const codes = await storage.getAllPromoCodes();
+      res.json(codes);
+    } catch (error) {
+      console.error("Admin get promo codes error:", error);
+      res.status(500).json({ error: "Failed to fetch promo codes" });
+    }
+  });
+
+  // Create promo code (admin)
+  app.post("/api/admin/promos", requireAdmin, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { 
+        name, 
+        description, 
+        code,
+        discountType, 
+        discountValue, 
+        eligibleTiers,
+        minPurchaseAmount,
+        maxTotalUses,
+        maxUsesPerUser,
+        validFrom,
+        validUntil,
+      } = req.body;
+      
+      if (!name || !discountType || !discountValue) {
+        return res.status(400).json({ error: "Name, discount type, and discount value are required" });
+      }
+      
+      // Generate code if not provided
+      const promoCodeValue = code?.toUpperCase() || generatePromoCode();
+      
+      // Check if code already exists
+      const existing = await storage.getPromoCodeByCode(promoCodeValue);
+      if (existing) {
+        return res.status(400).json({ error: "A promo code with this code already exists" });
+      }
+      
+      const promoCode = await storage.createPromoCode({
+        code: promoCodeValue,
+        name,
+        description,
+        discountType,
+        discountValue,
+        eligibleTiers: eligibleTiers || null,
+        minPurchaseAmount: minPurchaseAmount || null,
+        maxTotalUses: maxTotalUses || null,
+        maxUsesPerUser: maxUsesPerUser || 1,
+        validFrom: validFrom ? new Date(validFrom) : new Date(),
+        validUntil: validUntil ? new Date(validUntil) : null,
+        status: 'active',
+        createdBy: user.id,
+      });
+      
+      res.json(promoCode);
+    } catch (error) {
+      console.error("Admin create promo code error:", error);
+      res.status(500).json({ error: "Failed to create promo code" });
+    }
+  });
+
+  // Update promo code (admin)
+  app.patch("/api/admin/promos/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      // Prevent code modification
+      delete updates.code;
+      delete updates.createdBy;
+      delete updates.currentUses;
+      
+      const promoCode = await storage.updatePromoCode(id, updates);
+      
+      if (!promoCode) {
+        return res.status(404).json({ error: "Promo code not found" });
+      }
+      
+      res.json(promoCode);
+    } catch (error) {
+      console.error("Admin update promo code error:", error);
+      res.status(500).json({ error: "Failed to update promo code" });
+    }
+  });
+
+  // Get promo redemptions (admin)
+  app.get("/api/admin/promos/redemptions", requireAdmin, async (req, res) => {
+    try {
+      const redemptions = await storage.getAllPromoRedemptions();
+      res.json(redemptions);
+    } catch (error) {
+      console.error("Admin get promo redemptions error:", error);
+      res.status(500).json({ error: "Failed to fetch redemptions" });
+    }
+  });
+
+  // Get promo analytics (admin)
+  app.get("/api/admin/promos/analytics", requireAdmin, async (req, res) => {
+    try {
+      const analytics = await storage.getPromoAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Admin promo analytics error:", error);
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -416,17 +416,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserAnalytics(userId: string, startDate?: Date, endDate?: Date): Promise<ToolAnalytic[]> {
-    let query = db.select().from(toolAnalytics).where(eq(toolAnalytics.userId, userId));
-    
     if (startDate && endDate) {
-      query = query.where(and(
-        gt(toolAnalytics.createdAt, startDate),
-        lt(toolAnalytics.createdAt, endDate)
-      )) as any;
+      return db.select().from(toolAnalytics)
+        .where(and(
+          eq(toolAnalytics.userId, userId),
+          gt(toolAnalytics.createdAt, startDate),
+          lt(toolAnalytics.createdAt, endDate)
+        ));
     }
-    
-    const result = await query;
-    return result;
+    return db.select().from(toolAnalytics).where(eq(toolAnalytics.userId, userId));
   }
 
   // Admin methods
