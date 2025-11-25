@@ -1038,6 +1038,30 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // Tool Analytics Logging API - Track tool access for admin dashboard
+  app.post("/api/analytics/tool-access", async (req, res) => {
+    try {
+      const { toolId, action = 'access' } = req.body;
+      const user = req.user as any;
+      
+      if (!toolId) {
+        return res.status(400).json({ error: "toolId is required" });
+      }
+      
+      await storage.createToolAnalytic({
+        userId: user?.id || null,
+        toolId,
+        action,
+        metadata: { userAgent: req.headers['user-agent'], timestamp: new Date().toISOString() },
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Tool analytics tracking error:", error);
+      res.status(500).json({ error: "Failed to track tool access" });
+    }
+  });
+
   // ============ ADMIN API ENDPOINTS ============
   
   // Analytics Endpoints

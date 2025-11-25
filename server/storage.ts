@@ -496,24 +496,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getToolUsageStats(limit?: number): Promise<Array<{ toolId: string; action: string; count: number; timestamp?: Date }>> {
-    // For now, return mock data from referrals as a proxy for tool usage
-    // In a real implementation, you would have a separate tool_usage_logs table
+    // Use real tool analytics data from the toolAnalytics table
     const result = await db
       .select()
-      .from(referrals)
-      .limit(limit || 100);
+      .from(toolAnalytics)
+      .orderBy(desc(toolAnalytics.createdAt))
+      .limit(limit ? limit * 10 : 1000); // Get more for aggregation
     
-    // Aggregate by toolId and channel (action)
+    // Aggregate by toolId
     const stats: { [key: string]: { toolId: string; action: string; count: number; timestamp?: Date } } = {};
     
-    result.forEach(referral => {
-      const key = `${referral.toolId}-${referral.channel}`;
+    result.forEach(analytic => {
+      const key = analytic.toolId;
       if (!stats[key]) {
         stats[key] = {
-          toolId: referral.toolId,
-          action: referral.channel,
+          toolId: analytic.toolId,
+          action: analytic.action,
           count: 0,
-          timestamp: referral.createdAt,
+          timestamp: analytic.createdAt,
         };
       }
       stats[key].count++;
