@@ -1826,7 +1826,274 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* User Management Table */}
+                {/* Geographic Distribution - Show when users-geo is selected */}
+                {activeSection === 'users-geo' && (
+                  <Card data-testid="card-geographic-distribution">
+                    <CardHeader>
+                      <CardTitle>Geographic Distribution</CardTitle>
+                      <CardDescription>User distribution by country</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {usersAnalytics?.geographicDistribution && usersAnalytics.geographicDistribution.length > 0 ? (
+                        <div className="space-y-6">
+                          <ResponsiveContainer width="100%" height={400}>
+                            <RechartsBarChart 
+                              data={usersAnalytics.geographicDistribution.sort((a, b) => b.users - a.users).slice(0, 15)}
+                              layout="vertical"
+                              margin={{ left: 80, right: 20, top: 20, bottom: 20 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                              <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} />
+                              <YAxis 
+                                type="category" 
+                                dataKey="country" 
+                                stroke="hsl(var(--foreground))" 
+                                fontSize={12}
+                                width={80}
+                              />
+                              <RechartsTooltip
+                                contentStyle={{
+                                  backgroundColor: 'hsl(var(--card))',
+                                  border: '1px solid hsl(var(--border))',
+                                  borderRadius: '8px'
+                                }}
+                                formatter={(value: number) => [`${value} users`, 'Users']}
+                              />
+                              <Bar dataKey="users" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]} />
+                            </RechartsBarChart>
+                          </ResponsiveContainer>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {usersAnalytics.geographicDistribution.slice(0, 8).map((item, index) => (
+                              <div key={item.country} className="p-4 rounded-lg bg-muted/50">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
+                                  <span className="font-medium text-sm">{item.country}</span>
+                                </div>
+                                <p className="text-2xl font-bold">{item.users}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {((item.users / usersAnalytics.geographicDistribution.reduce((sum, i) => sum + i.users, 0)) * 100).toFixed(1)}% of total
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center">
+                          <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                          <p className="text-muted-foreground">No geographic data available</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Churn Analysis - Show only when users-churn is selected */}
+                {activeSection === 'users-churn' && (
+                  <Card data-testid="card-churn-analysis">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <UserX className="h-5 w-5 text-red-500" />
+                        Churn Risk Analysis
+                      </CardTitle>
+                      <CardDescription>Identify users at risk of churning and track retention metrics</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        {/* Churn Metrics */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <UserX className="h-4 w-4 text-red-500" />
+                              <span className="text-sm font-medium">At-Risk Users</span>
+                            </div>
+                            <p className="text-2xl font-bold text-red-500">
+                              {usersData?.users?.filter(u => {
+                                const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                                const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                                return daysSinceActivity > 14 && daysSinceActivity <= 30;
+                              }).length || 0}
+                            </p>
+                            <p className="text-xs text-muted-foreground">14-30 days inactive</p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertTriangle className="h-4 w-4 text-amber-500" />
+                              <span className="text-sm font-medium">Churned Users</span>
+                            </div>
+                            <p className="text-2xl font-bold text-amber-500">
+                              {usersData?.users?.filter(u => {
+                                const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                                const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                                return daysSinceActivity > 30;
+                              }).length || 0}
+                            </p>
+                            <p className="text-xs text-muted-foreground">30+ days inactive</p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <UserCheck className="h-4 w-4 text-green-500" />
+                              <span className="text-sm font-medium">Active Users</span>
+                            </div>
+                            <p className="text-2xl font-bold text-green-500">
+                              {usersData?.users?.filter(u => {
+                                const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                                const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                                return daysSinceActivity <= 7;
+                              }).length || 0}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Active in last 7 days</p>
+                          </div>
+                          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Target className="h-4 w-4 text-blue-500" />
+                              <span className="text-sm font-medium">Retention Rate</span>
+                            </div>
+                            <p className="text-2xl font-bold text-blue-500">
+                              {usersData?.users?.length ? 
+                                ((usersData.users.filter(u => {
+                                  const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                                  const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                                  return daysSinceActivity <= 30;
+                                }).length / usersData.users.length) * 100).toFixed(1) : 0}%
+                            </p>
+                            <p className="text-xs text-muted-foreground">30-day retention</p>
+                          </div>
+                        </div>
+
+                        {/* At-Risk Users List */}
+                        <div className="space-y-4">
+                          <h4 className="font-medium flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-amber-500" />
+                            Users Requiring Attention
+                          </h4>
+                          <div className="space-y-2">
+                            {usersData?.users?.filter(u => {
+                              const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                              const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                              return daysSinceActivity > 7;
+                            }).slice(0, 10).map(user => {
+                              const lastActivity = user.updatedAt ? new Date(user.updatedAt) : new Date(user.createdAt);
+                              const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                              const riskLevel = daysSinceActivity > 30 ? 'high' : daysSinceActivity > 14 ? 'medium' : 'low';
+                              return (
+                                <div key={user.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover-elevate">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-2 h-2 rounded-full ${riskLevel === 'high' ? 'bg-red-500' : riskLevel === 'medium' ? 'bg-amber-500' : 'bg-yellow-500'}`} />
+                                    <div>
+                                      <p className="font-medium">{user.firstName || user.email?.split('@')[0] || 'Unknown'}</p>
+                                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <Badge variant={riskLevel === 'high' ? 'destructive' : riskLevel === 'medium' ? 'secondary' : 'outline'}>
+                                      {riskLevel === 'high' ? 'High Risk' : riskLevel === 'medium' ? 'At Risk' : 'Dormant'}
+                                    </Badge>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Last active {daysSinceActivity} days ago
+                                    </p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {(!usersData?.users || usersData.users.filter(u => {
+                              const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                              const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                              return daysSinceActivity > 7;
+                            }).length === 0) && (
+                              <div className="py-8 text-center text-muted-foreground">
+                                <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                <p>All users are actively engaged!</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Cohort Analysis - Show only when users-cohorts is selected */}
+                {activeSection === 'users-cohorts' && usersAnalytics?.cohortAnalysis && (
+                  <Card data-testid="card-cohort-analysis">
+                    <CardHeader>
+                      <CardTitle>User Retention Cohort Analysis</CardTitle>
+                      <CardDescription>Week-over-week retention rates by cohort</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Cohort</TableHead>
+                              <TableHead>Week 0</TableHead>
+                              <TableHead>Week 1</TableHead>
+                              <TableHead>Week 2</TableHead>
+                              <TableHead>Week 3</TableHead>
+                              <TableHead>Week 4</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {usersAnalytics.cohortAnalysis.map((cohort) => (
+                              <TableRow key={cohort.cohort}>
+                                <TableCell className="font-medium">{cohort.cohort}</TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <div className="h-6 px-3 rounded bg-chart-1 text-white text-xs font-medium flex items-center justify-center">
+                                      100%
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className="h-6 px-3 rounded bg-chart-2 text-white text-xs font-medium flex items-center justify-center"
+                                      style={{ opacity: cohort.week1 / cohort.week0 }}
+                                    >
+                                      {((cohort.week1 / cohort.week0) * 100).toFixed(0)}%
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className="h-6 px-3 rounded bg-chart-3 text-white text-xs font-medium flex items-center justify-center"
+                                      style={{ opacity: cohort.week2 / cohort.week0 }}
+                                    >
+                                      {((cohort.week2 / cohort.week0) * 100).toFixed(0)}%
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className="h-6 px-3 rounded bg-chart-4 text-white text-xs font-medium flex items-center justify-center"
+                                      style={{ opacity: cohort.week3 / cohort.week0 }}
+                                    >
+                                      {((cohort.week3 / cohort.week0) * 100).toFixed(0)}%
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className="h-6 px-3 rounded bg-chart-5 text-white text-xs font-medium flex items-center justify-center"
+                                      style={{ opacity: cohort.week4 / cohort.week0 }}
+                                    >
+                                      {((cohort.week4 / cohort.week0) * 100).toFixed(0)}%
+                                    </div>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* User Management Table - Always shown at bottom */}
                 <Card>
                   <CardHeader>
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -2106,273 +2373,6 @@ export default function AdminDashboard() {
                     )}
                   </CardContent>
                 </Card>
-
-                {/* Geographic Distribution - Show when users-geo is selected */}
-                {activeSection === 'users-geo' && (
-                  <Card data-testid="card-geographic-distribution">
-                    <CardHeader>
-                      <CardTitle>Geographic Distribution</CardTitle>
-                      <CardDescription>User distribution by country</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {usersAnalytics?.geographicDistribution && usersAnalytics.geographicDistribution.length > 0 ? (
-                        <div className="space-y-6">
-                          <ResponsiveContainer width="100%" height={400}>
-                            <RechartsBarChart 
-                              data={usersAnalytics.geographicDistribution.sort((a, b) => b.users - a.users).slice(0, 15)}
-                              layout="vertical"
-                              margin={{ left: 80, right: 20, top: 20, bottom: 20 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                              <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} />
-                              <YAxis 
-                                type="category" 
-                                dataKey="country" 
-                                stroke="hsl(var(--foreground))" 
-                                fontSize={12}
-                                width={80}
-                              />
-                              <RechartsTooltip
-                                contentStyle={{
-                                  backgroundColor: 'hsl(var(--card))',
-                                  border: '1px solid hsl(var(--border))',
-                                  borderRadius: '8px'
-                                }}
-                                formatter={(value: number) => [`${value} users`, 'Users']}
-                              />
-                              <Bar dataKey="users" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]} />
-                            </RechartsBarChart>
-                          </ResponsiveContainer>
-                          
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {usersAnalytics.geographicDistribution.slice(0, 8).map((item, index) => (
-                              <div key={item.country} className="p-4 rounded-lg bg-muted/50">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
-                                  <span className="font-medium text-sm">{item.country}</span>
-                                </div>
-                                <p className="text-2xl font-bold">{item.users}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {((item.users / usersAnalytics.geographicDistribution.reduce((sum, i) => sum + i.users, 0)) * 100).toFixed(1)}% of total
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="py-12 text-center">
-                          <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">No geographic data available</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Churn Analysis - Show only when users-churn is selected */}
-                {activeSection === 'users-churn' && (
-                  <Card data-testid="card-churn-analysis">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <UserX className="h-5 w-5 text-red-500" />
-                        Churn Risk Analysis
-                      </CardTitle>
-                      <CardDescription>Identify users at risk of churning and track retention metrics</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-6">
-                        {/* Churn Metrics */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                            <div className="flex items-center gap-2 mb-2">
-                              <UserX className="h-4 w-4 text-red-500" />
-                              <span className="text-sm font-medium">At-Risk Users</span>
-                            </div>
-                            <p className="text-2xl font-bold text-red-500">
-                              {usersData?.users?.filter(u => {
-                                const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
-                                const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
-                                return daysSinceActivity > 14 && daysSinceActivity <= 30;
-                              }).length || 0}
-                            </p>
-                            <p className="text-xs text-muted-foreground">14-30 days inactive</p>
-                          </div>
-                          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                            <div className="flex items-center gap-2 mb-2">
-                              <AlertTriangle className="h-4 w-4 text-amber-500" />
-                              <span className="text-sm font-medium">Churned Users</span>
-                            </div>
-                            <p className="text-2xl font-bold text-amber-500">
-                              {usersData?.users?.filter(u => {
-                                const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
-                                const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
-                                return daysSinceActivity > 30;
-                              }).length || 0}
-                            </p>
-                            <p className="text-xs text-muted-foreground">30+ days inactive</p>
-                          </div>
-                          <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                            <div className="flex items-center gap-2 mb-2">
-                              <UserCheck className="h-4 w-4 text-green-500" />
-                              <span className="text-sm font-medium">Active Users</span>
-                            </div>
-                            <p className="text-2xl font-bold text-green-500">
-                              {usersData?.users?.filter(u => {
-                                const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
-                                const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
-                                return daysSinceActivity <= 7;
-                              }).length || 0}
-                            </p>
-                            <p className="text-xs text-muted-foreground">Active in last 7 days</p>
-                          </div>
-                          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Target className="h-4 w-4 text-blue-500" />
-                              <span className="text-sm font-medium">Retention Rate</span>
-                            </div>
-                            <p className="text-2xl font-bold text-blue-500">
-                              {usersData?.users?.length ? 
-                                ((usersData.users.filter(u => {
-                                  const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
-                                  const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
-                                  return daysSinceActivity <= 30;
-                                }).length / usersData.users.length) * 100).toFixed(1) : 0}%
-                            </p>
-                            <p className="text-xs text-muted-foreground">30-day retention</p>
-                          </div>
-                        </div>
-
-                        {/* At-Risk Users List */}
-                        <div className="space-y-4">
-                          <h4 className="font-medium flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 text-amber-500" />
-                            Users Requiring Attention
-                          </h4>
-                          <div className="space-y-2">
-                            {usersData?.users?.filter(u => {
-                              const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
-                              const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
-                              return daysSinceActivity > 7;
-                            }).slice(0, 10).map(user => {
-                              const lastActivity = user.updatedAt ? new Date(user.updatedAt) : new Date(user.createdAt);
-                              const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
-                              const riskLevel = daysSinceActivity > 30 ? 'high' : daysSinceActivity > 14 ? 'medium' : 'low';
-                              return (
-                                <div key={user.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover-elevate">
-                                  <div className="flex items-center gap-3">
-                                    <div className={`w-2 h-2 rounded-full ${riskLevel === 'high' ? 'bg-red-500' : riskLevel === 'medium' ? 'bg-amber-500' : 'bg-yellow-500'}`} />
-                                    <div>
-                                      <p className="font-medium">{user.firstName || user.email?.split('@')[0] || 'Unknown'}</p>
-                                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <Badge variant={riskLevel === 'high' ? 'destructive' : riskLevel === 'medium' ? 'secondary' : 'outline'}>
-                                      {riskLevel === 'high' ? 'High Risk' : riskLevel === 'medium' ? 'At Risk' : 'Dormant'}
-                                    </Badge>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      Last active {daysSinceActivity} days ago
-                                    </p>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                            {(!usersData?.users || usersData.users.filter(u => {
-                              const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
-                              const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
-                              return daysSinceActivity > 7;
-                            }).length === 0) && (
-                              <div className="py-8 text-center text-muted-foreground">
-                                <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                <p>All users are actively engaged!</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Cohort Analysis - Show only when users-cohorts is selected */}
-                {activeSection === 'users-cohorts' && usersAnalytics?.cohortAnalysis && (
-                  <Card data-testid="card-cohort-analysis">
-                    <CardHeader>
-                      <CardTitle>User Retention Cohort Analysis</CardTitle>
-                      <CardDescription>Week-over-week retention rates by cohort</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Cohort</TableHead>
-                              <TableHead>Week 0</TableHead>
-                              <TableHead>Week 1</TableHead>
-                              <TableHead>Week 2</TableHead>
-                              <TableHead>Week 3</TableHead>
-                              <TableHead>Week 4</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {usersAnalytics.cohortAnalysis.map((cohort) => (
-                              <TableRow key={cohort.cohort}>
-                                <TableCell className="font-medium">{cohort.cohort}</TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <div className="h-6 px-3 rounded bg-chart-1 text-white text-xs font-medium flex items-center justify-center">
-                                      100%
-                                    </div>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <div
-                                      className="h-6 px-3 rounded bg-chart-2 text-white text-xs font-medium flex items-center justify-center"
-                                      style={{ opacity: cohort.week1 / cohort.week0 }}
-                                    >
-                                      {((cohort.week1 / cohort.week0) * 100).toFixed(0)}%
-                                    </div>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <div
-                                      className="h-6 px-3 rounded bg-chart-3 text-white text-xs font-medium flex items-center justify-center"
-                                      style={{ opacity: cohort.week2 / cohort.week0 }}
-                                    >
-                                      {((cohort.week2 / cohort.week0) * 100).toFixed(0)}%
-                                    </div>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <div
-                                      className="h-6 px-3 rounded bg-chart-4 text-white text-xs font-medium flex items-center justify-center"
-                                      style={{ opacity: cohort.week3 / cohort.week0 }}
-                                    >
-                                      {((cohort.week3 / cohort.week0) * 100).toFixed(0)}%
-                                    </div>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <div
-                                      className="h-6 px-3 rounded bg-chart-5 text-white text-xs font-medium flex items-center justify-center"
-                                      style={{ opacity: cohort.week4 / cohort.week0 }}
-                                    >
-                                      {((cohort.week4 / cohort.week0) * 100).toFixed(0)}%
-                                    </div>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
               </motion.div>
                   </div>
                 )}

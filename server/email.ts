@@ -335,7 +335,7 @@ export async function sendPaymentReceiptEmail(
     }
 
     console.log("Payment receipt email sent successfully to:", email);
-    return { success: true, messageId: data.id };
+    return { success: true };
   } catch (error) {
     console.error("Email send error:", error);
     return { success: false, error: "Failed to send email" };

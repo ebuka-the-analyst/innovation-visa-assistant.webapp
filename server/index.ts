@@ -331,5 +331,32 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    
+    // Start notification processing interval (every 5 minutes)
+    const NOTIFICATION_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+    setInterval(async () => {
+      try {
+        const { processPendingNotifications } = await import("./services/notificationService");
+        const processed = await processPendingNotifications();
+        if (processed > 0) {
+          log(`Processed ${processed} pending notifications`);
+        }
+      } catch (error) {
+        console.error("Notification processing error:", error);
+      }
+    }, NOTIFICATION_INTERVAL);
+    
+    // Process notifications once on startup after a brief delay
+    setTimeout(async () => {
+      try {
+        const { processPendingNotifications } = await import("./services/notificationService");
+        const processed = await processPendingNotifications();
+        if (processed > 0) {
+          log(`Initial notification processing: ${processed} notifications sent`);
+        }
+      } catch (error) {
+        console.error("Initial notification processing error:", error);
+      }
+    }, 10000); // 10 second delay after startup
   });
 })();
