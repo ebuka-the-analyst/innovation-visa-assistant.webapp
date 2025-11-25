@@ -201,7 +201,7 @@ export default function PremiumFeatures() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {FEATURE_CARDS.map((feature) => {
               const Icon = feature.icon;
-              const isUnlocked = hasAccess(feature.tier);
+              const isUnlocked = hasAccess(feature.tier as "free" | "basic" | "premium" | "enterprise" | "ultimate");
               const tierIndex = TIER_ORDER.indexOf(feature.tier);
               const userTierIndex = TIER_ORDER.indexOf(userTier);
 

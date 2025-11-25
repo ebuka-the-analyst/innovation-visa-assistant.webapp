@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 import Header from "@/components/Header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 const tiers = [
   {
@@ -108,6 +110,8 @@ const tiers = [
 
 export default function Pricing() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [processingTier, setProcessingTier] = useState<string | null>(null);
   
   const { data: user } = useQuery<{ 
     id: string; 
@@ -120,11 +124,53 @@ export default function Pricing() {
     retry: false,
   });
 
+  const { data: businessPlans } = useQuery<Array<{
+    id: string;
+    tier: string;
+    status: string;
+    createdAt: string;
+  }>>({
+    queryKey: ['/api/business-plans'],
+    enabled: !!user,
+  });
+
   const currentTier = user?.subscriptionTier || 'free';
+  
+  const latestPlan = businessPlans?.sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )[0];
+
+  const checkoutMutation = useMutation({
+    mutationFn: async ({ planId, newTier }: { planId: string; newTier: string }) => {
+      const response = await apiRequest('POST', '/api/payment/create-checkout', { planId });
+      return response;
+    },
+    onSuccess: (data: any) => {
+      if (data.skipCheckout) {
+        setLocation(data.redirectUrl);
+      } else if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start checkout",
+        variant: "destructive",
+      });
+      setProcessingTier(null);
+    },
+  });
 
   const handleSelectTier = (tierId: string) => {
     if (!user) {
       setLocation(`/signup?tier=${tierId}`);
+      return;
+    }
+
+    if (latestPlan && latestPlan.status === 'pending' && latestPlan.tier === tierId) {
+      setProcessingTier(tierId);
+      checkoutMutation.mutate({ planId: latestPlan.id, newTier: tierId });
     } else {
       setLocation(`/questionnaire?tier=${tierId}`);
     }
@@ -207,16 +253,33 @@ export default function Pricing() {
                 </ul>
               </CardContent>
 
-              <CardFooter>
+              <CardFooter className="flex-col gap-2">
                 <Button
                   className="w-full"
                   variant={tier.popular ? "default" : "outline"}
                   size="lg"
                   onClick={() => handleSelectTier(tier.id)}
+                  disabled={processingTier === tier.id || checkoutMutation.isPending}
                   data-testid={`button-select-${tier.id}`}
                 >
-                  Select {tier.name}
+                  {processingTier === tier.id ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : isCurrentTier ? (
+                    "Current Plan"
+                  ) : latestPlan && latestPlan.tier === tier.id && latestPlan.status === 'pending' ? (
+                    "Continue to Payment"
+                  ) : (
+                    "Get Started"
+                  )}
                 </Button>
+                {!isCurrentTier && !(latestPlan && latestPlan.tier === tier.id) && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Complete questionnaire, then pay
+                  </p>
+                )}
               </CardFooter>
             </Card>
             );

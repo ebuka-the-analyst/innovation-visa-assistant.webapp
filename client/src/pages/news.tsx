@@ -233,7 +233,9 @@ function FeaturedNewsCard({ article }: { article: NewsArticle }) {
           <span>{article.sourceName}</span>
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            {formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })}
+            {article.publishedAt && !isNaN(new Date(article.publishedAt).getTime()) 
+              ? formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })
+              : "Recently"}
           </span>
         </div>
       </CardContent>
@@ -290,7 +292,9 @@ function NewsCard({ article }: { article: NewsArticle }) {
           <span className="truncate max-w-[120px]">{article.sourceName}</span>
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            {formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })}
+            {article.publishedAt && !isNaN(new Date(article.publishedAt).getTime()) 
+              ? formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })
+              : "Recently"}
           </span>
         </div>
         <Button
