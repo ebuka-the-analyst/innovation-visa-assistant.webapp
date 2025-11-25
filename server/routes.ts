@@ -2797,6 +2797,428 @@ ${generatedSections.join('\n\n---\n\n')}`;
   });
 
   // ============================================
+  // LAWYER REVIEW CENTER (ADMIN)
+  // ============================================
+
+  // Get all immigration lawyers
+  app.get("/api/admin/lawyers", requireAdmin, async (req, res) => {
+    try {
+      const lawyers = await storage.getAllImmigrationLawyers();
+      res.json(lawyers);
+    } catch (error) {
+      console.error("Get lawyers error:", error);
+      res.status(500).json({ error: "Failed to fetch lawyers" });
+    }
+  });
+
+  // Create a new immigration lawyer
+  app.post("/api/admin/lawyers", requireAdmin, async (req, res) => {
+    try {
+      const lawyer = await storage.createImmigrationLawyer(req.body);
+      res.json(lawyer);
+    } catch (error) {
+      console.error("Create lawyer error:", error);
+      res.status(500).json({ error: "Failed to create lawyer" });
+    }
+  });
+
+  // Update an immigration lawyer
+  app.patch("/api/admin/lawyers/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const lawyer = await storage.updateImmigrationLawyer(id, req.body);
+      if (!lawyer) {
+        return res.status(404).json({ error: "Lawyer not found" });
+      }
+      res.json(lawyer);
+    } catch (error) {
+      console.error("Update lawyer error:", error);
+      res.status(500).json({ error: "Failed to update lawyer" });
+    }
+  });
+
+  // Delete an immigration lawyer
+  app.delete("/api/admin/lawyers/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteImmigrationLawyer(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete lawyer error:", error);
+      res.status(500).json({ error: "Failed to delete lawyer" });
+    }
+  });
+
+  // Get available lawyers for assignment
+  app.get("/api/admin/lawyers/available", requireAdmin, async (req, res) => {
+    try {
+      const lawyers = await storage.getAvailableLawyers();
+      res.json(lawyers);
+    } catch (error) {
+      console.error("Get available lawyers error:", error);
+      res.status(500).json({ error: "Failed to fetch available lawyers" });
+    }
+  });
+
+  // Get all document reviews
+  app.get("/api/admin/lawyer-reviews", requireAdmin, async (req, res) => {
+    try {
+      const { status } = req.query;
+      let reviews;
+      if (status && typeof status === 'string') {
+        reviews = await storage.getLawyerDocumentReviewsByStatus(status);
+      } else {
+        reviews = await storage.getAllLawyerDocumentReviews();
+      }
+      res.json(reviews);
+    } catch (error) {
+      console.error("Get lawyer reviews error:", error);
+      res.status(500).json({ error: "Failed to fetch reviews" });
+    }
+  });
+
+  // Get a single document review with details
+  app.get("/api/admin/lawyer-reviews/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const review = await storage.getLawyerDocumentReview(id);
+      if (!review) {
+        return res.status(404).json({ error: "Review not found" });
+      }
+      
+      // Get related data
+      const [comments, history, businessPlan] = await Promise.all([
+        storage.getLawyerReviewCommentsByReview(id),
+        storage.getLawyerReviewStatusHistory(id),
+        review.businessPlanId ? storage.getBusinessPlan(review.businessPlanId) : null
+      ]);
+      
+      // Get user info
+      const user = await storage.getUser(review.userId);
+      
+      // Get lawyer info if assigned
+      let lawyer = null;
+      if (review.lawyerId) {
+        lawyer = await storage.getImmigrationLawyer(review.lawyerId);
+      }
+      
+      res.json({
+        ...review,
+        comments,
+        statusHistory: history,
+        businessPlan,
+        user: user ? { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } : null,
+        lawyer
+      });
+    } catch (error) {
+      console.error("Get lawyer review detail error:", error);
+      res.status(500).json({ error: "Failed to fetch review details" });
+    }
+  });
+
+  // Assign a lawyer to a review
+  app.post("/api/admin/lawyer-reviews/:id/assign", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { lawyerId } = req.body;
+      
+      if (!lawyerId) {
+        return res.status(400).json({ error: "Lawyer ID is required" });
+      }
+      
+      const review = await storage.assignLawyerToReview(id, lawyerId);
+      if (!review) {
+        return res.status(404).json({ error: "Review not found" });
+      }
+      
+      // Log status change
+      const user = req.user as any;
+      await storage.createLawyerReviewStatusHistory({
+        reviewId: id,
+        fromStatus: 'pending',
+        toStatus: 'assigned',
+        changedBy: user.id,
+        changedByRole: 'admin',
+        reason: `Assigned to lawyer ${lawyerId}`
+      });
+      
+      res.json(review);
+    } catch (error) {
+      console.error("Assign lawyer error:", error);
+      res.status(500).json({ error: "Failed to assign lawyer" });
+    }
+  });
+
+  // Update review status
+  app.patch("/api/admin/lawyer-reviews/:id/status", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, reason } = req.body;
+      
+      const currentReview = await storage.getLawyerDocumentReview(id);
+      if (!currentReview) {
+        return res.status(404).json({ error: "Review not found" });
+      }
+      
+      const review = await storage.updateLawyerDocumentReview(id, { status });
+      
+      // Log status change
+      const user = req.user as any;
+      await storage.createLawyerReviewStatusHistory({
+        reviewId: id,
+        fromStatus: currentReview.status,
+        toStatus: status,
+        changedBy: user.id,
+        changedByRole: 'admin',
+        reason
+      });
+      
+      res.json(review);
+    } catch (error) {
+      console.error("Update review status error:", error);
+      res.status(500).json({ error: "Failed to update status" });
+    }
+  });
+
+  // Complete a review with verdict
+  app.post("/api/admin/lawyer-reviews/:id/complete", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { verdict, confidenceScore, complianceScore, readinessScore, executiveSummary, keyStrengths, criticalIssues, recommendations } = req.body;
+      
+      if (!verdict) {
+        return res.status(400).json({ error: "Verdict is required" });
+      }
+      
+      // Update with all completion data
+      await storage.updateLawyerDocumentReview(id, {
+        executiveSummary,
+        keyStrengths,
+        criticalIssues,
+        recommendations
+      });
+      
+      const review = await storage.completeLawyerDocumentReview(id, verdict, {
+        confidence: confidenceScore,
+        compliance: complianceScore,
+        readiness: readinessScore
+      });
+      
+      if (!review) {
+        return res.status(404).json({ error: "Review not found" });
+      }
+      
+      // Log status change
+      const user = req.user as any;
+      await storage.createLawyerReviewStatusHistory({
+        reviewId: id,
+        fromStatus: 'in_review',
+        toStatus: 'completed',
+        changedBy: user.id,
+        changedByRole: 'admin',
+        reason: `Completed with verdict: ${verdict}`
+      });
+      
+      res.json(review);
+    } catch (error) {
+      console.error("Complete review error:", error);
+      res.status(500).json({ error: "Failed to complete review" });
+    }
+  });
+
+  // Add a comment to a review
+  app.post("/api/admin/lawyer-reviews/:id/comments", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = req.user as any;
+      
+      const comment = await storage.createLawyerReviewComment({
+        reviewId: id,
+        lawyerId: user.id, // Admin acting as reviewer
+        ...req.body
+      });
+      
+      res.json(comment);
+    } catch (error) {
+      console.error("Add comment error:", error);
+      res.status(500).json({ error: "Failed to add comment" });
+    }
+  });
+
+  // Update a comment
+  app.patch("/api/admin/lawyer-reviews/comments/:commentId", requireAdmin, async (req, res) => {
+    try {
+      const { commentId } = req.params;
+      const comment = await storage.updateLawyerReviewComment(commentId, req.body);
+      if (!comment) {
+        return res.status(404).json({ error: "Comment not found" });
+      }
+      res.json(comment);
+    } catch (error) {
+      console.error("Update comment error:", error);
+      res.status(500).json({ error: "Failed to update comment" });
+    }
+  });
+
+  // Delete a comment
+  app.delete("/api/admin/lawyer-reviews/comments/:commentId", requireAdmin, async (req, res) => {
+    try {
+      const { commentId } = req.params;
+      await storage.deleteLawyerReviewComment(commentId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete comment error:", error);
+      res.status(500).json({ error: "Failed to delete comment" });
+    }
+  });
+
+  // Get lawyer review analytics
+  app.get("/api/admin/lawyer-reviews/analytics", requireAdmin, async (req, res) => {
+    try {
+      const analytics = await storage.getLawyerReviewAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Get review analytics error:", error);
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // Get lawyer performance
+  app.get("/api/admin/lawyers/:id/performance", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const performance = await storage.getLawyerPerformance(id);
+      res.json(performance);
+    } catch (error) {
+      console.error("Get lawyer performance error:", error);
+      res.status(500).json({ error: "Failed to fetch performance" });
+    }
+  });
+
+  // ============================================
+  // USER-FACING LAWYER REVIEW ROUTES
+  // ============================================
+
+  // Request a lawyer review for a business plan
+  app.post("/api/lawyer-reviews/request", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { businessPlanId, priority = 'normal' } = req.body;
+      
+      if (!businessPlanId) {
+        return res.status(400).json({ error: "Business plan ID is required" });
+      }
+      
+      // Verify user owns the business plan
+      const businessPlan = await storage.getBusinessPlan(businessPlanId);
+      if (!businessPlan || businessPlan.userId !== user.id) {
+        return res.status(403).json({ error: "You do not have permission to request a review for this plan" });
+      }
+      
+      // Check tier access (only Premium and above can request reviews)
+      const userTier = user.tier || 'free';
+      if (!['premium', 'enterprise', 'ultimate'].includes(userTier)) {
+        return res.status(403).json({ error: "Lawyer review is only available for Premium, Enterprise, and Ultimate tier users" });
+      }
+      
+      // Calculate SLA based on tier
+      let slaHours = 72; // Default 3 days
+      if (userTier === 'enterprise') slaHours = 48;
+      if (userTier === 'ultimate') slaHours = 24;
+      
+      const dueDate = new Date();
+      dueDate.setHours(dueDate.getHours() + slaHours);
+      
+      const review = await storage.createLawyerDocumentReview({
+        businessPlanId,
+        userId: user.id,
+        tier: userTier,
+        priority,
+        slaHours,
+        dueDate
+      });
+      
+      res.json(review);
+    } catch (error) {
+      console.error("Request lawyer review error:", error);
+      res.status(500).json({ error: "Failed to request review" });
+    }
+  });
+
+  // Get user's lawyer reviews
+  app.get("/api/lawyer-reviews", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const reviews = await storage.getLawyerDocumentReviewsByUser(user.id);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Get user lawyer reviews error:", error);
+      res.status(500).json({ error: "Failed to fetch reviews" });
+    }
+  });
+
+  // Get a specific review (user can only see their own)
+  app.get("/api/lawyer-reviews/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      
+      const review = await storage.getLawyerDocumentReview(id);
+      if (!review) {
+        return res.status(404).json({ error: "Review not found" });
+      }
+      
+      if (review.userId !== user.id) {
+        return res.status(403).json({ error: "You do not have permission to view this review" });
+      }
+      
+      // Get visible comments only
+      const allComments = await storage.getLawyerReviewCommentsByReview(id);
+      const visibleComments = allComments.filter(c => c.isVisibleToUser);
+      
+      res.json({
+        ...review,
+        comments: visibleComments
+      });
+    } catch (error) {
+      console.error("Get user lawyer review error:", error);
+      res.status(500).json({ error: "Failed to fetch review" });
+    }
+  });
+
+  // Rate a completed review
+  app.post("/api/lawyer-reviews/:id/rate", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      const { rating, feedback } = req.body;
+      
+      const review = await storage.getLawyerDocumentReview(id);
+      if (!review) {
+        return res.status(404).json({ error: "Review not found" });
+      }
+      
+      if (review.userId !== user.id) {
+        return res.status(403).json({ error: "You do not have permission to rate this review" });
+      }
+      
+      if (review.status !== 'completed') {
+        return res.status(400).json({ error: "Can only rate completed reviews" });
+      }
+      
+      const updated = await storage.updateLawyerDocumentReview(id, {
+        userRating: rating,
+        userFeedback: feedback
+      });
+      
+      res.json(updated);
+    } catch (error) {
+      console.error("Rate review error:", error);
+      res.status(500).json({ error: "Failed to rate review" });
+    }
+  });
+
+  // ============================================
   // PARTNER DASHBOARD
   // ============================================
 

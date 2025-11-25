@@ -14,9 +14,13 @@ import {
   type PayoutRequest, type InsertPayoutRequest,
   type SupportTicket, type InsertSupportTicket,
   type UserDocument, type InsertUserDocument,
+  type ImmigrationLawyer, type InsertImmigrationLawyer,
+  type LawyerDocumentReview, type InsertLawyerDocumentReview,
+  type LawyerReviewComment, type InsertLawyerReviewComment,
+  type LawyerReviewStatusHistory, type InsertLawyerReviewStatusHistory,
   users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics,
   referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits, payoutRequests,
-  supportTickets, userDocuments
+  supportTickets, userDocuments, immigrationLawyers, lawyerDocumentReviews, lawyerReviewComments, lawyerReviewStatusHistory
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gt, lt, desc, sql, count } from "drizzle-orm";
@@ -204,6 +208,68 @@ export interface IStorage {
   // ============================================
   markOnboardingComplete(userId: string): Promise<void>;
   resetOnboarding(userId: string): Promise<void>;
+
+  // ============================================
+  // IMMIGRATION LAWYERS
+  // ============================================
+  createImmigrationLawyer(lawyer: InsertImmigrationLawyer): Promise<ImmigrationLawyer>;
+  getImmigrationLawyer(id: string): Promise<ImmigrationLawyer | undefined>;
+  getImmigrationLawyerByEmail(email: string): Promise<ImmigrationLawyer | undefined>;
+  getAllImmigrationLawyers(): Promise<ImmigrationLawyer[]>;
+  getAvailableLawyers(): Promise<ImmigrationLawyer[]>;
+  updateImmigrationLawyer(id: string, updates: Partial<ImmigrationLawyer>): Promise<ImmigrationLawyer | undefined>;
+  deleteImmigrationLawyer(id: string): Promise<void>;
+
+  // ============================================
+  // LAWYER DOCUMENT REVIEWS
+  // ============================================
+  createLawyerDocumentReview(review: InsertLawyerDocumentReview): Promise<LawyerDocumentReview>;
+  getLawyerDocumentReview(id: string): Promise<LawyerDocumentReview | undefined>;
+  getLawyerDocumentReviewsByUser(userId: string): Promise<LawyerDocumentReview[]>;
+  getLawyerDocumentReviewsByLawyer(lawyerId: string): Promise<LawyerDocumentReview[]>;
+  getLawyerDocumentReviewsByStatus(status: string): Promise<LawyerDocumentReview[]>;
+  getAllLawyerDocumentReviews(): Promise<LawyerDocumentReview[]>;
+  getPendingLawyerDocumentReviews(): Promise<LawyerDocumentReview[]>;
+  updateLawyerDocumentReview(id: string, updates: Partial<LawyerDocumentReview>): Promise<LawyerDocumentReview | undefined>;
+  assignLawyerToReview(reviewId: string, lawyerId: string): Promise<LawyerDocumentReview | undefined>;
+  completeLawyerDocumentReview(reviewId: string, verdict: string, scores: { confidence?: number; compliance?: number; readiness?: number }): Promise<LawyerDocumentReview | undefined>;
+
+  // ============================================
+  // LAWYER REVIEW COMMENTS
+  // ============================================
+  createLawyerReviewComment(comment: InsertLawyerReviewComment): Promise<LawyerReviewComment>;
+  getLawyerReviewComment(id: string): Promise<LawyerReviewComment | undefined>;
+  getLawyerReviewCommentsByReview(reviewId: string): Promise<LawyerReviewComment[]>;
+  getLawyerReviewCommentsBySection(reviewId: string, section: string): Promise<LawyerReviewComment[]>;
+  updateLawyerReviewComment(id: string, updates: Partial<LawyerReviewComment>): Promise<LawyerReviewComment | undefined>;
+  resolveLawyerReviewComment(id: string, resolvedBy: string, note?: string): Promise<LawyerReviewComment | undefined>;
+  deleteLawyerReviewComment(id: string): Promise<void>;
+
+  // ============================================
+  // LAWYER REVIEW STATUS HISTORY
+  // ============================================
+  createLawyerReviewStatusHistory(history: InsertLawyerReviewStatusHistory): Promise<LawyerReviewStatusHistory>;
+  getLawyerReviewStatusHistory(reviewId: string): Promise<LawyerReviewStatusHistory[]>;
+
+  // ============================================
+  // LAWYER REVIEW ANALYTICS
+  // ============================================
+  getLawyerReviewAnalytics(): Promise<{
+    totalReviews: number;
+    pendingReviews: number;
+    inProgressReviews: number;
+    completedReviews: number;
+    approvedReviews: number;
+    needsRevisionReviews: number;
+    averageTurnaroundHours: number;
+    overdueReviews: number;
+  }>;
+  getLawyerPerformance(lawyerId: string): Promise<{
+    totalReviews: number;
+    completedReviews: number;
+    averageRating: number;
+    averageTurnaroundHours: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1015,6 +1081,301 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
+  }
+
+  // ============================================
+  // IMMIGRATION LAWYERS
+  // ============================================
+  async createImmigrationLawyer(lawyer: InsertImmigrationLawyer): Promise<ImmigrationLawyer> {
+    const [result] = await db.insert(immigrationLawyers).values(lawyer).returning();
+    return result;
+  }
+
+  async getImmigrationLawyer(id: string): Promise<ImmigrationLawyer | undefined> {
+    const [result] = await db.select().from(immigrationLawyers).where(eq(immigrationLawyers.id, id)).limit(1);
+    return result;
+  }
+
+  async getImmigrationLawyerByEmail(email: string): Promise<ImmigrationLawyer | undefined> {
+    const [result] = await db.select().from(immigrationLawyers).where(eq(immigrationLawyers.email, email)).limit(1);
+    return result;
+  }
+
+  async getAllImmigrationLawyers(): Promise<ImmigrationLawyer[]> {
+    return db.select().from(immigrationLawyers).orderBy(desc(immigrationLawyers.createdAt));
+  }
+
+  async getAvailableLawyers(): Promise<ImmigrationLawyer[]> {
+    return db.select().from(immigrationLawyers)
+      .where(and(
+        eq(immigrationLawyers.isAvailable, true),
+        eq(immigrationLawyers.status, 'active')
+      ))
+      .orderBy(immigrationLawyers.currentReviewCount);
+  }
+
+  async updateImmigrationLawyer(id: string, updates: Partial<ImmigrationLawyer>): Promise<ImmigrationLawyer | undefined> {
+    const [result] = await db.update(immigrationLawyers)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(immigrationLawyers.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteImmigrationLawyer(id: string): Promise<void> {
+    await db.delete(immigrationLawyers).where(eq(immigrationLawyers.id, id));
+  }
+
+  // ============================================
+  // LAWYER DOCUMENT REVIEWS
+  // ============================================
+  async createLawyerDocumentReview(review: InsertLawyerDocumentReview): Promise<LawyerDocumentReview> {
+    const [result] = await db.insert(lawyerDocumentReviews).values(review).returning();
+    return result;
+  }
+
+  async getLawyerDocumentReview(id: string): Promise<LawyerDocumentReview | undefined> {
+    const [result] = await db.select().from(lawyerDocumentReviews).where(eq(lawyerDocumentReviews.id, id)).limit(1);
+    return result;
+  }
+
+  async getLawyerDocumentReviewsByUser(userId: string): Promise<LawyerDocumentReview[]> {
+    return db.select().from(lawyerDocumentReviews)
+      .where(eq(lawyerDocumentReviews.userId, userId))
+      .orderBy(desc(lawyerDocumentReviews.createdAt));
+  }
+
+  async getLawyerDocumentReviewsByLawyer(lawyerId: string): Promise<LawyerDocumentReview[]> {
+    return db.select().from(lawyerDocumentReviews)
+      .where(eq(lawyerDocumentReviews.lawyerId, lawyerId))
+      .orderBy(desc(lawyerDocumentReviews.createdAt));
+  }
+
+  async getLawyerDocumentReviewsByStatus(status: string): Promise<LawyerDocumentReview[]> {
+    return db.select().from(lawyerDocumentReviews)
+      .where(eq(lawyerDocumentReviews.status, status))
+      .orderBy(desc(lawyerDocumentReviews.createdAt));
+  }
+
+  async getAllLawyerDocumentReviews(): Promise<LawyerDocumentReview[]> {
+    return db.select().from(lawyerDocumentReviews).orderBy(desc(lawyerDocumentReviews.createdAt));
+  }
+
+  async getPendingLawyerDocumentReviews(): Promise<LawyerDocumentReview[]> {
+    return db.select().from(lawyerDocumentReviews)
+      .where(eq(lawyerDocumentReviews.status, 'pending'))
+      .orderBy(lawyerDocumentReviews.requestedAt);
+  }
+
+  async updateLawyerDocumentReview(id: string, updates: Partial<LawyerDocumentReview>): Promise<LawyerDocumentReview | undefined> {
+    const [result] = await db.update(lawyerDocumentReviews)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(lawyerDocumentReviews.id, id))
+      .returning();
+    return result;
+  }
+
+  async assignLawyerToReview(reviewId: string, lawyerId: string): Promise<LawyerDocumentReview | undefined> {
+    const [result] = await db.update(lawyerDocumentReviews)
+      .set({
+        lawyerId,
+        status: 'assigned',
+        assignedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(lawyerDocumentReviews.id, reviewId))
+      .returning();
+    
+    // Increment lawyer's current review count
+    await db.update(immigrationLawyers)
+      .set({
+        currentReviewCount: sql`${immigrationLawyers.currentReviewCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(immigrationLawyers.id, lawyerId));
+    
+    return result;
+  }
+
+  async completeLawyerDocumentReview(
+    reviewId: string, 
+    verdict: string, 
+    scores: { confidence?: number; compliance?: number; readiness?: number }
+  ): Promise<LawyerDocumentReview | undefined> {
+    const review = await this.getLawyerDocumentReview(reviewId);
+    if (!review) return undefined;
+
+    const [result] = await db.update(lawyerDocumentReviews)
+      .set({
+        status: 'completed',
+        overallVerdict: verdict,
+        confidenceScore: scores.confidence,
+        complianceScore: scores.compliance,
+        readinessScore: scores.readiness,
+        completedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(lawyerDocumentReviews.id, reviewId))
+      .returning();
+
+    // Update lawyer stats
+    if (review.lawyerId) {
+      await db.update(immigrationLawyers)
+        .set({
+          currentReviewCount: sql`GREATEST(0, ${immigrationLawyers.currentReviewCount} - 1)`,
+          totalReviewsCompleted: sql`${immigrationLawyers.totalReviewsCompleted} + 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(immigrationLawyers.id, review.lawyerId));
+    }
+
+    return result;
+  }
+
+  // ============================================
+  // LAWYER REVIEW COMMENTS
+  // ============================================
+  async createLawyerReviewComment(comment: InsertLawyerReviewComment): Promise<LawyerReviewComment> {
+    const [result] = await db.insert(lawyerReviewComments).values(comment).returning();
+    return result;
+  }
+
+  async getLawyerReviewComment(id: string): Promise<LawyerReviewComment | undefined> {
+    const [result] = await db.select().from(lawyerReviewComments).where(eq(lawyerReviewComments.id, id)).limit(1);
+    return result;
+  }
+
+  async getLawyerReviewCommentsByReview(reviewId: string): Promise<LawyerReviewComment[]> {
+    return db.select().from(lawyerReviewComments)
+      .where(eq(lawyerReviewComments.reviewId, reviewId))
+      .orderBy(lawyerReviewComments.createdAt);
+  }
+
+  async getLawyerReviewCommentsBySection(reviewId: string, section: string): Promise<LawyerReviewComment[]> {
+    return db.select().from(lawyerReviewComments)
+      .where(and(
+        eq(lawyerReviewComments.reviewId, reviewId),
+        eq(lawyerReviewComments.section, section)
+      ))
+      .orderBy(lawyerReviewComments.createdAt);
+  }
+
+  async updateLawyerReviewComment(id: string, updates: Partial<LawyerReviewComment>): Promise<LawyerReviewComment | undefined> {
+    const [result] = await db.update(lawyerReviewComments)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(lawyerReviewComments.id, id))
+      .returning();
+    return result;
+  }
+
+  async resolveLawyerReviewComment(id: string, resolvedBy: string, note?: string): Promise<LawyerReviewComment | undefined> {
+    const [result] = await db.update(lawyerReviewComments)
+      .set({
+        isResolved: true,
+        resolvedAt: new Date(),
+        resolvedBy,
+        resolutionNote: note,
+        updatedAt: new Date()
+      })
+      .where(eq(lawyerReviewComments.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteLawyerReviewComment(id: string): Promise<void> {
+    await db.delete(lawyerReviewComments).where(eq(lawyerReviewComments.id, id));
+  }
+
+  // ============================================
+  // LAWYER REVIEW STATUS HISTORY
+  // ============================================
+  async createLawyerReviewStatusHistory(history: InsertLawyerReviewStatusHistory): Promise<LawyerReviewStatusHistory> {
+    const [result] = await db.insert(lawyerReviewStatusHistory).values(history).returning();
+    return result;
+  }
+
+  async getLawyerReviewStatusHistory(reviewId: string): Promise<LawyerReviewStatusHistory[]> {
+    return db.select().from(lawyerReviewStatusHistory)
+      .where(eq(lawyerReviewStatusHistory.reviewId, reviewId))
+      .orderBy(desc(lawyerReviewStatusHistory.createdAt));
+  }
+
+  // ============================================
+  // LAWYER REVIEW ANALYTICS
+  // ============================================
+  async getLawyerReviewAnalytics(): Promise<{
+    totalReviews: number;
+    pendingReviews: number;
+    inProgressReviews: number;
+    completedReviews: number;
+    approvedReviews: number;
+    needsRevisionReviews: number;
+    averageTurnaroundHours: number;
+    overdueReviews: number;
+  }> {
+    const allReviews = await db.select().from(lawyerDocumentReviews);
+    
+    const pendingReviews = allReviews.filter(r => r.status === 'pending').length;
+    const inProgressReviews = allReviews.filter(r => ['assigned', 'in_review'].includes(r.status)).length;
+    const completedReviews = allReviews.filter(r => r.status === 'completed').length;
+    const approvedReviews = allReviews.filter(r => r.overallVerdict === 'approved').length;
+    const needsRevisionReviews = allReviews.filter(r => r.overallVerdict === 'needs_revision').length;
+    const overdueReviews = allReviews.filter(r => r.isOverdue).length;
+
+    // Calculate average turnaround for completed reviews
+    const completedWithTimes = allReviews.filter(r => r.completedAt && r.requestedAt);
+    let avgTurnaround = 0;
+    if (completedWithTimes.length > 0) {
+      const totalHours = completedWithTimes.reduce((sum, r) => {
+        const diff = new Date(r.completedAt!).getTime() - new Date(r.requestedAt).getTime();
+        return sum + (diff / (1000 * 60 * 60));
+      }, 0);
+      avgTurnaround = Math.round(totalHours / completedWithTimes.length);
+    }
+
+    return {
+      totalReviews: allReviews.length,
+      pendingReviews,
+      inProgressReviews,
+      completedReviews,
+      approvedReviews,
+      needsRevisionReviews,
+      averageTurnaroundHours: avgTurnaround,
+      overdueReviews
+    };
+  }
+
+  async getLawyerPerformance(lawyerId: string): Promise<{
+    totalReviews: number;
+    completedReviews: number;
+    averageRating: number;
+    averageTurnaroundHours: number;
+  }> {
+    const reviews = await db.select().from(lawyerDocumentReviews)
+      .where(eq(lawyerDocumentReviews.lawyerId, lawyerId));
+    
+    const completedReviews = reviews.filter(r => r.status === 'completed');
+    const ratings = completedReviews.filter(r => r.userRating !== null).map(r => r.userRating!);
+    const avgRating = ratings.length > 0 
+      ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 
+      : 0;
+
+    const completedWithTimes = completedReviews.filter(r => r.completedAt && r.requestedAt);
+    let avgTurnaround = 0;
+    if (completedWithTimes.length > 0) {
+      const totalHours = completedWithTimes.reduce((sum, r) => {
+        const diff = new Date(r.completedAt!).getTime() - new Date(r.requestedAt).getTime();
+        return sum + (diff / (1000 * 60 * 60));
+      }, 0);
+      avgTurnaround = Math.round(totalHours / completedWithTimes.length);
+    }
+
+    return {
+      totalReviews: reviews.length,
+      completedReviews: completedReviews.length,
+      averageRating: avgRating,
+      averageTurnaroundHours: avgTurnaround
+    };
   }
 }
 
