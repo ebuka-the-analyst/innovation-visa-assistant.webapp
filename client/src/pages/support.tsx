@@ -32,7 +32,7 @@ const FAQ_CATEGORIES = [
       },
       {
         q: "How does this platform help me?",
-        a: "Our platform provides 109 PhD-level tools to guide you through every aspect of the visa application process, from business planning to endorser preparation. All tools are designed to meet official visa requirements."
+        a: "Our platform provides 100+ professional-level tools to guide you through every aspect of the visa application process, from business planning to endorser preparation. All tools are designed to meet official visa requirements."
       },
       {
         q: "Is my data secure?",

@@ -136,7 +136,7 @@ export default function Signup() {
     <>
       <SEOHead
         title="Sign Up | UK Innovator Founder Visa Assistant"
-        description="Create your free account and start your UK Innovator Founder Visa application journey. Access 109 PhD-level tools, business plan generator, and expert guidance."
+        description="Create your free account and start your UK Innovator Founder Visa application journey. Access 100+ professional-level tools, business plan generator, and expert guidance."
         path="/signup"
       />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">

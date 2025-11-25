@@ -1040,7 +1040,7 @@ export default function AdminDashboard() {
                           {getSectionTitle()}
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                          PhD-level analytics and comprehensive system management
+                          Professional-level analytics and comprehensive system management
                         </p>
                       </div>
                     </div>

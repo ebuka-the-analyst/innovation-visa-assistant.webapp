@@ -28,8 +28,8 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <SEOHead
-        title="UK Innovator Founder Visa Assistant | 109 Expert Tools & PhD-Level Guidance"
-        description="Get approved with our AI-powered UK Innovator Founder Visa platform. 109 PhD-level tools covering compliance, business plans, financial modeling, and endorsement preparation. Start your journey today."
+        title="UK Innovator Founder Visa Assistant | 100+ Professional Tools & Expert Guidance"
+        description="Get approved with our AI-powered UK Innovator Founder Visa platform. 100+ professional-level tools covering compliance, business plans, financial modeling, and endorsement preparation. Start your journey today."
         canonical="https://innovatorfoundervisaassistant.co.uk/"
         keywords="UK Innovator Founder Visa, innovator visa, UK business visa, visa for entrepreneurs UK, innovator founder visa requirements, UK visa application, business plan for visa, endorsement UK visa"
         schema={combinedSchema}

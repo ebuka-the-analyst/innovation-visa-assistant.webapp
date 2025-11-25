@@ -55,7 +55,7 @@ export function ToolAccessGuard({ children, requiredTier, toolName }: ToolAccess
                     This tool requires the <strong>{getRequiredTierName(requiredTier)} Plan</strong>
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Upgrade to unlock this powerful feature and access PhD-level analysis
+                    Upgrade to unlock this powerful feature and access professional-level analysis
                   </p>
                 </div>
 

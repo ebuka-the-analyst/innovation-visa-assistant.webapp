@@ -16,7 +16,7 @@ export default function TermsOfService() {
     <>
       <SEOHead
         title="Terms of Service | UK Innovator Founder Visa Assistant"
-        description="UK Innovator Founder Visa Assistant terms of service. Understand your rights and responsibilities when using our PhD-level visa application tools."
+        description="UK Innovator Founder Visa Assistant terms of service. Understand your rights and responsibilities when using our professional-level visa application tools."
         canonical="https://innovatorfoundervisaassistant.co.uk/terms"
       />
       
@@ -67,7 +67,7 @@ export default function TermsOfService() {
                     UK Innovator Founder Visa Assistant provides AI-powered tools and resources to help applicants prepare for the UK Innovator Founder Visa application process. Our services include:
                   </p>
                   <ul className="list-disc pl-6 text-muted-foreground space-y-1">
-                    <li>109 PhD-level business planning and visa preparation tools</li>
+                    <li>100+ professional-level business planning and visa preparation tools</li>
                     <li>Business plan generation and innovation assessment</li>
                     <li>Financial modeling and compliance checking</li>
                     <li>Pitch coaching and endorsement preparation</li>
@@ -112,8 +112,8 @@ export default function TermsOfService() {
                     <li><strong>Free (£0):</strong> 13 essential tools</li>
                     <li><strong>Basic (£29):</strong> 20 tools total</li>
                     <li><strong>Premium (£49):</strong> 83 tools total (Most Popular)</li>
-                    <li><strong>Enterprise (£89):</strong> 109 tools total</li>
-                    <li><strong>Ultimate (£129):</strong> All 109 tools + VIP support</li>
+                    <li><strong>Enterprise (£89):</strong> All tools</li>
+                    <li><strong>Ultimate (£129):</strong> All 100+ tools + VIP support</li>
                   </ul>
 
                   <h3 className="font-semibold mb-2">4.2 Payment Terms</h3>

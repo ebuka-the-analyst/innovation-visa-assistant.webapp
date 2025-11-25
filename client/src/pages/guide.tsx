@@ -32,7 +32,7 @@ export default function Guide() {
     <>
       <SEOHead
         title="UK Innovator Founder Visa Complete Guide 2025 | Requirements, Process & Timeline"
-        description="Comprehensive PhD-level guide to the UK Innovator Founder Visa. Learn requirements, endorsement process, innovation criteria, financial planning, and path to settlement. Updated for 2025."
+        description="Comprehensive expert guide to the UK Innovator Founder Visa. Learn requirements, endorsement process, innovation criteria, financial planning, and path to settlement. Updated for 2025."
         path="/guide"
         keywords="UK Innovator Founder Visa 2025, innovator visa guide, UK visa requirements, endorsement process, settlement pathway, visa application timeline"
         ogType="article"
@@ -57,7 +57,7 @@ export default function Guide() {
                 <span className="block text-primary mt-2">Complete Guide 2025</span>
               </h1>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                The definitive, PhD-level resource for understanding and successfully navigating the UK Innovator Founder Visa application process. Everything you need to know about requirements, endorsement, innovation assessment, and settlement.
+                The definitive expert resource for understanding and successfully navigating the UK Innovator Founder Visa application process. Everything you need to know about requirements, endorsement, innovation assessment, and settlement.
               </p>
               <div className="mt-8 flex gap-4 justify-center">
                 <Link href="/signup">
@@ -68,7 +68,7 @@ export default function Guide() {
                 </Link>
                 <Link href="/tools-hub">
                   <Button size="lg" variant="outline" data-testid="button-view-tools">
-                    View 109 Tools
+                    View All Tools
                   </Button>
                 </Link>
               </div>
@@ -630,7 +630,7 @@ export default function Guide() {
           <section id="tips">
             <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
               <Target className="w-8 h-8 text-primary" />
-              PhD-Level Success Tips
+              Expert Success Tips
             </h2>
             <Card>
               <CardContent className="pt-6 space-y-4 text-muted-foreground leading-relaxed">
@@ -664,7 +664,7 @@ export default function Guide() {
                 <div className="bg-accent/20 p-6 rounded mt-6">
                   <h3 className="text-2xl font-bold mb-4 text-center">Ready to Start Your Journey?</h3>
                   <p className="text-center mb-4">
-                    Access our 109 PhD-level tools designed specifically for UK Innovator Founder Visa applicants.
+                    Access our 100+ professional-level tools designed specifically for UK Innovator Founder Visa applicants.
                   </p>
                   <div className="flex gap-4 justify-center">
                     <Link href="/signup">

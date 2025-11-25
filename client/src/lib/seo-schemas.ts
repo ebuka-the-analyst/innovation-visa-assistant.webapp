@@ -5,7 +5,7 @@ export const organizationSchema = {
   "name": "UK Innovator Founder Visa Assistant",
   "url": "https://innovatorfoundervisaassistant.co.uk",
   "logo": "https://innovatorfoundervisaassistant.co.uk/logo.png",
-  "description": "AI-powered platform providing 109 expert tools for UK Innovator Founder Visa applications. PhD-level guidance covering compliance, business planning, financial modeling, and endorsement preparation.",
+  "description": "AI-powered platform providing 100+ expert tools for UK Innovator Founder Visa applications. Professional-level guidance covering compliance, business planning, financial modeling, and endorsement preparation.",
   "contactPoint": {
     "@type": "ContactPoint",
     "contactType": "Customer Support",
@@ -39,7 +39,7 @@ export const softwareApplicationSchema = {
     "bestRating": "5",
     "worstRating": "1"
   },
-  "description": "Comprehensive UK Innovator Founder Visa application toolkit with 109 PhD-level tools for compliance, business planning, and endorsement success."
+  "description": "Comprehensive UK Innovator Founder Visa application toolkit with 100+ professional-level tools for compliance, business planning, and endorsement success."
 };
 
 // FAQ Schema for common questions

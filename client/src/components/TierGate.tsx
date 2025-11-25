@@ -94,7 +94,7 @@ export function TierGate({ children, requiredTier, toolName }: TierGateProps) {
               </li>
               <li className="flex items-center gap-2">
                 <span className="text-primary">✓</span>
-                <span>PhD-level business planning assistance</span>
+                <span>Professional-level business planning assistance</span>
               </li>
               <li className="flex items-center gap-2">
                 <span className="text-primary">✓</span>

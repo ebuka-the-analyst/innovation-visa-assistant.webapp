@@ -152,7 +152,7 @@ export default function FAQ() {
                 <span className="block text-primary mt-2">Frequently Asked Questions</span>
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                PhD-level answers to your most important questions about the UK Innovator Founder Visa process, requirements, and timeline.
+                Expert answers to your most important questions about the UK Innovator Founder Visa process, requirements, and timeline.
               </p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function FAQ() {
             <CardContent className="p-8 text-center">
               <h2 className="text-2xl font-bold mb-4">Still Have Questions?</h2>
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Get started with our 109 PhD-level tools designed to guide you through every step of your UK Innovator Founder Visa application.
+                Get started with our 100+ professional-level tools designed to guide you through every step of your UK Innovator Founder Visa application.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/tools-hub">

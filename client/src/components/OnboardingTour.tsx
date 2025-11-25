@@ -23,12 +23,12 @@ const TOUR_STEPS: TourStep[] = [
   {
     id: "welcome",
     title: "Welcome to Your Visa Journey",
-    description: "The UK Innovator Founder Visa Assistant guides you through every step of your visa application with 109 PhD-level tools designed for success.",
+    description: "The UK Innovator Founder Visa Assistant guides you through every step of your visa application with 100+ professional-level tools designed for success.",
     icon: Sparkles,
   },
   {
     id: "tools",
-    title: "Explore 109 Expert Tools",
+    title: "Explore 100+ Expert Tools",
     description: "Access comprehensive tools across Compliance, Documentation, Business Planning, Financial Modeling, and more. Start with the Business Plan Generator - it's free!",
     icon: FileText,
     action: { label: "Browse Tools", href: "/tools-hub" }

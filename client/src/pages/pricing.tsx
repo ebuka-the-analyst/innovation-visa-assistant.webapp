@@ -72,7 +72,7 @@ const tiers = [
     description: "Maximum detail for complex ventures",
     pages: "50-80 pages",
     features: [
-      "109 tools access (all Premium + 26 Enterprise)",
+      "All tools access (all Premium + Enterprise)",
       "Deep-dive Innovation coverage",
       "Complete Viability assessment",
       "Multi-market Scalability plan",
@@ -92,7 +92,7 @@ const tiers = [
     description: "Everything you need for guaranteed approval",
     pages: "80+ pages",
     features: [
-      "ALL 109 tools - complete access",
+      "ALL 100+ tools - complete access",
       "All Enterprise features included",
       "24/7 VIP support & live chat",
       "Personal visa strategist",
