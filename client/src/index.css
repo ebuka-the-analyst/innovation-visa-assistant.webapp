@@ -415,6 +415,7 @@
 }
 
 /* Logo dark mode - show/hide based on theme */
+/* clip-path inset: top right bottom left - crop more from bottom to hide black pad */
 .logo-light {
   display: block;
   mix-blend-mode: normal !important;
@@ -424,8 +425,8 @@
   object-position: center;
   padding: 0;
   margin: 0;
-  clip-path: inset(28% 0% 28% 0%);
-  transform: scaleX(1.22) scaleY(1.4);
+  clip-path: inset(28% 0% 34% 0%);
+  transform: scaleX(1.22) scaleY(1.5);
 }
 
 .logo-dark {
@@ -437,8 +438,8 @@
   object-position: center;
   padding: 0;
   margin: 0;
-  clip-path: inset(28% 0% 28% 0%);
-  transform: scaleX(1.22) scaleY(1.4);
+  clip-path: inset(28% 0% 34% 0%);
+  transform: scaleX(1.22) scaleY(1.5);
 }
 
 .dark .logo-light {
@@ -452,8 +453,8 @@
   opacity: 1 !important;
   object-fit: contain;
   object-position: center;
-  clip-path: inset(28% 0% 28% 0%);
-  transform: scaleX(1.22) scaleY(1.4);
+  clip-path: inset(28% 0% 34% 0%);
+  transform: scaleX(1.22) scaleY(1.5);
 }
 
 /* Logo container - no color interference */
