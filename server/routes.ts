@@ -930,7 +930,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
-  // Chat API endpoint - Multi-LLM powered visa assistant
+  // Chat API endpoint - Multi-LLM powered visa assistant with news context
   app.post("/api/chat", async (req, res) => {
     try {
       const { message, conversationHistory } = req.body;
@@ -941,9 +941,29 @@ ${generatedSections.join('\n\n---\n\n')}`;
 
       const { chatWithMultipleLLMs } = await import("./chatService");
       
+      // Fetch recent news for context if user mentions news/updates
+      let newsContext: Array<{title: string; source: string; publishedAt: string; summary: string}> = [];
+      const newsKeywords = ['news', 'update', 'recent', 'latest', 'change', 'announce', 'policy'];
+      const mentionsNews = newsKeywords.some(kw => message.toLowerCase().includes(kw));
+      
+      if (mentionsNews) {
+        try {
+          const recentNews = await getLatestNews();
+          newsContext = recentNews.slice(0, 5).map((article: any) => ({
+            title: article.title || '',
+            source: article.source || '',
+            publishedAt: article.publishedAt || new Date().toISOString(),
+            summary: article.summary || '',
+          }));
+        } catch (newsError) {
+          console.warn("Failed to fetch news context for chat:", newsError);
+        }
+      }
+      
       const result = await chatWithMultipleLLMs(
         message,
-        conversationHistory || []
+        conversationHistory || [],
+        newsContext
       );
 
       res.json({ 

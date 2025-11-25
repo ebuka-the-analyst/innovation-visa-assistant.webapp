@@ -5,7 +5,14 @@ interface Message {
   content: string;
 }
 
-const VISA_SYSTEM_PROMPT = `You are an expert UK Innovator Founder Visa consultant.
+interface NewsArticle {
+  title: string;
+  source: string;
+  publishedAt: string;
+  summary: string;
+}
+
+const BASE_VISA_SYSTEM_PROMPT = `You are an expert UK Innovator Founder Visa consultant.
 
 RULES:
 - Be EXTREMELY concise: 1-3 sentences max
@@ -17,6 +24,23 @@ RULES:
 
 Give direct answers. No filler.`;
 
+function buildSystemPrompt(newsContext?: NewsArticle[]): string {
+  if (!newsContext || newsContext.length === 0) {
+    return BASE_VISA_SYSTEM_PROMPT;
+  }
+  
+  const newsSection = newsContext.slice(0, 5).map(article => 
+    `- ${article.title} (${article.source}, ${new Date(article.publishedAt).toLocaleDateString()})`
+  ).join('\n');
+  
+  return `${BASE_VISA_SYSTEM_PROMPT}
+
+RECENT UK IMMIGRATION NEWS (reference if relevant):
+${newsSection}
+
+When users ask about recent news or updates, reference this information.`;
+}
+
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
@@ -24,8 +48,10 @@ const openai = new OpenAI({
 
 export async function chatWithMultipleLLMs(
   userMessage: string,
-  conversationHistory: Message[]
+  conversationHistory: Message[],
+  newsContext?: NewsArticle[]
 ): Promise<{ response: string; provider: string }> {
+  const systemPrompt = buildSystemPrompt(newsContext);
   // Try each LLM in order of preference
   
   // 1. Try OpenAI (GPT-4o via Replit AI Integrations)
@@ -38,7 +64,7 @@ export async function chatWithMultipleLLMs(
       messages: [
         {
           role: "system",
-          content: VISA_SYSTEM_PROMPT,
+          content: systemPrompt,
         },
         ...conversationHistory.map((msg) => ({
           role: msg.role,
@@ -74,7 +100,7 @@ export async function chatWithMultipleLLMs(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         system_instruction: {
-          parts: [{ text: VISA_SYSTEM_PROMPT }],
+          parts: [{ text: systemPrompt }],
         },
         contents: [
           ...conversationHistory.map((msg) => ({
@@ -120,7 +146,7 @@ export async function chatWithMultipleLLMs(
       body: JSON.stringify({
         model: "claude-3-5-sonnet-20241022",
         max_tokens: 500,
-        system: VISA_SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: [
           ...conversationHistory.map((msg) => ({
             role: msg.role,
