@@ -46,6 +46,7 @@ import EndorserInvestmentRequirements from "@/pages/endorser-investment-requirem
 import AIAssistant from "@/pages/ai-assistant";
 import Handoff from "@/pages/handoff";
 import AdminDashboard from "@/pages/admin-dashboard";
+import PartnerDashboard from "@/pages/partner-dashboard";
 import InterviewPrep from "@/pages/interview-prep";
 import FAQ from "@/pages/faq";
 import Guide from "@/pages/guide";
@@ -119,6 +120,7 @@ function Router() {
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/handoff" component={Handoff} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
+      <Route path="/partner-dashboard" component={PartnerDashboard} />
       <Route path="/referral-dashboard" component={ReferralDashboard} />
       <Route path="/interview-prep" component={InterviewPrep} />
       <Route path="/faq" component={FAQ} />

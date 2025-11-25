@@ -2696,7 +2696,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
               email: userDetails?.email || 'Unknown',
               firstName: userDetails?.firstName || 'Unknown',
               lastName: userDetails?.lastName || '',
-              tier: userDetails?.tier || 'free',
+              tier: userDetails?.subscriptionTier || 'free',
               promoCode: pc.promoCode.code,
               promoCodeName: pc.promoCode.name,
               redeemedAt: u.redeemedAt,
@@ -2907,7 +2907,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       // Create comprehensive demo business plan
       const existingDemoPlans = await storage.getDemoBusinessPlans();
       if (existingDemoPlans.length === 0) {
-        await storage.createBusinessPlan({
+        const demoPlan = await storage.createBusinessPlan({
           tier: "enterprise",
           businessName: "MedTech AI Solutions Ltd",
           industry: "Healthcare Technology / AI-Powered Diagnostics",
@@ -2955,14 +2955,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
           targetEndorser: "Primary: Tech Nation (endorsed by NHS Digital and Health Innovation Network)\nSecondary: SETsquared Partnership (university-backed, strong healthcare portfolio)\nRationale: Tech Nation's healthcare track record (15+ successful visa applications in health tech), strong NHS relationships, and dedicated health tech support team align perfectly with our profile.",
           contactPointsStrategy: "1) Tech Nation: Attended 2 Tech Nation events, connected with 3 portfolio founders, scheduled intro call with healthcare sector lead (Sarah Mitchell)\n2) NHS Digital connection: Our pilot programme lead (Dr. James Roberts) serves on Tech Nation advisory board\n3) Warm introductions: 2 existing Tech Nation endorsed founders offered to provide referrals\n4) Supporting evidence prepared: NHS deployment metrics, revenue documentation, patent applications",
           supportingEvidence: "Comprehensive evidence package prepared:\n- NHS Trust deployment agreements (4 signed contracts)\n- Letters of Intent (5 documents, £1.2M value)\n- Patent applications (3 pending UK patents)\n- Financial statements (audited, 12 months revenue)\n- Customer testimonials (12 NHS clinician endorsements)\n- Press coverage (BBC, BMJ, The Guardian)\n- Award certificates (NHS Innovation Award 2024)\n- Technical certifications (ISO 27001, CE Mark, DTAC)",
-          generatedContent: null,
-          pdfUrl: null,
-          status: "completed",
-          currentGenerationStage: null,
-          stripeSessionId: null,
           userId: demoUser.id,
           isDemoData: true,
         });
+        
+        // Update the plan status separately (since status is omitted from insert schema)
+        await storage.updateBusinessPlan(demoPlan.id, { status: 'completed' });
       }
       
       // Create demo documents for the demo user

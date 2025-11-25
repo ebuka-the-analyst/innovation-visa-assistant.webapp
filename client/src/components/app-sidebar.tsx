@@ -36,6 +36,7 @@ import {
   Target,
   HelpCircle,
   FolderOpen,
+  Handshake,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -54,6 +55,12 @@ export function AppSidebar() {
   const [location, setLocation] = useLocation();
   const { data: user } = useQuery<{ id: string; email: string; displayName?: string; isAdmin?: boolean }>({
     queryKey: ["/api/auth/user"],
+    retry: false,
+  });
+
+  const { data: partnerStatus } = useQuery<{ isPartner: boolean; promoCodeCount: number }>({
+    queryKey: ["/api/partner/status"],
+    enabled: !!user,
     retry: false,
   });
 
@@ -87,6 +94,22 @@ export function AppSidebar() {
                 icon: Shield,
                 description: "System analytics & management",
                 badge: "ADMIN",
+              },
+            ],
+          },
+        ]
+      : []),
+    ...(partnerStatus?.isPartner
+      ? [
+          {
+            label: "Partner",
+            items: [
+              {
+                title: "Partner Dashboard",
+                url: "/partner-dashboard",
+                icon: Handshake,
+                description: "Track your referrals & earnings",
+                badge: "PARTNER",
               },
             ],
           },
