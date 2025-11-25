@@ -17,6 +17,8 @@ import {
 } from 'recharts';
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from "@/lib/seo-schemas";
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 
 type InnovationFactors = {
   novelty: number;
@@ -41,6 +43,8 @@ const INDUSTRY_BENCHMARKS: IndustryBenchmark[] = [
 ];
 
 export default function InnovationScore() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [factors, setFactors] = useState<InnovationFactors>({
     novelty: 50,
     technicalAdvancement: 50,
@@ -276,7 +280,7 @@ export default function InnovationScore() {
     return actions.slice(0, 12);
   };
 
-  const handleExport = () => {
+  const handleExportPdf = () => {
     const report = `UK INNOVATOR FOUNDER VISA - INNOVATION SCORE ASSESSMENT
 Generated: ${new Date().toLocaleString('en-GB')}
 ${'='.repeat(80)}
@@ -497,6 +501,75 @@ for official assessment and application preparation.
     URL.revokeObjectURL(url);
   };
 
+  const handleExportWord = async () => {
+    const strongestFactor = Object.entries(factors).reduce((max, [key, val]) => val > max[1] ? [key, val] : max, ['', 0]);
+    const weakestFactor = Object.entries(factors).reduce((min, [key, val]) => val < min[1] ? [key, val] : min, ['', 100]);
+    
+    await generateWord({
+      title: 'Innovation Score Assessment',
+      subtitle: 'UK Innovator Founder Visa Innovation Criterion Evaluation',
+      filename: `innovation-score-report-${new Date().toISOString().split('T')[0]}`,
+      sections: [
+        { type: 'heading', content: 'Overall Innovation Assessment', level: 1 },
+        { type: 'score', score: { value: innovationScore, max: 100, label: 'Innovation Score' } },
+        { type: 'table', tableData: {
+          headers: ['Metric', 'Value'],
+          rows: [
+            ['Status', meetsMinimum ? (isStrongCandidate ? 'Strong Innovation Profile' : 'Meets Minimum Threshold') : 'Below Threshold'],
+            ['Pass Threshold', `${passThreshold}/100`],
+            ['Strong Candidate Threshold', `${strongThreshold}/100`],
+            ['Selected Industry Sector', selectedSector],
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', content: 'Innovation Factors Breakdown', level: 1 },
+        { type: 'table', tableData: {
+          headers: ['Factor', 'Score', 'Weight', 'Assessment'],
+          rows: [
+            ['Novelty', `${factors.novelty}/100`, '25%', factors.novelty >= 70 ? 'Strong' : factors.novelty >= 60 ? 'Adequate' : 'Needs Improvement'],
+            ['Technical Advancement', `${factors.technicalAdvancement}/100`, '20%', factors.technicalAdvancement >= 70 ? 'Excellent' : factors.technicalAdvancement >= 60 ? 'Adequate' : 'Needs Improvement'],
+            ['Market Disruption', `${factors.marketDisruption}/100`, '20%', factors.marketDisruption >= 70 ? 'Strong' : factors.marketDisruption >= 60 ? 'Moderate' : 'Weak'],
+            ['IP Protection', `${factors.ipProtection}/100`, '20%', factors.ipProtection >= 70 ? 'Robust' : factors.ipProtection >= 60 ? 'Basic' : 'Weak'],
+            ['R&D Investment', `${factors.rdInvestment}/100`, '15%', factors.rdInvestment >= 70 ? 'Substantial' : factors.rdInvestment >= 60 ? 'Moderate' : 'Minimal'],
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', content: 'Factor Analysis', level: 1 },
+        { type: 'table', tableData: {
+          headers: ['Analysis', 'Details'],
+          rows: [
+            ['Strongest Factor', `${String(strongestFactor[0]).replace(/([A-Z])/g, ' $1').trim()} (${strongestFactor[1]}%)`],
+            ['Weakest Factor', `${String(weakestFactor[0]).replace(/([A-Z])/g, ' $1').trim()} (${weakestFactor[1]}%)`],
+            ['Factor Range', `${Math.max(...Object.values(factors)) - Math.min(...Object.values(factors))}%`],
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', content: 'Industry Benchmark Comparison', level: 1 },
+        { type: 'table', tableData: {
+          headers: ['Sector', 'Industry Average', 'Your Score', 'Gap'],
+          rows: benchmarkData.map(b => [b.sector, `${b.industryAvg}%`, `${b.yourScore}%`, `${b.gap >= 0 ? '+' : ''}${b.gap}%`])
+        }},
+        { type: 'divider' },
+        { type: 'heading', content: 'Smart Recommendations', level: 1 },
+        { type: 'list', items: getSmartTips().slice(0, 8) },
+        { type: 'divider' },
+        { type: 'heading', content: 'Action Plan', level: 1 },
+        { type: 'table', tableData: {
+          headers: ['Week', 'Action', 'Priority'],
+          rows: generateActionPlan().slice(0, 8).map(item => [item.week, item.action, item.priority])
+        }},
+      ],
+      metadata: {
+        subject: 'Innovation Score Assessment for UK Innovator Founder Visa',
+        keywords: ['innovation', 'score', 'visa', 'assessment'],
+      }
+    });
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
+  };
+
   const breadcrumbSchema = createBreadcrumbSchema([
     { name: "Home", url: "https://innovatorfoundervisaassistant.co.uk/" },
     { name: "Tools Hub", url: "https://innovatorfoundervisaassistant.co.uk/tools-hub" },
@@ -540,7 +613,8 @@ for official assessment and application preparation.
             toolId="innovation-score"
             onSave={handleSave}
             onRestore={handleRestore}
-            onExport={handleExport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             getSerializedState={getSerializedState}
             toolName="Innovation Score"
           />

@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -35,6 +37,8 @@ type PitchSlide = {
 };
 
 export default function PitchDeck() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [slides, setSlides] = useState<PitchSlide[]>([
     {
       id: 'problem',
@@ -306,7 +310,7 @@ export default function PitchDeck() {
     ];
   };
 
-  const handleExport = () => {
+  const handleExportPdf = () => {
     const report = `UK INNOVATOR FOUNDER VISA - PITCH DECK BUILDER
 Generated: ${new Date().toLocaleString('en-GB')}
 Completion: ${overallCompletion}%
@@ -409,6 +413,59 @@ Ensure all claims are accurate and can be verified.
     URL.revokeObjectURL(url);
   };
 
+  const handleExportWord = async () => {
+    const sections = [];
+    
+    sections.push({ type: 'heading' as const, content: 'Pitch Deck Summary', level: 1 as const });
+    sections.push({ type: 'paragraph' as const, content: `Overall Completion: ${overallCompletion}% | Deck Strength: ${deckStrength}%` });
+    
+    slides.forEach(slide => {
+      sections.push({ type: 'heading' as const, content: `${slide.title} (${calculateSlideCompletion(slide)}% Complete)`, level: 2 as const });
+      slide.fields.forEach(field => {
+        sections.push({ type: 'heading' as const, content: field.label, level: 3 as const });
+        sections.push({ type: 'paragraph' as const, content: field.value || '[Not completed]' });
+      });
+    });
+    
+    sections.push({ type: 'heading' as const, content: 'Deck Strength Analysis', level: 1 as const });
+    sections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Slide', 'Completion', 'Weight'],
+        rows: slides.map(s => [s.title, `${calculateSlideCompletion(s)}%`, `${s.weight}%`])
+      }
+    });
+    
+    sections.push({ type: 'heading' as const, content: 'Smart Recommendations', level: 1 as const });
+    sections.push({ type: 'list' as const, items: getSmartTips() });
+    
+    sections.push({ type: 'heading' as const, content: '4-Week Action Plan', level: 1 as const });
+    sections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Week', 'Action', 'Priority'],
+        rows: generateActionPlan().map(item => [item.week, item.action, item.priority])
+      }
+    });
+
+    await generateWord({
+      title: 'UK Innovator Founder Visa - Pitch Deck Builder',
+      subtitle: `Completion: ${overallCompletion}% | Deck Strength: ${deckStrength}%`,
+      filename: `pitch-deck-builder-${Date.now()}.docx`,
+      sections,
+      metadata: {
+        subject: 'Pitch Deck Builder Report',
+        author: 'UK Innovator Founder Visa Assistant',
+        keywords: ['pitch deck', 'innovator visa', 'UK visa', 'business plan']
+      }
+    });
+
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
+  };
+
   return (
     <>
       <AuthHeader />
@@ -428,7 +485,8 @@ Ensure all claims are accurate and can be verified.
             toolId="pitch-deck"
             onSave={handleSave}
             onRestore={handleRestore}
-            onExport={handleExport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             onSmartTips={() => setActiveTab('tips')}
             onActionPlan={() => setActiveTab('action')}
             getSerializedState={getSerializedState}

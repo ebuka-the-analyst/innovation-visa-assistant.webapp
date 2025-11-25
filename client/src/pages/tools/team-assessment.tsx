@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 
 interface TeamMember {
   id: string;
@@ -26,6 +28,8 @@ interface TeamMember {
 }
 
 export default function TeamAssessment() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [members, setMembers] = useState<TeamMember[]>([
@@ -68,7 +72,7 @@ export default function TeamAssessment() {
     setMembers(members.map(m => m.id === id ? { ...m, [field]: value } : m));
   };
 
-  const exportAssessment = () => {
+  const handleExportPdf = () => {
     const content = `TEAM ASSESSMENT REPORT\n\nTeam Size: ${members.length}\nTeam Health Score: ${teamScore}/100\n\nMember Assessments:\n${members.map(m => `${m.name} (${m.role})\nTechnical: ${m.technicalSkill}/10 | Leadership: ${m.leadership}/10 | Collaboration: ${m.collaboration}/10 | Innovation: ${m.innovation}/10 | Reliability: ${m.reliability}/10\nNotes: ${m.notes}`).join('\n\n')}`;
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -76,6 +80,67 @@ export default function TeamAssessment() {
     a.href = url;
     a.download = 'team-assessment.txt';
     a.click();
+  };
+
+  const handleExportWord = async () => {
+    await generateWord({
+      title: 'Team Assessment Report',
+      subtitle: `Team Size: ${members.length} | Health Score: ${teamScore}/100`,
+      filename: `team-assessment-${Date.now()}.docx`,
+      sections: [
+        { type: 'heading', content: 'Overview', level: 1 },
+        { type: 'score', score: { value: teamScore, max: 100, label: 'Team Health Score' } },
+        { type: 'paragraph', content: `Total Team Members: ${members.length}` },
+        { type: 'divider' },
+        { type: 'heading', content: 'Team Capabilities Summary', level: 1 },
+        {
+          type: 'table',
+          tableData: {
+            headers: ['Capability', 'Average Score'],
+            rows: [
+              ['Technical', `${(members.reduce((sum, m) => sum + m.technicalSkill, 0) / members.length).toFixed(1)}/10`],
+              ['Leadership', `${(members.reduce((sum, m) => sum + m.leadership, 0) / members.length).toFixed(1)}/10`],
+              ['Collaboration', `${(members.reduce((sum, m) => sum + m.collaboration, 0) / members.length).toFixed(1)}/10`],
+              ['Innovation', `${(members.reduce((sum, m) => sum + m.innovation, 0) / members.length).toFixed(1)}/10`],
+              ['Reliability', `${(members.reduce((sum, m) => sum + m.reliability, 0) / members.length).toFixed(1)}/10`]
+            ]
+          }
+        },
+        { type: 'divider' },
+        { type: 'heading', content: 'Individual Member Assessments', level: 1 },
+        {
+          type: 'table',
+          tableData: {
+            headers: ['Name', 'Role', 'Technical', 'Leadership', 'Collaboration', 'Innovation', 'Reliability'],
+            rows: members.map(m => [
+              m.name,
+              m.role,
+              `${m.technicalSkill}/10`,
+              `${m.leadership}/10`,
+              `${m.collaboration}/10`,
+              `${m.innovation}/10`,
+              `${m.reliability}/10`
+            ])
+          }
+        },
+        { type: 'divider' },
+        { type: 'heading', content: 'Member Notes', level: 1 },
+        ...members.filter(m => m.notes).map(m => ({
+          type: 'paragraph' as const,
+          content: `${m.name} (${m.role}): ${m.notes}`
+        }))
+      ],
+      metadata: {
+        subject: 'Team Assessment Report',
+        author: 'UK Innovator Founder Visa Assistant',
+        keywords: ['team', 'assessment', 'visa', 'innovator founder']
+      }
+    });
+
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
   };
 
   const getRadarData = () => {
@@ -115,7 +180,8 @@ export default function TeamAssessment() {
             toolId="team-assessment"
             toolName="Team Assessment"
             onSave={saveProgress}
-            onExport={exportAssessment}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             getSerializedState={getSerializedState}
           />
 
@@ -162,7 +228,7 @@ export default function TeamAssessment() {
             Add Team Member
           </Button>
 
-          <Button className="w-full gap-2 bg-primary" onClick={exportAssessment} data-testid="button-export-assessment">
+          <Button className="w-full gap-2 bg-primary" onClick={handleExportPdf} data-testid="button-export-assessment">
             <Download className="w-4 h-4" />
             Export Assessment Report
           </Button>

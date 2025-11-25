@@ -14,6 +14,8 @@ import { CheckCircle2, AlertTriangle, TrendingUp, Server, Users, Zap, Calendar, 
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 
 type Milestone = {
   id: string;
@@ -76,6 +78,8 @@ type CapacityPlan = {
 };
 
 export default function ScalabilityRoadmap() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('roadmap');
   const [savedDate, setSavedDate] = useState('');
 
@@ -434,7 +438,7 @@ export default function ScalabilityRoadmap() {
     ];
   };
 
-  const handleExport = () => {
+  const handleExportPdf = () => {
     const report = `UK INNOVATOR FOUNDER VISA - SCALABILITY ROADMAP
 Generated: ${new Date().toLocaleString('en-GB')}
 Scalability Readiness Score: ${scalabilityReadiness}%
@@ -607,6 +611,85 @@ submitting visa applications.
     URL.revokeObjectURL(url);
   };
 
+  const handleExportWord = async () => {
+    await generateWord({
+      title: "Scalability Roadmap",
+      subtitle: "UK Innovator Founder Visa - Infrastructure, Team & Technology Scaling Plan",
+      filename: "scalability-roadmap",
+      sections: [
+        { type: 'heading', level: 1, content: 'Scalability Overview' },
+        { type: 'score', score: { value: scalabilityReadiness, max: 100, label: 'Scalability Readiness' } },
+        { type: 'table', tableData: {
+          headers: ['Metric', 'Value'],
+          rows: [
+            ['Current Status', scalabilityReadiness >= 70 ? 'Ready to Scale' : scalabilityReadiness >= 40 ? 'Moderate Readiness' : 'Early Stage'],
+            ['Infrastructure Investment', `£${infrastructure.estimatedCost?.toLocaleString() || '0'}`],
+            ['UK Jobs Planned', teamGrowth.ukJobsCreated.toString()],
+            ['Team Growth', `${teamGrowth.currentHeadcount} → ${teamGrowth.targetHeadcount}`],
+            ['User Capacity', `${capacityPlan.currentUsers} → ${capacityPlan.targetUsers}`]
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Infrastructure Scaling Plan' },
+        { type: 'table', tableData: {
+          headers: ['Attribute', 'Details'],
+          rows: [
+            ['Current Capacity', infrastructure.currentCapacity || 'Not Specified'],
+            ['Target Capacity', infrastructure.targetCapacity || 'Not Specified'],
+            ['Scaling Strategy', infrastructure.scalingStrategy || 'Not Specified'],
+            ['Cloud Provider', infrastructure.cloudProvider || 'Not Specified'],
+            ['Estimated Investment', `£${infrastructure.estimatedCost?.toLocaleString() || '0'}`],
+            ['Timeline', infrastructure.timeline || 'Not Specified'],
+            ['Redundancy & DR', infrastructure.redundancy || 'Not Specified']
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Team Growth & UK Job Creation' },
+        { type: 'table', tableData: {
+          headers: ['Metric', 'Value'],
+          rows: [
+            ['Current Headcount', teamGrowth.currentHeadcount.toString()],
+            ['Target Headcount', teamGrowth.targetHeadcount.toString()],
+            ['UK Jobs Created', teamGrowth.ukJobsCreated.toString()],
+            ['Hiring Timeline', teamGrowth.hiringTimeline || 'Not Specified']
+          ]
+        }},
+        { type: 'paragraph', content: `Key Roles: ${teamGrowth.keyRoles || 'Not Specified'}` },
+        { type: 'paragraph', content: `Training Plan: ${teamGrowth.trainingPlan || 'Not Specified'}` },
+        { type: 'paragraph', content: `Retention Strategy: ${teamGrowth.retentionStrategy || 'Not Specified'}` },
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Milestone Timeline' },
+        { type: 'table', tableData: {
+          headers: ['Milestone', 'Category', 'Target Date', 'Status'],
+          rows: milestones.map(m => [
+            m.name || 'Unnamed',
+            m.category.charAt(0).toUpperCase() + m.category.slice(1),
+            m.targetDate || 'Not Set',
+            m.status.charAt(0).toUpperCase() + m.status.slice(1).replace('-', ' ')
+          ])
+        }},
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Smart Recommendations' },
+        { type: 'list', items: getSmartTips() },
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: '4-Week Action Plan' },
+        { type: 'table', tableData: {
+          headers: ['Week', 'Action', 'Priority'],
+          rows: generateActionPlan().map(item => [item.week, item.action, item.priority])
+        }}
+      ],
+      metadata: {
+        subject: 'Scalability Roadmap',
+        author: 'UK Innovator Founder Visa Assistant',
+        keywords: ['scalability', 'infrastructure', 'UK visa', 'growth planning']
+      }
+    });
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
+  };
+
   return (
     <>
       <AuthHeader />
@@ -626,7 +709,8 @@ submitting visa applications.
             toolId="scalability-roadmap"
             onSave={handleSave}
             onRestore={handleRestore}
-            onExport={handleExport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             onSmartTips={() => setActiveTab('tips')}
             onActionPlan={() => setActiveTab('action')}
             getSerializedState={getSerializedState}

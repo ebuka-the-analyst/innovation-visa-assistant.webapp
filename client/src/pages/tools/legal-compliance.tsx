@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { Download, Save, Lightbulb, Calendar, RefreshCw } from "lucide-react";
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 
 const LEGAL_ITEMS = [
   {category:"Company Formation",items:["Incorporated at Companies House","Memorandum & Articles of Association","Company registration certificate"]},
@@ -18,6 +20,8 @@ const LEGAL_ITEMS = [
 ];
 
 export default function LegalCompliance() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
@@ -62,7 +66,7 @@ export default function LegalCompliance() {
     ];
   };
 
-  const exportReport = () => {
+  const handleExportPdf = () => {
     const report = `LEGAL COMPLIANCE REPORT\nDate: ${new Date().toLocaleDateString()}\nCompliance Score: ${complianceScore}%\nItems Complete: ${completedItems}/${totalItems}\n\nSTATUS: ${complianceScore===100?"FULLY COMPLIANT":"IN PROGRESS"}`;
     const blob = new Blob([report], {type: 'text/plain'});
     const url = window.URL.createObjectURL(blob);
@@ -70,6 +74,44 @@ export default function LegalCompliance() {
     a.href = url;
     a.download = 'legal-compliance.txt';
     a.click();
+  };
+
+  const handleExportWord = async () => {
+    await generateWord({
+      title: "Legal Compliance Report",
+      subtitle: "UK Company Law Requirements Validation",
+      filename: "legal-compliance-report",
+      sections: [
+        { type: 'score', score: { value: complianceScore, max: 100, label: 'Compliance Score' } },
+        { type: 'heading', level: 1, content: 'Compliance Summary' },
+        { type: 'paragraph', content: `Items Complete: ${completedItems}/${totalItems}` },
+        { type: 'paragraph', content: `Status: ${complianceScore === 100 ? "FULLY COMPLIANT" : "IN PROGRESS"}` },
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Checklist Details' },
+        ...LEGAL_ITEMS.map(cat => [
+          { type: 'heading' as const, level: 2 as const, content: cat.category },
+          { type: 'list' as const, items: cat.items.map(item => `${checks[`${cat.category}-${item}`] ? '✓' : '○'} ${item}`) }
+        ]).flat(),
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Recommendations' },
+        { type: 'list', items: getRecommendations() },
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Action Plan' },
+        { type: 'table', tableData: {
+          headers: ['Week', 'Action', 'Priority'],
+          rows: generateActionPlan().map(item => [item.week, item.action, item.priority])
+        }}
+      ],
+      metadata: {
+        subject: 'Legal Compliance Report',
+        author: 'UK Innovator Founder Visa Assistant',
+        keywords: ['legal compliance', 'UK company law', 'visa requirements']
+      }
+    });
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
   };
 
   const getSerializedState = () => {
@@ -113,7 +155,8 @@ export default function LegalCompliance() {
             toolName="Legal Compliance Checker"
             onSave={saveProgress}
             onRestore={loadProgress}
-            onExport={exportReport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             onSmartTips={() => setShowRecommendations(!showRecommendations)}
             onActionPlan={() => setShowActionPlan(!showActionPlan)}
             getSerializedState={getSerializedState}

@@ -11,8 +11,12 @@ import { Download, Lightbulb } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CoverLetterBuilder() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [company, setCompany] = useState("");
@@ -35,13 +39,46 @@ export default function CoverLetterBuilder() {
   const handleFileUpload = (file: any) => setUploadedFiles(prev => [...prev, file]);
   const handleRemoveFile = (id: string) => setUploadedFiles(prev => prev.filter(f => f.id !== id));
 
-  const exportLetter = () => {
+  const handleExportPdf = () => {
     const blob = new Blob([coverLetter], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `cover-letter-${company}-${role}.txt`;
     a.click();
+  };
+
+  const handleExportWord = async () => {
+    const strengthsList = strengths.split('\n').filter(s => s.trim());
+    await generateWord({
+      title: 'Cover Letter',
+      subtitle: `${role} Position at ${company}`,
+      filename: `cover-letter-${company}-${role}-${new Date().toISOString().split('T')[0]}`,
+      sections: [
+        { type: 'heading', content: 'Application Details', level: 1 },
+        { type: 'table', tableData: {
+          headers: ['Field', 'Value'],
+          rows: [
+            ['Company', company || 'Not specified'],
+            ['Role', role || 'Not specified'],
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', content: 'Key Strengths', level: 1 },
+        { type: 'list', items: strengthsList.length > 0 ? strengthsList : ['No strengths listed'] },
+        { type: 'divider' },
+        { type: 'heading', content: 'Cover Letter', level: 1 },
+        { type: 'paragraph', content: coverLetter || 'No cover letter generated yet.' },
+      ],
+      metadata: {
+        subject: 'Cover Letter for Job Application',
+        keywords: ['cover letter', 'job application', company, role],
+      }
+    });
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
   };
 
   const getSerializedState = () => ({ uploadedFiles, company, role, strengths, coverLetter, savedDate });
@@ -71,7 +108,8 @@ export default function CoverLetterBuilder() {
             toolId="cover-letter-builder"
             toolName="Cover Letter Builder"
             onSave={saveProgress}
-            onExport={exportLetter}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             getSerializedState={getSerializedState}
           />
 

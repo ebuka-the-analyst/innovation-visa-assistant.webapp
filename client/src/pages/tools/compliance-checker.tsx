@@ -9,6 +9,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { Download, AlertTriangle, CheckCircle2, Save, Share2, Lightbulb, Calendar, RefreshCw } from "lucide-react";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 
 const ITEMS = [
   {id:"1",name:"Company Structure Audit",cat:"Legal",pen:"Critical"},
@@ -22,6 +24,8 @@ const ITEMS = [
 ];
 
 export default function ComplianceChecker() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
@@ -65,7 +69,7 @@ export default function ComplianceChecker() {
     ];
   };
 
-  const exportReport = () => {
+  const handleExportPdf = () => {
     const report = `COMPLIANCE CHECKER REPORT\nDate: ${new Date().toLocaleDateString()}\nCompliance Score: ${score}%\nItems Completed: ${done}/8\n\nSTATUS: ${score>=80?"COMPLIANT":"REVIEW NEEDED"}`;
     const blob = new Blob([report], {type: 'text/plain'});
     const url = window.URL.createObjectURL(blob);
@@ -73,6 +77,65 @@ export default function ComplianceChecker() {
     a.href = url;
     a.download = 'compliance-audit.txt';
     a.click();
+  };
+
+  const handleExportWord = async () => {
+    const recommendations = getRecommendations();
+    const actionPlan = generateActionPlan();
+    const completedItems = ITEMS.filter(item => checks[item.id]);
+    const pendingItems = ITEMS.filter(item => !checks[item.id]);
+
+    await generateWord({
+      title: 'Compliance Checker Report',
+      subtitle: `Compliance Score: ${score}%`,
+      filename: `compliance-audit-${Date.now()}.docx`,
+      sections: [
+        { type: 'heading', content: 'Overview', level: 1 },
+        { type: 'score', score: { value: score, max: 100, label: 'Compliance Score' } },
+        { type: 'paragraph', content: `Items Completed: ${done}/8` },
+        { type: 'paragraph', content: `Status: ${score >= 80 ? 'COMPLIANT' : 'REVIEW NEEDED'}` },
+        { type: 'divider' },
+        { type: 'heading', content: 'Completed Items', level: 1 },
+        {
+          type: 'table',
+          tableData: {
+            headers: ['Item', 'Category', 'Priority'],
+            rows: completedItems.map(item => [item.name, item.cat, item.pen])
+          }
+        },
+        { type: 'divider' },
+        { type: 'heading', content: 'Pending Items', level: 1 },
+        {
+          type: 'table',
+          tableData: {
+            headers: ['Item', 'Category', 'Priority'],
+            rows: pendingItems.map(item => [item.name, item.cat, item.pen])
+          }
+        },
+        { type: 'divider' },
+        { type: 'heading', content: 'Smart Recommendations', level: 1 },
+        { type: 'list', items: recommendations },
+        { type: 'divider' },
+        { type: 'heading', content: 'Action Plan', level: 1 },
+        {
+          type: 'table',
+          tableData: {
+            headers: ['Week', 'Action', 'Priority'],
+            rows: actionPlan.map(a => [a.week, a.action, a.priority])
+          }
+        }
+      ],
+      metadata: {
+        subject: 'Compliance Audit Report',
+        author: 'UK Innovator Founder Visa Assistant',
+        keywords: ['compliance', 'audit', 'visa', 'innovator founder']
+      }
+    });
+
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
   };
 
   const getSerializedState = () => {
@@ -121,7 +184,8 @@ export default function ComplianceChecker() {
             toolName="Compliance Checker"
             onSave={saveProgress}
             onRestore={loadProgress}
-            onExport={exportReport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             onSmartTips={() => setShowRecommendations(!showRecommendations)}
             onActionPlan={() => setShowActionPlan(!showActionPlan)}
             getSerializedState={getSerializedState}

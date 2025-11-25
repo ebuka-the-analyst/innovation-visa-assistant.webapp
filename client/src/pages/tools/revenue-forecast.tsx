@@ -15,6 +15,8 @@ import {
   LineChart, Line, BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 
 type RevenueStream = {
   name: string;
@@ -28,6 +30,8 @@ type RevenueStream = {
 type GrowthScenario = 'conservative' | 'base' | 'optimistic';
 
 export default function RevenueForecast() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [streams, setStreams] = useState<RevenueStream[]>([
     { 
       name: 'SaaS Subscriptions', 
@@ -367,7 +371,7 @@ export default function RevenueForecast() {
     ];
   };
 
-  const handleExport = () => {
+  const handleExportPdf = () => {
     const metrics = getMetrics();
     const { score, grade } = getViabilityScore();
     const monthly = generateMonthlyProjections();
@@ -554,6 +558,104 @@ www.innovatorfoundervisaassistant.co.uk
     URL.revokeObjectURL(url);
   };
 
+  const handleExportWord = async () => {
+    const exportMetrics = getMetrics();
+    const { score: exportScore, grade: exportGrade } = getViabilityScore();
+    const annual = generateAnnualProjections();
+    const scenarioComp = generateScenarioComparison();
+
+    await generateWord({
+      title: "Comprehensive Revenue Forecast",
+      subtitle: "UK Innovator Founder Visa - Financial Viability Assessment",
+      filename: `revenue-forecast-${scenario}`,
+      sections: [
+        { type: 'heading', level: 1, content: 'Executive Summary' },
+        { type: 'score', score: { value: exportScore, max: 100, label: `Viability Score (${exportGrade})` } },
+        { type: 'table', tableData: {
+          headers: ['Metric', 'Value'],
+          rows: [
+            ['Selected Scenario', scenario.charAt(0).toUpperCase() + scenario.slice(1)],
+            ['Current ARR', `£${exportMetrics.currentARR.toLocaleString()}`],
+            ['Year 3 ARR', `£${exportMetrics.year3ARR.toLocaleString()}`],
+            ['3-Year CAGR', `${exportMetrics.cagr.toFixed(1)}%`],
+            ['Revenue Multiple', `${exportMetrics.revenueMultiple.toFixed(1)}x`],
+            ['Total 3-Year Revenue', `£${exportMetrics.totalRevenue3Years.toLocaleString()}`],
+            ['LTV:CAC Ratio', `${exportMetrics.ltvCacRatio.toFixed(1)}:1`],
+            ['Customer Payback Period', `${exportMetrics.paybackMonths.toFixed(1)} months`]
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Revenue Streams' },
+        { type: 'table', tableData: {
+          headers: ['Stream', 'Monthly Revenue', 'Growth Rate', 'Pricing Model', 'Customers'],
+          rows: streams.map(s => [
+            s.name || 'Unnamed',
+            `£${s.monthlyRevenue.toLocaleString()}`,
+            `${s.growthRate}%`,
+            s.pricingModel,
+            s.customers.toString()
+          ])
+        }},
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Annual Projections' },
+        { type: 'table', tableData: {
+          headers: ['Year', 'ARR', 'MRR', 'Customers'],
+          rows: annual.map(a => [
+            a.year,
+            `£${a.arr.toLocaleString()}`,
+            `£${a.mrr.toLocaleString()}`,
+            a.customers.toString()
+          ])
+        }},
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Scenario Comparison' },
+        { type: 'table', tableData: {
+          headers: ['Scenario', 'Year 3 ARR', '3-Year Total', 'Customers'],
+          rows: scenarioComp.map(s => [
+            s.scenario,
+            `£${s.arr.toLocaleString()}`,
+            `£${s.totalRevenue.toLocaleString()}`,
+            s.customers.toString()
+          ])
+        }},
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Unit Economics' },
+        { type: 'table', tableData: {
+          headers: ['Metric', 'Value'],
+          rows: [
+            ['Customer Acquisition Cost (CAC)', `£${cac.toLocaleString()}`],
+            ['Customer Lifetime Value (LTV)', `£${ltv.toLocaleString()}`],
+            ['LTV:CAC Ratio', `${exportMetrics.ltvCacRatio.toFixed(2)}:1`],
+            ['Payback Period', `${exportMetrics.paybackMonths.toFixed(1)} months`]
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'UK Visa Alignment' },
+        { type: 'paragraph', content: exportMetrics.year3ARR >= 1000000 
+          ? 'CRITERION MET - £1M+ ARR achieved (1 of 7 ILR criteria)' 
+          : `Current projection: £${exportMetrics.year3ARR.toLocaleString()} ARR - £${(1000000 - exportMetrics.year3ARR).toLocaleString()} short of £1M criterion` },
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: 'Smart Recommendations' },
+        { type: 'list', items: getSmartTips() },
+        { type: 'divider' },
+        { type: 'heading', level: 1, content: '4-Week Action Plan' },
+        { type: 'table', tableData: {
+          headers: ['Week', 'Action', 'Priority'],
+          rows: generateActionPlan().map(item => [item.week, item.action, item.priority])
+        }}
+      ],
+      metadata: {
+        subject: 'Revenue Forecast',
+        author: 'UK Innovator Founder Visa Assistant',
+        keywords: ['revenue', 'forecast', 'UK visa', 'financial projections']
+      }
+    });
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
+  };
+
   const metrics = getMetrics();
   const { score, grade } = getViabilityScore();
   const monthlyData = generateMonthlyProjections();
@@ -580,7 +682,8 @@ www.innovatorfoundervisaassistant.co.uk
             toolId="revenue-forecast"
             onSave={handleSave}
             onRestore={handleRestore}
-            onExport={handleExport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             getSerializedState={getSerializedState}
             toolName="Revenue Forecast"
           />

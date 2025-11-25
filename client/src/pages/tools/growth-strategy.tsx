@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -60,6 +62,8 @@ type RevenueExpansion = {
 };
 
 export default function GrowthStrategy() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('strategy');
   const [savedDate, setSavedDate] = useState('');
 
@@ -388,7 +392,7 @@ export default function GrowthStrategy() {
     ];
   };
 
-  const handleExport = () => {
+  const handleExportPdf = () => {
     const report = `UK INNOVATOR FOUNDER VISA - COMPREHENSIVE GROWTH STRATEGY
 Generated: ${new Date().toLocaleString('en-GB')}
 Strategy Completeness: ${completenessScore}%
@@ -520,6 +524,140 @@ qualified business advisors and immigration specialists before submitting visa a
     URL.revokeObjectURL(url);
   };
 
+  const handleExportWord = async () => {
+    const wordSections = [];
+    
+    wordSections.push({ type: 'heading' as const, content: 'Growth Goals', level: 1 as const });
+    wordSections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Goal', 'Timeframe', 'Metric', 'Current', 'Target'],
+        rows: growthGoals.map(g => [
+          g.goal || 'N/A',
+          `${g.timeframe}-term`,
+          g.metric || 'N/A',
+          g.currentValue || 'N/A',
+          g.targetValue || 'N/A'
+        ])
+      }
+    });
+    
+    wordSections.push({ type: 'heading' as const, content: 'Target Markets', level: 1 as const });
+    wordSections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Segment', 'Size', 'Geography', 'Demographics', 'Pain Points'],
+        rows: targetMarkets.map(m => [
+          m.segment || 'N/A',
+          m.size || 'N/A',
+          m.geography || 'N/A',
+          m.demographics || 'N/A',
+          m.painPoints || 'N/A'
+        ])
+      }
+    });
+    
+    wordSections.push({ type: 'heading' as const, content: 'Customer Acquisition Channels', level: 1 as const });
+    wordSections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Channel', 'Priority', 'Budget', 'Expected CAC', 'Conversion'],
+        rows: acquisitionChannels.map(c => [
+          c.channel || 'N/A',
+          c.priority,
+          `£${c.budget.toLocaleString()}`,
+          `£${c.expectedCAC.toLocaleString()}`,
+          `${c.expectedConversion}%`
+        ])
+      }
+    });
+    wordSections.push({ type: 'paragraph' as const, content: `Total Acquisition Budget: £${acquisitionChannels.reduce((sum, c) => sum + c.budget, 0).toLocaleString()}` });
+    
+    wordSections.push({ type: 'heading' as const, content: 'Retention Tactics', level: 1 as const });
+    wordSections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Tactic', 'Description', 'Frequency', 'Expected Impact'],
+        rows: retentionTactics.map(t => [
+          t.tactic || 'N/A',
+          t.description || 'N/A',
+          t.frequency || 'N/A',
+          t.expectedImpact || 'N/A'
+        ])
+      }
+    });
+    
+    wordSections.push({ type: 'heading' as const, content: 'Revenue Expansion Strategy', level: 1 as const });
+    wordSections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Attribute', 'Value'],
+        rows: [
+          ['Strategy', revenueExpansion.strategy || 'N/A'],
+          ['Description', revenueExpansion.description || 'N/A'],
+          ['Expected Revenue Lift', revenueExpansion.expectedRevenueLift || 'N/A'],
+          ['Implementation Time', revenueExpansion.implementationTime || 'N/A'],
+          ['UK Market Fit', revenueExpansion.ukMarketFit || 'N/A']
+        ]
+      }
+    });
+    
+    wordSections.push({ type: 'heading' as const, content: 'Growth Projections', level: 1 as const });
+    wordSections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Month', 'Revenue'],
+        rows: [
+          ['Month 1', `£${parseFloat(growthProjection.month1Revenue || '0').toLocaleString()}`],
+          ['Month 3', `£${parseFloat(growthProjection.month3Revenue || '0').toLocaleString()}`],
+          ['Month 6', `£${parseFloat(growthProjection.month6Revenue || '0').toLocaleString()}`],
+          ['Month 12', `£${parseFloat(growthProjection.month12Revenue || '0').toLocaleString()}`],
+          ['Month 18', `£${parseFloat(growthProjection.month18Revenue || '0').toLocaleString()}`],
+          ['Month 24', `£${parseFloat(growthProjection.month24Revenue || '0').toLocaleString()}`]
+        ]
+      }
+    });
+    
+    wordSections.push({ type: 'heading' as const, content: 'UK Scalability Criteria', level: 1 as const });
+    wordSections.push({ type: 'heading' as const, content: 'Job Creation Plan', level: 2 as const });
+    wordSections.push({ type: 'paragraph' as const, content: ukScalabilityNotes.jobCreationPlan || 'Not specified' });
+    wordSections.push({ type: 'heading' as const, content: 'Local Partnerships', level: 2 as const });
+    wordSections.push({ type: 'paragraph' as const, content: ukScalabilityNotes.localPartnerships || 'Not specified' });
+    wordSections.push({ type: 'heading' as const, content: 'Market Penetration Strategy', level: 2 as const });
+    wordSections.push({ type: 'paragraph' as const, content: ukScalabilityNotes.marketPenetration || 'Not specified' });
+    wordSections.push({ type: 'heading' as const, content: 'Competitive Advantage', level: 2 as const });
+    wordSections.push({ type: 'paragraph' as const, content: ukScalabilityNotes.competitiveAdvantage || 'Not specified' });
+    
+    wordSections.push({ type: 'heading' as const, content: 'Smart Recommendations', level: 1 as const });
+    wordSections.push({ type: 'list' as const, items: getSmartTips() });
+    
+    wordSections.push({ type: 'heading' as const, content: '4-Week Action Plan', level: 1 as const });
+    wordSections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Week', 'Action', 'Priority'],
+        rows: generateActionPlan().map(item => [item.week, item.action, item.priority])
+      }
+    });
+
+    await generateWord({
+      title: 'UK Innovator Founder Visa - Growth Strategy',
+      subtitle: `Strategy Completeness: ${completenessScore}%`,
+      filename: `growth-strategy-${Date.now()}.docx`,
+      sections: wordSections,
+      metadata: {
+        subject: 'Growth Strategy Report',
+        author: 'UK Innovator Founder Visa Assistant',
+        keywords: ['growth strategy', 'innovator visa', 'UK visa', 'scalability']
+      }
+    });
+
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
+  };
+
   return (
     <>
       <AuthHeader />
@@ -539,7 +677,8 @@ qualified business advisors and immigration specialists before submitting visa a
             toolId="growth-strategy"
             onSave={handleSave}
             onRestore={handleRestore}
-            onExport={handleExport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             onSmartTips={() => setActiveTab('tips')}
             onActionPlan={() => setActiveTab('action')}
             getSerializedState={getSerializedState}

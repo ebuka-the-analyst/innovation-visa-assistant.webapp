@@ -11,8 +11,12 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Download, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from "@/lib/seo-schemas";
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 
 export default function FinancialProjections() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [initial, setInitial] = useState(50000);
   const [monthly, setMonthly] = useState(15000);
   const [revenue, setRevenue] = useState(5000);
@@ -74,7 +78,7 @@ export default function FinancialProjections() {
     ];
   };
 
-  const exportReport = () => {
+  const handleExportPdf = () => {
     const report = `FINANCIAL PROJECTIONS REPORT
 Generated: ${new Date().toLocaleDateString()}
 ==================================================
@@ -112,6 +116,59 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
     a.href = url;
     a.download = 'financial-projections-report.txt';
     a.click();
+  };
+
+  const handleExportWord = async () => {
+    await generateWord({
+      title: 'Financial Projections Report',
+      subtitle: '12-Month Financial Projections for UK Innovator Founder Visa',
+      filename: `financial-projections-report-${new Date().toISOString().split('T')[0]}`,
+      sections: [
+        { type: 'heading', content: 'Input Parameters', level: 1 },
+        { type: 'table', tableData: {
+          headers: ['Parameter', 'Value'],
+          rows: [
+            ['Initial Capital', `£${initial.toLocaleString()}`],
+            ['Monthly Burn', `£${monthly.toLocaleString()}`],
+            ['Monthly Revenue', `£${revenue.toLocaleString()}`],
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', content: 'Key Metrics', level: 1 },
+        { type: 'table', tableData: {
+          headers: ['Metric', 'Value'],
+          rows: [
+            ['Runway', `${runway > 99 ? '∞' : runway} months`],
+            ['Net Monthly', `£${Math.abs(netMonthly).toLocaleString()}`],
+            ['Year-End Cash', `£${Math.abs(finalCash).toLocaleString()}`],
+            ['Status', isViable ? 'VIABLE' : 'CRITICAL'],
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', content: '12-Month Projections', level: 1 },
+        { type: 'table', tableData: {
+          headers: ['Month', 'Cash Balance'],
+          rows: projections.map(p => [`Month ${p.month}`, `£${p.cash.toLocaleString()}`])
+        }},
+        { type: 'divider' },
+        { type: 'heading', content: 'Recommendations', level: 1 },
+        { type: 'list', items: getRecommendations() },
+        { type: 'divider' },
+        { type: 'heading', content: 'Action Plan', level: 1 },
+        { type: 'table', tableData: {
+          headers: ['Week', 'Action', 'Priority'],
+          rows: generateActionPlan().map(a => [a.week, a.action, a.priority])
+        }},
+      ],
+      metadata: {
+        subject: 'Financial Projections for UK Innovator Founder Visa',
+        keywords: ['financial projections', 'visa', 'innovation', 'UK'],
+      }
+    });
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
   };
 
   const getSerializedState = () => {
@@ -176,7 +233,8 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
             toolName="Financial Projections"
             onSave={saveProgress}
             onRestore={loadProgress}
-            onExport={exportReport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             onSmartTips={() => setShowRecommendations(!showRecommendations)}
             onActionPlan={() => setShowActionPlan(!showActionPlan)}
             getSerializedState={getSerializedState}

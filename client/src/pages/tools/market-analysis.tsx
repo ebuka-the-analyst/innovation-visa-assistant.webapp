@@ -16,6 +16,8 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 
 // UK Innovator Founder Visa Context (November 2025)
 // Scalability Criterion: Large addressable market demonstrates growth potential
@@ -23,6 +25,8 @@ import {
 // Innovation Criterion: Market trends support innovative solution
 
 export default function MarketAnalysis() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [tam, setTam] = useState(5000000000); // Total Addressable Market
   const [sam, setSam] = useState(500000000); // Serviceable Addressable Market
   const [som, setSom] = useState(50000000); // Serviceable Obtainable Market
@@ -224,7 +228,7 @@ export default function MarketAnalysis() {
     ];
   };
 
-  const handleExport = () => {
+  const handleExportPdf = () => {
     const { score, grade } = getMarketOpportunity();
     const { isValid, issues } = getMarketSizingHealth();
     const samPercent = ((sam / tam) * 100).toFixed(1);
@@ -451,6 +455,96 @@ Report generated: ${new Date().toLocaleString('en-GB')}
     URL.revokeObjectURL(url);
   };
 
+  const handleExportWord = async () => {
+    const { score, grade } = getMarketOpportunity();
+    const { isValid, issues } = getMarketSizingHealth();
+    const samPercent = ((sam / tam) * 100).toFixed(1);
+    const somPercent = ((som / sam) * 100).toFixed(1);
+    const tips = getSmartTips();
+    const actionPlan = generateActionPlan();
+
+    await generateWord({
+      title: 'UK Innovator Founder Visa - Market Analysis',
+      subtitle: `Market Opportunity Score: ${score}% (${grade})`,
+      filename: `market-analysis-report-${Date.now()}.docx`,
+      sections: [
+        { type: 'heading', content: 'Executive Summary', level: 1 },
+        { type: 'score', score: { value: score, max: 100, label: 'Market Opportunity Score' } },
+        { type: 'paragraph', content: `Market Maturity: ${marketMaturity.charAt(0).toUpperCase() + marketMaturity.slice(1)}` },
+        { type: 'paragraph', content: `Annual Market Growth (CAGR): ${marketGrowth}%` },
+        { type: 'paragraph', content: `Competitor Count: ${competitorCount}` },
+        { type: 'paragraph', content: `Market Sizing Validation: ${isValid ? 'VALID' : 'NEEDS ADJUSTMENT'}` },
+        { type: 'divider' },
+        { type: 'heading', content: 'Market Sizing Framework (TAM/SAM/SOM)', level: 1 },
+        {
+          type: 'table',
+          tableData: {
+            headers: ['Metric', 'Value', 'Percentage'],
+            rows: [
+              ['Total Addressable Market (TAM)', `£${(tam / 1000000).toFixed(1)}M`, '100%'],
+              ['Serviceable Addressable Market (SAM)', `£${(sam / 1000000).toFixed(1)}M`, `${samPercent}% of TAM`],
+              ['Serviceable Obtainable Market (SOM)', `£${(som / 1000000).toFixed(1)}M`, `${somPercent}% of SAM`]
+            ]
+          }
+        },
+        { type: 'divider' },
+        { type: 'heading', content: 'Market Sizing Health Check', level: 1 },
+        issues.length > 0
+          ? { type: 'list', items: issues }
+          : { type: 'paragraph', content: 'All market sizing ratios are within realistic bounds' },
+        { type: 'divider' },
+        { type: 'heading', content: 'Target Market Segments', level: 1 },
+        { type: 'paragraph', content: targetSegments },
+        { type: 'divider' },
+        { type: 'heading', content: 'Key Market Trends', level: 1 },
+        { type: 'paragraph', content: keyTrends },
+        { type: 'divider' },
+        { type: 'heading', content: 'Customer Pain Points', level: 1 },
+        { type: 'paragraph', content: customerPainPoints },
+        { type: 'divider' },
+        { type: 'heading', content: 'Market Barriers to Entry', level: 1 },
+        { type: 'paragraph', content: marketBarriers },
+        { type: 'divider' },
+        { type: 'heading', content: '5-Year Market Projection', level: 1 },
+        {
+          type: 'table',
+          tableData: {
+            headers: ['Year', 'Projected SOM'],
+            rows: [
+              ['Year 1 (Baseline)', `£${(som / 1000000).toFixed(1)}M`],
+              ['Year 2', `£${(som * (1 + marketGrowth/100) / 1000000).toFixed(1)}M`],
+              ['Year 3', `£${(som * Math.pow(1 + marketGrowth/100, 2) / 1000000).toFixed(1)}M`],
+              ['Year 4', `£${(som * Math.pow(1 + marketGrowth/100, 3) / 1000000).toFixed(1)}M`],
+              ['Year 5', `£${(som * Math.pow(1 + marketGrowth/100, 4) / 1000000).toFixed(1)}M`]
+            ]
+          }
+        },
+        { type: 'divider' },
+        { type: 'heading', content: 'Smart Recommendations', level: 1 },
+        { type: 'list', items: tips },
+        { type: 'divider' },
+        { type: 'heading', content: '4-Week Action Plan', level: 1 },
+        {
+          type: 'table',
+          tableData: {
+            headers: ['Week', 'Action', 'Priority'],
+            rows: actionPlan.map(a => [a.week, a.action, a.priority])
+          }
+        }
+      ],
+      metadata: {
+        subject: 'Market Analysis Report',
+        author: 'UK Innovator Founder Visa Assistant',
+        keywords: ['market', 'analysis', 'TAM', 'SAM', 'SOM', 'visa', 'innovator founder']
+      }
+    });
+
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
+  };
+
   // Chart 1: TAM/SAM/SOM Funnel
   const getMarketFunnel = () => [
     { stage: "TAM", value: tam / 1000000, fill: "#ffa536" },
@@ -529,7 +623,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
             toolId="market-analysis"
             onSave={handleSave}
             onRestore={handleRestore}
-            onExport={handleExport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             getSerializedState={getSerializedState}
             toolName="Market Analysis"
           />

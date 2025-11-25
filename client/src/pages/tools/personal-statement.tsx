@@ -11,8 +11,12 @@ import { Download, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PersonalStatement() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [name, setName] = useState("");
@@ -36,13 +40,51 @@ export default function PersonalStatement() {
   const handleFileUpload = (file: any) => setUploadedFiles(prev => [...prev, file]);
   const handleRemoveFile = (id: string) => setUploadedFiles(prev => prev.filter(f => f.id !== id));
 
-  const exportStatement = () => {
+  const handleExportPdf = () => {
     const blob = new Blob([statement], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `personal-statement-${name}.txt`;
     a.click();
+  };
+
+  const handleExportWord = async () => {
+    const achievementsList = achievements.split('\n').filter(a => a.trim());
+    await generateWord({
+      title: 'Personal Statement',
+      subtitle: name || 'Personal Profile',
+      filename: `personal-statement-${name || 'document'}-${new Date().toISOString().split('T')[0]}`,
+      sections: [
+        { type: 'heading', content: 'Personal Information', level: 1 },
+        { type: 'table', tableData: {
+          headers: ['Field', 'Value'],
+          rows: [
+            ['Name', name || 'Not specified'],
+          ]
+        }},
+        { type: 'divider' },
+        { type: 'heading', content: 'Background & Experience', level: 1 },
+        { type: 'paragraph', content: background || 'No background information provided.' },
+        { type: 'divider' },
+        { type: 'heading', content: 'Key Achievements', level: 1 },
+        { type: 'list', items: achievementsList.length > 0 ? achievementsList : ['No achievements listed'] },
+        { type: 'divider' },
+        { type: 'heading', content: 'Vision & Aspirations', level: 1 },
+        { type: 'paragraph', content: vision || 'No vision statement provided.' },
+        { type: 'divider' },
+        { type: 'heading', content: 'Full Personal Statement', level: 1 },
+        { type: 'paragraph', content: statement || 'No personal statement generated yet.' },
+      ],
+      metadata: {
+        subject: 'Personal Statement',
+        keywords: ['personal statement', 'profile', name],
+      }
+    });
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
   };
 
   const getSerializedState = () => ({ uploadedFiles, name, background, achievements, vision, statement, savedDate });
@@ -73,7 +115,8 @@ export default function PersonalStatement() {
             toolId="personal-statement"
             toolName="Personal Statement"
             onSave={saveProgress}
-            onExport={exportStatement}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             getSerializedState={getSerializedState}
           />
 

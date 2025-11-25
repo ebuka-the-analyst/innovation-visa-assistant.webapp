@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+import { useWordExport } from "@/hooks/useWordExport";
+import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -55,6 +57,8 @@ type CustomerSegment = {
 };
 
 export default function MarketResearch() {
+  const { generateWord } = useWordExport();
+  const { toast } = useToast();
   const [activities, setActivities] = useState<ResearchActivity[]>([
     {
       id: '1',
@@ -416,7 +420,7 @@ export default function MarketResearch() {
     ];
   };
 
-  const handleExport = () => {
+  const handleExportPdf = () => {
     const report = `UK INNOVATOR FOUNDER VISA - MARKET RESEARCH REPORT
 Generated: ${new Date().toLocaleString('en-GB')}
 ${'='.repeat(80)}
@@ -572,6 +576,99 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
     URL.revokeObjectURL(url);
   };
 
+  const handleExportWord = async () => {
+    const sections = [];
+    
+    sections.push({ type: 'heading' as const, content: 'Research Completeness Summary', level: 1 as const });
+    sections.push({ type: 'paragraph' as const, content: `Overall Completeness Score: ${completenessScore}%` });
+    sections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Metric', 'Value'],
+        rows: [
+          ['Total Research Activities', totalActivities.toString()],
+          ['Completed Activities', `${completedActivities} (${Math.round((completedActivities / totalActivities) * 100)}%)`],
+          ['Total Sample Size', `${totalSampleSize} participants`],
+          ['Total Research Budget', `£${totalBudget.toLocaleString()}`],
+          ['Verified Activities', `${verifiedActivities} of ${totalActivities}`],
+          ['Competitors Analyzed', `${analyzedCompetitors} of ${competitors.length}`],
+          ['Customer Segments Validated', `${validatedSegments} of ${customerSegments.length}`]
+        ]
+      }
+    });
+    
+    sections.push({ type: 'heading' as const, content: 'Market Context', level: 1 as const });
+    sections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Metric', 'Value'],
+        rows: [
+          ['Total Addressable Market', `£${marketContext.totalMarketSize.toLocaleString()}`],
+          ['Target Market Size', `£${marketContext.targetMarketSize.toLocaleString()}`],
+          ['Market Growth Rate', `${marketContext.growthRate}% annually`],
+          ['Key Market Trends', marketContext.keyTrends || 'Not documented'],
+          ['Regulatory Factors', marketContext.regulatoryFactors || 'Not documented'],
+          ['Market Entry Barriers', marketContext.barriers || 'Not documented']
+        ]
+      }
+    });
+    
+    sections.push({ type: 'heading' as const, content: 'Research Activities', level: 1 as const });
+    activities.forEach((a, i) => {
+      sections.push({ type: 'heading' as const, content: `${i + 1}. ${a.title || 'Untitled Research Activity'}`, level: 2 as const });
+      sections.push({ type: 'paragraph' as const, content: `Type: ${a.type} | Method: ${a.method} | Status: ${a.status.toUpperCase()}` });
+      sections.push({ type: 'paragraph' as const, content: `Sample Size: ${a.actualSampleSize} of ${a.targetSampleSize} | Budget: £${a.budget.toLocaleString()}` });
+      if (a.keyFindings) sections.push({ type: 'paragraph' as const, content: `Key Findings: ${a.keyFindings}` });
+    });
+    
+    sections.push({ type: 'heading' as const, content: 'Competitor Analysis', level: 1 as const });
+    sections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Competitor', 'Market Share', 'Strengths', 'Weaknesses', 'Analyzed'],
+        rows: competitors.map(c => [c.name || 'Unnamed', `${c.marketShare}%`, c.strengths || 'N/A', c.weaknesses || 'N/A', c.analyzed ? 'Yes' : 'No'])
+      }
+    });
+    
+    sections.push({ type: 'heading' as const, content: 'Customer Segments', level: 1 as const });
+    sections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Segment', 'Size', 'Pain Points', 'Validated'],
+        rows: customerSegments.map(s => [s.segmentName || 'Unnamed', s.size.toLocaleString(), s.painPoints || 'N/A', s.validated ? 'Yes' : 'No'])
+      }
+    });
+    
+    sections.push({ type: 'heading' as const, content: 'Smart Recommendations', level: 1 as const });
+    sections.push({ type: 'list' as const, items: getSmartTips() });
+    
+    sections.push({ type: 'heading' as const, content: '4-Week Action Plan', level: 1 as const });
+    sections.push({ 
+      type: 'table' as const, 
+      tableData: {
+        headers: ['Week', 'Action', 'Priority'],
+        rows: generateActionPlan().map(item => [item.week, item.action, item.priority])
+      }
+    });
+
+    await generateWord({
+      title: 'UK Innovator Founder Visa - Market Research Report',
+      subtitle: `Completeness Score: ${completenessScore}%`,
+      filename: `market-research-report-${Date.now()}.docx`,
+      sections,
+      metadata: {
+        subject: 'Market Research Report',
+        author: 'UK Innovator Founder Visa Assistant',
+        keywords: ['market research', 'innovator visa', 'UK visa', 'competitive analysis']
+      }
+    });
+
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your document has been downloaded as a Word document (.docx).",
+    });
+  };
+
   return (
     <>
       <AuthHeader />
@@ -591,7 +688,8 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
             toolId="market-research"
             onSave={handleSave}
             onRestore={handleRestore}
-            onExport={handleExport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             getSerializedState={getSerializedState}
             toolName="Market Research Planner"
           />
