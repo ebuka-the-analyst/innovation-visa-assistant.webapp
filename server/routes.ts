@@ -1050,15 +1050,18 @@ ${generatedSections.join('\n\n---\n\n')}`;
       // Calculate user metrics
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       
       const totalUsers = allUsers.length;
-      const newUsers = allUsers.filter(u => new Date(u.createdAt) >= thirtyDaysAgo).length;
+      const newUsersThisMonth = allUsers.filter(u => new Date(u.createdAt) >= thirtyDaysAgo).length;
+      const newUsersLastWeek = allUsers.filter(u => new Date(u.createdAt) >= sevenDaysAgo).length;
       const activeUsers = allUsers.filter(u => u.isEmailVerified).length;
       
       // Calculate plan metrics
       const totalPlans = allPlans.length;
       const completedPlans = allPlans.filter(p => p.status === 'completed').length;
-      const demoPlans = allPlans.filter(p => p.isDemoData).length;
+      const pendingPlans = allPlans.filter(p => p.status === 'pending').length;
       
       // Get tool usage stats
       const toolUsageStats = await storage.getToolUsageStats(10);
@@ -1067,23 +1070,71 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const uptime = process.uptime();
       const databaseStatus = await storage.checkDatabaseHealth();
       
+      // Subscription distribution
+      const tierCounts = { free: 0, basic: 0, premium: 0, enterprise: 0, ultimate: 0 };
+      allUsers.forEach(user => {
+        const tier = (user.subscriptionTier || 'free') as keyof typeof tierCounts;
+        if (tier in tierCounts) tierCounts[tier]++;
+      });
+      
+      // Activity data (registrations per day for last 30 days)
+      const activityData: { date: string; count: number }[] = [];
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        const count = allUsers.filter(u => 
+          new Date(u.createdAt).toISOString().split('T')[0] === dateStr
+        ).length;
+        activityData.push({ date: dateStr, count });
+      }
+      
+      // Time series data for users over last 30 days
+      let cumulativeUsers = 0;
+      const timeSeriesData = activityData.map(d => {
+        cumulativeUsers += d.count;
+        return {
+          date: d.date,
+          users: cumulativeUsers,
+          plans: allPlans.filter(p => 
+            new Date(p.createdAt).toISOString().split('T')[0] <= d.date
+          ).length,
+          revenue: 0,
+        };
+      });
+      
       res.json({
-        users: {
-          total: totalUsers,
-          new: newUsers,
-          active: activeUsers,
-        },
-        plans: {
-          total: totalPlans,
-          completed: completedPlans,
-          demo: demoPlans,
-        },
-        topTools: toolUsageStats,
-        system: {
+        kpiMetrics: [
+          { label: 'Total Users', value: totalUsers, trend: { value: newUsersLastWeek, direction: 'up' as const, period: '7d' }, icon: 'Users', color: 'blue' },
+          { label: 'Active Now', value: activeUsers, trend: { value: Math.round((activeUsers / Math.max(totalUsers, 1)) * 100), direction: 'up' as const, period: '30d' }, icon: 'Activity', color: 'green' },
+          { label: 'Total Plans', value: totalPlans, trend: { value: completedPlans, direction: 'up' as const, period: 'completed' }, icon: 'FileText', color: 'purple' },
+          { label: 'Pending Plans', value: pendingPlans, trend: { value: pendingPlans, direction: 'neutral' as const, period: 'now' }, icon: 'Clock', color: 'orange' },
+        ],
+        timeSeriesData,
+        subscriptionDistribution: Object.entries(tierCounts).map(([tier, count]) => ({
+          tier,
+          count,
+          percentage: Math.round((count / Math.max(totalUsers, 1)) * 100),
+        })),
+        activityData,
+        topTools: toolUsageStats.map(t => ({
+          toolId: t.toolId,
+          toolName: t.toolId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          usageCount: t.count,
+          uniqueUsers: 0,
+          avgDuration: 0,
+        })),
+        recentActivity: [],
+        systemMetrics: {
           uptime: Math.floor(uptime),
           uptimeFormatted: `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m`,
-          database: databaseStatus ? 'healthy' : 'degraded',
+          cpuUsage: 0,
+          memoryUsage: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+          databaseStatus: databaseStatus ? 'healthy' : 'degraded',
+          apiLatency: 0,
+          errorRate: 0,
         },
+        lastUpdated: new Date().toISOString(),
       });
     } catch (error) {
       console.error("Admin analytics overview error:", error);
