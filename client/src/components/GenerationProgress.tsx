@@ -232,7 +232,9 @@ export default function GenerationProgress({ planId }: { planId: string }) {
             <div className="space-y-6">
               <div className="flex items-center justify-center gap-2 text-chart-3">
                 <CheckCircle className="w-6 h-6" />
-                <p className="text-lg font-semibold">Business Plan Complete!</p>
+                <p className="text-lg font-semibold">
+                  {tier === 'ultimate' ? 'Your Ultimate Business Plan Package is Complete!' : 'Business Plan Complete!'}
+                </p>
               </div>
               
               {/* Primary action - Download */}
@@ -340,35 +342,56 @@ export default function GenerationProgress({ planId }: { planId: string }) {
 
               <div className="bg-accent/20 rounded-lg p-4 mt-4">
                 <p className="text-xs font-medium text-foreground mb-2 text-center">
-                  {tier === 'basic' && '✨ Basic Plan'}
-                  {tier === 'premium' && '⭐ Premium Plan'}
-                  {tier === 'enterprise' && '💎 Enterprise Plan'}
+                  {tier === 'free' && 'Free Plan'}
+                  {tier === 'basic' && 'Basic Plan'}
+                  {tier === 'premium' && 'Premium Plan'}
+                  {tier === 'enterprise' && 'Enterprise Plan'}
+                  {tier === 'ultimate' && 'Ultimate Plan'}
                 </p>
                 <div className="text-xs text-muted-foreground space-y-1">
+                  {tier === 'free' && (
+                    <>
+                      <p className="text-center">✓ 10-15 page business plan</p>
+                      <p className="text-center">✓ 13 essential tools</p>
+                      <p className="text-center text-foreground font-medium mt-2">
+                        Upgrade to Basic for 25-35 pages and 20 tools.
+                      </p>
+                    </>
+                  )}
                   {tier === 'basic' && (
                     <>
-                      <p className="text-center">✓ Standard business plan template</p>
+                      <p className="text-center">✓ 25-35 page business plan</p>
+                      <p className="text-center">✓ 20 tools total</p>
                       <p className="text-center">✓ 1 revision included</p>
                       <p className="text-center text-foreground font-medium mt-2">
-                        Need more? Upgrade to Premium for detailed financials, 3 revisions, and endorsing body selection.
+                        Need more? Upgrade to Premium for 40-60 pages and 83 tools.
                       </p>
                     </>
                   )}
                   {tier === 'premium' && (
                     <>
-                      <p className="text-center">✓ Enhanced business plan with detailed financials</p>
+                      <p className="text-center">✓ 40-60 page business plan</p>
+                      <p className="text-center">✓ 83 tools total</p>
                       <p className="text-center">✓ 3 revisions included</p>
                       <p className="text-center">✓ Endorsing body selection guidance</p>
-                      <p className="text-center">✓ Priority generation queue</p>
                     </>
                   )}
                   {tier === 'enterprise' && (
                     <>
-                      <p className="text-center">✓ Full business plan package</p>
+                      <p className="text-center">✓ 50-80 page business plan</p>
+                      <p className="text-center">✓ All 109 tools</p>
                       <p className="text-center">✓ Unlimited revisions</p>
-                      <p className="text-center">✓ Human expert review</p>
-                      <p className="text-center">✓ Cover letter generation</p>
-                      <p className="text-center">✓ 24-hour delivery</p>
+                      <p className="text-center">✓ IP & patent strategy included</p>
+                    </>
+                  )}
+                  {tier === 'ultimate' && (
+                    <>
+                      <p className="text-center">✓ 80+ page comprehensive business plan</p>
+                      <p className="text-center">✓ All 109 tools + VIP support</p>
+                      <p className="text-center">✓ RFE Defense Strategy included</p>
+                      <p className="text-center">✓ Appeal Strategy & Success Coaching</p>
+                      <p className="text-center">✓ Personal strategist access</p>
+                      <p className="text-center">✓ Success guarantee</p>
                     </>
                   )}
                 </div>
@@ -383,8 +406,12 @@ export default function GenerationProgress({ planId }: { planId: string }) {
             </div>
           ) : (
             <div className="text-center text-sm text-muted-foreground">
-              <p>Estimated time: {tier === 'enterprise' ? '6-8' : tier === 'premium' ? '5-7' : '3-5'} minutes</p>
-              <p className="text-xs mt-1">We're generating a comprehensive business plan tailored to your needs</p>
+              <p>Estimated time: {tier === 'ultimate' ? '8-12' : tier === 'enterprise' ? '6-8' : tier === 'premium' ? '5-7' : '3-5'} minutes</p>
+              <p className="text-xs mt-1">
+                {tier === 'ultimate' 
+                  ? 'Generating your comprehensive 80+ page Ultimate business plan package...' 
+                  : "We're generating a comprehensive business plan tailored to your needs"}
+              </p>
             </div>
           )}
         </div>

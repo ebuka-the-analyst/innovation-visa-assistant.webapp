@@ -227,6 +227,210 @@ export const getSectionsForTier = (tier: string): Section[] => {
     ];
   }
   
+  // Ultimate tier (80+ pages - premium guarantee)
+  if (tier === 'ultimate') {
+    return [
+      {
+        title: "1. EXECUTIVE SUMMARY",
+        pageTarget: "5-6 pages",
+        requirements: [
+          "Comprehensive overview with quantified impact",
+          "Innovation significance with evidence",
+          "Market validation summary with customer quotes",
+          "Financial viability snapshot with key metrics",
+          "Endorsing body fit analysis",
+          "Success factors and differentiators"
+        ],
+        maxTokens: 2000
+      },
+      {
+        title: "2. FOUNDER CREDENTIALS & VALIDATION",
+        pageTarget: "8-10 pages",
+        requirements: [
+          "Complete education with honors/awards/thesis topics",
+          "Detailed work history with measurable impact",
+          "Technical expertise evidence with portfolio",
+          "Publications, patents, IP",
+          "Professional recognition and awards",
+          "Advisory roles and industry contributions",
+          "Personal immigration experience relevance"
+        ],
+        maxTokens: 4096
+      },
+      {
+        title: "3. INNOVATION & TECHNICAL DEPTH",
+        pageTarget: "12-15 pages",
+        requirements: [
+          "Problem quantification with market research",
+          "Technical architecture with detailed diagrams",
+          "AI/ML methodology with accuracy metrics",
+          "Data provenance and legal basis",
+          "GDPR compliance approach",
+          "Independent validation evidence",
+          "Industry-specific models",
+          "Technology stack with justification",
+          "Patent status with filing details",
+          "Academic literature context (5+ papers)",
+          "Competitive technical comparison matrix"
+        ],
+        maxTokens: 4096
+      },
+      {
+        title: "4. MARKET ANALYSIS & VALIDATION",
+        pageTarget: "12-15 pages",
+        requirements: [
+          "TAM/SAM/SOM with detailed methodology",
+          "Customer discovery (interview count, quotes)",
+          "Willingness to pay evidence",
+          "Letters of intent analysis",
+          "Competitor deep-dive (10+ competitors)",
+          "Market gaps with evidence",
+          "Distribution partnerships",
+          "Market trends and timing",
+          "International market assessment"
+        ],
+        maxTokens: 4096
+      },
+      {
+        title: "5. FINANCIAL VIABILITY - EXPERT LEVEL",
+        pageTarget: "15-18 pages",
+        requirements: [
+          "Revenue model with detailed tier breakdown",
+          "Month-by-month customer acquisition Year 1",
+          "Sales team sizing with benchmarks",
+          "Complete cost breakdown with market rates",
+          "LTV:CAC calculation with ALL costs",
+          "Industry benchmark comparison",
+          "Year 1 cash requirement with burn rate",
+          "ALL funding sources with amounts and evidence",
+          "36-month cashflow projection",
+          "Sensitivity analysis (3 scenarios)",
+          "Break-even analysis",
+          "Valuation methodology"
+        ],
+        maxTokens: 4096
+      },
+      {
+        title: "6. REGULATORY & COMPLIANCE",
+        pageTarget: "8-10 pages",
+        requirements: [
+          "Comprehensive regulatory requirements list",
+          "Detailed timeline with dependencies",
+          "Budget breakdown by phase",
+          "GDPR compliance implementation plan",
+          "Data processing agreements",
+          "Security certifications roadmap",
+          "Ongoing compliance costs",
+          "Legal structure recommendations"
+        ],
+        maxTokens: 3500
+      },
+      {
+        title: "7. TEAM & HIRING PLAN",
+        pageTarget: "6-8 pages",
+        requirements: [
+          "Current team with credentials",
+          "Detailed hiring plan by quarter",
+          "Market-rate salaries by role",
+          "Job creation timeline (12 employees Year 3)",
+          "Advisory board and mentors",
+          "Talent acquisition strategy",
+          "Remote vs office strategy"
+        ],
+        maxTokens: 3000
+      },
+      {
+        title: "8. SCALABILITY & GROWTH STRATEGY",
+        pageTarget: "8-10 pages",
+        requirements: [
+          "Customer growth targets with evidence",
+          "Geographic expansion timeline",
+          "Product roadmap with customer input",
+          "Infrastructure scaling plan",
+          "Support team scaling",
+          "Partnership strategy",
+          "International expansion phases"
+        ],
+        maxTokens: 3500
+      },
+      {
+        title: "9. COMPREHENSIVE RISK ANALYSIS",
+        pageTarget: "6-8 pages",
+        requirements: [
+          "Market risks with mitigation",
+          "Technical risks with contingency",
+          "Financial risks with scenarios",
+          "People/talent risks",
+          "Regulatory risks",
+          "Competitive risks",
+          "Immigration-specific risks"
+        ],
+        maxTokens: 3000
+      },
+      {
+        title: "10. ENDORSING BODY STRATEGY",
+        pageTarget: "6-8 pages",
+        requirements: [
+          "Primary target (Envestors/Innovator International)",
+          "Fit assessment with criteria mapping",
+          "Application strategy and timeline",
+          "Contact points plan (6+ touchpoints)",
+          "Evidence portfolio summary",
+          "Interview preparation notes"
+        ],
+        maxTokens: 3000
+      },
+      {
+        title: "11. RFE DEFENSE STRATEGY",
+        pageTarget: "5-6 pages",
+        requirements: [
+          "Common RFE triggers and prevention",
+          "Innovation evidence compilation",
+          "Viability evidence preparation",
+          "Scalability documentation",
+          "Response templates for each criterion"
+        ],
+        maxTokens: 2500
+      },
+      {
+        title: "12. APPEAL STRATEGY & REAPPLICATION GUIDE",
+        pageTarget: "4-5 pages",
+        requirements: [
+          "Appeal process overview",
+          "Reapplication strategy",
+          "Alternative endorser options",
+          "Timeline management",
+          "Evidence strengthening plan"
+        ],
+        maxTokens: 2000
+      },
+      {
+        title: "13. SUCCESS COACHING FRAMEWORK",
+        pageTarget: "4-5 pages",
+        requirements: [
+          "Interview preparation STAR method",
+          "Confidence building exercises",
+          "Key talking points",
+          "Objection handling",
+          "Post-approval next steps"
+        ],
+        maxTokens: 2000
+      },
+      {
+        title: "14. APPENDICES & EVIDENCE",
+        pageTarget: "8-10 pages",
+        requirements: [
+          "Financial assumptions documentation",
+          "Market research sources",
+          "Technology specifications",
+          "Regulatory compliance checklist",
+          "Document checklist for submission"
+        ],
+        maxTokens: 3500
+      }
+    ];
+  }
+
   // Enterprise tier (most comprehensive)
   return [
     {
@@ -372,7 +576,8 @@ export const getSectionsForTier = (tier: string): Section[] => {
 
 // Generate system prompt for a specific section
 export const getSectionSystemPrompt = (tier: string, section: Section, sectionNumber: number, totalSections: number): string => {
-  const qualityLevel = tier === 'enterprise' ? 'EXPERT-LEVEL (99.9% approval target)' : 
+  const qualityLevel = tier === 'ultimate' ? 'ULTIMATE GUARANTEE (100% approval focus)' :
+                       tier === 'enterprise' ? 'EXPERT-LEVEL (99.9% approval target)' : 
                        tier === 'premium' ? 'ENHANCED PROFESSIONAL' : 'PROFESSIONAL';
   
   return `You are an expert Innovation Visa consultant with 15 years experience achieving 95%+ approval rates.
@@ -416,6 +621,20 @@ ENTERPRISE TIER - CRITICAL REQUIREMENTS:
 - Technical architecture: Describe system, data pipeline, ML infrastructure
 - Academic context: Reference 3-5 relevant papers
 - Risk honesty: Acknowledge gaps with specific mitigation strategies
+` : ''}
+
+${tier === 'ultimate' ? `
+ULTIMATE TIER - 100% APPROVAL FOCUS:
+- ALL enterprise tier requirements PLUS:
+- EXHAUSTIVE documentation: Every claim backed by multiple evidence sources
+- RFE PREVENTION: Preemptively address every possible concern
+- INTERVIEW READY: Include talking points for endorser meetings
+- SUCCESS GUARANTEE: Content must be compelling, specific, and irrefutable
+- PERSONALIZED: Deeply integrate founder's unique story and experience
+- 80+ PAGES: Fill every section with maximum detail and evidence
+- NO GAPS: If data is missing, explain exactly how it will be obtained with timeline
+- PREMIUM QUALITY: This is the highest tier - every word must add value
+- DEFENSIBLE: Include counter-arguments and evidence for skeptical reviewers
 ` : ''}
 
 REQUIREMENTS FOR THIS SECTION:
