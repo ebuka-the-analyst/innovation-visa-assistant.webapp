@@ -2444,72 +2444,76 @@ export default function AdminDashboard() {
                 className="space-y-6"
               >
                 {/* Plan Analytics */}
-                {plansAnalytics && (
+                {plansAnalytics && (plansAnalytics.completionFunnel?.length > 0 || plansAnalytics.statusDistribution?.length > 0) && (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Plan Completion Funnel */}
-                    <Card data-testid="card-plan-completion-funnel">
-                      <CardHeader>
-                        <CardTitle>Plan Completion Funnel</CardTitle>
-                        <CardDescription>From creation to completion</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <ResponsiveContainer width="100%" height={300}>
-                          <FunnelChart>
-                            <RechartsTooltip
-                              contentStyle={{
-                                backgroundColor: 'hsl(var(--card))',
-                                border: '1px solid hsl(var(--border))',
-                                borderRadius: '8px'
-                              }}
-                            />
-                            <Funnel
-                              dataKey="count"
-                              data={plansAnalytics.completionFunnel}
-                              isAnimationActive
-                            >
-                              {plansAnalytics.completionFunnel.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                              ))}
-                            </Funnel>
-                          </FunnelChart>
-                        </ResponsiveContainer>
-                      </CardContent>
-                    </Card>
+                    {plansAnalytics.completionFunnel && plansAnalytics.completionFunnel.length > 0 && (
+                      <Card data-testid="card-plan-completion-funnel">
+                        <CardHeader>
+                          <CardTitle>Plan Completion Funnel</CardTitle>
+                          <CardDescription>From creation to completion</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <FunnelChart>
+                              <RechartsTooltip
+                                contentStyle={{
+                                  backgroundColor: 'hsl(var(--card))',
+                                  border: '1px solid hsl(var(--border))',
+                                  borderRadius: '8px'
+                                }}
+                              />
+                              <Funnel
+                                dataKey="count"
+                                data={plansAnalytics.completionFunnel}
+                                isAnimationActive
+                              >
+                                {plansAnalytics.completionFunnel.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                ))}
+                              </Funnel>
+                            </FunnelChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+                    )}
 
                     {/* Status Distribution */}
-                    <Card data-testid="card-plan-status-distribution">
-                      <CardHeader>
-                        <CardTitle>Plan Status Distribution</CardTitle>
-                        <CardDescription>Current status breakdown</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <ResponsiveContainer width="100%" height={300}>
-                          <RechartsPieChart>
-                            <Pie
-                              data={plansAnalytics.statusDistribution}
-                              cx="50%"
-                              cy="50%"
-                              labelLine={false}
-                              label={(entry) => `${entry.status} (${entry.percentage}%)`}
-                              outerRadius={100}
-                              fill="#8884d8"
-                              dataKey="count"
-                            >
-                              {plansAnalytics.statusDistribution.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                              ))}
-                            </Pie>
-                            <RechartsTooltip
-                              contentStyle={{
-                                backgroundColor: 'hsl(var(--card))',
-                                border: '1px solid hsl(var(--border))',
-                                borderRadius: '8px'
-                              }}
-                            />
-                          </RechartsPieChart>
-                        </ResponsiveContainer>
-                      </CardContent>
-                    </Card>
+                    {plansAnalytics.statusDistribution && plansAnalytics.statusDistribution.length > 0 && (
+                      <Card data-testid="card-plan-status-distribution">
+                        <CardHeader>
+                          <CardTitle>Plan Status Distribution</CardTitle>
+                          <CardDescription>Current status breakdown</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <RechartsPieChart>
+                              <Pie
+                                data={plansAnalytics.statusDistribution}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                label={(entry) => `${entry.status} (${entry.percentage}%)`}
+                                outerRadius={100}
+                                fill="#8884d8"
+                                dataKey="count"
+                              >
+                                {plansAnalytics.statusDistribution.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                ))}
+                              </Pie>
+                              <RechartsTooltip
+                                contentStyle={{
+                                  backgroundColor: 'hsl(var(--card))',
+                                  border: '1px solid hsl(var(--border))',
+                                  borderRadius: '8px'
+                                }}
+                              />
+                            </RechartsPieChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 )}
 
