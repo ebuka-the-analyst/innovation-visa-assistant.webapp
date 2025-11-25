@@ -4,7 +4,6 @@ import { storage } from "./storage";
 import { db } from "./db";
 import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
-import Stripe from "stripe";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
@@ -14,10 +13,7 @@ import crypto from "crypto";
 import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
 import { sendPaymentReceiptEmail, sendPasswordResetEmail, generateVerificationToken, getResetTokenExpiry, sendPlanCompletionEmail, sendReferralRewardEmail, sendPromoCodeRewardEmail } from "./email";
 import bcrypt from "bcrypt";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-11-17.clover",
-});
+import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -344,6 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
         : 'http://localhost:5000';
 
+      const stripe = await getUncachableStripeClient();
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
@@ -401,6 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Session mismatch - security violation" });
       }
 
+      const stripe = await getUncachableStripeClient();
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       
       if (session.payment_status !== "paid") {
