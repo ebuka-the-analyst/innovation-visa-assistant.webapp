@@ -77,6 +77,7 @@ const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
 const PartnerDashboard = lazy(() => import("@/pages/partner-dashboard"));
 
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features"];
+const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
 
 // Optimized loading skeleton
 function PageLoadingSkeleton() {
@@ -232,12 +233,24 @@ function UnifiedHeader() {
 function AppLayout() {
   const [location] = useLocation();
   const isPublicRoute = SIDEBAR_HIDDEN_ROUTES.includes(location);
+  const isCustomLayoutRoute = CUSTOM_LAYOUT_ROUTES.includes(location);
 
   if (isPublicRoute) {
     return (
       <Suspense fallback={<PageLoadingSkeleton />}>
         <Router />
       </Suspense>
+    );
+  }
+
+  // Admin pages have their own sidebar layout
+  if (isCustomLayoutRoute) {
+    return (
+      <ProtectedRoute>
+        <Suspense fallback={<PageLoadingSkeleton />}>
+          <Router />
+        </Suspense>
+      </ProtectedRoute>
     );
   }
 
