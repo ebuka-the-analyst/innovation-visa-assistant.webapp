@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
-import { Check, ChevronRight, Wrench, Wallet, Activity, LayoutDashboard } from "lucide-react";
-import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { Check, ChevronRight, Wrench, Wallet, Activity, LayoutDashboard, PanelLeft } from "lucide-react";
+import { SidebarProvider, SidebarInset, useSidebar } from "@/components/ui/sidebar";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/app-sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,6 +45,33 @@ const PRICING_TIERS = [
   { name: "Ultimate", price: "£299", access: "Complete 100+", pages: "80+", premium: true, colorClass: "border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/20" },
 ];
 
+function AnimatedSidebarTrigger() {
+  const { state, toggleSidebar } = useSidebar();
+  const isOpen = state === "expanded";
+  
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          data-testid="button-sidebar-toggle"
+          className="h-8 w-8 flex items-center justify-center group relative overflow-visible"
+        >
+          <PanelLeft className="w-5 h-5" />
+          {!isOpen && (
+            <div className="absolute -right-1 -top-1 w-2 h-2 bg-primary rounded-full animate-ping-slow" />
+          )}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {isOpen ? 'Close sidebar' : 'Open sidebar'}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 export default function FeaturesShowcase() {
   const { user } = useAuth();
   const isDemoMode = !user;
@@ -74,7 +102,7 @@ export default function FeaturesShowcase() {
         <SidebarInset className="flex-1 overflow-auto">
           <header className="sticky top-0 z-50 flex h-14 items-center justify-between gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
             <div className="flex items-center gap-2">
-              <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <AnimatedSidebarTrigger />
               <Link href="/">
                 <div className="logo-container h-8">
                   <img src={logoLight} alt="Logo" className="h-8 w-auto logo-light" />
