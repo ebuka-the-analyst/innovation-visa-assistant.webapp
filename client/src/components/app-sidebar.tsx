@@ -38,6 +38,8 @@ import {
   FolderOpen,
   Handshake,
   Sparkles,
+  Trophy,
+  CalendarDays,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -218,8 +220,40 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           title: "Tools Hub",
           url: "/tools-hub",
           icon: Zap,
-          description: "104+ visa application tools",
+          description: "100+ professional-level tools",
           badge: "100+",
+        },
+        {
+          title: "Achievements",
+          url: "/achievements",
+          icon: Trophy,
+          description: "Badges, milestones & certificates",
+        },
+        {
+          title: "Template Library",
+          url: "/template-library",
+          icon: FolderOpen,
+          description: "60+ document templates",
+          badge: "60+",
+        },
+        {
+          title: "AI Document Review",
+          url: "/document-review",
+          icon: Sparkles,
+          description: "AI-powered document feedback",
+          badge: "AI",
+        },
+        {
+          title: "Success Stories",
+          url: "/success-stories",
+          icon: Award,
+          description: "Real visa success cases",
+        },
+        {
+          title: "Calendar & Deadlines",
+          url: "/calendar",
+          icon: CalendarDays,
+          description: "Track visa timeline",
         },
         {
           title: "Endorser Comparison",

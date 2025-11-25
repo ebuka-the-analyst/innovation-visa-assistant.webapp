@@ -71,6 +71,11 @@ const KPIDashboard = lazy(() => import("@/pages/kpi-dashboard"));
 const DataModal = lazy(() => import("@/pages/data-modal"));
 const ReferralDashboard = lazy(() => import("@/pages/referral-dashboard"));
 const PremiumFeatures = lazy(() => import("@/pages/premium-features"));
+const Achievements = lazy(() => import("@/pages/achievements"));
+const TemplateLibrary = lazy(() => import("@/pages/template-library"));
+const DocumentReviewPage = lazy(() => import("@/pages/document-review"));
+const SuccessStories = lazy(() => import("@/pages/success-stories"));
+const CalendarSync = lazy(() => import("@/pages/calendar-sync"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
@@ -154,6 +159,11 @@ function Router() {
       <Route path="/partner-dashboard" component={PartnerDashboard} />
       <Route path="/referral-dashboard" component={ReferralDashboard} />
       <Route path="/premium-features" component={PremiumFeatures} />
+      <Route path="/achievements" component={Achievements} />
+      <Route path="/template-library" component={TemplateLibrary} />
+      <Route path="/document-review" component={DocumentReviewPage} />
+      <Route path="/success-stories" component={SuccessStories} />
+      <Route path="/calendar" component={CalendarSync} />
       <Route path="/interview-prep" component={InterviewPrep} />
       <Route path="/faq" component={FAQ} />
       <Route path="/guide" component={Guide} />
