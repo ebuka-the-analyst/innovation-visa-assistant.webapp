@@ -149,6 +149,7 @@ function Router() {
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/handoff" component={Handoff} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route path="/partner-dashboard" component={PartnerDashboard} />
       <Route path="/referral-dashboard" component={ReferralDashboard} />
       <Route path="/premium-features" component={PremiumFeatures} />
