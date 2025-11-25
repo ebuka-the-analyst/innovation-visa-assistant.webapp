@@ -1273,3 +1273,91 @@ export type InsertLawyerReviewComment = z.infer<typeof insertLawyerReviewComment
 
 export type LawyerReviewStatusHistory = typeof lawyerReviewStatusHistory.$inferSelect;
 export type InsertLawyerReviewStatusHistory = z.infer<typeof insertLawyerReviewStatusHistorySchema>;
+
+// ============================================
+// NEWS FEED SYSTEM - Live UK Immigration News
+// ============================================
+
+// News Articles - Cached articles from external news APIs
+export const newsArticles = pgTable("news_articles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Source Information
+  sourceId: varchar("source_id", { length: 100 }), // e.g., "bbc-news", "the-guardian-uk"
+  sourceName: varchar("source_name", { length: 255 }).notNull(),
+  sourceUrl: text("source_url"),
+  
+  // Article Content
+  title: text("title").notNull(),
+  description: text("description"),
+  content: text("content"), // Full article content if available
+  author: varchar("author", { length: 255 }),
+  
+  // URLs and Media
+  url: text("url").notNull().unique(), // Article URL (unique to prevent duplicates)
+  imageUrl: text("image_url"),
+  
+  // Categorization
+  category: varchar("category", { length: 50 }).notNull().default('general'), // immigration, visa, policy, business, endorsement
+  tags: text("tags").array(), // ['UK', 'visa', 'immigration', 'innovator']
+  relevanceScore: integer("relevance_score").default(50), // 0-100 relevance to visa applicants
+  
+  // Timestamps
+  publishedAt: timestamp("published_at").notNull(),
+  fetchedAt: timestamp("fetched_at").notNull().defaultNow(),
+  
+  // AI-Generated Summary for chatbot
+  aiSummary: text("ai_summary"),
+  keyPoints: text("key_points").array(), // Bullet points for quick reading
+  
+  // Status
+  isActive: boolean("is_active").notNull().default(true),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_news_published").on(table.publishedAt),
+  index("idx_news_category").on(table.category),
+  index("idx_news_relevance").on(table.relevanceScore),
+  index("idx_news_featured").on(table.isFeatured),
+  index("idx_news_active").on(table.isActive),
+]);
+
+// News Fetch Log - Track API fetches and rate limits
+export const newsFetchLog = pgTable("news_fetch_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  apiSource: varchar("api_source", { length: 50 }).notNull(), // newsapi, newsdata, guardian
+  endpoint: text("endpoint"),
+  
+  articlesFound: integer("articles_found").notNull().default(0),
+  articlesAdded: integer("articles_added").notNull().default(0),
+  articlesDuplicate: integer("articles_duplicate").notNull().default(0),
+  
+  status: varchar("status", { length: 20 }).notNull().default('success'), // success, error, rate_limited
+  errorMessage: text("error_message"),
+  
+  fetchedAt: timestamp("fetched_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_fetch_log_source").on(table.apiSource),
+  index("idx_fetch_log_time").on(table.fetchedAt),
+]);
+
+// Insert Schemas
+export const insertNewsArticleSchema = createInsertSchema(newsArticles).omit({
+  id: true,
+  createdAt: true,
+  fetchedAt: true,
+});
+
+export const insertNewsFetchLogSchema = createInsertSchema(newsFetchLog).omit({
+  id: true,
+  fetchedAt: true,
+});
+
+// Types
+export type NewsArticle = typeof newsArticles.$inferSelect;
+export type InsertNewsArticle = z.infer<typeof insertNewsArticleSchema>;
+
+export type NewsFetchLog = typeof newsFetchLog.$inferSelect;
+export type InsertNewsFetchLog = z.infer<typeof insertNewsFetchLogSchema>;
