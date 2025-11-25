@@ -33,6 +33,9 @@ import {
   Clock,
   DollarSign,
   Gift,
+  Target,
+  HelpCircle,
+  FolderOpen,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -202,6 +205,29 @@ export function AppSidebar() {
           url: "/expert-booking",
           icon: Users,
           description: "Expert consultation",
+        },
+      ],
+    },
+    {
+      label: "Your Journey",
+      items: [
+        {
+          title: "Progress Tracker",
+          url: "/progress",
+          icon: Target,
+          description: "Track your visa journey",
+        },
+        {
+          title: "My Documents",
+          url: "/documents",
+          icon: FolderOpen,
+          description: "Secure document storage",
+        },
+        {
+          title: "Support",
+          url: "/support",
+          icon: HelpCircle,
+          description: "Help & contact us",
         },
       ],
     },
