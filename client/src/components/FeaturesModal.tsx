@@ -179,30 +179,10 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
             overflowY: "auto"
           }}
         >
-          {/* Glitter effect background */}
+          {/* Subtle background gradient */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-primary/10 to-transparent rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-chart-3/10 to-transparent rounded-full blur-3xl" />
-            <style>{`
-              @keyframes sparkle {
-                0%, 100% { opacity: 0.5; transform: scale(1); }
-                50% { opacity: 1; transform: scale(1.1); }
-              }
-              .sparkle-item {
-                animation: sparkle 3s infinite;
-              }
-            `}</style>
-            {[...Array(12)].map((_, i) => (
-              <div
-                key={i}
-                className="sparkle-item absolute w-2 h-2 bg-gradient-to-r from-primary to-chart-3 rounded-full"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${i * 0.25}s`
-                }}
-              />
-            ))}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-chart-3/5 to-transparent rounded-full blur-3xl" />
           </div>
 
           {/* Content */}
