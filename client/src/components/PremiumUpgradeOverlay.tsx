@@ -32,11 +32,11 @@ const tierColors = {
 };
 
 const tierBenefits: Record<ToolTier, string[]> = {
-  free: ["13 essential tools", "Basic Innovator Founder Visa guidance", "Email support"],
-  basic: ["20 tools access", "Standard business planning", "48-hour delivery", "PDF downloads"],
-  premium: ["83 tools access", "Comprehensive analysis", "24-hour delivery", "Industry frameworks", "Market research"],
-  enterprise: ["100+ advanced tools", "Expert modeling", "12-hour priority", "Risk analysis", "Global roadmaps"],
-  ultimate: ["ALL 100+ tools", "24/7 VIP support", "Personal strategist", "Unlimited revisions", "Success guarantee"],
+  free: ["Essential tools access", "Basic Innovator Founder Visa guidance", "Email support"],
+  basic: ["Extended tools access", "Standard business planning", "48-hour delivery", "PDF downloads"],
+  premium: ["Comprehensive tools access", "Full analysis suite", "24-hour delivery", "Industry frameworks", "Market research"],
+  enterprise: ["Full tools access", "Expert modeling", "12-hour priority", "Risk analysis", "Global roadmaps"],
+  ultimate: ["Complete access to 100+ professional-level tools", "24/7 VIP support", "Personal strategist", "Unlimited revisions", "Success guarantee"],
 };
 
 export function PremiumUpgradeOverlay({

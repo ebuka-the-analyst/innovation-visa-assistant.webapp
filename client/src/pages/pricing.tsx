@@ -18,7 +18,7 @@ const tiers = [
     description: "Start your Innovator Founder Visa journey",
     pages: "10-15 pages",
     features: [
-      "13 essential tools access",
+      "Essential tools access",
       "Basic business overview",
       "Innovation introduction",
       "Essential compliance guide",
@@ -35,7 +35,7 @@ const tiers = [
     description: "Perfect for straightforward businesses",
     pages: "25-35 pages",
     features: [
-      "20 tools access (all Free + 7 Basic)",
+      "Extended tools access",
       "Core Innovation criteria coverage",
       "Basic Viability analysis",
       "Essential Scalability points",
@@ -53,7 +53,7 @@ const tiers = [
     pages: "40-60 pages",
     popular: true,
     features: [
-      "83 tools access (all Basic + 63 Premium)",
+      "Comprehensive tools access",
       "Comprehensive Innovation analysis",
       "Detailed Viability with financials",
       "Advanced Scalability strategy",
@@ -72,7 +72,7 @@ const tiers = [
     description: "Maximum detail for complex ventures",
     pages: "50-80 pages",
     features: [
-      "All tools access (all Premium + Enterprise)",
+      "Full tools access",
       "Deep-dive Innovation coverage",
       "Complete Viability assessment",
       "Multi-market Scalability plan",
@@ -92,7 +92,7 @@ const tiers = [
     description: "Everything you need for guaranteed approval",
     pages: "80+ pages",
     features: [
-      "ALL 100+ tools - complete access",
+      "Complete access to 100+ professional-level tools",
       "All Enterprise features included",
       "24/7 VIP support & live chat",
       "Personal visa strategist",
@@ -146,7 +146,7 @@ export default function Pricing() {
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
       <SEOHead
         title="Pricing Plans | UK Innovator Founder Visa Assistant - £0 to £129"
-        description="Choose from 5 pricing tiers for your UK Innovator Founder Visa application. Free (13 tools), Basic £29, Premium £49 (most popular), Enterprise £89, Ultimate £129. All plans include business plan generation and expert guidance."
+        description="Choose from 5 pricing tiers for your UK Innovator Founder Visa application. Free, Basic £29, Premium £49 (most popular), Enterprise £89, Ultimate £129. All plans include 100+ professional-level tools, business plan generation and expert guidance."
         canonical="https://innovatorfoundervisaassistant.co.uk/pricing"
         keywords="UK innovator visa cost, visa application pricing, business plan cost, innovator founder visa fees, visa assistance pricing"
         schema={combinedSchema}

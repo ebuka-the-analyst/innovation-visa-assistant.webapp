@@ -97,13 +97,13 @@ export default function TermsOfService() {
                   <h2 className="text-xl font-semibold mb-3">4. Subscription and Payments</h2>
                   
                   <h3 className="font-semibold mb-2">4.1 Subscription Tiers</h3>
-                  <p className="text-muted-foreground mb-2">We offer five subscription tiers:</p>
+                  <p className="text-muted-foreground mb-2">We offer five subscription tiers with access to our 100+ professional-level tools:</p>
                   <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-4">
-                    <li><strong>Free (£0):</strong> 13 essential tools</li>
-                    <li><strong>Basic (£29):</strong> 20 tools total</li>
-                    <li><strong>Premium (£49):</strong> 83 tools total (Most Popular)</li>
-                    <li><strong>Enterprise (£89):</strong> All tools</li>
-                    <li><strong>Ultimate (£129):</strong> All 100+ tools + VIP support</li>
+                    <li><strong>Free (£0):</strong> Essential tools access</li>
+                    <li><strong>Basic (£29):</strong> Extended tools access</li>
+                    <li><strong>Premium (£49):</strong> Comprehensive tools access (Most Popular)</li>
+                    <li><strong>Enterprise (£89):</strong> Full tools access</li>
+                    <li><strong>Ultimate (£129):</strong> Complete access to all 100+ tools + VIP support</li>
                   </ul>
 
                   <h3 className="font-semibold mb-2">4.2 Payment Terms</h3>

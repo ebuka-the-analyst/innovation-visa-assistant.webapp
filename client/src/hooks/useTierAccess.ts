@@ -27,6 +27,7 @@ const TIER_PRICES: Record<UserTier, string> = {
   ultimate: "£129",
 };
 
+// Tool counts kept internal for access logic - user-facing messaging uses "100+ professional-level tools"
 const TIER_TOOL_COUNTS: Record<UserTier, number> = {
   free: 13,
   basic: 20,
