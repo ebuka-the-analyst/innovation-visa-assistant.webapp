@@ -133,17 +133,39 @@ export default function BusinessPlan() {
   const [activeTab, setActiveTab] = useState('plan');
   const [savedDate, setSavedDate] = useState('');
 
+  const autoSaveDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
   const updateField = (sectionId: string, fieldId: string, value: string) => {
-    setSections(sections.map(section => 
-      section.id === sectionId 
-        ? {
-            ...section,
-            fields: section.fields.map(field =>
-              field.id === fieldId ? { ...field, value } : field
-            )
-          }
-        : section
-    ));
+    setSections(prevSections => {
+      const newSections = prevSections.map(section => 
+        section.id === sectionId 
+          ? {
+              ...section,
+              fields: section.fields.map(field =>
+                field.id === fieldId ? { ...field, value } : field
+              )
+            }
+          : section
+      );
+      
+      if (autoSaveDebounceRef.current) {
+        clearTimeout(autoSaveDebounceRef.current);
+      }
+      autoSaveDebounceRef.current = setTimeout(() => {
+        const state = {
+          sections: newSections,
+          milestones,
+          activeTab,
+          savedDate: new Date().toLocaleString('en-GB')
+        };
+        localStorage.setItem('business-plan-state', JSON.stringify(state));
+        setSavedDate(state.savedDate);
+        setShowAutoSaveNotification(true);
+        setTimeout(() => setShowAutoSaveNotification(false), 2000);
+      }, 500);
+      
+      return newSections;
+    });
   };
 
   const calculateSectionCompletion = (section: BusinessPlanSection): number => {

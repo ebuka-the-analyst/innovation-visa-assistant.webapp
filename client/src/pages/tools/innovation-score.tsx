@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,7 @@ import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, XCircle, AlertTriangle, TrendingUp, Info, Lightbulb, Shield, Zap, Globe } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, TrendingUp, Info, Lightbulb, Shield, Zap, Globe, Save } from "lucide-react";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, LineChart, Line
@@ -45,20 +45,76 @@ const INDUSTRY_BENCHMARKS: IndustryBenchmark[] = [
 export default function InnovationScore() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
-  const [factors, setFactors] = useState<InnovationFactors>({
-    novelty: 50,
-    technicalAdvancement: 50,
-    marketDisruption: 50,
-    ipProtection: 50,
-    rdInvestment: 50
+  const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
+  const [showAutoSave, setShowAutoSave] = useState(false);
+  
+  const [factors, setFactors] = useState<InnovationFactors>(() => {
+    const saved = localStorage.getItem('innovation-score-state');
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        return state.factors || {
+          novelty: 50,
+          technicalAdvancement: 50,
+          marketDisruption: 50,
+          ipProtection: 50,
+          rdInvestment: 50
+        };
+      } catch { }
+    }
+    return {
+      novelty: 50,
+      technicalAdvancement: 50,
+      marketDisruption: 50,
+      ipProtection: 50,
+      rdInvestment: 50
+    };
   });
 
-  const [activeTab, setActiveTab] = useState('overview');
-  const [savedDate, setSavedDate] = useState('');
-  const [selectedSector, setSelectedSector] = useState('FinTech');
+  const [activeTab, setActiveTab] = useState(() => {
+    const saved = localStorage.getItem('innovation-score-state');
+    if (saved) {
+      try { return JSON.parse(saved).activeTab || 'overview'; } catch { }
+    }
+    return 'overview';
+  });
+  const [savedDate, setSavedDate] = useState(() => {
+    const saved = localStorage.getItem('innovation-score-state');
+    if (saved) {
+      try { return JSON.parse(saved).savedDate || ''; } catch { }
+    }
+    return '';
+  });
+  const [selectedSector, setSelectedSector] = useState(() => {
+    const saved = localStorage.getItem('innovation-score-state');
+    if (saved) {
+      try { return JSON.parse(saved).selectedSector || 'FinTech'; } catch { }
+    }
+    return 'FinTech';
+  });
+
+  const triggerAutoSave = useCallback((newFactors: InnovationFactors, newActiveTab: string, newSelectedSector: string) => {
+    if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+    autoSaveRef.current = setTimeout(() => {
+      const state = {
+        factors: newFactors,
+        activeTab: newActiveTab,
+        selectedSector: newSelectedSector,
+        savedDate: new Date().toLocaleString('en-GB')
+      };
+      localStorage.setItem('innovation-score-state', JSON.stringify(state));
+      setSavedDate(state.savedDate);
+      setShowAutoSave(true);
+      setTimeout(() => setShowAutoSave(false), 2000);
+    }, 500);
+  }, []);
 
   const updateFactor = (field: keyof InnovationFactors, value: number) => {
-    setFactors(prev => ({ ...prev, [field]: value }));
+    setFactors(prev => {
+      const newFactors = { ...prev, [field]: value };
+      triggerAutoSave(newFactors, activeTab, selectedSector);
+      return newFactors;
+    });
   };
 
   const innovationScore = Math.round(

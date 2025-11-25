@@ -6,9 +6,9 @@ import { AuthHeader } from "@/components/AuthHeader";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { Download, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Download, TrendingUp, AlertTriangle, CheckCircle2, Save } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from "@/lib/seo-schemas";
 import { useWordExport } from "@/hooks/useWordExport";
@@ -17,12 +17,64 @@ import { useToast } from "@/hooks/use-toast";
 export default function FinancialProjections() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
-  const [initial, setInitial] = useState(50000);
-  const [monthly, setMonthly] = useState(15000);
-  const [revenue, setRevenue] = useState(5000);
-  const [savedDate, setSavedDate] = useState("");
+  const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
+  const [showAutoSave, setShowAutoSave] = useState(false);
+  
+  const [initial, setInitial] = useState(() => {
+    const saved = localStorage.getItem('financialProjectionsProgress');
+    if (saved) {
+      try { return JSON.parse(saved).initial || 50000; } catch { return 50000; }
+    }
+    return 50000;
+  });
+  const [monthly, setMonthly] = useState(() => {
+    const saved = localStorage.getItem('financialProjectionsProgress');
+    if (saved) {
+      try { return JSON.parse(saved).monthly || 15000; } catch { return 15000; }
+    }
+    return 15000;
+  });
+  const [revenue, setRevenue] = useState(() => {
+    const saved = localStorage.getItem('financialProjectionsProgress');
+    if (saved) {
+      try { return JSON.parse(saved).revenue || 5000; } catch { return 5000; }
+    }
+    return 5000;
+  });
+  const [savedDate, setSavedDate] = useState(() => localStorage.getItem('financialProjectionsDate') || "");
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
+
+  const triggerAutoSave = useCallback((newInitial: number, newMonthly: number, newRevenue: number) => {
+    if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+    autoSaveRef.current = setTimeout(() => {
+      localStorage.setItem('financialProjectionsProgress', JSON.stringify({ 
+        initial: newInitial, 
+        monthly: newMonthly, 
+        revenue: newRevenue 
+      }));
+      const date = new Date().toLocaleDateString();
+      localStorage.setItem('financialProjectionsDate', date);
+      setSavedDate(date);
+      setShowAutoSave(true);
+      setTimeout(() => setShowAutoSave(false), 2000);
+    }, 500);
+  }, []);
+
+  const handleInitialChange = (value: number) => {
+    setInitial(value);
+    triggerAutoSave(value, monthly, revenue);
+  };
+
+  const handleMonthlyChange = (value: number) => {
+    setMonthly(value);
+    triggerAutoSave(initial, value, revenue);
+  };
+
+  const handleRevenueChange = (value: number) => {
+    setRevenue(value);
+    triggerAutoSave(initial, monthly, value);
+  };
 
   const projections = Array.from({ length: 12 }, (_, i) => ({
     month: i + 1,
@@ -281,7 +333,15 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
           )}
 
           <Card className="p-6 mb-6">
-            <h3 className="font-bold mb-4">Input Parameters</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold">Input Parameters</h3>
+              {showAutoSave && (
+                <div className="flex items-center gap-2 text-xs text-green-600">
+                  <Save className="h-3 w-3" />
+                  <span>Saved</span>
+                </div>
+              )}
+            </div>
             <div className="grid md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="initial">Initial Capital (£)</Label>
@@ -289,7 +349,7 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
                   id="initial"
                   type="number"
                   value={initial}
-                  onChange={e => setInitial(Number(e.target.value))}
+                  onChange={e => handleInitialChange(Number(e.target.value))}
                   placeholder="50000"
                   data-testid="input-initial-capital"
                 />
@@ -300,7 +360,7 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
                   id="monthly"
                   type="number"
                   value={monthly}
-                  onChange={e => setMonthly(Number(e.target.value))}
+                  onChange={e => handleMonthlyChange(Number(e.target.value))}
                   placeholder="15000"
                   data-testid="input-monthly-burn"
                 />
@@ -311,7 +371,7 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
                   id="revenue"
                   type="number"
                   value={revenue}
-                  onChange={e => setRevenue(Number(e.target.value))}
+                  onChange={e => handleRevenueChange(Number(e.target.value))}
                   placeholder="5000"
                   data-testid="input-monthly-revenue"
                 />

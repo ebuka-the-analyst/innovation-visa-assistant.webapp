@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,11 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
+import { useAutoSave } from "@/hooks/useAutoSave";
 
 const steps = [
   {
@@ -146,15 +147,100 @@ interface PromoCodeValidation {
   creatorId?: string;
 }
 
+const defaultFormData: Record<string, string> = {
+  tier: 'premium',
+  businessName: '',
+  industry: '',
+  problem: '',
+  innovationStage: '',
+  productStatus: '',
+  existingCustomers: '',
+  tractionEvidence: '',
+  uniqueness: '',
+  techStack: '',
+  dataArchitecture: '',
+  aiMethodology: '',
+  complianceDesign: '',
+  patentStatus: '',
+  founderEducation: '',
+  founderWorkHistory: '',
+  founderAchievements: '',
+  relevantProjects: '',
+  funding: '',
+  fundingSources: '',
+  monthlyProjections: '',
+  customerAcquisitionCost: '',
+  lifetimeValue: '',
+  paybackPeriod: '',
+  detailedCosts: '',
+  competitors: '',
+  competitiveDifferentiation: '',
+  customerInterviews: '',
+  lettersOfIntent: '',
+  willingnessToPay: '',
+  marketSize: '',
+  regulatoryRequirements: '',
+  complianceTimeline: '',
+  complianceBudget: '',
+  jobCreation: '',
+  hiringPlan: '',
+  specificRegions: '',
+  expansion: '',
+  internationalPlan: '',
+  vision: '',
+  targetEndorser: '',
+  contactPointsStrategy: '',
+  experience: '',
+  revenue: '',
+};
+
 export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string }) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<Record<string, string>>({ tier });
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  
+  const {
+    savedData,
+    saveField,
+    saveAllFields,
+    clearAllFields,
+    hasUnsavedData,
+  } = useAutoSave('questionnaire-form', { ...defaultFormData, tier });
+
+  const [currentStep, setCurrentStep] = useState(() => {
+    const savedStep = localStorage.getItem('autosave_questionnaire-step');
+    return savedStep ? parseInt(savedStep) : 0;
+  });
+  const [formData, setFormData] = useState<Record<string, string>>(() => savedData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [promoValidation, setPromoValidation] = useState<PromoCodeValidation | null>(null);
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
-  const { toast } = useToast();
-  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (savedData && Object.keys(savedData).length > 0) {
+      setFormData(prev => ({ ...prev, ...savedData }));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('autosave_questionnaire-step', currentStep.toString());
+  }, [currentStep]);
+
+  const handleFieldChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    saveField(name, value);
+  };
+
+  const handleClearSavedData = () => {
+    clearAllFields();
+    setFormData({ ...defaultFormData, tier });
+    setCurrentStep(0);
+    localStorage.removeItem('autosave_questionnaire-step');
+    toast({
+      title: "Form Cleared",
+      description: "All saved data has been cleared. You can start fresh.",
+    });
+  };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
   const currentStepData = steps[currentStep];
@@ -341,6 +427,8 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           }
 
           if (checkoutData.url) {
+            clearAllFields();
+            localStorage.removeItem('autosave_questionnaire-step');
             window.location.href = checkoutData.url;
           } else {
             throw new Error("Checkout URL not received");
@@ -368,6 +456,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
 
   const handleChange = (name: string, value: string) => {
     setFormData({ ...formData, [name]: value });
+    saveField(name, value);
   };
 
   const handleTestAutoFill = () => {
@@ -472,6 +561,33 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
                 data-testid="button-autofill"
               >
                 Auto-Fill Test Data
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Auto-save status indicator */}
+        {hasUnsavedData && (
+          <Card className="p-4 mb-6 border-green-500/50 bg-green-500/5">
+            <div className="flex gap-4 items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Save className="h-4 w-4 text-green-600" />
+                <div>
+                  <h3 className="font-bold text-sm text-green-600">Progress Saved</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Your answers are automatically saved. You can leave and come back anytime.
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={handleClearSavedData}
+                variant="outline"
+                size="sm"
+                className="border-red-500/50 text-red-600 hover:bg-red-500/10"
+                data-testid="button-clear-saved"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Start Fresh
               </Button>
             </div>
           </Card>
