@@ -279,12 +279,12 @@ export function AppSidebar() {
       <SidebarContent>
         {navGroups.map((group, idx) => (
           <div key={idx}>
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-xs font-bold px-3 py-2 rounded-md" style={{ backgroundColor: "#ffa536", color: "#000000" }}>
+            <SidebarGroup className="py-1">
+              <SidebarGroupLabel className="text-[10px] font-bold px-2 py-1 rounded-md mb-1" style={{ backgroundColor: "#ffa536", color: "#000000" }}>
                 {group.label}
               </SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="gap-0.5">
                   {group.items.map((item) => {
                     const isActive = location === item.url;
                     const Icon = item.icon;
@@ -295,27 +295,29 @@ export function AppSidebar() {
                           asChild
                           isActive={isActive}
                           onClick={() => setLocation(item.url)}
-                          className={`cursor-pointer transition-all ${
+                          className={`cursor-pointer transition-all py-1.5 ${
                             isActive
                               ? "bg-primary/10 text-primary font-semibold"
                               : "hover:bg-muted"
                           }`}
                           data-testid={`nav-button-${item.url}`}
                         >
-                          <div className="flex items-start gap-3 py-1">
-                            <Icon className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                          <div className="flex items-center gap-2">
+                            <Icon className="h-3.5 w-3.5 flex-shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium leading-tight">
+                              <div className="text-xs font-medium leading-tight truncate">
                                 {item.title}
                               </div>
-                              <div className="text-xs text-muted-foreground line-clamp-1">
+                              <div className="text-[10px] text-muted-foreground line-clamp-1 hidden sm:block">
                                 {item.description}
                               </div>
                             </div>
                             {item.badge && (
-                              <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
                                 item.badge === "ADMIN"
                                   ? "bg-orange-500 text-white"
+                                  : item.badge === "PARTNER"
+                                  ? "bg-blue-500 text-white"
                                   : "text-primary bg-primary/10"
                               }`}>
                                 {item.badge}
@@ -329,26 +331,26 @@ export function AppSidebar() {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-            {idx < navGroups.length - 1 && <SidebarSeparator className="my-2" />}
+            {idx < navGroups.length - 1 && <SidebarSeparator className="my-1" />}
           </div>
         ))}
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex flex-col gap-3 p-2 border-t">
-          <div className="px-2 py-2 text-sm">
-            <div className="font-semibold text-foreground">{user.displayName || "User"}</div>
-            <div className="text-xs text-muted-foreground truncate">{user.email}</div>
+        <div className="flex flex-col gap-2 p-2 border-t">
+          <div className="px-1 py-1">
+            <div className="text-xs font-semibold text-foreground truncate">{user.displayName || "User"}</div>
+            <div className="text-[10px] text-muted-foreground truncate">{user.email}</div>
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="w-full justify-start gap-2"
+            className="w-full justify-start gap-2 h-7 text-xs"
             onClick={() => logoutMutation.mutate()}
             disabled={logoutMutation.isPending}
             data-testid="sidebar-logout-button"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-3 w-3" />
             {logoutMutation.isPending ? "Logging out..." : "Logout"}
           </Button>
         </div>
