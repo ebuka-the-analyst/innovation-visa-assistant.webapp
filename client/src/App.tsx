@@ -58,7 +58,7 @@ import Support from "@/pages/support";
 import Documents from "@/pages/documents";
 import ToolPage from "@/pages/tool-page";
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies"];
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features"];
 
 function AnimatedSidebarTrigger() {
   const { state, toggleSidebar } = useSidebar();
