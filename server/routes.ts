@@ -3469,8 +3469,8 @@ ${generatedSections.join('\n\n---\n\n')}`;
           fullStory: hasAccess ? story.fullStory : null,
           keySuccessFactors: hasAccess ? story.keySuccessFactors : null,
           adviceGiven: hasAccess ? story.adviceGiven : null,
-          lessonsLearned: hasAccess ? story.lessonsLearned : null,
-          challengesFaced: hasAccess ? story.challengesFaced : null,
+          challengesOvercome: hasAccess ? story.challengesOvercome : null,
+          timelineBreakdown: hasAccess ? story.timelineBreakdown : null,
         };
       });
       
