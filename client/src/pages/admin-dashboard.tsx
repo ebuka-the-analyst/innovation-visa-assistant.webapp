@@ -2698,12 +2698,7 @@ export default function AdminDashboard() {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                           onClick={() => {
-                                            const link = document.createElement('a');
-                                            link.href = `/api/admin/plans/${plan.id}/download`;
-                                            link.download = `${plan.businessName || 'Business-Plan'}-Submission.pdf`;
-                                            document.body.appendChild(link);
-                                            link.click();
-                                            document.body.removeChild(link);
+                                            window.open(`/api/admin/plans/${plan.id}/download`, '_blank');
                                           }}
                                         >
                                           <Download className="h-4 w-4 mr-2" />
