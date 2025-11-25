@@ -502,13 +502,28 @@ function PayoutRequestSection({ availableBalance }: { availableBalance: number }
   const [paymentDetails, setPaymentDetails] = useState('');
   const [amount, setAmount] = useState('');
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="border-orange-500 text-orange-500"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
+      case 'processing':
+        return <Badge variant="outline" className="border-blue-500 text-blue-500"><Clock className="h-3 w-3 mr-1" />Processing</Badge>;
+      case 'completed':
+        return <Badge variant="default" className="bg-green-500"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
   const { data: payouts } = useQuery<PayoutRequestData[]>({
     queryKey: ['/api/payouts'],
   });
 
   const createPayoutMutation = useMutation({
     mutationFn: async (data: { amount: number; paymentMethod: string; paymentDetails: string }) => {
-      return apiRequest('/api/payouts', { method: 'POST', body: JSON.stringify(data) });
+      return apiRequest('POST', '/api/payouts', data);
     },
     onSuccess: () => {
       toast({ title: 'Payout requested', description: 'Your payout request has been submitted for review.' });
