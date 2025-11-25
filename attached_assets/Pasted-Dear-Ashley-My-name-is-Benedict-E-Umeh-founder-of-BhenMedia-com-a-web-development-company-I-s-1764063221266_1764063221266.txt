@@ -1,0 +1,107 @@
+Dear Ashley,
+
+My name is Benedict E. Umeh, founder of BhenMedia.com, a web development company I started in 2017 in Nigeria helping startups and businesses create exceptional digital experiences. Web development isn't just my profession, it's genuinely my passion.
+
+My Journey & Background
+
+I started as a Full Stack Developer with WordPress as my foundation. But I didn't stop there,  I pursued a BSc in Information Technology to strengthen my technical foundation and deepen my understanding of systems and architecture. Later, I completed an MSc in Data Science because I wanted to combine everything: development, design, and data-driven decision making. This combination is what I've achieved and what I plan to deliver - websites that don't just look good, but are built on solid technical foundations and optimized through data insights.
+
+My qualifications:
+
+Web Development (Distinction)
+BSc in Information Technology
+MSc in Data Science
+
+Why I'm a Perfect Match for This Role:
+
+I've carefully reviewed your requirements, and I believe I meet and exceed every single one. Let me show you how:
+
+Design high-quality, user-friendly web interfaces in Figma. I create comprehensive wireframes and full page layouts in Figma before any development begins. This ensures alignment with stakeholders and results in cleaner, more purposeful designs.
+
+Build responsive, modern websites in WordPress using Elementor. I've been building WordPress sites since 2017, with extensive experience using Elementor and other page builders. Every site I create is fully responsive and optimized for all devices.
+
+Manage domain settings, DNS records, and basic hosting configurations. I handle all technical configurations for my clients, from domain registration and DNS management to hosting setup and SSL certificates. This is second nature to me after 7+ years managing client infrastructure.
+
+Collaborate with internal teams to translate briefs into functional, attractive web pages.
+Through BhenMedia, I regularly work with diverse stakeholders, translating business requirements into technical solutions. My hospitality experience at Ibis Styles Hotel has further strengthened my ability to understand user needs and communicate effectively across teams.
+
+Troubleshoot issues, optimise performance, and maintain site quality.
+I don't just build and leave, I optimise for speed, implement caching strategies, compress images, minify code, and continuously monitor performance. My Data Science background means I use analytics to identify and resolve issues proactively.
+
+A Project That Showcases My Initiative and Capabilities:
+
+While working at Ibis Styles Hotel Leeds, I identified an opportunity to enhance the guest experience through technology. Without being asked, I took the initiative to design and build a comprehensive AI-powered hotel concierge platform.
+
+Here's what I built from scratch:
+
+Multilingual AI Chatbot: Integrated intelligent chatbot with support for multiple languages, providing 24/7 guest assistance for hotel services, local recommendations, and booking inquiries
+
+Interactive Service Directory: Created a comprehensive catalog of 300+ hotel services organized across 8 intuitive categories (amenities, dining, attractions, business services, transport, promotions, activities)
+
+Guest Authentication System: Developed secure booking verification to ensure personalized, authorized access
+
+Responsive Design: Built mobile-first interface with glassmorphic UI, dark/light mode theming, and seamless cross-device experience
+
+Dynamic Content Management: Implemented filtering systems, service detail modals, animated news ticker, and real-time updates
+
+This project demonstrates several things:
+1. I take initiative - I saw a need and built the solution
+
+2. I go beyond requirements - this started as an idea and became a full platform
+
+3. I integrate AI thoughtfully - the multilingual chatbot enhances user experience
+
+4. I understand hospitality technology - built by someone who works in hotels, for hotels
+
+5. I design in Figma first, then develop in WordPress - complete design-to-development workflow
+
+This is exactly the approach I bring to every project - proactive, comprehensive, and always looking for ways to add value through intelligent features.
+
+My Portfolio Highlights:
+
+Ebluniversal.com - Complete e-commerce and business platform showcasing advanced WordPress functionality, custom integrations, and optimized user experience.
+
+Slot.ng - High-traffic retail platform handling complex product catalogs and seamless checkout processes.
+
+Desktones.com - Corporate website demonstrating clean design principles, responsive architecture, and professional business solutions.
+
+Vivano.com.ng - Nigerian e-commerce platform with payment integrations, inventory management, and mobile-optimized shopping experience.
+
+Rockae.com - Modern business website featuring dynamic content management and streamlined user navigation.
+
+
+Technical Skills Matching Your Requirements:
+
+WordPress & Elementor: 7+ years building sites with Elementor and other page builders
+Figma: Create full UI/UX layouts and wireframes for all projects
+UX Principles: Strong understanding of user experience, accessibility, and responsive design
+Domain/DNS/Hosting: Confident managing all technical configurations
+HTML/CSS/JavaScript: Solid foundation for custom functionality
+SEO & Performance: Implement optimization strategies across all projects
+Self-sufficient & Organized: Successfully managing multiple BhenMedia clients simultaneously
+
+Additional Value I Bring:
+
+AI Integration: Where appropriate, I enhance projects with intelligent chatbot functionality and automation
+Data-Driven Optimization: My MSc in Data Science means I use analytics to continuously improve website performance
+E-commerce Expertise: Payment gateway integrations, inventory systems, checkout optimization
+ Healthcare Understanding: Experience makes me well-suited for HealthTech projects 
+Proactive Problem Solving: I don't wait to be told - I identify opportunities and take initiative
+
+What Sets Me Apart:
+
+I genuinely enjoy going overboard on every project. I don't just meet requirements - I look for opportunities to enhance and exceed expectations. The hotel concierge platform is a perfect example: nobody asked me to build it, but I saw how technology could improve guest experiences, so I built it. This is how I approach all my work.
+
+My approach combines technical excellence with business understanding. I don't just build websites that look good - I create digital experiences that drive real results. Whether it's integrating AI for better user interactions, implementing data analytics for informed decisions, or optimizing performance for maximum conversions, I'm always thinking about how to deliver more value.
+
+I'm based in Leeds, UK, fully equipped for remote work, and available immediately. The combination of WordPress/Elementor expertise, Figma design skills, HealthTech alignment, and my proven track record of taking initiative makes me an ideal fit for this role.
+
+I'm willing to take up any project tailored to any of your clients, just give me the opportunity and watch me deliver excellence.
+
+Best regards,
+
+Ebuka Umeh
+07493363351
+ebuka.umeh40@outlook.com
+Linkedin.com/in/ebukaumeh 
+Bhenmedia.com
