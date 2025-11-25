@@ -741,6 +741,63 @@ export default function AdminDashboard() {
     enabled: !!user?.isAdmin && activeSection === 'referrals-rewards',
   });
 
+  // Lawyer Review Center queries
+  const { data: lawyerReviews, isLoading: lawyerReviewsLoading, refetch: refetchLawyerReviews } = useQuery<Array<{
+    id: string;
+    businessPlanId: string;
+    userId: string;
+    lawyerId: string | null;
+    documentType: string;
+    priority: string;
+    tier: string;
+    status: string;
+    requestedAt: string;
+    assignedAt: string | null;
+    completedAt: string | null;
+    dueDate: string | null;
+    isOverdue: boolean;
+    overallVerdict: string | null;
+    confidenceScore: number | null;
+    complianceScore: number | null;
+    readinessScore: number | null;
+  }>>({
+    queryKey: ['/api/admin/lawyer-reviews'],
+    enabled: !!user?.isAdmin && activeSection.startsWith('lawyer'),
+  });
+
+  const { data: lawyerTeam, isLoading: lawyerTeamLoading, refetch: refetchLawyerTeam } = useQuery<Array<{
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    oiscLevel: string | null;
+    firmName: string | null;
+    isAvailable: boolean;
+    maxConcurrentReviews: number;
+    currentReviewCount: number;
+    totalReviewsCompleted: number;
+    averageRating: number | null;
+    status: string;
+  }>>({
+    queryKey: ['/api/admin/lawyers'],
+    enabled: !!user?.isAdmin && activeSection.startsWith('lawyer'),
+  });
+
+  const { data: lawyerAnalytics, isLoading: lawyerAnalyticsLoading } = useQuery<{
+    totalReviews: number;
+    pendingReviews: number;
+    inProgressReviews: number;
+    completedReviews: number;
+    approvedReviews: number;
+    needsRevisionReviews: number;
+    averageTurnaroundHours: number;
+    overdueReviews: number;
+  }>({
+    queryKey: ['/api/admin/lawyer-reviews/analytics'],
+    enabled: !!user?.isAdmin && activeSection.startsWith('lawyer'),
+    refetchInterval: REFRESH_INTERVAL,
+  });
+
   // Refresh countdown timer
   useEffect(() => {
     if (overviewData?.lastUpdated) {
@@ -4081,6 +4138,448 @@ export default function AdminDashboard() {
                             </CardContent>
                           </Card>
                         </>
+                      )}
+                    </motion.div>
+                  </div>
+                )}
+
+                {/* Lawyer Review Center Section */}
+                {activeSection.startsWith('lawyer') && (
+                  <div className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="space-y-6"
+                    >
+                      {/* Dashboard Overview Cards */}
+                      {activeSection === 'lawyer-dashboard' && (
+                        <>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Total Reviews</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-orange-500">{lawyerAnalytics?.totalReviews || 0}</div>
+                                <p className="text-xs text-muted-foreground mt-1">All time document reviews</p>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border-yellow-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-yellow-500">{lawyerAnalytics?.pendingReviews || 0}</div>
+                                <p className="text-xs text-muted-foreground mt-1">Awaiting assignment</p>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">In Progress</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-blue-500">{lawyerAnalytics?.inProgressReviews || 0}</div>
+                                <p className="text-xs text-muted-foreground mt-1">Currently under review</p>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-green-500">{lawyerAnalytics?.completedReviews || 0}</div>
+                                <p className="text-xs text-muted-foreground mt-1">Successfully reviewed</p>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Approval Rate Card */}
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <CheckCircle className="h-5 w-5 text-green-500" />
+                                  Review Outcomes
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Approved</span>
+                                    <div className="flex items-center gap-2">
+                                      <Progress 
+                                        value={lawyerAnalytics?.totalReviews ? (lawyerAnalytics.approvedReviews / lawyerAnalytics.totalReviews) * 100 : 0} 
+                                        className="w-32 h-2" 
+                                      />
+                                      <span className="font-medium text-green-500">{lawyerAnalytics?.approvedReviews || 0}</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Needs Revision</span>
+                                    <div className="flex items-center gap-2">
+                                      <Progress 
+                                        value={lawyerAnalytics?.totalReviews ? (lawyerAnalytics.needsRevisionReviews / lawyerAnalytics.totalReviews) * 100 : 0} 
+                                        className="w-32 h-2" 
+                                      />
+                                      <span className="font-medium text-yellow-500">{lawyerAnalytics?.needsRevisionReviews || 0}</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Overdue</span>
+                                    <div className="flex items-center gap-2">
+                                      <Progress 
+                                        value={lawyerAnalytics?.totalReviews ? (lawyerAnalytics.overdueReviews / lawyerAnalytics.totalReviews) * 100 : 0} 
+                                        className="w-32 h-2" 
+                                      />
+                                      <span className="font-medium text-red-500">{lawyerAnalytics?.overdueReviews || 0}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            {/* Turnaround Time Card */}
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <Clock className="h-5 w-5 text-blue-500" />
+                                  Performance Metrics
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                                    <div>
+                                      <p className="text-sm text-muted-foreground">Avg. Turnaround Time</p>
+                                      <p className="text-2xl font-bold">{lawyerAnalytics?.averageTurnaroundHours || 0} hrs</p>
+                                    </div>
+                                    <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                      <Clock className="h-6 w-6 text-blue-500" />
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                                    <div>
+                                      <p className="text-sm text-muted-foreground">Active Lawyers</p>
+                                      <p className="text-2xl font-bold">{lawyerTeam?.filter(l => l.isAvailable).length || 0}</p>
+                                    </div>
+                                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                                      <UserCheck className="h-6 w-6 text-green-500" />
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Review Queue */}
+                      {(activeSection === 'lawyer-queue' || activeSection === 'lawyer-documents') && (
+                        <Card>
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle className="flex items-center gap-2">
+                                  <FileText className="h-5 w-5" />
+                                  Document Review Queue
+                                </CardTitle>
+                                <CardDescription>
+                                  {activeSection === 'lawyer-queue' ? 'Pending reviews awaiting assignment' : 'All document reviews'}
+                                </CardDescription>
+                              </div>
+                              <Button variant="outline" onClick={() => refetchLawyerReviews()}>
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                Refresh
+                              </Button>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            {lawyerReviewsLoading ? (
+                              <div className="space-y-4">
+                                {[1, 2, 3].map(i => (
+                                  <Skeleton key={i} className="h-16 w-full" />
+                                ))}
+                              </div>
+                            ) : lawyerReviews && lawyerReviews.length > 0 ? (
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Document</TableHead>
+                                    <TableHead>User Tier</TableHead>
+                                    <TableHead>Priority</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Requested</TableHead>
+                                    <TableHead>Due Date</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {lawyerReviews
+                                    .filter(r => activeSection === 'lawyer-queue' ? r.status === 'pending' : true)
+                                    .map((review) => (
+                                      <TableRow key={review.id} className={review.isOverdue ? 'bg-red-500/5' : ''}>
+                                        <TableCell>
+                                          <div className="flex items-center gap-2">
+                                            <FileText className="h-4 w-4 text-muted-foreground" />
+                                            <span className="font-medium">Business Plan</span>
+                                          </div>
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge variant="outline" className="capitalize">{review.tier}</Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge 
+                                            variant={review.priority === 'urgent' ? 'destructive' : review.priority === 'high' ? 'default' : 'secondary'}
+                                            className="capitalize"
+                                          >
+                                            {review.priority}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge 
+                                            variant={
+                                              review.status === 'completed' ? 'default' : 
+                                              review.status === 'in_review' ? 'secondary' : 
+                                              review.status === 'assigned' ? 'outline' : 
+                                              'secondary'
+                                            }
+                                            className="capitalize"
+                                          >
+                                            {review.status.replace('_', ' ')}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-sm text-muted-foreground">
+                                          {format(new Date(review.requestedAt), 'MMM d, HH:mm')}
+                                        </TableCell>
+                                        <TableCell>
+                                          {review.dueDate ? (
+                                            <span className={review.isOverdue ? 'text-red-500 font-medium' : 'text-muted-foreground'}>
+                                              {format(new Date(review.dueDate), 'MMM d, HH:mm')}
+                                              {review.isOverdue && ' (Overdue)'}
+                                            </span>
+                                          ) : '-'}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          <Button variant="ghost" size="sm">
+                                            <Eye className="h-4 w-4 mr-2" />
+                                            View
+                                          </Button>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                </TableBody>
+                              </Table>
+                            ) : (
+                              <div className="py-12 text-center text-muted-foreground">
+                                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                <p className="text-lg font-medium">No reviews in queue</p>
+                                <p>Reviews will appear here when users request document reviews</p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Lawyer Team Management */}
+                      {activeSection === 'lawyer-team' && (
+                        <Card>
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle className="flex items-center gap-2">
+                                  <Users className="h-5 w-5" />
+                                  Immigration Lawyer Team
+                                </CardTitle>
+                                <CardDescription>Manage lawyers who review business plans and documents</CardDescription>
+                              </div>
+                              <Button>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Lawyer
+                              </Button>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            {lawyerTeamLoading ? (
+                              <div className="space-y-4">
+                                {[1, 2, 3].map(i => (
+                                  <Skeleton key={i} className="h-20 w-full" />
+                                ))}
+                              </div>
+                            ) : lawyerTeam && lawyerTeam.length > 0 ? (
+                              <div className="space-y-4">
+                                {lawyerTeam.map((lawyer) => (
+                                  <div key={lawyer.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover-elevate">
+                                    <div className="flex items-center gap-4">
+                                      <div className={`h-12 w-12 rounded-full flex items-center justify-center ${lawyer.isAvailable ? 'bg-green-500/10' : 'bg-gray-500/10'}`}>
+                                        <span className="text-lg font-bold">
+                                          {lawyer.firstName[0]}{lawyer.lastName[0]}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <p className="font-medium">{lawyer.firstName} {lawyer.lastName}</p>
+                                        <p className="text-sm text-muted-foreground">{lawyer.email}</p>
+                                        {lawyer.firmName && (
+                                          <p className="text-xs text-muted-foreground">{lawyer.firmName}</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-6">
+                                      <div className="text-center">
+                                        <p className="text-2xl font-bold">{lawyer.currentReviewCount}/{lawyer.maxConcurrentReviews}</p>
+                                        <p className="text-xs text-muted-foreground">Active Reviews</p>
+                                      </div>
+                                      <div className="text-center">
+                                        <p className="text-2xl font-bold">{lawyer.totalReviewsCompleted}</p>
+                                        <p className="text-xs text-muted-foreground">Completed</p>
+                                      </div>
+                                      {lawyer.averageRating && (
+                                        <div className="text-center">
+                                          <p className="text-2xl font-bold">{lawyer.averageRating}</p>
+                                          <p className="text-xs text-muted-foreground">Avg. Rating</p>
+                                        </div>
+                                      )}
+                                      <Badge variant={lawyer.isAvailable ? 'default' : 'secondary'}>
+                                        {lawyer.isAvailable ? 'Available' : 'Unavailable'}
+                                      </Badge>
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button variant="ghost" size="icon">
+                                            <MoreVertical className="h-4 w-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                          <DropdownMenuItem>
+                                            <Edit className="h-4 w-4 mr-2" />
+                                            Edit Details
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem>
+                                            <Eye className="h-4 w-4 mr-2" />
+                                            View Performance
+                                          </DropdownMenuItem>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuItem className="text-destructive">
+                                            <Trash2 className="h-4 w-4 mr-2" />
+                                            Remove
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="py-12 text-center text-muted-foreground">
+                                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                <p className="text-lg font-medium">No lawyers added yet</p>
+                                <p className="mb-4">Add immigration lawyers to handle document reviews</p>
+                                <Button>
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Add First Lawyer
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Completed Reviews */}
+                      {activeSection === 'lawyer-completed' && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <CheckCircle className="h-5 w-5 text-green-500" />
+                              Completed Reviews
+                            </CardTitle>
+                            <CardDescription>Successfully reviewed and approved documents</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            {lawyerReviewsLoading ? (
+                              <div className="space-y-4">
+                                {[1, 2, 3].map(i => (
+                                  <Skeleton key={i} className="h-16 w-full" />
+                                ))}
+                              </div>
+                            ) : lawyerReviews?.filter(r => r.status === 'completed').length ? (
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Document</TableHead>
+                                    <TableHead>Verdict</TableHead>
+                                    <TableHead>Confidence</TableHead>
+                                    <TableHead>Compliance</TableHead>
+                                    <TableHead>Completed</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {lawyerReviews
+                                    .filter(r => r.status === 'completed')
+                                    .map((review) => (
+                                      <TableRow key={review.id}>
+                                        <TableCell>
+                                          <div className="flex items-center gap-2">
+                                            <FileText className="h-4 w-4 text-muted-foreground" />
+                                            <span className="font-medium">Business Plan</span>
+                                          </div>
+                                        </TableCell>
+                                        <TableCell>
+                                          <Badge variant={review.overallVerdict === 'approved' ? 'default' : 'secondary'}>
+                                            {review.overallVerdict || 'N/A'}
+                                          </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                          {review.confidenceScore !== null ? (
+                                            <span className="font-medium">{review.confidenceScore}%</span>
+                                          ) : '-'}
+                                        </TableCell>
+                                        <TableCell>
+                                          {review.complianceScore !== null ? (
+                                            <span className="font-medium">{review.complianceScore}%</span>
+                                          ) : '-'}
+                                        </TableCell>
+                                        <TableCell className="text-sm text-muted-foreground">
+                                          {review.completedAt ? format(new Date(review.completedAt), 'MMM d, yyyy') : '-'}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                          <Button variant="ghost" size="sm">
+                                            <Eye className="h-4 w-4 mr-2" />
+                                            View Report
+                                          </Button>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                </TableBody>
+                              </Table>
+                            ) : (
+                              <div className="py-12 text-center text-muted-foreground">
+                                <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                <p className="text-lg font-medium">No completed reviews yet</p>
+                                <p>Completed reviews will appear here</p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      {/* Comments placeholder */}
+                      {activeSection === 'lawyer-comments' && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Mail className="h-5 w-5" />
+                              Review Comments & Notes
+                            </CardTitle>
+                            <CardDescription>Internal notes and feedback on document reviews</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="py-12 text-center text-muted-foreground">
+                              <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                              <p className="text-lg font-medium">Comments Panel</p>
+                              <p>Select a specific review to view and add comments</p>
+                            </div>
+                          </CardContent>
+                        </Card>
                       )}
                     </motion.div>
                   </div>

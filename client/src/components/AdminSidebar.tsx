@@ -62,6 +62,12 @@ import {
   Percent,
   Link2,
   Receipt,
+  Scale,
+  UserCog,
+  ClipboardCheck,
+  FileSearch,
+  MessageSquare,
+  CheckSquare,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -161,6 +167,17 @@ const menuGroups = [
       { id: "referrals-rewards", label: "Pending Rewards", icon: Receipt, badge: "rewards" },
       { id: "promos-overview", label: "Promo Codes", icon: Tag, badge: null },
       { id: "promos-create", label: "Create Promo", icon: Percent, badge: null },
+    ]
+  },
+  {
+    label: "Lawyer Review Center",
+    items: [
+      { id: "lawyer-dashboard", label: "Review Dashboard", icon: Scale, badge: null },
+      { id: "lawyer-queue", label: "Review Queue", icon: ClipboardCheck, badge: "pending" },
+      { id: "lawyer-documents", label: "Document Review", icon: FileSearch, badge: null },
+      { id: "lawyer-team", label: "Lawyer Team", icon: UserCog, badge: null },
+      { id: "lawyer-comments", label: "Comments & Notes", icon: MessageSquare, badge: null },
+      { id: "lawyer-completed", label: "Completed Reviews", icon: CheckSquare, badge: null },
     ]
   },
   {
