@@ -379,10 +379,13 @@ export const referralRewards = pgTable("referral_rewards", {
   index("idx_referral_rewards_status").on(table.status),
 ]);
 
-// Promo Codes - Admin-created discount codes for marketing
+// Promo Codes - Admin-created discount codes for marketing (or partner-owned)
 export const promoCodes = pgTable("promo_codes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   code: varchar("code", { length: 30 }).unique().notNull(),
+  
+  // Partner ownership - if set, this is a partner promo code
+  ownerId: varchar("owner_id"), // User ID of the partner who owns this code
   
   // Campaign info
   name: text("name").notNull(), // Internal name for campaign
@@ -420,6 +423,7 @@ export const promoCodes = pgTable("promo_codes", {
 }, (table) => [
   index("idx_promo_codes_code").on(table.code),
   index("idx_promo_codes_status").on(table.status),
+  index("idx_promo_codes_owner").on(table.ownerId),
 ]);
 
 // Promo Code Redemptions - Audit trail for promo code usage

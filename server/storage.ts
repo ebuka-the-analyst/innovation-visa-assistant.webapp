@@ -114,6 +114,7 @@ export interface IStorage {
   getPromoCodeByCode(code: string): Promise<PromoCode | undefined>;
   getAllPromoCodes(): Promise<PromoCode[]>;
   getActivePromoCodes(): Promise<PromoCode[]>;
+  getPromoCodesByOwner(ownerId: string): Promise<PromoCode[]>;
   updatePromoCode(id: string, updates: Partial<PromoCode>): Promise<PromoCode | undefined>;
   deletePromoCode(id: string): Promise<void>;
   incrementPromoCodeUsage(id: string): Promise<void>;
@@ -143,6 +144,20 @@ export interface IStorage {
     activePromoCodes: number;
     totalRedemptions: number;
     totalDiscountGiven: number;
+  }>;
+  
+  // Partner-specific analytics
+  getPartnerAnalytics(ownerId: string): Promise<{
+    promoCodes: PromoCode[];
+    totalRedemptions: number;
+    totalDiscountGiven: number;
+    totalVisits: number;
+    conversions: number;
+    conversionRate: number;
+    usersByPromoCode: Array<{
+      promoCode: PromoCode;
+      users: Array<{ userId: string; redeemedAt: Date; discountApplied: number }>;
+    }>;
   }>;
   
   // ============================================
@@ -670,6 +685,12 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(promoCodes.createdAt));
   }
 
+  async getPromoCodesByOwner(ownerId: string): Promise<PromoCode[]> {
+    return db.select().from(promoCodes)
+      .where(eq(promoCodes.ownerId, ownerId))
+      .orderBy(desc(promoCodes.createdAt));
+  }
+
   async updatePromoCode(id: string, updates: Partial<PromoCode>): Promise<PromoCode | undefined> {
     const [result] = await db.update(promoCodes).set({ ...updates, updatedAt: new Date() }).where(eq(promoCodes.id, id)).returning();
     return result;
@@ -766,6 +787,67 @@ export class DatabaseStorage implements IStorage {
       activePromoCodes: activeCodes.length,
       totalRedemptions: redemptions.length,
       totalDiscountGiven: redemptions.reduce((sum, r) => sum + r.discountApplied, 0),
+    };
+  }
+
+  async getPartnerAnalytics(ownerId: string): Promise<{
+    promoCodes: PromoCode[];
+    totalRedemptions: number;
+    totalDiscountGiven: number;
+    totalVisits: number;
+    conversions: number;
+    conversionRate: number;
+    usersByPromoCode: Array<{
+      promoCode: PromoCode;
+      users: Array<{ userId: string; redeemedAt: Date; discountApplied: number }>;
+    }>;
+  }> {
+    // Get partner's promo codes
+    const partnerCodes = await this.getPromoCodesByOwner(ownerId);
+    const codeIds = partnerCodes.map(c => c.id);
+    
+    if (codeIds.length === 0) {
+      return {
+        promoCodes: [],
+        totalRedemptions: 0,
+        totalDiscountGiven: 0,
+        totalVisits: 0,
+        conversions: 0,
+        conversionRate: 0,
+        usersByPromoCode: [],
+      };
+    }
+    
+    // Get all redemptions for partner's codes
+    const allRedemptions = await db.select().from(promoRedemptions);
+    const partnerRedemptions = allRedemptions.filter(r => codeIds.includes(r.promoCodeId));
+    
+    // Get visits for partner's codes
+    const allVisits = await db.select().from(referralVisits);
+    const partnerVisits = allVisits.filter(v => v.promoCodeId && codeIds.includes(v.promoCodeId));
+    const conversions = partnerVisits.filter(v => v.converted).length;
+    
+    // Group users by promo code
+    const usersByPromoCode = partnerCodes.map(code => {
+      const codeRedemptions = partnerRedemptions.filter(r => r.promoCodeId === code.id);
+      return {
+        promoCode: code,
+        users: codeRedemptions.map(r => ({
+          userId: r.userId,
+          redeemedAt: r.createdAt,
+          discountApplied: r.discountApplied,
+        })),
+      };
+    });
+    
+    return {
+      promoCodes: partnerCodes,
+      totalRedemptions: partnerRedemptions.length,
+      totalDiscountGiven: partnerRedemptions.reduce((sum, r) => sum + r.discountApplied, 0),
+      totalVisits: partnerVisits.length,
+      conversions,
+      conversionRate: partnerVisits.length > 0 ? (conversions / partnerVisits.length) * 100 : 0,
+      usersByPromoCode,
     };
   }
 

@@ -2629,6 +2629,125 @@ ${generatedSections.join('\n\n---\n\n')}`;
   });
 
   // ============================================
+  // PARTNER DASHBOARD
+  // ============================================
+
+  // Check if user is a partner (has promo codes they own)
+  app.get("/api/partner/status", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const promoCodes = await storage.getPromoCodesByOwner(user.id);
+      res.json({ 
+        isPartner: promoCodes.length > 0,
+        promoCodeCount: promoCodes.length,
+      });
+    } catch (error) {
+      console.error("Partner status check error:", error);
+      res.status(500).json({ error: "Failed to check partner status" });
+    }
+  });
+
+  // Get partner analytics
+  app.get("/api/partner/analytics", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const analytics = await storage.getPartnerAnalytics(user.id);
+      
+      if (analytics.promoCodes.length === 0) {
+        return res.status(403).json({ error: "You are not a partner. Contact admin to get a promo code." });
+      }
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error("Partner analytics error:", error);
+      res.status(500).json({ error: "Failed to fetch partner analytics" });
+    }
+  });
+
+  // Get partner's promo codes
+  app.get("/api/partner/promo-codes", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const promoCodes = await storage.getPromoCodesByOwner(user.id);
+      res.json(promoCodes);
+    } catch (error) {
+      console.error("Partner promo codes error:", error);
+      res.status(500).json({ error: "Failed to fetch promo codes" });
+    }
+  });
+
+  // Get users who used partner's promo codes (with user details)
+  app.get("/api/partner/users", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const analytics = await storage.getPartnerAnalytics(user.id);
+      
+      if (analytics.promoCodes.length === 0) {
+        return res.status(403).json({ error: "You are not a partner" });
+      }
+      
+      // Get detailed user info for each user who used partner's codes
+      const usersWithDetails = await Promise.all(
+        analytics.usersByPromoCode.flatMap(pc => 
+          pc.users.map(async u => {
+            const userDetails = await storage.getUser(u.userId);
+            return {
+              userId: u.userId,
+              email: userDetails?.email || 'Unknown',
+              firstName: userDetails?.firstName || 'Unknown',
+              lastName: userDetails?.lastName || '',
+              tier: userDetails?.tier || 'free',
+              promoCode: pc.promoCode.code,
+              promoCodeName: pc.promoCode.name,
+              redeemedAt: u.redeemedAt,
+              discountApplied: u.discountApplied,
+            };
+          })
+        )
+      );
+      
+      res.json(usersWithDetails);
+    } catch (error) {
+      console.error("Partner users error:", error);
+      res.status(500).json({ error: "Failed to fetch partner users" });
+    }
+  });
+
+  // Partner can send email to their users (simplified - would need proper email service)
+  app.post("/api/partner/contact-user", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { userId, subject, message } = req.body;
+      
+      if (!userId || !subject || !message) {
+        return res.status(400).json({ error: "User ID, subject, and message are required" });
+      }
+      
+      // Verify this user used partner's promo code
+      const analytics = await storage.getPartnerAnalytics(user.id);
+      const allUserIds = analytics.usersByPromoCode.flatMap(pc => pc.users.map(u => u.userId));
+      
+      if (!allUserIds.includes(userId)) {
+        return res.status(403).json({ error: "You can only contact users who used your promo code" });
+      }
+      
+      const targetUser = await storage.getUser(userId);
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // In production, this would send an actual email
+      // For now, we'll just log and return success
+      console.log(`Partner ${user.email} sending email to ${targetUser.email}: ${subject}`);
+      
+      res.json({ success: true, message: "Message sent successfully" });
+    } catch (error) {
+      console.error("Partner contact user error:", error);
+      res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
+  // ============================================
   // SUPPORT SYSTEM
   // ============================================
 
