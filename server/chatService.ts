@@ -5,27 +5,17 @@ interface Message {
   content: string;
 }
 
-const VISA_SYSTEM_PROMPT = `You are an expert UK Innovator Founder Visa consultant with deep knowledge of Home Office requirements, endorser routes, and business planning.
+const VISA_SYSTEM_PROMPT = `You are an expert UK Innovator Founder Visa consultant.
 
-RESPONSE STYLE:
-- Keep responses CONCISE (2-4 sentences maximum unless user asks for details)
-- Be direct and accurate - no fluff or unnecessary context
-- Use bullet points for lists (simple dashes, not numbered lists)
-- ALWAYS use UK English spelling (programme, organisation, authorised, etc.)
-- Based on official GOV.UK guidance (November 2025)
+RULES:
+- Be EXTREMELY concise: 1-3 sentences max
+- Use UK English spelling
+- Use simple dashes for bullet points if needed
+- Never guarantee visa approval
+- If uncertain, say "verify with gov.uk"
+- Focus only on Innovator Founder Visa
 
-FORMATTING:
-- Use plain text formatting only (no markdown bold/italics)
-- Use simple dashes (-) for bullet points
-- Keep sentences complete - never truncate mid-sentence
-
-SAFETY RULES:
-1. State clearly if uncertain - recommend official sources or immigration lawyers
-2. Never guarantee visa approval
-3. Always suggest users verify with Home Office or endorsers
-4. Focus on Innovator Founder Visa only (redirect other visa questions)
-
-WHEN UNCERTAIN: Say "I recommend verifying this with [official source/immigration lawyer]" - don't speculate.`;
+Give direct answers. No filler.`;
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
@@ -171,18 +161,18 @@ Please try again shortly, or visit the official UK Home Office website for UK In
 }
 
 function addDisclaimerIfNeeded(response: string): string {
-  // Check if response already contains a disclaimer
-  if (response.toLowerCase().includes("disclaimer") || response.toLowerCase().includes("consult")) {
+  // Check if response already contains a disclaimer or verification note
+  if (response.toLowerCase().includes("disclaimer") || 
+      response.toLowerCase().includes("gov.uk") ||
+      response.toLowerCase().includes("verify")) {
     return response;
   }
 
-  // Add disclaimer to responses about applications, policy, or requirements
+  // Add brief disclaimer only for sensitive topics
   const topicsRequiringDisclaimer = [
     "application",
     "approval",
     "requirement",
-    "policy",
-    "rule",
     "eligible",
     "qualify",
     "refuse",
@@ -194,18 +184,7 @@ function addDisclaimerIfNeeded(response: string): string {
   );
 
   if (needsDisclaimer) {
-    return (
-      response +
-      `
-
----
-
-**Important Disclaimer:** This information is provided for educational purposes only and does not constitute legal or immigration advice. Regulations change frequently, and individual circumstances vary. Always:
-- Verify current policy on the official Home Office website
-- Consult with a qualified immigration lawyer
-- Contact your chosen endorser directly for specific guidance
-- Review the latest guidance before submitting your application`
-    );
+    return response + "\n\n*Verify at gov.uk before applying.*";
   }
 
   return response;
