@@ -51,16 +51,21 @@ type NavGroup = {
   }>;
 };
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  demoMode?: boolean;
+}
+
+export function AppSidebar({ demoMode = false }: AppSidebarProps) {
   const [location, setLocation] = useLocation();
   const { data: user } = useQuery<{ id: string; email: string; displayName?: string; isAdmin?: boolean }>({
     queryKey: ["/api/auth/user"],
     retry: false,
+    enabled: !demoMode,
   });
 
   const { data: partnerStatus } = useQuery<{ isPartner: boolean; promoCodeCount: number }>({
     queryKey: ["/api/partner/status"],
-    enabled: !!user,
+    enabled: !!user && !demoMode,
     retry: false,
   });
 
@@ -80,10 +85,20 @@ export function AppSidebar() {
     },
   });
 
-  if (!user) return null;
+  // Demo user data for non-logged-in users
+  const demoUser = {
+    id: "demo",
+    email: "demo@example.com",
+    displayName: "Demo User",
+    isAdmin: false,
+  };
+
+  const currentUser = demoMode ? demoUser : user;
+  
+  if (!currentUser && !demoMode) return null;
 
   const navGroups: NavGroup[] = [
-    ...(user?.isAdmin
+    ...(currentUser?.isAdmin && !demoMode
       ? [
           {
             label: "Admin",
@@ -99,7 +114,7 @@ export function AppSidebar() {
           },
         ]
       : []),
-    ...(partnerStatus?.isPartner
+    ...(partnerStatus?.isPartner && !demoMode
       ? [
           {
             label: "Partner",
@@ -339,20 +354,33 @@ export function AppSidebar() {
       <SidebarFooter>
         <div className="flex flex-col gap-2 p-2 border-t">
           <div className="px-1 py-1">
-            <div className="text-xs font-semibold text-foreground truncate">{user.displayName || "User"}</div>
-            <div className="text-[10px] text-muted-foreground truncate">{user.email}</div>
+            <div className="text-xs font-semibold text-foreground truncate">{currentUser?.displayName || "Demo User"}</div>
+            <div className="text-[10px] text-muted-foreground truncate">{currentUser?.email || "demo@example.com"}</div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start gap-2 h-7 text-xs"
-            onClick={() => logoutMutation.mutate()}
-            disabled={logoutMutation.isPending}
-            data-testid="sidebar-logout-button"
-          >
-            <LogOut className="h-3 w-3" />
-            {logoutMutation.isPending ? "Logging out..." : "Logout"}
-          </Button>
+          {demoMode ? (
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full justify-start gap-2 h-7 text-xs"
+              onClick={() => setLocation("/login")}
+              data-testid="sidebar-login-button"
+            >
+              <LogOut className="h-3 w-3" />
+              Sign In / Sign Up
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start gap-2 h-7 text-xs"
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+              data-testid="sidebar-logout-button"
+            >
+              <LogOut className="h-3 w-3" />
+              {logoutMutation.isPending ? "Logging out..." : "Logout"}
+            </Button>
+          )}
         </div>
       </SidebarFooter>
     </Sidebar>
