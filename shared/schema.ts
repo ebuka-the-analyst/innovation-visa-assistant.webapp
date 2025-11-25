@@ -1055,3 +1055,221 @@ export type DocumentTemplate = typeof documentTemplates.$inferSelect;
 export type InsertDocumentTemplate = z.infer<typeof insertDocumentTemplateSchema>;
 
 export type UserTemplateDownload = typeof userTemplateDownloads.$inferSelect;
+
+// ============================================
+// IMMIGRATION LAWYER REVIEW CENTER
+// PhD-Level Professional Document Review System
+// ============================================
+
+// Immigration Lawyers Table - Stores lawyer profiles
+export const immigrationLawyers = pgTable("immigration_lawyers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Basic Info
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  firstName: varchar("first_name", { length: 100 }).notNull(),
+  lastName: varchar("last_name", { length: 100 }).notNull(),
+  profileImageUrl: text("profile_image_url"),
+  
+  // Professional Credentials
+  oiscLevel: varchar("oisc_level", { length: 10 }), // Level 1, 2, or 3
+  oiscRegistrationNumber: varchar("oisc_registration_number", { length: 50 }),
+  sraNumber: varchar("sra_number", { length: 50 }), // Solicitors Regulation Authority
+  firmName: varchar("firm_name", { length: 255 }),
+  
+  // Specializations
+  specializations: jsonb("specializations"), // Array: ['innovator_founder', 'global_talent', 'skilled_worker']
+  yearsExperience: integer("years_experience"),
+  successRate: integer("success_rate"), // Percentage 0-100
+  
+  // Availability & Capacity
+  isAvailable: boolean("is_available").notNull().default(true),
+  maxConcurrentReviews: integer("max_concurrent_reviews").notNull().default(5),
+  currentReviewCount: integer("current_review_count").notNull().default(0),
+  
+  // Performance Metrics
+  totalReviewsCompleted: integer("total_reviews_completed").notNull().default(0),
+  averageRating: integer("average_rating"), // 1-5 stars (stored as integer, display as stars)
+  averageTurnaroundHours: integer("average_turnaround_hours"),
+  
+  // Status
+  status: varchar("status", { length: 20 }).notNull().default('active'), // active, inactive, suspended
+  verifiedAt: timestamp("verified_at"),
+  
+  // Notes
+  bio: text("bio"),
+  notes: text("notes"), // Admin notes
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_lawyer_email").on(table.email),
+  index("idx_lawyer_status").on(table.status),
+  index("idx_lawyer_available").on(table.isAvailable),
+]);
+
+// Lawyer Document Reviews - Track each review assignment
+export const lawyerDocumentReviews = pgTable("lawyer_document_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Relationships
+  businessPlanId: varchar("business_plan_id").notNull(), // Links to businessPlans table
+  userId: varchar("user_id").notNull(), // The applicant/user
+  lawyerId: varchar("lawyer_id"), // Assigned lawyer (null if unassigned)
+  
+  // Review Details
+  documentType: varchar("document_type", { length: 50 }).notNull().default('business_plan'), // business_plan, financial_projections, evidence_pack
+  priority: varchar("priority", { length: 20 }).notNull().default('normal'), // low, normal, high, urgent
+  tier: varchar("tier", { length: 20 }).notNull(), // User's subscription tier
+  
+  // Status Workflow: pending -> assigned -> in_review -> completed/revision_needed/approved/rejected
+  status: varchar("status", { length: 30 }).notNull().default('pending'),
+  
+  // Timestamps
+  requestedAt: timestamp("requested_at").notNull().defaultNow(),
+  assignedAt: timestamp("assigned_at"),
+  startedAt: timestamp("started_at"), // When lawyer started reviewing
+  completedAt: timestamp("completed_at"),
+  
+  // Due Date & SLA
+  dueDate: timestamp("due_date"),
+  slaHours: integer("sla_hours"), // Expected turnaround based on tier
+  isOverdue: boolean("is_overdue").notNull().default(false),
+  
+  // Review Results
+  overallVerdict: varchar("overall_verdict", { length: 30 }), // approved, needs_revision, conditional_approval, rejected
+  confidenceScore: integer("confidence_score"), // Lawyer's confidence 0-100
+  complianceScore: integer("compliance_score"), // Home Office compliance 0-100
+  readinessScore: integer("readiness_score"), // Visa readiness 0-100
+  
+  // Review Summary
+  executiveSummary: text("executive_summary"), // Brief overview for user
+  keyStrengths: jsonb("key_strengths"), // Array of strengths
+  criticalIssues: jsonb("critical_issues"), // Array of issues that must be fixed
+  recommendations: jsonb("recommendations"), // Array of recommendations
+  
+  // Lawyer Notes
+  internalNotes: text("internal_notes"), // Private notes (admin only)
+  
+  // Rating (user rates the review)
+  userRating: integer("user_rating"), // 1-5 stars
+  userFeedback: text("user_feedback"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_ldr_business_plan").on(table.businessPlanId),
+  index("idx_ldr_user").on(table.userId),
+  index("idx_ldr_lawyer").on(table.lawyerId),
+  index("idx_ldr_status").on(table.status),
+  index("idx_ldr_priority").on(table.priority),
+  index("idx_ldr_due_date").on(table.dueDate),
+]);
+
+// Review Comments - Detailed comments on specific parts of documents
+export const lawyerReviewComments = pgTable("lawyer_review_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  reviewId: varchar("review_id").notNull(), // Links to lawyerDocumentReviews
+  lawyerId: varchar("lawyer_id").notNull(),
+  
+  // Comment Details
+  section: varchar("section", { length: 100 }).notNull(), // Document section: executive_summary, financial_projections, etc.
+  pageNumber: integer("page_number"),
+  lineReference: varchar("line_reference", { length: 50 }), // e.g., "Lines 45-52"
+  
+  // Comment Content
+  commentType: varchar("comment_type", { length: 30 }).notNull(), // issue, suggestion, praise, question, warning
+  severity: varchar("severity", { length: 20 }).notNull().default('medium'), // low, medium, high, critical
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  
+  // Suggested Fix
+  suggestedFix: text("suggested_fix"),
+  exampleText: text("example_text"), // Example of how to fix
+  
+  // Resolution Tracking
+  isResolved: boolean("is_resolved").notNull().default(false),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedBy: varchar("resolved_by"), // User ID who resolved
+  resolutionNote: text("resolution_note"),
+  
+  // Visibility
+  isVisibleToUser: boolean("is_visible_to_user").notNull().default(true),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_lrc_review").on(table.reviewId),
+  index("idx_lrc_lawyer").on(table.lawyerId),
+  index("idx_lrc_section").on(table.section),
+  index("idx_lrc_type").on(table.commentType),
+  index("idx_lrc_resolved").on(table.isResolved),
+]);
+
+// Review Status History - Audit trail of all status changes
+export const lawyerReviewStatusHistory = pgTable("lawyer_review_status_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  reviewId: varchar("review_id").notNull(),
+  
+  fromStatus: varchar("from_status", { length: 30 }),
+  toStatus: varchar("to_status", { length: 30 }).notNull(),
+  
+  changedBy: varchar("changed_by").notNull(), // User or admin ID
+  changedByRole: varchar("changed_by_role", { length: 20 }).notNull(), // admin, lawyer, system
+  
+  reason: text("reason"), // Optional reason for status change
+  metadata: jsonb("metadata"), // Additional context
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_lrsh_review").on(table.reviewId),
+  index("idx_lrsh_created").on(table.createdAt),
+]);
+
+// Insert Schemas for Lawyer Review System
+export const insertImmigrationLawyerSchema = createInsertSchema(immigrationLawyers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  totalReviewsCompleted: true,
+  currentReviewCount: true,
+});
+
+export const insertLawyerDocumentReviewSchema = createInsertSchema(lawyerDocumentReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  requestedAt: true,
+  assignedAt: true,
+  startedAt: true,
+  completedAt: true,
+  isOverdue: true,
+});
+
+export const insertLawyerReviewCommentSchema = createInsertSchema(lawyerReviewComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  isResolved: true,
+  resolvedAt: true,
+});
+
+export const insertLawyerReviewStatusHistorySchema = createInsertSchema(lawyerReviewStatusHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types for Lawyer Review System
+export type ImmigrationLawyer = typeof immigrationLawyers.$inferSelect;
+export type InsertImmigrationLawyer = z.infer<typeof insertImmigrationLawyerSchema>;
+
+export type LawyerDocumentReview = typeof lawyerDocumentReviews.$inferSelect;
+export type InsertLawyerDocumentReview = z.infer<typeof insertLawyerDocumentReviewSchema>;
+
+export type LawyerReviewComment = typeof lawyerReviewComments.$inferSelect;
+export type InsertLawyerReviewComment = z.infer<typeof insertLawyerReviewCommentSchema>;
+
+export type LawyerReviewStatusHistory = typeof lawyerReviewStatusHistory.$inferSelect;
+export type InsertLawyerReviewStatusHistory = z.infer<typeof insertLawyerReviewStatusHistorySchema>;
