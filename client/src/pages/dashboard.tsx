@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award, Eye, EyeOff } from "lucide-react";
+import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award, Eye, EyeOff, RefreshCw } from "lucide-react";
 
 import ChatBot from "@/components/ChatBot";
 import type { BusinessPlan } from "@shared/schema";
 import { format } from "date-fns";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip } from "recharts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Local storage key for hidden demo plans
 const HIDDEN_DEMO_PLANS_KEY = "hiddenDemoPlans";
@@ -153,16 +153,27 @@ function calculateRadarData(plan: BusinessPlan) {
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { hiddenIds, hidePlan, showPlan, showAllPlans } = useHiddenDemoPlans();
+  const [redirecting, setRedirecting] = useState(false);
 
-  const { data: user, isLoading: userLoading } = useQuery<{ id: string; email: string; displayName?: string }>({
+  const { data: user, isLoading: userLoading, isError: userError, refetch: refetchUser } = useQuery<{ id: string; email: string; displayName?: string }>({
     queryKey: ['/api/auth/user'],
     retry: false,
+    staleTime: 30000,
   });
 
-  const { data: businessPlans, isLoading: plansLoading } = useQuery<BusinessPlan[]>({
+  const { data: businessPlans, isLoading: plansLoading, isError: plansError, refetch: refetchPlans } = useQuery<BusinessPlan[]>({
     queryKey: ['/api/dashboard/plans'],
     enabled: !!user,
+    staleTime: 30000,
   });
+
+  // Handle redirect to login when not authenticated
+  useEffect(() => {
+    if (!userLoading && !user && !redirecting) {
+      setRedirecting(true);
+      setLocation("/login");
+    }
+  }, [userLoading, user, redirecting, setLocation]);
 
   // Filter out hidden demo plans
   const displayPlans = businessPlans?.filter(plan => {
@@ -177,19 +188,39 @@ export default function Dashboard() {
   const hiddenDemoPlansCount = businessPlans?.filter(p => p.isDemoData && hiddenIds.includes(p.id)).length || 0;
   const hasUserPlans = businessPlans?.some(p => !p.isDemoData) || false;
 
-  if (userLoading) {
+  // Show loading state
+  if (userLoading || redirecting) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{redirecting ? 'Redirecting to login...' : 'Loading your dashboard...'}</p>
         </div>
       </div>
     );
   }
 
+  // Handle error state
+  if (userError || (!user && !userLoading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5">
+        <Card className="max-w-md w-full mx-4">
+          <CardHeader className="text-center">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-2" />
+            <CardTitle>Session Expired</CardTitle>
+            <CardDescription>Please log in again to access your dashboard</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <Button onClick={() => setLocation("/login")} data-testid="button-login-redirect">
+              Go to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (!user) {
-    setLocation("/login");
     return null;
   }
 
@@ -256,7 +287,7 @@ export default function Dashboard() {
 
         {plansLoading ? (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3].map((i) => (
                 <Card key={i}>
                   <CardHeader>
@@ -270,11 +301,25 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
+        ) : plansError ? (
+          <Card className="text-center p-8 md:p-12">
+            <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Failed to load plans</h3>
+            <p className="text-muted-foreground mb-6">
+              There was an error loading your business plans. Please try again.
+            </p>
+            <Button onClick={() => refetchPlans()} data-testid="button-retry-plans">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </Card>
         ) : displayPlans && displayPlans.length > 0 ? (
-          <div className="space-y-8">
+          <div className="space-y-6 md:space-y-8">
             {/* Insights Cards - Only show if there's a completed plan */}
             {completedPlan && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <Card data-testid="card-insight-approval">
                   <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Approval Probability</CardTitle>
@@ -382,8 +427,8 @@ export default function Dashboard() {
 
             {/* Business Plans List */}
             <div>
-              <h3 className="text-xl font-semibold mb-4">Your Business Plans</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <h3 className="text-lg md:text-xl font-semibold mb-4">Your Business Plans</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {displayPlans.map((plan) => (
                   <Card key={plan.id} className="hover-elevate" data-testid={`card-plan-${plan.id}`}>
                     <CardHeader>

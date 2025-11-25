@@ -145,7 +145,7 @@ export default function ToolsHub() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">Category</label>
                 <Select value={categoryFilter || "all"} onValueChange={(val) => setCategoryFilter(val === "all" ? "" : val)}>
@@ -235,7 +235,7 @@ export default function ToolsHub() {
               </p>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {filteredTools.map((tool) => {
                 const hasAccess = canAccessTool(tool.tier as ToolTier);
                 return (
@@ -300,7 +300,7 @@ export default function ToolsHub() {
         </div>
 
         {/* Summary Stats */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="mt-12 md:mt-16 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
           <Card className="p-6 text-center">
             <div className="text-3xl font-bold text-primary">{ALL_TOOLS.length}</div>
             <p className="text-sm text-muted-foreground mt-2">Total Tools</p>
