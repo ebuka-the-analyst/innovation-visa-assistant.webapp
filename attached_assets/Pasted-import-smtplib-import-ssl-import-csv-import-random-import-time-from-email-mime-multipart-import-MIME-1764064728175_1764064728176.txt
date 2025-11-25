@@ -1,0 +1,318 @@
+import smtplib
+import ssl
+import csv
+import random
+import time
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from urllib.parse import quote_plus
+
+# ==============================================================
+# CONFIG — UPDATE THESE VALUES BEFORE RUNNING
+# ==============================================================
+
+SMTP_SERVER = "email-smtp.eu-north-1.amazonaws.com"
+SMTP_PORT = 465
+
+# 🔴 SES SMTP USER/PASS
+SES_SMTP_USERNAME = "AKIAW5DSKK4M7XOGTQMV"
+SES_SMTP_PASSWORD = "BIKsFvDxrI41WZAIfpKv5gnqklH5rQoj4mfXyIkTDH5s"
+
+SENDER_EMAIL = "benedict.umeh@bhenmedia.com"
+SENDER_NAME = "Benedict E. Umeh"
+
+# Your CSV file (Apollo-style headers)
+CONTACTS_FILE = r"C:\Users\ebuka\Desktop\job_blitz_system\apollo_exports\email.csv"
+
+SUCCESS_LOG = "sent_success_test.csv"
+FAILED_LOG = "sent_failed_test.csv"
+
+# 🔴 GLOBAL BCC – you get a silent copy of every email
+GLOBAL_BCC = "benedict.umeh@bhenmedia.com"
+
+# 🔴 TRACKING BASE URL – where your tracking pixel points to
+TRACKING_BASE_URL = "https://bhenmedia.com/trk/open.gif"
+
+# ==============================================================
+# SUBJECT ROTATION
+# ==============================================================
+
+SUBJECTS = [
+    "WordPress · React · AI Chatbot Developer – Exploring Collaboration",
+    "Full-Stack WordPress & React with AI Chatbots – Potential Fit for Your Team",
+    "React, WordPress and AI Chatbot Engineering – Exploring a Possible Fit",
+    "AI Chatbot, React & WordPress Developer – Adding Value to Your Engineering Stack"
+]
+
+# ==============================================================
+# FULL HTML TEMPLATE (WITH ALL LINKS ACTIVATED)
+# ==============================================================
+
+HTML_TEMPLATE = """
+<html>
+<body style="font-family: Arial; line-height: 1.6; font-size: 15px; color: #222;">
+
+<p>Dear {firstname},</p>
+
+<p>{custom_intro}</p>
+
+<p>My name is Benedict E. Umeh, founder of 
+<a href="https://bhenmedia.com/">BhenMedia.com</a>, where I build
+data-driven websites and AI-powered solutions for teams across hospitality,
+healthcare, retail, and digital services.</p>
+
+<p>I currently live in Leeds on a UK Post-Study Work Visa (valid until <b>8 Dec 2025</b>)
+and I'm actively seeking a long-term role with a company holding a Tier 2 Sponsor Licence.</p>
+
+<p>With a BSc in Information Technology and an MSc in Data Science (Leeds Beckett),
+I design and deliver systems that merge clean UI, analytics, automation, and
+performance engineering.</p>
+
+<hr>
+
+<h3>Highlighted Projects (Portfolio)</h3>
+
+<b>WordPress Development</b><br>
+• <a href="https://www.ebluniversal.com/">Ebluniversal.com</a><br>
+• <a href="https://www.slot.ng/">Slot.ng</a><br>
+• <a href="https://www.vivano.com.ng/">Vivano.com.ng</a><br>
+• <a href="https://qalhatatech.com/">Qalhata Tech</a><br>
+• <a href="https://www.deskstones.com/">Deskstones Ltd</a><br>
+• <a href="https://www.ehcp.co.uk/">Eden Health Care</a><br>
+• <a href="https://www.rockae.com/">Rockae.com</a><br><br>
+• <a href="https://bm-hotel.bhenmedia.com/">BM Demo Hotel</a><br><br>
+
+
+<b>React & Frontend Engineering</b><br>
+• <a href="https://bhenmedia.com/portfolio-items/nhs-procurement-intelligence/">NHS Procurement Dashboard</a><br>
+• <a href="https://bhenmedia.com/portfolio-items/greengrid-hub/">GreenGrid Hub</a><br>
+• <a href="https://bhenmedia.com/portfolio-items/hotel-virtual-concierge/">AI Hotel Concierge</a><br>
+• <a href="https://bhenmedia.com/portfolio-items/care-ai/">Care AI Platform</a><br><br>
+
+<b>PHP Plugin Development</b><br>
+• <a href="https://bhenmedia.com/portfolio-items/professional-whatsapp-cloud-api-integration-for-woocommerce/">EBL WhatsApp Commerce Suite</a><br>
+• <a href="https://bhenmedia.com/">Bhenmedia Hide Master</a><br>
+• <a href="https://bhenmedia.com/">BhenMedia Analytics Suite</a><br>
+• <a href="https://bhenmedia.com/">CRM Lead Systems</a><br><br>
+
+<b>AI & Automation</b><br>
+• <a href="https://bhenmedia.com/">BhenMedia Intelligent Suite</a><br>
+• <a href="https://bhenmedia.com/">Hotel Service Automation</a><br>
+• <a href="https://bhenmedia.com/">Gemini Chatbot Integration</a><br><br>
+
+<b>Business Intelligence</b><br>
+• <a href="https://bhenmedia.com/portfolio-items/costa-coffee-performance-analysis/">Costa Coffee Dashboard</a><br>
+• <a href="https://bhenmedia.com/">NHS Mental Health Analytics</a><br>
+• <a href="https://bhenmedia.com/">Supplier Scorecards</a><br>
+• <a href="https://bhenmedia.com/">Power BI Dashboards</a><br>
+
+<hr>
+
+<h3>Let's Work Together</h3>
+
+<p>I’m also open to completing a small <b>pro bono sample project</b> to demonstrate
+my workflow and delivery standards before any commitment.</p>
+
+<p>I’m available to start immediately and would appreciate even a short reply
+regarding any opportunities at {company}.</p>
+
+<div style="margin-top:8px;">
+
+  <p style="margin:0;">Best regards,</p>
+  <p style="margin:0;">
+    Benedict E. Umeh<br>
+    <a href="tel:+447493363351">+44 7493 363 351</a> · <br>
+    <a href="mailto:benedict.umeh@bhenmedia.com">benedict.umeh@bhenmedia.com</a>
+  </p>
+
+  <div style="margin-top:6px; display:flex; align-items:center;">
+  </div>
+
+  <p style="margin:4px 0 0 0; font-size:14px;">
+    <a href="https://bhenmedia.com/" style="color:#e5533d; text-decoration:none;">Portfolio</a>
+    |
+    <a href="https://linkedin.com/in/ebukaumeh" style="color:#1a73e8; text-decoration:none;">LinkedIn</a>
+  </p>
+    <hr>
+  <table cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
+  <tr>
+    <td>
+      <img src="https://bhenmedia.com/website-storage/2025/11/unnamed_resized-removebg-preview.png"
+           alt="BhenMedia"
+           style="height:48px; width:auto; display:block;">
+    </td>
+    <td style="font-size:14px; padding-left:8px;">— Intelligent Web Development • AI Integration • UX + Data
+    </td>
+  </tr>
+</table>
+
+
+</div>
+
+<p>{custom_ps}</p>
+
+<p style="font-size:12px;color:#6b7280;">
+  This email was originally addressed to: <strong>{recipient}</strong>.
+</p>
+
+{tracking_pixel}
+
+</body>
+</html>
+"""
+
+# ==============================================================
+# NORMALISE ROW
+# ==============================================================
+
+def normalise_row(raw_row):
+    """
+    Takes a DictReader row and:
+      - strips whitespace from keys
+      - lowercases keys (so 'Email' or ' email ' both become 'email')
+      - strips whitespace from values
+    """
+    clean = {}
+    for k, v in raw_row.items():
+        if k is None:
+            continue
+        key = k.strip().lower()
+        if isinstance(v, str):
+            v = v.strip()
+        clean[key] = v
+    return clean
+
+# ==============================================================
+# SEND EMAIL FUNCTION
+# ==============================================================
+
+def send_email(row):
+    # row has already been normalised
+    recipient = row.get("email")
+    if not recipient:
+        print("[SKIP] Row without email:", row)
+        return False
+
+    # First name: supports "First Name" and "firstname"
+    firstname = (
+        row.get("first name")      # from CSV: "First Name"
+        or row.get("firstname")    # future-proof
+        or ""
+    ).strip() or "there"
+
+    # Company: supports "Company Name" and "company"
+    company = (
+        row.get("company name")    # from CSV: "Company Name"
+        or row.get("company")
+        or ""
+    ).strip() or "your company"
+
+    # Optional title from CSV
+    title = (row.get("title") or "").strip()
+
+    # Build custom intro if not supplied in CSV (no bold)
+    custom_intro = (row.get("custom_intro") or "").strip()
+    if not custom_intro:
+        if title and company:
+            custom_intro = (
+                f"I came across your work as {title} at {company} "
+                f"and thought it would be worth reaching out personally."
+            )
+        elif company:
+            custom_intro = (
+                f"I came across {company} recently and thought it would be "
+                f"worth reaching out personally."
+            )
+        else:
+            custom_intro = (
+                "I came across your profile recently and thought it would be worth "
+                "reaching out personally."
+            )
+
+    # Optional PS (supported if you add a custom_ps column later)
+    custom_ps = (row.get("custom_ps") or "").strip()
+
+    # Your current subjects don't use placeholders, so no .format needed
+    subject = random.choice(SUBJECTS)
+
+    # ==========================================================
+    # 🔴 BUILD TRACKING PIXEL
+    # ==========================================================
+    tracking_id = f"{int(time.time())}_{random.randint(1000, 9999)}"
+    encoded_email = quote_plus(recipient)
+
+    tracking_pixel = (
+        f'<img src="{TRACKING_BASE_URL}?eid={tracking_id}&email={encoded_email}" '
+        f'style="width:1px;height:1px;display:none;" alt="" />'
+    )
+
+    html_body = HTML_TEMPLATE.format(
+        firstname=firstname,
+        company=company,
+        custom_intro=custom_intro,
+        custom_ps=custom_ps,
+        recipient=recipient,
+        tracking_pixel=tracking_pixel,
+    )
+
+    msg = MIMEMultipart("alternative")
+    msg["From"] = f"{SENDER_NAME} <{SENDER_EMAIL}>"
+    msg["To"] = recipient
+    msg["Subject"] = subject
+
+    # 🔴 BCC – you silently receive a copy
+    if GLOBAL_BCC:
+        msg["Bcc"] = GLOBAL_BCC
+
+    msg.attach(MIMEText(html_body, "html"))
+
+    try:
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+            server.login(SES_SMTP_USERNAME, SES_SMTP_PASSWORD)
+
+            all_recipients = [recipient]
+            if GLOBAL_BCC:
+                all_recipients.append(GLOBAL_BCC)
+
+            server.sendmail(SENDER_EMAIL, all_recipients, msg.as_string())
+
+        print(f"[SENT] {recipient}")
+        return True
+
+    except Exception as e:
+        print(f"[FAILED] {recipient} — {e}")
+        return False
+
+
+# ==============================================================
+# MAIN LOOP
+# ==============================================================
+
+def main():
+    print("Using contacts file:", CONTACTS_FILE)
+
+    with open(CONTACTS_FILE, newline="", encoding="utf-8") as f, \
+         open(SUCCESS_LOG, "w", newline="", encoding="utf-8") as success, \
+         open(FAILED_LOG, "w", newline="", encoding="utf-8") as failed:
+
+        reader = csv.DictReader(f)
+        print("Detected CSV headers:", reader.fieldnames)
+
+        success_writer = csv.writer(success)
+        failed_writer = csv.writer(failed)
+
+        success_writer.writerow(["email"])
+        failed_writer.writerow(["email", "error"])
+
+        for raw_row in reader:
+            row = normalise_row(raw_row)
+            ok = send_email(row)
+            if ok:
+                success_writer.writerow([row.get("email", "")])
+            else:
+                failed_writer.writerow([row.get("email", ""), "error"])
+
+
+if __name__ == "__main__":
+    main()
