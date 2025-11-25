@@ -157,6 +157,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // Onboarding Tour Routes - Only shows once after plan activation
+  app.get("/api/onboarding/status", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      res.json({
+        hasCompletedOnboarding: user.hasCompletedOnboarding || false,
+        onboardingCompletedAt: user.onboardingCompletedAt || null,
+        subscriptionStatus: user.subscriptionStatus,
+        subscriptionTier: user.subscriptionTier,
+      });
+    } catch (error) {
+      console.error("Onboarding status error:", error);
+      res.status(500).json({ error: "Failed to fetch onboarding status" });
+    }
+  });
+
+  app.post("/api/onboarding/complete", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      await storage.markOnboardingComplete(user.id);
+      res.json({ 
+        success: true, 
+        message: "Onboarding completed successfully" 
+      });
+    } catch (error) {
+      console.error("Complete onboarding error:", error);
+      res.status(500).json({ error: "Failed to complete onboarding" });
+    }
+  });
+
+  app.post("/api/onboarding/reset", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      await storage.resetOnboarding(user.id);
+      res.json({ 
+        success: true, 
+        message: "Onboarding reset successfully - tour will show again" 
+      });
+    } catch (error) {
+      console.error("Reset onboarding error:", error);
+      res.status(500).json({ error: "Failed to reset onboarding" });
+    }
+  });
+
   app.get("/api/dashboard/plans", isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;

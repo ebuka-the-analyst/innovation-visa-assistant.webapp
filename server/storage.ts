@@ -198,6 +198,12 @@ export interface IStorage {
   getUserDocumentsByCategory(userId: string, category: string): Promise<UserDocument[]>;
   updateUserDocument(id: string, updates: Partial<UserDocument>): Promise<UserDocument | undefined>;
   deleteUserDocument(id: string): Promise<void>;
+  
+  // ============================================
+  // ONBOARDING TOUR
+  // ============================================
+  markOnboardingComplete(userId: string): Promise<void>;
+  resetOnboarding(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -986,6 +992,29 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUserDocument(id: string): Promise<void> {
     await db.delete(userDocuments).where(eq(userDocuments.id, id));
+  }
+
+  // ============================================
+  // ONBOARDING TOUR
+  // ============================================
+  async markOnboardingComplete(userId: string): Promise<void> {
+    await db.update(users)
+      .set({
+        hasCompletedOnboarding: true,
+        onboardingCompletedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async resetOnboarding(userId: string): Promise<void> {
+    await db.update(users)
+      .set({
+        hasCompletedOnboarding: false,
+        onboardingCompletedAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
   }
 }
 

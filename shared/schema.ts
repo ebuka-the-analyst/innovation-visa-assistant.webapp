@@ -36,6 +36,10 @@ export const users = pgTable("users", {
   // Admin flag
   isAdmin: boolean("is_admin").notNull().default(false),
   
+  // Onboarding tour tracking - only shows once after plan activation
+  hasCompletedOnboarding: boolean("has_completed_onboarding").notNull().default(false),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  
   subscriptionTier: varchar("subscription_tier", { length: 20 }).notNull().default('free'), // free, basic, premium, enterprise, ultimate
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
