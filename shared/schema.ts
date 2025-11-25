@@ -280,3 +280,248 @@ export const insertToolAnalyticsSchema = createInsertSchema(toolAnalytics).omit(
 
 export type InsertToolAnalytics = z.infer<typeof insertToolAnalyticsSchema>;
 export type ToolAnalytic = typeof toolAnalytics.$inferSelect;
+
+// ============================================
+// REFERRAL & PROMO CODE SYSTEM (PhD-Level)
+// ============================================
+
+// Referral Codes - User-generated codes for referring others
+export const referralCodes = pgTable("referral_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(), // Owner of this referral code
+  code: varchar("code", { length: 20 }).unique().notNull(), // Unique referral code
+  
+  // Reward configuration
+  rewardType: varchar("reward_type", { length: 20 }).notNull().default('percentage'), // percentage, fixed_amount, credits, tier_upgrade
+  rewardValue: integer("reward_value").notNull().default(10), // e.g., 10% or £10
+  refereeDiscount: integer("referee_discount").notNull().default(10), // Discount for person signing up with code
+  
+  // Stripe integration
+  stripeCouponId: text("stripe_coupon_id"), // Associated Stripe coupon for discounts
+  
+  // Status and limits
+  status: varchar("status", { length: 20 }).notNull().default('active'), // active, paused, expired, revoked
+  maxUses: integer("max_uses"), // null = unlimited
+  
+  // Aggregated stats (denormalized for performance)
+  totalReferrals: integer("total_referrals").notNull().default(0),
+  successfulReferrals: integer("successful_referrals").notNull().default(0),
+  pendingReferrals: integer("pending_referrals").notNull().default(0),
+  totalEarnings: integer("total_earnings").notNull().default(0), // in pence
+  paidEarnings: integer("paid_earnings").notNull().default(0), // in pence
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_referral_codes_user").on(table.userId),
+  index("idx_referral_codes_code").on(table.code),
+  index("idx_referral_codes_status").on(table.status),
+]);
+
+// Referral Events - Tracks each referral through its lifecycle
+export const referralEvents = pgTable("referral_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referralCodeId: varchar("referral_code_id").notNull(),
+  referrerId: varchar("referrer_id").notNull(), // User who referred
+  refereeId: varchar("referee_id"), // User who signed up (null until signup complete)
+  refereeEmail: varchar("referee_email"), // Email used to sign up
+  
+  // Status lifecycle: visited -> signed_up -> qualified -> rewarded
+  status: varchar("status", { length: 20 }).notNull().default('visited'),
+  
+  // Tracking
+  visitedAt: timestamp("visited_at").notNull().defaultNow(),
+  signedUpAt: timestamp("signed_up_at"),
+  qualifiedAt: timestamp("qualified_at"), // When payment or criteria met
+  rewardedAt: timestamp("rewarded_at"), // When reward issued
+  
+  // Attribution
+  landingPage: text("landing_page"),
+  userAgent: text("user_agent"),
+  ipHash: varchar("ip_hash", { length: 64 }), // Hashed for privacy
+  
+  // Reward details when qualified
+  rewardAmount: integer("reward_amount"), // in pence
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_referral_events_code").on(table.referralCodeId),
+  index("idx_referral_events_referrer").on(table.referrerId),
+  index("idx_referral_events_referee").on(table.refereeId),
+  index("idx_referral_events_status").on(table.status),
+]);
+
+// Referral Rewards - Ledger of earned rewards
+export const referralRewards = pgTable("referral_rewards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  referralEventId: varchar("referral_event_id").notNull(),
+  
+  // Reward details
+  type: varchar("type", { length: 20 }).notNull(), // cash, credits, tier_upgrade
+  amount: integer("amount").notNull(), // in pence or credits
+  currency: varchar("currency", { length: 3 }).notNull().default('GBP'),
+  
+  // Status: pending, approved, paid, cancelled
+  status: varchar("status", { length: 20 }).notNull().default('pending'),
+  
+  // Payout details
+  payoutMethod: varchar("payout_method", { length: 20 }), // bank_transfer, stripe, credits
+  payoutReference: text("payout_reference"),
+  paidAt: timestamp("paid_at"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_referral_rewards_user").on(table.userId),
+  index("idx_referral_rewards_status").on(table.status),
+]);
+
+// Promo Codes - Admin-created discount codes for marketing
+export const promoCodes = pgTable("promo_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code", { length: 30 }).unique().notNull(),
+  
+  // Campaign info
+  name: text("name").notNull(), // Internal name for campaign
+  description: text("description"),
+  
+  // Discount configuration
+  discountType: varchar("discount_type", { length: 20 }).notNull(), // percentage, fixed_amount
+  discountValue: integer("discount_value").notNull(), // e.g., 20 for 20% or £20
+  
+  // Eligibility
+  eligibleTiers: text("eligible_tiers").array(), // Which tiers can use this: ['basic', 'premium']
+  minPurchaseAmount: integer("min_purchase_amount"), // Minimum purchase in pence
+  
+  // Usage limits
+  maxTotalUses: integer("max_total_uses"), // null = unlimited
+  maxUsesPerUser: integer("max_uses_per_user").default(1),
+  currentUses: integer("current_uses").notNull().default(0),
+  
+  // Validity period
+  validFrom: timestamp("valid_from").notNull().defaultNow(),
+  validUntil: timestamp("valid_until"),
+  
+  // Stripe integration
+  stripeCouponId: text("stripe_coupon_id"),
+  stripePromotionCodeId: text("stripe_promotion_code_id"),
+  
+  // Status
+  status: varchar("status", { length: 20 }).notNull().default('active'), // active, paused, expired, deleted
+  
+  // Admin tracking
+  createdBy: varchar("created_by").notNull(),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_promo_codes_code").on(table.code),
+  index("idx_promo_codes_status").on(table.status),
+]);
+
+// Promo Code Redemptions - Audit trail for promo code usage
+export const promoRedemptions = pgTable("promo_redemptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  promoCodeId: varchar("promo_code_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  
+  // Transaction details
+  orderId: text("order_id"), // Stripe session ID or internal order
+  discountApplied: integer("discount_applied").notNull(), // in pence
+  originalAmount: integer("original_amount").notNull(), // in pence
+  finalAmount: integer("final_amount").notNull(), // in pence
+  
+  // Context
+  appliedAt: varchar("applied_at", { length: 20 }).notNull(), // checkout, signup, upgrade
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_promo_redemptions_code").on(table.promoCodeId),
+  index("idx_promo_redemptions_user").on(table.userId),
+]);
+
+// Referral Visits - Anonymous click tracking
+export const referralVisits = pgTable("referral_visits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  referralCodeId: varchar("referral_code_id"),
+  promoCodeId: varchar("promo_code_id"),
+  
+  // Visitor tracking (privacy-compliant)
+  visitorHash: varchar("visitor_hash", { length: 64 }).notNull(), // Hashed fingerprint
+  
+  // Attribution
+  source: varchar("source", { length: 50 }), // direct, email, social, etc.
+  landingPage: text("landing_page"),
+  userAgent: text("user_agent"),
+  
+  // Conversion tracking
+  converted: boolean("converted").notNull().default(false),
+  convertedUserId: varchar("converted_user_id"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_referral_visits_code").on(table.referralCodeId),
+  index("idx_referral_visits_promo").on(table.promoCodeId),
+  index("idx_referral_visits_visitor").on(table.visitorHash),
+]);
+
+// Schemas and Types for Referral System
+export const insertReferralCodeSchema = createInsertSchema(referralCodes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  totalReferrals: true,
+  successfulReferrals: true,
+  pendingReferrals: true,
+  totalEarnings: true,
+  paidEarnings: true,
+});
+
+export const insertReferralEventSchema = createInsertSchema(referralEvents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertReferralRewardSchema = createInsertSchema(referralRewards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  currentUses: true,
+});
+
+export const insertPromoRedemptionSchema = createInsertSchema(promoRedemptions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertReferralVisitSchema = createInsertSchema(referralVisits).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertReferralCode = z.infer<typeof insertReferralCodeSchema>;
+export type ReferralCode = typeof referralCodes.$inferSelect;
+
+export type InsertReferralEvent = z.infer<typeof insertReferralEventSchema>;
+export type ReferralEvent = typeof referralEvents.$inferSelect;
+
+export type InsertReferralReward = z.infer<typeof insertReferralRewardSchema>;
+export type ReferralReward = typeof referralRewards.$inferSelect;
+
+export type InsertPromoCode = z.infer<typeof insertPromoCodeSchema>;
+export type PromoCode = typeof promoCodes.$inferSelect;
+
+export type InsertPromoRedemption = z.infer<typeof insertPromoRedemptionSchema>;
+export type PromoRedemption = typeof promoRedemptions.$inferSelect;
+
+export type InsertReferralVisit = z.infer<typeof insertReferralVisitSchema>;
+export type ReferralVisit = typeof referralVisits.$inferSelect;
