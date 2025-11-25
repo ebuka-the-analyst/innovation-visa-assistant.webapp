@@ -426,7 +426,12 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
             throw new Error(checkoutData.error || "Checkout failed");
           }
 
-          if (checkoutData.url) {
+          // Handle free tier - skip checkout and redirect directly
+          if (checkoutData.skipCheckout && checkoutData.redirectUrl) {
+            clearAllFields();
+            localStorage.removeItem('autosave_questionnaire-step');
+            window.location.href = checkoutData.redirectUrl;
+          } else if (checkoutData.url) {
             clearAllFields();
             localStorage.removeItem('autosave_questionnaire-step');
             window.location.href = checkoutData.url;

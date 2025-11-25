@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import GenerationProgress from "@/components/GenerationProgress";
-import Chatbot from "@/components/Chatbot";
+import ChatBot from "@/components/ChatBot";
 
 export default function Generation() {
   const [planId, setPlanId] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export default function Generation() {
   return (
     <div>
       <GenerationProgress planId={planId} />
-      <Chatbot planId={planId} />
+      <ChatBot planId={planId} />
     </div>
   );
 }

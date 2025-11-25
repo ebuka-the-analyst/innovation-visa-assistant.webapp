@@ -39,6 +39,14 @@ export default function GenerationProgress({ planId }: { planId: string }) {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
+        const isFree = urlParams.get('free') === 'true';
+
+        // Handle free tier - skip payment verification
+        if (isFree) {
+          localStorage.setItem('trigger-onboarding-tour', 'true');
+          await apiRequest('POST', '/api/generate/start', { planId });
+          return;
+        }
 
         if (!sessionId) {
           setStatus('failed');

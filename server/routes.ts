@@ -24,9 +24,11 @@ const openai = new OpenAI({
 });
 
 const PRICING = {
-  basic: { amount: 1900, name: "Basic Plan" },
-  premium: { amount: 3900, name: "Premium Plan" },
-  enterprise: { amount: 7900, name: "Enterprise Plan" },
+  free: { amount: 0, name: "Free Plan" },
+  basic: { amount: 2900, name: "Basic Plan" },
+  premium: { amount: 4900, name: "Premium Plan" },
+  enterprise: { amount: 8900, name: "Enterprise Plan" },
+  ultimate: { amount: 12900, name: "Ultimate Plan" },
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -280,6 +282,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pricing = PRICING[businessPlan.tier as keyof typeof PRICING];
       if (!pricing) {
         return res.status(400).json({ error: "Invalid tier" });
+      }
+
+      // Handle free tier - skip checkout entirely
+      if (pricing.amount === 0 || businessPlan.tier === 'free') {
+        await storage.updateBusinessPlan(planId, { status: 'paid' });
+        return res.json({ 
+          skipCheckout: true, 
+          redirectUrl: `/generation?plan_id=${planId}&free=true` 
+        });
       }
 
       let finalAmount = pricing.amount;
