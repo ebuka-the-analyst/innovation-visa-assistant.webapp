@@ -92,6 +92,14 @@ export default function InnovationScore() {
     }
     return 'FinTech';
   });
+  const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+      if (hideIndicatorRef.current) clearTimeout(hideIndicatorRef.current);
+    };
+  }, []);
 
   const triggerAutoSave = useCallback((newFactors: InnovationFactors, newActiveTab: string, newSelectedSector: string) => {
     if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
@@ -105,7 +113,8 @@ export default function InnovationScore() {
       localStorage.setItem('innovation-score-state', JSON.stringify(state));
       setSavedDate(state.savedDate);
       setShowAutoSave(true);
-      setTimeout(() => setShowAutoSave(false), 2000);
+      if (hideIndicatorRef.current) clearTimeout(hideIndicatorRef.current);
+      hideIndicatorRef.current = setTimeout(() => setShowAutoSave(false), 2000);
     }, 500);
   }, []);
 

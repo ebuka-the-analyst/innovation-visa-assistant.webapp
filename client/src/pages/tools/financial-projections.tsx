@@ -44,6 +44,14 @@ export default function FinancialProjections() {
   const [savedDate, setSavedDate] = useState(() => localStorage.getItem('financialProjectionsDate') || "");
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
+  const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+      if (hideIndicatorRef.current) clearTimeout(hideIndicatorRef.current);
+    };
+  }, []);
 
   const triggerAutoSave = useCallback((newInitial: number, newMonthly: number, newRevenue: number) => {
     if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
@@ -57,7 +65,8 @@ export default function FinancialProjections() {
       localStorage.setItem('financialProjectionsDate', date);
       setSavedDate(date);
       setShowAutoSave(true);
-      setTimeout(() => setShowAutoSave(false), 2000);
+      if (hideIndicatorRef.current) clearTimeout(hideIndicatorRef.current);
+      hideIndicatorRef.current = setTimeout(() => setShowAutoSave(false), 2000);
     }, 500);
   }, []);
 
