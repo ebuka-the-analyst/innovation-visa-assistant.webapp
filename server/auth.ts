@@ -7,7 +7,7 @@ import connectPg from "connect-pg-simple";
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
 import { verifyTurnstileToken } from "./turnstile";
-import { generateVerificationToken, getTokenExpiry, sendVerificationEmail, sendPasswordResetEmail, getResetTokenExpiry } from "./email";
+import { generateVerificationToken, getTokenExpiry, sendVerificationEmail, sendPasswordResetEmail, getResetTokenExpiry, sendWelcomeEmail } from "./email";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -385,6 +385,14 @@ export async function setupAuth(app: Express) {
 
       // Verify the user
       await storage.verifyUserEmail(user.id);
+
+      // Send welcome email after successful verification
+      try {
+        await sendWelcomeEmail(user.email!, user.firstName || "there");
+      } catch (emailError) {
+        // Don't fail verification if welcome email fails
+        console.error("Failed to send welcome email:", emailError);
+      }
 
       res.json({ 
         success: true, 

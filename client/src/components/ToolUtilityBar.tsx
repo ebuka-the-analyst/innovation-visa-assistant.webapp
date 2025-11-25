@@ -114,10 +114,10 @@ export function ToolUtilityBar({
                   data-testid="button-export-report"
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Export Report
+                  Export PDF
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Download your results as a text file</TooltipContent>
+              <TooltipContent>Download your results as a professional PDF report</TooltipContent>
             </Tooltip>
           )}
 

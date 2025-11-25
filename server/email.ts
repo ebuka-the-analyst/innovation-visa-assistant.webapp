@@ -6,6 +6,17 @@ interface SendEmailParams {
   html: string;
 }
 
+function escapeHtml(text: string): string {
+  const htmlEscapeMap: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEscapeMap[char] || char);
+}
+
 export async function sendEmail({ to, subject, html }: SendEmailParams) {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   
@@ -81,11 +92,11 @@ export async function sendPasswordResetEmail(
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px;">🔐 Password Reset Request</h1>
+        <h1 style="color: white; margin: 0; font-size: 28px;">Password Reset Request</h1>
       </div>
       
       <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
-        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${firstName},</p>
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
         
         <p style="font-size: 16px; margin-bottom: 20px;">
           We received a request to reset your password for your UK Innovator Founder Visa Assistant account.
@@ -105,7 +116,7 @@ export async function sendPasswordResetEmail(
                     font-size: 18px; 
                     font-weight: bold;
                     display: inline-block;">
-            🔑 Reset Password
+            Reset Password
           </a>
         </div>
         
@@ -116,13 +127,13 @@ export async function sendPasswordResetEmail(
         
         <div style="background: #fff3cd; border-left: 4px solid #ffa536; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p style="margin: 0; font-size: 14px; color: #856404;">
-            ⏰ <strong>This link expires in 1 hour</strong>
+            <strong>This link expires in 1 hour</strong>
           </p>
         </div>
         
         <div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p style="margin: 0; font-size: 14px; color: #721c24;">
-            🛡️ <strong>Security Notice:</strong> If you didn't request a password reset, please ignore this email. Your password will remain unchanged.
+            <strong>Security Notice:</strong> If you did not request a password reset, please ignore this email. Your password will remain unchanged.
           </p>
         </div>
         
@@ -139,7 +150,7 @@ export async function sendPasswordResetEmail(
 
   return sendEmail({
     to: email,
-    subject: '🔐 Password Reset Request - UK Innovator Founder Visa Assistant',
+    subject: 'Password Reset Request - UK Innovator Founder Visa Assistant',
     html
   });
 }
@@ -166,11 +177,11 @@ export async function sendVerificationEmail(
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to UK Innovator Founder Visa Assistant! 🇬🇧</h1>
+        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to UK Innovator Founder Visa Assistant</h1>
       </div>
       
       <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
-        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${firstName},</p>
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
         
         <p style="font-size: 16px; margin-bottom: 20px;">
           Thank you for signing up! You're one step closer to your UK Innovator Founder Visa journey.
@@ -190,7 +201,7 @@ export async function sendVerificationEmail(
                     font-size: 18px; 
                     font-weight: bold;
                     display: inline-block;">
-            ✅ Verify Email Address
+            Verify Email Address
           </a>
         </div>
         
@@ -201,7 +212,7 @@ export async function sendVerificationEmail(
         
         <div style="background: #fff3cd; border-left: 4px solid #ffa536; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p style="margin: 0; font-size: 14px; color: #856404;">
-            ⏰ <strong>This link expires in 24 hours</strong>
+            <strong>This link expires in 24 hours</strong>
           </p>
         </div>
         
@@ -246,11 +257,11 @@ export async function sendPaymentReceiptEmail(
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px;">Payment Received! ✅</h1>
+        <h1 style="color: white; margin: 0; font-size: 28px;">Payment Received</h1>
       </div>
       
       <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
-        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${firstName},</p>
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
         
         <p style="font-size: 16px; margin-bottom: 20px;">
           Thank you for your payment! Your business plan generation is now in progress.
@@ -261,7 +272,7 @@ export async function sendPaymentReceiptEmail(
           <table style="width: 100%; font-size: 15px;">
             <tr>
               <td style="padding: 8px 0; color: #666;">Plan:</td>
-              <td style="padding: 8px 0; text-align: right; font-weight: bold;">${planName}</td>
+              <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(planName)}</td>
             </tr>
             <tr>
               <td style="padding: 8px 0; color: #666;">Amount Paid:</td>
@@ -269,7 +280,7 @@ export async function sendPaymentReceiptEmail(
             </tr>
             <tr>
               <td style="padding: 8px 0; color: #666;">Transaction ID:</td>
-              <td style="padding: 8px 0; text-align: right; font-family: monospace; font-size: 12px;">${sessionId}</td>
+              <td style="padding: 8px 0; text-align: right; font-family: monospace; font-size: 12px;">${escapeHtml(sessionId)}</td>
             </tr>
             <tr>
               <td style="padding: 8px 0; color: #666;">Date:</td>
@@ -311,7 +322,7 @@ export async function sendPaymentReceiptEmail(
       body: JSON.stringify({
         from: "UK Innovator Visa Assistant <billing@innovatorfoundervisaassistant.co.uk>",
         to: [email],
-        subject: '✅ Payment Receipt - UK Innovator Founder Visa Assistant',
+        subject: 'Payment Receipt - UK Innovator Founder Visa Assistant',
         html,
       }),
     });
@@ -329,6 +340,348 @@ export async function sendPaymentReceiptEmail(
     console.error("Email send error:", error);
     return { success: false, error: "Failed to send email" };
   }
+}
+
+// Welcome email sent after email verification
+export async function sendWelcomeEmail(
+  email: string,
+  firstName: string
+): Promise<{ success: boolean; error?: string }> {
+  const dashboardUrl = `${BASE_URL}/dashboard`;
+  const toolsUrl = `${BASE_URL}/tools-hub`;
+  const pricingUrl = `${BASE_URL}/pricing`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Your Visa Journey</h1>
+      </div>
+      
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          Congratulations! Your email is now verified and you have full access to the UK Innovator Founder Visa Assistant platform.
+        </p>
+        
+        <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <h3 style="margin: 0 0 10px 0; color: #2e7d32;">Here's what you can do now:</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #333;">
+            <li>Access 109 PhD-level visa preparation tools</li>
+            <li>Generate your comprehensive business plan</li>
+            <li>Practice endorser interviews with AI coaching</li>
+            <li>Track your visa readiness score</li>
+          </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${dashboardUrl}" 
+             style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); 
+                    color: white; 
+                    padding: 15px 40px; 
+                    text-decoration: none; 
+                    border-radius: 5px; 
+                    font-size: 18px; 
+                    font-weight: bold;
+                    display: inline-block;
+                    margin: 5px;">
+            Go to Dashboard
+          </a>
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${toolsUrl}" style="color: #11b6e9; margin: 0 15px;">Browse Tools</a>
+          <a href="${pricingUrl}" style="color: #11b6e9; margin: 0 15px;">View Plans</a>
+        </div>
+        
+        <div style="background: #fff3cd; border-left: 4px solid #ffa536; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p style="margin: 0; font-size: 14px; color: #856404;">
+            <strong>Pro Tip:</strong> Start with the Business Plan Generator to create your visa-compliant business plan. It is free to try!
+          </p>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          Your trusted partner in visa success<br>
+          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: 'Welcome to UK Innovator Founder Visa Assistant!',
+    html
+  });
+}
+
+// Plan completion notification
+export async function sendPlanCompletionEmail(
+  email: string,
+  firstName: string,
+  planName: string,
+  planId: string
+): Promise<{ success: boolean; error?: string }> {
+  const viewPlanUrl = `${BASE_URL}/dashboard?plan=${planId}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Your Business Plan is Ready</h1>
+      </div>
+      
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          Great news! Your business plan "<strong>${escapeHtml(planName)}</strong>" has been generated and is ready for review.
+        </p>
+        
+        <div style="background: #fff; border: 2px solid #4caf50; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin: 0 0 15px 0; color: #2e7d32;">What's included:</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #333;">
+            <li>Executive Summary optimized for endorsers</li>
+            <li>Innovation & Scalability analysis</li>
+            <li>Financial projections and funding strategy</li>
+            <li>Market research and competitor analysis</li>
+            <li>Team capabilities assessment</li>
+          </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${viewPlanUrl}" 
+             style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); 
+                    color: white; 
+                    padding: 15px 40px; 
+                    text-decoration: none; 
+                    border-radius: 5px; 
+                    font-size: 18px; 
+                    font-weight: bold;
+                    display: inline-block;">
+            View Your Plan
+          </a>
+        </div>
+        
+        <div style="background: #e3f2fd; border-left: 4px solid #11b6e9; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p style="margin: 0; font-size: 14px; color: #1565c0;">
+            <strong>Next Steps:</strong> Review your plan, make any refinements, then use our Pitch Practice Coach to prepare for your endorser interview.
+          </p>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: 'Your Business Plan is Ready - UK Innovator Founder Visa Assistant',
+    html
+  });
+}
+
+// Upgrade reminder email
+export async function sendUpgradeReminderEmail(
+  email: string,
+  firstName: string,
+  currentTier: string,
+  daysActive: number
+): Promise<{ success: boolean; error?: string }> {
+  const pricingUrl = `${BASE_URL}/pricing`;
+
+  const tierBenefits: Record<string, { name: string; tools: number; price: number }> = {
+    free: { name: 'Free', tools: 13, price: 0 },
+    basic: { name: 'Basic', tools: 20, price: 29 },
+    premium: { name: 'Premium', tools: 83, price: 49 },
+    enterprise: { name: 'Enterprise', tools: 109, price: 89 },
+  };
+
+  const currentPlan = tierBenefits[currentTier] || tierBenefits.free;
+  const recommendedPlan = currentTier === 'free' ? tierBenefits.premium : tierBenefits.enterprise;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Unlock More Tools</h1>
+      </div>
+      
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          You've been using the UK Innovator Founder Visa Assistant for ${daysActive} days now. 
+          We noticed you're on the <strong>${currentPlan.name}</strong> plan with access to ${currentPlan.tools} tools.
+        </p>
+        
+        <div style="background: #fff; border: 2px solid #ffa536; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin: 0 0 15px 0; color: #333;">Upgrade to ${recommendedPlan.name} and get:</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #333;">
+            <li><strong>${recommendedPlan.tools} PhD-level tools</strong> (${recommendedPlan.tools - currentPlan.tools} more!)</li>
+            <li>AI-powered pitch practice coaching</li>
+            <li>Advanced financial modeling tools</li>
+            <li>Innovation score calculator</li>
+            <li>Priority support</li>
+          </ul>
+          <p style="margin: 15px 0 0 0; font-size: 24px; font-weight: bold; color: #ffa536;">
+            Only £${recommendedPlan.price}/month
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${pricingUrl}" 
+             style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); 
+                    color: white; 
+                    padding: 15px 40px; 
+                    text-decoration: none; 
+                    border-radius: 5px; 
+                    font-size: 18px; 
+                    font-weight: bold;
+                    display: inline-block;">
+            Upgrade Now
+          </a>
+        </div>
+        
+        <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p style="margin: 0; font-size: 14px; color: #2e7d32;">
+            <strong>30-Day Money Back Guarantee:</strong> Not satisfied? Get a full refund, no questions asked.
+          </p>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: 'Unlock More Tools - Upgrade Your Plan Today!',
+    html
+  });
+}
+
+// Weekly progress email
+export async function sendWeeklyProgressEmail(
+  email: string,
+  firstName: string,
+  stats: {
+    toolsUsed: number;
+    plansCreated: number;
+    readinessScore: number;
+    nextSteps: string[];
+  }
+): Promise<{ success: boolean; error?: string }> {
+  const dashboardUrl = `${BASE_URL}/dashboard`;
+
+  const scoreColor = stats.readinessScore >= 70 ? '#4caf50' : 
+                    stats.readinessScore >= 40 ? '#ffa536' : '#f44336';
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Your Weekly Progress Report</h1>
+      </div>
+      
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          Here's a summary of your visa preparation progress this week:
+        </p>
+        
+        <div style="display: flex; justify-content: space-around; margin: 30px 0; text-align: center;">
+          <div style="flex: 1; padding: 15px;">
+            <div style="font-size: 36px; font-weight: bold; color: #11b6e9;">${stats.toolsUsed}</div>
+            <div style="font-size: 14px; color: #666;">Tools Used</div>
+          </div>
+          <div style="flex: 1; padding: 15px;">
+            <div style="font-size: 36px; font-weight: bold; color: #ffa536;">${stats.plansCreated}</div>
+            <div style="font-size: 14px; color: #666;">Plans Created</div>
+          </div>
+          <div style="flex: 1; padding: 15px;">
+            <div style="font-size: 36px; font-weight: bold; color: ${scoreColor};">${stats.readinessScore}%</div>
+            <div style="font-size: 14px; color: #666;">Readiness Score</div>
+          </div>
+        </div>
+        
+        ${stats.nextSteps.length > 0 ? `
+        <div style="background: #fff; border: 2px solid #11b6e9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin: 0 0 15px 0; color: #1565c0;">Recommended Next Steps:</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #333;">
+            ${stats.nextSteps.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+          </ul>
+        </div>
+        ` : ''}
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${dashboardUrl}" 
+             style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); 
+                    color: white; 
+                    padding: 15px 40px; 
+                    text-decoration: none; 
+                    border-radius: 5px; 
+                    font-size: 18px; 
+                    font-weight: bold;
+                    display: inline-block;">
+            Continue Your Journey
+          </a>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: 'Your Weekly Visa Prep Progress Report',
+    html
+  });
 }
 
 export function generateVerificationEmail(code: string, displayName: string): string {
@@ -361,7 +714,7 @@ export function generateVerificationEmail(code: string, displayName: string): st
           <tr>
             <td style="padding: 48px 40px;">
               <h2 style="margin: 0 0 16px 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">
-                Welcome, ${displayName}!
+                Welcome, ${escapeHtml(displayName)}!
               </h2>
               <p style="margin: 0 0 32px 0; color: #4a5568; font-size: 16px; line-height: 1.6;">
                 Thank you for signing up. Please verify your email address by entering this verification code:
@@ -387,7 +740,7 @@ export function generateVerificationEmail(code: string, displayName: string): st
               <!-- Security Notice -->
               <div style="margin-top: 32px; padding: 16px; background-color: #f7fafc; border-left: 4px solid #ffa536; border-radius: 4px;">
                 <p style="margin: 0; color: #2d3748; font-size: 14px; line-height: 1.5;">
-                  <strong>🔒 Security Tip:</strong> Never share this code with anyone. Innovator Visa AI Assistant will never ask for your verification code via email or phone.
+                  <strong>Security Tip:</strong> Never share this code with anyone. Innovator Visa AI Assistant will never ask for your verification code via email or phone.
                 </p>
               </div>
             </td>
