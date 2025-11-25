@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, AlertTriangle, TrendingUp, Calendar, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePdfExport } from "@/hooks/usePdfExport";
+import { useWordExport } from "@/hooks/useWordExport";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer
@@ -43,6 +44,7 @@ type MilestoneData = {
 export default function BusinessPlan() {
   const { toast } = useToast();
   const { generatePdf } = usePdfExport();
+  const { generateWord } = useWordExport();
   const [showAutoSaveNotification, setShowAutoSaveNotification] = useState(false);
   const lastSaveRef = useRef<string>('');
   
@@ -296,16 +298,16 @@ export default function BusinessPlan() {
     return plan;
   };
 
-  const handleExport = () => {
+  const getExportSections = () => {
     const businessName = sections.find(s => s.id === 'executive-summary')?.fields.find(f => f.id === 'business-name')?.value || 'Business Plan';
     
-    generatePdf({
+    return {
       title: 'UK Innovator Founder Visa Business Plan',
       subtitle: businessName,
       filename: `business-plan-${new Date().toISOString().split('T')[0]}`,
       sections: [
-        { type: 'score', score: { value: overallCompletion, max: 100, label: 'Overall Completion' } },
-        { type: 'divider' },
+        { type: 'score' as const, score: { value: overallCompletion, max: 100, label: 'Overall Completion' } },
+        { type: 'divider' as const },
         
         ...sections.flatMap(section => [
           { type: 'heading' as const, content: section.title, level: 1 as const },
@@ -317,23 +319,23 @@ export default function BusinessPlan() {
           { type: 'divider' as const },
         ]),
         
-        { type: 'heading', content: 'Milestones & Timeline', level: 1 },
-        { type: 'list', items: milestones.map(m => `${m.month}: ${m.milestone} [${m.status.toUpperCase()}]`) },
-        { type: 'divider' },
+        { type: 'heading' as const, content: 'Milestones & Timeline', level: 1 as const },
+        { type: 'list' as const, items: milestones.map(m => `${m.month}: ${m.milestone} [${m.status.toUpperCase()}]`) },
+        { type: 'divider' as const },
         
-        { type: 'heading', content: 'Smart Recommendations', level: 1 },
-        { type: 'list', items: getSmartTips() },
-        { type: 'divider' },
+        { type: 'heading' as const, content: 'Smart Recommendations', level: 1 as const },
+        { type: 'list' as const, items: getSmartTips() },
+        { type: 'divider' as const },
         
-        { type: 'heading', content: '4-Week Action Plan', level: 1 },
-        { type: 'table', tableData: {
+        { type: 'heading' as const, content: '4-Week Action Plan', level: 1 as const },
+        { type: 'table' as const, tableData: {
           headers: ['Week', 'Action', 'Priority'],
           rows: generateActionPlan().map(item => [item.week, item.action, item.priority])
         }},
-        { type: 'divider' },
+        { type: 'divider' as const },
         
-        { type: 'heading', content: 'GOV.UK Compliance Checklist', level: 1 },
-        { type: 'list', items: [
+        { type: 'heading' as const, content: 'GOV.UK Compliance Checklist', level: 1 as const },
+        { type: 'list' as const, items: [
           'Business concept demonstrates genuine innovation',
           'Minimum £50,000 investment secured and documented',
           'Clear scalability plan for UK market',
@@ -345,10 +347,10 @@ export default function BusinessPlan() {
           'Professional presentation with no errors',
           'Reviewed by immigration legal expert',
         ]},
-        { type: 'divider' },
+        { type: 'divider' as const },
         
-        { type: 'heading', content: 'Next Steps', level: 1 },
-        { type: 'list', items: [
+        { type: 'heading' as const, content: 'Next Steps', level: 1 as const },
+        { type: 'list' as const, items: [
           'Complete all sections to 100%',
           'Gather supporting documentation',
           'Have plan professionally reviewed',
@@ -356,18 +358,33 @@ export default function BusinessPlan() {
           'Prepare for interview/additional questions',
         ]},
         
-        { type: 'paragraph', content: 'DISCLAIMER: This business plan template is for guidance only. Consult with qualified legal and immigration advisors before submitting visa applications.' },
+        { type: 'paragraph' as const, content: 'DISCLAIMER: This business plan template is for guidance only. Consult with qualified legal and immigration advisors before submitting visa applications.' },
       ],
       metadata: {
         subject: 'UK Innovator Founder Visa Business Plan',
         author: 'UK Innovator Founder Visa Assistant',
         keywords: ['visa', 'business plan', 'UK', 'innovator', 'founder'],
       }
-    });
+    };
+  };
+
+  const handleExportPdf = () => {
+    const exportData = getExportSections();
+    generatePdf(exportData);
     
     toast({
       title: "PDF Exported Successfully",
       description: "Your business plan has been downloaded as a PDF.",
+    });
+  };
+
+  const handleExportWord = async () => {
+    const exportData = getExportSections();
+    await generateWord(exportData);
+    
+    toast({
+      title: "Word Document Exported Successfully",
+      description: "Your business plan has been downloaded as a Word document (.docx).",
     });
   };
 
@@ -425,7 +442,8 @@ export default function BusinessPlan() {
             toolId="business-plan"
             onSave={handleSave}
             onRestore={handleRestore}
-            onExport={handleExport}
+            onExportPdf={handleExportPdf}
+            onExportWord={handleExportWord}
             onSmartTips={() => setActiveTab('tips')}
             onActionPlan={() => setActiveTab('action')}
             getSerializedState={getSerializedState}

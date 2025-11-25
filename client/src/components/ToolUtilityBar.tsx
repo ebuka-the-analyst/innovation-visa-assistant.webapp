@@ -1,11 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Smartphone, Share2, Save, Lightbulb, Calendar, Download, RotateCcw } from "lucide-react";
+import { Smartphone, Share2, Save, Lightbulb, Calendar, Download, RotateCcw, FileText, FileType } from "lucide-react";
 import { useState } from "react";
 import { SessionHandoffDialog } from "./SessionHandoffDialog";
 import { ShareSheet } from "./ShareSheet";
 import { useSessionHandoff } from "@/hooks/useSessionHandoff";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ToolUtilityBarProps {
   toolId: string;
@@ -14,6 +20,8 @@ interface ToolUtilityBarProps {
   onSmartTips?: () => void;
   onActionPlan?: () => void;
   onExport?: () => void;
+  onExportPdf?: () => void;
+  onExportWord?: () => void;
   onRestore?: () => void;
   getSerializedState?: () => any;
   onGenerateShareableLink?: () => Promise<string>;
@@ -26,6 +34,8 @@ export function ToolUtilityBar({
   onSmartTips,
   onActionPlan,
   onExport,
+  onExportPdf,
+  onExportWord,
   onRestore,
   getSerializedState,
   onGenerateShareableLink,
@@ -104,21 +114,44 @@ export function ToolUtilityBar({
             </Tooltip>
           )}
 
-          {onExport && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={onExport}
-                  data-testid="button-export-report"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export PDF
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Download your results as a professional PDF report</TooltipContent>
-            </Tooltip>
+          {(onExport || onExportPdf || onExportWord) && (
+            <DropdownMenu>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      data-testid="button-export-report"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Export
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Download your results as PDF or Word document</TooltipContent>
+              </Tooltip>
+              <DropdownMenuContent align="start">
+                {(onExportPdf || onExport) && (
+                  <DropdownMenuItem 
+                    onClick={onExportPdf || onExport}
+                    data-testid="button-export-pdf"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export as PDF
+                  </DropdownMenuItem>
+                )}
+                {onExportWord && (
+                  <DropdownMenuItem 
+                    onClick={onExportWord}
+                    data-testid="button-export-word"
+                  >
+                    <FileType className="h-4 w-4 mr-2" />
+                    Export as Word (.docx)
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
 
           {onRestore && (
