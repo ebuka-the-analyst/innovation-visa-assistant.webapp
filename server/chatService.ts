@@ -40,6 +40,9 @@ export async function chatWithMultipleLLMs(
   
   // 1. Try OpenAI (GPT-4o via Replit AI Integrations)
   try {
+    console.log("[ChatService] Attempting OpenAI call with base URL:", process.env.AI_INTEGRATIONS_OPENAI_BASE_URL);
+    console.log("[ChatService] API key present:", !!process.env.AI_INTEGRATIONS_OPENAI_API_KEY || !!process.env.OPENAI_API_KEY);
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -61,12 +64,14 @@ export async function chatWithMultipleLLMs(
     });
 
     const content = response.choices[0]?.message?.content || "";
+    console.log("[ChatService] OpenAI response received successfully");
     return {
       response: addDisclaimerIfNeeded(content),
       provider: "GPT-4o",
     };
-  } catch (error) {
-    console.warn("OpenAI API failed, trying Gemini...", error);
+  } catch (error: any) {
+    console.error("[ChatService] OpenAI API failed:", error?.message || error);
+    console.error("[ChatService] Full error:", JSON.stringify(error, null, 2));
   }
 
   // 2. Try Gemini via REST API
