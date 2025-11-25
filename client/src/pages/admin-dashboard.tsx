@@ -86,7 +86,10 @@ import {
   UserX,
   Mail,
   DollarSign,
-  ArrowRight
+  ArrowRight,
+  CreditCard,
+  ScrollText,
+  LockKeyhole
 } from "lucide-react";
 import {
   BarChart as RechartsBarChart,
@@ -2723,6 +2726,489 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </motion.div>
+                  </div>
+                )}
+
+                {/* Revenue & Subscriptions Section */}
+                {activeSection.startsWith('revenue') && (
+                  <div className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="space-y-6"
+                    >
+                      {/* Revenue KPIs */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Revenue</CardTitle>
+                            <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
+                              <DollarSign className="h-4 w-4" />
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold">£4,890</div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="default" className="bg-green-500/10 text-green-500">+23%</Badge>
+                              <span className="text-xs text-muted-foreground">vs. last month</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">MRR</CardTitle>
+                            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                              <TrendingUp className="h-4 w-4" />
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold">£3,250</div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="default" className="bg-green-500/10 text-green-500">+15%</Badge>
+                              <span className="text-xs text-muted-foreground">recurring</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Active Subscriptions</CardTitle>
+                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                              <CreditCard className="h-4 w-4" />
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold">87</div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="default" className="bg-green-500/10 text-green-500">+8</Badge>
+                              <span className="text-xs text-muted-foreground">this month</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Avg. LTV</CardTitle>
+                            <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
+                              <LineChart className="h-4 w-4" />
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold">£156</div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="default" className="bg-green-500/10 text-green-500">+12%</Badge>
+                              <span className="text-xs text-muted-foreground">per customer</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      {/* Tier Distribution */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Subscription Tier Distribution</CardTitle>
+                            <CardDescription>Current subscriber breakdown by tier</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <ResponsiveContainer width="100%" height={300}>
+                              <RechartsPieChart>
+                                <Pie
+                                  data={[
+                                    { name: 'Free', value: 245, fill: 'hsl(var(--muted))' },
+                                    { name: 'Basic (£29)', value: 42, fill: 'hsl(var(--chart-1))' },
+                                    { name: 'Premium (£49)', value: 28, fill: 'hsl(var(--chart-2))' },
+                                    { name: 'Enterprise (£89)', value: 12, fill: 'hsl(var(--chart-3))' },
+                                    { name: 'Ultimate (£129)', value: 5, fill: 'hsl(var(--chart-4))' },
+                                  ]}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={60}
+                                  outerRadius={100}
+                                  paddingAngle={5}
+                                  dataKey="value"
+                                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                >
+                                </Pie>
+                                <RechartsTooltip />
+                              </RechartsPieChart>
+                            </ResponsiveContainer>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Revenue by Tier</CardTitle>
+                            <CardDescription>Monthly revenue contribution</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              {[
+                                { tier: 'Free', users: 245, revenue: 0, color: 'bg-muted' },
+                                { tier: 'Basic', users: 42, revenue: 1218, color: 'bg-chart-1' },
+                                { tier: 'Premium', users: 28, revenue: 1372, color: 'bg-chart-2' },
+                                { tier: 'Enterprise', users: 12, revenue: 1068, color: 'bg-chart-3' },
+                                { tier: 'Ultimate', users: 5, revenue: 645, color: 'bg-chart-4' },
+                              ].map((item) => (
+                                <div key={item.tier} className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`h-3 w-3 rounded-full ${item.color}`} />
+                                    <span className="font-medium">{item.tier}</span>
+                                    <Badge variant="secondary">{item.users} users</Badge>
+                                  </div>
+                                  <span className="font-bold">£{item.revenue.toLocaleString()}/mo</span>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
+
+                {/* Logs & Audit Section */}
+                {activeSection.startsWith('logs') && (
+                  <div className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="space-y-6"
+                    >
+                      {/* Log Stats */}
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Total Events</CardTitle>
+                            <ScrollText className="h-4 w-4 text-primary" />
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold">12,847</div>
+                            <p className="text-xs text-muted-foreground">Last 24 hours</p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Errors</CardTitle>
+                            <AlertTriangle className="h-4 w-4 text-red-500" />
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold text-red-500">23</div>
+                            <p className="text-xs text-muted-foreground">Needs attention</p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Warnings</CardTitle>
+                            <AlertCircle className="h-4 w-4 text-orange-500" />
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold text-orange-500">156</div>
+                            <p className="text-xs text-muted-foreground">Review recommended</p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Security Events</CardTitle>
+                            <Shield className="h-4 w-4 text-green-500" />
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold text-green-500">0</div>
+                            <p className="text-xs text-muted-foreground">No threats detected</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      {/* Activity Log */}
+                      <Card>
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <CardTitle>Recent Activity Log</CardTitle>
+                              <CardDescription>System events and user actions</CardDescription>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              <Download className="h-4 w-4 mr-2" />
+                              Export Logs
+                            </Button>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          {activityLogLoading ? (
+                            <div className="space-y-3">
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <ShimmerSkeleton key={i} />
+                              ))}
+                            </div>
+                          ) : activityLog && activityLog.length > 0 ? (
+                            <ScrollArea className="h-[400px]">
+                              <div className="space-y-3">
+                                {activityLog.map((entry, index) => (
+                                  <div key={index} className="flex items-start gap-4 p-3 rounded-lg border border-border/50 hover-elevate">
+                                    <div className={`p-2 rounded-lg ${
+                                      entry.severity === 'error' ? 'bg-red-500/10 text-red-500' :
+                                      entry.severity === 'warning' ? 'bg-orange-500/10 text-orange-500' :
+                                      'bg-primary/10 text-primary'
+                                    }`}>
+                                      {entry.severity === 'error' ? <AlertTriangle className="h-4 w-4" /> :
+                                       entry.severity === 'warning' ? <AlertCircle className="h-4 w-4" /> :
+                                       <Activity className="h-4 w-4" />}
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="flex items-center justify-between">
+                                        <span className="font-medium">{entry.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                                        <span className="text-xs text-muted-foreground">
+                                          {formatDistance(new Date(entry.timestamp), new Date(), { addSuffix: true })}
+                                        </span>
+                                      </div>
+                                      <p className="text-sm text-muted-foreground mt-1">{entry.message}</p>
+                                      {entry.userName && (
+                                        <Badge variant="secondary" className="mt-2">{entry.userName}</Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </ScrollArea>
+                          ) : (
+                            <div className="py-12 text-center">
+                              <ScrollText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                              <p className="text-muted-foreground">No activity logs available</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </div>
+                )}
+
+                {/* Communications Section */}
+                {activeSection.startsWith('comms') && (
+                  <div className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="space-y-6"
+                    >
+                      {/* Email Stats */}
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Emails Sent</CardTitle>
+                            <Mail className="h-4 w-4 text-primary" />
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold">1,247</div>
+                            <p className="text-xs text-muted-foreground">Last 30 days</p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Delivery Rate</CardTitle>
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold text-green-500">98.5%</div>
+                            <p className="text-xs text-muted-foreground">Excellent</p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Open Rate</CardTitle>
+                            <Eye className="h-4 w-4 text-blue-500" />
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold text-blue-500">42.3%</div>
+                            <p className="text-xs text-muted-foreground">Above average</p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="hover-elevate">
+                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Bounce Rate</CardTitle>
+                            <AlertCircle className="h-4 w-4 text-orange-500" />
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold text-orange-500">1.5%</div>
+                            <p className="text-xs text-muted-foreground">Healthy</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      {/* Email Types */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Email Type Distribution</CardTitle>
+                          <CardDescription>Breakdown by email category</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            {[
+                              { type: 'Verification Emails', count: 456, percent: 36.6 },
+                              { type: 'Password Reset', count: 89, percent: 7.1 },
+                              { type: 'Welcome Emails', count: 234, percent: 18.8 },
+                              { type: 'Plan Notifications', count: 312, percent: 25.0 },
+                              { type: 'Marketing', count: 156, percent: 12.5 },
+                            ].map((item) => (
+                              <div key={item.type} className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium">{item.type}</span>
+                                  <span className="text-sm text-muted-foreground">{item.count} sent</span>
+                                </div>
+                                <Progress value={item.percent} className="h-2" />
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </div>
+                )}
+
+                {/* Settings Section */}
+                {activeSection.startsWith('settings') && (
+                  <div className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="space-y-6"
+                    >
+                      {/* General Settings */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Settings className="h-5 w-5" />
+                            General Settings
+                          </CardTitle>
+                          <CardDescription>Configure platform-wide settings</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <Label>Maintenance Mode</Label>
+                              <p className="text-sm text-muted-foreground">Temporarily disable access for non-admins</p>
+                            </div>
+                            <Switch />
+                          </div>
+                          <Separator />
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <Label>New User Registration</Label>
+                              <p className="text-sm text-muted-foreground">Allow new users to sign up</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <Separator />
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <Label>Email Notifications</Label>
+                              <p className="text-sm text-muted-foreground">Send email notifications for system events</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <Separator />
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <Label>Auto-refresh Dashboard</Label>
+                              <p className="text-sm text-muted-foreground">Automatically refresh data every 30 seconds</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Access Control */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <LockKeyhole className="h-5 w-5" />
+                            Access Control
+                          </CardTitle>
+                          <CardDescription>Manage admin access and permissions</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
+                              <div className="flex items-center gap-4">
+                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                  <Shield className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">Super Admin Access</p>
+                                  <p className="text-sm text-muted-foreground">Full system access</p>
+                                </div>
+                              </div>
+                              <Badge>Active</Badge>
+                            </div>
+                            <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
+                              <div className="flex items-center gap-4">
+                                <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                  <Users className="h-5 w-5 text-blue-500" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">User Management</p>
+                                  <p className="text-sm text-muted-foreground">Create, edit, delete users</p>
+                                </div>
+                              </div>
+                              <Badge variant="secondary">Enabled</Badge>
+                            </div>
+                            <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
+                              <div className="flex items-center gap-4">
+                                <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                                  <FileText className="h-5 w-5 text-green-500" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">Plan Management</p>
+                                  <p className="text-sm text-muted-foreground">View and manage business plans</p>
+                                </div>
+                              </div>
+                              <Badge variant="secondary">Enabled</Badge>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* System Info */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Server className="h-5 w-5" />
+                            System Information
+                          </CardTitle>
+                          <CardDescription>Platform version and environment details</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 rounded-lg bg-card/50 border border-border/50">
+                              <p className="text-sm text-muted-foreground">Version</p>
+                              <p className="text-lg font-bold">v2.0.0</p>
+                            </div>
+                            <div className="p-4 rounded-lg bg-card/50 border border-border/50">
+                              <p className="text-sm text-muted-foreground">Environment</p>
+                              <p className="text-lg font-bold">Production</p>
+                            </div>
+                            <div className="p-4 rounded-lg bg-card/50 border border-border/50">
+                              <p className="text-sm text-muted-foreground">Node.js</p>
+                              <p className="text-lg font-bold">v20.x</p>
+                            </div>
+                            <div className="p-4 rounded-lg bg-card/50 border border-border/50">
+                              <p className="text-sm text-muted-foreground">Database</p>
+                              <p className="text-lg font-bold">PostgreSQL</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   </div>
                 )}
 
