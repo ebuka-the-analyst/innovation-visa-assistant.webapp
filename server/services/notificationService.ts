@@ -176,20 +176,106 @@ function generateEmailHtml(type: string, title: string, content: string): string
 </html>`;
 }
 
-export async function scheduleWeeklyDigest(userId: string) {
+export async function scheduleDigest(userId: string) {
+  const prefs = await getNotificationPreferences(userId);
+  
+  if (!prefs?.weeklyDigest) {
+    return null;
+  }
+  
+  const preferredTime = prefs?.preferredTime || '09:00';
+  const digestFrequency = prefs?.digestFrequency || 'weekly';
+  const [hours, minutes] = preferredTime.split(':').map(Number);
+  
   const now = new Date();
-  const nextMonday = new Date(now);
-  nextMonday.setDate(now.getDate() + (8 - now.getDay()) % 7);
-  nextMonday.setHours(9, 0, 0, 0);
+  let scheduledFor = new Date(now);
+  
+  if (digestFrequency === 'daily') {
+    scheduledFor.setDate(now.getDate() + 1);
+    scheduledFor.setHours(hours, minutes, 0, 0);
+  } else if (digestFrequency === 'monthly') {
+    scheduledFor.setMonth(now.getMonth() + 1);
+    scheduledFor.setDate(1);
+    scheduledFor.setHours(hours, minutes, 0, 0);
+  } else {
+    const daysUntilMonday = (8 - now.getDay()) % 7 || 7;
+    scheduledFor.setDate(now.getDate() + daysUntilMonday);
+    scheduledFor.setHours(hours, minutes, 0, 0);
+  }
 
   return scheduleNotification({
     userId,
     type: 'weekly_digest',
-    title: 'Your Weekly Visa Journey Progress',
-    content: 'Your personalized weekly digest is ready! Check your progress and upcoming tasks.',
-    scheduledFor: nextMonday,
-    metadata: { digestType: 'weekly' }
+    title: 'Your Visa Journey Progress Update',
+    content: `Your personalized ${digestFrequency} digest is ready! Check your progress and upcoming tasks.`,
+    scheduledFor,
+    metadata: { digestType: digestFrequency, preferredTime }
   });
+}
+
+export async function scheduleWeeklyDigest(userId: string) {
+  return scheduleDigest(userId);
+}
+
+export async function generateWeeklyDigestContent(userId: string): Promise<string> {
+  const [user] = await db.select().from(users).where(eq(users.id, userId));
+  if (!user) return '';
+  
+  const firstName = user.firstName || 'there';
+  const tier = user.subscriptionTier || 'free';
+  
+  const tierLabels: Record<string, string> = {
+    'free': 'Free',
+    'basic': 'Basic',
+    'premium': 'Premium',
+    'enterprise': 'Enterprise',
+    'ultimate': 'Ultimate'
+  };
+
+  const progressTips = [
+    "Have you completed your Innovation Score assessment? It's crucial for understanding your visa readiness.",
+    "Consider using the Business Plan Generator to structure your application narrative.",
+    "The Pitch Practice Coach can help you prepare for endorser interviews.",
+    "Financial projections are key - use our Financial Modelling tools to demonstrate viability.",
+    "Don't forget to review compliance requirements with our Compliance Checker."
+  ];
+  
+  const randomTip = progressTips[Math.floor(Math.random() * progressTips.length)];
+
+  return `
+    <div style="margin-bottom: 20px;">
+      <h2 style="color: #333; margin-bottom: 10px;">Hello ${firstName}!</h2>
+      <p style="color: #666;">Here's your weekly progress summary for your Innovator Founder Visa journey.</p>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <h3 style="color: white; margin: 0 0 10px 0;">Your Current Tier: ${tierLabels[tier]}</h3>
+      <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 14px;">
+        ${tier === 'free' ? 'Upgrade to unlock 100+ professional tools!' : 'You have access to premium visa preparation tools.'}
+      </p>
+    </div>
+
+    <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffa536;">
+      <h3 style="color: #333; margin: 0 0 10px 0;">💡 Weekly Tip</h3>
+      <p style="color: #666; margin: 0;">${randomTip}</p>
+    </div>
+
+    <div style="background: #fff; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <h3 style="color: #333; margin: 0 0 15px 0;">📋 Recommended Next Steps</h3>
+      <ul style="color: #666; margin: 0; padding-left: 20px;">
+        <li style="margin-bottom: 8px;">Complete your Innovation Score Assessment</li>
+        <li style="margin-bottom: 8px;">Review the 3 Endorsement Criteria</li>
+        <li style="margin-bottom: 8px;">Practice with the AI Interview Coach</li>
+        <li style="margin-bottom: 8px;">Generate your personalized Business Plan</li>
+      </ul>
+    </div>
+
+    <div style="text-align: center; padding: 15px; background: #f0f9ff; border-radius: 8px;">
+      <p style="color: #0369a1; margin: 0; font-weight: 500;">
+        🎯 Stay focused on your visa goal - we're here to help every step of the way!
+      </p>
+    </div>
+  `;
 }
 
 export async function scheduleDeadlineReminder(userId: string, deadline: Date, description: string) {

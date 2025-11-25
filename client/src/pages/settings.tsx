@@ -8,23 +8,32 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { 
   User as UserIcon, Bell, Shield, Palette, Trash2, Download, 
   CheckCircle2, AlertTriangle, Moon, Sun, Monitor,
-  Mail, Key, LogOut, Save
+  Mail, Key, LogOut, Save, Clock, Calendar, Zap, Trophy, Target, Newspaper
 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
+interface NotificationPreferences {
+  weeklyDigest: boolean;
+  deadlineReminders: boolean;
+  breakingNewsAlerts: boolean;
+  toolCompletionCelebrations: boolean;
+  progressMilestones: boolean;
+  digestFrequency: 'daily' | 'weekly' | 'monthly';
+  preferredTime: string;
+}
+
 export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [marketingEmails, setMarketingEmails] = useState(false);
-  const [progressReminders, setProgressReminders] = useState(true);
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
   const [autoSave, setAutoSave] = useState(true);
   
@@ -32,6 +41,30 @@ export default function Settings() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  // Fetch notification preferences from API
+  const { data: notifPrefs, isLoading: notifLoading } = useQuery<NotificationPreferences>({
+    queryKey: ['/api/notifications/preferences'],
+    enabled: !!user,
+  });
+
+  // Update notification preferences mutation
+  const updateNotifMutation = useMutation({
+    mutationFn: async (updates: Partial<NotificationPreferences>) => {
+      await apiRequest('PUT', '/api/notifications/preferences', updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/preferences'] });
+      toast({ title: "Notification preferences updated" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update preferences", variant: "destructive" });
+    }
+  });
+
+  const handleNotifChange = (key: keyof NotificationPreferences, value: boolean | string) => {
+    updateNotifMutation.mutate({ [key]: value });
+  };
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
@@ -382,56 +415,206 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Bell className="w-5 h-5" />
-                  Email Notifications
+                  Smart Email Notifications
                 </CardTitle>
-                <CardDescription>Choose what emails you receive</CardDescription>
+                <CardDescription>
+                  Customize your notification preferences for a personalized visa journey
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Progress Updates</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Get reminders about your visa application progress
-                    </p>
+                {notifLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className="h-16 bg-muted rounded-lg animate-pulse" />
+                    ))}
                   </div>
-                  <Switch
-                    checked={progressReminders}
-                    onCheckedChange={setProgressReminders}
-                    data-testid="switch-progress-notifications"
-                  />
+                ) : (
+                  <>
+                    {/* Weekly Digest */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Calendar className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <Label className="flex items-center gap-2">
+                            Weekly Progress Digest
+                            <Badge variant="secondary" className="text-xs">Popular</Badge>
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Summary of your visa journey progress, completed tools, and next steps
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notifPrefs?.weeklyDigest ?? true}
+                        onCheckedChange={(v) => handleNotifChange('weeklyDigest', v)}
+                        disabled={updateNotifMutation.isPending}
+                        data-testid="switch-weekly-digest"
+                      />
+                    </div>
+                    
+                    <Separator />
+                    
+                    {/* Deadline Reminders */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-destructive/10">
+                          <Clock className="w-4 h-4 text-destructive" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <Label className="flex items-center gap-2">
+                            Deadline Reminders
+                            <Badge variant="outline" className="text-xs border-destructive/50 text-destructive">Important</Badge>
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Get notified 7 days before important visa deadlines
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notifPrefs?.deadlineReminders ?? true}
+                        onCheckedChange={(v) => handleNotifChange('deadlineReminders', v)}
+                        disabled={updateNotifMutation.isPending}
+                        data-testid="switch-deadline-reminders"
+                      />
+                    </div>
+                    
+                    <Separator />
+                    
+                    {/* Breaking News Alerts */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-blue-500/10">
+                          <Newspaper className="w-4 h-4 text-blue-500" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <Label>Breaking News Alerts</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Urgent updates about UK visa policy changes from gov.uk
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notifPrefs?.breakingNewsAlerts ?? true}
+                        onCheckedChange={(v) => handleNotifChange('breakingNewsAlerts', v)}
+                        disabled={updateNotifMutation.isPending}
+                        data-testid="switch-breaking-news"
+                      />
+                    </div>
+                    
+                    <Separator />
+                    
+                    {/* Tool Completion Celebrations */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-green-500/10">
+                          <Zap className="w-4 h-4 text-green-500" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <Label>Tool Completion Celebrations</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Celebrate when you complete tools with encouragement emails
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notifPrefs?.toolCompletionCelebrations ?? true}
+                        onCheckedChange={(v) => handleNotifChange('toolCompletionCelebrations', v)}
+                        disabled={updateNotifMutation.isPending}
+                        data-testid="switch-tool-completion"
+                      />
+                    </div>
+                    
+                    <Separator />
+                    
+                    {/* Progress Milestones */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-amber-500/10">
+                          <Trophy className="w-4 h-4 text-amber-500" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <Label>Progress Milestones & Achievements</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Get notified when you unlock achievements and reach milestones
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notifPrefs?.progressMilestones ?? true}
+                        onCheckedChange={(v) => handleNotifChange('progressMilestones', v)}
+                        disabled={updateNotifMutation.isPending}
+                        data-testid="switch-milestones"
+                      />
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Digest Schedule Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Digest Schedule
+                </CardTitle>
+                <CardDescription>
+                  Choose when you want to receive your progress digests
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Frequency</Label>
+                    <Select
+                      value={notifPrefs?.digestFrequency || 'weekly'}
+                      onValueChange={(v) => handleNotifChange('digestFrequency', v)}
+                      disabled={updateNotifMutation.isPending || !notifPrefs?.weeklyDigest}
+                    >
+                      <SelectTrigger data-testid="select-digest-frequency">
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly (Recommended)</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Preferred Time</Label>
+                    <Select
+                      value={notifPrefs?.preferredTime || '09:00'}
+                      onValueChange={(v) => handleNotifChange('preferredTime', v)}
+                      disabled={updateNotifMutation.isPending || !notifPrefs?.weeklyDigest}
+                    >
+                      <SelectTrigger data-testid="select-preferred-time">
+                        <SelectValue placeholder="Select time" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="07:00">7:00 AM</SelectItem>
+                        <SelectItem value="08:00">8:00 AM</SelectItem>
+                        <SelectItem value="09:00">9:00 AM (Recommended)</SelectItem>
+                        <SelectItem value="10:00">10:00 AM</SelectItem>
+                        <SelectItem value="12:00">12:00 PM</SelectItem>
+                        <SelectItem value="18:00">6:00 PM</SelectItem>
+                        <SelectItem value="20:00">8:00 PM</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 
-                <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Important Alerts</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Deadline reminders and critical updates
-                    </p>
-                  </div>
-                  <Switch
-                    checked={emailNotifications}
-                    onCheckedChange={setEmailNotifications}
-                    data-testid="switch-email-notifications"
-                  />
-                </div>
-                
-                <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Marketing & Tips</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receive tips, new features, and promotional offers
-                    </p>
-                  </div>
-                  <Switch
-                    checked={marketingEmails}
-                    onCheckedChange={setMarketingEmails}
-                    data-testid="switch-marketing-emails"
-                  />
-                </div>
+                {!notifPrefs?.weeklyDigest && (
+                  <Alert>
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      Enable Weekly Progress Digest above to customize your schedule
+                    </AlertDescription>
+                  </Alert>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

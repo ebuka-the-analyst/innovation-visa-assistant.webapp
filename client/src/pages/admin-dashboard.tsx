@@ -1542,12 +1542,12 @@ export default function AdminDashboard() {
                                 <span className="text-sm text-muted-foreground">Health Score:</span>
                                 <Badge
                                   variant={
-                                    overviewData.systemMetrics.healthScore >= 90 ? "default" :
-                                    overviewData.systemMetrics.healthScore >= 70 ? "secondary" : "destructive"
+                                    (overviewData.systemMetrics?.healthScore ?? 0) >= 90 ? "default" :
+                                    (overviewData.systemMetrics?.healthScore ?? 0) >= 70 ? "secondary" : "destructive"
                                   }
                                   className="text-lg font-bold"
                                 >
-                                  {overviewData.systemMetrics.healthScore}/100
+                                  {overviewData.systemMetrics?.healthScore ?? 0}/100
                                 </Badge>
                               </div>
                             </div>
@@ -1561,9 +1561,9 @@ export default function AdminDashboard() {
                                     <Cpu className="h-4 w-4 text-primary" />
                                     <span className="text-sm font-medium">CPU Usage</span>
                                   </div>
-                                  <span className="text-sm font-bold">{overviewData.systemMetrics.cpu}%</span>
+                                  <span className="text-sm font-bold">{overviewData.systemMetrics?.cpu ?? 0}%</span>
                                 </div>
-                                <Progress value={overviewData.systemMetrics.cpu} className="h-2" />
+                                <Progress value={overviewData.systemMetrics?.cpu ?? 0} className="h-2" />
                               </div>
 
                               {/* Memory Usage */}
@@ -1574,12 +1574,12 @@ export default function AdminDashboard() {
                                     <span className="text-sm font-medium">Memory</span>
                                   </div>
                                   <span className="text-sm font-bold">
-                                    {overviewData.systemMetrics.memory.percentage}%
+                                    {overviewData.systemMetrics?.memory?.percentage ?? 0}%
                                   </span>
                                 </div>
-                                <Progress value={overviewData.systemMetrics.memory.percentage} className="h-2" />
+                                <Progress value={overviewData.systemMetrics?.memory?.percentage ?? 0} className="h-2" />
                                 <p className="text-xs text-muted-foreground">
-                                  {formatBytes(overviewData.systemMetrics.memory.used)} / {formatBytes(overviewData.systemMetrics.memory.total)}
+                                  {formatBytes(overviewData.systemMetrics?.memory?.used ?? 0)} / {formatBytes(overviewData.systemMetrics?.memory?.total ?? 0)}
                                 </p>
                               </div>
 
@@ -1591,11 +1591,11 @@ export default function AdminDashboard() {
                                     <span className="text-sm font-medium">Avg Response</span>
                                   </div>
                                   <span className="text-sm font-bold">
-                                    {overviewData.systemMetrics.api.avgResponseTime}ms
+                                    {overviewData.systemMetrics?.api?.avgResponseTime ?? 0}ms
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                  <span>Requests/min: {overviewData.systemMetrics.api.requestsPerMinute}</span>
+                                  <span>Requests/min: {overviewData.systemMetrics?.api?.requestsPerMinute ?? 0}</span>
                                 </div>
                               </div>
 
@@ -1607,11 +1607,11 @@ export default function AdminDashboard() {
                                     <span className="text-sm font-medium">Error Rate</span>
                                   </div>
                                   <span className="text-sm font-bold">
-                                    {overviewData.systemMetrics.api.errorRate}%
+                                    {overviewData.systemMetrics?.api?.errorRate ?? 0}%
                                   </span>
                                 </div>
                                 <Progress 
-                                  value={overviewData.systemMetrics.api.errorRate} 
+                                  value={overviewData.systemMetrics?.api?.errorRate ?? 0} 
                                   className="h-2"
                                 />
                               </div>
@@ -2861,17 +2861,17 @@ export default function AdminDashboard() {
                           <div className="space-y-4">
                             <div className="text-center">
                               <div className="text-5xl font-bold tabular-nums">
-                                <AnimatedNumber value={systemMetrics.cpu} decimals={1} />%
+                                <AnimatedNumber value={systemMetrics?.cpu ?? 0} decimals={1} />%
                               </div>
-                              <Progress value={systemMetrics.cpu} className="mt-4 h-3" />
+                              <Progress value={systemMetrics?.cpu ?? 0} className="mt-4 h-3" />
                             </div>
                             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                              {systemMetrics.cpu < 70 ? (
+                              {(systemMetrics?.cpu ?? 0) < 70 ? (
                                 <>
                                   <CheckCircle className="h-4 w-4 text-green-500" />
                                   Healthy
                                 </>
-                              ) : systemMetrics.cpu < 90 ? (
+                              ) : (systemMetrics?.cpu ?? 0) < 90 ? (
                                 <>
                                   <AlertCircle className="h-4 w-4 text-orange-500" />
                                   Warning
@@ -2898,12 +2898,12 @@ export default function AdminDashboard() {
                           <div className="space-y-4">
                             <div className="text-center">
                               <div className="text-5xl font-bold tabular-nums">
-                                <AnimatedNumber value={systemMetrics.memory.percentage} decimals={1} />%
+                                <AnimatedNumber value={systemMetrics?.memory?.percentage ?? 0} decimals={1} />%
                               </div>
-                              <Progress value={systemMetrics.memory.percentage} className="mt-4 h-3" />
+                              <Progress value={systemMetrics?.memory?.percentage ?? 0} className="mt-4 h-3" />
                             </div>
                             <p className="text-center text-sm text-muted-foreground">
-                              {formatBytes(systemMetrics.memory.used)} / {formatBytes(systemMetrics.memory.total)}
+                              {formatBytes(systemMetrics?.memory?.used ?? 0)} / {formatBytes(systemMetrics?.memory?.total ?? 0)}
                             </p>
                           </div>
                         </CardContent>
@@ -2920,17 +2920,17 @@ export default function AdminDashboard() {
                           <div className="space-y-4">
                             <div className="text-center">
                               <div className="text-5xl font-bold tabular-nums">
-                                <AnimatedNumber value={systemMetrics.healthScore} decimals={0} />
+                                <AnimatedNumber value={systemMetrics?.healthScore ?? 0} decimals={0} />
                               </div>
-                              <Progress value={systemMetrics.healthScore} className="mt-4 h-3" />
+                              <Progress value={systemMetrics?.healthScore ?? 0} className="mt-4 h-3" />
                             </div>
                             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                              {systemMetrics.healthScore >= 90 ? (
+                              {(systemMetrics?.healthScore ?? 0) >= 90 ? (
                                 <>
                                   <CheckCircle className="h-4 w-4 text-green-500" />
                                   Excellent
                                 </>
-                              ) : systemMetrics.healthScore >= 70 ? (
+                              ) : (systemMetrics?.healthScore ?? 0) >= 70 ? (
                                 <>
                                   <Info className="h-4 w-4 text-blue-500" />
                                   Good
@@ -2958,20 +2958,20 @@ export default function AdminDashboard() {
                           <div className="space-y-2">
                             <Label className="text-muted-foreground">Requests per Minute</Label>
                             <div className="text-3xl font-bold">
-                              <AnimatedNumber value={systemMetrics.api.requestsPerMinute} decimals={0} />
+                              <AnimatedNumber value={systemMetrics?.api?.requestsPerMinute ?? 0} decimals={0} />
                             </div>
                           </div>
                           <div className="space-y-2">
                             <Label className="text-muted-foreground">Avg Response Time</Label>
                             <div className="text-3xl font-bold">
-                              <AnimatedNumber value={systemMetrics.api.avgResponseTime} decimals={0} />
+                              <AnimatedNumber value={systemMetrics?.api?.avgResponseTime ?? 0} decimals={0} />
                               <span className="text-lg text-muted-foreground ml-1">ms</span>
                             </div>
                           </div>
                           <div className="space-y-2">
                             <Label className="text-muted-foreground">Error Rate</Label>
                             <div className="text-3xl font-bold">
-                              <AnimatedNumber value={systemMetrics.api.errorRate} decimals={2} />
+                              <AnimatedNumber value={systemMetrics?.api?.errorRate ?? 0} decimals={2} />
                               <span className="text-lg text-muted-foreground ml-1">%</span>
                             </div>
                           </div>
