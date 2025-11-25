@@ -100,7 +100,8 @@ import {
   ExternalLink,
   Ban,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  Globe
 } from "lucide-react";
 import {
   BarChart as RechartsBarChart,
@@ -1956,8 +1957,70 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
 
-                {/* Cohort Analysis */}
-                {usersAnalytics?.cohortAnalysis && (
+                {/* Geographic Distribution - Show when users-geo is selected */}
+                {activeSection === 'users-geo' && (
+                  <Card data-testid="card-geographic-distribution">
+                    <CardHeader>
+                      <CardTitle>Geographic Distribution</CardTitle>
+                      <CardDescription>User distribution by country</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {usersAnalytics?.geographicDistribution && usersAnalytics.geographicDistribution.length > 0 ? (
+                        <div className="space-y-6">
+                          <ResponsiveContainer width="100%" height={400}>
+                            <RechartsBarChart 
+                              data={usersAnalytics.geographicDistribution.sort((a, b) => b.users - a.users).slice(0, 15)}
+                              layout="vertical"
+                              margin={{ left: 80, right: 20, top: 20, bottom: 20 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                              <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} />
+                              <YAxis 
+                                type="category" 
+                                dataKey="country" 
+                                stroke="hsl(var(--foreground))" 
+                                fontSize={12}
+                                width={80}
+                              />
+                              <RechartsTooltip
+                                contentStyle={{
+                                  backgroundColor: 'hsl(var(--card))',
+                                  border: '1px solid hsl(var(--border))',
+                                  borderRadius: '8px'
+                                }}
+                                formatter={(value: number) => [`${value} users`, 'Users']}
+                              />
+                              <Bar dataKey="users" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]} />
+                            </RechartsBarChart>
+                          </ResponsiveContainer>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {usersAnalytics.geographicDistribution.slice(0, 8).map((item, index) => (
+                              <div key={item.country} className="p-4 rounded-lg bg-muted/50">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
+                                  <span className="font-medium text-sm">{item.country}</span>
+                                </div>
+                                <p className="text-2xl font-bold">{item.users}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {((item.users / usersAnalytics.geographicDistribution.reduce((sum, i) => sum + i.users, 0)) * 100).toFixed(1)}% of total
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center">
+                          <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                          <p className="text-muted-foreground">No geographic data available</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Cohort Analysis - Show when users-cohorts is selected or users-overview */}
+                {(activeSection === 'users-cohorts' || activeSection === 'users-overview') && usersAnalytics?.cohortAnalysis && (
                   <Card data-testid="card-cohort-analysis">
                     <CardHeader>
                       <CardTitle>User Retention Cohort Analysis</CardTitle>
