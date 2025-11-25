@@ -1,6 +1,21 @@
-import { type User, type UpsertUser, type InsertUser, type BusinessPlan, type InsertBusinessPlan, type SessionHandoff, type InsertSessionHandoff, type Referral, type InsertReferral, type UploadedFile, type InsertUploadedFile, type ToolAnalytic, type InsertToolAnalytics, users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics } from "@shared/schema";
+import { 
+  type User, type UpsertUser, type InsertUser, 
+  type BusinessPlan, type InsertBusinessPlan, 
+  type SessionHandoff, type InsertSessionHandoff, 
+  type Referral, type InsertReferral, 
+  type UploadedFile, type InsertUploadedFile, 
+  type ToolAnalytic, type InsertToolAnalytics,
+  type ReferralCode, type InsertReferralCode,
+  type ReferralEvent, type InsertReferralEvent,
+  type ReferralReward, type InsertReferralReward,
+  type PromoCode, type InsertPromoCode,
+  type PromoRedemption, type InsertPromoRedemption,
+  type ReferralVisit, type InsertReferralVisit,
+  users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics,
+  referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits
+} from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gt, lt } from "drizzle-orm";
+import { eq, and, gt, lt, desc, sql, count } from "drizzle-orm";
 
 export interface IStorage {
   // User management (supports both Google OAuth and email/password auth)
@@ -54,6 +69,76 @@ export interface IStorage {
   getToolUsageStats(limit?: number): Promise<Array<{ toolId: string; action: string; count: number; timestamp?: Date }>>;
   getUserAnalytics(userId: string, startDate?: Date, endDate?: Date): Promise<ToolAnalytic[]>;
   checkDatabaseHealth(): Promise<boolean>;
+  
+  // ============================================
+  // REFERRAL CODE SYSTEM
+  // ============================================
+  
+  // Referral Codes
+  createReferralCode(code: InsertReferralCode): Promise<ReferralCode>;
+  getReferralCode(id: string): Promise<ReferralCode | undefined>;
+  getReferralCodeByCode(code: string): Promise<ReferralCode | undefined>;
+  getUserReferralCodes(userId: string): Promise<ReferralCode[]>;
+  updateReferralCode(id: string, updates: Partial<ReferralCode>): Promise<ReferralCode | undefined>;
+  getAllReferralCodes(): Promise<ReferralCode[]>;
+  incrementReferralStats(codeId: string, field: 'totalReferrals' | 'successfulReferrals' | 'pendingReferrals', amount?: number): Promise<void>;
+  
+  // Referral Events
+  createReferralEvent(event: InsertReferralEvent): Promise<ReferralEvent>;
+  getReferralEvent(id: string): Promise<ReferralEvent | undefined>;
+  getReferralEventByReferee(refereeId: string): Promise<ReferralEvent | undefined>;
+  getReferralEventsByCode(codeId: string): Promise<ReferralEvent[]>;
+  getReferralEventsByReferrer(referrerId: string): Promise<ReferralEvent[]>;
+  updateReferralEvent(id: string, updates: Partial<ReferralEvent>): Promise<ReferralEvent | undefined>;
+  getAllReferralEvents(): Promise<ReferralEvent[]>;
+  
+  // Referral Rewards
+  createReferralReward(reward: InsertReferralReward): Promise<ReferralReward>;
+  getReferralReward(id: string): Promise<ReferralReward | undefined>;
+  getUserReferralRewards(userId: string): Promise<ReferralReward[]>;
+  updateReferralReward(id: string, updates: Partial<ReferralReward>): Promise<ReferralReward | undefined>;
+  getAllReferralRewards(): Promise<ReferralReward[]>;
+  getPendingRewards(): Promise<ReferralReward[]>;
+  
+  // ============================================
+  // PROMO CODE SYSTEM
+  // ============================================
+  
+  // Promo Codes
+  createPromoCode(code: InsertPromoCode): Promise<PromoCode>;
+  getPromoCode(id: string): Promise<PromoCode | undefined>;
+  getPromoCodeByCode(code: string): Promise<PromoCode | undefined>;
+  getAllPromoCodes(): Promise<PromoCode[]>;
+  getActivePromoCodes(): Promise<PromoCode[]>;
+  updatePromoCode(id: string, updates: Partial<PromoCode>): Promise<PromoCode | undefined>;
+  incrementPromoCodeUsage(id: string): Promise<void>;
+  
+  // Promo Redemptions
+  createPromoRedemption(redemption: InsertPromoRedemption): Promise<PromoRedemption>;
+  getPromoRedemptionsByUser(userId: string): Promise<PromoRedemption[]>;
+  getPromoRedemptionsByCode(codeId: string): Promise<PromoRedemption[]>;
+  getUserPromoRedemptionCount(userId: string, promoCodeId: string): Promise<number>;
+  getAllPromoRedemptions(): Promise<PromoRedemption[]>;
+  
+  // Referral Visits (Anonymous Tracking)
+  createReferralVisit(visit: InsertReferralVisit): Promise<ReferralVisit>;
+  getReferralVisitsByCode(codeId: string): Promise<ReferralVisit[]>;
+  updateReferralVisitConversion(visitorHash: string, userId: string): Promise<void>;
+  
+  // Analytics Aggregations
+  getReferralAnalytics(): Promise<{
+    totalReferralCodes: number;
+    totalReferrals: number;
+    successfulReferrals: number;
+    totalEarnings: number;
+    pendingPayouts: number;
+  }>;
+  getPromoAnalytics(): Promise<{
+    totalPromoCodes: number;
+    activePromoCodes: number;
+    totalRedemptions: number;
+    totalDiscountGiven: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -406,6 +491,236 @@ export class DatabaseStorage implements IStorage {
       console.error("Database health check failed:", error);
       return false;
     }
+  }
+
+  // ============================================
+  // REFERRAL CODE SYSTEM IMPLEMENTATION
+  // ============================================
+
+  async createReferralCode(code: InsertReferralCode): Promise<ReferralCode> {
+    const [result] = await db.insert(referralCodes).values(code).returning();
+    return result;
+  }
+
+  async getReferralCode(id: string): Promise<ReferralCode | undefined> {
+    const [result] = await db.select().from(referralCodes).where(eq(referralCodes.id, id)).limit(1);
+    return result;
+  }
+
+  async getReferralCodeByCode(code: string): Promise<ReferralCode | undefined> {
+    const [result] = await db.select().from(referralCodes).where(eq(referralCodes.code, code)).limit(1);
+    return result;
+  }
+
+  async getUserReferralCodes(userId: string): Promise<ReferralCode[]> {
+    return db.select().from(referralCodes).where(eq(referralCodes.userId, userId)).orderBy(desc(referralCodes.createdAt));
+  }
+
+  async updateReferralCode(id: string, updates: Partial<ReferralCode>): Promise<ReferralCode | undefined> {
+    const [result] = await db.update(referralCodes).set({ ...updates, updatedAt: new Date() }).where(eq(referralCodes.id, id)).returning();
+    return result;
+  }
+
+  async getAllReferralCodes(): Promise<ReferralCode[]> {
+    return db.select().from(referralCodes).orderBy(desc(referralCodes.createdAt));
+  }
+
+  async incrementReferralStats(codeId: string, field: 'totalReferrals' | 'successfulReferrals' | 'pendingReferrals', amount: number = 1): Promise<void> {
+    await db.update(referralCodes)
+      .set({ 
+        [field]: sql`${referralCodes[field]} + ${amount}`,
+        updatedAt: new Date()
+      })
+      .where(eq(referralCodes.id, codeId));
+  }
+
+  // Referral Events
+  async createReferralEvent(event: InsertReferralEvent): Promise<ReferralEvent> {
+    const [result] = await db.insert(referralEvents).values(event).returning();
+    return result;
+  }
+
+  async getReferralEvent(id: string): Promise<ReferralEvent | undefined> {
+    const [result] = await db.select().from(referralEvents).where(eq(referralEvents.id, id)).limit(1);
+    return result;
+  }
+
+  async getReferralEventByReferee(refereeId: string): Promise<ReferralEvent | undefined> {
+    const [result] = await db.select().from(referralEvents).where(eq(referralEvents.refereeId, refereeId)).limit(1);
+    return result;
+  }
+
+  async getReferralEventsByCode(codeId: string): Promise<ReferralEvent[]> {
+    return db.select().from(referralEvents).where(eq(referralEvents.referralCodeId, codeId)).orderBy(desc(referralEvents.createdAt));
+  }
+
+  async getReferralEventsByReferrer(referrerId: string): Promise<ReferralEvent[]> {
+    return db.select().from(referralEvents).where(eq(referralEvents.referrerId, referrerId)).orderBy(desc(referralEvents.createdAt));
+  }
+
+  async updateReferralEvent(id: string, updates: Partial<ReferralEvent>): Promise<ReferralEvent | undefined> {
+    const [result] = await db.update(referralEvents).set({ ...updates, updatedAt: new Date() }).where(eq(referralEvents.id, id)).returning();
+    return result;
+  }
+
+  async getAllReferralEvents(): Promise<ReferralEvent[]> {
+    return db.select().from(referralEvents).orderBy(desc(referralEvents.createdAt));
+  }
+
+  // Referral Rewards
+  async createReferralReward(reward: InsertReferralReward): Promise<ReferralReward> {
+    const [result] = await db.insert(referralRewards).values(reward).returning();
+    return result;
+  }
+
+  async getReferralReward(id: string): Promise<ReferralReward | undefined> {
+    const [result] = await db.select().from(referralRewards).where(eq(referralRewards.id, id)).limit(1);
+    return result;
+  }
+
+  async getUserReferralRewards(userId: string): Promise<ReferralReward[]> {
+    return db.select().from(referralRewards).where(eq(referralRewards.userId, userId)).orderBy(desc(referralRewards.createdAt));
+  }
+
+  async updateReferralReward(id: string, updates: Partial<ReferralReward>): Promise<ReferralReward | undefined> {
+    const [result] = await db.update(referralRewards).set({ ...updates, updatedAt: new Date() }).where(eq(referralRewards.id, id)).returning();
+    return result;
+  }
+
+  async getAllReferralRewards(): Promise<ReferralReward[]> {
+    return db.select().from(referralRewards).orderBy(desc(referralRewards.createdAt));
+  }
+
+  async getPendingRewards(): Promise<ReferralReward[]> {
+    return db.select().from(referralRewards).where(eq(referralRewards.status, 'pending')).orderBy(desc(referralRewards.createdAt));
+  }
+
+  // ============================================
+  // PROMO CODE SYSTEM IMPLEMENTATION
+  // ============================================
+
+  async createPromoCode(code: InsertPromoCode): Promise<PromoCode> {
+    const [result] = await db.insert(promoCodes).values(code).returning();
+    return result;
+  }
+
+  async getPromoCode(id: string): Promise<PromoCode | undefined> {
+    const [result] = await db.select().from(promoCodes).where(eq(promoCodes.id, id)).limit(1);
+    return result;
+  }
+
+  async getPromoCodeByCode(code: string): Promise<PromoCode | undefined> {
+    const [result] = await db.select().from(promoCodes).where(eq(promoCodes.code, code)).limit(1);
+    return result;
+  }
+
+  async getAllPromoCodes(): Promise<PromoCode[]> {
+    return db.select().from(promoCodes).orderBy(desc(promoCodes.createdAt));
+  }
+
+  async getActivePromoCodes(): Promise<PromoCode[]> {
+    const now = new Date();
+    return db.select().from(promoCodes)
+      .where(and(
+        eq(promoCodes.status, 'active'),
+        lt(promoCodes.validFrom, now)
+      ))
+      .orderBy(desc(promoCodes.createdAt));
+  }
+
+  async updatePromoCode(id: string, updates: Partial<PromoCode>): Promise<PromoCode | undefined> {
+    const [result] = await db.update(promoCodes).set({ ...updates, updatedAt: new Date() }).where(eq(promoCodes.id, id)).returning();
+    return result;
+  }
+
+  async incrementPromoCodeUsage(id: string): Promise<void> {
+    await db.update(promoCodes)
+      .set({ 
+        currentUses: sql`${promoCodes.currentUses} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(promoCodes.id, id));
+  }
+
+  // Promo Redemptions
+  async createPromoRedemption(redemption: InsertPromoRedemption): Promise<PromoRedemption> {
+    const [result] = await db.insert(promoRedemptions).values(redemption).returning();
+    return result;
+  }
+
+  async getPromoRedemptionsByUser(userId: string): Promise<PromoRedemption[]> {
+    return db.select().from(promoRedemptions).where(eq(promoRedemptions.userId, userId)).orderBy(desc(promoRedemptions.createdAt));
+  }
+
+  async getPromoRedemptionsByCode(codeId: string): Promise<PromoRedemption[]> {
+    return db.select().from(promoRedemptions).where(eq(promoRedemptions.promoCodeId, codeId)).orderBy(desc(promoRedemptions.createdAt));
+  }
+
+  async getUserPromoRedemptionCount(userId: string, promoCodeId: string): Promise<number> {
+    const [result] = await db.select({ count: count() }).from(promoRedemptions)
+      .where(and(
+        eq(promoRedemptions.userId, userId),
+        eq(promoRedemptions.promoCodeId, promoCodeId)
+      ));
+    return result?.count || 0;
+  }
+
+  async getAllPromoRedemptions(): Promise<PromoRedemption[]> {
+    return db.select().from(promoRedemptions).orderBy(desc(promoRedemptions.createdAt));
+  }
+
+  // Referral Visits
+  async createReferralVisit(visit: InsertReferralVisit): Promise<ReferralVisit> {
+    const [result] = await db.insert(referralVisits).values(visit).returning();
+    return result;
+  }
+
+  async getReferralVisitsByCode(codeId: string): Promise<ReferralVisit[]> {
+    return db.select().from(referralVisits).where(eq(referralVisits.referralCodeId, codeId)).orderBy(desc(referralVisits.createdAt));
+  }
+
+  async updateReferralVisitConversion(visitorHash: string, userId: string): Promise<void> {
+    await db.update(referralVisits)
+      .set({ converted: true, convertedUserId: userId })
+      .where(eq(referralVisits.visitorHash, visitorHash));
+  }
+
+  // Analytics Aggregations
+  async getReferralAnalytics(): Promise<{
+    totalReferralCodes: number;
+    totalReferrals: number;
+    successfulReferrals: number;
+    totalEarnings: number;
+    pendingPayouts: number;
+  }> {
+    const codes = await db.select().from(referralCodes);
+    const rewards = await db.select().from(referralRewards).where(eq(referralRewards.status, 'pending'));
+    
+    return {
+      totalReferralCodes: codes.length,
+      totalReferrals: codes.reduce((sum, c) => sum + c.totalReferrals, 0),
+      successfulReferrals: codes.reduce((sum, c) => sum + c.successfulReferrals, 0),
+      totalEarnings: codes.reduce((sum, c) => sum + c.totalEarnings, 0),
+      pendingPayouts: rewards.reduce((sum, r) => sum + r.amount, 0),
+    };
+  }
+
+  async getPromoAnalytics(): Promise<{
+    totalPromoCodes: number;
+    activePromoCodes: number;
+    totalRedemptions: number;
+    totalDiscountGiven: number;
+  }> {
+    const allCodes = await db.select().from(promoCodes);
+    const activeCodes = allCodes.filter(c => c.status === 'active');
+    const redemptions = await db.select().from(promoRedemptions);
+    
+    return {
+      totalPromoCodes: allCodes.length,
+      activePromoCodes: activeCodes.length,
+      totalRedemptions: redemptions.length,
+      totalDiscountGiven: redemptions.reduce((sum, r) => sum + r.discountApplied, 0),
+    };
   }
 }
 
