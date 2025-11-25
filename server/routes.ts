@@ -374,9 +374,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateBusinessPlan(planId, { stripeSessionId: session.id });
 
       res.json({ sessionId: session.id, url: session.url });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Stripe checkout error:", error);
-      res.status(500).json({ error: "Failed to create checkout session" });
+      const errorMessage = error?.message || error?.raw?.message || "Failed to create checkout session";
+      console.error("Stripe error details:", {
+        type: error?.type,
+        code: error?.code,
+        message: errorMessage,
+        statusCode: error?.statusCode
+      });
+      res.status(500).json({ error: errorMessage });
     }
   });
 
