@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
-import { Switch, Route, useLocation } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { Switch, Route, useLocation, Link } from "wouter";
+import { queryClient, apiRequest } from "./lib/queryClient";
+import { QueryClientProvider, useQuery, useMutation } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
@@ -14,7 +14,9 @@ import ToolsChronographWheel from "@/components/ToolsChronographWheel";
 import BlackNovemberBanner from "@/components/BlackNovemberBanner";
 import OnboardingTour from "@/components/OnboardingTour";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, LogOut } from "lucide-react";
+import logoLightImg from "@assets/official_logo.png";
+import logoDarkImg from "@assets/logo_dark.png";
 import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
@@ -130,6 +132,68 @@ function Router() {
   );
 }
 
+function UnifiedHeader() {
+  const [, setLocation] = useLocation();
+  
+  const { data: user } = useQuery<{ id: string; email: string; displayName?: string; firstName?: string }>({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/auth/logout', {});
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.clear();
+      if (data?.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        setLocation("/login");
+      }
+    },
+  });
+
+  return (
+    <header className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+      <AnimatedSidebarTrigger />
+      
+      <Link href="/">
+        <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-header-logo">
+          <div className="logo-container overflow-hidden flex items-center">
+            <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
+            <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+          </div>
+        </div>
+      </Link>
+      
+      <div className="flex-1" />
+      
+      {user && (
+        <span className="hidden sm:block text-sm text-muted-foreground">
+          {user.firstName || user.displayName || user.email}
+        </span>
+      )}
+      
+      <ThemeToggle />
+      
+      {user && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => logoutMutation.mutate()}
+          disabled={logoutMutation.isPending}
+          data-testid="button-header-logout"
+        >
+          <LogOut className="h-4 w-4 mr-1" />
+          <span className="hidden sm:inline">Logout</span>
+        </Button>
+      )}
+    </header>
+  );
+}
+
 function AppLayout() {
   const [location] = useLocation();
   const isPublicRoute = SIDEBAR_HIDDEN_ROUTES.includes(location);
@@ -148,11 +212,7 @@ function AppLayout() {
         <div className="flex h-screen w-full">
           <AppSidebar />
           <div className="flex flex-col flex-1 w-full">
-            <header className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 md:py-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
-              <AnimatedSidebarTrigger />
-              <div className="flex-1" />
-              <ThemeToggle />
-            </header>
+            <UnifiedHeader />
             <main className="flex-1 overflow-auto">
               <Suspense fallback={null}>
                 <Router />

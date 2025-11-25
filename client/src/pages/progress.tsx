@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AuthHeader } from "@/components/AuthHeader";
+
 import { useAuth } from "@/hooks/useAuth";
 import { 
   CheckCircle2, Circle, Clock, Target, TrendingUp, 
@@ -134,7 +134,6 @@ export default function ProgressPage() {
 
   return (
     <>
-      <AuthHeader />
       <div className="container mx-auto py-8 px-4 md:px-6 max-w-5xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2" data-testid="heading-progress">

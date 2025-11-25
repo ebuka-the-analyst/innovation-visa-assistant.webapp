@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AuthHeader } from "@/components/AuthHeader";
+
 import QuestionnaireForm from "@/components/QuestionnaireForm";
 import EvidencePreparationGuide from "@/components/EvidencePreparationGuide";
 import FeatureNavigation from "@/components/FeatureNavigation";
@@ -17,7 +17,6 @@ export default function Questionnaire() {
 
   return (
     <div className="min-h-screen">
-      <AuthHeader />
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <FeatureNavigation currentPage="questionnaire" />

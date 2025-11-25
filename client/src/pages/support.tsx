@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AuthHeader } from "@/components/AuthHeader";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -157,7 +157,6 @@ export default function SupportPage() {
 
   return (
     <>
-      <AuthHeader />
       <div className="container mx-auto py-8 px-4 md:px-6 max-w-5xl">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2" data-testid="heading-support">

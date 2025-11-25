@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award, Eye, EyeOff } from "lucide-react";
-import { AuthHeader } from "@/components/AuthHeader";
+
 import ChatBot from "@/components/ChatBot";
 import type { BusinessPlan } from "@shared/schema";
 import { format } from "date-fns";
@@ -213,7 +213,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
-      <AuthHeader />
 
       {/* Demo Plans Info Banner */}
       {demoPlansCount > 0 && !hasUserPlans && (
