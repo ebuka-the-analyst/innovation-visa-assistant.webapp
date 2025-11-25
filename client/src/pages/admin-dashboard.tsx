@@ -3632,6 +3632,73 @@ export default function AdminDashboard() {
                         </>
                       )}
 
+                      {/* Referral Codes Management */}
+                      {activeSection === 'referrals-codes' && (
+                        <Card>
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle className="flex items-center gap-2">
+                                  <Link2 className="h-5 w-5" />
+                                  Referral Codes Management
+                                </CardTitle>
+                                <CardDescription>All active referral codes in the system</CardDescription>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            {referralAnalyticsLoading ? (
+                              <div className="space-y-3">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Skeleton key={i} className="h-16 w-full" />
+                                ))}
+                              </div>
+                            ) : referralAnalytics?.topReferrers && referralAnalytics.topReferrers.length > 0 ? (
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Code</TableHead>
+                                    <TableHead>Owner</TableHead>
+                                    <TableHead>Discount</TableHead>
+                                    <TableHead className="text-center">Total Referrals</TableHead>
+                                    <TableHead className="text-center">Successful</TableHead>
+                                    <TableHead className="text-right">Earnings</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {referralAnalytics.topReferrers.map((referrer) => (
+                                    <TableRow key={referrer.userId}>
+                                      <TableCell>
+                                        <Badge variant="outline" className="font-mono text-base">
+                                          {referrer.code}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell className="font-medium">{referrer.email}</TableCell>
+                                      <TableCell>
+                                        <Badge variant="secondary">15% off</Badge>
+                                      </TableCell>
+                                      <TableCell className="text-center">{referrer.referrals}</TableCell>
+                                      <TableCell className="text-center">
+                                        <Badge variant="default" className="bg-green-500">{referrer.referrals}</Badge>
+                                      </TableCell>
+                                      <TableCell className="text-right text-green-500 font-medium">
+                                        £{(referrer.earnings / 100).toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            ) : (
+                              <div className="py-12 text-center text-muted-foreground">
+                                <Link2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                <p className="text-lg font-medium">No referral codes yet</p>
+                                <p>Users can generate referral codes from their dashboard</p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+
                       {/* Pending Rewards */}
                       {activeSection === 'referrals-rewards' && (
                         <Card>
