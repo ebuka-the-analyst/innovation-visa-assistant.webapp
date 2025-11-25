@@ -959,46 +959,28 @@ export default function AdminDashboard() {
     toast({ title: `Filter preset "${name}" saved` });
   }, [filterPresets, toast]);
 
-  // Loading state
+  // Loading state - with proper background for both light and dark mode
   if (userLoading) {
     return (
-      <motion.div
-        className="min-h-screen flex items-center justify-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <motion.div
-            className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
           <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   if (!user || !user.isAdmin) {
     return (
-      <motion.div
-        className="min-h-screen flex items-center justify-center bg-background"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <Shield className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Admin Access Required</h2>
           <p className="text-muted-foreground mb-4">Redirecting to home page...</p>
-          <motion.div
-            className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -1076,20 +1058,10 @@ export default function AdminDashboard() {
           />
           
           <SidebarInset className="flex-1 overflow-auto">
-            <motion.div
-              className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
+            <div className="min-h-screen bg-background">
               <div className="p-6 space-y-6">
-                {/* Header with Glassmorphism Effect */}
-                <motion.div
-                  className="relative overflow-hidden rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl p-4"
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
+                {/* Header */}
+                <div className="relative overflow-hidden rounded-lg border border-border/50 bg-card/80 backdrop-blur-sm p-4">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
                   
                   <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -1189,7 +1161,7 @@ export default function AdminDashboard() {
                       </Tooltip>
                     </div>
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Main Content - Section Based */}
                 {(activeSection === 'overview' || activeSection === 'realtime' || activeSection === 'kpis') && (
@@ -4008,7 +3980,7 @@ export default function AdminDashboard() {
                 )}
 
               </div>
-            </motion.div>
+            </div>
           </SidebarInset>
         </div>
 
