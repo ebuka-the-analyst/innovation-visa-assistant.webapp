@@ -54,13 +54,13 @@ export default function RFEDefenceLab() {
               <p className="text-sm text-red-900 dark:text-red-100 mb-1">High-Risk Issues</p>
               <p className="text-3xl font-bold text-red-600">2</p>
             </div>
-            <div className="p-6 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm text-amber-900 mb-1">Medium-Risk Issues</p>
-              <p className="text-3xl font-bold text-amber-600">2</p>
+            <div className="p-6 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <p className="text-sm text-amber-900 dark:text-amber-100 mb-1">Medium-Risk Issues</p>
+              <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">2</p>
             </div>
-            <div className="p-6 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-900 mb-1">Mitigated Issues</p>
-              <p className="text-3xl font-bold text-green-600">1</p>
+            <div className="p-6 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+              <p className="text-sm text-green-900 dark:text-green-100 mb-1">Mitigated Issues</p>
+              <p className="text-3xl font-bold text-green-600 dark:text-green-400">1</p>
             </div>
           </div>
 
@@ -85,9 +85,9 @@ export default function RFEDefenceLab() {
                       <p className="font-medium text-sm">{risk.risk}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                          risk.status === "completed" ? "bg-green-100 text-green-900" :
-                          risk.status === "in-progress" ? "bg-amber-100 text-amber-900" :
-                          "bg-gray-100 text-gray-900"
+                          risk.status === "completed" ? "bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100" :
+                          risk.status === "in-progress" ? "bg-amber-100 dark:bg-amber-900 text-amber-900 dark:text-amber-100" :
+                          "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                         }`}>
                           {risk.status}
                         </span>
@@ -102,7 +102,7 @@ export default function RFEDefenceLab() {
               <Card className="p-8 h-full">
                 <div className="mb-4">
                   <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                    selectedRisk.likelihood === "HIGH" ? "bg-red-100 text-red-900" : "bg-amber-100 text-amber-900"
+                    selectedRisk.likelihood === "HIGH" ? "bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100" : "bg-amber-100 dark:bg-amber-900 text-amber-900 dark:text-amber-100"
                   }`}>
                     {selectedRisk.likelihood} RISK
                   </span>
@@ -122,12 +122,12 @@ export default function RFEDefenceLab() {
             </div>
           </div>
 
-          <Card className="p-8 mt-8 bg-amber-50 border-amber-200">
+          <Card className="p-8 mt-8 bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
             <div className="flex items-start gap-4">
-              <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
+              <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-semibold mb-2">Mock Refusal Rehearsal</h3>
-                <p className="text-sm text-amber-900 mb-4">
+                <p className="text-sm text-amber-900 dark:text-amber-100 mb-4">
                   Ready for adversarial interview prep? We'll simulate a critical endorser panel and test your responses to tough questions.
                 </p>
                 <Button variant="outline">Start Mock Interview</Button>
