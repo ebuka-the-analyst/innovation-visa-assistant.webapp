@@ -25,10 +25,10 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="#features" className="hover:text-primary transition-colors">Features</a></li>
-              <li><a href="#pricing" className="hover:text-primary transition-colors">Pricing</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Templates</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Sample Plans</a></li>
+              <li><a href="/features" className="hover:text-primary transition-colors" data-testid="link-features">Features</a></li>
+              <li><a href="/pricing" className="hover:text-primary transition-colors" data-testid="link-pricing">Pricing</a></li>
+              <li><a href="/tools-hub" className="hover:text-primary transition-colors" data-testid="link-templates">Templates</a></li>
+              <li><a href="/generation" className="hover:text-primary transition-colors" data-testid="link-sample-plans">Sample Plans</a></li>
             </ul>
           </div>
 
@@ -36,10 +36,10 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Resources</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">Documentation</a></li>
-              <li><a href="#faq" className="hover:text-primary transition-colors">FAQ</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Blog</a></li>
-              <li><a href="mailto:support@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">Support</a></li>
+              <li><a href="/guide" className="hover:text-primary transition-colors" data-testid="link-documentation">Documentation</a></li>
+              <li><a href="/faq" className="hover:text-primary transition-colors" data-testid="link-faq">FAQ</a></li>
+              <li><a href="/guide" className="hover:text-primary transition-colors" data-testid="link-blog">Blog</a></li>
+              <li><a href="/support" className="hover:text-primary transition-colors" data-testid="link-support">Support</a></li>
             </ul>
           </div>
 
@@ -48,22 +48,22 @@ export default function Footer() {
             <h3 className="font-semibold mb-4">Contact</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li>
-                <a href="mailto:hello@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">
+                <a href="mailto:hello@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors" data-testid="link-general-inquiries">
                   General Inquiries
                 </a>
               </li>
               <li>
-                <a href="mailto:support@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">
+                <a href="/support" className="hover:text-primary transition-colors" data-testid="link-customer-support">
                   Customer Support
                 </a>
               </li>
               <li>
-                <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">
+                <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors" data-testid="link-billing">
                   Billing & Payments
                 </a>
               </li>
               <li>
-                <a href="mailto:team@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors">
+                <a href="mailto:team@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors" data-testid="link-partnership">
                   Partnership Inquiries
                 </a>
               </li>
