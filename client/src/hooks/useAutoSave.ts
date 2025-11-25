@@ -12,9 +12,9 @@ export function useAutoSave<T extends Record<string, any>>(
   defaultValues: T
 ): {
   savedData: T;
-  saveField: (fieldName: keyof T, value: any) => void;
+  saveField: (fieldName: keyof T | string, value: any) => void;
   saveAllFields: (data: Partial<T>) => void;
-  clearField: (fieldName: keyof T) => void;
+  clearField: (fieldName: keyof T | string) => void;
   clearAllFields: () => void;
   hasUnsavedData: boolean;
   loadSavedData: () => T;
@@ -69,7 +69,7 @@ export function useAutoSave<T extends Record<string, any>>(
     }
   }, [storageKey, defaultValues]);
 
-  const saveField = useCallback((fieldName: keyof T, value: any) => {
+  const saveField = useCallback((fieldName: keyof T | string, value: any) => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
@@ -97,7 +97,7 @@ export function useAutoSave<T extends Record<string, any>>(
     }, AUTO_SAVE_DEBOUNCE_MS);
   }, [saveToStorage]);
 
-  const clearField = useCallback((fieldName: keyof T) => {
+  const clearField = useCallback((fieldName: keyof T | string) => {
     setSavedData(prev => {
       const newData = { ...prev, [fieldName]: defaultValues[fieldName] };
       saveToStorage(newData);
