@@ -165,18 +165,41 @@ interface Plan {
 
 interface TrendData {
   value: number;
-  change: number;
-  changePercentage: number;
-  trend: 'up' | 'down' | 'flat';
+  change?: number;
+  changePercentage?: number;
+  trend?: 'up' | 'down' | 'flat';
+  direction?: 'up' | 'down' | 'neutral';
+  period?: string;
 }
 
 interface KPIMetric {
   label: string;
   value: number;
   trend: TrendData;
-  icon: typeof Users;
+  icon: string;
   color: string;
 }
+
+// Icon mapping for KPI metrics from string to component
+const iconMap: Record<string, typeof Users> = {
+  Users,
+  Activity,
+  FileText,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Target,
+  Shield,
+  Database,
+  Server,
+  Cpu,
+  HardDrive,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Zap,
+};
 
 interface TimeSeriesData {
   date: string;
@@ -439,8 +462,15 @@ const ShimmerSkeleton = memo(() => (
 ShimmerSkeleton.displayName = 'ShimmerSkeleton';
 
 const TrendIndicator = memo(({ trend }: { trend: TrendData }) => {
-  const Icon = trend.trend === 'up' ? ArrowUp : trend.trend === 'down' ? ArrowDown : Minus;
-  const color = trend.trend === 'up' ? 'text-green-500' : trend.trend === 'down' ? 'text-red-500' : 'text-gray-500';
+  // Handle both old format (trend.trend) and new format (trend.direction)
+  const trendDirection = trend.trend || (trend.direction === 'neutral' ? 'flat' : trend.direction) || 'flat';
+  const Icon = trendDirection === 'up' ? ArrowUp : trendDirection === 'down' ? ArrowDown : Minus;
+  const color = trendDirection === 'up' ? 'text-green-500' : trendDirection === 'down' ? 'text-red-500' : 'text-gray-500';
+  
+  // Calculate percentage to display
+  const percentageValue = trend.changePercentage !== undefined 
+    ? trend.changePercentage 
+    : (trend.value || 0);
 
   return (
     <motion.div
@@ -451,7 +481,7 @@ const TrendIndicator = memo(({ trend }: { trend: TrendData }) => {
     >
       <Icon className="h-4 w-4" />
       <span className="text-sm font-medium">
-        {Math.abs(trend.changePercentage).toFixed(1)}%
+        {trend.period ? `+${Math.abs(percentageValue)}` : `${Math.abs(percentageValue).toFixed(1)}%`}
       </span>
     </motion.div>
   );
@@ -1184,7 +1214,10 @@ export default function AdminDashboard() {
                                 whileHover={{ scale: 1.1, rotate: 5 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
                               >
-                                <metric.icon className="h-4 w-4" />
+                                {(() => {
+                                  const IconComponent = iconMap[metric.icon] || Activity;
+                                  return <IconComponent className="h-4 w-4" />;
+                                })()}
                               </motion.div>
                             </CardHeader>
 
@@ -2767,6 +2800,49 @@ export default function AdminDashboard() {
                 transition={{ duration: 0.5 }}
                 className="space-y-6"
               >
+                {/* Admin Actions Card */}
+                <Card data-testid="card-admin-actions">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-primary" />
+                      Admin Actions
+                    </CardTitle>
+                    <CardDescription>System management and demo data tools</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-4">
+                      <Button
+                        onClick={async () => {
+                          try {
+                            toast({ title: "Creating demo data...", description: "Please wait while comprehensive demo data is being created." });
+                            const response = await apiRequest('POST', '/api/admin/seed-demo-data', {});
+                            const data = await response.json() as { success: boolean; documentsCreated: number; message?: string };
+                            if (data.success) {
+                              toast({ title: "Demo data created successfully", description: `Created demo user with ${data.documentsCreated} documents` });
+                              queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+                              queryClient.invalidateQueries({ queryKey: ['/api/admin/plans'] });
+                            }
+                          } catch (error: any) {
+                            toast({ title: "Failed to create demo data", description: error.message, variant: "destructive" });
+                          }
+                        }}
+                        data-testid="button-seed-demo-data"
+                      >
+                        <Database className="h-4 w-4 mr-2" />
+                        Seed Demo Data
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => refetchOverview()}
+                        data-testid="button-refresh-analytics"
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Refresh Analytics
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* System Metrics */}
                 {systemMetrics && (
                   <>

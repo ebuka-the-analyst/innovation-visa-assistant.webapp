@@ -2748,6 +2748,324 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // ============ COMPREHENSIVE DEMO DATA SEEDING ============
+  
+  // Admin endpoint to create comprehensive demo account
+  app.post("/api/admin/seed-demo-data", requireAdmin, async (req, res) => {
+    try {
+      // Create or update demo user
+      const demoEmail = "demo@innovatorvisaassistant.co.uk";
+      let demoUser = await storage.getUserByEmail(demoEmail);
+      
+      if (!demoUser) {
+        // Create demo user with hashed password
+        const hashedPassword = await bcrypt.hash("Demo2024!Secure", 10);
+        demoUser = await storage.createUser({
+          email: demoEmail,
+          password: hashedPassword,
+          firstName: "Sarah",
+          lastName: "Chen",
+          isEmailVerified: true,
+          subscriptionTier: "ultimate",
+          subscriptionStatus: "active",
+        });
+      } else {
+        // Update existing demo user to ultimate tier
+        await storage.updateUser(demoUser.id, {
+          subscriptionTier: "ultimate",
+          subscriptionStatus: "active",
+          isEmailVerified: true,
+          firstName: "Sarah",
+          lastName: "Chen",
+        });
+        demoUser = await storage.getUser(demoUser.id);
+      }
+      
+      if (!demoUser) {
+        return res.status(500).json({ error: "Failed to create demo user" });
+      }
+      
+      // Create comprehensive demo business plan
+      const existingDemoPlans = await storage.getDemoBusinessPlans();
+      if (existingDemoPlans.length === 0) {
+        await storage.createBusinessPlan({
+          tier: "enterprise",
+          businessName: "MedTech AI Solutions Ltd",
+          industry: "Healthcare Technology / AI-Powered Diagnostics",
+          problem: "Early cancer detection remains a significant challenge in the UK healthcare system. Current screening methods miss up to 30% of early-stage cancers, leading to delayed treatment, higher mortality rates, and increased NHS costs. Radiologists are overwhelmed with increasing caseloads, resulting in diagnostic delays of 2-4 weeks. Our AI-powered diagnostic platform addresses this critical gap by providing rapid, accurate analysis of medical imaging to support clinical decisions.",
+          uniqueness: "Our proprietary deep learning algorithms have been trained on over 500,000 anonymised NHS medical images, achieving 97.3% accuracy in detecting early-stage tumours - significantly outperforming traditional screening methods. Unlike competitors focusing on single cancer types, our platform provides comprehensive multi-cancer screening from a single scan. We hold 3 patents pending for our novel image processing techniques and have secured exclusive data partnerships with 4 NHS Trusts.",
+          technology: "Our platform utilises a sophisticated ensemble of convolutional neural networks and transformer architectures, deployed on a scalable cloud infrastructure compliant with NHS Digital standards. The system integrates seamlessly with existing PACS systems through HL7 FHIR APIs. Our proprietary data augmentation techniques enable accurate diagnosis even with limited training data, while our explainable AI module provides clinicians with clear reasoning for each diagnosis.",
+          experience: "Dr. Sarah Chen (CEO) - 15 years in healthcare AI, former Head of AI Research at Imperial College Healthcare NHS Trust, PhD in Computer Vision from Cambridge. Led development of AI systems used in 50+ UK hospitals. James Thompson (CTO) - 12 years software engineering, former Principal Engineer at DeepMind Health, MSc in Machine Learning from Oxford. Dr. Emma Williams (CMO) - NHS consultant radiologist with 20 years experience, published 40+ peer-reviewed papers on medical imaging AI.",
+          funding: 750000,
+          revenue: "We have achieved £285,000 in revenue over the past 12 months through pilot programmes with 4 NHS Trusts and 3 private healthcare providers. Our B2B SaaS model charges £2,500/month per hospital site with volume discounts for Trust-wide deployments. We project Year 1 revenue of £850,000, Year 2 of £2.4M, and Year 3 of £5.8M based on contracted pilots converting to full deployments and new Trust acquisitions.",
+          jobCreation: 25,
+          expansion: "Initial focus on UK NHS and private healthcare market (Year 1-2), followed by expansion to Ireland and Nordic markets (Year 2-3), then EU and US markets (Year 3-5). We plan to hire 15 UK-based employees in Year 1, expanding to 25 by Year 2. Specific roles include ML Engineers, Clinical Specialists, and Sales team based in our London office.",
+          vision: "By 2030, we aim to be the leading AI diagnostic platform in Europe, having contributed to the early detection of over 100,000 cancers and saved an estimated 15,000 lives. We will establish the UK as a global hub for healthcare AI innovation, creating 200+ high-skilled jobs and attracting £50M+ in international investment. Our technology will become the standard of care across NHS Trusts, demonstrating the UK's leadership in ethical AI deployment in healthcare.",
+          innovationStage: "Growth",
+          productStatus: "Our platform is fully operational and deployed across 4 NHS Trust pilot sites. We have completed CE marking certification and NHS Digital DTAC compliance. The system has processed over 25,000 scans in production with a 99.7% uptime record. We are currently in final negotiations with 3 additional Trusts for full commercial deployments starting Q1 2025.",
+          existingCustomers: "Guy's and St Thomas' NHS Foundation Trust (18-month pilot, converting to full deployment), Royal Free London NHS Foundation Trust (12-month pilot), Barts Health NHS Trust (6-month pilot), Cambridge University Hospitals NHS Trust (active pilot). Private sector: HCA Healthcare UK (3 facilities), Nuffield Health (2 facilities), BMI Healthcare (pilot starting).",
+          betaTesters: "Our beta programme included 45 consultant radiologists from 12 NHS Trusts who provided extensive feedback over 18 months. 94% reported the system improved their diagnostic confidence, and 89% said it reduced their workload. Average time to diagnosis decreased by 62% in beta testing. All beta participants have expressed interest in continued use post-trial.",
+          tractionEvidence: "- £285,000 revenue in past 12 months with 3 paying customers\n- 25,000+ scans processed with 97.3% accuracy rate\n- Letters of Intent from 5 NHS Trusts worth £1.2M annual contract value\n- Selected for NHS Innovation Accelerator programme\n- Won HealthTech Innovation Award 2024\n- Featured in BMJ, The Lancet Digital Health, and BBC News\n- £500,000 Innovate UK grant awarded (completed)",
+          techStack: "Python/TensorFlow for ML models, FastAPI backend, React/TypeScript frontend, PostgreSQL with TimescaleDB for time-series data, Redis for caching, Kubernetes on AWS GovCloud (UK) for HIPAA/NHS compliance, Terraform for infrastructure as code, comprehensive CI/CD with GitHub Actions. All data encrypted at rest and in transit using AES-256.",
+          dataArchitecture: "We implement a sophisticated data pipeline with Apache Kafka for real-time streaming, Apache Airflow for ETL orchestration, and dbt for data transformation. Medical images are stored in S3-compatible object storage with strict access controls. Our data lake architecture supports both real-time inference and batch processing for model training. All PII is pseudonymised using NHS-approved tokenisation methods.",
+          aiMethodology: "Our ensemble approach combines EfficientNet-based CNNs for feature extraction with Vision Transformers for global context understanding. We employ federated learning for privacy-preserving model updates across Trust boundaries. Active learning pipelines continuously improve accuracy from clinician feedback. Uncertainty quantification using Monte Carlo dropout enables appropriate human escalation. All models undergo rigorous bias testing across demographic groups.",
+          complianceDesign: "Built from ground-up for healthcare compliance: GDPR and UK Data Protection Act compliant, ISO 27001 certified, CE marked as Class IIa medical device under MDR, NHS Digital DTAC fully compliant, Cyber Essentials Plus certified. We maintain comprehensive audit trails, implement role-based access control, and conduct quarterly penetration testing. Data Processing Agreements in place with all Trust partners.",
+          patentStatus: "3 UK patents pending (application numbers GB2023/001234, GB2023/001235, GB2023/001236) covering: 1) Novel multi-cancer detection ensemble methodology, 2) Explainable AI visualisation system for medical imaging, 3) Privacy-preserving federated learning protocol for healthcare. Expected grant date: Q2 2025. International PCT applications filed for US, EU, and Japan markets.",
+          founderEducation: "Dr. Sarah Chen: PhD Computer Vision, University of Cambridge (2012), MSc Artificial Intelligence, Imperial College London (2008), BSc Computer Science, UCL (2006). James Thompson: MSc Machine Learning, University of Oxford (2014), MEng Computer Science, University of Bristol (2010). Dr. Emma Williams: MBBS Medicine, King's College London (2000), FRCR Fellowship in Clinical Radiology (2008), MD Research Degree in Medical Imaging AI (2015).",
+          founderWorkHistory: "Dr. Sarah Chen: Head of AI Research, Imperial College Healthcare NHS Trust (2018-2023) - led team of 15, deployed AI in 50+ hospitals. Senior ML Engineer, Google Health (2015-2018). Research Scientist, Microsoft Research Cambridge (2012-2015). James Thompson: Principal Engineer, DeepMind Health (2018-2023) - technical lead on Streams project. Senior Engineer, Google Cloud Healthcare (2014-2018). Dr. Emma Williams: Consultant Radiologist, Royal Free London (2012-present), Lead for AI Integration (2019-present).",
+          founderAchievements: "Dr. Sarah Chen: 25 peer-reviewed publications (h-index 18), 4 patents granted, NHS Digital Pioneer Fellow (2022), Forbes 30 Under 30 in Healthcare (2019). James Thompson: Lead architect of systems processing 1M+ daily predictions, Google Cloud Certified Professional ML Engineer, contributor to TensorFlow medical imaging tools. Dr. Emma Williams: 40+ publications, President of British Society of AI in Radiology, NHS Clinical Entrepreneur Fellow, Royal College of Radiologists Innovation Award (2021).",
+          relevantProjects: "NHS AI Lab Collaboration (2022-2023): Developed and validated AI models with NHS AI Lab, resulting in 2 published studies demonstrating clinical efficacy. Innovate UK Smart Grant Project (2021-2022): £500,000 grant to develop federated learning capabilities, successfully deployed across 3 Trust networks. Imperial College Partnership (2020-present): Ongoing research collaboration producing 5 joint publications and 2 patent applications.",
+          monthlyProjections: "Month 1-3: £65,000/mo (existing contracts + 1 new deployment)\nMonth 4-6: £95,000/mo (3 pilot conversions)\nMonth 7-9: £140,000/mo (2 new Trust deployments)\nMonth 10-12: £185,000/mo (private sector expansion)\nYear 1 Total: £1.45M\nYear 2: £3.2M (EU market entry)\nYear 3: £6.8M (US market entry)",
+          customerAcquisitionCost: 45000,
+          lifetimeValue: 450000,
+          paybackPeriod: 4,
+          fundingSources: "Current funding: £500,000 Innovate UK grant (completed), £250,000 angel investment (2022). Seeking: £2M Series A (negotiations with 3 VC firms). Committed: £150,000 from existing angels for bridge round. Government support: Approved for £1M Future Fund matched investment pending Series A close.",
+          detailedCosts: "Personnel (60%): £540,000 - 8 FTE engineers, 2 clinical specialists, 2 sales\nCloud Infrastructure (15%): £135,000 - AWS GovCloud, data storage, compute\nR&D (10%): £90,000 - model development, research partnerships\nSales & Marketing (8%): £72,000 - conferences, content, lead generation\nCompliance & Legal (5%): £45,000 - certifications, legal counsel\nOperations (2%): £18,000 - office, admin, insurance\nTotal Year 1: £900,000",
+          competitors: "IBM Watson Health: Large but struggled with healthcare AI accuracy, recently divested imaging division. Google Health: Strong technology but limited NHS relationships, focus on US market. Qure.ai: Indian competitor focusing on chest X-rays, limited UK presence. Zebra Medical: General radiology AI, not cancer-specific, limited NHS deployments. Key differentiator: Our NHS-trained models, established Trust relationships, and multi-cancer comprehensive approach set us apart.",
+          competitiveDifferentiation: "1) NHS-specific training data: 500,000+ NHS images vs competitors' general datasets\n2) Multi-cancer detection: Single platform for comprehensive screening vs single-disease competitors\n3) Established NHS relationships: 4 active Trust deployments vs competitors' limited UK presence\n4) Explainable AI: Clinician-friendly visualisations vs black-box competitor systems\n5) UK-based team: Local support and regulatory expertise\n6) Federated learning: Privacy-preserving model updates vs data-centralising competitors",
+          customerInterviews: "Conducted 78 structured interviews across: 35 NHS radiologists (pain points: workload, diagnostic confidence, system integration), 18 Trust procurement leads (priorities: cost-effectiveness, compliance, support), 15 private sector medical directors (interests: competitive advantage, patient outcomes), 10 NHS Digital representatives (requirements: interoperability, security, scalability). Key insight: 92% willing to pay premium for UK-developed, NHS-compliant solution.",
+          lettersOfIntent: "5 Letters of Intent secured totaling £1.2M annual contract value:\n- Manchester University NHS Foundation Trust: £300,000/year (3-year commitment)\n- University Hospitals Birmingham: £280,000/year (2-year commitment)\n- Leeds Teaching Hospitals: £250,000/year (2-year commitment)\n- Newcastle upon Tyne Hospitals: £220,000/year (2-year commitment)\n- King's College Hospital: £150,000/year (pilot conversion)",
+          willingnessToPay: "NHS Trusts: £2,000-3,500/month per site based on volume (validated through 78 interviews and 4 active deployments). Private sector: £3,500-5,000/month per facility (premium for faster implementation). Pricing validated through: existing revenue of £285,000, 5 LoIs at proposed pricing, competitive analysis showing 20-30% below IBM Watson pricing while offering superior accuracy.",
+          marketSize: "UK Healthcare AI Market: £2.8B by 2027 (CAGR 35%). Medical Imaging AI specifically: £420M UK market. Our serviceable addressable market (cancer screening AI): £180M UK, £1.2B Europe. Bottom-up calculation: 150 NHS Trusts × £150,000 average annual contract = £22.5M UK NHS opportunity. Plus 300 private facilities × £48,000 = £14.4M private sector. Total UK SAM: £37M.",
+          regulatoryRequirements: "CE Marking (Class IIa Medical Device): Completed May 2024\nUK CA Marking: Application submitted, expected Q1 2025\nNHS Digital DTAC: Fully compliant, certified August 2024\nISO 27001: Certified June 2024\nISO 13485 (Medical Device QMS): In progress, target Q2 2025\nCyber Essentials Plus: Certified March 2024\nGDPR/UK DPA compliance: Ongoing, DPO appointed",
+          complianceTimeline: "Q1 2025: UK CA Marking approval, ISO 13485 certification\nQ2 2025: MHRA post-market surveillance plan implementation\nQ3 2025: FDA 510(k) submission for US market entry\nQ4 2025: EU MDR compliance for European expansion\nOngoing: Quarterly compliance audits, annual recertification, continuous DTAC compliance monitoring",
+          complianceBudget: 95000,
+          hiringPlan: "Year 1 (UK-based, London HQ):\n- Q1: 2 ML Engineers (£80-100k), 1 Clinical Specialist (£70-90k)\n- Q2: 2 Sales Representatives (£50-70k + commission), 1 DevOps Engineer (£75-95k)\n- Q3: 1 Product Manager (£70-90k), 1 Customer Success Manager (£45-60k)\n- Q4: 2 ML Engineers, 1 QA Engineer (£55-70k)\nTotal Year 1: 15 new UK employees, £1.1M annual payroll",
+          specificRegions: "HQ: London (Shoreditch Tech City) - existing office, 2,500 sq ft\nSales Office: Manchester - planned Q3 2025, targeting Northern Trusts\nR&D Hub: Cambridge - partnership with University, shared space\nAll UK employees with right to work, no visa sponsorship required initially",
+          internationalPlan: "Phase 1 (Year 2): Ireland expansion - leverage EU data adequacy, similar healthcare system, low-risk market entry. Establish Dublin sales office.\nPhase 2 (Year 2-3): Nordic markets (Denmark, Sweden, Norway) - strong digital health infrastructure, English proficiency.\nPhase 3 (Year 3-5): Germany and US - larger markets requiring local certification and sales teams.",
+          targetEndorser: "Primary: Tech Nation (endorsed by NHS Digital and Health Innovation Network)\nSecondary: SETsquared Partnership (university-backed, strong healthcare portfolio)\nRationale: Tech Nation's healthcare track record (15+ successful visa applications in health tech), strong NHS relationships, and dedicated health tech support team align perfectly with our profile.",
+          contactPointsStrategy: "1) Tech Nation: Attended 2 Tech Nation events, connected with 3 portfolio founders, scheduled intro call with healthcare sector lead (Sarah Mitchell)\n2) NHS Digital connection: Our pilot programme lead (Dr. James Roberts) serves on Tech Nation advisory board\n3) Warm introductions: 2 existing Tech Nation endorsed founders offered to provide referrals\n4) Supporting evidence prepared: NHS deployment metrics, revenue documentation, patent applications",
+          supportingEvidence: "Comprehensive evidence package prepared:\n- NHS Trust deployment agreements (4 signed contracts)\n- Letters of Intent (5 documents, £1.2M value)\n- Patent applications (3 pending UK patents)\n- Financial statements (audited, 12 months revenue)\n- Customer testimonials (12 NHS clinician endorsements)\n- Press coverage (BBC, BMJ, The Guardian)\n- Award certificates (NHS Innovation Award 2024)\n- Technical certifications (ISO 27001, CE Mark, DTAC)",
+          generatedContent: null,
+          pdfUrl: null,
+          status: "completed",
+          currentGenerationStage: null,
+          stripeSessionId: null,
+          userId: demoUser.id,
+          isDemoData: true,
+        });
+      }
+      
+      // Create demo documents for the demo user
+      const documentCategories = [
+        { 
+          category: "passport",
+          name: "UK Passport - Sarah Chen",
+          description: "Valid UK passport, expires December 2032",
+          fileType: "application/pdf",
+          fileSize: 2456000,
+          status: "verified",
+          expiryDate: new Date("2032-12-15")
+        },
+        {
+          category: "passport", 
+          name: "Chinese Passport (Original)",
+          description: "Original passport showing travel history and previous visas",
+          fileType: "application/pdf",
+          fileSize: 3120000,
+          status: "verified",
+          expiryDate: new Date("2028-08-20")
+        },
+        {
+          category: "bank_statement",
+          name: "Barclays Business Account - 12 Months",
+          description: "Business account statements showing £285,000 revenue and healthy cash flow",
+          fileType: "application/pdf",
+          fileSize: 1850000,
+          status: "verified"
+        },
+        {
+          category: "bank_statement",
+          name: "HSBC Personal Account - 6 Months",
+          description: "Personal savings showing £125,000 available funds",
+          fileType: "application/pdf",
+          fileSize: 980000,
+          status: "verified"
+        },
+        {
+          category: "business_plan",
+          name: "MedTech AI Solutions - Full Business Plan",
+          description: "Comprehensive 45-page business plan with financial projections",
+          fileType: "application/pdf",
+          fileSize: 8500000,
+          status: "verified"
+        },
+        {
+          category: "business_registration",
+          name: "Companies House Certificate",
+          description: "Certificate of Incorporation - Company No. 12345678",
+          fileType: "application/pdf",
+          fileSize: 450000,
+          status: "verified"
+        },
+        {
+          category: "tax_documents",
+          name: "HMRC Corporation Tax Return 2023-24",
+          description: "Filed corporation tax return showing business activity",
+          fileType: "application/pdf",
+          fileSize: 1200000,
+          status: "verified"
+        },
+        {
+          category: "contracts",
+          name: "NHS Trust Pilot Agreement - Guy's & St Thomas'",
+          description: "Signed 18-month pilot programme agreement",
+          fileType: "application/pdf",
+          fileSize: 2100000,
+          status: "verified"
+        },
+        {
+          category: "contracts",
+          name: "Letter of Intent - Manchester University NHS",
+          description: "LOI for £300,000/year deployment commitment",
+          fileType: "application/pdf",
+          fileSize: 680000,
+          status: "verified"
+        },
+        {
+          category: "qualifications",
+          name: "PhD Certificate - University of Cambridge",
+          description: "Doctor of Philosophy in Computer Vision, 2012",
+          fileType: "application/pdf",
+          fileSize: 890000,
+          status: "verified"
+        },
+        {
+          category: "qualifications",
+          name: "MSc Certificate - Imperial College London",
+          description: "Master of Science in Artificial Intelligence, 2008",
+          fileType: "application/pdf",
+          fileSize: 750000,
+          status: "verified"
+        },
+        {
+          category: "patent_documents",
+          name: "UK Patent Application GB2023/001234",
+          description: "Multi-cancer detection ensemble methodology patent",
+          fileType: "application/pdf",
+          fileSize: 3400000,
+          status: "pending"
+        },
+        {
+          category: "endorsement",
+          name: "Tech Nation Endorsement Application",
+          description: "Complete endorsement application with supporting evidence",
+          fileType: "application/pdf",
+          fileSize: 5600000,
+          status: "pending"
+        },
+        {
+          category: "reference_letters",
+          name: "Reference - Prof. David Williams, Cambridge",
+          description: "Academic reference from PhD supervisor",
+          fileType: "application/pdf",
+          fileSize: 420000,
+          status: "verified"
+        },
+        {
+          category: "reference_letters",
+          name: "Reference - NHS Trust Medical Director",
+          description: "Professional reference from pilot programme stakeholder",
+          fileType: "application/pdf",
+          fileSize: 380000,
+          status: "verified"
+        },
+        {
+          category: "press_coverage",
+          name: "BBC News Article - AI Cancer Detection",
+          description: "Media coverage of our NHS pilot success",
+          fileType: "application/pdf",
+          fileSize: 1100000,
+          status: "verified"
+        },
+        {
+          category: "awards",
+          name: "NHS Innovation Award Certificate 2024",
+          description: "Recognition for healthcare innovation excellence",
+          fileType: "image/png",
+          fileSize: 2800000,
+          status: "verified"
+        },
+        {
+          category: "financial_projections",
+          name: "5-Year Financial Model",
+          description: "Detailed Excel model with revenue projections and unit economics",
+          fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          fileSize: 1500000,
+          status: "verified"
+        }
+      ];
+      
+      // Clear existing demo user documents and create new ones
+      const existingDocs = await storage.getUserDocuments(demoUser.id);
+      for (const doc of existingDocs) {
+        await storage.deleteUserDocument(doc.id);
+      }
+      
+      for (const docData of documentCategories) {
+        await storage.createUserDocument({
+          userId: demoUser.id,
+          name: docData.name,
+          category: docData.category,
+          description: docData.description,
+          fileUrl: `/demo-files/${docData.category}/${docData.name.toLowerCase().replace(/\s+/g, '-')}.${docData.fileType.split('/')[1]}`,
+          fileType: docData.fileType,
+          fileSize: docData.fileSize,
+          status: docData.status as 'pending' | 'verified' | 'rejected',
+          expiryDate: docData.expiryDate,
+        });
+      }
+      
+      // Create demo tool analytics
+      const demoTools = [
+        "business-plan", "pitch-coach", "innovation-score", "financial-projections",
+        "compliance-xray", "interview-prep", "exec-summary", "pitch-deck",
+        "market-analysis", "competitor-mapping", "team-builder", "visa-checklist"
+      ];
+      
+      for (const toolId of demoTools) {
+        for (let i = 0; i < Math.floor(Math.random() * 10) + 5; i++) {
+          await storage.createToolAnalytic({
+            userId: demoUser.id,
+            toolId,
+            action: ['access', 'save', 'export'][Math.floor(Math.random() * 3)],
+            metadata: { 
+              source: 'demo-seed',
+              timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+            }
+          });
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "Comprehensive demo data created successfully",
+        demoUser: {
+          id: demoUser.id,
+          email: demoUser.email,
+          name: `${demoUser.firstName} ${demoUser.lastName}`,
+          tier: demoUser.subscriptionTier
+        },
+        documentsCreated: documentCategories.length,
+        toolAnalyticsCreated: demoTools.length * 7.5 // average
+      });
+    } catch (error) {
+      console.error("Seed demo data error:", error);
+      res.status(500).json({ error: "Failed to seed demo data", details: String(error) });
+    }
+  });
+  
+  // Get demo user's data (for sample plans modal)
+  app.get("/api/demo-plans", async (req, res) => {
+    try {
+      const demoPlans = await storage.getDemoBusinessPlans();
+      res.json(demoPlans);
+    } catch (error) {
+      console.error("Get demo plans error:", error);
+      res.status(500).json({ error: "Failed to get demo plans" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
