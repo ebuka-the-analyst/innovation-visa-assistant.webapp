@@ -365,6 +365,7 @@ export const referralRewards = pgTable("referral_rewards", {
   
   // Status: pending, approved, paid, cancelled
   status: varchar("status", { length: 20 }).notNull().default('pending'),
+  notes: text("notes"), // Admin notes (e.g., rejection reason)
   
   // Payout details
   payoutMethod: varchar("payout_method", { length: 20 }), // bank_transfer, stripe, credits

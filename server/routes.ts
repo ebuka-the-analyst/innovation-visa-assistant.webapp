@@ -301,23 +301,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.updateBusinessPlan(planId, { status: 'paid' });
+      
+      const pricing = PRICING[businessPlan.tier as keyof typeof PRICING];
+      const purchaseAmount = pricing?.amount || 0;
 
       // Send payment receipt email
       try {
         const fullUser = await storage.getUser(user.id);
         if (fullUser && fullUser.email) {
-          const pricing = PRICING[businessPlan.tier as keyof typeof PRICING];
           await sendPaymentReceiptEmail(
             fullUser.email,
             fullUser.firstName || 'Customer',
             pricing?.name || businessPlan.tier,
-            pricing?.amount || 0,
+            purchaseAmount,
             sessionId
           );
         }
       } catch (emailError) {
         console.error("Failed to send payment receipt email:", emailError);
         // Don't fail the request if email fails
+      }
+
+      // Process referral rewards - check if user was referred
+      try {
+        const referralEvent = await storage.getReferralEventByReferee(user.id);
+        if (referralEvent && referralEvent.status === 'signed_up') {
+          const referralCode = await storage.getReferralCode(referralEvent.referralCodeId);
+          if (referralCode) {
+            // Calculate reward based on referral code settings
+            let rewardAmount = 0;
+            if (referralCode.rewardType === 'percentage') {
+              rewardAmount = Math.round(purchaseAmount * referralCode.rewardValue / 100);
+            } else {
+              rewardAmount = referralCode.rewardValue;
+            }
+            
+            // Create reward for the referrer
+            await storage.createReferralReward({
+              userId: referralCode.userId,
+              referralEventId: referralEvent.id,
+              type: 'cash',
+              amount: rewardAmount,
+              currency: 'GBP',
+              status: 'pending',
+            });
+            
+            // Update referral event to qualified
+            await storage.updateReferralEvent(referralEvent.id, {
+              status: 'qualified',
+              qualifiedAt: new Date(),
+              rewardAmount,
+            });
+            
+            // Update referral code stats
+            await storage.incrementReferralStats(referralCode.id, 'successfulReferrals');
+            await storage.updateReferralCode(referralCode.id, {
+              totalEarnings: referralCode.totalEarnings + rewardAmount,
+            });
+          }
+        }
+      } catch (referralError) {
+        console.error("Failed to process referral reward:", referralError);
+        // Don't fail the request if referral processing fails
       }
 
       res.json({ success: true, verified: true });
@@ -1429,7 +1474,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
             id: `complete-${plan.id}`,
             type: 'plan_completed',
             description: `Business plan completed: ${plan.businessName}`,
-            timestamp: plan.updatedAt || new Date(plan.createdAt).toISOString(),
+            timestamp: new Date(plan.createdAt).toISOString(),
             planId: plan.id,
           });
         }

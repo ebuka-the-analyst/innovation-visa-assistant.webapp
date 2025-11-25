@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
@@ -24,7 +25,12 @@ import {
   Twitter,
   Linkedin,
   MessageCircle,
-  QrCode
+  QrCode,
+  ArrowRight,
+  Eye,
+  UserPlus,
+  CreditCard,
+  Wallet
 } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
@@ -126,6 +132,106 @@ function ReferralStats({ stats }: { stats: ReferralDashboardData['stats'] }) {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function ReferralJourneyFunnel({ stats }: { stats: ReferralDashboardData['stats'] }) {
+  const steps = [
+    { 
+      icon: Eye, 
+      label: "Link Clicked", 
+      value: stats.totalClicks, 
+      color: "bg-blue-500",
+      description: "Visitors who clicked your referral link"
+    },
+    { 
+      icon: UserPlus, 
+      label: "Signed Up", 
+      value: stats.signups, 
+      color: "bg-purple-500",
+      description: "Users who created an account"
+    },
+    { 
+      icon: CreditCard, 
+      label: "Subscribed", 
+      value: stats.qualified, 
+      color: "bg-orange-500",
+      description: "Users who made a purchase"
+    },
+    { 
+      icon: Wallet, 
+      label: "Rewards Earned", 
+      value: `£${(stats.pendingEarnings + stats.totalEarnings).toFixed(2)}`, 
+      color: "bg-green-500",
+      description: "Your total commission earnings"
+    },
+  ];
+
+  const conversionRate = stats.totalClicks > 0 
+    ? ((stats.qualified / stats.totalClicks) * 100).toFixed(1)
+    : '0';
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5" />
+          Referral Journey
+        </CardTitle>
+        <CardDescription>
+          Track how your referrals progress through each stage
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+          {steps.map((step, idx) => {
+            const Icon = step.icon;
+            return (
+              <div key={step.label} className="flex items-center gap-2 flex-1">
+                <div className="flex flex-col items-center text-center flex-1">
+                  <div className={`${step.color} p-3 rounded-full mb-2`}>
+                    <Icon className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold">{step.value}</div>
+                  <div className="text-sm font-medium">{step.label}</div>
+                  <div className="text-xs text-muted-foreground">{step.description}</div>
+                </div>
+                {idx < steps.length - 1 && (
+                  <ArrowRight className="h-5 w-5 text-muted-foreground hidden md:block" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <Separator className="my-4" />
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <div className="text-2xl font-bold text-primary">{conversionRate}%</div>
+            <div className="text-sm text-muted-foreground">Conversion Rate</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              (Clicks to Purchases)
+            </div>
+          </div>
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <div className="text-2xl font-bold">
+              {stats.pendingEarnings > 0 ? (
+                <span className="text-orange-500">£{stats.pendingEarnings.toFixed(2)}</span>
+              ) : (
+                <span className="text-green-500">£{stats.totalEarnings.toFixed(2)}</span>
+              )}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {stats.pendingEarnings > 0 ? "Pending Payout" : "Total Paid"}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {stats.pendingEarnings > 0 ? "Awaiting approval" : "Successfully paid out"}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -450,6 +556,8 @@ export default function ReferralDashboard() {
       </div>
       
       <ReferralStats stats={data.stats} />
+      
+      <ReferralJourneyFunnel stats={data.stats} />
       
       {data.code && (
         <ReferralLink code={data.code.code} refereeDiscount={data.code.refereeDiscount} />
