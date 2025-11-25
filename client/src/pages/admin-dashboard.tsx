@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -23,6 +22,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
+import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { AdminSidebar } from "@/components/AdminSidebar";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format, formatDistance, subDays, subHours, startOfDay, endOfDay, differenceInSeconds } from "date-fns";
@@ -449,8 +450,8 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState("overview");
+  // Section state (for sidebar navigation)
+  const [activeSection, setActiveSection] = useState("overview");
 
   // Filter states
   const [usersPage, setUsersPage] = useState(1);
@@ -536,33 +537,33 @@ export default function AdminDashboard() {
   // Users analytics
   const { data: usersAnalytics, isLoading: usersAnalyticsLoading } = useQuery<UsersAnalytics>({
     queryKey: ['/api/admin/analytics/users'],
-    enabled: !!user?.isAdmin && activeTab === 'users',
+    enabled: !!user?.isAdmin && activeSection.startsWith('users'),
     refetchInterval: REFRESH_INTERVAL,
   });
 
   // Users data
   const { data: usersData, isLoading: usersLoading } = useQuery<{ users: User[]; total: number; page: number; pageSize: number }>({
     queryKey: ['/api/admin/users', { page: usersPage, pageSize: usersPageSize, search: usersSearch, ...userFilters }],
-    enabled: !!user?.isAdmin && activeTab === 'users',
+    enabled: !!user?.isAdmin && activeSection.startsWith('users'),
   });
 
   // Plans analytics
   const { data: plansAnalytics, isLoading: plansAnalyticsLoading } = useQuery<PlansAnalytics>({
     queryKey: ['/api/admin/analytics/plans'],
-    enabled: !!user?.isAdmin && activeTab === 'plans',
+    enabled: !!user?.isAdmin && activeSection.startsWith('plans'),
     refetchInterval: REFRESH_INTERVAL,
   });
 
   // Plans data
   const { data: plansData, isLoading: plansLoading } = useQuery<{ plans: Plan[]; total: number; page: number; pageSize: number }>({
     queryKey: ['/api/admin/plans', { page: plansPage, pageSize: plansPageSize, ...planFilters }],
-    enabled: !!user?.isAdmin && activeTab === 'plans',
+    enabled: !!user?.isAdmin && activeSection.startsWith('plans'),
   });
 
   // Tool analytics data
   const { data: toolAnalytics, isLoading: toolAnalyticsLoading } = useQuery<ToolAnalytics>({
     queryKey: ['/api/admin/analytics/tools', { dateRange }],
-    enabled: !!user?.isAdmin && activeTab === 'analytics',
+    enabled: !!user?.isAdmin && activeSection.startsWith('tools'),
     refetchInterval: REFRESH_INTERVAL,
   });
 
@@ -576,13 +577,13 @@ export default function AdminDashboard() {
   // Audit log
   const { data: auditLog, isLoading: auditLogLoading } = useQuery<AuditLogEntry[]>({
     queryKey: ['/api/admin/audit-log'],
-    enabled: !!user?.isAdmin && activeTab === 'system',
+    enabled: !!user?.isAdmin && activeSection.startsWith('logs'),
   });
 
   // System metrics
   const { data: systemMetrics, isLoading: systemMetricsLoading } = useQuery<SystemMetrics>({
     queryKey: ['/api/admin/system/metrics'],
-    enabled: !!user?.isAdmin && activeTab === 'system',
+    enabled: !!user?.isAdmin && activeSection.startsWith('system'),
     refetchInterval: REFRESH_INTERVAL,
   });
 
@@ -755,156 +756,190 @@ export default function AdminDashboard() {
 
   const rowSpacing = dataDensity === 'compact' ? 'py-2' : dataDensity === 'comfortable' ? 'py-3' : 'py-4';
 
+  const sidebarStyle = {
+    "--sidebar-width": "18rem",
+    "--sidebar-width-icon": "4rem",
+  };
+
+  const getSectionTitle = () => {
+    const titles: Record<string, string> = {
+      'overview': 'Dashboard Overview',
+      'realtime': 'Real-Time Activity Monitor',
+      'kpis': 'Executive KPI Dashboard',
+      'users-overview': 'User Management',
+      'users-active': 'Active Users',
+      'users-new': 'New Registrations',
+      'users-churn': 'Churn Analysis',
+      'users-cohorts': 'Cohort Analysis',
+      'users-journey': 'User Journey Analytics',
+      'users-geo': 'Geographic Distribution',
+      'plans-overview': 'Business Plans',
+      'plans-pending': 'Pending Plans',
+      'plans-completed': 'Completed Plans',
+      'plans-failed': 'Failed Plans',
+      'plans-funnel': 'Plan Completion Funnel',
+      'revenue-overview': 'Revenue Dashboard',
+      'revenue-mrr': 'MRR Analytics',
+      'revenue-subscriptions': 'Subscription Management',
+      'revenue-tiers': 'Tier Distribution',
+      'revenue-ltv': 'Customer Lifetime Value',
+      'tools-usage': 'Tool Usage Analytics',
+      'tools-heatmap': 'Usage Heatmap',
+      'tools-popular': 'Top Tools',
+      'tools-engagement': 'Engagement Metrics',
+      'tools-completion': 'Tool Completion Rates',
+      'system-overview': 'System Health Dashboard',
+      'system-performance': 'Performance Metrics',
+      'system-database': 'Database Health',
+      'system-storage': 'Storage Analytics',
+      'system-api': 'API Performance',
+      'logs-activity': 'Activity Log',
+      'logs-errors': 'Error Log',
+      'logs-audit': 'Audit Trail',
+      'logs-security': 'Security Events',
+      'comms-emails': 'Email Analytics',
+      'comms-notifications': 'Notification Center',
+      'settings-general': 'General Settings',
+      'settings-access': 'Access Control',
+      'settings-maintenance': 'Maintenance Mode',
+    };
+    return titles[activeSection] || 'Dashboard';
+  };
+
   return (
     <TooltipProvider>
-      <motion.div
-        className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="container mx-auto px-4 py-8 space-y-8">
-          {/* Header with Glassmorphism Effect */}
-          <motion.div
-            className="relative overflow-hidden rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl p-6"
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
-            
-            <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex items-center gap-4">
+      <SidebarProvider style={sidebarStyle as React.CSSProperties}>
+        <div className="flex h-screen w-full">
+          <AdminSidebar 
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            stats={{
+              totalUsers: overviewData?.kpiMetrics?.[0]?.value || 0,
+              activeUsers: overviewData?.kpiMetrics?.[1]?.value || 0,
+              pendingPlans: plansData?.plans?.filter(p => p.status === 'pending').length || 0,
+              errorCount: activityLog?.filter(a => a.severity === 'error').length || 0,
+            }}
+          />
+          
+          <SidebarInset className="flex-1 overflow-auto">
+            <motion.div
+              className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="p-6 space-y-6">
+                {/* Header with Glassmorphism Effect */}
                 <motion.div
-                  className="p-3 rounded-lg bg-primary/10"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="relative overflow-hidden rounded-lg border border-border/50 bg-card/50 backdrop-blur-xl p-4"
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
                 >
-                  <Shield className="h-8 w-8 text-primary" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
+                  
+                  <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <SidebarTrigger className="md:hidden" />
+                      <div>
+                        <h1 className="text-2xl font-bold tracking-tight" data-testid="heading-admin-dashboard">
+                          {getSectionTitle()}
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                          PhD-level analytics and comprehensive system management
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      {/* Last Updated & Countdown */}
+                      {overviewData?.lastUpdated && (
+                        <motion.div
+                          className="flex items-center gap-2 px-3 py-2 rounded-md bg-card/80 border border-border/50"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                        >
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            Updated {formatDistance(new Date(overviewData.lastUpdated), new Date(), { addSuffix: true })}
+                          </span>
+                          <Badge variant="outline" className="ml-2">
+                            {refreshCountdown}s
+                          </Badge>
+                        </motion.div>
+                      )}
+
+                      {/* Manual Refresh */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={handleManualRefresh}
+                            disabled={overviewLoading}
+                            data-testid="button-manual-refresh"
+                          >
+                            <RefreshCw className={`h-4 w-4 ${overviewLoading ? 'animate-spin' : ''}`} />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Refresh all data</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      {/* Export Menu */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" data-testid="button-export-menu">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Export Data</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => exportMutation.mutate('users')}
+                            disabled={exportMutation.isPending}
+                          >
+                            <Users className="h-4 w-4 mr-2" />
+                            Users (CSV)
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => exportMutation.mutate('plans')}
+                            disabled={exportMutation.isPending}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Plans (CSV)
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => exportMutation.mutate('analytics')}
+                            disabled={exportMutation.isPending}
+                          >
+                            <BarChart3 className="h-4 w-4 mr-2" />
+                            Analytics (CSV)
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      {/* Dashboard Settings */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button size="icon" variant="outline" data-testid="button-dashboard-settings">
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Dashboard settings</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </div>
                 </motion.div>
-                <div>
-                  <h1 className="text-4xl font-bold tracking-tight" data-testid="heading-admin-dashboard">
-                    Admin Dashboard
-                  </h1>
-                  <p className="text-muted-foreground mt-1">
-                    Comprehensive system analytics and management
-                  </p>
-                </div>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Last Updated & Countdown */}
-                {overviewData?.lastUpdated && (
-                  <motion.div
-                    className="flex items-center gap-2 px-3 py-2 rounded-md bg-card/80 border border-border/50"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                  >
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      Updated {formatDistance(new Date(overviewData.lastUpdated), new Date(), { addSuffix: true })}
-                    </span>
-                    <Badge variant="outline" className="ml-2">
-                      {refreshCountdown}s
-                    </Badge>
-                  </motion.div>
-                )}
-
-                {/* Manual Refresh */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={handleManualRefresh}
-                      disabled={overviewLoading}
-                      data-testid="button-manual-refresh"
-                    >
-                      <RefreshCw className={`h-4 w-4 ${overviewLoading ? 'animate-spin' : ''}`} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Refresh all data</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                {/* Export Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" data-testid="button-export-menu">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Export Data</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => exportMutation.mutate('users')}
-                      disabled={exportMutation.isPending}
-                    >
-                      <Users className="h-4 w-4 mr-2" />
-                      Users (CSV)
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => exportMutation.mutate('plans')}
-                      disabled={exportMutation.isPending}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Plans (CSV)
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => exportMutation.mutate('analytics')}
-                      disabled={exportMutation.isPending}
-                    >
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      Analytics (CSV)
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Dashboard Settings */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="icon" variant="outline" data-testid="button-dashboard-settings">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Dashboard settings</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Main Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-2 bg-card/50 backdrop-blur-sm p-1" data-testid="tabs-navigation">
-              <TabsTrigger value="overview" className="gap-2" data-testid="tab-overview">
-                <LayoutDashboard className="h-4 w-4" />
-                <span className="hidden sm:inline">Overview</span>
-              </TabsTrigger>
-              <TabsTrigger value="users" className="gap-2" data-testid="tab-users">
-                <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">Users</span>
-              </TabsTrigger>
-              <TabsTrigger value="plans" className="gap-2" data-testid="tab-plans">
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">Plans</span>
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="gap-2" data-testid="tab-analytics">
-                <TrendingUp className="h-4 w-4" />
-                <span className="hidden sm:inline">Analytics</span>
-              </TabsTrigger>
-              <TabsTrigger value="system" className="gap-2" data-testid="tab-system">
-                <Server className="h-4 w-4" />
-                <span className="hidden sm:inline">System</span>
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
+                {/* Main Content - Section Based */}
+                {(activeSection === 'overview' || activeSection === 'realtime' || activeSection === 'kpis') && (
+                  <div className="space-y-6">
               <AnimatePresence mode="wait">
                 {overviewLoading ? (
                   <motion.div
@@ -1366,10 +1401,12 @@ export default function AdminDashboard() {
                   </Card>
                 )}
               </AnimatePresence>
-            </TabsContent>
+                  </div>
+                )}
 
-            {/* Users Tab */}
-            <TabsContent value="users" className="space-y-6">
+                {/* Users Section */}
+                {activeSection.startsWith('users') && (
+                  <div className="space-y-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1806,10 +1843,12 @@ export default function AdminDashboard() {
                   </Card>
                 )}
               </motion.div>
-            </TabsContent>
+                  </div>
+                )}
 
-            {/* Plans Tab */}
-            <TabsContent value="plans" className="space-y-6">
+                {/* Plans Section */}
+                {activeSection.startsWith('plans') && (
+                  <div className="space-y-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -2149,10 +2188,12 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </motion.div>
-            </TabsContent>
+                  </div>
+                )}
 
-            {/* Tool Analytics Tab */}
-            <TabsContent value="analytics" className="space-y-6">
+                {/* Tool Analytics Section */}
+                {activeSection.startsWith('tools') && (
+                  <div className="space-y-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -2396,10 +2437,12 @@ export default function AdminDashboard() {
                   </>
                 )}
               </motion.div>
-            </TabsContent>
+                  </div>
+                )}
 
-            {/* System Health Tab */}
-            <TabsContent value="system" className="space-y-6">
+                {/* System Health Section */}
+                {activeSection.startsWith('system') && (
+                  <div className="space-y-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -2680,8 +2723,12 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </motion.div>
-            </TabsContent>
-          </Tabs>
+                  </div>
+                )}
+
+              </div>
+            </motion.div>
+          </SidebarInset>
         </div>
 
         {/* Edit User Dialog */}
@@ -2844,7 +2891,7 @@ export default function AdminDashboard() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </motion.div>
+      </SidebarProvider>
     </TooltipProvider>
   );
 }
