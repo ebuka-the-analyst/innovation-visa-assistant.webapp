@@ -146,11 +146,13 @@ interface User {
   email: string;
   firstName?: string;
   lastName?: string;
-  subscriptionTier: 'free' | 'basic' | 'premium' | 'enterprise';
+  subscriptionTier: 'free' | 'basic' | 'premium' | 'enterprise' | 'ultimate';
   isAdmin: boolean;
   createdAt: string;
+  updatedAt?: string;
   lastLogin?: string;
   isVerified: boolean;
+  isEmailVerified?: boolean;
   totalPlans?: number;
 }
 
@@ -2188,9 +2190,9 @@ export default function AdminDashboard() {
                             </div>
                             <p className="text-2xl font-bold text-red-500">
                               {usersData?.users?.filter(u => {
-                                const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
-                                const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
-                                return daysSinceLogin > 14 && daysSinceLogin <= 30;
+                                const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                                const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                                return daysSinceActivity > 14 && daysSinceActivity <= 30;
                               }).length || 0}
                             </p>
                             <p className="text-xs text-muted-foreground">14-30 days inactive</p>
@@ -2202,9 +2204,9 @@ export default function AdminDashboard() {
                             </div>
                             <p className="text-2xl font-bold text-amber-500">
                               {usersData?.users?.filter(u => {
-                                const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
-                                const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
-                                return daysSinceLogin > 30;
+                                const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                                const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                                return daysSinceActivity > 30;
                               }).length || 0}
                             </p>
                             <p className="text-xs text-muted-foreground">30+ days inactive</p>
@@ -2216,9 +2218,9 @@ export default function AdminDashboard() {
                             </div>
                             <p className="text-2xl font-bold text-green-500">
                               {usersData?.users?.filter(u => {
-                                const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
-                                const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
-                                return daysSinceLogin <= 7;
+                                const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                                const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                                return daysSinceActivity <= 7;
                               }).length || 0}
                             </p>
                             <p className="text-xs text-muted-foreground">Active in last 7 days</p>
@@ -2231,9 +2233,9 @@ export default function AdminDashboard() {
                             <p className="text-2xl font-bold text-blue-500">
                               {usersData?.users?.length ? 
                                 ((usersData.users.filter(u => {
-                                  const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
-                                  const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
-                                  return daysSinceLogin <= 30;
+                                  const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                                  const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                                  return daysSinceActivity <= 30;
                                 }).length / usersData.users.length) * 100).toFixed(1) : 0}%
                             </p>
                             <p className="text-xs text-muted-foreground">30-day retention</p>
@@ -2248,19 +2250,19 @@ export default function AdminDashboard() {
                           </h4>
                           <div className="space-y-2">
                             {usersData?.users?.filter(u => {
-                              const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
-                              const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
-                              return daysSinceLogin > 7;
+                              const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                              const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                              return daysSinceActivity > 7;
                             }).slice(0, 10).map(user => {
-                              const lastLogin = user.lastLogin ? new Date(user.lastLogin) : null;
-                              const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
-                              const riskLevel = daysSinceLogin > 30 ? 'high' : daysSinceLogin > 14 ? 'medium' : 'low';
+                              const lastActivity = user.updatedAt ? new Date(user.updatedAt) : new Date(user.createdAt);
+                              const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                              const riskLevel = daysSinceActivity > 30 ? 'high' : daysSinceActivity > 14 ? 'medium' : 'low';
                               return (
                                 <div key={user.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover-elevate">
                                   <div className="flex items-center gap-3">
                                     <div className={`w-2 h-2 rounded-full ${riskLevel === 'high' ? 'bg-red-500' : riskLevel === 'medium' ? 'bg-amber-500' : 'bg-yellow-500'}`} />
                                     <div>
-                                      <p className="font-medium">{user.firstName || user.email.split('@')[0]}</p>
+                                      <p className="font-medium">{user.firstName || user.email?.split('@')[0] || 'Unknown'}</p>
                                       <p className="text-sm text-muted-foreground">{user.email}</p>
                                     </div>
                                   </div>
@@ -2269,16 +2271,16 @@ export default function AdminDashboard() {
                                       {riskLevel === 'high' ? 'High Risk' : riskLevel === 'medium' ? 'At Risk' : 'Dormant'}
                                     </Badge>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                      {daysSinceLogin === 999 ? 'Never logged in' : `${daysSinceLogin} days ago`}
+                                      Last active {daysSinceActivity} days ago
                                     </p>
                                   </div>
                                 </div>
                               );
                             })}
                             {(!usersData?.users || usersData.users.filter(u => {
-                              const lastLogin = u.lastLogin ? new Date(u.lastLogin) : null;
-                              const daysSinceLogin = lastLogin ? Math.floor((Date.now() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)) : 999;
-                              return daysSinceLogin > 7;
+                              const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
+                              const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+                              return daysSinceActivity > 7;
                             }).length === 0) && (
                               <div className="py-8 text-center text-muted-foreground">
                                 <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
