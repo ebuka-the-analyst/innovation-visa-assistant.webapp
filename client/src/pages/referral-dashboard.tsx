@@ -35,6 +35,11 @@ import {
 import { useState } from "react";
 import { format } from "date-fns";
 import QRCode from "qrcode";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Trophy, Banknote, ArrowUpRight, Medal, Crown, Award } from "lucide-react";
 
 interface ReferralDashboardData {
   code: {
@@ -480,6 +485,308 @@ function RewardsTable({ rewards }: { rewards: ReferralDashboardData['rewards'] }
   );
 }
 
+interface PayoutRequestData {
+  id: string;
+  amount: number;
+  status: string;
+  paymentMethod: string;
+  createdAt: string;
+  processedAt?: string;
+  notes?: string;
+}
+
+function PayoutRequestSection({ availableBalance }: { availableBalance: number }) {
+  const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentDetails, setPaymentDetails] = useState('');
+  const [amount, setAmount] = useState('');
+
+  const { data: payouts } = useQuery<PayoutRequestData[]>({
+    queryKey: ['/api/payouts'],
+  });
+
+  const createPayoutMutation = useMutation({
+    mutationFn: async (data: { amount: number; paymentMethod: string; paymentDetails: string }) => {
+      return apiRequest('/api/payouts', { method: 'POST', body: JSON.stringify(data) });
+    },
+    onSuccess: () => {
+      toast({ title: 'Payout requested', description: 'Your payout request has been submitted for review.' });
+      queryClient.invalidateQueries({ queryKey: ['/api/payouts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/referrals/dashboard'] });
+      setIsDialogOpen(false);
+      setAmount('');
+      setPaymentMethod('');
+      setPaymentDetails('');
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Error', 
+        description: error?.message || 'Failed to submit payout request', 
+        variant: 'destructive' 
+      });
+    },
+  });
+
+  const handleSubmit = () => {
+    const amountInPence = Math.round(parseFloat(amount) * 100);
+    if (isNaN(amountInPence) || amountInPence < 2000) {
+      toast({ title: 'Invalid amount', description: 'Minimum payout is £20', variant: 'destructive' });
+      return;
+    }
+    if (amountInPence > availableBalance) {
+      toast({ title: 'Insufficient balance', description: 'Amount exceeds available balance', variant: 'destructive' });
+      return;
+    }
+    if (!paymentMethod || !paymentDetails.trim()) {
+      toast({ title: 'Missing details', description: 'Please fill in all payment details', variant: 'destructive' });
+      return;
+    }
+    createPayoutMutation.mutate({ amount: amountInPence, paymentMethod, paymentDetails });
+  };
+
+  const pendingPayouts = payouts?.filter(p => p.status === 'pending' || p.status === 'processing') || [];
+  const pendingAmount = pendingPayouts.reduce((sum, p) => sum + p.amount, 0);
+  const effectiveBalance = availableBalance - pendingAmount;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Banknote className="h-5 w-5" />
+          Request Payout
+        </CardTitle>
+        <CardDescription>Withdraw your referral earnings to your bank account</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+            <p className="text-sm text-muted-foreground">Available Balance</p>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+              £{(effectiveBalance / 100).toFixed(2)}
+            </p>
+          </div>
+          <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+            <p className="text-sm text-muted-foreground">Pending Payouts</p>
+            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+              £{(pendingAmount / 100).toFixed(2)}
+            </p>
+          </div>
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+            <p className="text-sm text-muted-foreground">Minimum Payout</p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">£20.00</p>
+          </div>
+        </div>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button 
+              className="w-full" 
+              disabled={effectiveBalance < 2000}
+              data-testid="button-request-payout"
+            >
+              <Wallet className="h-4 w-4 mr-2" />
+              Request Payout
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Request Payout</DialogTitle>
+              <DialogDescription>
+                Enter the amount and payment details for your payout request.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="amount">Amount (£)</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  min="20"
+                  max={(effectiveBalance / 100).toFixed(2)}
+                  placeholder="e.g. 50.00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  data-testid="input-payout-amount"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Available: £{(effectiveBalance / 100).toFixed(2)} (min £20)
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="method">Payment Method</Label>
+                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <SelectTrigger data-testid="select-payment-method">
+                    <SelectValue placeholder="Select payment method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bank_transfer">Bank Transfer (UK)</SelectItem>
+                    <SelectItem value="paypal">PayPal</SelectItem>
+                    <SelectItem value="wise">Wise (TransferWise)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="details">Payment Details</Label>
+                <Textarea
+                  id="details"
+                  placeholder={
+                    paymentMethod === 'bank_transfer'
+                      ? "Account Name:\nSort Code:\nAccount Number:"
+                      : paymentMethod === 'paypal'
+                      ? "PayPal Email Address"
+                      : paymentMethod === 'wise'
+                      ? "Wise Email or Account Details"
+                      : "Enter your payment details"
+                  }
+                  value={paymentDetails}
+                  onChange={(e) => setPaymentDetails(e.target.value)}
+                  data-testid="input-payment-details"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={createPayoutMutation.isPending}
+                data-testid="button-submit-payout"
+              >
+                {createPayoutMutation.isPending ? 'Submitting...' : 'Submit Request'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {payouts && payouts.length > 0 && (
+          <div className="mt-4">
+            <h4 className="font-medium mb-2">Payout History</h4>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {payouts.map((payout) => (
+                  <TableRow key={payout.id} data-testid={`row-payout-${payout.id}`}>
+                    <TableCell className="text-sm">
+                      {format(new Date(payout.createdAt), 'MMM d, yyyy')}
+                    </TableCell>
+                    <TableCell className="font-medium">£{(payout.amount / 100).toFixed(2)}</TableCell>
+                    <TableCell className="capitalize">{payout.paymentMethod.replace('_', ' ')}</TableCell>
+                    <TableCell>{getStatusBadge(payout.status)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+interface LeaderboardEntry {
+  rank: number;
+  userName: string;
+  referralCode: string;
+  successfulReferrals: number;
+  totalReferrals: number;
+}
+
+function ReferralLeaderboard() {
+  const { data: leaderboard, isLoading } = useQuery<LeaderboardEntry[]>({
+    queryKey: ['/api/referrals/leaderboard'],
+  });
+
+  const getRankIcon = (rank: number) => {
+    switch (rank) {
+      case 1: return <Crown className="h-5 w-5 text-yellow-500" />;
+      case 2: return <Medal className="h-5 w-5 text-gray-400" />;
+      case 3: return <Award className="h-5 w-5 text-amber-600" />;
+      default: return <span className="text-muted-foreground font-mono">#{rank}</span>;
+    }
+  };
+
+  const getRankBg = (rank: number) => {
+    switch (rank) {
+      case 1: return 'bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-200 dark:border-yellow-800';
+      case 2: return 'bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 border-gray-200 dark:border-gray-800';
+      case 3: return 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800';
+      default: return '';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5" />
+            Leaderboard
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-yellow-500" />
+          Top Referrers
+        </CardTitle>
+        <CardDescription>See how you rank against other referrers</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {!leaderboard || leaderboard.length === 0 ? (
+          <div className="text-center py-6 text-muted-foreground">
+            <Trophy className="h-10 w-10 mx-auto mb-2 opacity-50" />
+            <p>No referrers yet. Be the first to reach the leaderboard!</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {leaderboard.map((entry) => (
+              <div 
+                key={entry.rank} 
+                className={`flex items-center justify-between p-3 rounded-lg border ${getRankBg(entry.rank)}`}
+                data-testid={`leaderboard-entry-${entry.rank}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 flex justify-center">{getRankIcon(entry.rank)}</div>
+                  <div>
+                    <p className="font-medium">{entry.userName}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{entry.referralCode}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-lg">{entry.successfulReferrals}</p>
+                  <p className="text-xs text-muted-foreground">successful / {entry.totalReferrals} total</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function ReferralDashboard() {
   const { data, isLoading, error } = useQuery<ReferralDashboardData>({
     queryKey: ['/api/referrals/dashboard'],
@@ -583,6 +890,11 @@ export default function ReferralDashboard() {
           </Tabs>
         </CardContent>
       </Card>
+      
+      <div className="grid gap-6 lg:grid-cols-2">
+        <PayoutRequestSection availableBalance={data.stats.totalEarnings} />
+        <ReferralLeaderboard />
+      </div>
       
       <Card>
         <CardHeader>

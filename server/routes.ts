@@ -10,7 +10,7 @@ import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
 import crypto from "crypto";
 import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
-import { sendPaymentReceiptEmail, sendPasswordResetEmail, generateVerificationToken, getResetTokenExpiry, sendPlanCompletionEmail } from "./email";
+import { sendPaymentReceiptEmail, sendPasswordResetEmail, generateVerificationToken, getResetTokenExpiry, sendPlanCompletionEmail, sendReferralRewardEmail, sendPromoCodeRewardEmail } from "./email";
 import bcrypt from "bcrypt";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -219,7 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/payment/create-checkout", isAuthenticated, async (req, res) => {
     try {
-      const { planId } = req.body;
+      const { planId, promoCode } = req.body;
       const user = req.user as any;
       
       if (!planId) {
@@ -236,6 +236,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid tier" });
       }
 
+      let finalAmount = pricing.amount;
+      let validPromoCode = null;
+      
+      // Validate and apply promo code discount with explicit error handling
+      if (promoCode) {
+        const promoCodeRecord = await storage.getPromoCodeByCode(promoCode.toUpperCase());
+        
+        if (!promoCodeRecord) {
+          return res.status(400).json({ error: "Invalid promo code", promoError: true });
+        }
+        
+        if (promoCodeRecord.status !== 'active') {
+          return res.status(400).json({ error: "This promo code is no longer active", promoError: true });
+        }
+        
+        const now = new Date();
+        if (now < promoCodeRecord.validFrom) {
+          return res.status(400).json({ error: "This promo code is not yet active", promoError: true });
+        }
+        
+        if (promoCodeRecord.validUntil && now > promoCodeRecord.validUntil) {
+          return res.status(400).json({ error: "This promo code has expired", promoError: true });
+        }
+        
+        if (promoCodeRecord.maxTotalUses && promoCodeRecord.currentUses >= promoCodeRecord.maxTotalUses) {
+          return res.status(400).json({ error: "This promo code has reached its usage limit", promoError: true });
+        }
+        
+        // Check tier eligibility
+        if (promoCodeRecord.eligibleTiers?.length > 0 && !promoCodeRecord.eligibleTiers.includes(businessPlan.tier)) {
+          return res.status(400).json({ error: `This promo code is not valid for the ${businessPlan.tier} tier`, promoError: true });
+        }
+        
+        // Check minimum purchase amount
+        if (promoCodeRecord.minPurchaseAmount && pricing.amount < promoCodeRecord.minPurchaseAmount) {
+          return res.status(400).json({ error: `Minimum purchase of £${(promoCodeRecord.minPurchaseAmount / 100).toFixed(2)} required`, promoError: true });
+        }
+        
+        // Apply the discount
+        validPromoCode = promoCodeRecord;
+        if (validPromoCode.discountType === 'percentage') {
+          finalAmount = Math.round(pricing.amount * (1 - validPromoCode.discountValue / 100));
+        } else {
+          finalAmount = Math.max(0, pricing.amount - validPromoCode.discountValue * 100);
+        }
+      }
+
       const baseUrl = process.env.REPLIT_DEV_DOMAIN 
         ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
         : 'http://localhost:5000';
@@ -248,9 +295,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               currency: "gbp",
               product_data: {
                 name: `Innovator Founder Visa Assistant - ${pricing.name}`,
-                description: `AI-powered UK Innovation Visa business plan - ${businessPlan.tier} tier`,
+                description: validPromoCode 
+                  ? `AI-powered UK Innovation Visa business plan - ${businessPlan.tier} tier (${validPromoCode.discountValue}% discount applied)`
+                  : `AI-powered UK Innovation Visa business plan - ${businessPlan.tier} tier`,
               },
-              unit_amount: pricing.amount,
+              unit_amount: finalAmount,
             },
             quantity: 1,
           },
@@ -260,6 +309,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cancel_url: `${baseUrl}/questionnaire`,
         metadata: {
           planId: businessPlan.id,
+          promoCode: validPromoCode?.code || '',
+          promoCodeId: validPromoCode?.id || '',
+          promoCodeCreatorId: validPromoCode?.creatorId || '',
+          originalAmount: pricing.amount.toString(),
+          discountAmount: (pricing.amount - finalAmount).toString(),
         },
       });
 
@@ -358,11 +412,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await storage.updateReferralCode(referralCode.id, {
               totalEarnings: referralCode.totalEarnings + rewardAmount,
             });
+
+            // Send email notification to referrer
+            try {
+              const referrer = await storage.getUser(referralCode.userId);
+              if (referrer?.email) {
+                await sendReferralRewardEmail(
+                  referrer.email,
+                  referrer.firstName || 'Friend',
+                  rewardAmount
+                );
+              }
+            } catch (emailErr) {
+              console.error('Failed to send referral reward email:', emailErr);
+            }
           }
         }
       } catch (referralError) {
         console.error("Failed to process referral reward:", referralError);
         // Don't fail the request if referral processing fails
+      }
+
+      // Process promo code usage - track promo code redemption
+      try {
+        const promoCodeId = session.metadata?.promoCodeId;
+        const promoCodeUsed = session.metadata?.promoCode;
+        const discountAmount = parseInt(session.metadata?.discountAmount || '0');
+        
+        if (promoCodeId && promoCodeUsed) {
+          // Increment promo code usage count
+          await storage.incrementPromoCodeUsage(promoCodeId);
+          
+          // Record the redemption
+          await storage.createPromoRedemption({
+            promoCodeId,
+            userId: user.id,
+            discountAmount,
+          });
+          
+          console.log(`Promo code ${promoCodeUsed} used successfully. Discount: £${(discountAmount / 100).toFixed(2)}`);
+        }
+      } catch (promoError) {
+        console.error("Failed to process promo code usage:", promoError);
+        // Don't fail the request if promo processing fails
       }
 
       res.json({ success: true, verified: true });
@@ -1976,6 +2068,108 @@ ${generatedSections.join('\n\n---\n\n')}`;
   });
 
   // ============================================
+  // PAYOUT REQUEST ROUTES
+  // ============================================
+
+  // Get user's payout requests
+  app.get("/api/payouts", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const payouts = await storage.getUserPayoutRequests(user.id);
+      res.json(payouts);
+    } catch (error) {
+      console.error("Get payout requests error:", error);
+      res.status(500).json({ error: "Failed to fetch payout requests" });
+    }
+  });
+
+  // Create payout request
+  app.post("/api/payouts", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { amount, paymentMethod, paymentDetails } = req.body;
+      
+      if (!amount || amount < 2000) { // Minimum £20 (2000 pence)
+        return res.status(400).json({ error: "Minimum payout amount is £20" });
+      }
+      
+      if (!paymentMethod || !paymentDetails) {
+        return res.status(400).json({ error: "Payment method and details required" });
+      }
+      
+      // Check user's available balance from referral codes
+      const userCodes = await storage.getUserReferralCodes(user.id);
+      const totalEarnings = userCodes.reduce((sum, c) => sum + c.totalEarnings, 0);
+      const paidEarnings = userCodes.reduce((sum, c) => sum + c.paidEarnings, 0);
+      const availableBalance = totalEarnings - paidEarnings;
+      
+      // Get pending payout requests
+      const pendingPayouts = await storage.getUserPayoutRequests(user.id);
+      const pendingAmount = pendingPayouts
+        .filter(p => p.status === 'pending' || p.status === 'processing')
+        .reduce((sum, p) => sum + p.amount, 0);
+      
+      if (amount > (availableBalance - pendingAmount)) {
+        return res.status(400).json({ error: "Insufficient balance for payout" });
+      }
+      
+      const payout = await storage.createPayoutRequest({
+        userId: user.id,
+        amount,
+        paymentMethod,
+        paymentDetails,
+        status: 'pending',
+      });
+      
+      // Send admin notification
+      try {
+        const { sendPayoutRequestNotification } = await import('./email');
+        await sendPayoutRequestNotification(
+          'admin@innovatorfoundervisaassistant.co.uk',
+          `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+          user.email,
+          amount / 100,
+          paymentMethod,
+          paymentDetails
+        );
+      } catch (emailError) {
+        console.error("Failed to send payout request notification:", emailError);
+      }
+      
+      res.json(payout);
+    } catch (error) {
+      console.error("Create payout request error:", error);
+      res.status(500).json({ error: "Failed to create payout request" });
+    }
+  });
+
+  // ============================================
+  // REFERRAL LEADERBOARD
+  // ============================================
+
+  // Get public leaderboard
+  app.get("/api/referrals/leaderboard", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const leaderboard = await storage.getReferralLeaderboard(limit);
+      
+      // Hide sensitive data for public display
+      const publicLeaderboard = leaderboard.map((entry, index) => ({
+        rank: index + 1,
+        userName: entry.userName.split(' ')[0] + (entry.userName.includes(' ') ? ' ' + entry.userName.split(' ')[1]?.[0] + '.' : ''),
+        referralCode: entry.referralCode,
+        successfulReferrals: entry.successfulReferrals,
+        totalReferrals: entry.totalReferrals,
+      }));
+      
+      res.json(publicLeaderboard);
+    } catch (error) {
+      console.error("Get leaderboard error:", error);
+      res.status(500).json({ error: "Failed to fetch leaderboard" });
+    }
+  });
+
+  // ============================================
   // ADMIN REFERRAL & PROMO ROUTES
   // ============================================
 
@@ -2072,6 +2266,99 @@ ${generatedSections.join('\n\n---\n\n')}`;
     } catch (error) {
       console.error("Admin referral analytics error:", error);
       res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // ============================================
+  // ADMIN PAYOUT MANAGEMENT ROUTES
+  // ============================================
+
+  // Get all payout requests (admin)
+  app.get("/api/admin/payouts", requireAdmin, async (req, res) => {
+    try {
+      const payouts = await storage.getAllPayoutRequests();
+      res.json(payouts);
+    } catch (error) {
+      console.error("Admin get payouts error:", error);
+      res.status(500).json({ error: "Failed to fetch payout requests" });
+    }
+  });
+
+  // Get pending payouts (admin)
+  app.get("/api/admin/payouts/pending", requireAdmin, async (req, res) => {
+    try {
+      const payouts = await storage.getPendingPayoutRequests();
+      res.json(payouts);
+    } catch (error) {
+      console.error("Admin get pending payouts error:", error);
+      res.status(500).json({ error: "Failed to fetch pending payouts" });
+    }
+  });
+
+  // Update payout request (admin)
+  app.patch("/api/admin/payouts/:id", requireAdmin, async (req, res) => {
+    try {
+      const admin = req.user as any;
+      const { id } = req.params;
+      const { status, notes, transactionRef } = req.body;
+      
+      if (!['processing', 'completed', 'rejected'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      
+      const updates: any = { 
+        status,
+        processedBy: admin.id,
+        processedAt: new Date(),
+      };
+      if (notes) updates.notes = notes;
+      if (transactionRef) updates.transactionRef = transactionRef;
+      
+      const payout = await storage.updatePayoutRequest(id, updates);
+      
+      if (!payout) {
+        return res.status(404).json({ error: "Payout request not found" });
+      }
+      
+      // If completed, update the user's paid earnings on their referral codes
+      if (status === 'completed') {
+        const userCodes = await storage.getUserReferralCodes(payout.userId);
+        let remainingAmount = payout.amount;
+        
+        for (const code of userCodes) {
+          if (remainingAmount <= 0) break;
+          const unpaidBalance = code.totalEarnings - code.paidEarnings;
+          const toDeduct = Math.min(unpaidBalance, remainingAmount);
+          if (toDeduct > 0) {
+            await storage.updateReferralCode(code.id, {
+              paidEarnings: code.paidEarnings + toDeduct,
+            });
+            remainingAmount -= toDeduct;
+          }
+        }
+      }
+      
+      // Send notification to user
+      try {
+        const user = await storage.getUser(payout.userId);
+        if (user?.email) {
+          const { sendPayoutStatusNotification } = await import('./email');
+          await sendPayoutStatusNotification(
+            user.email,
+            user.firstName || 'there',
+            payout.amount / 100,
+            status === 'completed' ? 'completed' : 'rejected',
+            notes
+          );
+        }
+      } catch (emailError) {
+        console.error("Failed to send payout status notification:", emailError);
+      }
+      
+      res.json(payout);
+    } catch (error) {
+      console.error("Admin update payout error:", error);
+      res.status(500).json({ error: "Failed to update payout request" });
     }
   });
 

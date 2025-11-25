@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, LogIn } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { UserPlus, LogIn, Gift, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import logoLightImg from "@assets/official_logo.png";
@@ -13,14 +14,61 @@ import { SEOHead } from "@/components/SEOHead";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
+  const search = useSearch();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralDiscount, setReferralDiscount] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     firstName: "",
     lastName: "",
   });
+
+  // Capture referral code from URL and validate it
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    const refCode = params.get('ref');
+    if (refCode) {
+      // Validate the referral code
+      fetch(`/api/referrals/validate/${refCode}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.valid) {
+            setReferralCode(refCode.toUpperCase());
+            setReferralDiscount(data.discount);
+            // Store in sessionStorage for later use
+            sessionStorage.setItem('referralCode', refCode.toUpperCase());
+            // Track the visit
+            fetch('/api/referrals/track-visit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                code: refCode, 
+                source: params.get('utm_source') || 'direct',
+                landingPage: window.location.pathname 
+              }),
+            });
+          }
+        })
+        .catch(() => {});
+    } else {
+      // Check if we have a stored referral code
+      const storedCode = sessionStorage.getItem('referralCode');
+      if (storedCode) {
+        setReferralCode(storedCode);
+        fetch(`/api/referrals/validate/${storedCode}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.valid) {
+              setReferralDiscount(data.discount);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [search]);
 
   const handleGoogleSignup = () => {
     window.location.href = "/api/auth/google";
@@ -34,7 +82,10 @@ export default function Signup() {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          referralCode: referralCode || sessionStorage.getItem('referralCode'),
+        }),
       });
 
       const result = await response.json();
@@ -59,6 +110,9 @@ export default function Signup() {
         setIsLoading(false);
         return;
       }
+
+      // Clear stored referral code after successful signup
+      sessionStorage.removeItem('referralCode');
 
       toast({
         title: "Account created!",
@@ -98,6 +152,20 @@ export default function Signup() {
         <CardHeader className="space-y-1 pt-4">
           <CardTitle className="text-2xl font-bold text-center">Create your account</CardTitle>
           <CardDescription className="text-center">Get started with your visa application journey</CardDescription>
+          {referralCode && referralDiscount && (
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                <Gift className="h-4 w-4" />
+                <span className="font-medium">Referral Applied!</span>
+                <Badge variant="secondary" className="bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300">
+                  {referralDiscount}% OFF
+                </Badge>
+              </div>
+              <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                You'll get {referralDiscount}% off your first purchase!
+              </p>
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={handleEmailSignup} className="space-y-3">

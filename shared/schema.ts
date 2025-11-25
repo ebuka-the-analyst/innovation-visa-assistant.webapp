@@ -526,3 +526,46 @@ export type PromoRedemption = typeof promoRedemptions.$inferSelect;
 
 export type InsertReferralVisit = z.infer<typeof insertReferralVisitSchema>;
 export type ReferralVisit = typeof referralVisits.$inferSelect;
+
+// Payout Requests Table
+export const payoutRequests = pgTable("payout_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  
+  // Amount and currency
+  amount: integer("amount").notNull(), // Amount in pence/cents
+  currency: varchar("currency", { length: 3 }).notNull().default('GBP'),
+  
+  // Payment details
+  paymentMethod: varchar("payment_method", { length: 50 }).notNull(), // bank_transfer, paypal, stripe
+  paymentDetails: text("payment_details").notNull(), // JSON string with payment info
+  
+  // Status
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // pending, processing, completed, rejected
+  
+  // Admin handling
+  processedBy: varchar("processed_by"),
+  processedAt: timestamp("processed_at"),
+  notes: text("notes"),
+  
+  // Transaction reference
+  transactionRef: varchar("transaction_ref", { length: 100 }),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+  index("idx_payout_user").on(table.userId),
+  index("idx_payout_status").on(table.status),
+]);
+
+export const insertPayoutRequestSchema = createInsertSchema(payoutRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  processedBy: true,
+  processedAt: true,
+  transactionRef: true,
+});
+
+export type InsertPayoutRequest = z.infer<typeof insertPayoutRequestSchema>;
+export type PayoutRequest = typeof payoutRequests.$inferSelect;

@@ -12,10 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { Badge } from "@/components/ui/badge";
 
 const steps = [
   {
@@ -138,15 +139,55 @@ const steps = [
   },
 ];
 
+interface PromoCodeValidation {
+  valid: boolean;
+  discount?: number;
+  message?: string;
+  creatorId?: string;
+}
+
 export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<Record<string, string>>({ tier });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoValidation, setPromoValidation] = useState<PromoCodeValidation | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
   const progress = ((currentStep + 1) / steps.length) * 100;
   const currentStepData = steps[currentStep];
+
+  const validatePromoCode = async () => {
+    if (!promoCode.trim()) {
+      setPromoValidation(null);
+      return;
+    }
+    
+    setIsValidatingPromo(true);
+    try {
+      const response = await fetch(`/api/promos/validate/${encodeURIComponent(promoCode.trim())}`);
+      const data = await response.json();
+      setPromoValidation({
+        valid: data.valid,
+        discount: data.discountValue,
+        message: data.message,
+        creatorId: data.creatorId,
+      });
+      
+      if (data.valid) {
+        toast({
+          title: 'Promo code applied!',
+          description: `You'll receive ${data.discountValue}% off your purchase.`,
+        });
+      }
+    } catch (error) {
+      setPromoValidation({ valid: false, message: 'Failed to validate promo code' });
+    } finally {
+      setIsValidatingPromo(false);
+    }
+  };
 
   const validateCurrentStep = (): boolean => {
     const requiredFields = currentStepData.fields.filter(f => f.required);
@@ -276,8 +317,28 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
         }
 
         if (responseData.planId) {
-          const checkoutResponse = await apiRequest('POST', '/api/payment/create-checkout', { planId: responseData.planId });
+          const checkoutPayload: { planId: string; promoCode?: string } = { planId: responseData.planId };
+          if (promoValidation?.valid && promoCode.trim()) {
+            checkoutPayload.promoCode = promoCode.trim();
+          }
+          const checkoutResponse = await apiRequest('POST', '/api/payment/create-checkout', checkoutPayload);
           const checkoutData = await checkoutResponse.json();
+
+          if (!checkoutResponse.ok) {
+            // Handle promo code errors specifically
+            if (checkoutData.promoError) {
+              setPromoValidation({ valid: false, message: checkoutData.error });
+              setPromoCode('');
+              toast({
+                title: "Promo Code Error",
+                description: checkoutData.error,
+                variant: "destructive",
+              });
+              setIsSubmitting(false);
+              return;
+            }
+            throw new Error(checkoutData.error || "Checkout failed");
+          }
 
           if (checkoutData.url) {
             window.location.href = checkoutData.url;
@@ -494,6 +555,56 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
               </div>
             ))}
           </div>
+
+          {/* Promo Code Section - Show on final step */}
+          {currentStep === steps.length - 1 && (
+            <div className="mt-8 pt-6 border-t">
+              <Label className="text-base font-medium flex items-center gap-2 mb-3">
+                <Tag className="w-4 h-4" />
+                Have a promo code?
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter promo code"
+                  value={promoCode}
+                  onChange={(e) => {
+                    setPromoCode(e.target.value.toUpperCase());
+                    setPromoValidation(null);
+                  }}
+                  className="max-w-[200px] uppercase"
+                  data-testid="input-promo-code"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={validatePromoCode}
+                  disabled={isValidatingPromo || !promoCode.trim()}
+                  data-testid="button-validate-promo"
+                >
+                  {isValidatingPromo ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    'Apply'
+                  )}
+                </Button>
+              </div>
+              {promoValidation && (
+                <div className="mt-2">
+                  {promoValidation.valid ? (
+                    <Badge className="bg-green-500 text-white">
+                      <Check className="w-3 h-3 mr-1" />
+                      {promoValidation.discount}% discount applied
+                    </Badge>
+                  ) : (
+                    <Badge variant="destructive">
+                      <X className="w-3 h-3 mr-1" />
+                      {promoValidation.message || 'Invalid code'}
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Navigation */}
           <div className="flex justify-between mt-12">

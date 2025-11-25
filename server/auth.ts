@@ -194,7 +194,7 @@ export async function setupAuth(app: Express) {
   // Email/Password Registration with validation
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { email, password, firstName, lastName } = req.body;
+      const { email, password, firstName, lastName, referralCode } = req.body;
 
       // Turnstile removed for better user experience
       // (Bot protection can be added later if needed)
@@ -254,6 +254,46 @@ export async function setupAuth(app: Express) {
         tokenExpiry,
         isEmailVerified: false,
       });
+
+      // If referral code is provided, create a referral event record
+      if (referralCode) {
+        try {
+          const referralCodeRecord = await storage.getReferralCodeByCode(referralCode.toUpperCase());
+          if (referralCodeRecord && referralCodeRecord.status === 'active') {
+            // Create referral event record
+            await storage.createReferralEvent({
+              referralCodeId: referralCodeRecord.id,
+              referrerId: referralCodeRecord.userId,
+              refereeId: newUser.id,
+              refereeEmail: normalizedEmail,
+              status: 'signed_up',
+              signedUpAt: new Date(),
+            });
+
+            // Increment pending referrals count on the referral code
+            await storage.incrementReferralStats(referralCodeRecord.id, 'pendingReferrals', 1);
+
+            // Send notification to referrer about new signup
+            const referrer = await storage.getUser(referralCodeRecord.userId);
+            if (referrer?.email) {
+              try {
+                const { sendReferralSignupNotification } = await import('./email');
+                await sendReferralSignupNotification(
+                  referrer.email,
+                  referrer.firstName || 'there',
+                  firstName || normalizedEmail.split('@')[0],
+                  referralCodeRecord.code
+                );
+              } catch (emailError) {
+                console.error("Failed to send referral signup notification:", emailError);
+              }
+            }
+          }
+        } catch (refError) {
+          console.error("Error processing referral code:", refError);
+          // Don't fail registration if referral processing fails
+        }
+      }
 
       // Send verification email
       let emailSent = false;

@@ -11,8 +11,9 @@ import {
   type PromoCode, type InsertPromoCode,
   type PromoRedemption, type InsertPromoRedemption,
   type ReferralVisit, type InsertReferralVisit,
+  type PayoutRequest, type InsertPayoutRequest,
   users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics,
-  referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits
+  referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits, payoutRequests
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gt, lt, desc, sql, count } from "drizzle-orm";
@@ -140,6 +141,26 @@ export interface IStorage {
     totalRedemptions: number;
     totalDiscountGiven: number;
   }>;
+  
+  // ============================================
+  // PAYOUT REQUESTS
+  // ============================================
+  createPayoutRequest(request: InsertPayoutRequest): Promise<PayoutRequest>;
+  getPayoutRequest(id: string): Promise<PayoutRequest | undefined>;
+  getUserPayoutRequests(userId: string): Promise<PayoutRequest[]>;
+  getAllPayoutRequests(): Promise<PayoutRequest[]>;
+  getPendingPayoutRequests(): Promise<PayoutRequest[]>;
+  updatePayoutRequest(id: string, updates: Partial<PayoutRequest>): Promise<PayoutRequest | undefined>;
+  
+  // Leaderboard
+  getReferralLeaderboard(limit?: number): Promise<Array<{
+    userId: string;
+    userName: string;
+    referralCode: string;
+    totalReferrals: number;
+    successfulReferrals: number;
+    totalEarnings: number;
+  }>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -724,6 +745,79 @@ export class DatabaseStorage implements IStorage {
       totalRedemptions: redemptions.length,
       totalDiscountGiven: redemptions.reduce((sum, r) => sum + r.discountApplied, 0),
     };
+  }
+
+  // ============================================
+  // PAYOUT REQUESTS
+  // ============================================
+  async createPayoutRequest(request: InsertPayoutRequest): Promise<PayoutRequest> {
+    const [result] = await db.insert(payoutRequests).values(request).returning();
+    return result;
+  }
+
+  async getPayoutRequest(id: string): Promise<PayoutRequest | undefined> {
+    const [result] = await db.select().from(payoutRequests).where(eq(payoutRequests.id, id)).limit(1);
+    return result;
+  }
+
+  async getUserPayoutRequests(userId: string): Promise<PayoutRequest[]> {
+    return db.select().from(payoutRequests).where(eq(payoutRequests.userId, userId)).orderBy(desc(payoutRequests.createdAt));
+  }
+
+  async getAllPayoutRequests(): Promise<PayoutRequest[]> {
+    return db.select().from(payoutRequests).orderBy(desc(payoutRequests.createdAt));
+  }
+
+  async getPendingPayoutRequests(): Promise<PayoutRequest[]> {
+    return db.select().from(payoutRequests).where(eq(payoutRequests.status, 'pending')).orderBy(desc(payoutRequests.createdAt));
+  }
+
+  async updatePayoutRequest(id: string, updates: Partial<PayoutRequest>): Promise<PayoutRequest | undefined> {
+    const [result] = await db.update(payoutRequests)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(payoutRequests.id, id))
+      .returning();
+    return result;
+  }
+
+  // Leaderboard
+  async getReferralLeaderboard(limit: number = 10): Promise<Array<{
+    userId: string;
+    userName: string;
+    referralCode: string;
+    totalReferrals: number;
+    successfulReferrals: number;
+    totalEarnings: number;
+  }>> {
+    const codes = await db.select().from(referralCodes)
+      .where(eq(referralCodes.status, 'active'))
+      .orderBy(desc(referralCodes.successfulReferrals))
+      .limit(limit);
+    
+    const result: Array<{
+      userId: string;
+      userName: string;
+      referralCode: string;
+      totalReferrals: number;
+      successfulReferrals: number;
+      totalEarnings: number;
+    }> = [];
+
+    for (const code of codes) {
+      const user = await this.getUser(code.userId);
+      if (user) {
+        result.push({
+          userId: code.userId,
+          userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Anonymous',
+          referralCode: code.code,
+          totalReferrals: code.totalReferrals,
+          successfulReferrals: code.successfulReferrals,
+          totalEarnings: code.totalEarnings,
+        });
+      }
+    }
+
+    return result;
   }
 }
 

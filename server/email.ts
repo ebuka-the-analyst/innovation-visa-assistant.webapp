@@ -684,6 +684,511 @@ export async function sendWeeklyProgressEmail(
   });
 }
 
+// ============================================
+// REFERRAL EMAIL NOTIFICATIONS
+// ============================================
+
+export async function sendReferralSignupNotification(
+  referrerEmail: string,
+  referrerName: string,
+  refereeName: string,
+  referralCode: string
+) {
+  const dashboardUrl = `${BASE_URL}/referral-dashboard`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">New Referral Signup!</h1>
+        </div>
+        
+        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none;">
+          <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(referrerName)},</p>
+          
+          <p style="font-size: 16px; margin-bottom: 20px; color: #333;">
+            Great news! <strong>${escapeHtml(refereeName)}</strong> just signed up using your referral code 
+            <strong style="color: #11b6e9;">${escapeHtml(referralCode)}</strong>.
+          </p>
+          
+          <div style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <p style="font-size: 24px; font-weight: bold; color: #2e7d32; margin: 0;">
+              Referral Progress: Signed Up
+            </p>
+            <p style="font-size: 14px; color: #388e3c; margin-top: 10px;">
+              When they make a purchase, you'll earn your reward automatically!
+            </p>
+          </div>
+          
+          <p style="font-size: 14px; color: #666;">
+            Your rewards are automatically tracked and will be added to your account when your referrals complete their purchase.
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${dashboardUrl}" 
+               style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); 
+                      color: white; 
+                      padding: 15px 40px; 
+                      text-decoration: none; 
+                      border-radius: 5px; 
+                      font-size: 16px; 
+                      font-weight: bold;
+                      display: inline-block;">
+              View Your Referral Dashboard
+            </a>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+          
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: referrerEmail,
+    subject: `New Referral Signup: ${refereeName} joined using your code!`,
+    html
+  });
+}
+
+export async function sendReferralPurchaseNotification(
+  referrerEmail: string,
+  referrerName: string,
+  refereeName: string,
+  rewardAmount: number,
+  rewardType: string
+) {
+  const dashboardUrl = `${BASE_URL}/referral-dashboard`;
+  
+  const rewardText = rewardType === 'percentage' 
+    ? `${rewardAmount}% commission` 
+    : `£${rewardAmount}`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">You Earned a Reward!</h1>
+        </div>
+        
+        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none;">
+          <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(referrerName)},</p>
+          
+          <p style="font-size: 16px; margin-bottom: 20px; color: #333;">
+            Congratulations! <strong>${escapeHtml(refereeName)}</strong> just made a purchase using your referral code.
+          </p>
+          
+          <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 25px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <p style="font-size: 14px; color: #1565c0; margin: 0 0 10px 0;">Your Reward:</p>
+            <p style="font-size: 36px; font-weight: bold; color: #0d47a1; margin: 0;">
+              ${rewardText}
+            </p>
+            <p style="font-size: 14px; color: #1976d2; margin-top: 10px;">
+              Added to your earnings balance
+            </p>
+          </div>
+          
+          <p style="font-size: 14px; color: #666;">
+            You can request a payout from your referral dashboard once your balance reaches £20.
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${dashboardUrl}" 
+               style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); 
+                      color: white; 
+                      padding: 15px 40px; 
+                      text-decoration: none; 
+                      border-radius: 5px; 
+                      font-size: 16px; 
+                      font-weight: bold;
+                      display: inline-block;">
+              View Your Earnings
+            </a>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+          
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: referrerEmail,
+    subject: `Referral Reward Earned: ${rewardText} added to your balance!`,
+    html
+  });
+}
+
+export async function sendRewardApprovalNotification(
+  email: string,
+  name: string,
+  amount: number,
+  status: 'approved' | 'rejected',
+  notes?: string
+) {
+  const dashboardUrl = `${BASE_URL}/referral-dashboard`;
+  
+  const isApproved = status === 'approved';
+  const statusColor = isApproved ? '#2e7d32' : '#c62828';
+  const statusBg = isApproved ? '#e8f5e9' : '#ffebee';
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: ${isApproved ? 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)' : 'linear-gradient(135deg, #ef5350 0%, #c62828 100%)'}; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">
+            ${isApproved ? 'Reward Approved!' : 'Reward Update'}
+          </h1>
+        </div>
+        
+        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none;">
+          <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(name)},</p>
+          
+          <div style="background: ${statusBg}; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <p style="font-size: 14px; color: ${statusColor}; margin: 0 0 10px 0;">
+              ${isApproved ? 'Your reward has been approved!' : 'Unfortunately, your reward could not be approved.'}
+            </p>
+            <p style="font-size: 28px; font-weight: bold; color: ${statusColor}; margin: 0;">
+              £${amount.toFixed(2)}
+            </p>
+          </div>
+          
+          ${notes ? `
+          <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="font-size: 14px; color: #333; margin: 0;">
+              <strong>Note:</strong> ${escapeHtml(notes)}
+            </p>
+          </div>
+          ` : ''}
+          
+          ${isApproved ? `
+          <p style="font-size: 14px; color: #666;">
+            The approved amount has been added to your earnings balance. You can request a payout from your dashboard.
+          </p>
+          ` : `
+          <p style="font-size: 14px; color: #666;">
+            If you have questions about this decision, please contact our support team.
+          </p>
+          `}
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${dashboardUrl}" 
+               style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); 
+                      color: white; 
+                      padding: 15px 40px; 
+                      text-decoration: none; 
+                      border-radius: 5px; 
+                      font-size: 16px; 
+                      font-weight: bold;
+                      display: inline-block;">
+              View Dashboard
+            </a>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+          
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: isApproved ? `Your £${amount.toFixed(2)} reward has been approved!` : `Reward Update: £${amount.toFixed(2)}`,
+    html
+  });
+}
+
+export async function sendPayoutRequestNotification(
+  adminEmail: string,
+  userName: string,
+  userEmail: string,
+  amount: number,
+  paymentMethod: string,
+  paymentDetails: string
+) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">New Payout Request</h1>
+        </div>
+        
+        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none;">
+          <p style="font-size: 18px; margin-bottom: 20px;">Admin Alert</p>
+          
+          <p style="font-size: 16px; margin-bottom: 20px; color: #333;">
+            A user has requested a payout from their referral earnings.
+          </p>
+          
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #666;">User Name:</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">${escapeHtml(userName)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;">User Email:</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">${escapeHtml(userEmail)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;">Amount Requested:</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #2e7d32; font-size: 20px;">£${amount.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;">Payment Method:</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">${escapeHtml(paymentMethod)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;">Payment Details:</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">${escapeHtml(paymentDetails)}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <p style="font-size: 14px; color: #666;">
+            Please process this payout request at your earliest convenience.
+          </p>
+          
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+          
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: adminEmail,
+    subject: `Payout Request: £${amount.toFixed(2)} from ${userName}`,
+    html
+  });
+}
+
+export async function sendPayoutStatusNotification(
+  email: string,
+  name: string,
+  amount: number,
+  status: 'completed' | 'rejected',
+  notes?: string
+) {
+  const isCompleted = status === 'completed';
+  const statusColor = isCompleted ? '#2e7d32' : '#c62828';
+  const statusBg = isCompleted ? '#e8f5e9' : '#ffebee';
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: ${isCompleted ? 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)' : 'linear-gradient(135deg, #ef5350 0%, #c62828 100%)'}; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">
+            ${isCompleted ? 'Payout Completed!' : 'Payout Update'}
+          </h1>
+        </div>
+        
+        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none;">
+          <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(name)},</p>
+          
+          <div style="background: ${statusBg}; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <p style="font-size: 14px; color: ${statusColor}; margin: 0 0 10px 0;">
+              ${isCompleted ? 'Your payout has been processed!' : 'Unfortunately, your payout request could not be completed.'}
+            </p>
+            <p style="font-size: 28px; font-weight: bold; color: ${statusColor}; margin: 0;">
+              £${amount.toFixed(2)}
+            </p>
+          </div>
+          
+          ${notes ? `
+          <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="font-size: 14px; color: #333; margin: 0;">
+              <strong>Note:</strong> ${escapeHtml(notes)}
+            </p>
+          </div>
+          ` : ''}
+          
+          ${isCompleted ? `
+          <p style="font-size: 14px; color: #666;">
+            The payment should arrive in your account within 3-5 business days depending on your payment method.
+          </p>
+          ` : `
+          <p style="font-size: 14px; color: #666;">
+            If you have questions about this decision, please contact our support team at support@innovatorfoundervisaassistant.co.uk.
+          </p>
+          `}
+          
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+          
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: isCompleted ? `Payout Completed: £${amount.toFixed(2)}` : `Payout Update: £${amount.toFixed(2)}`,
+    html
+  });
+}
+
+export async function sendReferralRewardEmail(
+  email: string,
+  firstName: string,
+  rewardAmount: number
+): Promise<{ success: boolean; error?: string }> {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8f9fa;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+          <h1 style="margin: 0; color: #ffffff; font-size: 24px;">Congratulations!</h1>
+        </div>
+        <div style="background: #ffffff; padding: 40px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <p style="font-size: 18px; color: #1a1a1a; margin-bottom: 20px;">
+            Hi ${escapeHtml(firstName)},
+          </p>
+          <p style="font-size: 16px; color: #4a5568; line-height: 1.6; margin-bottom: 20px;">
+            Great news! Someone you referred has just completed a purchase, and you've earned a reward.
+          </p>
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; border-radius: 12px; text-align: center; margin: 30px 0;">
+            <p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 0 0 8px 0;">Your Reward</p>
+            <p style="color: #ffffff; font-size: 42px; font-weight: 700; margin: 0;">
+              £${(rewardAmount / 100).toFixed(2)}
+            </p>
+          </div>
+          <p style="font-size: 14px; color: #718096; line-height: 1.6;">
+            This reward has been added to your account balance. You can request a payout once your balance reaches £20 or more.
+          </p>
+          <a href="${BASE_URL}/referral-dashboard" style="display: inline-block; background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; margin-top: 20px;">
+            View Your Dashboard
+          </a>
+        </div>
+        <p style="text-align: center; color: #a0aec0; font-size: 12px; margin-top: 24px;">
+          © 2024 UK Innovator Founder Visa Assistant. All rights reserved.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `You've Earned £${(rewardAmount / 100).toFixed(2)} from Your Referral!`,
+    html
+  });
+}
+
+export async function sendPromoCodeRewardEmail(
+  email: string,
+  firstName: string,
+  promoCode: string,
+  rewardAmount: number
+): Promise<{ success: boolean; error?: string }> {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8f9fa;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+          <h1 style="margin: 0; color: #ffffff; font-size: 24px;">Promo Code Commission Earned!</h1>
+        </div>
+        <div style="background: #ffffff; padding: 40px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <p style="font-size: 18px; color: #1a1a1a; margin-bottom: 20px;">
+            Hi ${escapeHtml(firstName)},
+          </p>
+          <p style="font-size: 16px; color: #4a5568; line-height: 1.6; margin-bottom: 20px;">
+            Someone used your promo code <strong style="color: #8b5cf6;">${escapeHtml(promoCode)}</strong> to make a purchase, and you've earned a commission!
+          </p>
+          <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 30px; border-radius: 12px; text-align: center; margin: 30px 0;">
+            <p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 0 0 8px 0;">Your Commission</p>
+            <p style="color: #ffffff; font-size: 42px; font-weight: 700; margin: 0;">
+              £${(rewardAmount / 100).toFixed(2)}
+            </p>
+          </div>
+          <p style="font-size: 14px; color: #718096; line-height: 1.6;">
+            This commission has been added to your account balance. Keep sharing your promo code to earn more!
+          </p>
+          <a href="${BASE_URL}/referral-dashboard" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; margin-top: 20px;">
+            View Your Dashboard
+          </a>
+        </div>
+        <p style="text-align: center; color: #a0aec0; font-size: 12px; margin-top: 24px;">
+          © 2024 UK Innovator Founder Visa Assistant. All rights reserved.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `You've Earned £${(rewardAmount / 100).toFixed(2)} from Promo Code ${promoCode}!`,
+    html
+  });
+}
+
 export function generateVerificationEmail(code: string, displayName: string): string {
   return `
 <!DOCTYPE html>
