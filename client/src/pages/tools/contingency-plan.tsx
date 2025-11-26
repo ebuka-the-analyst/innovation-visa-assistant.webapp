@@ -154,66 +154,78 @@ export default function ContingencyPlan() {
 
   const handleAiComplete = (answers: Record<string, any>) => {
     const newRisks: Risk[] = [];
+    const reviewSchedule = answers.review_schedule || 'Quarterly review by leadership team';
     
     if (answers.risk_financial_description) {
       newRisks.push({
-        id: 'ai-financial',
+        id: 'ai-financial-' + Date.now(),
         category: 'financial',
         description: answers.risk_financial_description || '',
         impact: 7,
         probability: 5,
         mitigation: answers.risk_financial_mitigation || '',
-        actionPlan: '',
-        owner: '',
-        deadline: ''
+        actionPlan: 'Monitor monthly cash flow and runway metrics',
+        owner: 'Finance Lead / Founder',
+        deadline: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]
       });
     }
     
     if (answers.risk_operational_description) {
       newRisks.push({
-        id: 'ai-operational',
+        id: 'ai-operational-' + Date.now(),
         category: 'operational',
         description: answers.risk_operational_description || '',
         impact: 6,
         probability: 5,
         mitigation: answers.risk_operational_mitigation || '',
-        actionPlan: '',
-        owner: '',
-        deadline: ''
+        actionPlan: 'Establish redundancy procedures and backup systems',
+        owner: 'Operations Lead / Founder',
+        deadline: new Date(Date.now() + 60*24*60*60*1000).toISOString().split('T')[0]
       });
     }
     
     if (answers.risk_market_description) {
       newRisks.push({
-        id: 'ai-market',
+        id: 'ai-market-' + Date.now(),
         category: 'market',
         description: answers.risk_market_description || '',
         impact: 6,
         probability: 6,
         mitigation: answers.risk_market_mitigation || '',
-        actionPlan: '',
-        owner: '',
-        deadline: ''
+        actionPlan: 'Monthly competitive analysis and customer feedback review',
+        owner: 'Business Development / Founder',
+        deadline: new Date(Date.now() + 45*24*60*60*1000).toISOString().split('T')[0]
       });
     }
     
     if (answers.risk_regulatory_description) {
       newRisks.push({
-        id: 'ai-regulatory',
+        id: 'ai-regulatory-' + Date.now(),
         category: 'regulatory',
         description: answers.risk_regulatory_description || '',
         impact: 8,
         probability: 4,
         mitigation: answers.risk_regulatory_mitigation || '',
-        actionPlan: answers.review_schedule || '',
-        owner: '',
-        deadline: ''
+        actionPlan: reviewSchedule,
+        owner: 'Compliance / Legal Advisor',
+        deadline: new Date(Date.now() + 90*24*60*60*1000).toISOString().split('T')[0]
       });
     }
     
     if (newRisks.length > 0) {
       setRisks(newRisks);
+      
+      const date = new Date().toLocaleString('en-GB');
+      localStorage.setItem('contingency-plan-progress', JSON.stringify({
+        risks: newRisks,
+        activeTab: 'planning',
+        savedDate: date
+      }));
+      setSavedDate(date);
     }
+    
+    setActiveTab('planning');
+    setMode('traditional');
   };
 
   const addRisk = (category: RiskCategory) => {

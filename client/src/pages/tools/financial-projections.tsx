@@ -95,18 +95,35 @@ export default function FinancialProjections() {
       return match ? parseInt(match[0].replace(/,/g, ''), 10) : 0;
     };
     
+    let newInitial = initial;
+    let newMonthly = monthly;
+    let newRevenue = revenue;
+    
     if (answers.initial_investment) {
       const val = parseNumber(answers.initial_investment);
-      if (val > 0) setInitial(val);
+      if (val > 0) newInitial = val;
     }
     if (answers.monthly_burn) {
       const val = parseNumber(answers.monthly_burn);
-      if (val > 0) setMonthly(val);
+      if (val > 0) newMonthly = val;
     }
     if (answers.monthly_revenue) {
       const val = parseNumber(answers.monthly_revenue);
-      if (val > 0) setRevenue(val);
+      if (val > 0) newRevenue = val;
     }
+    
+    setInitial(newInitial);
+    setMonthly(newMonthly);
+    setRevenue(newRevenue);
+    
+    localStorage.setItem('financialProjectionsProgress', JSON.stringify({ 
+      initial: newInitial, 
+      monthly: newMonthly, 
+      revenue: newRevenue 
+    }));
+    const date = new Date().toLocaleDateString();
+    localStorage.setItem('financialProjectionsDate', date);
+    setSavedDate(date);
     
     setMode('traditional');
     toast({

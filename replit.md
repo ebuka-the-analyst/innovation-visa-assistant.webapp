@@ -131,6 +131,32 @@ The platform features comprehensive auto-save functionality to prevent data loss
 - `client/src/hooks/useAutoSave.ts` - Core auto-save hook infrastructure
 - `client/src/components/AiInterviewChat.tsx` - AI interview with session persistence
 
+### AI-Driven Tool Mode System
+Tools now support dual-mode operation: AI-Guided conversational interface or Traditional form-based input.
+
+**Implementation Pattern:**
+1. Import `AiToolGuide`, `AiTraditionalToggle`, `ToolConfig` from `@/components/AiToolGuide`
+2. Define `AI_TOOL_CONFIG` with toolId, toolName, agent, greeting, questions array, completionMessage
+3. Add `mode` state with localStorage persistence: `localStorage.getItem('toolname-mode')`
+4. Add `handleAiComplete` callback that maps AI answers to form fields and persists to localStorage
+5. Add `AiTraditionalToggle` component in header for mode switching
+6. Wrap traditional form content in `{mode === 'ai' ? <AiToolGuide.../> : <TraditionalForm/>}` conditional
+
+**Agent Assignment (4 Specialized AI Agents):**
+- **Nova** (Innovation Specialist): innovation-score, business-plan, innovation tools
+- **Sterling** (Viability Expert): financial-projections, financial modeling tools
+- **Atlas** (Scalability Strategist): market-analysis, growth strategy tools
+- **Sage** (Compliance Expert): contingency-plan, regulatory, compliance tools
+
+**Tools with AI Mode Implemented:**
+- Contingency Plan & Risk Register (`contingency-plan.tsx`) - Sage agent, 10 questions
+- Financial Projections Calculator (`financial-projections.tsx`) - Sterling agent, 7 questions
+- Innovation Score Calculator (`innovation-score.tsx`) - Nova agent, 7 questions
+
+**Key Files:**
+- `client/src/components/AiToolGuide.tsx` - Reusable AI interview component for tools
+- `server/routes.ts` - `/api/ai/tool-feedback` endpoint for AI responses
+
 ## External Dependencies
 - **Database:** `PostgreSQL` managed by `Neon`.
 - **ORM:** `Drizzle ORM`.

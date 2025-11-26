@@ -129,13 +129,25 @@ export default function InnovationScore() {
       return Math.min(95, Math.round(score));
     };
     
-    setFactors({
+    const newFactors = {
       novelty: estimateScore(answers.novelty_assessment || answers.core_innovation || ''),
       technicalAdvancement: estimateScore(answers.technical_advancement || ''),
       marketDisruption: estimateScore(answers.market_disruption || ''),
       ipProtection: estimateScore(answers.ip_protection || ''),
       rdInvestment: estimateScore(answers.rd_investment || '')
-    });
+    };
+    
+    setFactors(newFactors);
+    
+    const state = {
+      factors: newFactors,
+      activeTab: 'overview',
+      selectedSector: selectedSector,
+      savedDate: new Date().toLocaleString('en-GB')
+    };
+    localStorage.setItem('innovation-score-state', JSON.stringify(state));
+    setSavedDate(state.savedDate);
+    setActiveTab('overview');
     
     setMode('traditional');
     toast({
