@@ -5680,14 +5680,63 @@ END:VEVENT
   // Innovative questionnaire with real-time scoring and gamification
   // ============================================================================
 
+  // Import comprehensive question bank
+  const { allQuestions, getQuestion, getRandomQuestion, getTotalQuestionCount } = require('./ai-interview-questions');
+
+  // Achievement definitions for gamification
+  const ACHIEVEMENTS = {
+    first_answer: { id: 'first_answer', title: 'First Steps', description: 'Answer your first question', xp: 50, icon: 'rocket' },
+    streak_5: { id: 'streak_5', title: 'On Fire', description: 'Answer 5 questions in a row', xp: 100, icon: 'flame' },
+    streak_10: { id: 'streak_10', title: 'Unstoppable', description: 'Answer 10 questions in a row', xp: 200, icon: 'zap' },
+    quality_master: { id: 'quality_master', title: 'Quality Master', description: 'Score 90%+ on an answer', xp: 150, icon: 'star' },
+    section_complete: { id: 'section_complete', title: 'Section Expert', description: 'Complete a full section', xp: 250, icon: 'award' },
+    agent_friend: { id: 'agent_friend', title: 'Agent Friend', description: 'Complete questions with all 4 agents', xp: 300, icon: 'users' },
+    fifty_questions: { id: 'fifty_questions', title: 'Halfway Hero', description: 'Answer 50 questions', xp: 500, icon: 'trophy' },
+    innovation_star: { id: 'innovation_star', title: 'Innovation Star', description: 'Score 80%+ on innovation section', xp: 400, icon: 'lightbulb' },
+    financial_wizard: { id: 'financial_wizard', title: 'Financial Wizard', description: 'Score 80%+ on viability section', xp: 400, icon: 'trending-up' },
+    growth_champion: { id: 'growth_champion', title: 'Growth Champion', description: 'Score 80%+ on scalability section', xp: 400, icon: 'bar-chart' },
+    compliance_pro: { id: 'compliance_pro', title: 'Compliance Pro', description: 'Score 80%+ on compliance section', xp: 400, icon: 'shield' },
+    perfect_answer: { id: 'perfect_answer', title: 'Perfection', description: 'Score 100% on any answer', xp: 250, icon: 'crown' },
+    speed_demon: { id: 'speed_demon', title: 'Speed Demon', description: 'Answer 10 questions in under 5 minutes', xp: 200, icon: 'clock' },
+    detail_oriented: { id: 'detail_oriented', title: 'Detail Oriented', description: 'Write 500+ character answers 5 times', xp: 300, icon: 'file-text' },
+    visa_ready: { id: 'visa_ready', title: 'Visa Ready', description: 'Reach 80% overall readiness', xp: 1000, icon: 'check-circle' }
+  };
+
+  // Level definitions
+  const LEVELS = [
+    { level: 1, title: 'Newcomer', minXP: 0, color: '#94a3b8' },
+    { level: 2, title: 'Apprentice', minXP: 200, color: '#22c55e' },
+    { level: 3, title: 'Explorer', minXP: 500, color: '#3b82f6' },
+    { level: 4, title: 'Achiever', minXP: 1000, color: '#8b5cf6' },
+    { level: 5, title: 'Expert', minXP: 2000, color: '#f59e0b' },
+    { level: 6, title: 'Master', minXP: 4000, color: '#ef4444' },
+    { level: 7, title: 'Champion', minXP: 7000, color: '#ec4899' },
+    { level: 8, title: 'Legend', minXP: 10000, color: '#ffa536' },
+    { level: 9, title: 'Visa Pro', minXP: 15000, color: '#11b6e9' },
+    { level: 10, title: 'Elite Founder', minXP: 25000, color: 'linear-gradient(135deg, #ffa536, #11b6e9)' }
+  ];
+
+  function getLevel(xp: number) {
+    for (let i = LEVELS.length - 1; i >= 0; i--) {
+      if (xp >= LEVELS[i].minXP) {
+        const nextLevel = LEVELS[i + 1];
+        const progress = nextLevel 
+          ? ((xp - LEVELS[i].minXP) / (nextLevel.minXP - LEVELS[i].minXP)) * 100 
+          : 100;
+        return { ...LEVELS[i], progress, nextLevelXP: nextLevel?.minXP || LEVELS[i].minXP };
+      }
+    }
+    return { ...LEVELS[0], progress: 0, nextLevelXP: LEVELS[1].minXP };
+  }
+
   // Start or resume an AI interview session
   app.post("/api/ai-interview/start", isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
       const { tier = 'premium', businessPlanId } = req.body;
       
-      // Create new session
       const sessionId = crypto.randomUUID();
+      const totalQuestions = getTotalQuestionCount();
       
       const session = {
         id: sessionId,
@@ -5698,16 +5747,24 @@ END:VEVENT
         currentSection: 1,
         currentQuestionIndex: 0,
         totalQuestionsAnswered: 0,
-        totalQuestions: 475,
+        totalQuestions,
         sessionDuration: 0,
         innovationScore: 0,
         viabilityScore: 0,
         scalabilityScore: 0,
+        complianceScore: 0,
         overallReadiness: 0,
-        approvalProbability: 0,
+        approvalProbability: 15,
         currentStreak: 0,
         longestStreak: 0,
         totalXP: 0,
+        level: getLevel(0),
+        achievements: [],
+        answeredQuestionIds: [],
+        agentsUsed: ['nova'],
+        detailedAnswerCount: 0,
+        perfectAnswerCount: 0,
+        sessionStartTime: Date.now(),
         conversationContext: {
           recentTopics: [],
           userPreferences: {},
@@ -5720,6 +5777,8 @@ END:VEVENT
       res.json({
         success: true,
         session,
+        achievements: ACHIEVEMENTS,
+        levels: LEVELS,
         agent: {
           id: 'nova',
           name: 'Nova',
@@ -5737,90 +5796,71 @@ END:VEVENT
   app.post("/api/ai-interview/next-question", isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      const { sessionId, tier, currentAgent, answeredQuestions = 0 } = req.body;
+      const { sessionId, tier, currentAgent, answeredQuestions = 0, answeredQuestionIds = [] } = req.body;
 
-      // Define questions by section and agent
-      const questionBank: Record<string, string[]> = {
-        nova: [
-          "Let's start with your business name. What's the official name of your venture?",
-          "Which industry does your business operate in? Be as specific as possible.",
-          "What specific problem does your business solve? Describe the pain point in detail.",
-          "What makes your solution truly innovative? How is it different from existing solutions?",
-          "Describe your current product development status. What have you built so far?",
-          "What technology stack powers your innovation? Include frameworks, languages, and tools.",
-          "Do you have any intellectual property - patents pending, filed, or defensive publications?",
-          "How does your data architecture support your innovation claims?",
-          "What AI or machine learning methodologies do you employ, if any?",
-          "How have you designed your system for regulatory compliance from day one?"
-        ],
-        sterling: [
-          "What's your current funding situation? How much capital do you have?",
-          "Walk me through your revenue model. How does your business make money?",
-          "What are your 36-month financial projections? Break it down month by month.",
-          "What's your customer acquisition cost (CAC)?",
-          "What's your customer lifetime value (LTV)?",
-          "What's the payback period for each customer?",
-          "Detail all your funding sources - personal, grants, investors - with amounts.",
-          "Break down all your costs: development, regulatory, operations, marketing.",
-          "Do you have letters of intent or pre-orders from customers?",
-          "What market validation have you conducted? Share customer interview findings."
-        ],
-        atlas: [
-          "How many jobs do you plan to create in the UK over the next 3 years?",
-          "Detail your hiring plan - specific roles, salaries, and hiring milestones.",
-          "Which specific UK regions will you target for your business?",
-          "What's your expansion strategy beyond the initial market?",
-          "Do you have international expansion plans? Which markets and timeline?",
-          "Describe your 5-year vision for this business.",
-          "Who are your main competitors? List at least 5 with their strengths and weaknesses.",
-          "What's your measurable competitive advantage?",
-          "What's your total addressable market (TAM)?",
-          "What's your serviceable obtainable market (SOM)?"
-        ],
-        sage: [
-          "Which endorsing body are you targeting? (Tech Nation, university, etc.)",
-          "What's your strategy for the 6 required contact points with your endorser?",
-          "List all regulatory requirements for your business - certifications, compliance standards.",
-          "What's your timeline for achieving each compliance requirement?",
-          "What budget have you allocated for regulatory compliance?",
-          "Do you have existing customers or beta testers? Describe them.",
-          "What traction evidence can you provide - metrics, pilot results, revenue?",
-          "What professional certifications or accreditations do you hold?",
-          "Describe your relevant work history that qualifies you for this venture.",
-          "What measurable achievements from previous roles demonstrate your capability?"
-        ]
-      };
+      const questions = allQuestions[currentAgent] || allQuestions.nova;
+      const availableQuestions = questions.filter((q: any) => !answeredQuestionIds.includes(q.id));
+      
+      let selectedQuestion;
+      if (availableQuestions.length > 0) {
+        const difficultyOrder = ['basic', 'intermediate', 'advanced'];
+        const progressRatio = answeredQuestions / getTotalQuestionCount();
+        
+        let targetDifficulty = 'basic';
+        if (progressRatio > 0.3) targetDifficulty = 'intermediate';
+        if (progressRatio > 0.6) targetDifficulty = 'advanced';
+        
+        const filteredByDifficulty = availableQuestions.filter((q: any) => q.difficulty === targetDifficulty);
+        selectedQuestion = filteredByDifficulty.length > 0 
+          ? filteredByDifficulty[Math.floor(Math.random() * filteredByDifficulty.length)]
+          : availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+      } else {
+        selectedQuestion = questions[answeredQuestions % questions.length];
+      }
 
-      const questions = questionBank[currentAgent] || questionBank.nova;
-      const questionIndex = answeredQuestions % questions.length;
-      const question = questions[questionIndex];
-      const questionId = `${currentAgent}-q${questionIndex + 1}`;
-
-      // Determine if we should switch agents
-      const switchAgent = answeredQuestions > 0 && answeredQuestions % 10 === 0;
+      const switchThreshold = Math.floor(questions.length / 4);
+      const questionsForCurrentAgent = answeredQuestionIds.filter((id: string) => id.startsWith(currentAgent)).length;
+      const switchAgent = questionsForCurrentAgent >= switchThreshold && questionsForCurrentAgent > 0;
+      
       const agentOrder = ['nova', 'sterling', 'atlas', 'sage'];
       const currentIndex = agentOrder.indexOf(currentAgent);
       const nextAgent = switchAgent ? agentOrder[(currentIndex + 1) % agentOrder.length] : currentAgent;
 
+      const baseScores = {
+        innovationScore: Math.min(100, 5 + answeredQuestions * 0.5),
+        viabilityScore: Math.min(100, 3 + answeredQuestions * 0.45),
+        scalabilityScore: Math.min(100, 4 + answeredQuestions * 0.48),
+        complianceScore: Math.min(100, 2 + answeredQuestions * 0.42),
+      };
+      
+      const overallReadiness = (baseScores.innovationScore + baseScores.viabilityScore + baseScores.scalabilityScore + baseScores.complianceScore) / 4;
+      const approvalProbability = Math.min(95, 15 + overallReadiness * 0.8);
+
       res.json({
-        question,
-        questionId,
-        section: Math.floor(answeredQuestions / 10) + 1,
+        question: selectedQuestion.text,
+        questionId: selectedQuestion.id,
+        questionData: {
+          category: selectedQuestion.category,
+          subcategory: selectedQuestion.subcategory,
+          difficulty: selectedQuestion.difficulty,
+          points: selectedQuestion.points,
+          tips: selectedQuestion.tips
+        },
+        section: Math.floor(answeredQuestions / 30) + 1,
         switchAgent,
         nextAgent,
         session: {
           id: sessionId || crypto.randomUUID(),
           currentAgent,
-          currentSection: Math.floor(answeredQuestions / 10) + 1,
+          currentSection: Math.floor(answeredQuestions / 30) + 1,
           totalQuestionsAnswered: answeredQuestions,
-          totalQuestions: 475,
-          innovationScore: Math.min(100, answeredQuestions * 2),
-          viabilityScore: Math.min(100, answeredQuestions * 1.8),
-          scalabilityScore: Math.min(100, answeredQuestions * 1.9),
-          overallReadiness: Math.min(100, answeredQuestions * 1.5),
-          approvalProbability: Math.min(95, 30 + answeredQuestions * 1.2),
-          currentStreak: answeredQuestions % 5,
-          totalXP: answeredQuestions * 50
+          totalQuestions: getTotalQuestionCount(),
+          ...baseScores,
+          overallReadiness: Math.round(overallReadiness * 10) / 10,
+          approvalProbability: Math.round(approvalProbability * 10) / 10,
+          currentStreak: answeredQuestions % 10,
+          totalXP: answeredQuestions * 50 + Math.floor(overallReadiness * 10),
+          level: getLevel(answeredQuestions * 50 + Math.floor(overallReadiness * 10))
         }
       });
     } catch (error) {
@@ -5833,7 +5873,7 @@ END:VEVENT
   app.post("/api/ai-interview/submit-answer", isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      const { sessionId, questionId, answer, tier } = req.body;
+      const { sessionId, questionId, answer, tier, currentStreak = 0, totalXP = 0, totalQuestionsAnswered = 0, achievements = [], agentsUsed = [], detailedAnswerCount = 0 } = req.body;
 
       if (!answer || answer.trim().length < 10) {
         return res.status(400).json({ 
@@ -5841,63 +5881,161 @@ END:VEVENT
         });
       }
 
-      // Calculate quality score based on answer length and content
       const answerLength = answer.length;
-      let qualityScore = 50;
+      let qualityScore = 40;
       
-      if (answerLength > 500) qualityScore += 30;
-      else if (answerLength > 200) qualityScore += 20;
-      else if (answerLength > 100) qualityScore += 10;
+      if (answerLength > 800) qualityScore += 35;
+      else if (answerLength > 500) qualityScore += 28;
+      else if (answerLength > 300) qualityScore += 20;
+      else if (answerLength > 150) qualityScore += 12;
+      else if (answerLength > 80) qualityScore += 5;
       
-      // Check for specific keywords that indicate quality
-      const qualityKeywords = ['specifically', 'for example', 'data shows', 'metrics', 'percentage', 'revenue', 'customers', 'validated'];
+      const qualityKeywords = [
+        'specifically', 'for example', 'data shows', 'metrics', 'percentage', 
+        'revenue', 'customers', 'validated', 'evidence', 'research',
+        'growth', 'market', 'competitive', 'innovation', 'strategy',
+        'timeline', 'milestone', 'funding', 'investment', 'profit',
+        'year', 'month', 'quarter', '20', 'uk', 'london', 'patent'
+      ];
+      
+      let keywordMatches = 0;
       qualityKeywords.forEach(keyword => {
-        if (answer.toLowerCase().includes(keyword)) qualityScore += 5;
+        if (answer.toLowerCase().includes(keyword)) {
+          qualityScore += 3;
+          keywordMatches++;
+        }
       });
       
-      qualityScore = Math.min(100, qualityScore);
-
-      // Generate AI feedback
-      let feedback = "";
-      const scoreChange = Math.floor(qualityScore / 10);
+      const hasNumbers = /\d+/.test(answer);
+      const hasCurrency = /[£$€]\d+|\d+[km]|\d+%/.test(answer);
+      const hasSpecificNames = /[A-Z][a-z]+\s[A-Z][a-z]+|Ltd|Inc|LLC|University|College/.test(answer);
       
-      if (qualityScore >= 80) {
+      if (hasNumbers) qualityScore += 5;
+      if (hasCurrency) qualityScore += 8;
+      if (hasSpecificNames) qualityScore += 5;
+      
+      qualityScore = Math.min(100, qualityScore);
+      
+      const baseXP = Math.floor(qualityScore * 0.8);
+      let bonusXP = 0;
+      const newAchievements: any[] = [];
+      const newStreak = qualityScore >= 50 ? currentStreak + 1 : 0;
+      
+      if (totalQuestionsAnswered === 0 && !achievements.includes('first_answer')) {
+        newAchievements.push(ACHIEVEMENTS.first_answer);
+        bonusXP += ACHIEVEMENTS.first_answer.xp;
+      }
+      
+      if (newStreak >= 5 && !achievements.includes('streak_5')) {
+        newAchievements.push(ACHIEVEMENTS.streak_5);
+        bonusXP += ACHIEVEMENTS.streak_5.xp;
+      }
+      
+      if (newStreak >= 10 && !achievements.includes('streak_10')) {
+        newAchievements.push(ACHIEVEMENTS.streak_10);
+        bonusXP += ACHIEVEMENTS.streak_10.xp;
+      }
+      
+      if (qualityScore >= 90 && !achievements.includes('quality_master')) {
+        newAchievements.push(ACHIEVEMENTS.quality_master);
+        bonusXP += ACHIEVEMENTS.quality_master.xp;
+      }
+      
+      if (qualityScore === 100 && !achievements.includes('perfect_answer')) {
+        newAchievements.push(ACHIEVEMENTS.perfect_answer);
+        bonusXP += ACHIEVEMENTS.perfect_answer.xp;
+      }
+      
+      if (answerLength >= 500) {
+        const newDetailedCount = detailedAnswerCount + 1;
+        if (newDetailedCount >= 5 && !achievements.includes('detail_oriented')) {
+          newAchievements.push(ACHIEVEMENTS.detail_oriented);
+          bonusXP += ACHIEVEMENTS.detail_oriented.xp;
+        }
+      }
+      
+      if ((totalQuestionsAnswered + 1) === 50 && !achievements.includes('fifty_questions')) {
+        newAchievements.push(ACHIEVEMENTS.fifty_questions);
+        bonusXP += ACHIEVEMENTS.fifty_questions.xp;
+      }
+      
+      const earnedXP = baseXP + bonusXP + (newStreak * 5);
+      const newTotalXP = totalXP + earnedXP;
+      const newLevel = getLevel(newTotalXP);
+      const oldLevel = getLevel(totalXP);
+      const leveledUp = newLevel.level > oldLevel.level;
+
+      let feedback = "";
+      const scoreChange = Math.floor(qualityScore / 12);
+      
+      if (qualityScore >= 90) {
+        feedback = "Outstanding! This is exactly the kind of detailed, evidence-backed response that endorsers love. You've demonstrated clear expertise and provided concrete examples.";
+      } else if (qualityScore >= 80) {
         feedback = "Excellent answer! You've provided specific details and evidence that endorsers look for. This strengthens your application significantly.";
+      } else if (qualityScore >= 70) {
+        feedback = "Very good! Your answer shows solid understanding. Adding a few more specific metrics or examples would make it even stronger.";
       } else if (qualityScore >= 60) {
-        feedback = "Good answer! Consider adding more specific metrics, examples, or evidence to make it even stronger.";
+        feedback = "Good answer! Consider adding more specific metrics, examples, or evidence to make it even more compelling for endorsers.";
+      } else if (qualityScore >= 50) {
+        feedback = "Decent start! Try to include specific numbers, dates, company names, or measurable outcomes to strengthen this response.";
       } else {
-        feedback = "This is a good start. Try to add more specific details - numbers, dates, company names, or measurable outcomes will strengthen this response.";
+        feedback = "This is a starting point. Endorsers want to see specific details - numbers, dates, company names, market data, and measurable outcomes. Let's add more substance.";
       }
 
-      // Check for milestone
-      const milestone = qualityScore >= 90 ? {
-        title: "Quality Expert",
-        xp: 100,
-        icon: "🌟"
+      const improvementSuggestions = qualityScore < 85 ? [
+        !hasNumbers && "Add specific numbers and quantities",
+        !hasCurrency && "Include financial figures (revenue, costs, investment)",
+        !hasSpecificNames && "Mention specific company names, products, or people",
+        keywordMatches < 3 && "Use industry-specific terminology",
+        answerLength < 200 && "Provide more detailed explanations",
+        "Reference market research or customer feedback",
+        "Include timeline and milestones"
+      ].filter(Boolean) : [];
+
+      const primaryMilestone = newAchievements.length > 0 ? {
+        title: newAchievements[0].title,
+        description: newAchievements[0].description,
+        xp: newAchievements[0].xp,
+        icon: newAchievements[0].icon
       } : null;
+
+      const newQuestionsAnswered = totalQuestionsAnswered + 1;
+      const progressPercent = (newQuestionsAnswered / getTotalQuestionCount()) * 100;
+      
+      const baseScores = {
+        innovationScore: Math.min(100, 5 + newQuestionsAnswered * 0.5 + (qualityScore > 70 ? scoreChange : 0)),
+        viabilityScore: Math.min(100, 3 + newQuestionsAnswered * 0.45 + (qualityScore > 70 ? scoreChange * 0.9 : 0)),
+        scalabilityScore: Math.min(100, 4 + newQuestionsAnswered * 0.48 + (qualityScore > 70 ? scoreChange * 0.95 : 0)),
+        complianceScore: Math.min(100, 2 + newQuestionsAnswered * 0.42 + (qualityScore > 70 ? scoreChange * 0.85 : 0)),
+      };
+      
+      const overallReadiness = (baseScores.innovationScore + baseScores.viabilityScore + baseScores.scalabilityScore + baseScores.complianceScore) / 4;
+      const approvalProbability = Math.min(95, 15 + overallReadiness * 0.8);
 
       res.json({
         success: true,
         qualityScore,
         feedback,
         scoreChange,
-        improvementSuggestions: qualityScore < 80 ? [
-          "Add specific metrics or percentages",
-          "Include company or product names",
-          "Mention dates or timelines",
-          "Reference customer feedback or testimonials"
-        ] : [],
-        milestone,
+        earnedXP,
+        bonusXP,
+        improvementSuggestions,
+        milestone: primaryMilestone,
+        newAchievements,
+        leveledUp,
+        newLevel: leveledUp ? newLevel : null,
         session: {
           id: sessionId,
-          totalQuestionsAnswered: 1,
-          innovationScore: Math.min(100, scoreChange * 5),
-          viabilityScore: Math.min(100, scoreChange * 4),
-          scalabilityScore: Math.min(100, scoreChange * 4.5),
-          overallReadiness: Math.min(100, scoreChange * 4),
-          approvalProbability: Math.min(95, 30 + scoreChange * 3),
-          currentStreak: 1,
-          totalXP: qualityScore
+          totalQuestionsAnswered: newQuestionsAnswered,
+          ...baseScores,
+          overallReadiness: Math.round(overallReadiness * 10) / 10,
+          approvalProbability: Math.round(approvalProbability * 10) / 10,
+          currentStreak: newStreak,
+          longestStreak: Math.max(newStreak, currentStreak),
+          totalXP: newTotalXP,
+          level: newLevel,
+          achievements: [...achievements, ...newAchievements.map(a => a.id)],
+          detailedAnswerCount: answerLength >= 500 ? detailedAnswerCount + 1 : detailedAnswerCount
         }
       });
     } catch (error) {
