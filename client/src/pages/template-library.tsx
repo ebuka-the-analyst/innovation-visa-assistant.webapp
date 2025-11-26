@@ -28,16 +28,30 @@ function renderMarkdown(text: string): JSX.Element[] {
     let processedLine = line
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-xs">$1</code>');
+      .replace(/`([^`]+)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-xs font-mono">$1</code>')
+      .replace(/\{\{([^}]+)\}\}/g, '<span class="bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 px-1.5 py-0.5 rounded text-xs font-mono">{{$1}}</span>');
     
-    if (line.match(/^\d+\.\s/)) {
+    if (line.match(/^###\s/)) {
+      processedLine = processedLine.replace(/^###\s/, '');
+      return <h5 key={index} className="font-semibold text-sm mt-3 mb-1" dangerouslySetInnerHTML={{ __html: processedLine }} />;
+    } else if (line.match(/^##\s/)) {
+      processedLine = processedLine.replace(/^##\s/, '');
+      return <h4 key={index} className="font-semibold text-base mt-4 mb-2" dangerouslySetInnerHTML={{ __html: processedLine }} />;
+    } else if (line.match(/^#\s/)) {
+      processedLine = processedLine.replace(/^#\s/, '');
+      return <h3 key={index} className="font-bold text-lg mt-4 mb-2" dangerouslySetInnerHTML={{ __html: processedLine }} />;
+    } else if (line.match(/^---$/)) {
+      return <hr key={index} className="my-3 border-border" />;
+    } else if (line.match(/^\d+\.\s/)) {
       return <div key={index} className="ml-4 my-1" dangerouslySetInnerHTML={{ __html: processedLine }} />;
     } else if (line.match(/^\s+-\s/)) {
       return <div key={index} className="ml-8 my-0.5" dangerouslySetInnerHTML={{ __html: processedLine }} />;
+    } else if (line.match(/^-\s/)) {
+      return <div key={index} className="ml-4 my-0.5" dangerouslySetInnerHTML={{ __html: processedLine }} />;
     } else if (line.trim() === '') {
       return <div key={index} className="h-2" />;
     } else {
-      return <div key={index} dangerouslySetInnerHTML={{ __html: processedLine }} />;
+      return <div key={index} className="my-0.5" dangerouslySetInnerHTML={{ __html: processedLine }} />;
     }
   });
 }
@@ -231,9 +245,9 @@ function TemplatePreviewDialog({
           <div>
             <h4 className="font-medium mb-2">Template Content</h4>
             <ScrollArea className="h-64 border rounded-lg p-4 bg-muted/30">
-              <pre className="text-sm whitespace-pre-wrap font-mono">
-                {template.content}
-              </pre>
+              <div className="text-sm">
+                {renderMarkdown(template.content)}
+              </div>
             </ScrollArea>
           </div>
           
@@ -241,9 +255,9 @@ function TemplatePreviewDialog({
             <div>
               <h4 className="font-medium mb-2">Example (Filled)</h4>
               <ScrollArea className="h-48 border rounded-lg p-4 bg-green-50 dark:bg-green-950/30">
-                <pre className="text-sm whitespace-pre-wrap">
-                  {template.exampleFilled}
-                </pre>
+                <div className="text-sm text-green-800 dark:text-green-200">
+                  {renderMarkdown(template.exampleFilled)}
+                </div>
               </ScrollArea>
             </div>
           )}
@@ -364,9 +378,9 @@ function TemplateEditorDialog({
           <div className="space-y-4 overflow-hidden">
             <h4 className="font-medium">Preview</h4>
             <ScrollArea className="h-[45vh] border rounded-lg p-4 bg-muted/30">
-              <pre className="text-sm whitespace-pre-wrap">
-                {generatedContent || template.content}
-              </pre>
+              <div className="text-sm">
+                {renderMarkdown(generatedContent || template.content)}
+              </div>
             </ScrollArea>
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1" onClick={handleCopy} data-testid="button-copy">
