@@ -4,7 +4,7 @@ import type { User, BusinessPlan } from "@shared/schema";
 import { ALL_TOOLS } from "@shared/tools-data";
 
 // ============================================
-// AI ACTION REGISTRY - PhD-Level AI Orchestrator
+// AI ACTION REGISTRY - Advanced AI Orchestrator
 // ============================================
 
 export type ActionCategory = 'account' | 'subscription' | 'insights' | 'documents' | 'support';

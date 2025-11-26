@@ -475,7 +475,7 @@ export default function Dashboard() {
                       <BookOpen className="h-5 w-5 text-green-500" />
                     </div>
                     <span className="text-sm font-medium">Templates</span>
-                    <span className="text-xs text-muted-foreground">60+ PhD-Level</span>
+                    <span className="text-xs text-muted-foreground">60+ Premium</span>
                   </Button>
                   <Button
                     variant="outline"

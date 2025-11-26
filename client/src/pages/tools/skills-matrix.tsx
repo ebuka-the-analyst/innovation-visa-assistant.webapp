@@ -60,7 +60,7 @@ export default function SkillsMatrix() {
     setSkillEntries(skillEntries.map(e => e.id === id ? { ...e, skills: { ...e.skills, [skill]: level } } : e));
   };
 
-  // PhD-Level: Team Skill Coverage Score
+  // Advanced: Team Skill Coverage Score
   // Formula: Weighted skill levels across critical competencies
   const getSkillCoverage = (): { score: number; grade: string; criticalGaps: number } => {
     if (skillEntries.length === 0) return { score: 0, grade: 'F', criticalGaps: 0 };
@@ -89,7 +89,7 @@ export default function SkillsMatrix() {
     return { score, grade, criticalGaps };
   };
 
-  // PhD-Level: Skill Redundancy Analysis (Business Continuity)
+  // Advanced: Skill Redundancy Analysis (Business Continuity)
   const getSkillRedundancy = (): { singlePointsOfFailure: number; avgDepth: number } => {
     let singlePoints = 0;
     let totalDepth = 0;

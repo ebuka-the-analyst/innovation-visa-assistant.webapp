@@ -59,7 +59,7 @@ export default function LeadershipDevelopment() {
     setLeaders(leaders.map(l => l.id === id ? { ...l, skillScores: { ...l.skillScores, [skill]: value } } : l));
   };
 
-  // PhD-Level: Leadership Bench Strength (McKinsey 9-Box Leadership Assessment)
+  // Advanced: Leadership Bench Strength (McKinsey 9-Box Leadership Assessment)
   const getLeadershipBenchStrength = (): { score: number; grade: string; readyLeaders: number } => {
     if (leaders.length === 0) return { score: 0, grade: 'F', readyLeaders: 0 };
     
@@ -85,7 +85,7 @@ export default function LeadershipDevelopment() {
     return { score, grade, readyLeaders };
   };
 
-  // PhD-Level: Development ROI (Deloitte research: Leadership dev = 2.5x ROI)
+  // Advanced: Development ROI (Deloitte research: Leadership dev = 2.5x ROI)
   const getDevelopmentROI = (): { totalInvestment: number; estimatedROI: number; productivityGain: number } => {
     const totalInvestment = leaders.reduce((sum, l) => sum + l.developmentCost, 0);
     

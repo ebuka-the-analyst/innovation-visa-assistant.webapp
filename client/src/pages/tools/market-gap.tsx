@@ -60,7 +60,7 @@ export default function MarketGap() {
   const [activeTab, setActiveTab] = useState('analyzer');
   const [savedDate, setSavedDate] = useState('');
 
-  // PhD-Level: Market Gap Opportunity Score
+  // Advanced: Market Gap Opportunity Score
   // Formula: Weighted average of gap severity, opportunity size, and innovation potential
   const getGapOpportunityScore = (): { score: number; grade: string } => {
     if (gaps.length === 0) return { score: 0, grade: 'F - No Gaps Identified' };
@@ -106,7 +106,7 @@ export default function MarketGap() {
     return { score, grade };
   };
 
-  // PhD-Level: Innovation Criterion Alignment
+  // Advanced: Innovation Criterion Alignment
   const getInnovationAlignment = (): { aligned: boolean; strengths: string[]; weaknesses: string[] } => {
     const strengths: string[] = [];
     const weaknesses: string[] = [];

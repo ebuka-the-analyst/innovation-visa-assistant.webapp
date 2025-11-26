@@ -286,7 +286,7 @@ export type InsertToolAnalytics = z.infer<typeof insertToolAnalyticsSchema>;
 export type ToolAnalytic = typeof toolAnalytics.$inferSelect;
 
 // ============================================
-// REFERRAL & PROMO CODE SYSTEM (PhD-Level)
+// REFERRAL & PROMO CODE SYSTEM
 // ============================================
 
 // Referral Codes - User-generated codes for referring others
@@ -1058,7 +1058,7 @@ export type UserTemplateDownload = typeof userTemplateDownloads.$inferSelect;
 
 // ============================================
 // IMMIGRATION LAWYER REVIEW CENTER
-// PhD-Level Professional Document Review System
+// Professional Document Review System
 // ============================================
 
 // Immigration Lawyers Table - Stores lawyer profiles
@@ -1363,7 +1363,7 @@ export type NewsFetchLog = typeof newsFetchLog.$inferSelect;
 export type InsertNewsFetchLog = z.infer<typeof insertNewsFetchLogSchema>;
 
 // ============================================
-// AI ACTION SYSTEM - PhD-Level AI Orchestrator
+// AI ACTION SYSTEM - Advanced AI Orchestrator
 // ============================================
 
 // AI Action Logs - Immutable audit trail for all AI-performed actions

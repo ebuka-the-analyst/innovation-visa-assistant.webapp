@@ -60,7 +60,7 @@ export default function RetentionStrategy() {
     setRisks(risks.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
-  // PhD-Level: Retention Health Score
+  // Advanced: Retention Health Score
   // Formula: Based on turnover rate vs industry benchmarks
   const getRetentionHealth = (): { score: number; grade: string } => {
     // UK tech industry average: 12-15% turnover
@@ -83,7 +83,7 @@ export default function RetentionStrategy() {
     return { score, grade };
   };
 
-  // PhD-Level: Turnover Cost Analysis
+  // Advanced: Turnover Cost Analysis
   // Formula: UK industry standard = 1.5x annual salary replacement cost
   const getTurnoverCost = (): { annualCost: number; potentialSavings: number; atRiskCost: number } => {
     const avgSalary = risks.length > 0 ? risks.reduce((sum, r) => sum + r.estimatedSalary, 0) / risks.length : 60000;

@@ -38,7 +38,7 @@ export default function MarketSizing() {
   const [activeTab, setActiveTab] = useState('calculator');
   const [savedDate, setSavedDate] = useState('');
 
-  // PhD-Level: Market Sizing Confidence Score
+  // Advanced: Market Sizing Confidence Score
   // Formula: Based on approach, evidence quality, and ratio validation
   const getConfidenceScore = (): { score: number; grade: string } => {
     let score = 0;
@@ -75,7 +75,7 @@ export default function MarketSizing() {
     return { score, grade };
   };
 
-  // PhD-Level: Market Health Assessment
+  // Advanced: Market Health Assessment
   const getMarketHealth = (): { score: number; grade: string } => {
     let score = 0;
     

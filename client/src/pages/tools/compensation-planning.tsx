@@ -72,7 +72,7 @@ export default function CompensationPlanning() {
     setRoles(roles.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
-  // PhD-Level: Scalability Score (Job Creation for Innovator Founder Visa)
+  // Advanced: Scalability Score (Job Creation for Innovator Founder Visa)
   // Formula: Based on GOV.UK ILR achievement criteria
   // - 5 full-time jobs at £25k+ = ILR criterion met
   // - 10 full-time jobs at any salary = ILR criterion met
@@ -108,7 +108,7 @@ export default function CompensationPlanning() {
     return { score, jobsCreated, meetsILRCriterion, criterionMet };
   };
 
-  // PhD-Level: Team Budget Viability Analysis
+  // Advanced: Team Budget Viability Analysis
   // Formula: Total 36-month team costs vs available funding
   // Includes: salaries, recruitment costs, employer NI (13.8%), pension (3%)
   const getTeamBudgetAnalysis = (): { totalCost36Mo: number; monthlyBurnRate: number; fundingGap: number; viabilityScore: number } => {
@@ -145,7 +145,7 @@ export default function CompensationPlanning() {
     return { totalCost36Mo, monthlyBurnRate, fundingGap, viabilityScore };
   };
 
-  // PhD-Level: Total Compensation Calculator
+  // Advanced: Total Compensation Calculator
   // Formula: Base + Bonus + Equity Value (4-year vesting, startup valuation assumptions)
   const getTotalCompensation = (role: TeamRole): number => {
     const baseSalary = (role.minSalary + role.maxSalary) / 2;
@@ -155,7 +155,7 @@ export default function CompensationPlanning() {
     return baseSalary + bonus + equityValue;
   };
 
-  // PhD-Level: Recruitment ROI Analysis
+  // Advanced: Recruitment ROI Analysis
   const getRecruitmentAnalysis = (): { totalRecruitmentCost: number; avgCostPerHire: number; costAsPercentOfSalary: number } => {
     const totalRecruitmentCost = roles.reduce((sum, r) => sum + r.costPerHire, 0);
     const avgCostPerHire = roles.length > 0 ? totalRecruitmentCost / roles.length : 0;
@@ -433,7 +433,7 @@ Budget Formula: Salary + Bonus + Employer NI (13.8%) + Pension (3%) + Recruitmen
             </Alert>
           )}
 
-          {/* PhD-Level KPI Dashboard */}
+          {/* Advanced KPI Dashboard */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
@@ -492,7 +492,7 @@ Budget Formula: Salary + Bonus + Employer NI (13.8%) + Pension (3%) + Recruitmen
             </div>
           </Card>
 
-          {/* PhD-Level: 4-Chart Analytics Dashboard */}
+          {/* Advanced: 4-Chart Analytics Dashboard */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Card className="p-6">
               <h3 className="font-semibold mb-4">Job Creation Timeline (Scalability)</h3>

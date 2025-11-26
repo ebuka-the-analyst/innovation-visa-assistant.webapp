@@ -34,7 +34,7 @@ export default function DiversityInclusion() {
   const handleFileUpload = (file: any) => setUploadedFiles(prev => [...prev, file]);
   const handleRemoveFile = (id: string) => setUploadedFiles(prev => prev.filter(f => f.id !== id));
 
-  // PhD-Level: Diversity Score (McKinsey research: diverse teams = 35% more innovation)
+  // Advanced: Diversity Score (McKinsey research: diverse teams = 35% more innovation)
   const getDiversityScore = (): { score: number; grade: string } => {
     let score = 0;
     
@@ -65,7 +65,7 @@ export default function DiversityInclusion() {
     return { score, grade };
   };
 
-  // PhD-Level: Innovation Impact (Boston Consulting Group research)
+  // Advanced: Innovation Impact (Boston Consulting Group research)
   const getInnovationImpact = (): { diversityBonus: number; talentPoolExpansion: number } => {
     const { score } = getDiversityScore();
     

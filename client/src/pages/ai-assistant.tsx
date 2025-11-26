@@ -334,7 +334,7 @@ export default function AIAssistant() {
               <AlertCircle className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-semibold text-green-700 dark:text-green-300">
-                  {isAuthenticated ? 'PhD-Level AI with Account Actions' : '100% Accurate Official Guidance'}
+                  {isAuthenticated ? 'Expert AI with Account Actions' : '100% Accurate Official Guidance'}
                 </p>
                 <p className="text-green-600 dark:text-green-400">
                   {isAuthenticated 

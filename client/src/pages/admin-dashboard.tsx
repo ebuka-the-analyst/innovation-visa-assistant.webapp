@@ -3868,7 +3868,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* Tool Performance Section - 5 Unique PhD-Level Pages */}
+                {/* Tool Performance Section - 5 Unique Advanced Pages */}
                 {activeSection.startsWith('tools') && (
                   <div className="space-y-6">
                     <motion.div
@@ -4683,7 +4683,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* System Health Section - 5 Unique PhD-Level Pages */}
+                {/* System Health Section - 5 Unique Advanced Pages */}
                 {activeSection.startsWith('system') && (
                   <div className="space-y-6">
                     <motion.div
@@ -5394,7 +5394,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* Revenue & Subscriptions Section - 5 Unique PhD-Level Pages */}
+                {/* Revenue & Subscriptions Section - 5 Unique Advanced Pages */}
                 {activeSection.startsWith('revenue') && (
                   <div className="space-y-6">
                     <motion.div
@@ -6323,7 +6323,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* Logs & Audit Section - 4 Unique PhD-Level Pages */}
+                {/* Logs & Audit Section - 4 Unique Advanced Pages */}
                 {activeSection.startsWith('logs') && (
                   <div className="space-y-6">
                     <motion.div
@@ -6932,7 +6932,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* Communications Section - 2 Unique PhD-Level Pages */}
+                {/* Communications Section - 2 Unique Advanced Pages */}
                 {activeSection.startsWith('comms') && (
                   <div className="space-y-6">
                     <motion.div
@@ -7340,7 +7340,7 @@ export default function AdminDashboard() {
                       transition={{ duration: 0.5 }}
                       className="space-y-6"
                     >
-                      {/* PhD-Level Referral Programme Overview */}
+                      {/* Advanced Referral Programme Overview */}
                       {activeSection === 'referrals-overview' && (
                         <>
                           {/* Hero Stats - PhD Level KPI Cards */}
@@ -7715,7 +7715,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Referral Codes Management */}
+                      {/* Advanced Referral Codes Management */}
                       {activeSection === 'referrals-codes' && (
                         <>
                           {/* Summary Stats */}
@@ -7915,7 +7915,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Pending Rewards with Approval Workflow */}
+                      {/* Advanced Pending Rewards with Approval Workflow */}
                       {activeSection === 'referrals-rewards' && (
                         <>
                           {/* Rewards Summary Stats */}
@@ -8128,7 +8128,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Promo Codes Management */}
+                      {/* Advanced Promo Codes Management */}
                       {activeSection === 'promos-overview' && (
                         <>
                           {/* Promo Summary Stats */}
@@ -8435,7 +8435,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Create Promo Section */}
+                      {/* Advanced Create Promo Section */}
                       {activeSection === 'promos-create' && (
                         <>
                           <Card>
@@ -8487,7 +8487,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Referral Analytics */}
+                      {/* Advanced Referral Analytics */}
                       {activeSection === 'referrals-analytics' && (
                         <>
                           {/* KPI Overview */}
@@ -8656,7 +8656,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Promo Analytics */}
+                      {/* Advanced Promo Analytics */}
                       {activeSection === 'promos-analytics' && (
                         <>
                           {/* Performance KPIs */}
@@ -8806,7 +8806,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Campaign Manager */}
+                      {/* Advanced Campaign Manager */}
                       {activeSection === 'promos-campaigns' && (
                         <>
                           <Card>
@@ -8867,7 +8867,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Promo Reports */}
+                      {/* Advanced Promo Reports */}
                       {activeSection === 'promos-reports' && (
                         <>
                           <Card>
@@ -8971,7 +8971,7 @@ export default function AdminDashboard() {
                       transition={{ duration: 0.5 }}
                       className="space-y-6"
                     >
-                      {/* PhD-Level Review Dashboard */}
+                      {/* Advanced Review Dashboard */}
                       {activeSection === 'lawyer-dashboard' && (
                         <>
                           {/* KPI Overview Row */}
@@ -9316,7 +9316,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Review Queue */}
+                      {/* Advanced Review Queue */}
                       {activeSection === 'lawyer-queue' && (
                         <>
                           {/* Queue Summary Stats */}
@@ -9553,7 +9553,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Document Review */}
+                      {/* Advanced Document Review */}
                       {activeSection === 'lawyer-documents' && (
                         <>
                           {/* Status Tabs */}
@@ -9712,7 +9712,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Lawyer Team Management */}
+                      {/* Advanced Lawyer Team Management */}
                       {activeSection === 'lawyer-team' && (
                         <>
                           {/* Team Overview Stats */}
@@ -9954,7 +9954,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Completed Reviews */}
+                      {/* Advanced Completed Reviews */}
                       {activeSection === 'lawyer-completed' && (
                         <>
                           {/* Completion Stats */}
@@ -10183,7 +10183,7 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* PhD-Level Comments & Notes */}
+                      {/* Advanced Comments & Notes */}
                       {activeSection === 'lawyer-comments' && (
                         <>
                           {/* Comments Overview */}

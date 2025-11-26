@@ -94,7 +94,7 @@ export default function CultureFramework() {
     }));
   };
 
-  // PhD-Level: Culture Strength Score
+  // Advanced: Culture Strength Score
   // Formula: (Avg Alignment × 0.7) + (Behavior Specificity × 0.3)
   const getCultureStrength = (): { score: number; grade: string } => {
     if (values.length === 0) return { score: 0, grade: 'F' };
@@ -113,7 +113,7 @@ export default function CultureFramework() {
     return { score, grade };
   };
 
-  // PhD-Level: Retention Impact Analysis
+  // Advanced: Retention Impact Analysis
   // Formula: Culture impact × 35% baseline improvement (industry research)
   const getRetentionImpact = (): { avgImpact: number; estimatedRetentionBoost: number; costSavings: number } => {
     const avgImpact = values.length > 0 ? values.reduce((sum, v) => sum + v.impactOnRetention, 0) / values.length : 0;

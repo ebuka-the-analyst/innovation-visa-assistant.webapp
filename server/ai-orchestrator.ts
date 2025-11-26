@@ -12,7 +12,7 @@ import {
 import type { User } from "@shared/schema";
 
 // ============================================
-// AI ORCHESTRATOR - PhD-Level Command Center
+// AI ORCHESTRATOR - Advanced Command Center
 // ============================================
 
 interface Message {
@@ -39,7 +39,7 @@ const openai = new OpenAI({
 });
 
 // System prompt that includes action capabilities
-const ORCHESTRATOR_SYSTEM_PROMPT = `You are the PhD-Level UK Innovator Founder Visa AI Assistant with the ability to perform actions on behalf of authenticated users.
+const ORCHESTRATOR_SYSTEM_PROMPT = `You are the UK Innovator Founder Visa AI Assistant - an expert-level advisor with the ability to perform actions on behalf of authenticated users.
 
 CORE CAPABILITIES:
 1. Answer visa questions with 100% accuracy based on official guidance

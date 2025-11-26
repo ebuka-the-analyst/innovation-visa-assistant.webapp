@@ -109,7 +109,7 @@ export default function SuccessionPlanning() {
     }));
   };
 
-  // PhD-Level: Business Continuity Risk Score (aligned with ISO 22301 Business Continuity Management)
+  // Advanced: Business Continuity Risk Score (aligned with ISO 22301 Business Continuity Management)
   // Formula: Weighted risk assessment based on role criticality, successor readiness, urgency
   // Scoring: 0-100 where 100 = excellent continuity, 0 = critical risk
   const getBusinessContinuityScore = (): { score: number; grade: string; criticalRisks: number } => {
@@ -167,7 +167,7 @@ export default function SuccessionPlanning() {
     return { score, grade, criticalRisks };
   };
 
-  // PhD-Level: Pipeline Health Metrics
+  // Advanced: Pipeline Health Metrics
   // Formula: Categorizes successor readiness by timeline (now, 6mo, 12mo+)
   const getPipelineHealth = (): { readyNow: number; ready6Mo: number; ready12Mo: number; atRisk: number } => {
     const readyNow = roles.filter(r => r.readinessLevel >= 80).length;
@@ -178,7 +178,7 @@ export default function SuccessionPlanning() {
     return { readyNow, ready6Mo, ready12Mo, atRisk };
   };
 
-  // PhD-Level: Development ROI Calculator
+  // Advanced: Development ROI Calculator
   // Formula: Investment in succession development vs cost of unplanned departures
   // Industry standard: Replacing executive = 2x annual salary, mid-level = 1.5x
   const getDevelopmentROI = (): { totalInvestment: number; avgCostPerRole: number; replacementCostSaved: number; roi: number } => {
@@ -203,7 +203,7 @@ export default function SuccessionPlanning() {
     return { totalInvestment, avgCostPerRole, replacementCostSaved: Math.round(replacementCostSaved), roi: Math.round(roi) };
   };
 
-  // PhD-Level: Readiness-Urgency Matrix (McKinsey 9-Box style analysis)
+  // Advanced: Readiness-Urgency Matrix (McKinsey 9-Box style analysis)
   // Maps successor readiness against succession urgency to prioritize development
   const getReadinessUrgencyMatrix = (): { critical: number; develop: number; monitor: number; stable: number } => {
     let critical = 0; // High urgency, low readiness (immediate action)
@@ -496,7 +496,7 @@ Assessment: Innovation, Viability, Scalability criteria
             </Alert>
           )}
 
-          {/* PhD-Level KPI Dashboard */}
+          {/* Advanced KPI Dashboard */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
@@ -535,7 +535,7 @@ Assessment: Innovation, Viability, Scalability criteria
             </Card>
           </div>
 
-          {/* PhD-Level: 4-Chart Analytics Dashboard */}
+          {/* Advanced: 4-Chart Analytics Dashboard */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Card className="p-6">
               <h3 className="font-semibold mb-4">Readiness vs Urgency Matrix</h3>

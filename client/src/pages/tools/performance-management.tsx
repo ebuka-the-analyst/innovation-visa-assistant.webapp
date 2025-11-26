@@ -75,7 +75,7 @@ export default function PerformanceManagement() {
     setReviews(reviews.map(r => r.id === id ? { ...r, goals: r.goals.filter((_, i) => i !== index) } : r));
   };
 
-  // PhD-Level: Team Performance Score
+  // Advanced: Team Performance Score
   // Formula: Weighted rating distribution (McKinsey forced ranking principles)
   const getTeamPerformance = (): { score: number; grade: string } => {
     if (reviews.length === 0) return { score: 0, grade: 'F' };
@@ -99,7 +99,7 @@ export default function PerformanceManagement() {
     return { score, grade };
   };
 
-  // PhD-Level: Performance-Pay Alignment (Compensation equity research)
+  // Advanced: Performance-Pay Alignment (Compensation equity research)
   const getPayAlignment = (): { alignmentScore: number; performersUnderpaid: number } => {
     if (reviews.length === 0) return { alignmentScore: 100, performersUnderpaid: 0 };
     

@@ -40,7 +40,7 @@ export default function MarketAnalysis() {
   const [activeTab, setActiveTab] = useState('analyzer');
   const [savedDate, setSavedDate] = useState('');
 
-  // PhD-Level: Market Opportunity Score
+  // Advanced: Market Opportunity Score
   // Formula: Based on TAM size, growth rate, and market maturity
   const getMarketOpportunity = (): { score: number; grade: string } => {
     let score = 0;
@@ -72,7 +72,7 @@ export default function MarketAnalysis() {
     return { score, grade };
   };
 
-  // PhD-Level: Market Sizing Validation
+  // Advanced: Market Sizing Validation
   // Formula: SOM should be 1-10% of SAM, SAM should be 10-50% of TAM
   const getMarketSizingHealth = (): { isValid: boolean; issues: string[] } => {
     const issues: string[] = [];

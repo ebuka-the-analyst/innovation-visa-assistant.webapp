@@ -1108,7 +1108,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
-  // Chat API endpoint - PhD-Level AI Orchestrator with action capabilities
+  // Chat API endpoint - Advanced AI Orchestrator with action capabilities
   app.post("/api/chat", async (req, res) => {
     try {
       const { message, conversationHistory } = req.body;

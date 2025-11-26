@@ -111,7 +111,7 @@ export default function RoleDesigner() {
     }));
   };
 
-  // PhD-Level: Organizational Clarity Score
+  // Advanced: Organizational Clarity Score
   // Formula: Measures how well-defined and scalable the organizational structure is
   // Based on: Role definition completeness, clear hierarchy, balanced team structure
   const getOrganizationalClarityScore = (): { score: number; wellDefinedRoles: number; scalabilityGrade: string } => {
@@ -155,7 +155,7 @@ export default function RoleDesigner() {
     return { score: Math.round(avgScore), wellDefinedRoles, scalabilityGrade };
   };
 
-  // PhD-Level: Team Structure Balance Analysis
+  // Advanced: Team Structure Balance Analysis
   // Formula: Evaluates organizational hierarchy balance (too flat vs too hierarchical)
   // Optimal balance: Mix of leadership (10-20%), senior (20-30%), mid (30-40%), junior (20-30%)
   const getTeamStructureBalance = (): { balance: string; departmentCount: number; seniorityDistribution: Record<string, number> } => {
@@ -187,7 +187,7 @@ export default function RoleDesigner() {
     return { balance, departmentCount, seniorityDistribution };
   };
 
-  // PhD-Level: Hiring Roadmap Analysis
+  // Advanced: Hiring Roadmap Analysis
   // Formula: Analyzes hiring timeline feasibility and capacity planning
   const getHiringRoadmapAnalysis = (): { monthlyHiring: { month: number; count: number }[]; peakMonth: number; phasing: string } => {
     const monthlyHiring: { month: number; count: number }[] = [];
@@ -210,7 +210,7 @@ export default function RoleDesigner() {
     return { monthlyHiring, peakMonth, phasing };
   };
 
-  // PhD-Level: Skill Coverage Gap Analysis
+  // Advanced: Skill Coverage Gap Analysis
   // Formula: Identifies missing skills across team for comprehensive capability
   const getSkillCoverageAnalysis = (): { totalUniqueSkills: number; skillFrequency: Record<string, number>; criticalGaps: string[] } => {
     const skillFrequency: Record<string, number> = {};
@@ -538,7 +538,7 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
             </Alert>
           )}
 
-          {/* PhD-Level KPI Dashboard */}
+          {/* Advanced KPI Dashboard */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
@@ -577,7 +577,7 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
             </Card>
           </div>
 
-          {/* PhD-Level: 4-Chart Analytics Dashboard */}
+          {/* Advanced: 4-Chart Analytics Dashboard */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Card className="p-6">
               <h3 className="font-semibold mb-4">Team Growth Timeline (Scalability)</h3>

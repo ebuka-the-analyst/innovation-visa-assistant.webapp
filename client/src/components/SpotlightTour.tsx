@@ -79,7 +79,7 @@ const COMPREHENSIVE_TOUR_STEPS: TourStep[] = [
   {
     id: "tools-hub",
     title: "100+ Professional Tools Hub",
-    description: "Access over 100 specialized tools organized by category: Compliance, Documentation, Business, Financial, Growth, Innovation, Team, and Defense. Each tool provides PhD-level analysis and guidance specific to UK visa requirements.",
+    description: "Access over 100 specialized tools organized by category: Compliance, Documentation, Business, Financial, Growth, Innovation, Team, and Defense. Each tool provides expert-level analysis and guidance specific to UK visa requirements.",
     icon: FileText,
     targetPage: "/tools-hub",
     targetSelector: "[data-testid='heading-tools-hub']",
