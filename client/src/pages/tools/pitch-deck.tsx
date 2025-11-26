@@ -118,7 +118,7 @@ export default function PitchDeck() {
       description: 'Investment ask and use of funds',
       weight: 5,
       fields: [
-        { id: 'funding-amount', label: 'Funding Amount', value: '', placeholder: 'Total investment required (minimum £50,000 for Innovator Founder Visa)', type: 'text', minChars: 5 },
+        { id: 'funding-amount', label: 'Funding Amount', value: '', placeholder: 'Total investment required for your business plan', type: 'text', minChars: 5 },
         { id: 'use-of-funds', label: 'Use of Funds', value: '', placeholder: 'Detailed breakdown: product development, marketing, hiring, operations, runway', type: 'textarea', minChars: 150 },
         { id: 'milestones-investment', label: 'Investment Milestones', value: '', placeholder: 'Key milestones this funding will achieve and timeline', type: 'textarea', minChars: 100 },
         { id: 'exit-strategy', label: 'Vision & Exit', value: '', placeholder: 'Long-term vision and potential exit opportunities (acquisition, IPO, etc.)', type: 'textarea', minChars: 80 },
@@ -262,12 +262,7 @@ export default function PitchDeck() {
     const askSlide = slides.find(s => s.id === 'ask');
     const fundingField = askSlide?.fields.find(f => f.id === 'funding-amount');
     if (fundingField && fundingField.value) {
-      const funding = parseFloat(fundingField.value.replace(/[^0-9.]/g, ''));
-      if (funding < 50000) {
-        tips.push("CRITICAL: UK Innovator Founder Visa requires minimum £50,000 investment. Update your funding ask to meet this requirement");
-      } else if (funding >= 50000) {
-        tips.push("Funding requirement met. Ensure your Use of Funds breakdown is detailed and aligns with your milestones");
-      }
+      tips.push("Ensure your Use of Funds breakdown is detailed and aligns with your milestones. Endorsers will assess if funding is appropriate for your plan.");
     }
     
     const teamSlide = slides.find(s => s.id === 'team');
@@ -371,7 +366,7 @@ TEAM CAPABILITY:
 [ ] Advisory support from credible industry experts
 
 FUNDING & COMMITMENT:
-[ ] Minimum £50,000 investment clearly stated
+[ ] Investment amount clearly stated and appropriate for plan
 [ ] Use of funds aligned with milestones
 [ ] Funding sources documented and verified
 [ ] Long-term commitment to UK market
@@ -891,7 +886,7 @@ Ensure all claims are accurate and can be verified.
                       'All 7 slides completed with minimum character requirements met',
                       'Deck strength score above 80%',
                       'All claims backed by evidence and credible sources',
-                      'Minimum £50,000 funding clearly stated and documented',
+                      'Funding clearly stated and appropriate for your business plan',
                       'UK market opportunity specifically addressed',
                       'Innovation clearly articulated and differentiated',
                       'Traction metrics included with evidence',

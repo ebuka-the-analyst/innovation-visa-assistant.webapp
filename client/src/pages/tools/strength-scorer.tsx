@@ -358,7 +358,7 @@ ${'-'.repeat(80)}
    
    Key Evidence Required:
    - Detailed 36-month financial projections
-   - Verified £50,000+ investment funds
+   - Verified investment funds appropriate for plan
    - Market size validation (TAM/SAM/SOM)
    - Customer letters of intent or contracts
    - Team credentials and relevant experience
@@ -1150,7 +1150,7 @@ application-specific advice. Endorser criteria and requirements may change.
                       <h4 className="font-semibold mb-2">Viability Strength Evidence</h4>
                       <ul className="space-y-1 ml-4 text-muted-foreground">
                         <li>Detailed 36-month financial projections (certified by accountant)</li>
-                        <li>Bank statements verifying minimum £50,000 investment funds</li>
+                        <li>Bank statements verifying investment funds appropriate for plan</li>
                         <li>Market research reports with TAM/SAM/SOM analysis</li>
                         <li>Customer letters of intent or signed contracts</li>
                         <li>Team CVs highlighting relevant industry experience</li>

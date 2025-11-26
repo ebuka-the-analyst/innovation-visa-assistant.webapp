@@ -186,8 +186,8 @@ export default function FinancialModeling() {
   const getSmartTips = () => {
     const tips = [];
 
-    if (inputs.initialCapital < 50000) {
-      tips.push('Increase initial capital to meet £50,000 minimum requirement for UK Innovator Founder Visa');
+    if (inputs.initialCapital < 10000) {
+      tips.push('Consider whether initial capital is sufficient for your business plan - endorsers assess funding appropriateness');
     }
 
     if (finalCash < 10000) {
@@ -315,7 +315,7 @@ ${generateActionPlan().map(item => `[${item.priority}] ${item.week}: ${item.acti
 
 VISA APPLICATION FINANCIAL REQUIREMENTS
 ${'-'.repeat(80)}
-- Minimum £50,000 investment capital (documented and accessible)
+- Investment capital appropriate for your business plan (documented and accessible)
 - Demonstrate sufficient funds to sustain business for 6-12 months minimum
 - Show credible path to profitability within 24-36 months
 - Include detailed assumptions with market validation
@@ -874,7 +874,7 @@ Consult with qualified accountants and financial advisors before making business
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-medium">3</div>
-                      <p>Evidence of £50,000+ investment capital with source documentation and accessibility confirmation</p>
+                      <p>Evidence of investment capital appropriate for your plan with source documentation and accessibility confirmation</p>
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-medium">4</div>

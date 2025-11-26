@@ -83,7 +83,7 @@ const COMMON_QA_QUESTIONS: Omit<QAItem, 'answer' | 'evidence' | 'prepared'>[] = 
   { id: 'q5', question: 'What traction have you achieved so far?', difficulty: 'medium' },
   { id: 'q6', question: 'Who are your key team members and what relevant experience do they have?', difficulty: 'easy' },
   { id: 'q7', question: 'What are your financial projections for the next 3 years?', difficulty: 'hard' },
-  { id: 'q8', question: 'How will you use the £50,000 investment?', difficulty: 'medium' },
+  { id: 'q8', question: 'How will you use your investment funds?', difficulty: 'medium' },
   { id: 'q9', question: 'What are the key risks and how will you mitigate them?', difficulty: 'hard' },
   { id: 'q10', question: 'Why the UK specifically? What makes it the right market for your business?', difficulty: 'medium' },
   { id: 'q11', question: 'How many jobs will you create in the UK over the next 3 years?', difficulty: 'easy' },

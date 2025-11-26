@@ -340,8 +340,8 @@ export default function OperationsPlan() {
       tips.push("Excellent operational readiness score - prepare detailed documentation explaining how these processes support your innovation claims, job creation commitments, and scalability in UK market");
     }
     
-    if (totalResourceCost < 30000) {
-      tips.push("Ensure resource planning aligns with your £50,000 minimum investment requirement - demonstrate how capital will be strategically deployed across operational needs to achieve business milestones");
+    if (totalResourceCost < 10000) {
+      tips.push("Ensure resource planning is appropriate for your business plan - demonstrate how capital will be strategically deployed across operational needs to achieve business milestones");
     }
     
     if (processes.filter(p => p.category === 'core-operations').every(p => p.status === 'not-started')) {
@@ -397,7 +397,7 @@ export default function OperationsPlan() {
       },
       {
         week: "Week 3",
-        action: "Create detailed operational budget showing quarterly resource allocation across staff, equipment, technology, facilities - demonstrate strategic alignment with £50,000 minimum investment and financial projections",
+        action: "Create detailed operational budget showing quarterly resource allocation across staff, equipment, technology, facilities - demonstrate strategic alignment with your investment and financial projections",
         priority: "High"
       },
       {
@@ -534,7 +534,7 @@ Resource Planning Evidence:
 □ Equipment and technology needs with specifications and costs
 □ Facilities requirements (office space, manufacturing, storage)
 □ Supplier and vendor relationships for key operational dependencies
-□ Total resource budget aligned with £50,000 investment requirement
+□ Total resource budget aligned with your investment plan
 □ Timeline showing when resources will be acquired (Month 1-12)
 
 KPI Framework Requirements:
@@ -591,7 +591,7 @@ ${'-'.repeat(80)}
 □ Resource requirements show job creation potential (2+ UK roles)
 □ KPIs aligned with financial projections in business plan
 □ Process documentation shows professional operational capability
-□ Resource budget consistent with £50,000 investment requirement
+□ Resource budget consistent with your investment plan
 □ Efficiency targets demonstrate competitive operational performance
 □ Quality assurance procedures ensure innovation delivers value
 □ Org structure and accountability framework clearly defined

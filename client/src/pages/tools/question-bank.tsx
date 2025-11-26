@@ -74,7 +74,7 @@ const QUESTION_BANK: Omit<Question, 'status' | 'answer' | 'keyPoints' | 'evidenc
     id: 'vi4',
     category: 'visa-interview',
     subcategory: 'Funding',
-    question: 'Where is your £50,000 funding coming from and can you prove it is available now?',
+    question: 'Where is your funding coming from and can you prove it is available now?',
     difficulty: 'advanced',
   },
   {
@@ -204,7 +204,7 @@ const QUESTION_BANK: Omit<Question, 'status' | 'answer' | 'keyPoints' | 'evidenc
     id: 'ip6',
     category: 'investor-pitch',
     subcategory: 'Use of Funds',
-    question: 'How will you deploy the £50,000 investment? Provide a detailed breakdown.',
+    question: 'How will you deploy your investment funds? Provide a detailed breakdown.',
     difficulty: 'advanced',
   },
   {

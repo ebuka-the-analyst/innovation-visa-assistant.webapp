@@ -159,7 +159,7 @@ export default function WeaknessAnalysis() {
 
     const financialCategory = categories.find(c => c.name === 'Financial Sustainability');
     if (financialCategory && financialCategory.score < 60) {
-      tips.push("Financial Model Weakness: Your financial projections and funding strategy need strengthening. Endorsing bodies require detailed 3-year cashflow, verified funding sources (minimum £50,000), and realistic revenue assumptions based on market data. Engage a qualified accountant.");
+      tips.push("Financial Model Weakness: Your financial projections and funding strategy need strengthening. Endorsing bodies require detailed 3-year cashflow, verified funding sources appropriate for your plan, and realistic revenue assumptions based on market data. Engage a qualified accountant.");
     }
 
     const scalabilityCategory = categories.find(c => c.name === 'Scalability Plan');
@@ -392,7 +392,7 @@ ${c.name === 'Market Viability' ? `  - Customer letters of intent or signed cont
   - Evidence of product-market fit through pilot programs
   - Revenue projections validated by industry benchmarks` : ''}
 ${c.name === 'Financial Sustainability' ? `  - Detailed 36-month financial projections certified by accountant
-  - Bank statements verifying minimum £50,000 investment funds
+  - Bank statements verifying investment funds appropriate for plan
   - Clear funding roadmap with identified sources for each growth phase
   - Profitability pathway with realistic timeline` : ''}
 ${c.name === 'Scalability Plan' ? `  - Detailed hiring plan with specific roles and timelines
@@ -444,7 +444,7 @@ ${'-'.repeat(80)}
 [ ] Maximum 2 categories in 50-60% range (high-risk threshold)
 [ ] Innovation strength validated with IP filings or expert endorsements
 [ ] Financial projections certified by qualified accountant
-[ ] Minimum £50,000 funding verified with bank statements
+[ ] Funding verified with bank statements (appropriate for plan)
 [ ] Job creation plan demonstrates minimum 2 FTE by Year 3
 [ ] All major claims supported by third-party evidence
 [ ] Competitive analysis demonstrates clear UK market gap

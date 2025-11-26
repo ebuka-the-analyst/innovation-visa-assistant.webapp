@@ -338,7 +338,7 @@ ${generateActionPlan().map(item => `[${item.priority}] ${item.week}: ${item.acti
 COMPLIANCE NOTES FOR INNOVATOR FOUNDER VISA
 ${'-'.repeat(80)}
 - Founders must draw a salary that meets UK minimum wage requirements
-- Salary must be sustainable from available business funding (£50,000 minimum)
+- Salary must be sustainable from available business funding (as assessed by endorsing body)
 - Director's salary must be registered with HMRC PAYE system
 - Maintain evidence of regular salary payments via UK business bank account
 - Cost of living must be covered by net income to demonstrate financial viability

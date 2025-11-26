@@ -35,7 +35,7 @@ const INITIAL_DOCUMENTS: Document[] = [
   
   // Financial Evidence
   { id: 'doc-6', name: 'Bank Statements (28 days)', category: 'Financial', priority: 'Critical', requirement: 'Showing minimum £1,270 maintenance funds', status: 'not-started' },
-  { id: 'doc-7', name: 'Investment Funds Evidence', category: 'Financial', priority: 'Critical', requirement: '£50,000 available for business investment', status: 'not-started' },
+  { id: 'doc-7', name: 'Investment Funds Evidence', category: 'Financial', priority: 'Critical', requirement: 'Funds appropriate for your business investment', status: 'not-started' },
   { id: 'doc-8', name: 'Source of Funds Declaration', category: 'Financial', priority: 'Critical', requirement: 'Clear documentation of fund origins', status: 'not-started' },
   { id: 'doc-9', name: 'Bank Reference Letters', category: 'Financial', priority: 'High', requirement: 'Confirming account holder and fund availability', status: 'not-started' },
   { id: 'doc-10', name: 'Financial Institution Certification', category: 'Financial', priority: 'High', requirement: 'Regulated institution confirmation', status: 'not-started' },
@@ -231,7 +231,7 @@ export default function VerificationChecklist() {
       },
       { 
         week: "Week 2", 
-        action: "Obtain source of funds documentation and bank reference letters confirming £50,000 investment availability", 
+        action: "Obtain source of funds documentation and bank reference letters confirming investment availability", 
         priority: "Critical",
         documents: ["Source of Funds", "Bank References", "Investment Evidence"]
       },
@@ -325,7 +325,7 @@ IDENTITY DOCUMENTS:
 FINANCIAL EVIDENCE:
 - Minimum £1,270 maintenance funds shown in bank statements
 - Funds must be held continuously for 28 days before application
-- £50,000 investment funds must be evidenced and accessible
+- Investment funds appropriate for your plan must be evidenced and accessible
 - Source of funds must be clearly documented
 - Regulated financial institution confirmation required
 
@@ -715,7 +715,7 @@ professional immigration advice for your specific situation.
                       <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="font-medium">Financial Evidence (2025 Update)</p>
-                        <p className="text-sm text-muted-foreground">£1,270 maintenance + £50,000 investment must be evidenced with 28-day bank statements from regulated institutions</p>
+                        <p className="text-sm text-muted-foreground">£1,270 maintenance + appropriate investment funds must be evidenced with 28-day bank statements from regulated institutions</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">

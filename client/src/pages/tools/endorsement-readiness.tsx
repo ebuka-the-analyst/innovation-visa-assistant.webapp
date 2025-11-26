@@ -68,7 +68,7 @@ const ENDORSER_DATA: EndorserRequirements = {
         score: 0,
         maxScore: 25,
         requirements: [
-          { id: 'fin-50k-investment', description: 'Minimum £50,000 investment funds available', completed: false, critical: true },
+          { id: 'fin-50k-investment', description: 'Appropriate investment funds for your business plan', completed: false, critical: true },
           { id: 'fin-source-proof', description: 'Source of funds documentation', completed: false, critical: true },
           { id: 'fin-bank-statements', description: 'Bank statements showing fund availability', completed: false, critical: true },
           { id: 'fin-budget-allocation', description: 'Detailed budget and fund allocation plan', completed: false, critical: true },
@@ -121,7 +121,7 @@ const ENDORSER_DATA: EndorserRequirements = {
         score: 0,
         maxScore: 25,
         requirements: [
-          { id: 'fin-investment-proof', description: '£50,000 minimum investment evidence', completed: false, critical: true },
+          { id: 'fin-investment-proof', description: 'Appropriate investment evidence for your plan', completed: false, critical: true },
           { id: 'fin-verification-letters', description: 'Bank verification letters for all sources', completed: false, critical: true },
           { id: 'fin-use-of-funds', description: 'Detailed use of funds breakdown', completed: false, critical: true },
           { id: 'fin-revenue-evidence', description: 'Revenue traction or pre-revenue validation', completed: false, critical: false },
@@ -174,7 +174,7 @@ const ENDORSER_DATA: EndorserRequirements = {
         score: 0,
         maxScore: 25,
         requirements: [
-          { id: 'fin-available-funds', description: '£50,000 accessible investment funds', completed: false, critical: true },
+          { id: 'fin-available-funds', description: 'Appropriate accessible investment funds', completed: false, critical: true },
           { id: 'fin-bank-verification', description: 'Bank verification of fund availability', completed: false, critical: true },
           { id: 'fin-fund-origin', description: 'Clear documentation of fund origins', completed: false, critical: true },
           { id: 'fin-financial-planning', description: 'Comprehensive financial planning', completed: false, critical: true },
@@ -227,7 +227,7 @@ const ENDORSER_DATA: EndorserRequirements = {
         score: 0,
         maxScore: 25,
         requirements: [
-          { id: 'fin-50k-evidence', description: '£50,000 minimum investment documented', completed: false, critical: true },
+          { id: 'fin-50k-evidence', description: 'Investment funding documented and verified', completed: false, critical: true },
           { id: 'fin-fund-verification', description: 'Third-party verification of funds', completed: false, critical: true },
           { id: 'fin-source-clarity', description: 'Crystal clear fund source documentation', completed: false, critical: true },
           { id: 'fin-allocation-detail', description: 'Granular fund allocation planning', completed: false, critical: true },

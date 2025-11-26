@@ -99,7 +99,7 @@ const DEFAULT_FAQ_ITEMS: Omit<FAQItem, 'yourAnswer' | 'preparednessScore' | 'isC
   {
     id: 'faq-7',
     category: 'financials',
-    question: 'How will you use the £50,000 investment funds? Provide a detailed breakdown.',
+    question: 'How will you use your investment funds? Provide a detailed breakdown.',
     recommendedAnswer: 'Create itemized budget showing allocation across categories. Be specific and realistic. Example: "Product Development: £15K (2 developers, 3 months). Marketing: £10K (digital campaigns, content creation). Sales: £8K (CRM, sales tools, travel). Operations: £7K (office setup, legal, accounting). Working Capital: £10K (runway buffer). This funding enables us to reach first customer revenue within 4 months and positions us for Series A fundraising."',
     difficulty: 'basic',
     tags: ['funding', 'budget', 'allocation'],
@@ -163,7 +163,7 @@ const DEFAULT_FAQ_ITEMS: Omit<FAQItem, 'yourAnswer' | 'preparednessScore' | 'isC
   {
     id: 'faq-15',
     category: 'endorser-dd',
-    question: 'How do you plan to fund ongoing operations beyond the initial £50,000?',
+    question: 'How do you plan to fund ongoing operations beyond your initial investment?',
     recommendedAnswer: 'Show clear fundraising strategy and path to sustainability. Example: "Funding roadmap: (1) £50K investment funds initial 6 months, (2) Revenue from early customers extends runway to 12 months, (3) Raise £500K seed round at Month 9 from UK VCs and angels, (4) Achieve profitability Month 18 from revenue growth, (5) Series A (£3M-£5M) at Month 24 for scale. Alternative: Profitable growth from Month 12 if seed fundraising delayed. Strong UK investor pipeline already engaged (3 VCs in discussions)."',
     difficulty: 'advanced',
     tags: ['fundraising', 'sustainability', 'runway'],

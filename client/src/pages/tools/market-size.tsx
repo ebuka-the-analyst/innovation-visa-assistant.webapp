@@ -499,7 +499,7 @@ ${'='.repeat(70)}
 • Cite credible third-party sources for all market sizing claims (avoid self-published estimates)
 • Demonstrate realistic market capture assumptions (avoid overly optimistic projections)
 • Show clear connection between market size and job creation potential (5 jobs at £25,694+ salary)
-• Align market opportunity with your funding requirements (minimum £50,000 investment)
+• Align market opportunity with your funding requirements (investment appropriate for your plan)
 • Provide evidence of market validation (customer letters of intent, pilot programs, partnerships)
 • Document methodology transparency (show both top-down and bottom-up calculations)
 • UK focus: Explain how UK market supports initial growth before international expansion

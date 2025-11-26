@@ -103,7 +103,7 @@ export default function BusinessPlan() {
       id: 'financials',
       title: 'Financial Projections',
       fields: [
-        { id: 'funding-required', label: 'Funding Required', value: '', placeholder: 'Total investment needed (minimum £50,000)', type: 'text', minChars: 5 },
+        { id: 'funding-required', label: 'Funding Required', value: '', placeholder: 'Total investment needed for your business plan', type: 'text', minChars: 5 },
         { id: 'revenue-forecast', label: 'Revenue Forecast', value: '', placeholder: 'Year 1-3 revenue projections with assumptions', type: 'textarea', minChars: 150 },
         { id: 'profit-margins', label: 'Profit Margins', value: '', placeholder: 'Expected gross and net profit margins', type: 'textarea', minChars: 50 },
         { id: 'break-even', label: 'Break-Even Analysis', value: '', placeholder: 'When do you expect to reach break-even?', type: 'textarea', minChars: 100 },
@@ -268,7 +268,7 @@ export default function BusinessPlan() {
     if (fundingField && fundingField.value) {
       const funding = parseFloat(fundingField.value.replace(/[^0-9.]/g, ''));
       if (funding < 50000) {
-        tips.push("CRITICAL: UK Innovator Founder Visa requires minimum £50,000 investment. Ensure your funding meets this threshold");
+        tips.push("Include clear funding details appropriate for your business plan - endorsers will assess if funding is realistic for your specific business");
       }
     }
     
@@ -359,7 +359,7 @@ export default function BusinessPlan() {
         { type: 'heading' as const, content: 'GOV.UK Compliance Checklist', level: 1 as const },
         { type: 'list' as const, items: [
           'Business concept demonstrates genuine innovation',
-          'Minimum £50,000 investment secured and documented',
+          'Investment funding secured and documented',
           'Clear scalability plan for UK market',
           'Evidence of market demand and competitive advantage',
           'Credible financial projections (3-year minimum)',
@@ -650,8 +650,8 @@ export default function BusinessPlan() {
                     <div className="flex items-start gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-medium">Minimum Investment</p>
-                        <p className="text-sm text-muted-foreground">At least £50,000 available to invest in your business</p>
+                        <p className="font-medium">Appropriate Investment</p>
+                        <p className="text-sm text-muted-foreground">Funding appropriate for your business plan - no fixed minimum requirement</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -767,7 +767,7 @@ export default function BusinessPlan() {
                       "Financial projections reviewed by accountant",
                       "Market research supported by credible sources",
                       "UK expansion plans detailed and realistic",
-                      "Minimum £50,000 investment documented",
+                      "Investment funding documented and appropriate for plan",
                       "Team credentials and CVs prepared",
                       "Supporting documents organized and ready",
                       "Plan reviewed by immigration legal expert",

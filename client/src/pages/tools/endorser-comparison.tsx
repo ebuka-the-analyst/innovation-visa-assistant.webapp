@@ -67,7 +67,7 @@ const ENDORSERS: EndorserBody[] = [
       rdSpend: "10% of budget on R&D",
       jobCreation: "5+ jobs in 3 years",
       innovation: "Clear tech differentiation, IP strategy",
-      funding: "£50,000+ verified investment"
+      funding: "Verified investment appropriate for plan"
     },
     strengths: ["Fast processing", "Tech expertise", "Investor network", "Founder community"],
     ideal: ["Tech founders with IP", "AI/ML innovators", "Deep tech ventures", "Software companies"],
@@ -148,7 +148,7 @@ const ENDORSERS: EndorserBody[] = [
       rdSpend: "Sector appropriate",
       jobCreation: "4+ jobs in 3 years",
       innovation: "Documented innovation, market opportunity",
-      funding: "£50,000+ accessible funds"
+      funding: "Accessible funds appropriate for plan"
     },
     strengths: ["Balanced criteria", "Broad acceptance", "Thorough feedback", "Post-endorsement support"],
     ideal: ["Growth-stage companies", "Revenue businesses", "Balanced profiles", "Multiple sector innovators"],
@@ -303,8 +303,8 @@ export default function EndorserComparison() {
       tips.push("Low Match Scores Across All Endorsers: Your business profile may need strengthening before application. Consider enhancing innovation documentation, securing more funding, or clarifying your sector positioning.");
     }
 
-    if (businessProfile.fundingAmount < 50000) {
-      tips.push("Funding Below Recommended Threshold: While no minimum exists officially (as of 2024), most endorsers expect £50,000+ in accessible funds. Secure additional funding or strong revenue projections to strengthen your application.");
+    if (businessProfile.fundingAmount < 10000 && !businessProfile.hasRevenue) {
+      tips.push("Funding Consideration: Ensure your funding is appropriate for your business plan. Endorsers assess whether you have sufficient resources to execute your plans, though there is no fixed minimum requirement.");
     }
 
     if (!businessProfile.hasTechIP && ENDORSERS.find(e => e.id === 'tech-nation') === bestMatch) {

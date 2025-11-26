@@ -108,7 +108,7 @@ export default function FundingSources() {
     const tips = [];
     
     if (!meetsMinimum) {
-      tips.push('Total funding below £50,000 minimum - add more sources or increase amounts');
+      tips.push('Consider if total funding is appropriate for your business plan - endorsers assess funding adequacy');
     }
     
     if (meetsMinimum && !verifiedMeetsMinimum) {
@@ -125,8 +125,8 @@ export default function FundingSources() {
     }
     
     const immediateAccess = sources.filter(s => s.availability === 'immediate').reduce((sum, s) => sum + s.amount, 0);
-    if (immediateAccess < 50000) {
-      tips.push('Ensure at least £50k is immediately accessible - visa applications can be time-sensitive');
+    if (immediateAccess < totalFunding * 0.5) {
+      tips.push('Ensure most of your funding is immediately accessible - visa applications can be time-sensitive');
     }
     
     if (visaApprovedFunding < totalFunding) {

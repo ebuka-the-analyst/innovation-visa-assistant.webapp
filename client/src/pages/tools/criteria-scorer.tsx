@@ -332,7 +332,7 @@ Innovation Evidence:
 
 Viability Evidence:
   [ ] Detailed 36-month financial projections certified by accountant
-  [ ] Bank statements verifying minimum £50,000 investment funds
+  [ ] Bank statements verifying investment funds appropriate for plan
   [ ] Customer letters of intent or signed contracts
   [ ] Market research reports with TAM/SAM/SOM analysis
   [ ] Team CVs highlighting relevant industry experience
@@ -352,7 +352,7 @@ ${'-'.repeat(80)}
 4. Select most compatible endorsing body based on weighted scores
 5. Schedule mock interview preparation with visa advisor
 6. Ensure all documentation meets endorsing body specific requirements
-7. Maintain £50,000 minimum investment funds throughout process
+7. Maintain appropriate investment funds throughout process
 
 IMPORTANT NOTES
 ${'-'.repeat(80)}

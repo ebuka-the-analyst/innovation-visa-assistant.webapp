@@ -101,7 +101,7 @@ const TYPICAL_RFE_QUESTIONS = [
   },
   {
     category: 'evidence' as const,
-    question: 'The bank statements provided are incomplete - provide statements for all accounts showing £50,000 availability',
+    question: 'The bank statements provided are incomplete - provide statements for all accounts showing fund availability',
     evidenceRequired: ['Complete bank statements (last 3 months)', 'Account verification letters', 'Fund source documentation', 'Transfer records'],
     homeOfficeNotes: 'All pages of statements required. Funds must be accessible and properly documented.'
   },

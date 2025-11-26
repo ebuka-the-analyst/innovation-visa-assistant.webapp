@@ -235,7 +235,7 @@ export default function RoadmapBuilder() {
 
     const totalBudget = milestones.reduce((sum, m) => sum + m.budget, 0);
     if (totalBudget < 50000) {
-      tips.push("Total budget allocation appears low. Ensure your roadmap demonstrates how you will deploy the minimum £50,000 investment requirement strategically across quarters");
+      tips.push("Total budget allocation appears low. Ensure your roadmap demonstrates how you will deploy your investment strategically across quarters to support business growth");
     }
 
     if (quarterlyMetrics.some(q => q.teamSize === 0)) {
@@ -483,7 +483,7 @@ for personalized guidance on your UK Innovator Founder visa application.
             <Alert variant="destructive" className="mb-6">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                Total budget allocation is below £50,000 minimum investment requirement. Ensure your roadmap demonstrates strategic deployment of required funding.
+                Total budget allocation appears low for most business plans. Ensure your roadmap demonstrates strategic deployment of investment funds appropriate for your specific business.
               </AlertDescription>
             </Alert>
           )}
