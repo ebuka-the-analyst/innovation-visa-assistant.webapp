@@ -1689,22 +1689,27 @@ ${generatedSections.join('\n\n---\n\n')}`;
   // Business Plan Management Endpoints
   app.get("/api/admin/plans", requireAdmin, async (req, res) => {
     try {
-      const { page = '1', limit = '20', status = '', tier = '' } = req.query;
+      // Accept both 'limit' and 'pageSize' parameter names
+      const { page = '1', limit, pageSize, status = '', statusFilters, tier = '', tierFilters } = req.query;
       
       const pageNum = parseInt(page as string);
-      const limitNum = parseInt(limit as string);
+      const limitNum = parseInt((pageSize || limit || '25') as string);
       const offset = (pageNum - 1) * limitNum;
+      
+      // Get status filter - accept both 'status' string and 'statusFilters' array
+      const statusFilter = statusFilters ? (Array.isArray(statusFilters) ? statusFilters[0] : statusFilters) : status;
+      const tierFilter = tierFilters ? (Array.isArray(tierFilters) ? tierFilters[0] : tierFilters) : tier;
       
       let allPlans = await storage.getAllBusinessPlans();
       
       // Filter by status
-      if (status) {
-        allPlans = allPlans.filter(p => p.status === status);
+      if (statusFilter) {
+        allPlans = allPlans.filter(p => p.status === statusFilter);
       }
       
       // Filter by tier
-      if (tier) {
-        allPlans = allPlans.filter(p => p.tier === tier);
+      if (tierFilter) {
+        allPlans = allPlans.filter(p => p.tier === tierFilter);
       }
       
       const total = allPlans.length;
@@ -1727,14 +1732,13 @@ ${generatedSections.join('\n\n---\n\n')}`;
         })
       );
       
+      // Return response in format frontend expects
       res.json({
         plans: plansWithOwner,
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum),
-        },
+        total,
+        page: pageNum,
+        pageSize: limitNum,
+        totalPages: Math.ceil(total / limitNum),
       });
     } catch (error) {
       console.error("Admin plans list error:", error);
