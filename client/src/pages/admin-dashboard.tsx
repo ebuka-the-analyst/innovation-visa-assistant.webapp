@@ -4143,10 +4143,14 @@ export default function AdminDashboard() {
                                     { toolName: 'Compliance Checker', usageCount: 623 },
                                     { toolName: 'Growth Strategy Builder', usageCount: 578 },
                                   ];
-                                  const toolsData = (toolAnalytics?.topTools && toolAnalytics.topTools.length > 0) 
-                                    ? toolAnalytics.topTools.map(t => ({
-                                        toolName: t.toolName || 'Unknown Tool',
-                                        usageCount: t.usageCount ?? 0
+                                  const rawTools = toolAnalytics?.topTools;
+                                  const hasValidData = rawTools && rawTools.length > 0 && rawTools.some((t: any) => 
+                                    (t.toolName || t.toolId) && (t.usageCount > 0 || t.count > 0)
+                                  );
+                                  const toolsData = hasValidData 
+                                    ? rawTools.map((t: any) => ({
+                                        toolName: t.toolName || (t.toolId ? t.toolId.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : 'Unknown Tool'),
+                                        usageCount: t.usageCount ?? t.count ?? 0
                                       }))
                                     : defaultTools;
                                   const maxUses = toolsData[0]?.usageCount || 1;
@@ -4213,12 +4217,19 @@ export default function AdminDashboard() {
                                     { name: 'Timeline', value: 742 },
                                     { name: 'Endorser Match', value: 689 },
                                   ];
-                                  const radialData = (toolAnalytics?.topTools && toolAnalytics.topTools.length > 0)
-                                    ? toolAnalytics.topTools.slice(0, 8).map((tool, index) => ({
-                                        name: (tool.toolName || 'Tool').length > 15 ? (tool.toolName || 'Tool').slice(0, 13) + '...' : (tool.toolName || 'Tool'),
-                                        value: tool.usageCount ?? 0,
-                                        fill: CHART_COLORS[index % CHART_COLORS.length]
-                                      }))
+                                  const rawTools = toolAnalytics?.topTools;
+                                  const hasValidData = rawTools && rawTools.length > 0 && rawTools.some((t: any) => 
+                                    (t.toolName || t.toolId) && (t.usageCount > 0 || t.count > 0)
+                                  );
+                                  const radialData = hasValidData
+                                    ? rawTools.slice(0, 8).map((tool: any, index: number) => {
+                                        const name = tool.toolName || (tool.toolId ? tool.toolId.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : 'Tool');
+                                        return {
+                                          name: name.length > 15 ? name.slice(0, 13) + '...' : name,
+                                          value: tool.usageCount ?? tool.count ?? 0,
+                                          fill: CHART_COLORS[index % CHART_COLORS.length]
+                                        };
+                                      })
                                     : defaultRadialData.map((item, index) => ({ ...item, fill: CHART_COLORS[index % CHART_COLORS.length] }));
                                   
                                   return (
