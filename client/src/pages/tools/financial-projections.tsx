@@ -8,17 +8,112 @@ import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { Download, TrendingUp, AlertTriangle, CheckCircle2, Save } from "lucide-react";
+import { Download, TrendingUp, AlertTriangle, CheckCircle2, Save, Sparkles } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from "@/lib/seo-schemas";
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'financial-projections',
+  toolName: 'Financial Projections Calculator',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your Viability Expert. Let me help you build compelling financial projections for your UK Innovator Founder Visa application. Endorsers need to see you understand your numbers - let's demonstrate your financial acumen!",
+  questions: [
+    {
+      id: 'fp-initial-funding',
+      question: "Let's start with your starting capital. How much initial funding do you have secured or plan to secure for launching your UK business? (in GBP)",
+      hint: "Include personal investment, loans, grants, or investor commitments. The minimum is typically around £50,000 for credibility.",
+      fieldKey: 'initial_investment',
+      minLength: 10
+    },
+    {
+      id: 'fp-monthly-costs',
+      question: "What are your projected monthly operating costs? Think about salaries, rent, software, marketing, and other recurring expenses.",
+      hint: "Be realistic - endorsers will scrutinize unrealistic projections. Include founder salary.",
+      fieldKey: 'monthly_burn',
+      minLength: 10
+    },
+    {
+      id: 'fp-revenue-timeline',
+      question: "When do you expect to generate your first revenue, and what's your projected monthly revenue in the first year?",
+      hint: "Most startups take 3-6 months to generate revenue. Be conservative but show growth potential.",
+      fieldKey: 'monthly_revenue',
+      minLength: 20
+    },
+    {
+      id: 'fp-growth-rate',
+      question: "What monthly growth rate do you project for your revenue? What evidence supports this assumption?",
+      hint: "Typical SaaS growth is 10-20% monthly in early stages. Cite market research or pilot results.",
+      fieldKey: 'growth_assumptions',
+      minLength: 50
+    },
+    {
+      id: 'fp-funding-strategy',
+      question: "What's your funding strategy beyond the initial capital? Are you planning to bootstrap, seek investors, or apply for grants?",
+      hint: "UK has programs like Innovate UK grants, SEIS/EIS tax incentives for investors.",
+      fieldKey: 'funding_strategy',
+      minLength: 50
+    },
+    {
+      id: 'fp-break-even',
+      question: "Based on your numbers, when do you expect to reach break-even? What's your plan if it takes longer than expected?",
+      hint: "Having contingency plans shows maturity. Consider scenarios of 1.5x and 2x expected time.",
+      fieldKey: 'break_even_plan',
+      minLength: 50
+    },
+    {
+      id: 'fp-runway',
+      question: "How many months of runway does your initial funding provide? What triggers would prompt you to seek additional funding?",
+      hint: "6-18 months runway is typical. Key triggers: reaching milestones, market validation, team expansion.",
+      fieldKey: 'runway_analysis',
+      minLength: 40
+    }
+  ],
+  completionMessage: "Excellent! You've demonstrated strong financial thinking. These projections show endorsers you understand your business economics. I'm populating your financial model with these figures - you can fine-tune them in the calculator view."
+};
 
 export default function FinancialProjections() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
+  
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('financial-projections-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('financial-projections-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const parseNumber = (str: string): number => {
+      const match = str.match(/[\d,]+/);
+      return match ? parseInt(match[0].replace(/,/g, ''), 10) : 0;
+    };
+    
+    if (answers.initial_investment) {
+      const val = parseNumber(answers.initial_investment);
+      if (val > 0) setInitial(val);
+    }
+    if (answers.monthly_burn) {
+      const val = parseNumber(answers.monthly_burn);
+      if (val > 0) setMonthly(val);
+    }
+    if (answers.monthly_revenue) {
+      const val = parseNumber(answers.monthly_revenue);
+      if (val > 0) setRevenue(val);
+    }
+    
+    setMode('traditional');
+    toast({
+      title: "Projections Updated",
+      description: "Your financial data has been populated from the AI session. Review and adjust as needed.",
+    });
+  };
   
   const [initial, setInitial] = useState(() => {
     const saved = localStorage.getItem('financialProjectionsProgress');
@@ -286,27 +381,63 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Financial Projections</h1>
-          <p className="text-muted-foreground mb-6">12-month financial projections for UK visa compliance</p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Financial Projections</h1>
+              <p className="text-muted-foreground">12-month financial projections for UK visa compliance</p>
+            </div>
+            <AiTraditionalToggle
+              mode={mode}
+              onModeChange={setMode}
+              aiLabel="AI-Guided"
+              traditionalLabel="Calculator"
+            />
+          </div>
 
-          <ToolUtilityBar
-            toolId="financial-projections"
-            toolName="Financial Projections"
-            onSave={saveProgress}
-            onRestore={loadProgress}
-            onExportPdf={handleExportPdf}
-            onExportWord={handleExportWord}
-            onSmartTips={() => setShowRecommendations(!showRecommendations)}
-            onActionPlan={() => setShowActionPlan(!showActionPlan)}
-            getSerializedState={getSerializedState}
-          />
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Sterling, our Viability Expert, helps you build compelling financial projections through conversation.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Get guidance on realistic assumptions</li>
+                    <li>Understand what endorsers look for</li>
+                    <li>Learn UK-specific funding options</li>
+                    <li>Earn XP as you complete each question</li>
+                  </ul>
+                  <p className="pt-2">Your numbers will automatically populate the calculator when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
+              <ToolUtilityBar
+                toolId="financial-projections"
+                toolName="Financial Projections"
+                onSave={saveProgress}
+                onRestore={loadProgress}
+                onExportPdf={handleExportPdf}
+                onExportWord={handleExportWord}
+                onSmartTips={() => setShowRecommendations(!showRecommendations)}
+                onActionPlan={() => setShowActionPlan(!showActionPlan)}
+                getSerializedState={getSerializedState}
+              />
 
-          {savedDate && (
-            <Alert className="mb-4">
-              <CheckCircle2 className="h-4 w-4" />
-              <AlertDescription>Last saved: {savedDate}</AlertDescription>
-            </Alert>
-          )}
+              {savedDate && (
+                <Alert className="mb-4">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertDescription>Last saved: {savedDate}</AlertDescription>
+                </Alert>
+              )}
 
           {showRecommendations && (
             <Card className="p-4 mb-4 bg-blue-50 dark:bg-blue-950/30">
@@ -442,6 +573,8 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
               </BarChart>
             </ResponsiveContainer>
           </Card>
+            </>
+          )}
         </div>
       </div>
     </>

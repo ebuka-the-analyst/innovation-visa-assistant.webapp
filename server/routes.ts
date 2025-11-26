@@ -5879,7 +5879,9 @@ END:VEVENT
       const user = req.user as any;
       const { sessionId, tier, currentAgent, answeredQuestions = 0, answeredQuestionIds = [] } = req.body;
 
-      const questions = allQuestions[currentAgent] || allQuestions.nova;
+      const validAgents = ['nova', 'sterling', 'atlas', 'sage'] as const;
+      const agentKey = validAgents.includes(currentAgent) ? currentAgent as keyof typeof allQuestions : 'nova';
+      const questions = allQuestions[agentKey];
       const availableQuestions = questions.filter((q: any) => !answeredQuestionIds.includes(q.id));
       
       let selectedQuestion;
