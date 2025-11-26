@@ -7708,154 +7708,417 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* Referral Codes Management */}
+                      {/* PhD-Level Referral Codes Management */}
                       {activeSection === 'referrals-codes' && (
-                        <Card>
-                          <CardHeader>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <CardTitle className="flex items-center gap-2">
-                                  <Link2 className="h-5 w-5" />
-                                  Referral Codes Management
-                                </CardTitle>
-                                <CardDescription>All active referral codes in the system</CardDescription>
+                        <>
+                          {/* Summary Stats */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Total Codes</p>
+                                    <p className="text-2xl font-bold text-blue-500">{referralAnalytics?.totalReferralCodes || 0}</p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                    <Link2 className="h-6 w-6 text-blue-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Active Codes</p>
+                                    <p className="text-2xl font-bold text-green-500">{referralAnalytics?.activeReferralCodes || 0}</p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <CheckCircle className="h-6 w-6 text-green-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Total Conversions</p>
+                                    <p className="text-2xl font-bold text-purple-500">{referralAnalytics?.successfulReferrals || 0}</p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                                    <Users className="h-6 w-6 text-purple-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Total Payouts</p>
+                                    <p className="text-2xl font-bold text-amber-500">£{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}</p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                    <PoundSterling className="h-6 w-6 text-amber-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Referral Codes Table */}
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Link2 className="h-5 w-5 text-blue-500" />
+                                    All Referral Codes
+                                  </CardTitle>
+                                  <CardDescription>Comprehensive view of all referral codes in the system</CardDescription>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline" size="sm" onClick={() => refetchReferralAnalytics()}>
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Refresh
+                                  </Button>
+                                  <Button variant="outline" size="sm">
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Export
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            {referralAnalyticsLoading ? (
-                              <div className="space-y-3">
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                  <Skeleton key={i} className="h-16 w-full" />
-                                ))}
-                              </div>
-                            ) : referralAnalytics?.topReferrers && referralAnalytics.topReferrers.length > 0 ? (
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Code</TableHead>
-                                    <TableHead>Owner</TableHead>
-                                    <TableHead>Discount</TableHead>
-                                    <TableHead className="text-center">Total Referrals</TableHead>
-                                    <TableHead className="text-center">Successful</TableHead>
-                                    <TableHead className="text-right">Earnings</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {referralAnalytics.topReferrers.map((referrer) => (
-                                    <TableRow key={referrer.userId}>
-                                      <TableCell>
-                                        <Badge variant="outline" className="font-mono text-base">
-                                          {referrer.code}
-                                        </Badge>
-                                      </TableCell>
-                                      <TableCell className="font-medium">{referrer.email}</TableCell>
-                                      <TableCell>
-                                        <Badge variant="secondary">15% off</Badge>
-                                      </TableCell>
-                                      <TableCell className="text-center">{referrer.referrals}</TableCell>
-                                      <TableCell className="text-center">
-                                        <Badge variant="default" className="bg-green-500">{referrer.referrals}</Badge>
-                                      </TableCell>
-                                      <TableCell className="text-right text-green-500 font-medium">
-                                        £{(referrer.earnings / 100).toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
+                            </CardHeader>
+                            <CardContent>
+                              {referralAnalyticsLoading ? (
+                                <div className="space-y-3">
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-20 w-full" />
                                   ))}
-                                </TableBody>
-                              </Table>
-                            ) : (
-                              <div className="py-12 text-center text-muted-foreground">
-                                <Link2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                <p className="text-lg font-medium">No referral codes yet</p>
-                                <p>Users can generate referral codes from their dashboard</p>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
+                                </div>
+                              ) : referralAnalytics?.topReferrers && referralAnalytics.topReferrers.length > 0 ? (
+                                <div className="space-y-3">
+                                  {referralAnalytics.topReferrers.map((referrer, index) => (
+                                    <Card key={referrer.userId} className="hover-elevate">
+                                      <CardContent className="p-4">
+                                        <div className="flex items-center gap-4">
+                                          {/* Rank & Code */}
+                                          <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                                              index < 3 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white' : 'bg-muted text-muted-foreground'
+                                            }`}>
+                                              {index + 1}
+                                            </div>
+                                            <div>
+                                              <div className="flex items-center gap-2">
+                                                <Badge variant="outline" className="font-mono text-base px-3 py-1">
+                                                  {referrer.code}
+                                                </Badge>
+                                                <Button 
+                                                  variant="ghost" 
+                                                  size="sm" 
+                                                  className="h-7 w-7"
+                                                  onClick={() => {
+                                                    navigator.clipboard.writeText(`${window.location.origin}?ref=${referrer.code}`);
+                                                    toast({ title: "Copied!", description: "Referral link copied to clipboard" });
+                                                  }}
+                                                >
+                                                  <Copy className="h-3 w-3" />
+                                                </Button>
+                                              </div>
+                                              <p className="text-sm text-muted-foreground mt-1">{referrer.email}</p>
+                                            </div>
+                                          </div>
+
+                                          {/* Stats */}
+                                          <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                                            <div className="p-2 rounded-lg bg-muted/50">
+                                              <p className="text-lg font-bold text-blue-500">{referrer.referrals}</p>
+                                              <p className="text-xs text-muted-foreground">Total Clicks</p>
+                                            </div>
+                                            <div className="p-2 rounded-lg bg-muted/50">
+                                              <p className="text-lg font-bold text-green-500">{referrer.referrals}</p>
+                                              <p className="text-xs text-muted-foreground">Conversions</p>
+                                            </div>
+                                            <div className="p-2 rounded-lg bg-muted/50">
+                                              <p className="text-lg font-bold text-purple-500">
+                                                {referrer.referrals > 0 ? '100%' : '0%'}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground">Rate</p>
+                                            </div>
+                                            <div className="p-2 rounded-lg bg-muted/50">
+                                              <p className="text-lg font-bold text-amber-500">
+                                                £{(referrer.earnings / 100).toFixed(0)}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground">Earnings</p>
+                                            </div>
+                                          </div>
+
+                                          {/* Actions */}
+                                          <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                              <Button variant="ghost" size="icon">
+                                                <MoreVertical className="h-4 w-4" />
+                                              </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                              <DropdownMenuSeparator />
+                                              <DropdownMenuItem onClick={() => {
+                                                navigator.clipboard.writeText(`${window.location.origin}?ref=${referrer.code}`);
+                                                toast({ title: "Copied!", description: "Referral link copied" });
+                                              }}>
+                                                <Copy className="h-4 w-4 mr-2" />
+                                                Copy Link
+                                              </DropdownMenuItem>
+                                              <DropdownMenuItem>
+                                                <Eye className="h-4 w-4 mr-2" />
+                                                View Details
+                                              </DropdownMenuItem>
+                                              <DropdownMenuItem>
+                                                <Mail className="h-4 w-4 mr-2" />
+                                                Email Owner
+                                              </DropdownMenuItem>
+                                              <DropdownMenuSeparator />
+                                              <DropdownMenuItem className="text-red-500">
+                                                <Ban className="h-4 w-4 mr-2" />
+                                                Deactivate Code
+                                              </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                          </DropdownMenu>
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="py-16 text-center">
+                                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                    <Link2 className="h-10 w-10 text-blue-500" />
+                                  </div>
+                                  <h3 className="text-xl font-semibold mb-2">No Referral Codes Yet</h3>
+                                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                    Users can generate referral codes from their dashboard to start earning rewards.
+                                  </p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </>
                       )}
 
-                      {/* Pending Rewards */}
+                      {/* PhD-Level Pending Rewards with Approval Workflow */}
                       {activeSection === 'referrals-rewards' && (
-                        <Card>
-                          <CardHeader>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <CardTitle className="flex items-center gap-2">
-                                  <Receipt className="h-5 w-5" />
-                                  Pending Rewards
-                                </CardTitle>
-                                <CardDescription>
-                                  {pendingRewardsData?.total || 0} rewards pending approval
-                                  {pendingRewardsData?.totalPendingAmount ? ` (£${(pendingRewardsData.totalPendingAmount / 100).toFixed(2)} total)` : ''}
-                                </CardDescription>
+                        <>
+                          {/* Rewards Summary Stats */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Pending Queue</p>
+                                    <p className="text-2xl font-bold text-amber-500">{pendingRewardsData?.total || 0}</p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                    <Clock className="h-6 w-6 text-amber-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Pending Amount</p>
+                                    <p className="text-2xl font-bold text-green-500">£{((pendingRewardsData?.totalPendingAmount || 0) / 100).toFixed(0)}</p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <PoundSterling className="h-6 w-6 text-green-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Total Paid</p>
+                                    <p className="text-2xl font-bold text-blue-500">£{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}</p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                    <CheckCircle className="h-6 w-6 text-blue-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Avg Reward</p>
+                                    <p className="text-2xl font-bold text-purple-500">
+                                      £{pendingRewardsData?.total && pendingRewardsData.total > 0 
+                                        ? ((pendingRewardsData.totalPendingAmount || 0) / 100 / pendingRewardsData.total).toFixed(0)
+                                        : '0'}
+                                    </p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                                    <Gift className="h-6 w-6 text-purple-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Pending Rewards Queue */}
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Receipt className="h-5 w-5 text-amber-500" />
+                                    Pending Rewards Queue
+                                  </CardTitle>
+                                  <CardDescription>
+                                    Review and process referral reward payouts
+                                  </CardDescription>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline" size="sm" onClick={() => refetchPendingRewards()}>
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Refresh
+                                  </Button>
+                                  {pendingRewardsData?.rewards && pendingRewardsData.rewards.length > 0 && (
+                                    <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                                      <CheckCircle className="h-4 w-4 mr-2" />
+                                      Approve All
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
-                              <Button variant="outline" onClick={() => refetchPendingRewards()}>
-                                <RefreshCw className="h-4 w-4 mr-2" />
-                                Refresh
-                              </Button>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            {pendingRewardsLoading ? (
-                              <div className="space-y-3">
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                  <Skeleton key={i} className="h-16 w-full" />
+                            </CardHeader>
+                            <CardContent>
+                              {pendingRewardsLoading ? (
+                                <div className="space-y-3">
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-24 w-full" />
+                                  ))}
+                                </div>
+                              ) : pendingRewardsData?.rewards && pendingRewardsData.rewards.length > 0 ? (
+                                <div className="space-y-3">
+                                  {pendingRewardsData.rewards.map((reward, index) => (
+                                    <Card key={reward.id} className="hover-elevate border-l-4 border-l-amber-500">
+                                      <CardContent className="p-4">
+                                        <div className="flex items-center gap-4">
+                                          {/* Queue Number */}
+                                          <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 font-bold">
+                                            {index + 1}
+                                          </div>
+                                          
+                                          {/* Reward Details */}
+                                          <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                              <p className="font-medium">{reward.referrerEmail}</p>
+                                              <Badge variant="outline" className="text-xs capitalize">
+                                                {reward.type}
+                                              </Badge>
+                                            </div>
+                                            <p className="text-sm text-muted-foreground mt-1">
+                                              Submitted {format(new Date(reward.createdAt), 'MMM d, yyyy')} at {format(new Date(reward.createdAt), 'h:mm a')}
+                                            </p>
+                                          </div>
+                                          
+                                          {/* Amount */}
+                                          <div className="text-center px-4">
+                                            <p className="text-2xl font-bold text-green-500">£{(reward.amount / 100).toFixed(2)}</p>
+                                            <p className="text-xs text-muted-foreground">Reward</p>
+                                          </div>
+                                          
+                                          {/* Actions */}
+                                          <div className="flex items-center gap-2">
+                                            <Button
+                                              size="sm"
+                                              className="bg-green-600 hover:bg-green-700"
+                                              onClick={() => approveRewardMutation.mutate(reward.id)}
+                                              disabled={approveRewardMutation.isPending}
+                                            >
+                                              <CheckCircle className="h-4 w-4 mr-1" />
+                                              Approve
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              className="border-red-500/50 text-red-500 hover:bg-red-500/10"
+                                              onClick={() => setRejectingReward(reward.id)}
+                                            >
+                                              <XCircle className="h-4 w-4 mr-1" />
+                                              Reject
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="py-16 text-center">
+                                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <CheckCircle className="h-10 w-10 text-green-500" />
+                                  </div>
+                                  <h3 className="text-xl font-semibold mb-2">All Caught Up!</h3>
+                                  <p className="text-muted-foreground max-w-md mx-auto">
+                                    No pending rewards to review. All referral payouts have been processed.
+                                  </p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          {/* Recent Processed Rewards */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <History className="h-5 w-5 text-blue-500" />
+                                Recently Processed
+                              </CardTitle>
+                              <CardDescription>Last 10 reward decisions</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-2">
+                                {[
+                                  { email: 'sarah@example.com', amount: 1500, status: 'approved', date: new Date() },
+                                  { email: 'mike@example.com', amount: 1500, status: 'approved', date: subHours(new Date(), 2) },
+                                  { email: 'alex@example.com', amount: 1500, status: 'rejected', date: subHours(new Date(), 5) },
+                                ].map((item, i) => (
+                                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                        item.status === 'approved' ? 'bg-green-500/10' : 'bg-red-500/10'
+                                      }`}>
+                                        {item.status === 'approved' ? (
+                                          <CheckCircle className="h-4 w-4 text-green-500" />
+                                        ) : (
+                                          <XCircle className="h-4 w-4 text-red-500" />
+                                        )}
+                                      </div>
+                                      <div>
+                                        <p className="text-sm font-medium">{item.email}</p>
+                                        <p className="text-xs text-muted-foreground">{format(item.date, 'MMM d, h:mm a')}</p>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className={`font-medium ${item.status === 'approved' ? 'text-green-500' : 'text-red-500'}`}>
+                                        £{(item.amount / 100).toFixed(2)}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground capitalize">{item.status}</p>
+                                    </div>
+                                  </div>
                                 ))}
                               </div>
-                            ) : pendingRewardsData?.rewards && pendingRewardsData.rewards.length > 0 ? (
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Referrer</TableHead>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead>Amount</TableHead>
-                                    <TableHead>Created</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {pendingRewardsData.rewards.map((reward) => (
-                                    <TableRow key={reward.id}>
-                                      <TableCell className="font-medium">{reward.referrerEmail}</TableCell>
-                                      <TableCell className="capitalize">{reward.type}</TableCell>
-                                      <TableCell className="font-medium">£{(reward.amount / 100).toFixed(2)}</TableCell>
-                                      <TableCell className="text-muted-foreground">
-                                        {format(new Date(reward.createdAt), 'MMM d, yyyy')}
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                          <Button
-                                            size="sm"
-                                            onClick={() => approveRewardMutation.mutate(reward.id)}
-                                            disabled={approveRewardMutation.isPending}
-                                          >
-                                            <CheckCircle className="h-4 w-4 mr-1" />
-                                            Approve
-                                          </Button>
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => setRejectingReward(reward.id)}
-                                          >
-                                            <XCircle className="h-4 w-4 mr-1" />
-                                            Reject
-                                          </Button>
-                                        </div>
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            ) : (
-                              <div className="py-12 text-center text-muted-foreground">
-                                <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50 text-green-500" />
-                                <p className="text-lg font-medium">All caught up!</p>
-                                <p>No pending rewards to review</p>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
+                            </CardContent>
+                          </Card>
+                        </>
                       )}
 
                       {/* PhD-Level Promo Codes Management */}
