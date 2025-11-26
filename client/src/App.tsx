@@ -68,6 +68,11 @@ const AIAssistant = lazy(() => import("@/pages/ai-assistant"));
 const Handoff = lazy(() => import("@/pages/handoff"));
 const AdaptiveIntake = lazy(() => import("@/pages/adaptive-intake"));
 
+// Evidence and Endorser Preparation (PhD-level tools)
+const TractionEvidence = lazy(() => import("@/pages/traction-evidence"));
+const FounderPortfolio = lazy(() => import("@/pages/founder-portfolio"));
+const EndorserCoverLetter = lazy(() => import("@/pages/endorser-cover-letter"));
+
 // Dashboards and analytics
 const FeaturesDashboard = lazy(() => import("@/pages/features-dashboard"));
 const KPIDashboard = lazy(() => import("@/pages/kpi-dashboard"));
@@ -209,6 +214,9 @@ function Router() {
       <Route path="/calendar" component={CalendarSync} />
       <Route path="/news" component={News} />
       <Route path="/interview-prep" component={InterviewPrep} />
+      <Route path="/traction-evidence" component={TractionEvidence} />
+      <Route path="/founder-portfolio" component={FounderPortfolio} />
+      <Route path="/endorser-cover-letter" component={EndorserCoverLetter} />
       <Route path="/faq" component={FAQ} />
       <Route path="/guide" component={Guide} />
       <Route path="/privacy" component={Privacy} />

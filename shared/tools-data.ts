@@ -37,6 +37,14 @@ export const ALL_TOOLS: Tool[] = [
   { id: "endorser-comparison", name: "Endorser Comparison Tool", description: "Compare different endorsement bodies", category: "documentation", stage: "before", tier: "basic", icon: "Scale" },
   { id: "evidence-collection", name: "Evidence Collection & Organization", description: "Organize supporting evidence and documents", category: "documentation", stage: "during", tier: "basic", icon: "Package" },
   { id: "evidence-validator", name: "Evidence Quality Validator", description: "Validate quality and relevance of evidence", category: "compliance", stage: "during", tier: "enterprise", icon: "CheckCheck" },
+  { id: "traction-evidence", name: "Traction Evidence Builder", description: "Build proof of market demand with waitlists, LOIs, partnerships & surveys", category: "business", stage: "before", tier: "premium", icon: "TrendingUp" },
+  { id: "founder-portfolio", name: "Founder Capability Portfolio", description: "Showcase GitHub, demos, past projects, references & credentials", category: "documentation", stage: "before", tier: "premium", icon: "User" },
+  { id: "endorser-cover-letter", name: "Endorser Cover Letter Generator", description: "Create professional IVS-ready cover letters for endorsement applications", category: "documentation", stage: "before", tier: "premium", icon: "FileText" },
+  { id: "commercial-validation", name: "Commercial Validation Suite", description: "Competitor analysis, user interviews, and case study builder", category: "business", stage: "before", tier: "premium", icon: "Target" },
+  { id: "oisc-compliance", name: "OISC Compliance Guide", description: "Immigration advice boundary checker & legal opinion templates", category: "compliance", stage: "before", tier: "premium", icon: "Shield" },
+  { id: "market-data-verifier", name: "Market Data Verifier", description: "Verify and cite market statistics with credible sources", category: "business", stage: "before", tier: "premium", icon: "CheckCircle" },
+  { id: "mvp-demo-guide", name: "MVP & Demo Builder Guide", description: "Create compelling prototypes and demo videos for endorsers", category: "innovation", stage: "before", tier: "premium", icon: "Video" },
+  { id: "financial-resilience", name: "Financial Resilience Evidence", description: "Document runway, bank statements & investment readiness", category: "financial", stage: "before", tier: "premium", icon: "Wallet" },
 
   // F - Financial & Funding
   { id: "financial-projections", name: "Financial Projections Generator", description: "Generate 3-5 year financial forecasts", category: "financial", stage: "during", tier: "basic", icon: "LineChart" },
