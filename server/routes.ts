@@ -728,20 +728,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/credits/balance", isAuthenticated, async (req, res) => {
     try {
-      const user = req.user as any;
+      const sessionUser = req.user as any;
       
-      const tierCredits = TIER_CREDITS[user.subscriptionTier || 'free'];
-      const hasUnlimited = user.subscriptionTier === 'ultimate' || user.hasUltimateAssurance;
+      // Fetch fresh user data from database (session might be stale)
+      const freshUser = await storage.getUser(sessionUser.id);
+      if (!freshUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const userTier = freshUser.subscriptionTier || 'free';
+      const tierCredits = TIER_CREDITS[userTier];
+      const hasUnlimited = userTier === 'ultimate' || freshUser.hasUltimateAssurance;
       
       res.json({
-        planCredits: user.planCredits || 0,
-        bonusCredits: user.bonusCredits || 0,
-        totalCredits: (user.planCredits || 0) + (user.bonusCredits || 0),
-        creditsUsed: user.creditsUsed || 0,
+        planCredits: freshUser.planCredits || 0,
+        bonusCredits: freshUser.bonusCredits || 0,
+        totalCredits: (freshUser.planCredits || 0) + (freshUser.bonusCredits || 0),
+        creditsUsed: freshUser.creditsUsed || 0,
         hasUnlimitedCredits: hasUnlimited,
         tierCreditLimit: tierCredits,
-        hasUltimateAssurance: user.hasUltimateAssurance || false,
-        lastCreditRefresh: user.lastCreditRefresh,
+        hasUltimateAssurance: freshUser.hasUltimateAssurance || false,
+        lastCreditRefresh: freshUser.lastCreditRefresh,
       });
     } catch (error) {
       console.error("Get credit balance error:", error);
