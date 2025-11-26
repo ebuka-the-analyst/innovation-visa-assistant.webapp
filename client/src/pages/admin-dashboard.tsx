@@ -1517,7 +1517,7 @@ export default function AdminDashboard() {
                           </CardHeader>
                           <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
-                              <AreaChart data={overviewData.activityData}>
+                              <RechartsAreaChart data={overviewData.activityData}>
                                 <defs>
                                   <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="hsl(var(--chart-3))" stopOpacity={0.8}/>
@@ -1548,7 +1548,7 @@ export default function AdminDashboard() {
                                   fill="url(#colorActivity)"
                                   strokeWidth={2}
                                 />
-                              </AreaChart>
+                              </RechartsAreaChart>
                             </ResponsiveContainer>
                           </CardContent>
                         </Card>
@@ -3878,7 +3878,7 @@ export default function AdminDashboard() {
                             <CardContent>
                               {toolAnalytics ? (
                                 <ResponsiveContainer width="100%" height={350}>
-                                  <AreaChart data={toolAnalytics.usageTrends}>
+                                  <RechartsAreaChart data={toolAnalytics.usageTrends}>
                                     <defs>
                                       <linearGradient id="usageGradient" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
@@ -3894,7 +3894,7 @@ export default function AdminDashboard() {
                                     />
                                     <Area type="monotone" dataKey="uses" stroke="#3b82f6" fill="url(#usageGradient)" strokeWidth={3} />
                                     <Brush dataKey="date" height={40} stroke="#3b82f6" tickFormatter={(v) => format(new Date(v), 'MMM dd')} />
-                                  </AreaChart>
+                                  </RechartsAreaChart>
                                 </ResponsiveContainer>
                               ) : (
                                 <div className="h-[350px] flex items-center justify-center">
@@ -4567,7 +4567,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <ResponsiveContainer width="100%" height={280}>
-                                  <AreaChart data={[
+                                  <RechartsAreaChart data={[
                                     { month: 'Jun', rate: 62 },
                                     { month: 'Jul', rate: 65 },
                                     { month: 'Aug', rate: 68 },
@@ -4589,7 +4589,7 @@ export default function AdminDashboard() {
                                       formatter={(value: number) => [`${value}%`, 'Completion Rate']}
                                     />
                                     <Area type="monotone" dataKey="rate" stroke="#22c55e" fill="url(#completionGradient)" strokeWidth={3} />
-                                  </AreaChart>
+                                  </RechartsAreaChart>
                                 </ResponsiveContainer>
                               </CardContent>
                             </Card>
@@ -5486,7 +5486,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <ResponsiveContainer width="100%" height={300}>
-                                  <AreaChart data={[
+                                  <RechartsAreaChart data={[
                                     { month: 'Jan', revenue: 1200, target: 1000 },
                                     { month: 'Feb', revenue: 1450, target: 1200 },
                                     { month: 'Mar', revenue: 1800, target: 1500 },
@@ -5515,7 +5515,7 @@ export default function AdminDashboard() {
                                     />
                                     <Area type="monotone" dataKey="revenue" stroke="#22c55e" fill="url(#revenueGradient)" strokeWidth={3} name="Revenue" />
                                     <Line type="monotone" dataKey="target" stroke="#94a3b8" strokeDasharray="5 5" strokeWidth={2} name="Target" dot={false} />
-                                  </AreaChart>
+                                  </RechartsAreaChart>
                                 </ResponsiveContainer>
                               </CardContent>
                             </Card>
@@ -6200,7 +6200,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <ResponsiveContainer width="100%" height={300}>
-                                  <AreaChart data={[
+                                  <RechartsAreaChart data={[
                                     { month: 'Jun', ltv: 98 },
                                     { month: 'Jul', ltv: 112 },
                                     { month: 'Aug', ltv: 125 },
@@ -6222,7 +6222,7 @@ export default function AdminDashboard() {
                                       formatter={(value: number) => [`£${value}`, 'LTV']}
                                     />
                                     <Area type="monotone" dataKey="ltv" stroke="#8b5cf6" fill="url(#ltvGradient)" strokeWidth={3} />
-                                  </AreaChart>
+                                  </RechartsAreaChart>
                                 </ResponsiveContainer>
                               </CardContent>
                             </Card>
