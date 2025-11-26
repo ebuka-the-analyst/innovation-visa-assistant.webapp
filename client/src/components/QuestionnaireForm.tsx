@@ -572,7 +572,61 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
       targetEndorser: "PRIMARY TARGET: INNOVATOR INTERNATIONAL (innovatorinternational.co.uk). RATIONALE: (1) Highest approval rate (65%+) among endorsing bodies. (2) Faster processing (4-6 weeks vs 3-4 months). (3) Cost-effective (£1,500 application fee). (4) Technology/digital sector focus aligns with AI SaaS platform. (5) Experience with first-time founders and immigrant entrepreneurs. (6) Clear requirements and feedback process. APPLICATION RESEARCH: Requirements verified November 2025: Business plan (40-60 pages), Financial projections (3-year), Founder CV, Evidence portfolio, Product demo. Scoring criteria: Innovation (30%), Viability (35%), Scalability (35%). BACKUP OPTIONS: (1) UKES (UK Endorsing Services) - larger pipeline, slower processing. (2) Envestors - investment focus, higher bar. (3) SETsquared (university partnership) - if academic connection leveraged (Leeds Beckett). APPLICATION TIMELINE: January 2026: Application submission. February-March 2026: Assessment period. April 2026: Decision expected.",
       contactPointsStrategy: "6 CONTACT POINTS STRATEGY (3-Year Engagement): YEAR 1 (3 mandatory contacts): CP1 (Month 3, May 2026): Initial post-endorsement meeting (60min, video call). Deliverables: 5-page progress report, user metrics, product demo. Agenda: Business update, milestone review, mentor matching. CP2 (Month 6, August 2026): Q2 progress review (45min). Deliverables: Financial update, customer testimonials, hiring progress. CP3 (Month 12, February 2027): Year 1 annual review (90min, in-person if possible). Deliverables: 15-page annual report, audited financials, 2 employee proof, product roadmap. YEAR 2 (2 mandatory contacts): CP4 (Month 18, August 2027): Mid-year check-in (45min video). Deliverables: 10-page update, 500+ customer milestone, partnership evidence. CP5 (Month 24, February 2028): Year 2 annual review (90min). Deliverables: 20-page report, 5 employees, £150K+ revenue, growth metrics. YEAR 3 (2 contacts): CP6 (Month 30, August 2028): Progress review (45min). Deliverables: Scaling update, 8 employees, market position. CP7 (Month 36, February 2029): Final 3-year review + ILR preparation (120min). Deliverables: Comprehensive 25-page final report, all KPIs achieved, ILR endorsement request. PROACTIVE ENGAGEMENT: Monthly email updates, endorser newsletter sharing, community participation, potential speaking at endorser events.",
       experience: "FOUNDER SKILLS SUMMARY: TECHNICAL EXPERTISE (7+ years): Full-Stack Development (React, Node.js, TypeScript, Python), AI/ML Integration (OpenAI GPT-4, Google Gemini, custom prompts), Database Architecture (PostgreSQL, MongoDB), Cloud Deployment (AWS, Replit, Vercel). Demonstrated: 50+ production projects, AI virtual concierge handling 200+ daily queries, current platform with 109 tools. BUSINESS & COMMERCIAL: Client management (50+ projects), Revenue generation (£45K+ freelance), Partnership development (3 LOIs secured), Financial modeling (3-year projections created), Market research (28 customer interviews). LEADERSHIP: Team leadership at Qalhata Technology, Project delivery across multiple sectors, Client presentation and stakeholder management. DOMAIN EXPERTISE: First-hand UK visa experience (navigated process personally), Immigration journey understanding, Extensive research on Innovator Founder Visa requirements (November 2025). GAPS ADDRESSED: (1) Limited marketing → Part-time Marketing Specialist hire Month 7. (2) No immigration law qualification → OISC partnership model, legal opinion obtained. (3) Limited sales experience → SDR hire Year 2, sales training completed. UNIQUE STRENGTHS: Technical + business hybrid, domain expertise, proven execution, resourcefulness (MVP built for under £1,000).",
-      revenue: "5-TIER SAAS SUBSCRIPTION MODEL: FREE (£0, 13 tools): Basic compliance checker, eligibility calculator, document checklist. Lead generation and product sampling. Target: 60% of users, conversion funnel. BASIC (£29 one-time, 20 tools): Everything in Free + business plan templates, timeline calculator, cost estimator, basic AI guidance. Target: 20% conversion, entry-level users. PREMIUM (£49 one-time, 83 tools): Most Popular tier. Full business plan generator, financial projections, market analysis, pitch deck builder, interview prep, AI document review. Target: 15% conversion, serious applicants. ENTERPRISE (£89 one-time, 109 tools): All Premium + advanced IP strategy, patent guidance, expert AI orchestrator, priority support. Target: 4% conversion, complex cases. ULTIMATE (£129 one-time, 109 tools + VIP): Everything + personal strategist consultation, success guarantee, priority queue, quarterly check-ins. Target: 1% conversion, premium segment. REVENUE MIX (Year 1): 60% Free (conversion funnel), 20% Basic (£5,800), 15% Premium (£7,350), 4% Enterprise (£3,560), 1% Ultimate (£1,290). Monthly Target: 500 customers → £17,900/month by Month 12. UNIT ECONOMICS: ARPU £55, LTV £237 (4.3 months avg), CAC £25, LTV:CAC 9.5:1, Payback 2 months. Year 1 Revenue: £69,890. Year 3 Revenue: £612,000.",
+      revenue: "EXPERT-LEVEL 5-TIER CREDIT-BASED REVENUE MODEL (Comprehensive Business Architecture):\n\n" +
+        "TIER STRUCTURE WITH PLAN CREDITS:\n" +
+        "• FREE (£0): 13 essential tools, 0 plan credits, 1 saved draft only. Purpose: Lead generation, product demonstration, conversion funnel entry. Users explore basic compliance checker, eligibility calculator, document checklists. Cannot generate full business plans.\n" +
+        "• BASIC (£29 one-time): 20 tools, 1 plan credit, 1 active business, 2 revisions per plan. Target: Straightforward visa applications with clear business models. Includes basic AI guidance, timeline calculator, cost estimator.\n" +
+        "• PREMIUM (£49 one-time, MOST POPULAR): 83 tools, 3 plan credits, 2 active businesses, 4 revisions per plan. Full AI-powered business plan generator, financial projections, market analysis, pitch deck builder, interview prep, AI document review. Target: Serious applicants needing comprehensive support.\n" +
+        "• ENTERPRISE (£89 one-time): 109 tools, 6 plan credits, 3 active businesses, 6 revisions per plan. All Premium features plus advanced IP/patent strategy, Expert AI Orchestrator (4 specialized agents), deep-dive innovation coverage, priority email support (24hr response). Target: Complex ventures, multiple business ideas.\n" +
+        "• ULTIMATE (£129 one-time + optional £99/year Assurance): 109 tools + VIP benefits, 12 plan credits per year with 'fair-use unlimited' (auto top-up in 3-credit blocks if needed), unlimited businesses, unlimited revisions. Includes white-glove concierge support, legal review queue access, 1-hour rush delivery, appeal strategy planning, success guarantee coaching, lifetime access to all future tool updates. Assurance subscribers get annual credit refresh; lapsed Assurance converts to pay-per-credit model (£35/plan).\n\n" +
+        "CREDIT SYSTEM EXPLAINED: Each 'plan credit' = one complete AI-generated business plan (60-80 pages). Revisions to existing plans don't consume credits. Credits never expire for one-time purchases. Users can generate plans for different business ideas using available credits.\n\n" +
+        "UPGRADE PRICING (Pay Difference Only): Basic→Premium = £20 (not £49), Premium→Enterprise = £40 (not £89), Enterprise→Ultimate = £40 (not £129). Unused credits carry forward. Cross-grade purchases inherit highest tier tools instantly. This fair pricing encourages upgrades and increases customer lifetime value.\n\n" +
+        "ADD-ON PURCHASES (Secondary Revenue Streams):\n" +
+        "• Single Plan Credit: £39 (for users who exhaust tier credits)\n" +
+        "• Triple Credit Pack: £99 (15% savings, for multiple business ideas)\n" +
+        "• Partner/Family Bundle: +2 additional user seats for £59 (spouse/co-founder access)\n" +
+        "• Rejection Recovery Pack: 2 credits + 30min coach call for £89 (visa rejection support)\n" +
+        "• Rush Delivery: £49 (1-hour priority processing vs standard 24hr)\n" +
+        "• Annual Compliance Refresh: £59/year (updated plans reflecting new regulations)\n\n" +
+        "REFERRAL PROGRAM (3-Sided Network Effect):\n" +
+        "• Referrer Reward: 1 free plan credit OR £25 cash payout (user choice)\n" +
+        "• Referee Benefit: 15% off first paid tier purchase\n" +
+        "• Advisor/Lawyer Referral: Dashboard analytics unlock + priority listing in lawyer directory\n" +
+        "• Tracking: Unique referral codes, cookie-based attribution (30-day window), dashboard showing referral status\n\n" +
+        "PROMO CODE FRAMEWORK:\n" +
+        "• Percentage Discount: 10-50% off tier price (e.g., LAUNCH20 = 20% off)\n" +
+        "• Fixed Credit Bonus: +1 or +2 credits with purchase (e.g., BONUS1)\n" +
+        "• Free Tier Upgrade: Purchase Basic, get Premium free (limited campaigns)\n" +
+        "• Voucher Codes: Fixed value (£10, £20) applicable to any tier\n" +
+        "• Stacking Rules: Maximum 1 discount + 1 voucher per transaction\n" +
+        "• Expiry: Configurable per code (single-use, multi-use, time-limited)\n" +
+        "• Affiliate Tracking: Commission-based codes for partners (10-20% revenue share)\n\n" +
+        "52 SCENARIO COVERAGE (Edge Cases Handled):\n" +
+        "1-10: New user journeys (Free→Basic→Premium→Enterprise→Ultimate conversions)\n" +
+        "11-20: Upgrade paths with credit preservation and differential pricing\n" +
+        "21-25: Credit exhaustion and add-on purchase flows\n" +
+        "26-30: Multi-business portfolio management (different ideas, same user)\n" +
+        "31-35: Visa rejection recovery (retry plans, appeal strategies)\n" +
+        "36-40: Family/partner applications (separate plans, shared accounts)\n" +
+        "41-45: Business pivot scenarios (endorser feedback requiring revisions)\n" +
+        "46-48: Bulk/corporate purchases (universities, accelerators, consultancies)\n" +
+        "49-50: Refund scenarios (credit claw-back policy, 14-day cooling off)\n" +
+        "51-52: Future pricing changes (grandfathering existing users, Assurance fee updates)\n\n" +
+        "REVENUE PROJECTIONS:\n" +
+        "Year 1 (500 paying customers): Free 60% (funnel), Basic 25% (£3,625), Premium 40% (£9,800), Enterprise 25% (£11,125), Ultimate 10% (£6,450). Tier revenue: £31,000. Add-ons: £8,500. Referral-driven: £5,200. Total Year 1: £44,700 + organic growth = £69,890.\n" +
+        "Year 2 (1,200 customers): Tier revenue £98,400, Add-ons £32,000, Referrals £18,000, Assurance renewals £12,000. Total: £160,400.\n" +
+        "Year 3 (2,500 customers): Tier revenue £285,000, Add-ons £95,000, Referrals £45,000, Assurance £48,000, B2B partnerships £140,000. Total: £613,000.\n" +
+        "3-Year Cumulative: £843,290 revenue.\n\n" +
+        "UNIT ECONOMICS:\n" +
+        "• Average Revenue Per User (ARPU): £68 (blended across tiers + add-ons)\n" +
+        "• Customer Acquisition Cost (CAC): £25 (organic SEO-first, rising to £45 with paid ads Year 2)\n" +
+        "• Lifetime Value (LTV): £285 (initial purchase + 1.8 add-on purchases + 40% upgrade rate)\n" +
+        "• LTV:CAC Ratio: 11.4:1 (excellent, target >3:1)\n" +
+        "• Payback Period: 1.8 months\n" +
+        "• Gross Margin: 87% (low infrastructure costs, AI API ~8% of revenue)\n" +
+        "• Net Margin Target: 40% by Year 3\n" +
+        "• Monthly Recurring Revenue (Ultimate Assurance): £8,250/month by Year 3 (100 Assurance subscribers × £99/12)\n\n" +
+        "SUSTAINABILITY ANALYSIS: Unlike competitors relying on high one-time fees, our model generates recurring revenue through: (1) Add-on credit purchases, (2) Ultimate Assurance annual subscriptions, (3) Referral-driven new customers, (4) B2B partnership licensing. This creates predictable revenue streams while maintaining accessible pricing for individual applicants.",
     };
     
     setFormData(ebukaData);
