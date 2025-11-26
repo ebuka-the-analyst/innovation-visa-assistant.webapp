@@ -22,6 +22,26 @@ import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SEOHead } from "@/components/SEOHead";
 
+function renderMarkdown(text: string): JSX.Element[] {
+  const lines = text.split('\n');
+  return lines.map((line, index) => {
+    let processedLine = line
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+      .replace(/`([^`]+)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-xs">$1</code>');
+    
+    if (line.match(/^\d+\.\s/)) {
+      return <div key={index} className="ml-4 my-1" dangerouslySetInnerHTML={{ __html: processedLine }} />;
+    } else if (line.match(/^\s+-\s/)) {
+      return <div key={index} className="ml-8 my-0.5" dangerouslySetInnerHTML={{ __html: processedLine }} />;
+    } else if (line.trim() === '') {
+      return <div key={index} className="h-2" />;
+    } else {
+      return <div key={index} dangerouslySetInnerHTML={{ __html: processedLine }} />;
+    }
+  });
+}
+
 interface DocumentTemplate {
   id: string;
   name: string;
@@ -180,11 +200,17 @@ function TemplatePreviewDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4">
+        <ScrollArea className="max-h-[60vh]">
+        <div className="space-y-4 pr-4">
           {template.usageGuide && (
-            <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg">
-              <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Usage Guide</h4>
-              <p className="text-sm text-blue-700 dark:text-blue-300">{template.usageGuide}</p>
+            <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Usage Guide
+              </h4>
+              <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                {renderMarkdown(template.usageGuide)}
+              </div>
             </div>
           )}
           
@@ -222,6 +248,7 @@ function TemplatePreviewDialog({
             </div>
           )}
         </div>
+        </ScrollArea>
         
         <div className="flex justify-end gap-2 mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
