@@ -169,50 +169,50 @@ export default function FinancialResilience() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className={resilienceScore >= 70 ? "border-green-500" : resilienceScore >= 40 ? "border-yellow-500" : "border-red-500"}>
+        <Card className={resilienceScore >= 70 ? "border-green-500" : resilienceScore >= 40 ? "border-yellow-500" : "border-red-500"} data-testid="card-resilience-score">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Resilience Score</span>
-              <Badge variant={resilienceScore >= 70 ? "default" : resilienceScore >= 40 ? "secondary" : "destructive"}>
+              <Badge variant={resilienceScore >= 70 ? "default" : resilienceScore >= 40 ? "secondary" : "destructive"} data-testid="badge-resilience-status">
                 {resilienceScore >= 70 ? "Strong" : resilienceScore >= 40 ? "Moderate" : "Weak"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2">{resilienceScore}%</div>
-            <Progress value={resilienceScore} className="h-2" />
+            <div className="text-3xl font-bold mb-2" data-testid="text-resilience-score">{resilienceScore}%</div>
+            <Progress value={resilienceScore} className="h-2" data-testid="progress-resilience-score" />
           </CardContent>
         </Card>
 
-        <Card className={runwayMonths >= 12 ? "border-green-500" : runwayMonths >= 6 ? "border-yellow-500" : "border-red-500"}>
+        <Card className={runwayMonths >= 12 ? "border-green-500" : runwayMonths >= 6 ? "border-yellow-500" : "border-red-500"} data-testid="card-runway">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Runway</span>
             </div>
-            <div className="text-2xl font-bold">{runwayMonths} months</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold" data-testid="text-runway-months">{runwayMonths} months</div>
+            <p className="text-xs text-muted-foreground" data-testid="text-runway-status">
               {runwayMonths >= 12 ? "Excellent" : runwayMonths >= 6 ? "Acceptable" : "Too short"}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-total-funding">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <PoundSterling className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Total Funding</span>
             </div>
-            <div className="text-2xl font-bold">£{calculateTotalFunding().toLocaleString()}</div>
+            <div className="text-2xl font-bold" data-testid="text-total-funding">£{calculateTotalFunding().toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">secured</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-monthly-burn">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="h-4 w-4 text-red-500" />
               <span className="text-sm font-medium">Monthly Burn</span>
             </div>
-            <div className="text-2xl font-bold">£{calculateMonthlyBurn().toLocaleString()}</div>
+            <div className="text-2xl font-bold" data-testid="text-monthly-burn">£{calculateMonthlyBurn().toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">expenses</p>
           </CardContent>
         </Card>
@@ -269,6 +269,7 @@ export default function FinancialResilience() {
                 value={newFunding.amount || ""} 
                 onChange={(e) => setNewFunding({...newFunding, amount: parseFloat(e.target.value)})}
                 placeholder="50000"
+                data-testid="input-funding-amount"
               />
             </div>
             <div>
@@ -277,6 +278,7 @@ export default function FinancialResilience() {
                 value={newFunding.description || ""} 
                 onChange={(e) => setNewFunding({...newFunding, description: e.target.value})}
                 placeholder="Personal savings from previous employment"
+                data-testid="input-funding-description"
               />
             </div>
             <div>
@@ -285,6 +287,7 @@ export default function FinancialResilience() {
                 value={newFunding.evidenceType || ""} 
                 onChange={(e) => setNewFunding({...newFunding, evidenceType: e.target.value})}
                 placeholder="Bank statement, Term sheet, Grant letter"
+                data-testid="input-funding-evidence"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -292,6 +295,7 @@ export default function FinancialResilience() {
                 id="secured"
                 checked={newFunding.secured}
                 onCheckedChange={(checked) => setNewFunding({...newFunding, secured: !!checked})}
+                data-testid="checkbox-funding-secured"
               />
               <label htmlFor="secured" className="text-sm cursor-pointer">
                 Funding is secured/confirmed
@@ -306,19 +310,19 @@ export default function FinancialResilience() {
           {fundingSources.length > 0 && (
             <div className="space-y-2">
               {fundingSources.map((source) => (
-                <div key={source.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div key={source.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg" data-testid={`card-funding-${source.id}`}>
                   <div className="flex items-center gap-3">
                     {source.secured ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-green-500" data-testid={`icon-funding-secured-${source.id}`} />
                     ) : (
                       <Clock className="h-4 w-4 text-yellow-500" />
                     )}
                     <div>
-                      <span className="font-medium">£{source.amount.toLocaleString()}</span>
-                      <Badge variant="outline" className="ml-2">{source.type}</Badge>
-                      <p className="text-sm text-muted-foreground">{source.description}</p>
+                      <span className="font-medium" data-testid={`text-funding-amount-${source.id}`}>£{source.amount.toLocaleString()}</span>
+                      <Badge variant="outline" className="ml-2" data-testid={`badge-funding-type-${source.id}`}>{source.type}</Badge>
+                      <p className="text-sm text-muted-foreground" data-testid={`text-funding-description-${source.id}`}>{source.description}</p>
                       {source.evidenceType && (
-                        <p className="text-xs text-muted-foreground">Evidence: {source.evidenceType}</p>
+                        <p className="text-xs text-muted-foreground" data-testid={`text-funding-evidence-${source.id}`}>Evidence: {source.evidenceType}</p>
                       )}
                     </div>
                   </div>
@@ -326,6 +330,7 @@ export default function FinancialResilience() {
                     variant="ghost" 
                     size="sm"
                     onClick={() => setFundingSources(fundingSources.filter(f => f.id !== source.id))}
+                    data-testid={`button-remove-funding-${source.id}`}
                   >
                     Remove
                   </Button>
@@ -349,10 +354,10 @@ export default function FinancialResilience() {
         <CardContent>
           <div className="space-y-3">
             {expenses.map((expense) => (
-              <div key={expense.id} className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+              <div key={expense.id} className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg" data-testid={`card-expense-${expense.id}`}>
                 <div className="flex-1">
-                  <span className="font-medium">{expense.category}</span>
-                  {expense.essential && <Badge variant="outline" className="ml-2 text-xs">Essential</Badge>}
+                  <span className="font-medium" data-testid={`text-expense-category-${expense.id}`}>{expense.category}</span>
+                  {expense.essential && <Badge variant="outline" className="ml-2 text-xs" data-testid={`badge-expense-essential-${expense.id}`}>Essential</Badge>}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">£</span>
@@ -361,14 +366,15 @@ export default function FinancialResilience() {
                     value={expense.monthlyAmount}
                     onChange={(e) => updateExpense(expense.id, parseFloat(e.target.value) || 0)}
                     className="w-24"
+                    data-testid={`input-expense-amount-${expense.id}`}
                   />
                   <span className="text-muted-foreground">/month</span>
                 </div>
               </div>
             ))}
-            <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg font-semibold">
+            <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg font-semibold" data-testid="card-total-burn">
               <span>Total Monthly Burn</span>
-              <span>£{calculateMonthlyBurn().toLocaleString()}/month</span>
+              <span data-testid="text-total-burn">£{calculateMonthlyBurn().toLocaleString()}/month</span>
             </div>
           </div>
         </CardContent>

@@ -139,48 +139,48 @@ export default function MarketDataVerifier() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className={dataQuality >= 70 ? "border-green-500" : dataQuality >= 40 ? "border-yellow-500" : "border-red-500"}>
+        <Card className={dataQuality >= 70 ? "border-green-500" : dataQuality >= 40 ? "border-yellow-500" : "border-red-500"} data-testid="card-data-quality">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Data Quality</span>
-              <Badge variant={dataQuality >= 70 ? "default" : dataQuality >= 40 ? "secondary" : "destructive"}>
+              <Badge variant={dataQuality >= 70 ? "default" : dataQuality >= 40 ? "secondary" : "destructive"} data-testid="badge-data-quality-status">
                 {dataQuality >= 70 ? "High" : dataQuality >= 40 ? "Medium" : "Low"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2">{dataQuality}%</div>
-            <Progress value={dataQuality} className="h-2" />
+            <div className="text-3xl font-bold mb-2" data-testid="text-data-quality">{dataQuality}%</div>
+            <Progress value={dataQuality} className="h-2" data-testid="progress-data-quality" />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-verified-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle2 className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Verified</span>
             </div>
-            <div className="text-2xl font-bold">{statistics.filter(s => s.verified).length}</div>
+            <div className="text-2xl font-bold" data-testid="text-verified-count">{statistics.filter(s => s.verified).length}</div>
             <p className="text-xs text-muted-foreground">statistics</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-official-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <BookOpen className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Official</span>
             </div>
-            <div className="text-2xl font-bold">{statistics.filter(s => s.sourceType === "official").length}</div>
+            <div className="text-2xl font-bold" data-testid="text-official-count">{statistics.filter(s => s.sourceType === "official").length}</div>
             <p className="text-xs text-muted-foreground">sources</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-unverified-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle className="h-4 w-4 text-yellow-500" />
               <span className="text-sm font-medium">Unverified</span>
             </div>
-            <div className="text-2xl font-bold">{unverifiedCount}</div>
+            <div className="text-2xl font-bold" data-testid="text-unverified-count">{unverifiedCount}</div>
             <p className="text-xs text-muted-foreground">need review</p>
           </CardContent>
         </Card>
@@ -229,6 +229,7 @@ export default function MarketDataVerifier() {
                 value={newStat.value || ""} 
                 onChange={(e) => setNewStat({...newStat, value: e.target.value})}
                 placeholder="£3.7 billion"
+                data-testid="input-stat-value"
               />
             </div>
             <div>
@@ -237,6 +238,7 @@ export default function MarketDataVerifier() {
                 value={newStat.source || ""} 
                 onChange={(e) => setNewStat({...newStat, source: e.target.value})}
                 placeholder="Tech Nation Report 2024"
+                data-testid="input-stat-source"
               />
             </div>
             <div>
@@ -245,6 +247,7 @@ export default function MarketDataVerifier() {
                 value={newStat.sourceUrl || ""} 
                 onChange={(e) => setNewStat({...newStat, sourceUrl: e.target.value})}
                 placeholder="https://technation.io/report/..."
+                data-testid="input-stat-source-url"
               />
             </div>
             <div>
@@ -253,6 +256,7 @@ export default function MarketDataVerifier() {
                 className="w-full h-10 rounded-md border border-input bg-background px-3"
                 value={newStat.sourceType || "report"}
                 onChange={(e) => setNewStat({...newStat, sourceType: e.target.value as any})}
+                data-testid="select-stat-source-type"
               >
                 <option value="official">Official Government Source</option>
                 <option value="report">Industry Report</option>
@@ -267,6 +271,7 @@ export default function MarketDataVerifier() {
                 type="date"
                 value={newStat.publicationDate || ""} 
                 onChange={(e) => setNewStat({...newStat, publicationDate: e.target.value})}
+                data-testid="input-stat-publication-date"
               />
             </div>
             <div className="md:col-span-2">
@@ -276,6 +281,7 @@ export default function MarketDataVerifier() {
                 onChange={(e) => setNewStat({...newStat, notes: e.target.value})}
                 placeholder="Any additional context or caveats..."
                 rows={2}
+                data-testid="textarea-stat-notes"
               />
             </div>
           </div>
@@ -298,7 +304,7 @@ export default function MarketDataVerifier() {
           <CardContent>
             <div className="space-y-3">
               {statistics.map((stat) => (
-                <Card key={stat.id} className={`p-4 ${stat.verified ? "border-green-200 bg-green-50/50 dark:bg-green-950/20" : ""}`}>
+                <Card key={stat.id} className={`p-4 ${stat.verified ? "border-green-200 bg-green-50/50 dark:bg-green-950/20" : ""}`} data-testid={`card-stat-${stat.id}`}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -307,6 +313,7 @@ export default function MarketDataVerifier() {
                           size="sm"
                           onClick={() => toggleVerified(stat.id)}
                           className={stat.verified ? "text-green-600" : "text-muted-foreground"}
+                          data-testid={`button-toggle-verify-${stat.id}`}
                         >
                           {stat.verified ? (
                             <CheckCircle2 className="h-5 w-5" />
@@ -314,18 +321,18 @@ export default function MarketDataVerifier() {
                             <XCircle className="h-5 w-5" />
                           )}
                         </Button>
-                        <span className="font-medium">{stat.statistic}</span>
-                        <Badge variant="secondary" className="font-mono">{stat.value}</Badge>
+                        <span className="font-medium" data-testid={`text-stat-description-${stat.id}`}>{stat.statistic}</span>
+                        <Badge variant="secondary" className="font-mono" data-testid={`badge-stat-value-${stat.id}`}>{stat.value}</Badge>
                         <Badge variant={
                           stat.sourceType === "official" ? "default" :
                           stat.sourceType === "report" ? "secondary" :
                           stat.sourceType === "estimate" ? "outline" :
                           "destructive"
-                        }>
+                        } data-testid={`badge-stat-type-${stat.id}`}>
                           {stat.sourceType}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-2">
+                      <p className="text-sm text-muted-foreground mt-2" data-testid={`text-stat-source-${stat.id}`}>
                         <strong>Source:</strong> {stat.source}
                         {stat.publicationDate && ` (${stat.publicationDate})`}
                       </p>
@@ -335,14 +342,15 @@ export default function MarketDataVerifier() {
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="text-sm text-blue-600 hover:underline flex items-center gap-1 mt-1"
+                          data-testid={`link-stat-source-${stat.id}`}
                         >
                           <ExternalLink className="h-3 w-3" /> View source
                         </a>
                       )}
                       {stat.notes && (
-                        <p className="text-sm text-muted-foreground mt-1 italic">{stat.notes}</p>
+                        <p className="text-sm text-muted-foreground mt-1 italic" data-testid={`text-stat-notes-${stat.id}`}>{stat.notes}</p>
                       )}
-                      <div className="mt-2 p-2 bg-muted rounded text-xs font-mono">
+                      <div className="mt-2 p-2 bg-muted rounded text-xs font-mono" data-testid={`text-stat-citation-${stat.id}`}>
                         Citation: "{stat.value}" ({stat.source}{stat.publicationDate ? `, ${stat.publicationDate}` : ''})
                       </div>
                     </div>
@@ -350,6 +358,7 @@ export default function MarketDataVerifier() {
                       variant="ghost" 
                       size="sm"
                       onClick={() => setStatistics(statistics.filter(s => s.id !== stat.id))}
+                      data-testid={`button-remove-stat-${stat.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

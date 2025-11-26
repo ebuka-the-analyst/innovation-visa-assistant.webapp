@@ -202,48 +202,48 @@ export default function CommercialValidation() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className={validationScore >= 70 ? "border-green-500" : validationScore >= 40 ? "border-yellow-500" : "border-red-500"}>
+        <Card className={validationScore >= 70 ? "border-green-500" : validationScore >= 40 ? "border-yellow-500" : "border-red-500"} data-testid="card-validation-score">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Validation Score</span>
-              <Badge variant={validationScore >= 70 ? "default" : validationScore >= 40 ? "secondary" : "destructive"}>
+              <Badge variant={validationScore >= 70 ? "default" : validationScore >= 40 ? "secondary" : "destructive"} data-testid="badge-validation-status">
                 {validationScore >= 70 ? "Strong" : validationScore >= 40 ? "Moderate" : "Weak"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2">{validationScore}/100</div>
-            <Progress value={validationScore} className="h-2" />
+            <div className="text-3xl font-bold mb-2" data-testid="text-validation-score">{validationScore}/100</div>
+            <Progress value={validationScore} className="h-2" data-testid="progress-validation-score" />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-competitors-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <Scale className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Competitors</span>
             </div>
-            <div className="text-2xl font-bold">{competitors.length}</div>
+            <div className="text-2xl font-bold" data-testid="text-competitors-count">{competitors.length}</div>
             <p className="text-xs text-muted-foreground">analyzed</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-interviews-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <MessageSquare className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Interviews</span>
             </div>
-            <div className="text-2xl font-bold">{interviews.length}</div>
+            <div className="text-2xl font-bold" data-testid="text-interviews-count">{interviews.length}</div>
             <p className="text-xs text-muted-foreground">conducted</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-case-studies-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <FileText className="h-4 w-4 text-purple-500" />
               <span className="text-sm font-medium">Case Studies</span>
             </div>
-            <div className="text-2xl font-bold">{caseStudies.length}</div>
+            <div className="text-2xl font-bold" data-testid="text-case-studies-count">{caseStudies.length}</div>
             <p className="text-xs text-muted-foreground">documented</p>
           </CardContent>
         </Card>
@@ -308,6 +308,7 @@ export default function CommercialValidation() {
                     value={newCompetitor.website || ""} 
                     onChange={(e) => setNewCompetitor({...newCompetitor, website: e.target.value})}
                     placeholder="https://competitor.com"
+                    data-testid="input-competitor-website"
                   />
                 </div>
                 <div>
@@ -316,6 +317,7 @@ export default function CommercialValidation() {
                     value={newCompetitor.pricing || ""} 
                     onChange={(e) => setNewCompetitor({...newCompetitor, pricing: e.target.value})}
                     placeholder="£50-200/month, Enterprise pricing"
+                    data-testid="input-competitor-pricing"
                   />
                 </div>
                 <div>
@@ -324,6 +326,7 @@ export default function CommercialValidation() {
                     value={newCompetitor.targetMarket || ""} 
                     onChange={(e) => setNewCompetitor({...newCompetitor, targetMarket: e.target.value})}
                     placeholder="SMEs, Enterprise, Startups"
+                    data-testid="input-competitor-target-market"
                   />
                 </div>
                 <div>
@@ -332,6 +335,7 @@ export default function CommercialValidation() {
                     value={(newCompetitor.strengths || []).join(", ")} 
                     onChange={(e) => setNewCompetitor({...newCompetitor, strengths: e.target.value.split(",").map(s => s.trim())})}
                     placeholder="Brand recognition, Feature-rich, Market leader"
+                    data-testid="input-competitor-strengths"
                   />
                 </div>
                 <div>
@@ -340,6 +344,7 @@ export default function CommercialValidation() {
                     value={(newCompetitor.weaknesses || []).join(", ")} 
                     onChange={(e) => setNewCompetitor({...newCompetitor, weaknesses: e.target.value.split(",").map(s => s.trim())})}
                     placeholder="Expensive, Complex, Poor UX"
+                    data-testid="input-competitor-weaknesses"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -349,6 +354,7 @@ export default function CommercialValidation() {
                     onChange={(e) => setNewCompetitor({...newCompetitor, differentiator: e.target.value})}
                     placeholder="How does your solution address their weaknesses or offer unique value?"
                     rows={2}
+                    data-testid="textarea-competitor-differentiator"
                   />
                 </div>
               </div>
@@ -373,15 +379,15 @@ export default function CommercialValidation() {
                     </thead>
                     <tbody>
                       {competitors.map((comp) => (
-                        <tr key={comp.id} className="border-t">
+                        <tr key={comp.id} className="border-t" data-testid={`row-competitor-${comp.id}`}>
                           <td className="p-3">
-                            <div className="font-medium">{comp.name}</div>
+                            <div className="font-medium" data-testid={`text-competitor-name-${comp.id}`}>{comp.name}</div>
                             {comp.website && (
                               <a href={comp.website} target="_blank" rel="noopener noreferrer" 
-                                 className="text-xs text-blue-600 hover:underline">{comp.website}</a>
+                                 className="text-xs text-blue-600 hover:underline" data-testid={`link-competitor-website-${comp.id}`}>{comp.website}</a>
                             )}
                           </td>
-                          <td className="p-3 text-sm">{comp.pricing || "-"}</td>
+                          <td className="p-3 text-sm" data-testid={`text-competitor-pricing-${comp.id}`}>{comp.pricing || "-"}</td>
                           <td className="p-3">
                             <div className="flex flex-wrap gap-1">
                               {comp.strengths.slice(0, 2).map((s, i) => (
@@ -396,12 +402,13 @@ export default function CommercialValidation() {
                               ))}
                             </div>
                           </td>
-                          <td className="p-3 text-sm max-w-[200px] truncate">{comp.differentiator || "-"}</td>
+                          <td className="p-3 text-sm max-w-[200px] truncate" data-testid={`text-competitor-differentiator-${comp.id}`}>{comp.differentiator || "-"}</td>
                           <td className="p-3">
                             <Button 
                               variant="ghost" 
                               size="sm"
                               onClick={() => setCompetitors(competitors.filter(c => c.id !== comp.id))}
+                              data-testid={`button-remove-competitor-${comp.id}`}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -444,6 +451,7 @@ export default function CommercialValidation() {
                     value={newInterview.role || ""} 
                     onChange={(e) => setNewInterview({...newInterview, role: e.target.value})}
                     placeholder="Head of Operations"
+                    data-testid="input-interviewee-role"
                   />
                 </div>
                 <div>
@@ -452,6 +460,7 @@ export default function CommercialValidation() {
                     value={newInterview.company || ""} 
                     onChange={(e) => setNewInterview({...newInterview, company: e.target.value})}
                     placeholder="Target Corp"
+                    data-testid="input-interviewee-company"
                   />
                 </div>
                 <div>
@@ -460,6 +469,7 @@ export default function CommercialValidation() {
                     type="date"
                     value={newInterview.date || ""} 
                     onChange={(e) => setNewInterview({...newInterview, date: e.target.value})}
+                    data-testid="input-interview-date"
                   />
                 </div>
                 <div>
@@ -468,6 +478,7 @@ export default function CommercialValidation() {
                     value={(newInterview.painPoints || []).join(", ")} 
                     onChange={(e) => setNewInterview({...newInterview, painPoints: e.target.value.split(",").map(s => s.trim())})}
                     placeholder="Manual processes, High costs, Lack of visibility"
+                    data-testid="input-interview-pain-points"
                   />
                 </div>
                 <div>
@@ -476,6 +487,7 @@ export default function CommercialValidation() {
                     value={newInterview.willingnessToPay || ""} 
                     onChange={(e) => setNewInterview({...newInterview, willingnessToPay: e.target.value})}
                     placeholder="£50-100/month, Would pay premium for X"
+                    data-testid="input-interview-willingness-to-pay"
                   />
                 </div>
                 <div>
@@ -484,6 +496,7 @@ export default function CommercialValidation() {
                     className="w-full h-10 rounded-md border border-input bg-background px-3"
                     value={newInterview.overallSentiment || "positive"}
                     onChange={(e) => setNewInterview({...newInterview, overallSentiment: e.target.value as any})}
+                    data-testid="select-interview-sentiment"
                   >
                     <option value="positive">Positive - Strong Interest</option>
                     <option value="neutral">Neutral - Some Interest</option>
@@ -496,6 +509,7 @@ export default function CommercialValidation() {
                     className="w-full h-10 rounded-md border border-input bg-background px-3"
                     value={newInterview.wouldRecommend ? "yes" : "no"}
                     onChange={(e) => setNewInterview({...newInterview, wouldRecommend: e.target.value === "yes"})}
+                    data-testid="select-interview-recommend"
                   >
                     <option value="yes">Yes - Would recommend to others</option>
                     <option value="no">No - Would not recommend</option>
@@ -510,6 +524,7 @@ export default function CommercialValidation() {
 "I wish something like this existed"
 "We would definitely be early adopters"'
                     rows={3}
+                    data-testid="textarea-interview-quotes"
                   />
                 </div>
               </div>
@@ -522,24 +537,24 @@ export default function CommercialValidation() {
               {interviews.length > 0 && (
                 <div className="space-y-3">
                   {interviews.map((interview) => (
-                    <Card key={interview.id} className="p-4">
+                    <Card key={interview.id} className="p-4" data-testid={`card-interview-${interview.id}`}>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium">{interview.intervieweeName}</span>
-                            <Badge variant="outline">{interview.role}</Badge>
-                            {interview.company && <Badge variant="secondary">{interview.company}</Badge>}
+                            <span className="font-medium" data-testid={`text-interview-name-${interview.id}`}>{interview.intervieweeName}</span>
+                            <Badge variant="outline" data-testid={`badge-interview-role-${interview.id}`}>{interview.role}</Badge>
+                            {interview.company && <Badge variant="secondary" data-testid={`badge-interview-company-${interview.id}`}>{interview.company}</Badge>}
                             <Badge variant={
                               interview.overallSentiment === "positive" ? "default" :
                               interview.overallSentiment === "neutral" ? "secondary" :
                               "destructive"
-                            }>
+                            } data-testid={`badge-interview-sentiment-${interview.id}`}>
                               {interview.overallSentiment}
                             </Badge>
                             {interview.wouldRecommend ? (
-                              <Check className="h-4 w-4 text-green-500" />
+                              <Check className="h-4 w-4 text-green-500" data-testid={`icon-interview-recommend-${interview.id}`} />
                             ) : (
-                              <X className="h-4 w-4 text-red-500" />
+                              <X className="h-4 w-4 text-red-500" data-testid={`icon-interview-not-recommend-${interview.id}`} />
                             )}
                           </div>
                           {interview.painPoints.length > 0 && (
@@ -551,7 +566,7 @@ export default function CommercialValidation() {
                             </div>
                           )}
                           {interview.willingnessToPay && (
-                            <p className="text-sm mt-1"><strong>WTP:</strong> {interview.willingnessToPay}</p>
+                            <p className="text-sm mt-1" data-testid={`text-interview-wtp-${interview.id}`}><strong>WTP:</strong> {interview.willingnessToPay}</p>
                           )}
                           {interview.keyQuotes.length > 0 && (
                             <div className="mt-2 space-y-1">
@@ -565,6 +580,7 @@ export default function CommercialValidation() {
                           variant="ghost" 
                           size="sm"
                           onClick={() => setInterviews(interviews.filter(i => i.id !== interview.id))}
+                          data-testid={`button-remove-interview-${interview.id}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -622,6 +638,7 @@ export default function CommercialValidation() {
                     value={newCaseStudy.clientName || ""} 
                     onChange={(e) => setNewCaseStudy({...newCaseStudy, clientName: e.target.value})}
                     placeholder="Acme Corporation"
+                    data-testid="input-case-study-client"
                   />
                 </div>
                 <div>
@@ -630,6 +647,7 @@ export default function CommercialValidation() {
                     value={newCaseStudy.industry || ""} 
                     onChange={(e) => setNewCaseStudy({...newCaseStudy, industry: e.target.value})}
                     placeholder="Financial Services, Healthcare, etc."
+                    data-testid="input-case-study-industry"
                   />
                 </div>
                 <div>
@@ -638,6 +656,7 @@ export default function CommercialValidation() {
                     value={newCaseStudy.metrics || ""} 
                     onChange={(e) => setNewCaseStudy({...newCaseStudy, metrics: e.target.value})}
                     placeholder="50% time saved, £100k cost reduction"
+                    data-testid="input-case-study-metrics"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -647,6 +666,7 @@ export default function CommercialValidation() {
                     onChange={(e) => setNewCaseStudy({...newCaseStudy, challenge: e.target.value})}
                     placeholder="What problem did the client face?"
                     rows={2}
+                    data-testid="textarea-case-study-challenge"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -656,6 +676,7 @@ export default function CommercialValidation() {
                     onChange={(e) => setNewCaseStudy({...newCaseStudy, solution: e.target.value})}
                     placeholder="How did you solve their problem?"
                     rows={2}
+                    data-testid="textarea-case-study-solution"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -667,6 +688,7 @@ export default function CommercialValidation() {
 Saved £100,000 annually
 Improved customer satisfaction by 30%"
                     rows={3}
+                    data-testid="textarea-case-study-results"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -676,6 +698,7 @@ Improved customer satisfaction by 30%"
                     onChange={(e) => setNewCaseStudy({...newCaseStudy, testimonialQuote: e.target.value})}
                     placeholder='"This solution transformed our operations..." - John Smith, CEO'
                     rows={2}
+                    data-testid="textarea-case-study-testimonial"
                   />
                 </div>
               </div>
@@ -688,20 +711,20 @@ Improved customer satisfaction by 30%"
               {caseStudies.length > 0 && (
                 <div className="space-y-3">
                   {caseStudies.map((cs) => (
-                    <Card key={cs.id} className="p-4">
+                    <Card key={cs.id} className="p-4" data-testid={`card-case-study-${cs.id}`}>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <FileText className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">{cs.title}</span>
-                            <Badge variant="secondary">{cs.clientName}</Badge>
-                            {cs.industry && <Badge variant="outline">{cs.industry}</Badge>}
+                            <span className="font-medium" data-testid={`text-case-study-title-${cs.id}`}>{cs.title}</span>
+                            <Badge variant="secondary" data-testid={`badge-case-study-client-${cs.id}`}>{cs.clientName}</Badge>
+                            {cs.industry && <Badge variant="outline" data-testid={`badge-case-study-industry-${cs.id}`}>{cs.industry}</Badge>}
                           </div>
                           {cs.challenge && (
-                            <p className="text-sm mt-2"><strong>Challenge:</strong> {cs.challenge}</p>
+                            <p className="text-sm mt-2" data-testid={`text-case-study-challenge-${cs.id}`}><strong>Challenge:</strong> {cs.challenge}</p>
                           )}
                           {cs.metrics && (
-                            <p className="text-sm"><strong>Impact:</strong> {cs.metrics}</p>
+                            <p className="text-sm" data-testid={`text-case-study-metrics-${cs.id}`}><strong>Impact:</strong> {cs.metrics}</p>
                           )}
                           {cs.results.length > 0 && (
                             <ul className="text-sm mt-2 list-disc list-inside">
@@ -711,13 +734,14 @@ Improved customer satisfaction by 30%"
                             </ul>
                           )}
                           {cs.testimonialQuote && (
-                            <p className="text-sm italic text-muted-foreground mt-2">"{cs.testimonialQuote}"</p>
+                            <p className="text-sm italic text-muted-foreground mt-2" data-testid={`text-case-study-testimonial-${cs.id}`}>"{cs.testimonialQuote}"</p>
                           )}
                         </div>
                         <Button 
                           variant="ghost" 
                           size="sm"
                           onClick={() => setCaseStudies(caseStudies.filter(c => c.id !== cs.id))}
+                          data-testid={`button-remove-case-study-${cs.id}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

@@ -220,37 +220,37 @@ ATTACHMENTS:
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card className={complianceScore >= 80 ? "border-green-500" : complianceScore >= 50 ? "border-yellow-500" : "border-red-500"}>
+        <Card className={complianceScore >= 80 ? "border-green-500" : complianceScore >= 50 ? "border-yellow-500" : "border-red-500"} data-testid="card-compliance-score">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Compliance Score</span>
-              <Badge variant={complianceScore >= 80 ? "default" : complianceScore >= 50 ? "secondary" : "destructive"}>
+              <Badge variant={complianceScore >= 80 ? "default" : complianceScore >= 50 ? "secondary" : "destructive"} data-testid="badge-compliance-status">
                 {complianceScore >= 80 ? "Good" : complianceScore >= 50 ? "At Risk" : "Critical"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2">{complianceScore}%</div>
-            <Progress value={complianceScore} className="h-2" />
+            <div className="text-3xl font-bold mb-2" data-testid="text-compliance-score">{complianceScore}%</div>
+            <Progress value={complianceScore} className="h-2" data-testid="progress-compliance-score" />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-high-risk-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle className="h-4 w-4 text-red-500" />
               <span className="text-sm font-medium">High Risk Issues</span>
             </div>
-            <div className="text-2xl font-bold">{highRiskIssues.length}</div>
+            <div className="text-2xl font-bold" data-testid="text-high-risk-count">{highRiskIssues.length}</div>
             <p className="text-xs text-muted-foreground">require attention</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-compliant-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle2 className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Compliant Areas</span>
             </div>
-            <div className="text-2xl font-bold">{checks.length - highRiskIssues.length}</div>
+            <div className="text-2xl font-bold" data-testid="text-compliant-count">{checks.length - highRiskIssues.length}</div>
             <p className="text-xs text-muted-foreground">of {checks.length} checks</p>
           </CardContent>
         </Card>
@@ -346,6 +346,7 @@ ATTACHMENTS:
                 value={legalOpinionData.lawFirm}
                 onChange={(e) => setLegalOpinionData({...legalOpinionData, lawFirm: e.target.value})}
                 placeholder="Smith & Partners Immigration"
+                data-testid="input-law-firm"
               />
             </div>
             <div>
@@ -354,6 +355,7 @@ ATTACHMENTS:
                 value={legalOpinionData.lawyerName}
                 onChange={(e) => setLegalOpinionData({...legalOpinionData, lawyerName: e.target.value})}
                 placeholder="Ms. Jane Smith"
+                data-testid="input-lawyer-name"
               />
             </div>
             <div>
@@ -362,6 +364,7 @@ ATTACHMENTS:
                 value={legalOpinionData.targetUsers}
                 onChange={(e) => setLegalOpinionData({...legalOpinionData, targetUsers: e.target.value})}
                 placeholder="Entrepreneurs, startup founders"
+                data-testid="input-target-users"
               />
             </div>
             <div className="md:col-span-2">
@@ -371,6 +374,7 @@ ATTACHMENTS:
                 onChange={(e) => setLegalOpinionData({...legalOpinionData, serviceDescription: e.target.value})}
                 placeholder="Describe your service in detail. What exactly does your platform do? What tools do you offer? How do users interact with visa-related content?"
                 rows={5}
+                data-testid="textarea-service-description"
               />
             </div>
           </div>
@@ -385,17 +389,17 @@ ATTACHMENTS:
               <div className="flex items-center justify-between mb-2">
                 <Label>Generated Request Letter</Label>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={copyToClipboard}>
+                  <Button variant="outline" size="sm" onClick={copyToClipboard} data-testid="button-copy-opinion">
                     <Copy className="h-4 w-4 mr-2" />
                     Copy
                   </Button>
-                  <Button variant="outline" size="sm" onClick={downloadRequest}>
+                  <Button variant="outline" size="sm" onClick={downloadRequest} data-testid="button-download-opinion">
                     <Download className="h-4 w-4 mr-2" />
                     Download
                   </Button>
                 </div>
               </div>
-              <pre className="whitespace-pre-wrap font-sans text-sm bg-muted p-4 rounded-lg overflow-auto max-h-[400px]">
+              <pre className="whitespace-pre-wrap font-sans text-sm bg-muted p-4 rounded-lg overflow-auto max-h-[400px]" data-testid="text-generated-opinion">
                 {generatedOpinionRequest}
               </pre>
             </div>
@@ -462,6 +466,7 @@ ATTACHMENTS:
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-blue-600 hover:underline"
+              data-testid="link-oisc-finder"
             >
               <ExternalLink className="h-4 w-4" />
               OISC Adviser Finder

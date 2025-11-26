@@ -146,48 +146,48 @@ export default function MVPDemoGuide() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className={mvpReadiness >= 70 ? "border-green-500" : mvpReadiness >= 40 ? "border-yellow-500" : "border-red-500"}>
+        <Card className={mvpReadiness >= 70 ? "border-green-500" : mvpReadiness >= 40 ? "border-yellow-500" : "border-red-500"} data-testid="card-mvp-readiness">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Demo Readiness</span>
-              <Badge variant={mvpReadiness >= 70 ? "default" : mvpReadiness >= 40 ? "secondary" : "destructive"}>
+              <Badge variant={mvpReadiness >= 70 ? "default" : mvpReadiness >= 40 ? "secondary" : "destructive"} data-testid="badge-mvp-status">
                 {mvpReadiness >= 70 ? "Ready" : mvpReadiness >= 40 ? "Almost" : "Not Ready"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2">{mvpReadiness}%</div>
-            <Progress value={mvpReadiness} className="h-2" />
+            <div className="text-3xl font-bold mb-2" data-testid="text-mvp-readiness">{mvpReadiness}%</div>
+            <Progress value={mvpReadiness} className="h-2" data-testid="progress-mvp-readiness" />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-checklist-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle2 className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Checklist</span>
             </div>
-            <div className="text-2xl font-bold">{completedChecks.length}/{mvpChecklist.length}</div>
+            <div className="text-2xl font-bold" data-testid="text-checklist-count">{completedChecks.length}/{mvpChecklist.length}</div>
             <p className="text-xs text-muted-foreground">items complete</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-features-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <Zap className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Features</span>
             </div>
-            <div className="text-2xl font-bold">{features.filter(f => f.demoable).length}/{features.length}</div>
+            <div className="text-2xl font-bold" data-testid="text-features-count">{features.filter(f => f.demoable).length}/{features.length}</div>
             <p className="text-xs text-muted-foreground">demoable</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="card-assets-count">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-2">
               <Video className="h-4 w-4 text-purple-500" />
               <span className="text-sm font-medium">Assets</span>
             </div>
-            <div className="text-2xl font-bold">{assets.filter(a => a.quality === "polished").length}</div>
+            <div className="text-2xl font-bold" data-testid="text-assets-count">{assets.filter(a => a.quality === "polished").length}</div>
             <p className="text-xs text-muted-foreground">polished</p>
           </CardContent>
         </Card>
@@ -243,6 +243,7 @@ export default function MVPDemoGuide() {
                   id={item.id}
                   checked={completedChecks.includes(item.id)}
                   onCheckedChange={() => toggleCheck(item.id)}
+                  data-testid={`checkbox-mvp-${item.id}`}
                 />
                 <label htmlFor={item.id} className="text-sm cursor-pointer flex-1">
                   {item.label}
@@ -280,6 +281,7 @@ export default function MVPDemoGuide() {
                 className="w-full h-10 rounded-md border border-input bg-background px-3"
                 value={newFeature.status || "planned"}
                 onChange={(e) => setNewFeature({...newFeature, status: e.target.value as any})}
+                data-testid="select-feature-status"
               >
                 <option value="planned">Planned</option>
                 <option value="in-progress">In Progress</option>
@@ -294,6 +296,7 @@ export default function MVPDemoGuide() {
                 onChange={(e) => setNewFeature({...newFeature, description: e.target.value})}
                 placeholder="What does this feature do?"
                 rows={2}
+                data-testid="textarea-feature-description"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -301,6 +304,7 @@ export default function MVPDemoGuide() {
                 id="demoable"
                 checked={newFeature.demoable}
                 onCheckedChange={(checked) => setNewFeature({...newFeature, demoable: !!checked})}
+                data-testid="checkbox-feature-demoable"
               />
               <label htmlFor="demoable" className="text-sm cursor-pointer">
                 Can be demonstrated live
@@ -315,20 +319,20 @@ export default function MVPDemoGuide() {
           {features.length > 0 && (
             <div className="space-y-2">
               {features.map((feature) => (
-                <div key={feature.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div key={feature.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg" data-testid={`card-feature-${feature.id}`}>
                   <div className="flex items-center gap-3">
                     {feature.demoable ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-green-500" data-testid={`icon-feature-demoable-${feature.id}`} />
                     ) : (
                       <Clock className="h-4 w-4 text-muted-foreground" />
                     )}
                     <div>
-                      <span className="font-medium">{feature.name}</span>
+                      <span className="font-medium" data-testid={`text-feature-name-${feature.id}`}>{feature.name}</span>
                       <Badge variant={
                         feature.status === "demo-ready" ? "default" :
                         feature.status === "complete" ? "secondary" :
                         "outline"
-                      } className="ml-2">
+                      } className="ml-2" data-testid={`badge-feature-status-${feature.id}`}>
                         {feature.status}
                       </Badge>
                     </div>
@@ -337,6 +341,7 @@ export default function MVPDemoGuide() {
                     variant="ghost" 
                     size="sm"
                     onClick={() => setFeatures(features.filter(f => f.id !== feature.id))}
+                    data-testid={`button-remove-feature-${feature.id}`}
                   >
                     Remove
                   </Button>
@@ -374,6 +379,7 @@ export default function MVPDemoGuide() {
                 className="w-full h-10 rounded-md border border-input bg-background px-3"
                 value={newAsset.type || "video"}
                 onChange={(e) => setNewAsset({...newAsset, type: e.target.value as any})}
+                data-testid="select-asset-type"
               >
                 <option value="video">Video Demo</option>
                 <option value="screenshot">Screenshots</option>
@@ -387,6 +393,7 @@ export default function MVPDemoGuide() {
                 value={newAsset.url || ""} 
                 onChange={(e) => setNewAsset({...newAsset, url: e.target.value})}
                 placeholder="https://loom.com/share/..."
+                data-testid="input-asset-url"
               />
             </div>
             <div>
@@ -395,6 +402,7 @@ export default function MVPDemoGuide() {
                 className="w-full h-10 rounded-md border border-input bg-background px-3"
                 value={newAsset.quality || "draft"}
                 onChange={(e) => setNewAsset({...newAsset, quality: e.target.value as any})}
+                data-testid="select-asset-quality"
               >
                 <option value="draft">Draft</option>
                 <option value="polished">Polished</option>
@@ -409,21 +417,21 @@ export default function MVPDemoGuide() {
           {assets.length > 0 && (
             <div className="space-y-2">
               {assets.map((asset) => (
-                <div key={asset.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div key={asset.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg" data-testid={`card-asset-${asset.id}`}>
                   <div className="flex items-center gap-3">
                     {asset.type === "video" && <Video className="h-4 w-4 text-red-500" />}
                     {asset.type === "screenshot" && <Monitor className="h-4 w-4 text-blue-500" />}
                     {asset.type === "prototype" && <Smartphone className="h-4 w-4 text-purple-500" />}
                     {asset.type === "documentation" && <Code className="h-4 w-4 text-gray-500" />}
                     <div>
-                      <span className="font-medium">{asset.title}</span>
-                      <Badge variant={asset.quality === "polished" ? "default" : "outline"} className="ml-2">
+                      <span className="font-medium" data-testid={`text-asset-title-${asset.id}`}>{asset.title}</span>
+                      <Badge variant={asset.quality === "polished" ? "default" : "outline"} className="ml-2" data-testid={`badge-asset-quality-${asset.id}`}>
                         {asset.quality}
                       </Badge>
                     </div>
                   </div>
                   {asset.url && (
-                    <a href={asset.url} target="_blank" rel="noopener noreferrer">
+                    <a href={asset.url} target="_blank" rel="noopener noreferrer" data-testid={`link-asset-${asset.id}`}>
                       <ExternalLink className="h-4 w-4 text-blue-500" />
                     </a>
                   )}
