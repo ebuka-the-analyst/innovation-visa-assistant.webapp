@@ -1778,3 +1778,198 @@ export type InsertEligibilityAssessment = z.infer<typeof insertEligibilityAssess
 
 export type InnovationCoachingSession = typeof innovationCoachingSessions.$inferSelect;
 export type InsertInnovationCoachingSession = z.infer<typeof insertInnovationCoachingSessionSchema>;
+
+// ============================================================================
+// AI CONVERSATIONAL QUESTIONNAIRE SYSTEM
+// Innovative PhD-level UX for collecting 475+ data points through AI interviews
+// ============================================================================
+
+// AI Interview Sessions - Tracks conversation sessions with agent personas
+export const aiInterviewSessions = pgTable("ai_interview_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  businessPlanId: varchar("business_plan_id"),
+  
+  // Session State
+  status: varchar("status", { length: 20 }).notNull().default('active'), // active, paused, completed, abandoned
+  currentAgent: varchar("current_agent", { length: 20 }).notNull().default('nova'), // nova, sterling, atlas, sage
+  currentSection: integer("current_section").notNull().default(1), // 1-14 sections
+  currentQuestionIndex: integer("current_question_index").notNull().default(0),
+  
+  // Progress Tracking
+  totalQuestionsAnswered: integer("total_questions_answered").notNull().default(0),
+  totalQuestions: integer("total_questions").notNull().default(475),
+  sessionDuration: integer("session_duration").notNull().default(0), // seconds
+  
+  // Real-time Scores (0-100)
+  innovationScore: integer("innovation_score").notNull().default(0),
+  viabilityScore: integer("viability_score").notNull().default(0),
+  scalabilityScore: integer("scalability_score").notNull().default(0),
+  overallReadiness: integer("overall_readiness").notNull().default(0),
+  approvalProbability: integer("approval_probability").notNull().default(0),
+  
+  // Gamification
+  currentStreak: integer("current_streak").notNull().default(0),
+  longestStreak: integer("longest_streak").notNull().default(0),
+  totalXP: integer("total_xp").notNull().default(0),
+  
+  // Session Metadata
+  lastActivityAt: timestamp("last_activity_at").notNull().defaultNow(),
+  startedAt: timestamp("started_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+  
+  // Conversation State (for context continuity)
+  conversationContext: jsonb("conversation_context").$type<{
+    recentTopics: string[];
+    userPreferences: Record<string, string>;
+    strengthAreas: string[];
+    improvementAreas: string[];
+    lastAgentMessage: string;
+  }>(),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_ai_interview_user").on(table.userId),
+  index("idx_ai_interview_status").on(table.status),
+  index("idx_ai_interview_agent").on(table.currentAgent),
+]);
+
+// AI Interview Responses - Stores individual answers with quality scoring
+export const aiInterviewResponses = pgTable("ai_interview_responses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull().references(() => aiInterviewSessions.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Question Reference
+  questionId: varchar("question_id", { length: 20 }).notNull(), // e.g., "1.A.1" = Section 1, Part A, Question 1
+  sectionNumber: integer("section_number").notNull(),
+  criterion: varchar("criterion", { length: 20 }).notNull(), // innovation, viability, scalability
+  agent: varchar("agent", { length: 20 }).notNull(), // which AI agent asked this
+  
+  // Question Text (for reference)
+  questionText: text("question_text").notNull(),
+  
+  // User's Answer
+  answer: text("answer").notNull(),
+  answerLength: integer("answer_length").notNull().default(0),
+  
+  // AI Quality Assessment (0-100)
+  qualityScore: integer("quality_score").notNull().default(0),
+  completenessScore: integer("completeness_score").notNull().default(0),
+  relevanceScore: integer("relevance_score").notNull().default(0),
+  
+  // AI Feedback
+  aiFeedback: text("ai_feedback"),
+  improvementSuggestions: jsonb("improvement_suggestions").$type<string[]>(),
+  scoreImpact: integer("score_impact").notNull().default(0), // How much this answer affected overall score
+  
+  // Revision Tracking
+  revisionCount: integer("revision_count").notNull().default(0),
+  previousAnswers: jsonb("previous_answers").$type<Array<{
+    answer: string;
+    timestamp: string;
+    qualityScore: number;
+  }>>(),
+  
+  // Timing
+  timeToAnswer: integer("time_to_answer"), // seconds
+  answeredAt: timestamp("answered_at").notNull().defaultNow(),
+  lastUpdatedAt: timestamp("last_updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_response_session").on(table.sessionId),
+  index("idx_response_user").on(table.userId),
+  index("idx_response_question").on(table.questionId),
+  index("idx_response_criterion").on(table.criterion),
+]);
+
+// Interview Milestones - Gamification tracking for AI interview sessions
+export const interviewMilestones = pgTable("interview_milestones", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  sessionId: varchar("session_id").references(() => aiInterviewSessions.id),
+  
+  // Milestone Details
+  milestoneId: varchar("milestone_id", { length: 50 }).notNull(), // e.g., "innovation_bronze", "section_complete_1"
+  milestoneType: varchar("milestone_type", { length: 30 }).notNull(), // milestone, streak, quality, speed, completion
+  title: varchar("title", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  icon: varchar("icon", { length: 50 }).notNull(), // emoji or icon name
+  
+  // Milestone Tier
+  tier: varchar("tier", { length: 20 }).notNull().default('bronze'), // bronze, silver, gold, platinum
+  xpReward: integer("xp_reward").notNull().default(0),
+  
+  // Timestamps
+  earnedAt: timestamp("earned_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_milestone_user").on(table.userId),
+  index("idx_milestone_type").on(table.milestoneType),
+]);
+
+// Score History - Track score changes over time for visualization
+export const scoreHistory = pgTable("score_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull().references(() => aiInterviewSessions.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Scores at this point
+  innovationScore: integer("innovation_score").notNull(),
+  viabilityScore: integer("viability_score").notNull(),
+  scalabilityScore: integer("scalability_score").notNull(),
+  overallReadiness: integer("overall_readiness").notNull(),
+  
+  // What triggered this update
+  triggerType: varchar("trigger_type", { length: 30 }).notNull(), // answer, revision, ai_evaluation
+  questionId: varchar("question_id", { length: 20 }),
+  
+  recordedAt: timestamp("recorded_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_score_history_session").on(table.sessionId),
+  index("idx_score_history_user").on(table.userId),
+]);
+
+// Insert Schemas for AI Interview System
+export const insertAiInterviewSessionSchema = createInsertSchema(aiInterviewSessions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAiInterviewResponseSchema = createInsertSchema(aiInterviewResponses).omit({
+  id: true,
+});
+
+export const insertInterviewMilestoneSchema = createInsertSchema(interviewMilestones).omit({
+  id: true,
+});
+
+export const insertScoreHistorySchema = createInsertSchema(scoreHistory).omit({
+  id: true,
+});
+
+// Types for AI Interview System
+export type AiInterviewSession = typeof aiInterviewSessions.$inferSelect;
+export type InsertAiInterviewSession = z.infer<typeof insertAiInterviewSessionSchema>;
+
+export type AiInterviewResponse = typeof aiInterviewResponses.$inferSelect;
+export type InsertAiInterviewResponse = z.infer<typeof insertAiInterviewResponseSchema>;
+
+export type InterviewMilestone = typeof interviewMilestones.$inferSelect;
+export type InsertInterviewMilestone = z.infer<typeof insertInterviewMilestoneSchema>;
+
+export type ScoreHistory = typeof scoreHistory.$inferSelect;
+export type InsertScoreHistory = z.infer<typeof insertScoreHistorySchema>;
+
+// Agent Personas Configuration Type
+export type AgentPersona = {
+  id: 'nova' | 'sterling' | 'atlas' | 'sage';
+  name: string;
+  title: string;
+  avatar: string;
+  primaryColor: string;
+  criterion: 'innovation' | 'viability' | 'scalability' | 'compliance';
+  sections: number[]; // Which sections this agent handles
+  personality: string;
+  greeting: string;
+};
