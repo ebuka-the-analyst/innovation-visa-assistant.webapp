@@ -110,6 +110,27 @@ The platform features comprehensive, enterprise-grade SEO infrastructure targeti
 2. Set up Google Search Console and submit sitemap
 3. Create custom OG image (1200x630px) for social sharing
 
+### Auto-Save & Session Persistence System
+The platform features comprehensive auto-save functionality to prevent data loss:
+
+**AI Interview Session Persistence:**
+- Full session state saved to localStorage including: session data, messages, answered question IDs
+- Automatic restoration on page refresh or return visit
+- XP, level, achievements, and streak preserved across sessions
+- Progress percentage and visa readiness scores maintained
+
+**Tool Auto-Save System:**
+- `useAutoSaveWithIndicator` hook for easy integration into any tool
+- `RestoreBanner` component shows "Restore Progress" option for saved data
+- `AutoSaveIndicator` component shows real-time save status (saving, saved, last saved time)
+- 500ms debounce to prevent excessive localStorage writes
+- All 126+ tools have localStorage-based state persistence
+
+**Key Files:**
+- `client/src/components/AutoSaveIndicator.tsx` - Reusable auto-save components and hooks
+- `client/src/hooks/useAutoSave.ts` - Core auto-save hook infrastructure
+- `client/src/components/AiInterviewChat.tsx` - AI interview with session persistence
+
 ## External Dependencies
 - **Database:** `PostgreSQL` managed by `Neon`.
 - **ORM:** `Drizzle ORM`.

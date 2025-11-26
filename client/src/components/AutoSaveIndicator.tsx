@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import { Save, Check, Cloud, AlertCircle } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Save, Check, Cloud, AlertCircle, RefreshCw, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AutoSaveIndicatorProps {
   isSaving?: boolean;
@@ -8,6 +9,247 @@ interface AutoSaveIndicatorProps {
   hasUnsavedChanges?: boolean;
   showNotification?: boolean;
   className?: string;
+}
+
+export function useAutoSaveWithIndicator<T extends Record<string, any>>(
+  storageKey: string,
+  initialData: T
+): {
+  data: T;
+  setData: (newData: T | ((prev: T) => T)) => void;
+  updateField: <K extends keyof T>(field: K, value: T[K]) => void;
+  clearSaved: () => void;
+  restoreSaved: () => T | null;
+  hasSavedData: boolean;
+  lastSaved: Date | null;
+  isSaving: boolean;
+  indicatorProps: {
+    isSaving: boolean;
+    lastSaved: string | null;
+    hasUnsavedChanges: boolean;
+    showNotification: boolean;
+  };
+} {
+  const fullKey = `autosave_${storageKey}`;
+  
+  const [data, setDataState] = useState<T>(() => {
+    try {
+      const saved = localStorage.getItem(fullKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const timestamp = parsed._lastSaved;
+        delete parsed._lastSaved;
+        return { ...initialData, ...parsed };
+      }
+    } catch (e) {
+      console.error('Failed to load saved data:', e);
+    }
+    return initialData;
+  });
+  
+  const [hasSavedData, setHasSavedData] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previousDataRef = useRef<string>(JSON.stringify(initialData));
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(fullKey);
+      setHasSavedData(!!saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed._lastSaved) {
+          setLastSaved(new Date(parsed._lastSaved));
+        }
+      }
+    } catch (e) {}
+  }, [fullKey]);
+
+  const setData = useCallback((newData: T | ((prev: T) => T)) => {
+    setDataState(prev => {
+      const updated = typeof newData === 'function' ? (newData as (prev: T) => T)(prev) : newData;
+      const newDataString = JSON.stringify(updated);
+      
+      if (newDataString === previousDataRef.current) {
+        return prev;
+      }
+      
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      
+      setIsSaving(true);
+      
+      saveTimeoutRef.current = setTimeout(() => {
+        try {
+          const saveData = {
+            ...updated,
+            _lastSaved: new Date().toISOString()
+          };
+          localStorage.setItem(fullKey, JSON.stringify(saveData));
+          previousDataRef.current = newDataString;
+          setHasSavedData(true);
+          setLastSaved(new Date());
+          setIsSaving(false);
+          setShowNotification(true);
+          setTimeout(() => setShowNotification(false), 2000);
+        } catch (err) {
+          console.error('Auto-save failed:', err);
+          setIsSaving(false);
+        }
+      }, 500);
+      
+      return updated;
+    });
+  }, [fullKey]);
+
+  const updateField = useCallback(<K extends keyof T>(field: K, value: T[K]) => {
+    setData(prev => ({ ...prev, [field]: value }));
+  }, [setData]);
+
+  const clearSaved = useCallback(() => {
+    localStorage.removeItem(fullKey);
+    setHasSavedData(false);
+    setLastSaved(null);
+    setDataState(initialData);
+    previousDataRef.current = JSON.stringify(initialData);
+  }, [fullKey, initialData]);
+
+  const restoreSaved = useCallback((): T | null => {
+    try {
+      const saved = localStorage.getItem(fullKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        delete parsed._lastSaved;
+        const restored = { ...initialData, ...parsed };
+        setDataState(restored);
+        previousDataRef.current = JSON.stringify(restored);
+        return restored;
+      }
+    } catch (e) {
+      console.error('Failed to restore:', e);
+    }
+    return null;
+  }, [fullKey, initialData]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const formatLastSaved = (): string | null => {
+    if (!lastSaved) return null;
+    const seconds = Math.floor((Date.now() - lastSaved.getTime()) / 1000);
+    if (seconds < 5) return 'just now';
+    if (seconds < 60) return `${seconds}s ago`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    return lastSaved.toLocaleTimeString();
+  };
+
+  return {
+    data,
+    setData,
+    updateField,
+    clearSaved,
+    restoreSaved,
+    hasSavedData,
+    lastSaved,
+    isSaving,
+    indicatorProps: {
+      isSaving,
+      lastSaved: formatLastSaved(),
+      hasUnsavedChanges: hasSavedData,
+      showNotification
+    }
+  };
+}
+
+export function RestoreBanner({
+  storageKey,
+  onRestore,
+  onDismiss,
+  className,
+}: {
+  storageKey: string;
+  onRestore: () => void;
+  onDismiss: () => void;
+  className?: string;
+}) {
+  const fullKey = `autosave_${storageKey}`;
+  const [show, setShow] = useState(false);
+  const [savedDate, setSavedDate] = useState<string>("");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(fullKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const hasRealData = Object.keys(parsed).some(k => {
+          if (k === '_lastSaved') return false;
+          const v = parsed[k];
+          if (v === null || v === undefined) return false;
+          if (typeof v === 'string' && v.trim() === '') return false;
+          if (Array.isArray(v) && v.length === 0) return false;
+          return true;
+        });
+        if (hasRealData) {
+          if (parsed._lastSaved) {
+            setSavedDate(new Date(parsed._lastSaved).toLocaleString());
+          }
+          setShow(true);
+        }
+      }
+    } catch (e) {}
+  }, [fullKey]);
+
+  if (!show) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className={cn(
+        "bg-primary/10 border border-primary/20 rounded-lg p-3 mb-4 flex items-center justify-between gap-4",
+        className
+      )}
+      data-testid="restore-banner"
+    >
+      <div className="flex items-center gap-2">
+        <RotateCcw className="h-4 w-4 text-primary" />
+        <span className="text-sm">
+          You have saved progress{savedDate ? ` from ${savedDate}` : ""}.
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => {
+            setShow(false);
+            onDismiss();
+          }}
+          className="text-xs text-muted-foreground hover:text-foreground px-2 py-1"
+          data-testid="button-dismiss-restore"
+        >
+          Start Fresh
+        </button>
+        <button
+          onClick={() => {
+            setShow(false);
+            onRestore();
+          }}
+          className="text-xs bg-primary text-primary-foreground px-3 py-1 rounded-md hover:bg-primary/90"
+          data-testid="button-restore-progress"
+        >
+          Restore
+        </button>
+      </div>
+    </motion.div>
+  );
 }
 
 export function AutoSaveIndicator({
