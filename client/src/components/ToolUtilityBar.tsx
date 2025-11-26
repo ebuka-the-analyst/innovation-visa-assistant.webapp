@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Smartphone, Share2, Save, Lightbulb, Calendar, Download, RotateCcw, FileText, FileType } from "lucide-react";
+import { Smartphone, Share2, Save, Lightbulb, Calendar, Download, RotateCcw, FileText, FileType, Cloud, Check, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { SessionHandoffDialog } from "./SessionHandoffDialog";
 import { ShareSheet } from "./ShareSheet";
@@ -13,6 +13,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+interface AutoSaveStatus {
+  isSaving?: boolean;
+  lastSaved?: string | null;
+  showNotification?: boolean;
+}
+
 interface ToolUtilityBarProps {
   toolId: string;
   toolName: string;
@@ -25,6 +31,7 @@ interface ToolUtilityBarProps {
   onRestore?: () => void;
   getSerializedState?: () => any;
   onGenerateShareableLink?: () => Promise<string>;
+  autoSaveStatus?: AutoSaveStatus;
 }
 
 export function ToolUtilityBar({
@@ -39,6 +46,7 @@ export function ToolUtilityBar({
   onRestore,
   getSerializedState,
   onGenerateShareableLink,
+  autoSaveStatus,
 }: ToolUtilityBarProps) {
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
@@ -173,6 +181,32 @@ export function ToolUtilityBar({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          {autoSaveStatus && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-2" data-testid="autosave-status">
+              {autoSaveStatus.isSaving ? (
+                <>
+                  <RefreshCw className="h-3 w-3 animate-spin text-primary" />
+                  <span>Saving...</span>
+                </>
+              ) : autoSaveStatus.showNotification ? (
+                <>
+                  <Check className="h-3 w-3 text-green-500" />
+                  <span className="text-green-500">Saved</span>
+                </>
+              ) : autoSaveStatus.lastSaved ? (
+                <>
+                  <Cloud className="h-3 w-3" />
+                  <span>Saved {autoSaveStatus.lastSaved}</span>
+                </>
+              ) : (
+                <>
+                  <Cloud className="h-3 w-3" />
+                  <span>Auto-save on</span>
+                </>
+              )}
+            </div>
+          )}
+          
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
