@@ -103,7 +103,10 @@ import {
   ToggleRight,
   Globe,
   LogOut,
-  Lightbulb
+  Lightbulb,
+  Crown,
+  Building,
+  Star
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Link } from "wouter";
@@ -4385,7 +4388,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* Revenue & Subscriptions Section */}
+                {/* Revenue & Subscriptions Section - 5 Unique PhD-Level Pages */}
                 {activeSection.startsWith('revenue') && (
                   <div className="space-y-6">
                     <motion.div
@@ -4394,133 +4397,922 @@ export default function AdminDashboard() {
                       transition={{ duration: 0.5 }}
                       className="space-y-6"
                     >
-                      {/* Revenue KPIs */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <Card className="hover-elevate">
-                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Revenue</CardTitle>
-                            <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
-                              <DollarSign className="h-4 w-4" />
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-3xl font-bold">£4,890</div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="default" className="bg-green-500/10 text-green-500">+23%</Badge>
-                              <span className="text-xs text-muted-foreground">vs. last month</span>
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        <Card className="hover-elevate">
-                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">MRR</CardTitle>
-                            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                              <TrendingUp className="h-4 w-4" />
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-3xl font-bold">£3,250</div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="default" className="bg-green-500/10 text-green-500">+15%</Badge>
-                              <span className="text-xs text-muted-foreground">recurring</span>
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        <Card className="hover-elevate">
-                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Active Subscriptions</CardTitle>
-                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-                              <CreditCard className="h-4 w-4" />
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-3xl font-bold">87</div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="default" className="bg-green-500/10 text-green-500">+8</Badge>
-                              <span className="text-xs text-muted-foreground">this month</span>
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        <Card className="hover-elevate">
-                          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Avg. LTV</CardTitle>
-                            <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
-                              <LineChart className="h-4 w-4" />
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-3xl font-bold">£156</div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="default" className="bg-green-500/10 text-green-500">+12%</Badge>
-                              <span className="text-xs text-muted-foreground">per customer</span>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-
-                      {/* Tier Distribution */}
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Subscription Tier Distribution</CardTitle>
-                            <CardDescription>Current subscriber breakdown by tier</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <ResponsiveContainer width="100%" height={300}>
-                              <RechartsPieChart>
-                                <Pie
-                                  data={[
-                                    { name: 'Free', value: 245, fill: 'hsl(var(--muted))' },
-                                    { name: 'Basic (£29)', value: 42, fill: 'hsl(var(--chart-1))' },
-                                    { name: 'Premium (£49)', value: 28, fill: 'hsl(var(--chart-2))' },
-                                    { name: 'Enterprise (£89)', value: 12, fill: 'hsl(var(--chart-3))' },
-                                    { name: 'Ultimate (£129)', value: 5, fill: 'hsl(var(--chart-4))' },
-                                  ]}
-                                  cx="50%"
-                                  cy="50%"
-                                  innerRadius={60}
-                                  outerRadius={100}
-                                  paddingAngle={5}
-                                  dataKey="value"
-                                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                >
-                                </Pie>
-                                <RechartsTooltip />
-                              </RechartsPieChart>
-                            </ResponsiveContainer>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Revenue by Tier</CardTitle>
-                            <CardDescription>Monthly revenue contribution</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-4">
-                              {[
-                                { tier: 'Free', users: 245, revenue: 0, color: 'bg-muted' },
-                                { tier: 'Basic', users: 42, revenue: 1218, color: 'bg-chart-1' },
-                                { tier: 'Premium', users: 28, revenue: 1372, color: 'bg-chart-2' },
-                                { tier: 'Enterprise', users: 12, revenue: 1068, color: 'bg-chart-3' },
-                                { tier: 'Ultimate', users: 5, revenue: 645, color: 'bg-chart-4' },
-                              ].map((item) => (
-                                <div key={item.tier} className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <div className={`h-3 w-3 rounded-full ${item.color}`} />
-                                    <span className="font-medium">{item.tier}</span>
-                                    <Badge variant="secondary">{item.users} users</Badge>
+                      {/* 1. REVENUE DASHBOARD - Executive Overview with Real-Time Metrics */}
+                      {activeSection === 'revenue-overview' && (
+                        <>
+                          {/* Real-Time Revenue Ticker */}
+                          <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-teal-500/10 border-green-500/20">
+                            <CardContent className="py-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                  <motion.div
+                                    className="p-3 rounded-xl bg-green-500 text-white"
+                                    animate={{ scale: [1, 1.05, 1] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                  >
+                                    <DollarSign className="h-6 w-6" />
+                                  </motion.div>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Live Revenue Today</p>
+                                    <p className="text-3xl font-bold text-green-500">£347.00</p>
                                   </div>
-                                  <span className="font-bold">£{item.revenue.toLocaleString()}/mo</span>
                                 </div>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
+                                <div className="flex items-center gap-6">
+                                  <div className="text-right">
+                                    <p className="text-sm text-muted-foreground">This Week</p>
+                                    <p className="text-xl font-bold">£1,892</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-sm text-muted-foreground">This Month</p>
+                                    <p className="text-xl font-bold">£4,890</p>
+                                  </div>
+                                  <Badge className="bg-green-500 text-white px-4 py-2">
+                                    <TrendingUp className="h-4 w-4 mr-1" />
+                                    +23% MTD
+                                  </Badge>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Revenue KPIs Grid */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                              <Card className="hover-elevate border-l-4 border-l-green-500">
+                                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
+                                  <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
+                                    <DollarSign className="h-4 w-4" />
+                                  </div>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="text-3xl font-bold">£24,560</div>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Badge className="bg-green-500/10 text-green-500">+34%</Badge>
+                                    <span className="text-xs text-muted-foreground">all-time</span>
+                                  </div>
+                                  <Progress value={78} className="h-1 mt-3" />
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                              <Card className="hover-elevate border-l-4 border-l-blue-500">
+                                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                  <CardTitle className="text-sm font-medium text-muted-foreground">MRR</CardTitle>
+                                  <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                                    <TrendingUp className="h-4 w-4" />
+                                  </div>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="text-3xl font-bold">£3,250</div>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Badge className="bg-green-500/10 text-green-500">+15%</Badge>
+                                    <span className="text-xs text-muted-foreground">vs. last month</span>
+                                  </div>
+                                  <Progress value={65} className="h-1 mt-3" />
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                              <Card className="hover-elevate border-l-4 border-l-purple-500">
+                                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                  <CardTitle className="text-sm font-medium text-muted-foreground">ARR</CardTitle>
+                                  <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
+                                    <Calendar className="h-4 w-4" />
+                                  </div>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="text-3xl font-bold">£39,000</div>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Badge className="bg-green-500/10 text-green-500">+28%</Badge>
+                                    <span className="text-xs text-muted-foreground">projected</span>
+                                  </div>
+                                  <Progress value={82} className="h-1 mt-3" />
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+                              <Card className="hover-elevate border-l-4 border-l-amber-500">
+                                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                  <CardTitle className="text-sm font-medium text-muted-foreground">Avg. Order Value</CardTitle>
+                                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
+                                    <Target className="h-4 w-4" />
+                                  </div>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="text-3xl font-bold">£52.40</div>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Badge className="bg-green-500/10 text-green-500">+8%</Badge>
+                                    <span className="text-xs text-muted-foreground">per transaction</span>
+                                  </div>
+                                  <Progress value={54} className="h-1 mt-3" />
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+                          </div>
+
+                          {/* Revenue Charts */}
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <Card className="lg:col-span-2">
+                              <CardHeader>
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <CardTitle>Revenue Trend (12 Months)</CardTitle>
+                                    <CardDescription>Monthly recurring revenue growth trajectory</CardDescription>
+                                  </div>
+                                  <Badge variant="outline" className="text-green-500 border-green-500">
+                                    <TrendingUp className="h-3 w-3 mr-1" />
+                                    Healthy Growth
+                                  </Badge>
+                                </div>
+                              </CardHeader>
+                              <CardContent>
+                                <ResponsiveContainer width="100%" height={300}>
+                                  <AreaChart data={[
+                                    { month: 'Jan', revenue: 1200, target: 1000 },
+                                    { month: 'Feb', revenue: 1450, target: 1200 },
+                                    { month: 'Mar', revenue: 1800, target: 1500 },
+                                    { month: 'Apr', revenue: 2100, target: 1800 },
+                                    { month: 'May', revenue: 2400, target: 2100 },
+                                    { month: 'Jun', revenue: 2850, target: 2400 },
+                                    { month: 'Jul', revenue: 3100, target: 2700 },
+                                    { month: 'Aug', revenue: 3400, target: 3000 },
+                                    { month: 'Sep', revenue: 3750, target: 3300 },
+                                    { month: 'Oct', revenue: 4200, target: 3600 },
+                                    { month: 'Nov', revenue: 4890, target: 4000 },
+                                    { month: 'Dec', revenue: 5500, target: 4500 },
+                                  ]}>
+                                    <defs>
+                                      <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                                      </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                    <XAxis dataKey="month" stroke="hsl(var(--foreground))" fontSize={12} />
+                                    <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickFormatter={(v) => `£${v}`} />
+                                    <RechartsTooltip
+                                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                                      formatter={(value: number) => [`£${value}`, '']}
+                                    />
+                                    <Area type="monotone" dataKey="revenue" stroke="#22c55e" fill="url(#revenueGradient)" strokeWidth={3} name="Revenue" />
+                                    <Line type="monotone" dataKey="target" stroke="#94a3b8" strokeDasharray="5 5" strokeWidth={2} name="Target" dot={false} />
+                                  </AreaChart>
+                                </ResponsiveContainer>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>Revenue Sources</CardTitle>
+                                <CardDescription>Breakdown by payment type</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-4">
+                                  {[
+                                    { source: 'Subscriptions', amount: 3250, percent: 66, color: 'bg-green-500' },
+                                    { source: 'One-time', amount: 890, percent: 18, color: 'bg-blue-500' },
+                                    { source: 'Upgrades', amount: 540, percent: 11, color: 'bg-purple-500' },
+                                    { source: 'Add-ons', amount: 210, percent: 5, color: 'bg-amber-500' },
+                                  ].map((item, index) => (
+                                    <motion.div
+                                      key={item.source}
+                                      initial={{ opacity: 0, x: -20 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="space-y-2"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                          <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                                          <span className="font-medium">{item.source}</span>
+                                        </div>
+                                        <span className="font-bold">£{item.amount}</span>
+                                      </div>
+                                      <div className="relative h-2 rounded-full bg-muted overflow-hidden">
+                                        <motion.div
+                                          className={`absolute inset-y-0 left-0 rounded-full ${item.color}`}
+                                          initial={{ width: 0 }}
+                                          animate={{ width: `${item.percent}%` }}
+                                          transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
+                                        />
+                                      </div>
+                                      <p className="text-xs text-muted-foreground text-right">{item.percent}% of total</p>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Recent Transactions */}
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle>Recent Transactions</CardTitle>
+                                  <CardDescription>Latest payment activities</CardDescription>
+                                </div>
+                                <Button variant="outline" size="sm">
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Export
+                                </Button>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-3">
+                                {[
+                                  { user: 'Nnaemeka Umeh', email: 'emexy8088@yahoo.com', amount: 49, tier: 'Premium', time: '2 hours ago', status: 'success' },
+                                  { user: 'Sarah Johnson', email: 'sarah.j@email.com', amount: 89, tier: 'Enterprise', time: '5 hours ago', status: 'success' },
+                                  { user: 'Michael Chen', email: 'm.chen@startup.io', amount: 29, tier: 'Basic', time: '1 day ago', status: 'success' },
+                                  { user: 'Emma Williams', email: 'emma.w@company.uk', amount: 129, tier: 'Ultimate', time: '2 days ago', status: 'success' },
+                                ].map((tx, index) => (
+                                  <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <Avatar className="h-10 w-10">
+                                        <AvatarFallback className="bg-primary/10 text-primary">
+                                          {tx.user.split(' ').map(n => n[0]).join('')}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <p className="font-medium">{tx.user}</p>
+                                        <p className="text-xs text-muted-foreground">{tx.email}</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                      <Badge variant="outline">{tx.tier}</Badge>
+                                      <span className="font-bold text-green-500">+£{tx.amount}</span>
+                                      <span className="text-xs text-muted-foreground">{tx.time}</span>
+                                      <CheckCircle className="h-4 w-4 text-green-500" />
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+
+                      {/* 2. MRR ANALYTICS - Deep Dive Monthly Recurring Revenue */}
+                      {activeSection === 'revenue-mrr' && (
+                        <>
+                          {/* MRR Summary Header */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            {[
+                              { label: 'Current MRR', value: '£3,250', change: '+15%', icon: DollarSign, color: 'green' },
+                              { label: 'New MRR', value: '£420', change: '+8 subs', icon: Plus, color: 'blue' },
+                              { label: 'Expansion MRR', value: '£180', change: '5 upgrades', icon: TrendingUp, color: 'purple' },
+                              { label: 'Churned MRR', value: '£87', change: '-2 subs', icon: TrendingDown, color: 'red' },
+                              { label: 'Net New MRR', value: '£513', change: '+18%', icon: Zap, color: 'amber' },
+                            ].map((metric, index) => (
+                              <motion.div
+                                key={metric.label}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                              >
+                                <Card className={`hover-elevate border-t-4 border-t-${metric.color}-500`}>
+                                  <CardContent className="pt-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="text-xs text-muted-foreground">{metric.label}</span>
+                                      <metric.icon className={`h-4 w-4 text-${metric.color}-500`} />
+                                    </div>
+                                    <p className="text-2xl font-bold">{metric.value}</p>
+                                    <Badge className={`mt-2 ${metric.color === 'red' ? 'bg-red-500/10 text-red-500' : `bg-${metric.color}-500/10 text-${metric.color}-500`}`}>
+                                      {metric.change}
+                                    </Badge>
+                                  </CardContent>
+                                </Card>
+                              </motion.div>
+                            ))}
+                          </div>
+
+                          {/* MRR Trend Chart */}
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle>MRR Growth Analysis</CardTitle>
+                                  <CardDescription>Monthly breakdown with movement analysis</CardDescription>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                                    <span className="text-xs">New</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-blue-500" />
+                                    <span className="text-xs">Expansion</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                                    <span className="text-xs">Churned</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <ResponsiveContainer width="100%" height={350}>
+                                <RechartsBarChart data={[
+                                  { month: 'Jul', new: 320, expansion: 80, churned: -45, net: 355 },
+                                  { month: 'Aug', new: 380, expansion: 120, churned: -60, net: 440 },
+                                  { month: 'Sep', new: 290, expansion: 95, churned: -35, net: 350 },
+                                  { month: 'Oct', new: 410, expansion: 150, churned: -70, net: 490 },
+                                  { month: 'Nov', new: 420, expansion: 180, churned: -87, net: 513 },
+                                ]}>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                  <XAxis dataKey="month" stroke="hsl(var(--foreground))" fontSize={12} />
+                                  <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickFormatter={(v) => `£${Math.abs(v)}`} />
+                                  <RechartsTooltip
+                                    contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                                    formatter={(value: number) => [`£${Math.abs(value)}`, '']}
+                                  />
+                                  <Bar dataKey="new" fill="#22c55e" name="New MRR" radius={[4, 4, 0, 0]} />
+                                  <Bar dataKey="expansion" fill="#3b82f6" name="Expansion" radius={[4, 4, 0, 0]} />
+                                  <Bar dataKey="churned" fill="#ef4444" name="Churned" radius={[4, 4, 0, 0]} />
+                                </RechartsBarChart>
+                              </ResponsiveContainer>
+                            </CardContent>
+                          </Card>
+
+                          {/* MRR by Tier & Cohort */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>MRR by Subscription Tier</CardTitle>
+                                <CardDescription>Revenue contribution per tier</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-4">
+                                  {[
+                                    { tier: 'Ultimate (£129)', mrr: 645, users: 5, percent: 20, color: '#8b5cf6' },
+                                    { tier: 'Enterprise (£89)', mrr: 1068, users: 12, percent: 33, color: '#f59e0b' },
+                                    { tier: 'Premium (£49)', mrr: 1372, users: 28, percent: 42, color: '#3b82f6' },
+                                    { tier: 'Basic (£29)', mrr: 165, users: 42, percent: 5, color: '#22c55e' },
+                                  ].map((item, index) => (
+                                    <motion.div
+                                      key={item.tier}
+                                      initial={{ opacity: 0, x: -20 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="space-y-2"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                          <span className="font-medium">{item.tier}</span>
+                                          <Badge variant="secondary">{item.users} users</Badge>
+                                        </div>
+                                        <span className="font-bold">£{item.mrr}/mo</span>
+                                      </div>
+                                      <div className="relative h-3 rounded-full bg-muted overflow-hidden">
+                                        <motion.div
+                                          className="absolute inset-y-0 left-0 rounded-full"
+                                          style={{ backgroundColor: item.color }}
+                                          initial={{ width: 0 }}
+                                          animate={{ width: `${item.percent}%` }}
+                                          transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
+                                        />
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>MRR Cohort Analysis</CardTitle>
+                                <CardDescription>Revenue retention by signup month</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-3">
+                                  {[
+                                    { cohort: 'Nov 2024', initial: 420, current: 420, retention: 100, status: 'new' },
+                                    { cohort: 'Oct 2024', initial: 380, current: 365, retention: 96, status: 'healthy' },
+                                    { cohort: 'Sep 2024', initial: 290, current: 275, retention: 95, status: 'healthy' },
+                                    { cohort: 'Aug 2024', initial: 350, current: 310, retention: 89, status: 'watch' },
+                                    { cohort: 'Jul 2024', initial: 420, current: 350, retention: 83, status: 'concern' },
+                                  ].map((cohort, index) => (
+                                    <motion.div
+                                      key={cohort.cohort}
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: index * 0.08 }}
+                                      className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
+                                    >
+                                      <div>
+                                        <p className="font-medium">{cohort.cohort}</p>
+                                        <p className="text-xs text-muted-foreground">£{cohort.initial} → £{cohort.current}</p>
+                                      </div>
+                                      <div className="flex items-center gap-3">
+                                        <Badge className={
+                                          cohort.status === 'new' ? 'bg-blue-500' :
+                                          cohort.status === 'healthy' ? 'bg-green-500' :
+                                          cohort.status === 'watch' ? 'bg-amber-500' : 'bg-red-500'
+                                        }>
+                                          {cohort.retention}% retained
+                                        </Badge>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </>
+                      )}
+
+                      {/* 3. SUBSCRIPTIONS - Active Subscription Management */}
+                      {activeSection === 'revenue-subscriptions' && (
+                        <>
+                          {/* Subscription Overview Stats */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <Card className="hover-elevate bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Active Subscriptions</p>
+                                    <p className="text-3xl font-bold">87</p>
+                                    <Badge className="mt-2 bg-green-500/10 text-green-500">+8 this month</Badge>
+                                  </div>
+                                  <CreditCard className="h-12 w-12 text-blue-500 opacity-50" />
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="hover-elevate bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Renewal Rate</p>
+                                    <p className="text-3xl font-bold">94.2%</p>
+                                    <Badge className="mt-2 bg-green-500/10 text-green-500">Excellent</Badge>
+                                  </div>
+                                  <RefreshCw className="h-12 w-12 text-green-500 opacity-50" />
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="hover-elevate bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Due for Renewal</p>
+                                    <p className="text-3xl font-bold">12</p>
+                                    <Badge className="mt-2 bg-amber-500/10 text-amber-500">Next 7 days</Badge>
+                                  </div>
+                                  <Clock className="h-12 w-12 text-amber-500 opacity-50" />
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="hover-elevate bg-gradient-to-br from-red-500/10 to-red-500/5 border-red-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">At Risk</p>
+                                    <p className="text-3xl font-bold">3</p>
+                                    <Badge className="mt-2 bg-red-500/10 text-red-500">Needs attention</Badge>
+                                  </div>
+                                  <AlertTriangle className="h-12 w-12 text-red-500 opacity-50" />
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Active Subscriptions List */}
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle>Active Subscriptions</CardTitle>
+                                  <CardDescription>All current paying subscribers</CardDescription>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline" size="sm">
+                                    <Filter className="h-4 w-4 mr-2" />
+                                    Filter
+                                  </Button>
+                                  <Button variant="outline" size="sm">
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Export
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <ScrollArea className="h-[400px]">
+                                <div className="space-y-3">
+                                  {[
+                                    { user: 'Nnaemeka Umeh', email: 'emexy8088@yahoo.com', tier: 'Premium', amount: 49, status: 'active', nextBilling: 'Dec 15, 2024', since: 'Oct 2024' },
+                                    { user: 'Sarah Johnson', email: 'sarah.j@email.com', tier: 'Enterprise', amount: 89, status: 'active', nextBilling: 'Dec 20, 2024', since: 'Sep 2024' },
+                                    { user: 'Michael Chen', email: 'm.chen@startup.io', tier: 'Basic', amount: 29, status: 'active', nextBilling: 'Dec 1, 2024', since: 'Nov 2024' },
+                                    { user: 'Emma Williams', email: 'emma.w@company.uk', tier: 'Ultimate', amount: 129, status: 'active', nextBilling: 'Jan 5, 2025', since: 'Aug 2024' },
+                                    { user: 'James Brown', email: 'jbrown@tech.co', tier: 'Premium', amount: 49, status: 'renewing', nextBilling: 'Nov 28, 2024', since: 'Jul 2024' },
+                                    { user: 'Lisa Anderson', email: 'lisa.a@biz.uk', tier: 'Enterprise', amount: 89, status: 'at_risk', nextBilling: 'Nov 30, 2024', since: 'Jun 2024' },
+                                  ].map((sub, index) => (
+                                    <motion.div
+                                      key={index}
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: index * 0.05 }}
+                                      className={`flex items-center justify-between p-4 rounded-lg border ${
+                                        sub.status === 'at_risk' ? 'border-red-500/50 bg-red-500/5' :
+                                        sub.status === 'renewing' ? 'border-amber-500/50 bg-amber-500/5' :
+                                        'border-border/50'
+                                      } hover-elevate`}
+                                    >
+                                      <div className="flex items-center gap-4">
+                                        <Avatar>
+                                          <AvatarFallback className="bg-primary/10">
+                                            {sub.user.split(' ').map(n => n[0]).join('')}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                          <p className="font-medium">{sub.user}</p>
+                                          <p className="text-xs text-muted-foreground">{sub.email}</p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-6">
+                                        <div className="text-center">
+                                          <Badge className={
+                                            sub.tier === 'Ultimate' ? 'bg-purple-500' :
+                                            sub.tier === 'Enterprise' ? 'bg-amber-500' :
+                                            sub.tier === 'Premium' ? 'bg-blue-500' : 'bg-green-500'
+                                          }>{sub.tier}</Badge>
+                                          <p className="text-xs text-muted-foreground mt-1">Since {sub.since}</p>
+                                        </div>
+                                        <div className="text-center">
+                                          <p className="font-bold">£{sub.amount}/mo</p>
+                                          <p className="text-xs text-muted-foreground">Next: {sub.nextBilling}</p>
+                                        </div>
+                                        <Badge variant="outline" className={
+                                          sub.status === 'at_risk' ? 'text-red-500 border-red-500' :
+                                          sub.status === 'renewing' ? 'text-amber-500 border-amber-500' :
+                                          'text-green-500 border-green-500'
+                                        }>
+                                          {sub.status === 'at_risk' ? 'At Risk' : sub.status === 'renewing' ? 'Renewing Soon' : 'Active'}
+                                        </Badge>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </ScrollArea>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+
+                      {/* 4. TIER DISTRIBUTION - Visual Tier Analysis */}
+                      {activeSection === 'revenue-tiers' && (
+                        <>
+                          {/* Tier Overview Cards */}
+                          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            {[
+                              { tier: 'Free', price: 0, users: 245, color: '#94a3b8', icon: Users },
+                              { tier: 'Basic', price: 29, users: 42, color: '#22c55e', icon: Zap },
+                              { tier: 'Premium', price: 49, users: 28, color: '#3b82f6', icon: Star },
+                              { tier: 'Enterprise', price: 89, users: 12, color: '#f59e0b', icon: Building },
+                              { tier: 'Ultimate', price: 129, users: 5, color: '#8b5cf6', icon: Crown },
+                            ].map((tier, index) => (
+                              <motion.div
+                                key={tier.tier}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: index * 0.1 }}
+                              >
+                                <Card className="hover-elevate text-center" style={{ borderTopColor: tier.color, borderTopWidth: '4px' }}>
+                                  <CardContent className="pt-6">
+                                    <div className="p-3 rounded-full mx-auto w-fit" style={{ backgroundColor: `${tier.color}20` }}>
+                                      <tier.icon className="h-6 w-6" style={{ color: tier.color }} />
+                                    </div>
+                                    <p className="font-bold text-lg mt-3">{tier.tier}</p>
+                                    <p className="text-2xl font-bold mt-1" style={{ color: tier.color }}>
+                                      {tier.price === 0 ? 'Free' : `£${tier.price}`}
+                                    </p>
+                                    <Badge className="mt-2" style={{ backgroundColor: `${tier.color}20`, color: tier.color }}>
+                                      {tier.users} users
+                                    </Badge>
+                                  </CardContent>
+                                </Card>
+                              </motion.div>
+                            ))}
+                          </div>
+
+                          {/* Tier Distribution Charts */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>User Distribution by Tier</CardTitle>
+                                <CardDescription>Percentage breakdown of subscribers</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <ResponsiveContainer width="100%" height={300}>
+                                  <RechartsPieChart>
+                                    <Pie
+                                      data={[
+                                        { name: 'Free', value: 245, fill: '#94a3b8' },
+                                        { name: 'Basic', value: 42, fill: '#22c55e' },
+                                        { name: 'Premium', value: 28, fill: '#3b82f6' },
+                                        { name: 'Enterprise', value: 12, fill: '#f59e0b' },
+                                        { name: 'Ultimate', value: 5, fill: '#8b5cf6' },
+                                      ]}
+                                      cx="50%"
+                                      cy="50%"
+                                      innerRadius={70}
+                                      outerRadius={110}
+                                      paddingAngle={3}
+                                      dataKey="value"
+                                    >
+                                    </Pie>
+                                    <RechartsTooltip formatter={(value: number, name: string) => [`${value} users`, name]} />
+                                  </RechartsPieChart>
+                                </ResponsiveContainer>
+                                <div className="flex flex-wrap justify-center gap-4 mt-4">
+                                  {[
+                                    { name: 'Free', color: '#94a3b8' },
+                                    { name: 'Basic', color: '#22c55e' },
+                                    { name: 'Premium', color: '#3b82f6' },
+                                    { name: 'Enterprise', color: '#f59e0b' },
+                                    { name: 'Ultimate', color: '#8b5cf6' },
+                                  ].map(item => (
+                                    <div key={item.name} className="flex items-center gap-2">
+                                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                      <span className="text-sm">{item.name}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>Revenue by Tier</CardTitle>
+                                <CardDescription>Monthly revenue contribution</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <ResponsiveContainer width="100%" height={300}>
+                                  <RechartsBarChart data={[
+                                    { tier: 'Free', revenue: 0, users: 245 },
+                                    { tier: 'Basic', revenue: 1218, users: 42 },
+                                    { tier: 'Premium', revenue: 1372, users: 28 },
+                                    { tier: 'Enterprise', revenue: 1068, users: 12 },
+                                    { tier: 'Ultimate', revenue: 645, users: 5 },
+                                  ]} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                    <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} tickFormatter={(v) => `£${v}`} />
+                                    <YAxis type="category" dataKey="tier" stroke="hsl(var(--foreground))" fontSize={12} width={80} />
+                                    <RechartsTooltip
+                                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                                      formatter={(value: number) => [`£${value}/mo`, 'Revenue']}
+                                    />
+                                    <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
+                                      {[
+                                        { fill: '#94a3b8' },
+                                        { fill: '#22c55e' },
+                                        { fill: '#3b82f6' },
+                                        { fill: '#f59e0b' },
+                                        { fill: '#8b5cf6' },
+                                      ].map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                                      ))}
+                                    </Bar>
+                                  </RechartsBarChart>
+                                </ResponsiveContainer>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Tier Conversion Funnel */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Tier Upgrade Funnel</CardTitle>
+                              <CardDescription>User progression through subscription tiers</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex items-center justify-between gap-4">
+                                {[
+                                  { tier: 'Free', users: 245, converts: 42, rate: 17.1 },
+                                  { tier: 'Basic', users: 42, converts: 28, rate: 66.7 },
+                                  { tier: 'Premium', users: 28, converts: 12, rate: 42.9 },
+                                  { tier: 'Enterprise', users: 12, converts: 5, rate: 41.7 },
+                                  { tier: 'Ultimate', users: 5, converts: 0, rate: 0 },
+                                ].map((stage, index, arr) => (
+                                  <div key={stage.tier} className="flex-1 relative">
+                                    <motion.div
+                                      initial={{ opacity: 0, y: 20 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      className="text-center p-4 rounded-lg bg-muted/50"
+                                    >
+                                      <p className="text-xs text-muted-foreground">{stage.tier}</p>
+                                      <p className="text-2xl font-bold mt-1">{stage.users}</p>
+                                      {index < arr.length - 1 && (
+                                        <Badge className="mt-2 bg-green-500/10 text-green-500">
+                                          {stage.rate}% upgrade
+                                        </Badge>
+                                      )}
+                                    </motion.div>
+                                    {index < arr.length - 1 && (
+                                      <ArrowRight className="absolute -right-2 top-1/2 -translate-y-1/2 text-muted-foreground z-10" />
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+
+                      {/* 5. LTV ANALYSIS - Customer Lifetime Value */}
+                      {activeSection === 'revenue-ltv' && (
+                        <>
+                          {/* LTV Summary */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <Card className="hover-elevate border-l-4 border-l-purple-500">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Average LTV</p>
+                                    <p className="text-3xl font-bold">£156</p>
+                                    <Badge className="mt-2 bg-green-500/10 text-green-500">+12% YoY</Badge>
+                                  </div>
+                                  <LineChart className="h-10 w-10 text-purple-500 opacity-50" />
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="hover-elevate border-l-4 border-l-green-500">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">LTV:CAC Ratio</p>
+                                    <p className="text-3xl font-bold">4.2:1</p>
+                                    <Badge className="mt-2 bg-green-500/10 text-green-500">Healthy</Badge>
+                                  </div>
+                                  <Target className="h-10 w-10 text-green-500 opacity-50" />
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="hover-elevate border-l-4 border-l-blue-500">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Avg. Customer Lifespan</p>
+                                    <p className="text-3xl font-bold">8.2 mo</p>
+                                    <Badge className="mt-2 bg-blue-500/10 text-blue-500">+1.3 mo</Badge>
+                                  </div>
+                                  <Clock className="h-10 w-10 text-blue-500 opacity-50" />
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="hover-elevate border-l-4 border-l-amber-500">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">CAC Payback</p>
+                                    <p className="text-3xl font-bold">2.1 mo</p>
+                                    <Badge className="mt-2 bg-green-500/10 text-green-500">Fast</Badge>
+                                  </div>
+                                  <Zap className="h-10 w-10 text-amber-500 opacity-50" />
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* LTV by Tier */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Lifetime Value by Subscription Tier</CardTitle>
+                              <CardDescription>Projected revenue over customer lifetime</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                {[
+                                  { tier: 'Basic', ltv: 87, lifespan: 3, color: '#22c55e', arpu: 29 },
+                                  { tier: 'Premium', ltv: 294, lifespan: 6, color: '#3b82f6', arpu: 49 },
+                                  { tier: 'Enterprise', ltv: 712, lifespan: 8, color: '#f59e0b', arpu: 89 },
+                                  { tier: 'Ultimate', ltv: 1548, lifespan: 12, color: '#8b5cf6', arpu: 129 },
+                                ].map((item, index) => (
+                                  <motion.div
+                                    key={item.tier}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                  >
+                                    <Card className="text-center" style={{ borderColor: item.color, borderWidth: '2px' }}>
+                                      <CardContent className="pt-6">
+                                        <p className="font-medium" style={{ color: item.color }}>{item.tier}</p>
+                                        <p className="text-4xl font-bold mt-2">£{item.ltv}</p>
+                                        <p className="text-sm text-muted-foreground mt-1">Lifetime Value</p>
+                                        <Separator className="my-4" />
+                                        <div className="space-y-2 text-sm">
+                                          <div className="flex justify-between">
+                                            <span className="text-muted-foreground">ARPU</span>
+                                            <span className="font-medium">£{item.arpu}/mo</span>
+                                          </div>
+                                          <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Avg. Lifespan</span>
+                                            <span className="font-medium">{item.lifespan} months</span>
+                                          </div>
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* LTV Trend & Cohort */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>LTV Trend Over Time</CardTitle>
+                                <CardDescription>Average customer lifetime value progression</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <ResponsiveContainer width="100%" height={300}>
+                                  <AreaChart data={[
+                                    { month: 'Jun', ltv: 98 },
+                                    { month: 'Jul', ltv: 112 },
+                                    { month: 'Aug', ltv: 125 },
+                                    { month: 'Sep', ltv: 138 },
+                                    { month: 'Oct', ltv: 148 },
+                                    { month: 'Nov', ltv: 156 },
+                                  ]}>
+                                    <defs>
+                                      <linearGradient id="ltvGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                                      </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                    <XAxis dataKey="month" stroke="hsl(var(--foreground))" fontSize={12} />
+                                    <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickFormatter={(v) => `£${v}`} />
+                                    <RechartsTooltip
+                                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                                      formatter={(value: number) => [`£${value}`, 'LTV']}
+                                    />
+                                    <Area type="monotone" dataKey="ltv" stroke="#8b5cf6" fill="url(#ltvGradient)" strokeWidth={3} />
+                                  </AreaChart>
+                                </ResponsiveContainer>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>LTV:CAC Analysis</CardTitle>
+                                <CardDescription>Return on customer acquisition investment</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-6">
+                                  <div className="text-center p-6 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
+                                    <p className="text-sm text-muted-foreground">LTV:CAC Ratio</p>
+                                    <p className="text-5xl font-bold text-green-500 mt-2">4.2:1</p>
+                                    <p className="text-sm text-muted-foreground mt-2">
+                                      Industry benchmark: 3:1 (You're outperforming!)
+                                    </p>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="text-center p-4 rounded-lg bg-muted/30">
+                                      <p className="text-xs text-muted-foreground">Avg. LTV</p>
+                                      <p className="text-2xl font-bold">£156</p>
+                                    </div>
+                                    <div className="text-center p-4 rounded-lg bg-muted/30">
+                                      <p className="text-xs text-muted-foreground">Avg. CAC</p>
+                                      <p className="text-2xl font-bold">£37</p>
+                                    </div>
+                                  </div>
+                                  <Card className="bg-blue-500/5 border-blue-500/20">
+                                    <CardContent className="py-3">
+                                      <div className="flex items-center gap-2">
+                                        <Lightbulb className="h-4 w-4 text-blue-500" />
+                                        <span className="text-sm text-blue-500 font-medium">Insight</span>
+                                      </div>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        Your healthy LTV:CAC ratio indicates strong unit economics. Consider increasing marketing spend.
+                                      </p>
+                                    </CardContent>
+                                  </Card>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </>
+                      )}
                     </motion.div>
                   </div>
                 )}
