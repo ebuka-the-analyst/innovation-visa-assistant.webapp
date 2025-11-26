@@ -709,6 +709,372 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Credit System Routes
+  const TIER_CREDITS: Record<string, number | 'unlimited'> = {
+    free: 0,
+    basic: 1,
+    premium: 3,
+    enterprise: 6,
+    ultimate: 'unlimited',
+  };
+
+  const ADDON_PRICES = {
+    single_credit: { amount: 3900, credits: 1, name: "Single Credit" },
+    triple_pack: { amount: 9900, credits: 3, name: "Triple Credit Pack" },
+    partner_bundle: { amount: 5900, credits: 1, name: "Partner Bundle" },
+    family_pack: { amount: 14900, credits: 4, name: "Family Pack" },
+    ultimate_assurance: { amount: 9900, credits: 0, name: "Ultimate Assurance (Annual)" },
+  };
+
+  app.get("/api/credits/balance", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      const tierCredits = TIER_CREDITS[user.subscriptionTier || 'free'];
+      const hasUnlimited = user.subscriptionTier === 'ultimate' || user.hasUltimateAssurance;
+      
+      res.json({
+        planCredits: user.planCredits || 0,
+        bonusCredits: user.bonusCredits || 0,
+        totalCredits: (user.planCredits || 0) + (user.bonusCredits || 0),
+        creditsUsed: user.creditsUsed || 0,
+        hasUnlimitedCredits: hasUnlimited,
+        tierCreditLimit: tierCredits,
+        hasUltimateAssurance: user.hasUltimateAssurance || false,
+        lastCreditRefresh: user.lastCreditRefresh,
+      });
+    } catch (error) {
+      console.error("Get credit balance error:", error);
+      res.status(500).json({ error: "Failed to get credit balance" });
+    }
+  });
+
+  app.post("/api/credits/consume", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { creditsToConsume = 1, referenceId, referenceType, description } = req.body;
+      
+      const hasUnlimited = user.subscriptionTier === 'ultimate' || user.hasUltimateAssurance;
+      
+      // Ultimate users have unlimited credits
+      if (hasUnlimited) {
+        // Log the usage but don't deduct credits
+        await db.execute(sql`
+          INSERT INTO credit_transactions (id, user_id, type, credits_change, credits_type, balance_after, reference_id, reference_type, description)
+          VALUES (gen_random_uuid(), ${user.id}, 'unlimited_use', 0, 'unlimited', 0, ${referenceId || null}, ${referenceType || 'business_plan'}, ${description || 'Business plan generation (unlimited)'})
+        `);
+        
+        return res.json({ 
+          success: true, 
+          message: "Unlimited credits - no deduction needed",
+          remainingCredits: 'unlimited',
+          wasUnlimited: true,
+        });
+      }
+      
+      const totalCredits = (user.planCredits || 0) + (user.bonusCredits || 0);
+      
+      if (totalCredits < creditsToConsume) {
+        return res.status(402).json({ 
+          error: "Insufficient credits",
+          required: creditsToConsume,
+          available: totalCredits,
+          suggestUpgrade: true,
+        });
+      }
+      
+      // Deduct from bonus credits first, then plan credits
+      let remainingToDeduct = creditsToConsume;
+      let newBonusCredits = user.bonusCredits || 0;
+      let newPlanCredits = user.planCredits || 0;
+      
+      if (newBonusCredits >= remainingToDeduct) {
+        newBonusCredits -= remainingToDeduct;
+        remainingToDeduct = 0;
+      } else {
+        remainingToDeduct -= newBonusCredits;
+        newBonusCredits = 0;
+        newPlanCredits -= remainingToDeduct;
+      }
+      
+      // Update user credits
+      await db.update(users)
+        .set({
+          planCredits: newPlanCredits,
+          bonusCredits: newBonusCredits,
+          creditsUsed: sql`${users.creditsUsed} + ${creditsToConsume}`,
+        })
+        .where(eq(users.id, user.id));
+      
+      // Log the transaction
+      const newBalance = newPlanCredits + newBonusCredits;
+      await db.execute(sql`
+        INSERT INTO credit_transactions (id, user_id, type, credits_change, credits_type, balance_after, reference_id, reference_type, description)
+        VALUES (gen_random_uuid(), ${user.id}, 'consumption', ${-creditsToConsume}, 'mixed', ${newBalance}, ${referenceId || null}, ${referenceType || 'business_plan'}, ${description || 'Business plan generation'})
+      `);
+      
+      res.json({
+        success: true,
+        creditsConsumed: creditsToConsume,
+        remainingCredits: newBalance,
+        planCredits: newPlanCredits,
+        bonusCredits: newBonusCredits,
+      });
+    } catch (error) {
+      console.error("Consume credits error:", error);
+      res.status(500).json({ error: "Failed to consume credits" });
+    }
+  });
+
+  app.get("/api/credits/transactions", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      const transactions = await db.execute(sql`
+        SELECT * FROM credit_transactions 
+        WHERE user_id = ${user.id} 
+        ORDER BY created_at DESC 
+        LIMIT 50
+      `);
+      
+      res.json(transactions.rows);
+    } catch (error) {
+      console.error("Get credit transactions error:", error);
+      res.status(500).json({ error: "Failed to get credit transactions" });
+    }
+  });
+
+  app.post("/api/credits/purchase-addon", isAuthenticated, async (req, res) => {
+    try {
+      const { addonType } = req.body;
+      const user = req.user as any;
+      
+      const addon = ADDON_PRICES[addonType as keyof typeof ADDON_PRICES];
+      if (!addon) {
+        return res.status(400).json({ error: "Invalid addon type" });
+      }
+
+      // Get base URL
+      const getBaseUrl = () => {
+        if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
+        const origin = req.get('origin') || req.get('referer');
+        if (origin) {
+          try {
+            const url = new URL(origin);
+            return `${url.protocol}//${url.host}`;
+          } catch (e) {}
+        }
+        if (process.env.REPLIT_DEPLOYMENT === '1' && process.env.REPLIT_DOMAINS) {
+          return `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+        }
+        if (process.env.REPLIT_DEV_DOMAIN) {
+          return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+        }
+        return 'http://localhost:5000';
+      };
+      const baseUrl = getBaseUrl();
+
+      const stripe = await getUncachableStripeClient();
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "gbp",
+              product_data: {
+                name: `UK Innovator Founder Visa - ${addon.name}`,
+                description: addonType === 'ultimate_assurance' 
+                  ? 'Unlimited business plan generations for 1 year'
+                  : `${addon.credits} additional business plan credit${addon.credits > 1 ? 's' : ''}`,
+              },
+              unit_amount: addon.amount,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: `${baseUrl}/tools-hub?addon_purchased=true&type=${addonType}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/pricing`,
+        metadata: {
+          addonType,
+          creditsToAdd: addon.credits.toString(),
+          userId: user.id,
+        },
+      });
+
+      res.json({ sessionId: session.id, url: session.url });
+    } catch (error: any) {
+      console.error("Addon purchase error:", error);
+      res.status(500).json({ error: error?.message || "Failed to create addon checkout" });
+    }
+  });
+
+  app.post("/api/credits/verify-addon", isAuthenticated, async (req, res) => {
+    try {
+      const { sessionId } = req.body;
+      const user = req.user as any;
+
+      const stripe = await getUncachableStripeClient();
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      if (session.payment_status !== "paid") {
+        return res.status(402).json({ error: "Payment not completed" });
+      }
+
+      const addonType = session.metadata?.addonType;
+      const creditsToAdd = parseInt(session.metadata?.creditsToAdd || '0');
+
+      // Record the addon purchase
+      await db.execute(sql`
+        INSERT INTO addon_purchases (id, user_id, addon_type, amount, credits_granted, stripe_payment_intent_id, status)
+        VALUES (gen_random_uuid(), ${user.id}, ${addonType}, ${session.amount_total}, ${creditsToAdd}, ${session.payment_intent}, 'completed')
+      `);
+
+      if (addonType === 'ultimate_assurance') {
+        // Grant Ultimate Assurance - unlimited business plans for 1 year
+        await db.update(users)
+          .set({
+            hasUltimateAssurance: true,
+          })
+          .where(eq(users.id, user.id));
+        
+        // Log the transaction
+        await db.execute(sql`
+          INSERT INTO credit_transactions (id, user_id, type, credits_change, credits_type, balance_after, reference_type, description)
+          VALUES (gen_random_uuid(), ${user.id}, 'ultimate_assurance', 0, 'unlimited', 0, 'addon_purchase', 'Ultimate Assurance purchased - unlimited business plans for 1 year')
+        `);
+      } else {
+        // Add bonus credits
+        await db.update(users)
+          .set({
+            bonusCredits: sql`${users.bonusCredits} + ${creditsToAdd}`,
+          })
+          .where(eq(users.id, user.id));
+        
+        // Log the transaction
+        const newBalance = (user.planCredits || 0) + (user.bonusCredits || 0) + creditsToAdd;
+        await db.execute(sql`
+          INSERT INTO credit_transactions (id, user_id, type, credits_change, credits_type, balance_after, reference_type, description)
+          VALUES (gen_random_uuid(), ${user.id}, 'addon_purchase', ${creditsToAdd}, 'bonus', ${newBalance}, 'addon_purchase', ${`Purchased ${addonType}: +${creditsToAdd} credits`})
+        `);
+      }
+
+      res.json({ 
+        success: true, 
+        addonType,
+        creditsAdded: creditsToAdd,
+        isUltimateAssurance: addonType === 'ultimate_assurance',
+      });
+    } catch (error) {
+      console.error("Verify addon error:", error);
+      res.status(500).json({ error: "Failed to verify addon purchase" });
+    }
+  });
+
+  app.get("/api/credits/upgrade-pricing", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const currentTier = user.subscriptionTier || 'free';
+      const currentPrice = PRICING[currentTier as keyof typeof PRICING]?.amount || 0;
+      
+      const upgradePrices: Record<string, { price: number; credits: number | 'unlimited' }> = {};
+      
+      for (const [tier, pricing] of Object.entries(PRICING)) {
+        if (pricing.amount > currentPrice) {
+          upgradePrices[tier] = {
+            price: pricing.amount - currentPrice,
+            credits: TIER_CREDITS[tier],
+          };
+        }
+      }
+      
+      res.json({
+        currentTier,
+        currentPrice,
+        upgradePrices,
+      });
+    } catch (error) {
+      console.error("Get upgrade pricing error:", error);
+      res.status(500).json({ error: "Failed to get upgrade pricing" });
+    }
+  });
+
+  app.post("/api/credits/award-referral", isAuthenticated, async (req, res) => {
+    try {
+      const { referredUserId } = req.body;
+      const user = req.user as any;
+      
+      // Award 1 bonus credit for successful referral
+      await db.update(users)
+        .set({
+          bonusCredits: sql`${users.bonusCredits} + 1`,
+        })
+        .where(eq(users.id, user.id));
+      
+      // Log the transaction
+      const newBalance = (user.planCredits || 0) + (user.bonusCredits || 0) + 1;
+      await db.execute(sql`
+        INSERT INTO credit_transactions (id, user_id, type, credits_change, credits_type, balance_after, reference_id, reference_type, description)
+        VALUES (gen_random_uuid(), ${user.id}, 'referral_reward', 1, 'bonus', ${newBalance}, ${referredUserId}, 'referral', 'Referral reward: +1 credit')
+      `);
+      
+      res.json({ 
+        success: true, 
+        creditsAwarded: 1,
+        newBalance,
+      });
+    } catch (error) {
+      console.error("Award referral credit error:", error);
+      res.status(500).json({ error: "Failed to award referral credit" });
+    }
+  });
+
+  // Grant initial plan credits when user subscribes to a tier
+  app.post("/api/credits/grant-tier-credits", isAuthenticated, async (req, res) => {
+    try {
+      const { tier } = req.body;
+      const user = req.user as any;
+      
+      const tierCredits = TIER_CREDITS[tier];
+      if (tierCredits === undefined) {
+        return res.status(400).json({ error: "Invalid tier" });
+      }
+      
+      if (tierCredits === 'unlimited') {
+        // Ultimate tier - no credits to add, but mark as unlimited
+        res.json({ 
+          success: true, 
+          message: "Ultimate tier grants unlimited credits",
+          creditsGranted: 'unlimited',
+        });
+        return;
+      }
+      
+      // Update plan credits
+      await db.update(users)
+        .set({
+          planCredits: tierCredits,
+          lastCreditRefresh: new Date(),
+        })
+        .where(eq(users.id, user.id));
+      
+      // Log the transaction
+      await db.execute(sql`
+        INSERT INTO credit_transactions (id, user_id, type, credits_change, credits_type, balance_after, reference_type, description)
+        VALUES (gen_random_uuid(), ${user.id}, 'tier_grant', ${tierCredits}, 'plan', ${tierCredits + (user.bonusCredits || 0)}, 'subscription', ${`${tier.charAt(0).toUpperCase() + tier.slice(1)} tier subscription: +${tierCredits} credits`})
+      `);
+      
+      res.json({ 
+        success: true, 
+        creditsGranted: tierCredits,
+        totalCredits: tierCredits + (user.bonusCredits || 0),
+      });
+    } catch (error) {
+      console.error("Grant tier credits error:", error);
+      res.status(500).json({ error: "Failed to grant tier credits" });
+    }
+  });
+
   app.post("/api/generate/start", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.body;
