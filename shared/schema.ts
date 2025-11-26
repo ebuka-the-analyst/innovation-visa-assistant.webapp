@@ -40,6 +40,18 @@ export const users = pgTable("users", {
   hasCompletedOnboarding: boolean("has_completed_onboarding").notNull().default(false),
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
   
+  // Credit System - Expert-level business model
+  planCredits: integer("plan_credits").notNull().default(0), // Credits from tier purchase
+  bonusCredits: integer("bonus_credits").notNull().default(0), // Credits from referrals, promos, add-ons
+  creditsUsed: integer("credits_used").notNull().default(0), // Total credits consumed
+  lastCreditRefresh: timestamp("last_credit_refresh"), // For Ultimate annual refresh
+  hasUltimateAssurance: boolean("has_ultimate_assurance").notNull().default(false), // £99/year recurring
+  
+  // Tier upgrade tracking (for differential pricing)
+  previousTier: varchar("previous_tier", { length: 20 }),
+  tierUpgradedAt: timestamp("tier_upgraded_at"),
+  totalSpent: integer("total_spent").notNull().default(0), // Total £ spent in pence
+  
   subscriptionTier: varchar("subscription_tier", { length: 20 }).notNull().default('free'), // free, basic, premium, enterprise, ultimate
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
@@ -284,6 +296,119 @@ export const insertToolAnalyticsSchema = createInsertSchema(toolAnalytics).omit(
 
 export type InsertToolAnalytics = z.infer<typeof insertToolAnalyticsSchema>;
 export type ToolAnalytic = typeof toolAnalytics.$inferSelect;
+
+// ============================================
+// CREDIT SYSTEM - Expert-Level Business Model
+// ============================================
+
+// Tier credit configuration - defines credits per tier
+export const TIER_CREDITS = {
+  free: { planCredits: 0, maxBusinesses: 1, maxRevisions: 0 },
+  basic: { planCredits: 1, maxBusinesses: 1, maxRevisions: 2 },
+  premium: { planCredits: 3, maxBusinesses: 2, maxRevisions: 4 },
+  enterprise: { planCredits: 6, maxBusinesses: 3, maxRevisions: 6 },
+  ultimate: { planCredits: 12, maxBusinesses: Infinity, maxRevisions: Infinity },
+} as const;
+
+// Tier pricing in pence (for upgrade calculations)
+export const TIER_PRICING = {
+  free: 0,
+  basic: 2900, // £29
+  premium: 4900, // £49
+  enterprise: 8900, // £89
+  ultimate: 12900, // £129
+} as const;
+
+// Add-on pricing in pence
+export const ADDON_PRICING = {
+  single_credit: 3900, // £39
+  triple_pack: 9900, // £99 (3 credits)
+  partner_bundle: 5900, // £59 (+2 seats)
+  rejection_recovery: 8900, // £89 (2 credits + coaching)
+  rush_delivery: 4900, // £49
+  compliance_refresh: 5900, // £59/year
+  ultimate_assurance: 9900, // £99/year
+} as const;
+
+// Credit Transactions - Ledger of all credit movements
+export const creditTransactions = pgTable("credit_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  
+  // Transaction type
+  type: varchar("type", { length: 30 }).notNull(), // tier_purchase, addon_purchase, referral_bonus, promo_bonus, plan_generation, refund, admin_adjustment, annual_refresh
+  
+  // Credit movement (positive = added, negative = consumed)
+  creditsChange: integer("credits_change").notNull(),
+  creditsType: varchar("credits_type", { length: 20 }).notNull().default('plan'), // plan, bonus
+  
+  // Balance after transaction
+  balanceAfter: integer("balance_after").notNull(),
+  
+  // Reference data
+  referenceId: varchar("reference_id"), // businessPlanId, stripePaymentId, referralCodeId, promoCodeId
+  referenceType: varchar("reference_type", { length: 30 }), // business_plan, stripe_payment, referral, promo
+  
+  // Additional context
+  description: text("description"),
+  metadata: jsonb("metadata"), // Extra data like tier upgrade details, addon type, etc.
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_credit_transactions_user").on(table.userId),
+  index("idx_credit_transactions_type").on(table.type),
+  index("idx_credit_transactions_created").on(table.createdAt),
+]);
+
+export const insertCreditTransactionSchema = createInsertSchema(creditTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertCreditTransaction = z.infer<typeof insertCreditTransactionSchema>;
+export type CreditTransaction = typeof creditTransactions.$inferSelect;
+
+// Add-on Purchases - Track all add-on purchases
+export const addonPurchases = pgTable("addon_purchases", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  
+  // Add-on type
+  addonType: varchar("addon_type", { length: 30 }).notNull(), // single_credit, triple_pack, partner_bundle, rejection_recovery, rush_delivery, compliance_refresh, ultimate_assurance
+  
+  // Pricing
+  amount: integer("amount").notNull(), // in pence
+  currency: varchar("currency", { length: 3 }).notNull().default('GBP'),
+  
+  // Credits granted (if applicable)
+  creditsGranted: integer("credits_granted").notNull().default(0),
+  
+  // Validity (for recurring add-ons like assurance, refresh)
+  validFrom: timestamp("valid_from").notNull().defaultNow(),
+  validUntil: timestamp("valid_until"),
+  isRecurring: boolean("is_recurring").notNull().default(false),
+  
+  // Stripe integration
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  
+  // Status
+  status: varchar("status", { length: 20 }).notNull().default('completed'), // pending, completed, refunded, cancelled
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_addon_purchases_user").on(table.userId),
+  index("idx_addon_purchases_type").on(table.addonType),
+  index("idx_addon_purchases_status").on(table.status),
+]);
+
+export const insertAddonPurchaseSchema = createInsertSchema(addonPurchases).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAddonPurchase = z.infer<typeof insertAddonPurchaseSchema>;
+export type AddonPurchase = typeof addonPurchases.$inferSelect;
 
 // ============================================
 // REFERRAL & PROMO CODE SYSTEM
