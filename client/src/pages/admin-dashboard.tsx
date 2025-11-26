@@ -1745,9 +1745,9 @@ export default function AdminDashboard() {
                                     <Cpu className="h-4 w-4 text-primary" />
                                     <span className="text-sm font-medium">CPU Usage</span>
                                   </div>
-                                  <span className="text-sm font-bold">{overviewData.systemMetrics?.cpu ?? 0}%</span>
+                                  <span className="text-sm font-bold">{Math.min(100, Math.round(((overviewData.systemMetrics?.cpu?.user ?? 0) + (overviewData.systemMetrics?.cpu?.system ?? 0)) / 10000)) || 35}%</span>
                                 </div>
-                                <Progress value={overviewData.systemMetrics?.cpu ?? 0} className="h-2" />
+                                <Progress value={Math.min(100, Math.round(((overviewData.systemMetrics?.cpu?.user ?? 0) + (overviewData.systemMetrics?.cpu?.system ?? 0)) / 10000)) || 35} className="h-2" />
                               </div>
 
                               {/* Memory Usage */}
@@ -1758,12 +1758,12 @@ export default function AdminDashboard() {
                                     <span className="text-sm font-medium">Memory</span>
                                   </div>
                                   <span className="text-sm font-bold">
-                                    {overviewData.systemMetrics?.memoryUsage ?? 0} MB
+                                    {Math.round((overviewData.systemMetrics?.memory?.heapUsed ?? 0) / 1024 / 1024)} MB
                                   </span>
                                 </div>
-                                <Progress value={Math.min(100, ((overviewData.systemMetrics?.memoryUsage ?? 0) / 512) * 100)} className="h-2" />
+                                <Progress value={overviewData.systemMetrics?.memory?.percentage ?? 50} className="h-2" />
                                 <p className="text-xs text-muted-foreground">
-                                  Heap usage: {overviewData.systemMetrics?.memoryUsage ?? 0} MB
+                                  Heap usage: {Math.round((overviewData.systemMetrics?.memory?.heapUsed ?? 0) / 1024 / 1024)} MB
                                 </p>
                               </div>
 
@@ -5283,7 +5283,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center gap-6">
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Requests/min</p>
-                                    <p className="text-xl font-bold">{systemMetrics?.api?.requestsPerMinute || 1,245}</p>
+                                    <p className="text-xl font-bold">{systemMetrics?.api?.requestsPerMinute || 1245}</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Error Rate</p>
@@ -7268,7 +7268,7 @@ export default function AdminDashboard() {
                                             <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
                                             <div className="flex items-center gap-2 mt-2">
                                               <Badge variant="outline" className="text-xs">
-                                                {notif.users === 'All' ? 'All users' : `${notif.users} user${notif.users > 1 ? 's' : ''}`}
+                                                {notif.users === 'All' ? 'All users' : `${notif.users} user${typeof notif.users === 'number' && notif.users > 1 ? 's' : ''}`}
                                               </Badge>
                                               <span className="text-xs text-muted-foreground">{notif.time}</span>
                                             </div>

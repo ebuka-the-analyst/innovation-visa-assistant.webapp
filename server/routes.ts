@@ -337,8 +337,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Get the correct base URL for redirects (production or development)
+      // Get the correct base URL for redirects - use request origin for reliability
       const getBaseUrl = () => {
+        // First, check for custom domain environment variable
+        if (process.env.APP_URL) {
+          return process.env.APP_URL.replace(/\/$/, '');
+        }
+        // Use request origin header (most reliable for all environments)
+        const origin = req.get('origin') || req.get('referer');
+        if (origin) {
+          try {
+            const url = new URL(origin);
+            return `${url.protocol}//${url.host}`;
+          } catch (e) {
+            // If parsing fails, continue to fallbacks
+          }
+        }
         // Production deployment - use REPLIT_DOMAINS (first domain)
         if (process.env.REPLIT_DEPLOYMENT === '1' && process.env.REPLIT_DOMAINS) {
           const prodDomain = process.env.REPLIT_DOMAINS.split(',')[0];
@@ -348,10 +362,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (process.env.REPLIT_DEV_DOMAIN) {
           return `https://${process.env.REPLIT_DEV_DOMAIN}`;
         }
+        // Get from X-Forwarded-Host header (common in proxied environments)
+        const forwardedHost = req.get('X-Forwarded-Host');
+        const forwardedProto = req.get('X-Forwarded-Proto') || 'https';
+        if (forwardedHost) {
+          return `${forwardedProto}://${forwardedHost}`;
+        }
+        // Last resort: use request host
+        const host = req.get('host');
+        if (host && !host.includes('localhost')) {
+          return `https://${host}`;
+        }
         // Fallback for local development
         return 'http://localhost:5000';
       };
       const baseUrl = getBaseUrl();
+      console.log('[STRIPE] Using base URL for redirects:', baseUrl);
 
       const stripe = await getUncachableStripeClient();
       const session = await stripe.checkout.sessions.create({
@@ -396,6 +422,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: errorMessage,
         statusCode: error?.statusCode
       });
+      res.status(500).json({ error: errorMessage });
+    }
+  });
+
+  // Direct subscription endpoint - allows immediate payment from pricing page without questionnaire
+  app.post("/api/payment/direct-subscribe", isAuthenticated, async (req, res) => {
+    try {
+      const { tier } = req.body;
+      const user = req.user as any;
+      
+      if (!tier || !['basic', 'premium', 'enterprise', 'ultimate'].includes(tier)) {
+        return res.status(400).json({ error: "Valid tier is required (basic, premium, enterprise, or ultimate)" });
+      }
+
+      const pricing = PRICING[tier as keyof typeof PRICING];
+      if (!pricing || pricing.amount === 0) {
+        return res.status(400).json({ error: "Invalid tier for direct subscription" });
+      }
+
+      // Create a minimal business plan for this direct subscription
+      const businessPlan = await storage.createBusinessPlan({
+        userId: user.id,
+        tier: tier,
+        businessName: `Direct Subscription - ${pricing.name}`,
+        businessDescription: "Plan created via direct subscription",
+        targetMarket: "UK",
+        uniqueValue: "Subscription purchase",
+        teamSize: "1",
+        fundingStatus: "self-funded",
+        industry: "technology",
+        status: 'pending',
+      });
+
+      // Get the correct base URL for redirects
+      const getBaseUrl = () => {
+        if (process.env.APP_URL) {
+          return process.env.APP_URL.replace(/\/$/, '');
+        }
+        const origin = req.get('origin') || req.get('referer');
+        if (origin) {
+          try {
+            const url = new URL(origin);
+            return `${url.protocol}//${url.host}`;
+          } catch (e) {}
+        }
+        if (process.env.REPLIT_DEPLOYMENT === '1' && process.env.REPLIT_DOMAINS) {
+          const prodDomain = process.env.REPLIT_DOMAINS.split(',')[0];
+          return `https://${prodDomain}`;
+        }
+        if (process.env.REPLIT_DEV_DOMAIN) {
+          return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+        }
+        const forwardedHost = req.get('X-Forwarded-Host');
+        const forwardedProto = req.get('X-Forwarded-Proto') || 'https';
+        if (forwardedHost) {
+          return `${forwardedProto}://${forwardedHost}`;
+        }
+        const host = req.get('host');
+        if (host && !host.includes('localhost')) {
+          return `https://${host}`;
+        }
+        return 'http://localhost:5000';
+      };
+      const baseUrl = getBaseUrl();
+      console.log('[STRIPE DIRECT] Using base URL for redirects:', baseUrl);
+
+      const stripe = await getUncachableStripeClient();
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "gbp",
+              product_data: {
+                name: `UK Innovator Founder Visa - ${pricing.name} Access`,
+                description: `Unlock ${pricing.name} tier access to all tools and features`,
+              },
+              unit_amount: pricing.amount,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: `${baseUrl}/tools-hub?session_id={CHECKOUT_SESSION_ID}&plan_id=${businessPlan.id}&upgraded=true`,
+        cancel_url: `${baseUrl}/pricing`,
+        metadata: {
+          planId: businessPlan.id,
+          directSubscription: 'true',
+          tier: tier,
+          originalAmount: pricing.amount.toString(),
+        },
+      });
+
+      await storage.updateBusinessPlan(businessPlan.id, { stripeSessionId: session.id });
+
+      console.log(`[DIRECT SUBSCRIBE] User ${user.id} starting direct subscription to ${tier} tier`);
+      res.json({ sessionId: session.id, url: session.url, planId: businessPlan.id });
+    } catch (error: any) {
+      console.error("Direct subscription error:", error);
+      const errorMessage = error?.message || error?.raw?.message || "Failed to create subscription";
       res.status(500).json({ error: errorMessage });
     }
   });

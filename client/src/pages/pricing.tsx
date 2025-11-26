@@ -5,7 +5,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Zap, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
@@ -162,6 +162,38 @@ export default function Pricing() {
     },
   });
 
+  // Direct subscription mutation - allows immediate payment without questionnaire
+  const directSubscribeMutation = useMutation({
+    mutationFn: async (tier: string) => {
+      const response = await apiRequest('POST', '/api/payment/direct-subscribe', { tier });
+      return response;
+    },
+    onSuccess: (data: any) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start subscription",
+        variant: "destructive",
+      });
+      setProcessingTier(null);
+    },
+  });
+
+  // Direct subscribe - go straight to payment
+  const handleDirectSubscribe = (tierId: string) => {
+    if (!user) {
+      setLocation(`/signup?tier=${tierId}&direct=true`);
+      return;
+    }
+    setProcessingTier(tierId);
+    directSubscribeMutation.mutate(tierId);
+  };
+
+  // Full flow with questionnaire
   const handleSelectTier = (tierId: string) => {
     if (!user) {
       setLocation(`/signup?tier=${tierId}`);
@@ -254,30 +286,76 @@ export default function Pricing() {
               </CardContent>
 
               <CardFooter className="flex-col gap-2">
-                <Button
-                  className="w-full"
-                  variant={tier.popular ? "default" : "outline"}
-                  size="lg"
-                  onClick={() => handleSelectTier(tier.id)}
-                  disabled={processingTier === tier.id || checkoutMutation.isPending}
-                  data-testid={`button-select-${tier.id}`}
-                >
-                  {processingTier === tier.id ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : isCurrentTier ? (
-                    "Current Plan"
-                  ) : latestPlan && latestPlan.tier === tier.id && latestPlan.status === 'pending' ? (
-                    "Continue to Payment"
-                  ) : (
-                    "Get Started"
-                  )}
-                </Button>
-                {!isCurrentTier && !(latestPlan && latestPlan.tier === tier.id) && (
+                {/* Direct Subscribe Button - Primary action for paid tiers */}
+                {tier.id !== 'free' && !isCurrentTier && (
+                  <Button
+                    className="w-full"
+                    variant={tier.popular ? "default" : "outline"}
+                    size="lg"
+                    onClick={() => handleDirectSubscribe(tier.id)}
+                    disabled={processingTier === tier.id || directSubscribeMutation.isPending || checkoutMutation.isPending}
+                    data-testid={`button-subscribe-${tier.id}`}
+                  >
+                    {processingTier === tier.id && directSubscribeMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="mr-2 h-4 w-4" />
+                        Subscribe Now
+                      </>
+                    )}
+                  </Button>
+                )}
+                
+                {/* Free tier or Current Plan button */}
+                {(tier.id === 'free' || isCurrentTier) && (
+                  <Button
+                    className="w-full"
+                    variant={tier.popular ? "default" : "outline"}
+                    size="lg"
+                    onClick={() => tier.id === 'free' ? setLocation('/tools-hub') : undefined}
+                    disabled={isCurrentTier && tier.id !== 'free'}
+                    data-testid={`button-select-${tier.id}`}
+                  >
+                    {isCurrentTier ? "Current Plan" : "Access Free Tools"}
+                  </Button>
+                )}
+
+                {/* Business Plan with Questionnaire - Secondary option */}
+                {tier.id !== 'free' && !isCurrentTier && (
+                  <Button
+                    className="w-full"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSelectTier(tier.id)}
+                    disabled={processingTier === tier.id || checkoutMutation.isPending}
+                    data-testid={`button-questionnaire-${tier.id}`}
+                  >
+                    {processingTier === tier.id && checkoutMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : latestPlan && latestPlan.tier === tier.id && latestPlan.status === 'pending' ? (
+                      <>
+                        <FileText className="mr-2 h-4 w-4" />
+                        Continue Pending Plan
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="mr-2 h-4 w-4" />
+                        Create Business Plan First
+                      </>
+                    )}
+                  </Button>
+                )}
+                
+                {tier.id !== 'free' && !isCurrentTier && (
                   <p className="text-xs text-muted-foreground text-center">
-                    Complete questionnaire, then pay
+                    Subscribe now for instant access, or create a business plan first
                   </p>
                 )}
               </CardFooter>
