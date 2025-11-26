@@ -13,6 +13,7 @@ import { ChevronLeft, ChevronRight, LogOut, Loader2, LayoutDashboard, Wrench, Fi
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
 import { useSpotlightTour } from "@/components/SpotlightTour";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Lazy load ChatBot and other heavy components
 const ChatBot = lazy(() => import("@/components/ChatBot"));
@@ -378,21 +379,23 @@ function GlobalSpotlightTour() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Suspense fallback={null}>
-          <BlackNovemberBanner />
-          <ChatBot />
-          <ToolsChronographWheel />
-        </Suspense>
-        <GlobalSpotlightTour />
-        <Toaster />
-        <AppLayout />
-        <Suspense fallback={null}>
-          <CookieConsent />
-        </Suspense>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Suspense fallback={null}>
+            <BlackNovemberBanner />
+            <ChatBot />
+            <ToolsChronographWheel />
+          </Suspense>
+          <GlobalSpotlightTour />
+          <Toaster />
+          <AppLayout />
+          <Suspense fallback={null}>
+            <CookieConsent />
+          </Suspense>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
