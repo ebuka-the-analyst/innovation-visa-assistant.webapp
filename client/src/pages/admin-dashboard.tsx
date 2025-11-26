@@ -1214,14 +1214,16 @@ export default function AdminDashboard() {
             <header className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 sticky top-0">
               <SidebarTrigger data-testid="button-admin-sidebar-toggle" />
               
-              <Link href="/">
-                <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-admin-logo">
-                  <div className="logo-container overflow-hidden flex items-center">
-                    <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-light object-contain" loading="lazy" />
-                    <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 md:h-10 w-auto logo-dark object-contain" loading="lazy" />
-                  </div>
+              <div 
+                onClick={() => setLocation('/')}
+                className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" 
+                data-testid="button-admin-logo"
+              >
+                <div className="logo-container overflow-hidden flex items-center">
+                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant - Click to go home" className="h-8 md:h-10 w-auto logo-light object-contain" loading="lazy" />
+                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant - Click to go home" className="h-8 md:h-10 w-auto logo-dark object-contain" loading="lazy" />
                 </div>
-              </Link>
+              </div>
               
               <div className="flex-1" />
               
