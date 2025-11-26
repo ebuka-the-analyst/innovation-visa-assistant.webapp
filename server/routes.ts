@@ -1104,6 +1104,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // CREDIT CONSUMPTION: Check if user has credits before generation
+      const fullUser = await storage.getUser(user.id);
+      if (!fullUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const userTier = fullUser.subscriptionTier || 'free';
+      const hasUltimateAssurance = fullUser.hasUltimateAssurance || false;
+      const isUnlimited = userTier === 'ultimate' || hasUltimateAssurance;
+      
+      if (!isUnlimited) {
+        const planCredits = fullUser.planCredits || 0;
+        const bonusCredits = fullUser.bonusCredits || 0;
+        const totalCredits = planCredits + bonusCredits;
+        
+        if (totalCredits < 1) {
+          return res.status(403).json({ 
+            error: "Insufficient credits. Please purchase additional credits or upgrade your plan.",
+            creditsRequired: 1,
+            creditsAvailable: totalCredits,
+          });
+        }
+        
+        // Consume 1 credit (bonus first, then plan credits)
+        let newBonusCredits = bonusCredits;
+        let newPlanCredits = planCredits;
+        
+        if (bonusCredits >= 1) {
+          newBonusCredits = bonusCredits - 1;
+        } else {
+          newPlanCredits = planCredits - 1;
+        }
+        
+        // Update user credits
+        await db.update(users)
+          .set({
+            planCredits: newPlanCredits,
+            bonusCredits: newBonusCredits,
+          })
+          .where(eq(users.id, user.id));
+        
+        // Log the credit transaction
+        const creditsDeducted = bonusCredits >= 1 ? 'bonus' : 'plan';
+        await db.execute(sql`
+          INSERT INTO credit_transactions (id, user_id, type, credits_change, credits_type, balance_after, reference_type, reference_id, description)
+          VALUES (gen_random_uuid(), ${user.id}, 'generation', -1, ${creditsDeducted}, ${newPlanCredits + newBonusCredits}, 'business_plan', ${planId}, 'Business plan generation')
+        `);
+        
+        console.log(`[CREDITS] User ${user.id} consumed 1 ${creditsDeducted} credit for plan ${planId}. Balance: ${newPlanCredits + newBonusCredits}`);
+      } else {
+        console.log(`[CREDITS] User ${user.id} has unlimited credits (${isUnlimited ? 'Ultimate' : 'Ultimate Assurance'}), no credit consumed`);
+      }
+
       await storage.updateBusinessPlan(planId, { 
         status: 'generating',
         currentGenerationStage: 'Starting generation - preparing AI agents...'
