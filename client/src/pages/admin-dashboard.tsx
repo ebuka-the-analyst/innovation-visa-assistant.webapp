@@ -226,13 +226,22 @@ interface SubscriptionDistribution {
 
 interface ActivityLogEntry {
   id: string;
-  type: 'user_registration' | 'plan_created' | 'admin_action' | 'plan_completed' | 'user_upgrade' | 'error';
-  message: string;
+  type: 'user_registration' | 'plan_created' | 'admin_action' | 'plan_completed' | 'user_upgrade' | 'error' | 'email_verified';
+  message?: string;
+  description?: string;
   timestamp: string;
   userId?: string;
   userName?: string;
-  metadata?: Record<string, unknown>;
-  severity: 'info' | 'success' | 'warning' | 'error';
+  userEmail?: string;
+  planId?: string;
+  metadata?: {
+    tier?: string;
+    status?: string;
+    verified?: boolean;
+    isDemo?: boolean;
+    [key: string]: unknown;
+  };
+  severity?: 'info' | 'success' | 'warning' | 'error';
 }
 
 interface AuditLogEntry {
@@ -370,6 +379,7 @@ const DATA_DENSITY_OPTIONS = ['compact', 'comfortable', 'spacious'] as const;
 
 const ACTIVITY_ICONS = {
   user_registration: UserPlus,
+  email_verified: CheckCircle,
   plan_created: FileText,
   admin_action: Shield,
   plan_completed: FileCheck,
@@ -1075,6 +1085,7 @@ export default function AdminDashboard() {
   const getSectionTitle = () => {
     const titles: Record<string, string> = {
       'overview': 'Dashboard Overview',
+      'realtime': 'Real-Time Activity Monitor',
       'kpis': 'Executive KPI Dashboard',
       'users-overview': 'User Management',
       'users-active': 'Active Users',
@@ -1563,8 +1574,8 @@ export default function AdminDashboard() {
                             <ScrollArea className="h-[400px] pr-4">
                               <div className="space-y-3">
                                 {overviewData.recentActivity?.map((activity, index) => {
-                                  const Icon = ACTIVITY_ICONS[activity.type];
-                                  const colorClass = ACTIVITY_COLORS[activity.severity];
+                                  const Icon = ACTIVITY_ICONS[activity.type as keyof typeof ACTIVITY_ICONS] || Activity;
+                                  const colorClass = ACTIVITY_COLORS[activity.severity || 'info'];
 
                                   return (
                                     <motion.div
@@ -1742,6 +1753,445 @@ export default function AdminDashboard() {
                   </Card>
                 )}
               </AnimatePresence>
+                  </div>
+                )}
+
+                {/* REAL-TIME ACTIVITY SECTION - PhD-level live monitoring */}
+                {activeSection === 'realtime' && (
+                  <div className="space-y-6">
+                    <AnimatePresence mode="wait">
+                      {activityLogLoading ? (
+                        <motion.div
+                          key="loading"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="space-y-4"
+                        >
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <Card key={i}>
+                              <CardContent className="p-4">
+                                <ShimmerSkeleton />
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="realtime-content"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.5 }}
+                          className="space-y-6"
+                        >
+                          {/* Live Status Header */}
+                          <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-transparent border-green-500/20">
+                            <CardContent className="p-6">
+                              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div className="flex items-center gap-4">
+                                  <motion.div
+                                    className="relative"
+                                    animate={{ scale: [1, 1.1, 1] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                  >
+                                    <div className="h-4 w-4 rounded-full bg-green-500" />
+                                    <div className="absolute inset-0 h-4 w-4 rounded-full bg-green-500 animate-ping opacity-75" />
+                                  </motion.div>
+                                  <div>
+                                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                                      Real-Time Activity Monitor
+                                      <Badge variant="default" className="bg-green-500 hover:bg-green-600">LIVE</Badge>
+                                    </h2>
+                                    <p className="text-muted-foreground">Platform activity stream with user identity tracking</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <div className="text-center px-4 py-2 bg-background rounded-lg border">
+                                    <p className="text-2xl font-bold text-green-500">{activityLog?.length || 0}</p>
+                                    <p className="text-xs text-muted-foreground">Events</p>
+                                  </div>
+                                  <div className="text-center px-4 py-2 bg-background rounded-lg border">
+                                    <p className="text-2xl font-bold text-blue-500">{overviewData?.kpiMetrics?.[1]?.value || 0}</p>
+                                    <p className="text-xs text-muted-foreground">Active Now</p>
+                                  </div>
+                                  <div className="text-center px-4 py-2 bg-background rounded-lg border">
+                                    <p className="text-2xl font-bold text-amber-500">30s</p>
+                                    <p className="text-xs text-muted-foreground">Refresh</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Activity Statistics Row */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            <Card className="hover-elevate">
+                              <CardContent className="p-4 text-center">
+                                <UserPlus className="h-6 w-6 mx-auto mb-2 text-green-500" />
+                                <p className="text-2xl font-bold">{activityLog?.filter(a => a.type === 'user_registration').length || 0}</p>
+                                <p className="text-xs text-muted-foreground">Registrations</p>
+                              </CardContent>
+                            </Card>
+                            <Card className="hover-elevate">
+                              <CardContent className="p-4 text-center">
+                                <CheckCircle className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                                <p className="text-2xl font-bold">{activityLog?.filter(a => a.type === 'email_verified').length || 0}</p>
+                                <p className="text-xs text-muted-foreground">Verifications</p>
+                              </CardContent>
+                            </Card>
+                            <Card className="hover-elevate">
+                              <CardContent className="p-4 text-center">
+                                <FileText className="h-6 w-6 mx-auto mb-2 text-purple-500" />
+                                <p className="text-2xl font-bold">{activityLog?.filter(a => a.type === 'plan_created').length || 0}</p>
+                                <p className="text-xs text-muted-foreground">Plans Created</p>
+                              </CardContent>
+                            </Card>
+                            <Card className="hover-elevate">
+                              <CardContent className="p-4 text-center">
+                                <FileCheck className="h-6 w-6 mx-auto mb-2 text-emerald-500" />
+                                <p className="text-2xl font-bold">{activityLog?.filter(a => a.type === 'plan_completed').length || 0}</p>
+                                <p className="text-xs text-muted-foreground">Completed</p>
+                              </CardContent>
+                            </Card>
+                            <Card className="hover-elevate">
+                              <CardContent className="p-4 text-center">
+                                <TrendingUp className="h-6 w-6 mx-auto mb-2 text-orange-500" />
+                                <p className="text-2xl font-bold">{activityLog?.filter(a => a.type === 'user_upgrade').length || 0}</p>
+                                <p className="text-xs text-muted-foreground">Upgrades</p>
+                              </CardContent>
+                            </Card>
+                            <Card className="hover-elevate">
+                              <CardContent className="p-4 text-center">
+                                <AlertTriangle className="h-6 w-6 mx-auto mb-2 text-red-500" />
+                                <p className="text-2xl font-bold">{activityLog?.filter(a => a.severity === 'error').length || 0}</p>
+                                <p className="text-xs text-muted-foreground">Errors</p>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Main Activity Feed with Timeline */}
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Live Activity Timeline - Main Column */}
+                            <div className="lg:col-span-2">
+                              <Card className="h-full">
+                                <CardHeader>
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <CardTitle className="flex items-center gap-2">
+                                        <Activity className="h-5 w-5" />
+                                        Live Activity Timeline
+                                      </CardTitle>
+                                      <CardDescription>Real-time platform events with user identity</CardDescription>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <motion.div
+                                        className="h-2 w-2 rounded-full bg-green-500"
+                                        animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
+                                        transition={{ duration: 1.5, repeat: Infinity }}
+                                      />
+                                      <span className="text-xs text-muted-foreground">Auto-updating</span>
+                                    </div>
+                                  </div>
+                                </CardHeader>
+                                <CardContent>
+                                  <ScrollArea className="h-[600px] pr-4">
+                                    <div className="relative">
+                                      {/* Timeline line */}
+                                      <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border" />
+                                      
+                                      <div className="space-y-4">
+                                        {activityLog?.map((activity, index) => {
+                                          const Icon = ACTIVITY_ICONS[activity.type as keyof typeof ACTIVITY_ICONS] || Activity;
+                                          const severityColor = {
+                                            info: 'bg-blue-500/10 border-blue-500/30 text-blue-500',
+                                            success: 'bg-green-500/10 border-green-500/30 text-green-500',
+                                            warning: 'bg-amber-500/10 border-amber-500/30 text-amber-500',
+                                            error: 'bg-red-500/10 border-red-500/30 text-red-500'
+                                          }[activity.severity || 'info'];
+                                          
+                                          const iconBgColor = {
+                                            user_registration: 'bg-green-500',
+                                            email_verified: 'bg-blue-500',
+                                            plan_created: 'bg-purple-500',
+                                            plan_completed: 'bg-emerald-500',
+                                            user_upgrade: 'bg-orange-500',
+                                            admin_action: 'bg-slate-500',
+                                            error: 'bg-red-500'
+                                          }[activity.type] || 'bg-gray-500';
+
+                                          return (
+                                            <motion.div
+                                              key={activity.id}
+                                              initial={{ opacity: 0, x: -20 }}
+                                              animate={{ opacity: 1, x: 0 }}
+                                              transition={{ delay: index * 0.03 }}
+                                              className="relative pl-14"
+                                            >
+                                              {/* Timeline dot */}
+                                              <div className={`absolute left-4 top-4 h-5 w-5 rounded-full ${iconBgColor} flex items-center justify-center z-10`}>
+                                                <Icon className="h-3 w-3 text-white" />
+                                              </div>
+                                              
+                                              {/* Activity Card */}
+                                              <Card className={`border ${severityColor} hover-elevate`}>
+                                                <CardContent className="p-4">
+                                                  <div className="flex items-start justify-between gap-4">
+                                                    <div className="flex-1 min-w-0">
+                                                      {/* User Identity Section */}
+                                                      {activity.userEmail && (
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                                            <UserCheck className="h-4 w-4 text-primary" />
+                                                          </div>
+                                                          <div>
+                                                            <p className="text-sm font-semibold">{activity.userEmail}</p>
+                                                            <p className="text-xs text-muted-foreground">User ID: {activity.userId?.slice(0, 8)}...</p>
+                                                          </div>
+                                                        </div>
+                                                      )}
+                                                      
+                                                      {/* Activity Description */}
+                                                      <p className="text-sm font-medium">{activity.description || activity.message}</p>
+                                                      
+                                                      {/* Metadata Tags */}
+                                                      {activity.metadata && (
+                                                        <div className="flex flex-wrap gap-2 mt-2">
+                                                          {activity.metadata.tier && (
+                                                            <Badge variant="outline" className="text-xs">
+                                                              Tier: {activity.metadata.tier}
+                                                            </Badge>
+                                                          )}
+                                                          {activity.metadata.status && (
+                                                            <Badge variant="outline" className="text-xs">
+                                                              Status: {activity.metadata.status}
+                                                            </Badge>
+                                                          )}
+                                                          {activity.metadata.verified !== undefined && (
+                                                            <Badge variant={activity.metadata.verified ? "default" : "secondary"} className="text-xs">
+                                                              {activity.metadata.verified ? 'Verified' : 'Unverified'}
+                                                            </Badge>
+                                                          )}
+                                                          {activity.metadata.isDemo && (
+                                                            <Badge variant="secondary" className="text-xs">Demo</Badge>
+                                                          )}
+                                                        </div>
+                                                      )}
+                                                      
+                                                      {/* Timestamp */}
+                                                      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                                                        <Clock className="h-3 w-3" />
+                                                        <span>{format(new Date(activity.timestamp), 'PPpp')}</span>
+                                                        <span className="text-muted-foreground/50">•</span>
+                                                        <span>{formatDistance(new Date(activity.timestamp), new Date(), { addSuffix: true })}</span>
+                                                      </div>
+                                                    </div>
+                                                    
+                                                    {/* Severity Badge */}
+                                                    <Badge variant="outline" className={`shrink-0 ${severityColor}`}>
+                                                      {activity.severity || 'info'}
+                                                    </Badge>
+                                                  </div>
+                                                </CardContent>
+                                              </Card>
+                                            </motion.div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  </ScrollArea>
+                                </CardContent>
+                              </Card>
+                            </div>
+
+                            {/* Right Sidebar - Live Stats & Recent Users */}
+                            <div className="space-y-6">
+                              {/* Activity Distribution */}
+                              <Card>
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-sm">Activity Distribution</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-3">
+                                    {[
+                                      { type: 'Registrations', count: activityLog?.filter(a => a.type === 'user_registration').length || 0, color: 'bg-green-500' },
+                                      { type: 'Verifications', count: activityLog?.filter(a => a.type === 'email_verified').length || 0, color: 'bg-blue-500' },
+                                      { type: 'Plans Created', count: activityLog?.filter(a => a.type === 'plan_created').length || 0, color: 'bg-purple-500' },
+                                      { type: 'Plans Completed', count: activityLog?.filter(a => a.type === 'plan_completed').length || 0, color: 'bg-emerald-500' },
+                                    ].map((item) => {
+                                      const total = activityLog?.length || 1;
+                                      const percentage = Math.round((item.count / total) * 100);
+                                      return (
+                                        <div key={item.type} className="space-y-1">
+                                          <div className="flex items-center justify-between text-sm">
+                                            <span>{item.type}</span>
+                                            <span className="font-medium">{item.count}</span>
+                                          </div>
+                                          <div className="h-2 rounded-full bg-muted overflow-hidden">
+                                            <motion.div
+                                              className={`h-full ${item.color}`}
+                                              initial={{ width: 0 }}
+                                              animate={{ width: `${percentage}%` }}
+                                              transition={{ duration: 0.8, delay: 0.2 }}
+                                            />
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </CardContent>
+                              </Card>
+
+                              {/* Recent Active Users */}
+                              <Card>
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-sm flex items-center gap-2">
+                                    <Users className="h-4 w-4" />
+                                    Recent Active Users
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <ScrollArea className="h-[300px]">
+                                    <div className="space-y-3">
+                                      {activityLog?.filter(a => a.userEmail).slice(0, 15).map((activity, index) => (
+                                        <motion.div
+                                          key={`user-${activity.id}-${index}`}
+                                          initial={{ opacity: 0, y: 10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          transition={{ delay: index * 0.05 }}
+                                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50"
+                                        >
+                                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                                            <span className="text-xs font-bold text-primary">
+                                              {activity.userEmail?.charAt(0).toUpperCase()}
+                                            </span>
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">{activity.userEmail}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                              {formatDistance(new Date(activity.timestamp), new Date(), { addSuffix: true })}
+                                            </p>
+                                          </div>
+                                          <div className={`h-2 w-2 rounded-full ${
+                                            activity.type === 'user_registration' ? 'bg-green-500' :
+                                            activity.type === 'email_verified' ? 'bg-blue-500' :
+                                            activity.type === 'plan_created' ? 'bg-purple-500' : 'bg-gray-500'
+                                          }`} />
+                                        </motion.div>
+                                      ))}
+                                    </div>
+                                  </ScrollArea>
+                                </CardContent>
+                              </Card>
+
+                              {/* Activity Heatmap by Hour */}
+                              <Card>
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-sm flex items-center gap-2">
+                                    <BarChart3 className="h-4 w-4" />
+                                    Activity by Hour (Today)
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="grid grid-cols-6 gap-1">
+                                    {Array.from({ length: 24 }, (_, hour) => {
+                                      const count = activityLog?.filter(a => 
+                                        new Date(a.timestamp).getHours() === hour
+                                      ).length || 0;
+                                      const maxCount = Math.max(...Array.from({ length: 24 }, (_, h) => 
+                                        activityLog?.filter(a => new Date(a.timestamp).getHours() === h).length || 0
+                                      ));
+                                      const intensity = maxCount > 0 ? count / maxCount : 0;
+                                      
+                                      return (
+                                        <Tooltip key={hour}>
+                                          <TooltipTrigger asChild>
+                                            <div
+                                              className={`h-6 rounded cursor-pointer transition-colors ${
+                                                intensity === 0 ? 'bg-muted' :
+                                                intensity < 0.25 ? 'bg-green-500/20' :
+                                                intensity < 0.5 ? 'bg-green-500/40' :
+                                                intensity < 0.75 ? 'bg-green-500/60' :
+                                                'bg-green-500/80'
+                                              }`}
+                                            />
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <p>{hour}:00 - {count} events</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      );
+                                    })}
+                                  </div>
+                                  <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                                    <span>00:00</span>
+                                    <span>12:00</span>
+                                    <span>23:00</span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          </div>
+
+                          {/* Activity Insights */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Lightbulb className="h-5 w-5 text-amber-500" />
+                                Real-Time Insights
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <TrendingUp className="h-4 w-4 text-green-500" />
+                                    <span className="font-medium text-green-500">Peak Activity</span>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {(() => {
+                                      const hourCounts = Array.from({ length: 24 }, (_, h) => ({
+                                        hour: h,
+                                        count: activityLog?.filter(a => new Date(a.timestamp).getHours() === h).length || 0
+                                      }));
+                                      const peak = hourCounts.reduce((a, b) => a.count > b.count ? a : b, { hour: 0, count: 0 });
+                                      return `Most active at ${peak.hour}:00 with ${peak.count} events`;
+                                    })()}
+                                  </p>
+                                </div>
+                                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Users className="h-4 w-4 text-blue-500" />
+                                    <span className="font-medium text-blue-500">User Engagement</span>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {activityLog?.filter(a => a.userEmail).length || 0} unique user interactions tracked
+                                  </p>
+                                </div>
+                                <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <FileText className="h-4 w-4 text-purple-500" />
+                                    <span className="font-medium text-purple-500">Plan Activity</span>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {activityLog?.filter(a => a.type.includes('plan')).length || 0} plan-related events in feed
+                                  </p>
+                                </div>
+                                <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Clock className="h-4 w-4 text-amber-500" />
+                                    <span className="font-medium text-amber-500">Latest Activity</span>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">
+                                    {activityLog?.[0] ? formatDistance(new Date(activityLog[0].timestamp), new Date(), { addSuffix: true }) : 'No recent activity'}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 )}
 
