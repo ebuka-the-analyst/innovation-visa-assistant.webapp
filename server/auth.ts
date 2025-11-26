@@ -42,6 +42,8 @@ interface User {
   profileImageUrl?: string | null;
   isAdmin?: boolean;
   isEmailVerified?: boolean;
+  subscriptionTier?: string;
+  subscriptionStatus?: string;
 }
 
 export async function setupAuth(app: Express) {
@@ -174,7 +176,7 @@ export async function setupAuth(app: Express) {
       if (!user) {
         return done(null, false);
       }
-      // Return session user without password
+      // Return session user without password - includes subscription data for tier access
       const sessionUser: User = {
         id: user.id,
         email: user.email!,
@@ -184,6 +186,8 @@ export async function setupAuth(app: Express) {
         profileImageUrl: user.profileImageUrl,
         isAdmin: user.isAdmin || false,
         isEmailVerified: user.isEmailVerified || false,
+        subscriptionTier: user.subscriptionTier || "free",
+        subscriptionStatus: user.subscriptionStatus || "inactive",
       };
       done(null, sessionUser);
     } catch (error) {
