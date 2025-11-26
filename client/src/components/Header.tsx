@@ -14,13 +14,32 @@ export default function Header() {
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+    
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          
+          // Hysteresis: different thresholds for scrolling down vs up
+          // This prevents rapid toggling when scrolling slowly around the threshold
+          if (!isScrolled && currentScrollY > 50) {
+            setIsScrolled(true);
+          } else if (isScrolled && currentScrollY < 20) {
+            setIsScrolled(false);
+          }
+          
+          lastScrollY = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isScrolled]);
 
   const handleNavigation = (sectionId: string) => {
     setMobileMenuOpen(false);
@@ -56,13 +75,13 @@ export default function Header() {
         </div>
       )}
       
-      <nav className={`container mx-auto px-3 md:px-6 flex items-center justify-between border-b border-border/40 transition-all duration-300 ${isScrolled ? 'h-12 md:h-14' : 'h-24 md:h-36'}`}>
+      <nav className={`container mx-auto px-3 md:px-6 flex items-center justify-between border-b border-border/40 transition-[height] duration-200 ease-out will-change-[height] ${isScrolled ? 'h-14 md:h-16' : 'h-20 md:h-24'}`}>
         {/* Logo */}
         <Link href="/">
           <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
             <div className="logo-container overflow-hidden flex items-center">
-              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-16 md:h-20' : 'h-14 md:h-20'}`} />
-              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100 transition-all duration-300 ${isScrolled ? 'h-16 md:h-20' : 'h-14 md:h-20'}`} />
+              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100 transition-[height] duration-200 ease-out ${isScrolled ? 'h-12 md:h-14' : 'h-14 md:h-18'}`} />
+              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className={`w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100 transition-[height] duration-200 ease-out ${isScrolled ? 'h-12 md:h-14' : 'h-14 md:h-18'}`} />
             </div>
           </div>
         </Link>
