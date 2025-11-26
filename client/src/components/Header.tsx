@@ -1,17 +1,37 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
 import ThemeToggle from "./ThemeToggle";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [disclaimerDismissed, setDisclaimerDismissed] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [location, setLocation] = useLocation();
+
+  // Check if user is logged in
+  const { data: user, isLoading: authLoading } = useQuery<{ id: string; email: string; isAdmin?: boolean }>({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+  });
+
+  const isAuthenticated = !!user;
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest('POST', '/api/auth/logout');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      setLocation('/');
+    },
+  });
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -113,16 +133,39 @@ export default function Header() {
         {/* CTA Buttons & Theme Toggle */}
         <div className={`hidden md:flex items-center transition-all duration-300 ${isScrolled ? 'gap-1' : 'gap-2'}`}>
           <ThemeToggle />
-          <Link href="/login">
-            <Button variant="ghost" size={isScrolled ? "sm" : "default"} data-testid="button-header-signin">
-              Sign In
-            </Button>
-          </Link>
-          <Link href="/pricing">
-            <Button size={isScrolled ? "sm" : "default"} data-testid="button-header-cta">
-              Get Started
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link href="/tools-hub">
+                <Button variant="ghost" size={isScrolled ? "sm" : "default"} data-testid="button-header-dashboard">
+                  <LayoutDashboard className="h-4 w-4 mr-1" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                size={isScrolled ? "sm" : "default"} 
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+                data-testid="button-header-logout"
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                Log Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="ghost" size={isScrolled ? "sm" : "default"} data-testid="button-header-signin">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button size={isScrolled ? "sm" : "default"} data-testid="button-header-cta">
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -165,16 +208,39 @@ export default function Header() {
                 <ThemeToggle />
                 <span className="text-sm text-muted-foreground">Dark Mode</span>
               </div>
-              <Link href="/login" className="w-full">
-                <Button variant="ghost" className="w-full justify-start">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/pricing" className="w-full">
-                <Button className="w-full">
-                  Get Started
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link href="/tools-hub" className="w-full">
+                    <Button variant="ghost" className="w-full justify-start" data-testid="button-mobile-dashboard">
+                      <LayoutDashboard className="h-4 w-4 mr-2" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => logoutMutation.mutate()}
+                    disabled={logoutMutation.isPending}
+                    data-testid="button-mobile-logout"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Log Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="w-full">
+                    <Button variant="ghost" className="w-full justify-start" data-testid="button-mobile-signin">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/pricing" className="w-full">
+                    <Button className="w-full" data-testid="button-mobile-cta">
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
