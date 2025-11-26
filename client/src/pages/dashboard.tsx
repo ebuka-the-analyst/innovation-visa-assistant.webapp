@@ -157,7 +157,13 @@ export default function Dashboard() {
   const [redirecting, setRedirecting] = useState(false);
   
 
-  const { data: user, isLoading: userLoading, isError: userError, refetch: refetchUser } = useQuery<{ id: string; email: string; displayName?: string }>({
+  const { data: user, isLoading: userLoading, isError: userError, refetch: refetchUser } = useQuery<{ 
+    id: string; 
+    email: string; 
+    displayName?: string; 
+    subscriptionTier?: string;
+    subscriptionStatus?: string;
+  }>({
     queryKey: ['/api/auth/user'],
     retry: false,
     staleTime: 30000,
@@ -281,7 +287,11 @@ export default function Dashboard() {
             )}
             <Button 
               size="lg"
-              onClick={() => setLocation("/pricing")}
+              onClick={() => {
+                // Ultimate users go directly to questionnaire, others to pricing
+                const isUltimate = user?.subscriptionTier === 'ultimate';
+                setLocation(isUltimate ? "/questionnaire?tier=ultimate" : "/pricing");
+              }}
               data-testid="button-create-plan"
             >
               <Plus className="h-5 w-5 mr-2" />
@@ -617,7 +627,11 @@ export default function Dashboard() {
             </p>
             <Button 
               size="lg"
-              onClick={() => setLocation("/pricing")}
+              onClick={() => {
+                // Ultimate users go directly to questionnaire, others to pricing
+                const isUltimate = user?.subscriptionTier === 'ultimate';
+                setLocation(isUltimate ? "/questionnaire?tier=ultimate" : "/pricing");
+              }}
               data-testid="button-create-first-plan"
             >
               <Plus className="h-5 w-5 mr-2" />
