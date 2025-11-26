@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { 
   CheckCircle2, Circle, Clock, Target, TrendingUp, 
   FileText, Calculator, Users, Shield, Rocket,
-  AlertTriangle, ArrowRight, Calendar, Award
+  AlertTriangle, ArrowRight, Calendar, Award, Star, Trophy, Zap, Sparkles
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -202,6 +202,48 @@ export default function ProgressPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Achievements Section */}
+        <Card className="mb-8 overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Trophy className="w-5 h-5 text-amber-500" />
+              Achievements & Milestones
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className={`flex flex-col items-center p-4 rounded-lg border-2 transition-all ${completedSteps >= 1 ? 'border-amber-400 bg-amber-50 dark:bg-amber-950/20' : 'border-muted bg-muted/30 opacity-50'}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${completedSteps >= 1 ? 'bg-amber-400' : 'bg-muted'}`}>
+                  <Star className={`w-6 h-6 ${completedSteps >= 1 ? 'text-white' : 'text-muted-foreground'}`} />
+                </div>
+                <span className="text-sm font-medium text-center">First Step</span>
+                <span className="text-xs text-muted-foreground">Complete 1 task</span>
+              </div>
+              <div className={`flex flex-col items-center p-4 rounded-lg border-2 transition-all ${completedSteps >= 5 ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/20' : 'border-muted bg-muted/30 opacity-50'}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${completedSteps >= 5 ? 'bg-blue-500' : 'bg-muted'}`}>
+                  <Zap className={`w-6 h-6 ${completedSteps >= 5 ? 'text-white' : 'text-muted-foreground'}`} />
+                </div>
+                <span className="text-sm font-medium text-center">Fast Starter</span>
+                <span className="text-xs text-muted-foreground">Complete 5 tasks</span>
+              </div>
+              <div className={`flex flex-col items-center p-4 rounded-lg border-2 transition-all ${overallProgress >= 50 ? 'border-purple-400 bg-purple-50 dark:bg-purple-950/20' : 'border-muted bg-muted/30 opacity-50'}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${overallProgress >= 50 ? 'bg-purple-500' : 'bg-muted'}`}>
+                  <Target className={`w-6 h-6 ${overallProgress >= 50 ? 'text-white' : 'text-muted-foreground'}`} />
+                </div>
+                <span className="text-sm font-medium text-center">Halfway There</span>
+                <span className="text-xs text-muted-foreground">50% complete</span>
+              </div>
+              <div className={`flex flex-col items-center p-4 rounded-lg border-2 transition-all ${overallProgress >= 100 ? 'border-green-400 bg-green-50 dark:bg-green-950/20' : 'border-muted bg-muted/30 opacity-50'}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${overallProgress >= 100 ? 'bg-green-500' : 'bg-muted'}`}>
+                  <Trophy className={`w-6 h-6 ${overallProgress >= 100 ? 'text-white' : 'text-muted-foreground'}`} />
+                </div>
+                <span className="text-sm font-medium text-center">Visa Ready</span>
+                <span className="text-xs text-muted-foreground">100% complete</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {nextStep && (
           <Alert className="mb-8 border-primary/50 bg-primary/5">
