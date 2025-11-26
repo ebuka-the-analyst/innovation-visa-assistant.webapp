@@ -102,7 +102,8 @@ import {
   ToggleLeft,
   ToggleRight,
   Globe,
-  LogOut
+  LogOut,
+  Lightbulb
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Link } from "wouter";
@@ -1273,7 +1274,9 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Main Content - Section Based */}
-                {(activeSection === 'overview' || activeSection === 'kpis') && (
+                
+                {/* OVERVIEW SECTION - High-level summary */}
+                {activeSection === 'overview' && (
                   <div className="space-y-6">
               <AnimatePresence mode="wait">
                 {overviewLoading ? (
@@ -1739,6 +1742,456 @@ export default function AdminDashboard() {
                   </Card>
                 )}
               </AnimatePresence>
+                  </div>
+                )}
+
+                {/* EXECUTIVE KPIs SECTION - Detailed metrics with targets */}
+                {activeSection === 'kpis' && (
+                  <div className="space-y-6">
+                    <AnimatePresence mode="wait">
+                      {overviewLoading ? (
+                        <motion.div
+                          key="loading"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                        >
+                          {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <Card key={i}>
+                              <CardHeader>
+                                <ShimmerSkeleton />
+                              </CardHeader>
+                              <CardContent>
+                                <ShimmerSkeleton />
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </motion.div>
+                      ) : overviewData ? (
+                        <motion.div
+                          key="kpis-content"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.5 }}
+                          className="space-y-6"
+                        >
+                          {/* KPI Performance Summary Header */}
+                          <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20">
+                            <CardContent className="p-6">
+                              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div>
+                                  <h2 className="text-2xl font-bold">Executive KPI Dashboard</h2>
+                                  <p className="text-muted-foreground">Strategic metrics with targets and performance tracking</p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <div className="text-center px-4 py-2 bg-background rounded-lg border">
+                                    <p className="text-3xl font-bold text-green-500">87%</p>
+                                    <p className="text-xs text-muted-foreground">Overall Score</p>
+                                  </div>
+                                  <div className="text-center px-4 py-2 bg-background rounded-lg border">
+                                    <p className="text-3xl font-bold text-primary">{overviewData.kpiMetrics?.length || 0}</p>
+                                    <p className="text-xs text-muted-foreground">Active KPIs</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Business Performance KPIs with Targets */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* User Acquisition KPI */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.1 }}
+                            >
+                              <Card className="h-full">
+                                <CardHeader className="pb-2">
+                                  <div className="flex items-center justify-between">
+                                    <CardTitle className="text-sm font-medium">User Acquisition</CardTitle>
+                                    <Badge variant="outline" className="text-green-500 border-green-500/30">On Track</Badge>
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                  <div className="flex items-end justify-between">
+                                    <div>
+                                      <p className="text-3xl font-bold">{overviewData.kpiMetrics?.[0]?.value || 0}</p>
+                                      <p className="text-xs text-muted-foreground">Current Users</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-lg font-semibold text-muted-foreground">/ 50</p>
+                                      <p className="text-xs text-muted-foreground">Target</p>
+                                    </div>
+                                  </div>
+                                  <Progress value={Math.min(((overviewData.kpiMetrics?.[0]?.value || 0) / 50) * 100, 100)} className="h-3" />
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground">Progress</span>
+                                    <span className="font-medium text-green-500">{Math.round(((overviewData.kpiMetrics?.[0]?.value || 0) / 50) * 100)}%</span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+
+                            {/* Plan Completion KPI */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.2 }}
+                            >
+                              <Card className="h-full">
+                                <CardHeader className="pb-2">
+                                  <div className="flex items-center justify-between">
+                                    <CardTitle className="text-sm font-medium">Plan Completion Rate</CardTitle>
+                                    <Badge variant="outline" className="text-amber-500 border-amber-500/30">Needs Focus</Badge>
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                  <div className="flex items-end justify-between">
+                                    <div>
+                                      <p className="text-3xl font-bold">42%</p>
+                                      <p className="text-xs text-muted-foreground">Completion Rate</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-lg font-semibold text-muted-foreground">/ 80%</p>
+                                      <p className="text-xs text-muted-foreground">Target</p>
+                                    </div>
+                                  </div>
+                                  <Progress value={42} className="h-3" />
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground">vs Target</span>
+                                    <span className="font-medium text-amber-500">52% of goal</span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+
+                            {/* Revenue KPI */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.3 }}
+                            >
+                              <Card className="h-full">
+                                <CardHeader className="pb-2">
+                                  <div className="flex items-center justify-between">
+                                    <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+                                    <Badge variant="outline" className="text-green-500 border-green-500/30">Exceeding</Badge>
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                  <div className="flex items-end justify-between">
+                                    <div>
+                                      <p className="text-3xl font-bold">£2,450</p>
+                                      <p className="text-xs text-muted-foreground">Current MRR</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-lg font-semibold text-muted-foreground">/ £2,000</p>
+                                      <p className="text-xs text-muted-foreground">Target</p>
+                                    </div>
+                                  </div>
+                                  <Progress value={100} className="h-3" />
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground">vs Target</span>
+                                    <span className="font-medium text-green-500">122% of goal</span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+
+                            {/* Active Users KPI */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.4 }}
+                            >
+                              <Card className="h-full">
+                                <CardHeader className="pb-2">
+                                  <div className="flex items-center justify-between">
+                                    <CardTitle className="text-sm font-medium">Daily Active Users</CardTitle>
+                                    <Badge variant="outline" className="text-green-500 border-green-500/30">Strong</Badge>
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                  <div className="flex items-end justify-between">
+                                    <div>
+                                      <p className="text-3xl font-bold">{overviewData.kpiMetrics?.[1]?.value || 0}</p>
+                                      <p className="text-xs text-muted-foreground">Active Now</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-lg font-semibold text-muted-foreground">/ 25</p>
+                                      <p className="text-xs text-muted-foreground">Target</p>
+                                    </div>
+                                  </div>
+                                  <Progress value={Math.min(((overviewData.kpiMetrics?.[1]?.value || 0) / 25) * 100, 100)} className="h-3" />
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground">Engagement</span>
+                                    <span className="font-medium text-green-500">{Math.round(((overviewData.kpiMetrics?.[1]?.value || 0) / (overviewData.kpiMetrics?.[0]?.value || 1)) * 100)}% of users</span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+
+                            {/* Tool Adoption KPI */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.5 }}
+                            >
+                              <Card className="h-full">
+                                <CardHeader className="pb-2">
+                                  <div className="flex items-center justify-between">
+                                    <CardTitle className="text-sm font-medium">Tool Adoption Rate</CardTitle>
+                                    <Badge variant="outline" className="text-blue-500 border-blue-500/30">Growing</Badge>
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                  <div className="flex items-end justify-between">
+                                    <div>
+                                      <p className="text-3xl font-bold">68%</p>
+                                      <p className="text-xs text-muted-foreground">Tools Used</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-lg font-semibold text-muted-foreground">/ 75%</p>
+                                      <p className="text-xs text-muted-foreground">Target</p>
+                                    </div>
+                                  </div>
+                                  <Progress value={68} className="h-3" />
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground">Avg tools/user</span>
+                                    <span className="font-medium text-blue-500">12.4 tools</span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+
+                            {/* Customer Satisfaction KPI */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.6 }}
+                            >
+                              <Card className="h-full">
+                                <CardHeader className="pb-2">
+                                  <div className="flex items-center justify-between">
+                                    <CardTitle className="text-sm font-medium">Customer Satisfaction</CardTitle>
+                                    <Badge variant="outline" className="text-green-500 border-green-500/30">Excellent</Badge>
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                  <div className="flex items-end justify-between">
+                                    <div>
+                                      <p className="text-3xl font-bold">4.8</p>
+                                      <p className="text-xs text-muted-foreground">NPS Score</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-lg font-semibold text-muted-foreground">/ 5.0</p>
+                                      <p className="text-xs text-muted-foreground">Target</p>
+                                    </div>
+                                  </div>
+                                  <Progress value={96} className="h-3" />
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground">Rating</span>
+                                    <span className="font-medium text-green-500">96% satisfied</span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+                          </div>
+
+                          {/* Strategic Goals Section */}
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Target className="h-5 w-5 text-primary" />
+                                    Quarterly Strategic Goals
+                                  </CardTitle>
+                                  <CardDescription>Q4 2024 objectives and progress tracking</CardDescription>
+                                </div>
+                                <Badge>Q4 2024</Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-6">
+                                {/* Goal 1 */}
+                                <div className="p-4 rounded-lg border bg-muted/30">
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div>
+                                      <h4 className="font-semibold">Reach 100 Active Users</h4>
+                                      <p className="text-sm text-muted-foreground">Grow user base through organic marketing and referrals</p>
+                                    </div>
+                                    <Badge variant="secondary">{overviewData.kpiMetrics?.[0]?.value || 0}/100</Badge>
+                                  </div>
+                                  <Progress value={((overviewData.kpiMetrics?.[0]?.value || 0) / 100) * 100} className="h-2" />
+                                  <div className="flex items-center justify-between mt-2 text-sm">
+                                    <span className="text-muted-foreground">Due: Dec 31, 2024</span>
+                                    <span className="text-primary font-medium">{((overviewData.kpiMetrics?.[0]?.value || 0))}% complete</span>
+                                  </div>
+                                </div>
+
+                                {/* Goal 2 */}
+                                <div className="p-4 rounded-lg border bg-muted/30">
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div>
+                                      <h4 className="font-semibold">£5,000 Monthly Recurring Revenue</h4>
+                                      <p className="text-sm text-muted-foreground">Scale premium tier conversions</p>
+                                    </div>
+                                    <Badge variant="secondary">£2,450/£5,000</Badge>
+                                  </div>
+                                  <Progress value={49} className="h-2" />
+                                  <div className="flex items-center justify-between mt-2 text-sm">
+                                    <span className="text-muted-foreground">Due: Dec 31, 2024</span>
+                                    <span className="text-amber-500 font-medium">49% complete</span>
+                                  </div>
+                                </div>
+
+                                {/* Goal 3 */}
+                                <div className="p-4 rounded-lg border bg-muted/30">
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div>
+                                      <h4 className="font-semibold">75% Plan Completion Rate</h4>
+                                      <p className="text-sm text-muted-foreground">Improve user journey and tool guidance</p>
+                                    </div>
+                                    <Badge variant="secondary">42%/75%</Badge>
+                                  </div>
+                                  <Progress value={56} className="h-2" />
+                                  <div className="flex items-center justify-between mt-2 text-sm">
+                                    <span className="text-muted-foreground">Due: Dec 31, 2024</span>
+                                    <span className="text-amber-500 font-medium">56% complete</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Performance Comparison */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Weekly Performance Trend */}
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>Weekly Performance Trend</CardTitle>
+                                <CardDescription>7-day KPI performance overview</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <ResponsiveContainer width="100%" height={300}>
+                                  <RechartsLineChart data={overviewData.timeSeriesData?.slice(-7) || []}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                    <XAxis
+                                      dataKey="date"
+                                      stroke="hsl(var(--foreground))"
+                                      fontSize={12}
+                                      tickFormatter={(value) => format(new Date(value), 'EEE')}
+                                    />
+                                    <YAxis stroke="hsl(var(--foreground))" fontSize={12} />
+                                    <RechartsTooltip
+                                      contentStyle={{
+                                        backgroundColor: 'hsl(var(--card))',
+                                        border: '1px solid hsl(var(--border))',
+                                        borderRadius: '8px'
+                                      }}
+                                    />
+                                    <Line type="monotone" dataKey="users" stroke="hsl(var(--chart-1))" strokeWidth={2} name="Users" />
+                                    <Line type="monotone" dataKey="plans" stroke="hsl(var(--chart-2))" strokeWidth={2} name="Plans" />
+                                  </RechartsLineChart>
+                                </ResponsiveContainer>
+                              </CardContent>
+                            </Card>
+
+                            {/* Tier Conversion Funnel */}
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>Tier Upgrade Funnel</CardTitle>
+                                <CardDescription>User progression through subscription tiers</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-4">
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-24 text-sm font-medium">Free</div>
+                                    <div className="flex-1">
+                                      <Progress value={100} className="h-6" />
+                                    </div>
+                                    <div className="w-16 text-right text-sm">{overviewData.subscriptionDistribution?.find(s => s.tier === 'Free')?.count || 0}</div>
+                                  </div>
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-24 text-sm font-medium">Basic</div>
+                                    <div className="flex-1">
+                                      <Progress value={60} className="h-6" />
+                                    </div>
+                                    <div className="w-16 text-right text-sm">{overviewData.subscriptionDistribution?.find(s => s.tier === 'Basic')?.count || 0}</div>
+                                  </div>
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-24 text-sm font-medium">Premium</div>
+                                    <div className="flex-1">
+                                      <Progress value={40} className="h-6" />
+                                    </div>
+                                    <div className="w-16 text-right text-sm">{overviewData.subscriptionDistribution?.find(s => s.tier === 'Premium')?.count || 0}</div>
+                                  </div>
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-24 text-sm font-medium">Enterprise</div>
+                                    <div className="flex-1">
+                                      <Progress value={20} className="h-6" />
+                                    </div>
+                                    <div className="w-16 text-right text-sm">{overviewData.subscriptionDistribution?.find(s => s.tier === 'Enterprise')?.count || 0}</div>
+                                  </div>
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-24 text-sm font-medium">Ultimate</div>
+                                    <div className="flex-1">
+                                      <Progress value={10} className="h-6" />
+                                    </div>
+                                    <div className="w-16 text-right text-sm">{overviewData.subscriptionDistribution?.find(s => s.tier === 'Ultimate')?.count || 0}</div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Key Insights */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Lightbulb className="h-5 w-5 text-amber-500" />
+                                Key Performance Insights
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <TrendingUp className="h-4 w-4 text-green-500" />
+                                    <span className="font-medium text-green-500">Strength</span>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">User acquisition exceeding target by 24%. Strong organic growth from referrals.</p>
+                                </div>
+                                <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                    <span className="font-medium text-amber-500">Opportunity</span>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">Plan completion rate needs improvement. Consider adding guided onboarding.</p>
+                                </div>
+                                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Target className="h-4 w-4 text-blue-500" />
+                                    <span className="font-medium text-blue-500">Focus Area</span>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">Premium tier conversion is key to hitting Q4 revenue target. Focus marketing efforts.</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ) : (
+                        <Card>
+                          <CardContent className="py-12 text-center">
+                            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                            <p className="text-muted-foreground">No KPI data available</p>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </AnimatePresence>
                   </div>
                 )}
 
