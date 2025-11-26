@@ -292,12 +292,24 @@ export default function SupportPage() {
                   </Alert>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
-                    {indicatorProps.lastSaved && (
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <CheckCircle2 className="h-3 w-3 text-green-500" />
-                        <span>Draft auto-saved {indicatorProps.lastSaved}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="autosave-status">
+                      {indicatorProps.isSaving ? (
+                        <>
+                          <Clock className="h-3 w-3 animate-spin text-primary" />
+                          <span>Saving draft...</span>
+                        </>
+                      ) : indicatorProps.showNotification ? (
+                        <>
+                          <CheckCircle2 className="h-3 w-3 text-green-500" />
+                          <span className="text-green-500">Draft saved</span>
+                        </>
+                      ) : indicatorProps.lastSaved ? (
+                        <>
+                          <CheckCircle2 className="h-3 w-3 text-muted-foreground" />
+                          <span>Draft auto-saved {indicatorProps.lastSaved}</span>
+                        </>
+                      ) : null}
+                    </div>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="topic">Topic</Label>
