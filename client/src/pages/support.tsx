@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useAutoSaveWithIndicator } from "@/components/AutoSaveIndicator";
 import { 
   HelpCircle, MessageSquare, Mail, Phone, Clock, 
   CheckCircle2, Send, BookOpen, FileQuestion, 
@@ -111,16 +112,18 @@ const CONTACT_TOPICS = [
 export default function SupportPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [topic, setTopic] = useState("");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  
+  const { data: formData, setData: setFormData, clearSaved, indicatorProps } = useAutoSaveWithIndicator(
+    'support-form',
+    { topic: "", subject: "", message: "" }
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!topic || !subject || !message) {
+    if (!formData.topic || !formData.subject || !formData.message) {
       toast({
         title: "Missing Information",
         description: "Please fill in all fields",
@@ -133,12 +136,13 @@ export default function SupportPage() {
 
     try {
       await apiRequest("POST", "/api/support/contact", {
-        topic,
-        subject,
-        message,
+        topic: formData.topic,
+        subject: formData.subject,
+        message: formData.message,
         email: user?.email,
       });
 
+      clearSaved();
       setSubmitted(true);
       toast({
         title: "Message Sent",
@@ -279,9 +283,7 @@ export default function SupportPage() {
                         className="mt-3"
                         onClick={() => {
                           setSubmitted(false);
-                          setTopic("");
-                          setSubject("");
-                          setMessage("");
+                          clearSaved();
                         }}
                       >
                         Send Another Message
@@ -290,10 +292,16 @@ export default function SupportPage() {
                   </Alert>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    {indicatorProps.lastSaved && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <CheckCircle2 className="h-3 w-3 text-green-500" />
+                        <span>Draft auto-saved {indicatorProps.lastSaved}</span>
+                      </div>
+                    )}
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="topic">Topic</Label>
-                        <Select value={topic} onValueChange={setTopic}>
+                        <Select value={formData.topic} onValueChange={(v) => setFormData({ ...formData, topic: v })}>
                           <SelectTrigger id="topic" data-testid="select-topic">
                             <SelectValue placeholder="Select a topic" />
                           </SelectTrigger>
@@ -323,8 +331,8 @@ export default function SupportPage() {
                       <Label htmlFor="subject">Subject</Label>
                       <Input 
                         id="subject"
-                        value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
+                        value={formData.subject}
+                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                         placeholder="Brief description of your inquiry"
                         data-testid="input-subject"
                       />
@@ -334,8 +342,8 @@ export default function SupportPage() {
                       <Label htmlFor="message">Message</Label>
                       <Textarea 
                         id="message"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        value={formData.message}
+                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                         placeholder="Please provide as much detail as possible..."
                         rows={6}
                         data-testid="input-message"
