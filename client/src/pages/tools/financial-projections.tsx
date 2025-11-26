@@ -24,7 +24,7 @@ const AI_TOOL_CONFIG: ToolConfig = {
     {
       id: 'fp-initial-funding',
       question: "Let's start with your starting capital. How much initial funding do you have secured or plan to secure for launching your UK business? (in GBP)",
-      hint: "Include personal investment, loans, grants, or investor commitments. The minimum is typically around £50,000 for credibility.",
+      hint: "Include personal investment, loans, grants, or investor commitments. There's no minimum requirement - focus on what you need to execute your plan.",
       fieldKey: 'initial_investment',
       minLength: 10
     },

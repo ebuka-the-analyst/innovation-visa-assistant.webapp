@@ -102,10 +102,10 @@ export default function MinInvestmentCalc() {
   const barData = categories.map((c) => ({ name: c.name.split(" ")[0], amount: c.amount }));
 
   const getRecommendation = () => {
-    if (totalInvestment < 50000) {
-      return { level: "low", message: "Investment may be insufficient for a viable UK business. Consider increasing to at least £50,000." };
+    if (totalInvestment < 20000) {
+      return { level: "low", message: "Consider if this covers your business needs. There's no minimum requirement - focus on what you need to execute your plan." };
     }
-    if (totalInvestment >= 50000 && totalInvestment < 100000) {
+    if (totalInvestment >= 20000 && totalInvestment < 75000) {
       return { level: "medium", message: "Reasonable starting investment. Ensure runway covers at least 12 months of operations." };
     }
     return { level: "high", message: "Strong investment level. This demonstrates commitment and provides good runway." };

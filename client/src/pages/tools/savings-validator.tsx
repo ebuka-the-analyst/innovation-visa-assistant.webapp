@@ -49,15 +49,15 @@ export default function SavingsValidator() {
   const totalSavings = accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
   const verifiedSavings = accounts.filter(acc => acc.verified).reduce((sum, acc) => sum + acc.balance, 0);
   const unverifiedSavings = totalSavings - verifiedSavings;
-  const meetsMinimum = totalSavings >= 50000;
-  const verifiedMeetsMinimum = verifiedSavings >= 50000;
+  const meetsMinimum = totalSavings >= 1270;
+  const verifiedMeetsMinimum = verifiedSavings >= 1270;
   
   const accountsWithFullStatements = accounts.filter(acc => acc.monthsOfStatements >= 6).length;
   const accountsWithSourceDocs = accounts.filter(acc => acc.sourceDocumented).length;
   const totalAccounts = accounts.length;
   
   const documentationScore = Math.min(100, Math.round(
-    ((verifiedSavings / 50000) * 40) +
+    ((Math.min(verifiedSavings, totalSavings) / Math.max(totalSavings, 1270)) * 40) +
     ((accountsWithFullStatements / totalAccounts) * 30) +
     ((accountsWithSourceDocs / totalAccounts) * 30)
   ));
@@ -119,12 +119,12 @@ export default function SavingsValidator() {
 
   const getSmartTips = () => {
     const tips = [];
-    if (!meetsMinimum) tips.push("You need at least £50,000 in total personal savings to meet the UK Innovator Founder Visa requirement");
+    if (!meetsMinimum) tips.push("You need at least £1,270 in personal savings held for 28 consecutive days to meet the UK Innovator Founder Visa maintenance requirement");
     if (!verifiedMeetsMinimum && meetsMinimum) tips.push("Ensure all savings accounts are verified with official bank letterhead confirming balances and accessibility");
     if (accounts.some(a => a.monthsOfStatements < 6)) tips.push("GOV.UK requires 6 months of consecutive bank statements for all accounts - gaps will raise red flags");
     if (accounts.some(a => !a.sourceDocumented && a.balance > 10000)) tips.push("Document the source of all large deposits (salary slips, sale of property, inheritance letters, etc.)");
     if (accounts.filter(a => a.verified).length < accounts.length) tips.push("Request official bank letters on letterhead confirming account ownership, balance, and accessibility");
-    if (totalAccounts === 1 && totalSavings >= 50000) tips.push("Having savings spread across 2-3 accounts demonstrates financial stability and reduces single-point-of-failure risk");
+    if (totalAccounts === 1 && totalSavings >= 5000) tips.push("Having savings spread across 2-3 accounts demonstrates financial stability and reduces single-point-of-failure risk");
     if (documentationScore >= 80) tips.push("Excellent documentation status - ensure all statements are recent (within 31 days of submission)");
     if (accounts.some(a => a.accountType === 'investment')) tips.push("Investment accounts must show liquid accessible funds - provide evidence of withdrawal capability without penalties");
     return tips.slice(0, 6);
@@ -141,7 +141,7 @@ export default function SavingsValidator() {
       { week: "Week 3", action: "Verify all statements show your name, address, and account details clearly visible", priority: "High" },
       { week: "Week 4", action: "Create summary spreadsheet listing all accounts, balances, and documentation status", priority: "Medium" },
       { week: "Week 4", action: "Have accountant certify the total savings figure and confirm fund accessibility", priority: "High" },
-      { week: "Ongoing", action: "Monitor balances - do not drop below £50k from now until visa decision", priority: "Critical" },
+      { week: "Ongoing", action: "Monitor balances - do not drop below £1,270 from now until visa decision", priority: "Critical" },
     ];
   };
 
@@ -155,7 +155,7 @@ ${'-'.repeat(80)}
 Total Personal Savings: £${totalSavings.toLocaleString()}
 Verified Savings: £${verifiedSavings.toLocaleString()}
 Unverified Savings: £${unverifiedSavings.toLocaleString()}
-Minimum Requirement: £50,000
+Minimum Requirement: £1,270 (personal maintenance)
 Status: ${meetsMinimum ? 'MEETS MINIMUM' : 'BELOW MINIMUM'}
 Verified Status: ${verifiedMeetsMinimum ? 'VERIFIED MEETS MINIMUM' : 'NEEDS MORE VERIFICATION'}
 Documentation Compliance Score: ${documentationScore}%
@@ -181,7 +181,7 @@ ${savingsByType.map(item => `${item.name}: £${item.value.toLocaleString()}`).jo
 
 GOV.UK COMPLIANCE CHECKLIST
 ${'-'.repeat(80)}
-${meetsMinimum ? '[✓]' : '[ ]'} Minimum £50,000 total savings
+${meetsMinimum ? '[✓]' : '[ ]'} Minimum £1,270 personal maintenance savings
 ${verifiedMeetsMinimum ? '[✓]' : '[ ]'} Verified with official bank letters
 ${accountsWithFullStatements === totalAccounts ? '[✓]' : '[ ]'} 6 months consecutive statements for all accounts
 ${accountsWithSourceDocs === totalAccounts ? '[✓]' : '[ ]'} Source of funds documented for all accounts
@@ -284,7 +284,7 @@ Consult with a qualified immigration lawyer before submitting your application.
           
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2" data-testid="heading-savings-validator">Personal Savings Validator</h1>
-            <p className="text-lg text-muted-foreground">Verify £50,000 savings requirement with complete documentation compliance</p>
+            <p className="text-lg text-muted-foreground">Verify your personal savings meet the £1,270 maintenance requirement with proper documentation</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
             )}
@@ -311,7 +311,7 @@ Consult with a qualified immigration lawyer before submitting your application.
               <Card>
                 <CardHeader>
                   <CardTitle>Savings Documentation Status</CardTitle>
-                  <CardDescription>UK Innovator Founder Visa requires £50,000 in accessible personal savings with 6-month bank statements</CardDescription>
+                  <CardDescription>UK Innovator Founder Visa requires £1,270 in personal savings held for 28 consecutive days. Additional savings strengthen your application.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid md:grid-cols-3 gap-4">
@@ -364,7 +364,7 @@ Consult with a qualified immigration lawyer before submitting your application.
                     <Alert variant="destructive">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertDescription>
-                        You are £{(50000 - totalSavings).toLocaleString()} short of the £50,000 minimum requirement. You must have this amount in accessible personal savings.
+                        You are £{(1270 - totalSavings).toLocaleString()} short of the £1,270 minimum personal savings requirement.
                       </AlertDescription>
                     </Alert>
                   )}
