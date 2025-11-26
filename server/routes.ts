@@ -1708,10 +1708,27 @@ ${generatedSections.join('\n\n---\n\n')}`;
       }
       
       const total = allPlans.length;
-      const plans = allPlans.slice(offset, offset + limitNum);
+      const paginatedPlans = allPlans.slice(offset, offset + limitNum);
+      
+      // Fetch user emails for each plan
+      const plansWithOwner = await Promise.all(
+        paginatedPlans.map(async (plan) => {
+          let userEmail = null;
+          if (plan.userId) {
+            const user = await storage.getUser(plan.userId);
+            if (user) {
+              userEmail = user.email;
+            }
+          }
+          return {
+            ...plan,
+            userEmail,
+          };
+        })
+      );
       
       res.json({
-        plans,
+        plans: plansWithOwner,
         pagination: {
           page: pageNum,
           limit: limitNum,
