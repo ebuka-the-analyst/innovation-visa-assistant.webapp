@@ -592,7 +592,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllBusinessPlans(): Promise<BusinessPlan[]> {
-    const result = await db.select().from(businessPlans);
+    const result = await db.select().from(businessPlans).orderBy(desc(businessPlans.createdAt));
     return result;
   }
 
