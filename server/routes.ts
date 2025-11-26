@@ -441,18 +441,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid tier for direct subscription" });
       }
 
-      // Create a minimal business plan for this direct subscription
+      // Create a minimal business plan for this direct subscription with all required fields
       const businessPlan = await storage.createBusinessPlan({
         userId: user.id,
         tier: tier,
         businessName: `Direct Subscription - ${pricing.name}`,
-        businessDescription: "Plan created via direct subscription",
-        targetMarket: "UK",
-        uniqueValue: "Subscription purchase",
-        teamSize: "1",
-        fundingStatus: "self-funded",
         industry: "technology",
-        status: 'pending',
+        problem: "Direct subscription - complete questionnaire later to generate full business plan",
+        uniqueness: "Direct subscription purchase",
+        technology: "To be completed",
+        experience: "To be completed",
+        funding: 0,
+        revenue: "To be completed",
+        jobCreation: 2,
+        expansion: "UK and international markets",
+        vision: "To be completed after subscription",
+        innovationStage: "concept",
+        productStatus: "Direct subscription - details to be completed",
+        techStack: "To be completed",
+        dataArchitecture: "To be completed after subscription",
+        aiMethodology: "To be completed after subscription",
+        complianceDesign: "To be completed after subscription",
+        patentStatus: "none",
+        founderEducation: "To be completed",
+        founderWorkHistory: "To be completed after subscription",
+        founderAchievements: "To be completed",
+        relevantProjects: "To be completed",
+        monthlyProjections: "To be completed",
+        customerAcquisitionCost: 0,
+        lifetimeValue: 0,
+        paybackPeriod: 12,
+        fundingSources: "Self-funded",
+        detailedCosts: "To be completed",
+        competitors: "To be completed",
+        competitiveDifferentiation: "To be completed",
+        customerInterviews: "To be completed",
+        willingnessToPay: "To be completed",
+        marketSize: "To be completed",
+        regulatoryRequirements: "To be completed",
+        complianceTimeline: "To be completed",
+        complianceBudget: 0,
+        hiringPlan: "To be completed",
+        specificRegions: "United Kingdom",
+        targetEndorser: "To be selected",
+        contactPointsStrategy: "To be completed",
       });
 
       // Get the correct base URL for redirects
@@ -3032,7 +3064,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       // Calculate analytics per code
       const codesWithAnalytics = codes.map(code => {
         const codeRedemptions = redemptions.filter(r => r.promoCodeId === code.id);
-        const totalRevenue = codeRedemptions.reduce((sum, r) => sum + (r.discountAmount || 0), 0);
+        const totalRevenue = codeRedemptions.reduce((sum, r) => sum + (r.discountApplied || 0), 0);
         
         return {
           ...code,
@@ -3052,7 +3084,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const activeCodes = codes.filter(c => c.status === 'active').length;
       const expiredCodes = codes.filter(c => c.validUntil && new Date(c.validUntil) < new Date()).length;
       const totalRedemptions = redemptions.length;
-      const totalRevenueSaved = redemptions.reduce((sum, r) => sum + (r.discountAmount || 0), 0);
+      const totalRevenueSaved = redemptions.reduce((sum, r) => sum + (r.discountApplied || 0), 0);
       
       res.json({
         promoCodes: codesWithAnalytics,
