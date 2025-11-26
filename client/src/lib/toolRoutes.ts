@@ -130,6 +130,14 @@ const toolMap: Record<string, any> = {
   'skills-matrix': lazy(() => import('@/pages/tools/skills-matrix')),
   'succession-planning': lazy(() => import('@/pages/tools/succession-planning')),
   'team-bios': lazy(() => import('@/pages/tools/team-bios')),
+  'traction-evidence': lazy(() => import('@/pages/tools/traction-evidence')),
+  'founder-portfolio': lazy(() => import('@/pages/tools/founder-portfolio')),
+  'endorser-cover-letter': lazy(() => import('@/pages/tools/endorser-cover-letter')),
+  'commercial-validation': lazy(() => import('@/pages/tools/commercial-validation')),
+  'oisc-compliance': lazy(() => import('@/pages/tools/oisc-compliance')),
+  'market-data-verifier': lazy(() => import('@/pages/tools/market-data-verifier')),
+  'mvp-demo-guide': lazy(() => import('@/pages/tools/mvp-demo-guide')),
+  'financial-resilience': lazy(() => import('@/pages/tools/financial-resilience')),
 };
 
 export function getToolComponent(toolId: string) {
