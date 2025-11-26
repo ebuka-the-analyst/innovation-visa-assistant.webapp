@@ -1325,7 +1325,7 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
 
       try {
         const completion = await openai.chat.completions.create({
-          model: "gpt-4-turbo-preview",
+          model: "gpt-4o",
           messages: [
             { role: "system", content: sectionSystemPrompt },
             { role: "user", content: sectionUserPrompt },
@@ -1338,8 +1338,13 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
         generatedSections.push(`\n\n## ${section.title}\n\n${sectionContent}`);
         
         console.log(`✓ Section ${i + 1} complete (${sectionContent.length} chars)`);
-      } catch (error) {
-        console.error(`Error generating section ${i + 1}:`, error);
+      } catch (error: any) {
+        console.error(`Error generating section ${i + 1} (${section.title}):`, {
+          message: error?.message,
+          status: error?.status,
+          code: error?.code,
+          type: error?.type
+        });
         generatedSections.push(`\n\n## ${section.title}\n\n[Generation failed for this section]`);
       }
     }
