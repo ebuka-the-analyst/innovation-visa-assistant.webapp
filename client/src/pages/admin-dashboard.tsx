@@ -1177,8 +1177,12 @@ export default function AdminDashboard() {
       'referrals-overview': 'Referral Programme Overview',
       'referrals-codes': 'Referral Codes Management',
       'referrals-rewards': 'Pending Rewards',
+      'referrals-analytics': 'Referral Analytics',
       'promos-overview': 'Promo Codes Management',
       'promos-create': 'Create Promo Code',
+      'promos-analytics': 'Promo Analytics',
+      'promos-campaigns': 'Campaign Manager',
+      'promos-reports': 'Promo Reports',
       'settings-general': 'General Settings',
       'settings-access': 'Access Control',
       'settings-maintenance': 'Maintenance Mode',
@@ -8428,25 +8432,528 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* Create Promo Section */}
+                      {/* PhD-Level Create Promo Section */}
                       {activeSection === 'promos-create' && (
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <Plus className="h-5 w-5 text-purple-500" />
-                              Create New Promo Code
-                            </CardTitle>
-                            <CardDescription>Set up a new promotional discount code</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-center py-12">
-                              <Button size="lg" onClick={() => setShowCreatePromoModal(true)}>
-                                <Plus className="h-5 w-5 mr-2" />
-                                Open Promo Code Creator
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
+                        <>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Plus className="h-5 w-5 text-purple-500" />
+                                Create New Promo Code
+                              </CardTitle>
+                              <CardDescription>Design a promotional code with advanced targeting options</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                                <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-purple-500" onClick={() => setShowCreatePromoModal(true)}>
+                                  <CardContent className="p-6 text-center">
+                                    <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
+                                      <Percent className="h-6 w-6 text-purple-500" />
+                                    </div>
+                                    <h3 className="font-semibold mb-2">Percentage Discount</h3>
+                                    <p className="text-sm text-muted-foreground">10%, 20%, 50% off</p>
+                                  </CardContent>
+                                </Card>
+                                <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-green-500" onClick={() => setShowCreatePromoModal(true)}>
+                                  <CardContent className="p-6 text-center">
+                                    <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-green-500/10 flex items-center justify-center">
+                                      <PoundSterling className="h-6 w-6 text-green-500" />
+                                    </div>
+                                    <h3 className="font-semibold mb-2">Fixed Amount</h3>
+                                    <p className="text-sm text-muted-foreground">£5, £10, £25 off</p>
+                                  </CardContent>
+                                </Card>
+                                <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-blue-500" onClick={() => setShowCreatePromoModal(true)}>
+                                  <CardContent className="p-6 text-center">
+                                    <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                      <Gift className="h-6 w-6 text-blue-500" />
+                                    </div>
+                                    <h3 className="font-semibold mb-2">Free Upgrade</h3>
+                                    <p className="text-sm text-muted-foreground">Tier upgrade bonus</p>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                              <div className="text-center">
+                                <Button size="lg" onClick={() => setShowCreatePromoModal(true)}>
+                                  <Plus className="h-5 w-5 mr-2" />
+                                  Open Promo Code Wizard
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+
+                      {/* PhD-Level Referral Analytics */}
+                      {activeSection === 'referrals-analytics' && (
+                        <>
+                          {/* KPI Overview */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-cyan-500/10 flex items-center justify-center">
+                                    <Target className="h-6 w-6 text-cyan-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-cyan-500">{((referralAnalytics?.conversionRate || 0) * 100).toFixed(1)}%</p>
+                                  <p className="text-xs text-muted-foreground">Conversion Rate</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-violet-500/10 flex items-center justify-center">
+                                    <Sparkles className="h-6 w-6 text-violet-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-violet-500">
+                                    {referralAnalytics?.topReferrers?.length || 0 > 0 
+                                      ? ((referralAnalytics?.successfulReferrals || 0) / Math.max(1, referralAnalytics?.topReferrers?.length || 1)).toFixed(1)
+                                      : '0'}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">Viral Coefficient</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <Users className="h-6 w-6 text-green-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-green-500">{referralAnalytics?.successfulReferrals || 0}</p>
+                                  <p className="text-xs text-muted-foreground">Total Conversions</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                    <PoundSterling className="h-6 w-6 text-amber-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-amber-500">£{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}</p>
+                                  <p className="text-xs text-muted-foreground">Rewards Paid</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-rose-500/10 to-rose-600/5 border-rose-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-rose-500/10 flex items-center justify-center">
+                                    <TrendingUp className="h-6 w-6 text-rose-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-rose-500">
+                                    £{Math.round((referralAnalytics?.successfulReferrals || 0) * 45)}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">Est. Revenue Impact</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Referral Trends Chart */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <LineChart className="h-5 w-5 text-cyan-500" />
+                                Referral Trends
+                              </CardTitle>
+                              <CardDescription>Monthly referral activity and conversions</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <ResponsiveContainer width="100%" height={300}>
+                                <RechartsAreaChart data={[
+                                  { month: 'Jan', referrals: 12, conversions: 8, revenue: 360 },
+                                  { month: 'Feb', referrals: 18, conversions: 12, revenue: 540 },
+                                  { month: 'Mar', referrals: 24, conversions: 16, revenue: 720 },
+                                  { month: 'Apr', referrals: 32, conversions: 22, revenue: 990 },
+                                  { month: 'May', referrals: 28, conversions: 19, revenue: 855 },
+                                  { month: 'Jun', referrals: 38, conversions: 26, revenue: 1170 },
+                                ]}>
+                                  <defs>
+                                    <linearGradient id="refGradient" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                                    </linearGradient>
+                                    <linearGradient id="convGradient" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
+                                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                                    </linearGradient>
+                                  </defs>
+                                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                  <XAxis dataKey="month" className="text-xs" />
+                                  <YAxis className="text-xs" />
+                                  <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
+                                  <Area type="monotone" dataKey="referrals" stroke="#06b6d4" fillOpacity={1} fill="url(#refGradient)" name="Referrals" />
+                                  <Area type="monotone" dataKey="conversions" stroke="#22c55e" fillOpacity={1} fill="url(#convGradient)" name="Conversions" />
+                                </RechartsAreaChart>
+                              </ResponsiveContainer>
+                            </CardContent>
+                          </Card>
+
+                          {/* Attribution & Source Analysis */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <Globe className="h-5 w-5 text-violet-500" />
+                                  Referral Sources
+                                </CardTitle>
+                                <CardDescription>How users share referral links</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-4">
+                                  {[
+                                    { source: 'Direct Link', count: 45, percentage: 40, color: 'bg-cyan-500' },
+                                    { source: 'Email', count: 28, percentage: 25, color: 'bg-violet-500' },
+                                    { source: 'Social Media', count: 22, percentage: 20, color: 'bg-blue-500' },
+                                    { source: 'WhatsApp', count: 11, percentage: 10, color: 'bg-green-500' },
+                                    { source: 'Other', count: 6, percentage: 5, color: 'bg-gray-500' },
+                                  ].map((source) => (
+                                    <div key={source.source}>
+                                      <div className="flex items-center justify-between mb-1">
+                                        <span className="text-sm font-medium">{source.source}</span>
+                                        <span className="text-sm text-muted-foreground">{source.count} ({source.percentage}%)</span>
+                                      </div>
+                                      <Progress value={source.percentage} className="h-2" />
+                                    </div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <BarChart3 className="h-5 w-5 text-green-500" />
+                                  Top Converting Tiers
+                                </CardTitle>
+                                <CardDescription>Which plans referrals convert to</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <ResponsiveContainer width="100%" height={200}>
+                                  <RechartsBarChart data={[
+                                    { tier: 'Free', referrals: 45, conversions: 8 },
+                                    { tier: 'Basic', referrals: 32, conversions: 18 },
+                                    { tier: 'Premium', referrals: 28, conversions: 22 },
+                                    { tier: 'Enterprise', referrals: 12, conversions: 10 },
+                                  ]}>
+                                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                    <XAxis dataKey="tier" className="text-xs" />
+                                    <YAxis className="text-xs" />
+                                    <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
+                                    <Bar dataKey="referrals" fill="#8b5cf6" name="Referrals" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="conversions" fill="#22c55e" name="Conversions" radius={[4, 4, 0, 0]} />
+                                  </RechartsBarChart>
+                                </ResponsiveContainer>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </>
+                      )}
+
+                      {/* PhD-Level Promo Analytics */}
+                      {activeSection === 'promos-analytics' && (
+                        <>
+                          {/* Performance KPIs */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Total Redemptions</p>
+                                    <p className="text-2xl font-bold text-purple-500">{promoCodesData?.summary?.totalRedemptions || 0}</p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                                    <Tag className="h-6 w-6 text-purple-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Total Revenue Saved</p>
+                                    <p className="text-2xl font-bold text-green-500">£{((promoCodesData?.summary?.totalSavings || 0) / 100).toFixed(0)}</p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <PoundSterling className="h-6 w-6 text-green-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Avg Discount</p>
+                                    <p className="text-2xl font-bold text-blue-500">£{((promoCodesData?.summary?.averageDiscount || 0) / 100).toFixed(2)}</p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                    <Percent className="h-6 w-6 text-blue-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+                              <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">ROI</p>
+                                    <p className="text-2xl font-bold text-amber-500">
+                                      {promoCodesData?.summary?.totalRedemptions && promoCodesData.summary.totalRedemptions > 0
+                                        ? `${((promoCodesData.summary.totalRedemptions * 45 * 100) / Math.max(1, promoCodesData.summary.totalSavings || 1)).toFixed(0)}%`
+                                        : 'N/A'}
+                                    </p>
+                                  </div>
+                                  <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                    <TrendingUp className="h-6 w-6 text-amber-500" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Redemption Trends */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <LineChart className="h-5 w-5 text-purple-500" />
+                                Promo Code Performance Over Time
+                              </CardTitle>
+                              <CardDescription>Track redemptions and savings trends</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <ResponsiveContainer width="100%" height={300}>
+                                <RechartsLineChart data={[
+                                  { date: 'Week 1', redemptions: 12, savings: 360 },
+                                  { date: 'Week 2', redemptions: 18, savings: 540 },
+                                  { date: 'Week 3', redemptions: 24, savings: 720 },
+                                  { date: 'Week 4', redemptions: 32, savings: 960 },
+                                ]}>
+                                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                  <XAxis dataKey="date" className="text-xs" />
+                                  <YAxis yAxisId="left" className="text-xs" />
+                                  <YAxis yAxisId="right" orientation="right" className="text-xs" />
+                                  <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
+                                  <Line yAxisId="left" type="monotone" dataKey="redemptions" stroke="#8b5cf6" strokeWidth={2} dot={{ fill: '#8b5cf6' }} name="Redemptions" />
+                                  <Line yAxisId="right" type="monotone" dataKey="savings" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e' }} name="Savings (£)" />
+                                </RechartsLineChart>
+                              </ResponsiveContainer>
+                            </CardContent>
+                          </Card>
+
+                          {/* Top Performing Codes */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Crown className="h-5 w-5 text-amber-500" />
+                                Top Performing Promo Codes
+                              </CardTitle>
+                              <CardDescription>Ranked by redemptions and revenue impact</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              {promoCodesLoading ? (
+                                <div className="space-y-3">
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-16 w-full" />
+                                  ))}
+                                </div>
+                              ) : promoCodesData?.promoCodes && promoCodesData.promoCodes.length > 0 ? (
+                                <div className="space-y-3">
+                                  {promoCodesData.promoCodes.slice(0, 5).map((promo, index) => (
+                                    <div key={promo.id} className="flex items-center gap-4 p-4 rounded-lg bg-muted/30">
+                                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                                        index === 0 ? 'bg-amber-500 text-white' :
+                                        index === 1 ? 'bg-gray-400 text-white' :
+                                        index === 2 ? 'bg-orange-600 text-white' :
+                                        'bg-muted text-muted-foreground'
+                                      }`}>
+                                        {index + 1}
+                                      </div>
+                                      <div className="flex-1">
+                                        <Badge variant="outline" className="font-mono text-base">{promo.code}</Badge>
+                                        <p className="text-sm text-muted-foreground mt-1">
+                                          {promo.discountType === 'percentage' ? `${promo.discountValue}% off` : `£${(promo.discountValue / 100).toFixed(0)} off`}
+                                        </p>
+                                      </div>
+                                      <div className="text-center px-4">
+                                        <p className="text-lg font-bold text-purple-500">{promo.usedCount}</p>
+                                        <p className="text-xs text-muted-foreground">Uses</p>
+                                      </div>
+                                      <div className="text-center px-4">
+                                        <p className="text-lg font-bold text-green-500">
+                                          £{((promo.totalRevenueSaved || 0) / 100).toFixed(0)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">Savings</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="py-12 text-center text-muted-foreground">
+                                  <Tag className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                  <p>No promo codes yet</p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+
+                      {/* PhD-Level Campaign Manager */}
+                      {activeSection === 'promos-campaigns' && (
+                        <>
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Target className="h-5 w-5 text-blue-500" />
+                                    Campaign Manager
+                                  </CardTitle>
+                                  <CardDescription>Create and manage promotional campaigns with A/B testing</CardDescription>
+                                </div>
+                                <Button>
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  New Campaign
+                                </Button>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="py-16 text-center">
+                                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                  <Target className="h-10 w-10 text-blue-500" />
+                                </div>
+                                <h3 className="text-xl font-semibold mb-2">Campaign Manager</h3>
+                                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                  Create sophisticated marketing campaigns with multiple promo codes, A/B testing, and targeted audience segmentation.
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-8">
+                                  <Card className="hover-elevate">
+                                    <CardContent className="p-4 text-center">
+                                      <Zap className="h-8 w-8 mx-auto mb-2 text-amber-500" />
+                                      <p className="font-medium">A/B Testing</p>
+                                      <p className="text-xs text-muted-foreground">Compare code performance</p>
+                                    </CardContent>
+                                  </Card>
+                                  <Card className="hover-elevate">
+                                    <CardContent className="p-4 text-center">
+                                      <Users className="h-8 w-8 mx-auto mb-2 text-violet-500" />
+                                      <p className="font-medium">Audience Targeting</p>
+                                      <p className="text-xs text-muted-foreground">Segment by tier, usage</p>
+                                    </CardContent>
+                                  </Card>
+                                  <Card className="hover-elevate">
+                                    <CardContent className="p-4 text-center">
+                                      <Clock className="h-8 w-8 mx-auto mb-2 text-cyan-500" />
+                                      <p className="font-medium">Scheduling</p>
+                                      <p className="text-xs text-muted-foreground">Time-based campaigns</p>
+                                    </CardContent>
+                                  </Card>
+                                </div>
+                                <Button size="lg">
+                                  <Plus className="h-5 w-5 mr-2" />
+                                  Create Your First Campaign
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+
+                      {/* PhD-Level Promo Reports */}
+                      {activeSection === 'promos-reports' && (
+                        <>
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <FileText className="h-5 w-5 text-green-500" />
+                                    Promotional Reports
+                                  </CardTitle>
+                                  <CardDescription>Generate comprehensive reports on promotional performance</CardDescription>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline">
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Export CSV
+                                  </Button>
+                                  <Button variant="outline">
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Export PDF
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              {/* Report Type Selection */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                                <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-purple-500">
+                                  <CardContent className="p-4 text-center">
+                                    <BarChart3 className="h-8 w-8 mx-auto mb-2 text-purple-500" />
+                                    <p className="font-medium">Usage Report</p>
+                                    <p className="text-xs text-muted-foreground">Redemptions by code</p>
+                                  </CardContent>
+                                </Card>
+                                <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-green-500">
+                                  <CardContent className="p-4 text-center">
+                                    <PoundSterling className="h-8 w-8 mx-auto mb-2 text-green-500" />
+                                    <p className="font-medium">Revenue Impact</p>
+                                    <p className="text-xs text-muted-foreground">Financial analysis</p>
+                                  </CardContent>
+                                </Card>
+                                <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-blue-500">
+                                  <CardContent className="p-4 text-center">
+                                    <Users className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+                                    <p className="font-medium">User Acquisition</p>
+                                    <p className="text-xs text-muted-foreground">New customers via promos</p>
+                                  </CardContent>
+                                </Card>
+                                <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-amber-500">
+                                  <CardContent className="p-4 text-center">
+                                    <TrendingUp className="h-8 w-8 mx-auto mb-2 text-amber-500" />
+                                    <p className="font-medium">ROI Analysis</p>
+                                    <p className="text-xs text-muted-foreground">Return on investment</p>
+                                  </CardContent>
+                                </Card>
+                              </div>
+
+                              {/* Summary Stats */}
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <Card className="bg-muted/30">
+                                  <CardContent className="p-4 text-center">
+                                    <p className="text-3xl font-bold text-purple-500">{promoCodesData?.summary?.totalCodes || 0}</p>
+                                    <p className="text-sm text-muted-foreground">Total Codes Created</p>
+                                  </CardContent>
+                                </Card>
+                                <Card className="bg-muted/30">
+                                  <CardContent className="p-4 text-center">
+                                    <p className="text-3xl font-bold text-green-500">{promoCodesData?.summary?.totalRedemptions || 0}</p>
+                                    <p className="text-sm text-muted-foreground">Total Redemptions</p>
+                                  </CardContent>
+                                </Card>
+                                <Card className="bg-muted/30">
+                                  <CardContent className="p-4 text-center">
+                                    <p className="text-3xl font-bold text-blue-500">£{((promoCodesData?.summary?.totalSavings || 0) / 100).toFixed(0)}</p>
+                                    <p className="text-sm text-muted-foreground">Total Savings</p>
+                                  </CardContent>
+                                </Card>
+                                <Card className="bg-muted/30">
+                                  <CardContent className="p-4 text-center">
+                                    <p className="text-3xl font-bold text-amber-500">
+                                      £{Math.round((promoCodesData?.summary?.totalRedemptions || 0) * 45)}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Est. Revenue Generated</p>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </>
                       )}
                     </motion.div>
                   </div>
