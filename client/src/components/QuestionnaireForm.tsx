@@ -589,7 +589,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
         "• Rush Delivery: £49 (1-hour priority processing vs standard 24hr)\n" +
         "• Annual Compliance Refresh: £59/year (updated plans reflecting new regulations)\n\n" +
         "REFERRAL PROGRAM (3-Sided Network Effect):\n" +
-        "• Referrer Reward: 1 free plan credit OR £25 cash payout (user choice)\n" +
+        "• Referrer Reward: 1 free plan credit per successful referral (credits accumulate, never expire)\n" +
         "• Referee Benefit: 15% off first paid tier purchase\n" +
         "• Advisor/Lawyer Referral: Dashboard analytics unlock + priority listing in lawyer directory\n" +
         "• Tracking: Unique referral codes, cookie-based attribution (30-day window), dashboard showing referral status\n\n" +
