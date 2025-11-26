@@ -648,7 +648,7 @@ qualified business advisors and immigration specialists before submitting visa a
       metadata: {
         subject: 'Growth Strategy Report',
         author: 'UK Innovator Founder Visa Assistant',
-        keywords: ['growth strategy', 'innovator visa', 'UK visa', 'scalability']
+        keywords: ['growth strategy', 'Innovator Founder Visa', 'UK visa', 'scalability']
       }
     });
 

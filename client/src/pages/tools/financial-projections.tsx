@@ -279,7 +279,7 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
         title="Financial Projections Tool | UK Innovator Founder Visa Compliance"
         description="Generate GOV.UK-compliant 12-month financial projections for your UK Innovator Founder Visa. Calculate cash runway, burn rate, profitability, and demonstrate viability criteria."
         canonical="https://innovatorfoundervisaassistant.co.uk/tools/financial-projections"
-        keywords="financial projections UK visa, innovator visa financials, cash flow projections, business viability calculator, startup financial planning"
+        keywords="financial projections UK visa, Innovator Founder Visa financials, cash flow projections, business viability calculator, startup financial planning"
         schema={combinedSchema}
       />
       

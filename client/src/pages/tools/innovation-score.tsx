@@ -658,7 +658,7 @@ for official assessment and application preparation.
         title="Innovation Score Calculator | UK Innovator Founder Visa Assessment"
         description="Calculate your innovation score for UK Innovator Founder Visa applications. Assess novelty, technical advancement, market disruption, IP protection, and R&D investment with industry benchmarks."
         canonical="https://innovatorfoundervisaassistant.co.uk/tools/innovation-score"
-        keywords="innovation score calculator, UK visa innovation assessment, innovator visa criteria, innovation evaluation tool, visa innovation requirements"
+        keywords="innovation score calculator, UK visa innovation assessment, Innovator Founder Visa criteria, innovation evaluation tool, visa innovation requirements"
         schema={combinedSchema}
       />
       

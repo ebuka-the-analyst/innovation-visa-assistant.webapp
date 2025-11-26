@@ -34,7 +34,7 @@ export default function Guide() {
         title="UK Innovator Founder Visa Complete Guide 2025 | Requirements, Process & Timeline"
         description="Comprehensive expert guide to the UK Innovator Founder Visa. Learn requirements, endorsement process, innovation criteria, financial planning, and path to settlement. Updated for 2025."
         path="/guide"
-        keywords="UK Innovator Founder Visa 2025, innovator visa guide, UK visa requirements, endorsement process, settlement pathway, visa application timeline"
+        keywords="UK Innovator Founder Visa 2025, Innovator Founder Visa guide, UK visa requirements, endorsement process, settlement pathway, visa application timeline"
         ogType="article"
         schemas={[
           createArticleSchema(

@@ -659,7 +659,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
       metadata: {
         subject: 'Market Research Report',
         author: 'UK Innovator Founder Visa Assistant',
-        keywords: ['market research', 'innovator visa', 'UK visa', 'competitive analysis']
+        keywords: ['market research', 'Innovator Founder Visa', 'UK visa', 'competitive analysis']
       }
     });
 

@@ -223,7 +223,7 @@ export function AdminSidebar({ activeSection, onSectionChange, stats }: AdminSid
           </div>
           <div>
             <h2 className="text-lg font-bold">Admin Console</h2>
-            <p className="text-xs text-muted-foreground">UK Innovator Visa Assistant</p>
+            <p className="text-xs text-muted-foreground">UK Innovator Founder Visa Assistant</p>
           </div>
         </div>
         

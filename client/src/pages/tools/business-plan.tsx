@@ -433,7 +433,7 @@ export default function BusinessPlan() {
         title="Business Plan Generator | UK Innovator Founder Visa Assistant"
         description="Create a professional, GOV.UK-compliant business plan for your UK Innovator Founder Visa. Covers all Innovation, Viability, and Scalability criteria. Used by 1,000+ successful applicants."
         canonical="https://innovatorfoundervisaassistant.co.uk/tools/business-plan"
-        keywords="business plan for UK visa, innovator visa business plan, UK visa business plan template, endorsement business plan, visa application business plan"
+        keywords="business plan for UK visa, Innovator Founder Visa business plan, UK visa business plan template, endorsement business plan, visa application business plan"
         schema={combinedSchema}
       />
       

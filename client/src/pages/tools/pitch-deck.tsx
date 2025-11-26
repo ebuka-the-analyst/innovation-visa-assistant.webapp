@@ -456,7 +456,7 @@ Ensure all claims are accurate and can be verified.
       metadata: {
         subject: 'Pitch Deck Builder Report',
         author: 'UK Innovator Founder Visa Assistant',
-        keywords: ['pitch deck', 'innovator visa', 'UK visa', 'business plan']
+        keywords: ['pitch deck', 'Innovator Founder Visa', 'UK visa', 'business plan']
       }
     });
 
