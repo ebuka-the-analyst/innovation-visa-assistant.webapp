@@ -127,6 +127,62 @@ const ACHIEVEMENT_ICONS: Record<string, typeof Rocket> = {
   'check-circle': CheckCircle2
 };
 
+const SESSION_STORAGE_KEY = 'ai-interview-session';
+const MESSAGES_STORAGE_KEY = 'ai-interview-messages';
+const ANSWERED_IDS_STORAGE_KEY = 'ai-interview-answered-ids';
+
+const saveToLocalStorage = (session: InterviewSession | null, messages: Message[], answeredIds: string[]) => {
+  try {
+    if (session) {
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+    }
+    if (messages.length > 0) {
+      const serializableMessages = messages.map(m => ({
+        ...m,
+        timestamp: m.timestamp instanceof Date ? m.timestamp.toISOString() : m.timestamp
+      }));
+      localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(serializableMessages));
+    }
+    if (answeredIds.length > 0) {
+      localStorage.setItem(ANSWERED_IDS_STORAGE_KEY, JSON.stringify(answeredIds));
+    }
+  } catch (err) {
+    console.error('Failed to save to localStorage:', err);
+  }
+};
+
+const loadFromLocalStorage = (): { session: InterviewSession | null; messages: Message[]; answeredIds: string[] } => {
+  try {
+    const sessionStr = localStorage.getItem(SESSION_STORAGE_KEY);
+    const messagesStr = localStorage.getItem(MESSAGES_STORAGE_KEY);
+    const answeredIdsStr = localStorage.getItem(ANSWERED_IDS_STORAGE_KEY);
+    
+    const session = sessionStr ? JSON.parse(sessionStr) : null;
+    const messages = messagesStr 
+      ? JSON.parse(messagesStr).map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        }))
+      : [];
+    const answeredIds = answeredIdsStr ? JSON.parse(answeredIdsStr) : [];
+    
+    return { session, messages, answeredIds };
+  } catch (err) {
+    console.error('Failed to load from localStorage:', err);
+    return { session: null, messages: [], answeredIds: [] };
+  }
+};
+
+const clearLocalStorage = () => {
+  try {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    localStorage.removeItem(MESSAGES_STORAGE_KEY);
+    localStorage.removeItem(ANSWERED_IDS_STORAGE_KEY);
+  } catch (err) {
+    console.error('Failed to clear localStorage:', err);
+  }
+};
+
 interface Message {
   id: string;
   role: 'agent' | 'user' | 'system';
@@ -384,9 +440,25 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
 
   useEffect(() => {
     if (!isInitialized && messages.length === 0) {
-      initializeSession();
+      const saved = loadFromLocalStorage();
+      if (saved.session && saved.messages.length > 0) {
+        setSession(saved.session);
+        setMessages(saved.messages);
+        setAnsweredQuestionIds(saved.answeredIds);
+        setIsInitialized(true);
+        onSessionUpdate?.(saved.session);
+        console.log('Restored interview session from localStorage');
+      } else {
+        initializeSession();
+      }
     }
   }, []);
+  
+  useEffect(() => {
+    if (session && messages.length > 0 && !messages.some(m => m.isTyping)) {
+      saveToLocalStorage(session, messages, answeredQuestionIds);
+    }
+  }, [session, messages, answeredQuestionIds]);
 
   const askNextQuestion = async (currentSession?: InterviewSession) => {
     const activeSession = currentSession || session;
