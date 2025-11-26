@@ -10,7 +10,7 @@ import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, XCircle, AlertTriangle, TrendingUp, Info, Lightbulb, Shield, Zap, Globe, Save } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, TrendingUp, Info, Lightbulb, Shield, Zap, Globe, Save, Sparkles } from "lucide-react";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, LineChart, Line
@@ -19,6 +19,66 @@ import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from "@/lib/seo-schemas";
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'innovation-score',
+  toolName: 'Innovation Score Calculator',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. Let's assess your business innovation together! For UK Innovator Founder Visa endorsement, you need to demonstrate genuine innovation - let me help you articulate what makes your solution truly unique.",
+  questions: [
+    {
+      id: 'is-core-innovation',
+      question: "What is the core innovation in your business? Describe what makes your solution genuinely new or significantly improved compared to what already exists.",
+      hint: "Focus on specific technical advancements, novel approaches, or unique methodologies - not just improvements to existing solutions.",
+      fieldKey: 'core_innovation',
+      minLength: 100
+    },
+    {
+      id: 'is-novelty',
+      question: "How novel is your approach? Is this something never done before, a significant improvement, or an innovative application of existing technology?",
+      hint: "Endorsers look for genuine novelty. A new app doing the same thing isn't innovative - what's the technical or business model breakthrough?",
+      fieldKey: 'novelty_assessment',
+      minLength: 80
+    },
+    {
+      id: 'is-technical-advancement',
+      question: "What technical or scientific advancements does your solution incorporate? Describe any proprietary technology, algorithms, or methodologies.",
+      hint: "Include specific technologies, patents pending, research papers, or technical differentiators.",
+      fieldKey: 'technical_advancement',
+      minLength: 80
+    },
+    {
+      id: 'is-market-disruption',
+      question: "How will your innovation disrupt the existing market? What problems does it solve that current solutions cannot?",
+      hint: "Quantify the disruption if possible - 10x faster, 50% cheaper, reaching underserved markets, etc.",
+      fieldKey: 'market_disruption',
+      minLength: 80
+    },
+    {
+      id: 'is-ip-strategy',
+      question: "What's your IP protection strategy? Do you have patents, trade secrets, or other forms of intellectual property protection?",
+      hint: "UK visa applications benefit from demonstrable IP. Include patent applications, trademarks, or copyright registrations.",
+      fieldKey: 'ip_protection',
+      minLength: 50
+    },
+    {
+      id: 'is-rd-investment',
+      question: "How much have you invested (or plan to invest) in R&D? What percentage of revenue will go to continued innovation?",
+      hint: "R&D investment demonstrates commitment to ongoing innovation. Include team time, tools, research partnerships.",
+      fieldKey: 'rd_investment',
+      minLength: 40
+    },
+    {
+      id: 'is-competitive-edge',
+      question: "What makes your innovation defensible? How will you maintain competitive advantage as others try to copy your approach?",
+      hint: "Network effects, data moats, switching costs, regulatory advantages, or continuous innovation pipeline.",
+      fieldKey: 'competitive_edge',
+      minLength: 60
+    }
+  ],
+  completionMessage: "Excellent assessment! You've clearly articulated your innovation. These insights will help endorsers understand your unique value. I'm calculating your innovation score and populating the detailed breakdown."
+};
 
 type InnovationFactors = {
   novelty: number;
@@ -47,6 +107,42 @@ export default function InnovationScore() {
   const { toast } = useToast();
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
+  
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('innovation-score-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('innovation-score-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const estimateScore = (text: string): number => {
+      if (!text) return 50;
+      const length = text.length;
+      const hasKeywords = ['unique', 'proprietary', 'patent', 'first', 'novel', 'breakthrough', 'disrupt'].some(k => 
+        text.toLowerCase().includes(k)
+      );
+      let score = 40 + Math.min(30, length / 10);
+      if (hasKeywords) score += 15;
+      return Math.min(95, Math.round(score));
+    };
+    
+    setFactors({
+      novelty: estimateScore(answers.novelty_assessment || answers.core_innovation || ''),
+      technicalAdvancement: estimateScore(answers.technical_advancement || ''),
+      marketDisruption: estimateScore(answers.market_disruption || ''),
+      ipProtection: estimateScore(answers.ip_protection || ''),
+      rdInvestment: estimateScore(answers.rd_investment || '')
+    });
+    
+    setMode('traditional');
+    toast({
+      title: "Innovation Assessment Complete",
+      description: "Your innovation scores have been calculated based on your responses. Review and adjust as needed.",
+    });
+  };
   
   const [factors, setFactors] = useState<InnovationFactors>(() => {
     const saved = localStorage.getItem('innovation-score-state');
@@ -667,27 +763,63 @@ for official assessment and application preparation.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-innovation-score">Innovation Score Assessment</h1>
-            <p className="text-lg text-muted-foreground">Comprehensive evaluation of UK Innovator Founder Visa innovation criterion</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-innovation-score">Innovation Score Assessment</h1>
+                <p className="text-lg text-muted-foreground">Comprehensive evaluation of UK Innovator Founder Visa innovation criterion</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Calculator"
+              />
+            </div>
           </div>
 
-          <ToolUtilityBar
-            toolId="innovation-score"
-            onSave={handleSave}
-            onRestore={handleRestore}
-            onExportPdf={handleExportPdf}
-            onExportWord={handleExportWord}
-            getSerializedState={getSerializedState}
-            toolName="Innovation Score"
-          />
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Nova, our Innovation Specialist, helps you articulate your innovation through guided conversation.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Learn what endorsers look for in innovation</li>
+                    <li>Get feedback on your unique value proposition</li>
+                    <li>Understand UK-specific innovation criteria</li>
+                    <li>Earn XP as you complete each assessment</li>
+                  </ul>
+                  <p className="pt-2">Your innovation factors will be calculated and populated in the detailed view when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
+              <ToolUtilityBar
+                toolId="innovation-score"
+                onSave={handleSave}
+                onRestore={handleRestore}
+                onExportPdf={handleExportPdf}
+                onExportWord={handleExportWord}
+                getSerializedState={getSerializedState}
+                toolName="Innovation Score"
+              />
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5" data-testid="tabs-innovation-score">
-              <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
-              <TabsTrigger value="assessment" data-testid="tab-assessment">Assessment</TabsTrigger>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                <TabsList className="grid w-full grid-cols-5" data-testid="tabs-innovation-score">
+                  <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
+                  <TabsTrigger value="assessment" data-testid="tab-assessment">Assessment</TabsTrigger>
               <TabsTrigger value="benchmarks" data-testid="tab-benchmarks">Benchmarks</TabsTrigger>
               <TabsTrigger value="tips" data-testid="tab-tips">Smart Tips</TabsTrigger>
               <TabsTrigger value="action" data-testid="tab-action">Action Plan</TabsTrigger>
@@ -1236,7 +1368,9 @@ for official assessment and application preparation.
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
+              </Tabs>
+            </>
+          )}
         </div>
       </div>
     </ToolAccessGuard>
