@@ -291,27 +291,45 @@ interface CohortData {
 }
 
 interface SystemMetrics {
-  cpu: number;
-  memory: {
-    used: number;
-    total: number;
+  uptime?: {
+    seconds: number;
+    formatted: string;
+  };
+  cpu?: {
+    user: number;
+    system: number;
+  };
+  memory?: {
+    heapUsed: number;
+    heapTotal: number;
+    rss: number;
+    external: number;
     percentage: number;
   };
-  database: {
-    connections: number;
-    maxConnections: number;
-    queryTime: {
+  database?: {
+    status: string;
+    totalUsers: number;
+    totalPlans: number;
+    connections?: number;
+    maxConnections?: number;
+    responseTime?: string;
+    queryTime?: {
       p50: number;
       p95: number;
       p99: number;
     };
   };
-  api: {
+  api?: {
     requestsPerMinute: number;
     errorRate: number;
     avgResponseTime: number;
   };
-  healthScore: number;
+  node?: {
+    version: string;
+    platform: string;
+    arch: string;
+  };
+  healthScore?: number;
 }
 
 interface OverviewData {
@@ -4665,7 +4683,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center gap-6">
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Uptime</p>
-                                    <p className="text-2xl font-bold">{systemMetrics?.uptimeFormatted || '99.9%'}</p>
+                                    <p className="text-2xl font-bold">{systemMetrics?.uptime?.formatted || '99.9%'}</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Health Score</p>
@@ -4722,9 +4740,9 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <div className="text-4xl font-bold text-center mb-4">
-                                  {systemMetrics?.cpu || 45}%
+                                  {Math.min(100, Math.round(((systemMetrics?.cpu?.user || 0) + (systemMetrics?.cpu?.system || 0)) / 10000) || 35)}%
                                 </div>
-                                <Progress value={systemMetrics?.cpu || 45} className="h-3" />
+                                <Progress value={Math.min(100, Math.round(((systemMetrics?.cpu?.user || 0) + (systemMetrics?.cpu?.system || 0)) / 10000) || 35)} className="h-3" />
                                 <p className="text-sm text-muted-foreground text-center mt-2">Normal load</p>
                               </CardContent>
                             </Card>
@@ -4738,11 +4756,11 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <div className="text-4xl font-bold text-center mb-4">
-                                  {systemMetrics?.heapUsed || 256} MB
+                                  {systemMetrics?.memory?.heapUsed || 256} MB
                                 </div>
-                                <Progress value={Math.min(100, ((systemMetrics?.heapUsed || 256) / (systemMetrics?.heapTotal || 512)) * 100)} className="h-3" />
+                                <Progress value={systemMetrics?.memory?.percentage || 62} className="h-3" />
                                 <p className="text-sm text-muted-foreground text-center mt-2">
-                                  {systemMetrics?.heapUsed || 256} / {systemMetrics?.heapTotal || 512} MB
+                                  {systemMetrics?.memory?.heapUsed || 256} / {systemMetrics?.memory?.heapTotal || 512} MB
                                 </p>
                               </CardContent>
                             </Card>
@@ -4853,12 +4871,12 @@ export default function AdminDashboard() {
                                         strokeLinecap="round"
                                         strokeDasharray={553}
                                         initial={{ strokeDashoffset: 553 }}
-                                        animate={{ strokeDashoffset: 553 - (553 * (systemMetrics?.cpu || 45)) / 100 }}
+                                        animate={{ strokeDashoffset: 553 - (553 * (Math.min(100, Math.round(((systemMetrics?.cpu?.user || 0) + (systemMetrics?.cpu?.system || 0)) / 10000) || 35))) / 100 }}
                                         transition={{ duration: 1 }}
                                       />
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                      <span className="text-4xl font-bold">{systemMetrics?.cpu || 45}%</span>
+                                      <span className="text-4xl font-bold">{Math.min(100, Math.round(((systemMetrics?.cpu?.user || 0) + (systemMetrics?.cpu?.system || 0)) / 10000) || 35)}%</span>
                                       <span className="text-sm text-muted-foreground">CPU</span>
                                     </div>
                                   </div>
@@ -4898,12 +4916,12 @@ export default function AdminDashboard() {
                                         strokeLinecap="round"
                                         strokeDasharray={553}
                                         initial={{ strokeDashoffset: 553 }}
-                                        animate={{ strokeDashoffset: 553 - (553 * (systemMetrics?.percentage || 62)) / 100 }}
+                                        animate={{ strokeDashoffset: 553 - (553 * (systemMetrics?.memory?.percentage || 62)) / 100 }}
                                         transition={{ duration: 1 }}
                                       />
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                      <span className="text-4xl font-bold">{systemMetrics?.percentage || 62}%</span>
+                                      <span className="text-4xl font-bold">{systemMetrics?.memory?.percentage || 62}%</span>
                                       <span className="text-sm text-muted-foreground">RAM</span>
                                     </div>
                                   </div>
