@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Download, CheckCircle, AlertTriangle, FileText } from "lucide-react";
+import { CheckCircle, AlertTriangle, FileText } from "lucide-react";
 
 const expertQuestions = {
   "SECTION 1: FOUNDER CREDENTIALS & BACKGROUND": {
@@ -339,37 +339,6 @@ export default function EvidencePreparationGuide() {
         </div>
       </div>
 
-      <div className="mb-6">
-        <Button 
-          className="w-full" 
-          size="lg" 
-          variant="outline"
-          data-testid="button-download-guide"
-          onClick={() => {
-            const content = Object.entries(expertQuestions).map(([section, data]) => {
-              let text = `\n\n${section}\n${data.description}\n${'='.repeat(80)}\n`;
-              Object.entries(data.subsections).forEach(([subsection, questions]) => {
-                text += `\n${subsection}\n${'-'.repeat(40)}\n`;
-                questions.forEach((q, i) => {
-                  text += `${i + 1}. ${q}\n\n`;
-                });
-              });
-              return text;
-            }).join('\n');
-            
-            const blob = new Blob([`INNOVATION VISA EVIDENCE PREPARATION GUIDE\n\n475 Questions for 95% Approval Rate\n\nInstructions:\n- Answer every question with specific, evidence-based responses\n- For any "I don't know" answers, that's a research task\n- Gather proof for every claim\n- This preparation is CRITICAL for approval\n\n${content}`], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Innovation-Visa-Evidence-Guide.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-          }}
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Download Complete 475-Question Guide
-        </Button>
-      </div>
 
       <Accordion type="single" collapsible className="space-y-2">
         {Object.entries(expertQuestions).map(([section, data], sectionIndex) => (
