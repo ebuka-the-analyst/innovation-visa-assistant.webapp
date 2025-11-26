@@ -4109,7 +4109,7 @@ export default function AdminDashboard() {
                       )}
 
                       {/* 3. TOP TOOLS - Most Popular Tools Ranking */}
-                      {activeSection === 'tools-top' && (
+                      {activeSection === 'tools-popular' && (
                         <>
                           {/* Top Tools Leaderboard */}
                           <Card>
