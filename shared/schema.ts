@@ -1473,3 +1473,183 @@ export type InsertAiPendingConfirmation = z.infer<typeof insertAiPendingConfirma
 
 export type AiRateLimit = typeof aiRateLimits.$inferSelect;
 export type InsertAiRateLimit = z.infer<typeof insertAiRateLimitSchema>;
+
+// ==========================================
+// ELIGIBILITY & ADAPTIVE FORMS SYSTEM
+// ==========================================
+
+// Industry Profiles - Defines industry-specific form configurations
+export const industryProfiles = pgTable("industry_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: varchar("slug", { length: 50 }).notNull().unique(), // e.g., 'fintech', 'healthtech', 'real-estate'
+  label: varchar("label", { length: 100 }).notNull(), // e.g., 'FinTech / Financial Services'
+  category: varchar("category", { length: 50 }).notNull(), // 'technology', 'traditional', 'hybrid'
+  description: text("description"),
+  
+  // Visa-critical factors for this industry
+  visaCriticalFactors: jsonb("visa_critical_factors").notNull().$type<{
+    innovationIndicators: string[];
+    scalabilityFactors: string[];
+    viabilityChecks: string[];
+    commonPitfalls: string[];
+  }>(),
+  
+  // Form section configuration
+  requiredSections: jsonb("required_sections").notNull().$type<string[]>(), // Section keys that must be shown
+  optionalSections: jsonb("optional_sections").$type<string[]>(), // Section keys that are optional
+  hiddenSections: jsonb("hidden_sections").$type<string[]>(), // Section keys to hide for this industry
+  
+  // Industry-specific field replacements
+  fieldOverrides: jsonb("field_overrides").$type<Record<string, {
+    label: string;
+    placeholder: string;
+    helpText: string;
+    required: boolean;
+  }>>(),
+  
+  // Innovation examples for guidance
+  innovationExamples: jsonb("innovation_examples").$type<{
+    innovative: Array<{ title: string; description: string; whyInnovative: string }>;
+    notInnovative: Array<{ title: string; description: string; whyNot: string }>;
+  }>(),
+  
+  // Endorser recommendations
+  recommendedEndorsers: jsonb("recommended_endorsers").$type<string[]>(),
+  
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_industry_slug").on(table.slug),
+  index("idx_industry_category").on(table.category),
+  index("idx_industry_active").on(table.isActive),
+]);
+
+// Eligibility Assessments - Stores pre-questionnaire eligibility checks
+export const eligibilityAssessments = pgTable("eligibility_assessments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  
+  // Concept brief (what user submitted)
+  businessConcept: text("business_concept").notNull(), // Brief description of the business idea
+  industrySlug: varchar("industry_slug", { length: 50 }).notNull(),
+  targetMarket: text("target_market"),
+  problemStatement: text("problem_statement"),
+  proposedSolution: text("proposed_solution"),
+  
+  // Scoring components (0-100 each)
+  innovationScore: integer("innovation_score").notNull(),
+  scalabilityScore: integer("scalability_score").notNull(),
+  viabilityScore: integer("viability_score").notNull(),
+  overallScore: integer("overall_score").notNull(), // Weighted average
+  
+  // AI Analysis
+  aiAnalysis: jsonb("ai_analysis").$type<{
+    strengths: string[];
+    weaknesses: string[];
+    innovationGaps: string[];
+    recommendations: string[];
+    endorserFit: string[];
+    riskFactors: string[];
+  }>(),
+  
+  // Eligibility band: 'eligible', 'needs_improvement', 'not_eligible'
+  eligibilityBand: varchar("eligibility_band", { length: 30 }).notNull(),
+  
+  // Specific disqualifying factors (if any)
+  disqualifiers: jsonb("disqualifiers").$type<string[]>(),
+  
+  // Enhancement suggestions
+  enhancementSuggestions: jsonb("enhancement_suggestions").$type<Array<{
+    area: string;
+    currentState: string;
+    suggestion: string;
+    impactOnScore: number;
+  }>>(),
+  
+  // Status and gating
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // 'pending', 'passed', 'failed', 'expired'
+  canProceed: boolean("can_proceed").notNull().default(false), // Whether user can proceed to full questionnaire
+  
+  // Token for gating access to questionnaire
+  accessToken: varchar("access_token", { length: 64 }).unique(),
+  expiresAt: timestamp("expires_at"),
+  
+  // Tracking
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_eligibility_user").on(table.userId),
+  index("idx_eligibility_industry").on(table.industrySlug),
+  index("idx_eligibility_band").on(table.eligibilityBand),
+  index("idx_eligibility_token").on(table.accessToken),
+  index("idx_eligibility_status").on(table.status),
+]);
+
+// Innovation Coaching Sessions - Tracks real-time guidance interactions
+export const innovationCoachingSessions = pgTable("innovation_coaching_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  businessPlanId: varchar("business_plan_id"),
+  eligibilityAssessmentId: varchar("eligibility_assessment_id"),
+  
+  // Current section being worked on
+  currentSection: varchar("current_section", { length: 50 }),
+  
+  // Session data
+  interactions: jsonb("interactions").$type<Array<{
+    timestamp: string;
+    userInput: string;
+    fieldKey: string;
+    aiSuggestion: string;
+    innovationScore: number;
+    userAccepted: boolean;
+  }>>(),
+  
+  // Aggregate scores during session
+  currentInnovationScore: integer("current_innovation_score").default(0),
+  previousInnovationScore: integer("previous_innovation_score").default(0),
+  scoreHistory: jsonb("score_history").$type<Array<{
+    timestamp: string;
+    score: number;
+    trigger: string;
+  }>>(),
+  
+  // Session state
+  isActive: boolean("is_active").notNull().default(true),
+  lastActivityAt: timestamp("last_activity_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_coaching_user").on(table.userId),
+  index("idx_coaching_plan").on(table.businessPlanId),
+  index("idx_coaching_active").on(table.isActive),
+]);
+
+// Insert Schemas for new tables
+export const insertIndustryProfileSchema = createInsertSchema(industryProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEligibilityAssessmentSchema = createInsertSchema(eligibilityAssessments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInnovationCoachingSessionSchema = createInsertSchema(innovationCoachingSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types for new tables
+export type IndustryProfile = typeof industryProfiles.$inferSelect;
+export type InsertIndustryProfile = z.infer<typeof insertIndustryProfileSchema>;
+
+export type EligibilityAssessment = typeof eligibilityAssessments.$inferSelect;
+export type InsertEligibilityAssessment = z.infer<typeof insertEligibilityAssessmentSchema>;
+
+export type InnovationCoachingSession = typeof innovationCoachingSessions.$inferSelect;
+export type InsertInnovationCoachingSession = z.infer<typeof insertInnovationCoachingSessionSchema>;
