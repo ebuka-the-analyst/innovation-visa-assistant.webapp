@@ -1233,6 +1233,107 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // ============================================
+  // ELIGIBILITY ASSESSMENT SYSTEM
+  // ============================================
+
+  // Get all active industry profiles
+  app.get("/api/industries", async (req, res) => {
+    try {
+      const industries = await storage.getActiveIndustryProfiles();
+      res.json(industries);
+    } catch (error) {
+      console.error("Get industries error:", error);
+      res.status(500).json({ error: "Failed to get industries" });
+    }
+  });
+
+  // Get specific industry profile by slug
+  app.get("/api/industries/:slug", async (req, res) => {
+    try {
+      const industry = await storage.getIndustryProfileBySlug(req.params.slug);
+      if (!industry) {
+        return res.status(404).json({ error: "Industry not found" });
+      }
+      res.json(industry);
+    } catch (error) {
+      console.error("Get industry error:", error);
+      res.status(500).json({ error: "Failed to get industry" });
+    }
+  });
+
+  // Submit eligibility assessment
+  app.post("/api/eligibility/assess", async (req, res) => {
+    try {
+      const { businessConcept, industrySlug, targetMarket, problemStatement, proposedSolution } = req.body;
+      
+      if (!businessConcept || !industrySlug) {
+        return res.status(400).json({ error: "Business concept and industry are required" });
+      }
+
+      const userId = req.isAuthenticated() ? (req.user as any).id : undefined;
+
+      const { assessEligibility } = await import("./eligibility-service");
+      const { assessment, result } = await assessEligibility(
+        { businessConcept, industrySlug, targetMarket, problemStatement, proposedSolution },
+        userId
+      );
+
+      res.json({
+        assessmentId: assessment.id,
+        ...result,
+        accessToken: assessment.accessToken
+      });
+    } catch (error) {
+      console.error("Eligibility assessment error:", error);
+      res.status(500).json({ error: "Failed to assess eligibility" });
+    }
+  });
+
+  // Get eligibility assessment by ID
+  app.get("/api/eligibility/:id", async (req, res) => {
+    try {
+      const assessment = await storage.getEligibilityAssessment(req.params.id);
+      if (!assessment) {
+        return res.status(404).json({ error: "Assessment not found" });
+      }
+      res.json(assessment);
+    } catch (error) {
+      console.error("Get assessment error:", error);
+      res.status(500).json({ error: "Failed to get assessment" });
+    }
+  });
+
+  // Get user's eligibility assessments
+  app.get("/api/eligibility/user/history", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const assessments = await storage.getUserEligibilityAssessments(user.id);
+      res.json(assessments);
+    } catch (error) {
+      console.error("Get user assessments error:", error);
+      res.status(500).json({ error: "Failed to get assessments" });
+    }
+  });
+
+  // Validate access token for questionnaire
+  app.post("/api/eligibility/validate-token", async (req, res) => {
+    try {
+      const { accessToken } = req.body;
+      if (!accessToken) {
+        return res.status(400).json({ error: "Access token required" });
+      }
+
+      const { validateAccessToken } = await import("./eligibility-service");
+      const isValid = await validateAccessToken(accessToken);
+      
+      res.json({ valid: isValid });
+    } catch (error) {
+      console.error("Token validation error:", error);
+      res.status(500).json({ error: "Failed to validate token" });
+    }
+  });
+
   app.get("/api/news", async (req, res) => {
     try {
       const news = await getLatestNews();

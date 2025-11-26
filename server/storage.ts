@@ -23,10 +23,14 @@ import {
   type AiActionLog, type InsertAiActionLog,
   type AiPendingConfirmation, type InsertAiPendingConfirmation,
   type AiRateLimit, type InsertAiRateLimit,
+  type IndustryProfile, type InsertIndustryProfile,
+  type EligibilityAssessment, type InsertEligibilityAssessment,
+  type InnovationCoachingSession, type InsertInnovationCoachingSession,
   users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics,
   referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits, payoutRequests,
   supportTickets, userDocuments, immigrationLawyers, lawyerDocumentReviews, lawyerReviewComments, lawyerReviewStatusHistory,
-  newsArticles, newsFetchLog, aiActionLogs, aiPendingConfirmations, aiRateLimits
+  newsArticles, newsFetchLog, aiActionLogs, aiPendingConfirmations, aiRateLimits,
+  industryProfiles, eligibilityAssessments, innovationCoachingSessions
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gt, lt, desc, sql, count } from "drizzle-orm";
@@ -313,6 +317,28 @@ export interface IStorage {
   // Rate Limiting
   checkAiRateLimit(userId: string, actionType: string, maxActions: number, windowMinutes: number): Promise<boolean>;
   incrementAiRateLimit(userId: string, actionType: string, windowMinutes: number): Promise<void>;
+  
+  // ============================================
+  // INDUSTRY PROFILES & ELIGIBILITY SYSTEM
+  // ============================================
+  
+  // Industry Profiles
+  getIndustryProfiles(): Promise<IndustryProfile[]>;
+  getIndustryProfileBySlug(slug: string): Promise<IndustryProfile | null>;
+  getActiveIndustryProfiles(): Promise<IndustryProfile[]>;
+  
+  // Eligibility Assessments
+  createEligibilityAssessment(assessment: InsertEligibilityAssessment): Promise<EligibilityAssessment>;
+  getEligibilityAssessment(id: string): Promise<EligibilityAssessment | undefined>;
+  getUserEligibilityAssessments(userId: string): Promise<EligibilityAssessment[]>;
+  getEligibilityAssessmentByToken(token: string): Promise<EligibilityAssessment | undefined>;
+  updateEligibilityAssessment(id: string, updates: Partial<EligibilityAssessment>): Promise<EligibilityAssessment | undefined>;
+  
+  // Innovation Coaching Sessions
+  createInnovationCoachingSession(session: InsertInnovationCoachingSession): Promise<InnovationCoachingSession>;
+  getInnovationCoachingSession(id: string): Promise<InnovationCoachingSession | undefined>;
+  getUserActiveCoachingSession(userId: string): Promise<InnovationCoachingSession | undefined>;
+  updateInnovationCoachingSession(id: string, updates: Partial<InnovationCoachingSession>): Promise<InnovationCoachingSession | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1609,6 +1635,89 @@ export class DatabaseStorage implements IStorage {
       windowEnd,
       actionCount: 1
     });
+  }
+
+  // ============================================
+  // INDUSTRY PROFILES & ELIGIBILITY SYSTEM
+  // ============================================
+
+  async getIndustryProfiles(): Promise<IndustryProfile[]> {
+    return db.select().from(industryProfiles).orderBy(industryProfiles.sortOrder);
+  }
+
+  async getIndustryProfileBySlug(slug: string): Promise<IndustryProfile | null> {
+    const result = await db.select().from(industryProfiles).where(eq(industryProfiles.slug, slug)).limit(1);
+    return result[0] || null;
+  }
+
+  async getActiveIndustryProfiles(): Promise<IndustryProfile[]> {
+    return db.select()
+      .from(industryProfiles)
+      .where(eq(industryProfiles.isActive, true))
+      .orderBy(industryProfiles.sortOrder);
+  }
+
+  async createEligibilityAssessment(assessment: InsertEligibilityAssessment): Promise<EligibilityAssessment> {
+    const [result] = await db.insert(eligibilityAssessments).values(assessment).returning();
+    return result;
+  }
+
+  async getEligibilityAssessment(id: string): Promise<EligibilityAssessment | undefined> {
+    const result = await db.select().from(eligibilityAssessments).where(eq(eligibilityAssessments.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserEligibilityAssessments(userId: string): Promise<EligibilityAssessment[]> {
+    return db.select()
+      .from(eligibilityAssessments)
+      .where(eq(eligibilityAssessments.userId, userId))
+      .orderBy(desc(eligibilityAssessments.createdAt));
+  }
+
+  async getEligibilityAssessmentByToken(token: string): Promise<EligibilityAssessment | undefined> {
+    const result = await db.select()
+      .from(eligibilityAssessments)
+      .where(eq(eligibilityAssessments.accessToken, token))
+      .limit(1);
+    return result[0];
+  }
+
+  async updateEligibilityAssessment(id: string, updates: Partial<EligibilityAssessment>): Promise<EligibilityAssessment | undefined> {
+    const [result] = await db.update(eligibilityAssessments)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(eligibilityAssessments.id, id))
+      .returning();
+    return result;
+  }
+
+  async createInnovationCoachingSession(session: InsertInnovationCoachingSession): Promise<InnovationCoachingSession> {
+    const [result] = await db.insert(innovationCoachingSessions).values(session).returning();
+    return result;
+  }
+
+  async getInnovationCoachingSession(id: string): Promise<InnovationCoachingSession | undefined> {
+    const result = await db.select().from(innovationCoachingSessions).where(eq(innovationCoachingSessions.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserActiveCoachingSession(userId: string): Promise<InnovationCoachingSession | undefined> {
+    const result = await db.select()
+      .from(innovationCoachingSessions)
+      .where(and(
+        eq(innovationCoachingSessions.userId, userId),
+        eq(innovationCoachingSessions.isActive, true)
+      ))
+      .orderBy(desc(innovationCoachingSessions.createdAt))
+      .limit(1);
+    return result[0];
+  }
+
+  async updateInnovationCoachingSession(id: string, updates: Partial<InnovationCoachingSession>): Promise<InnovationCoachingSession | undefined> {
+    const [result] = await db.update(innovationCoachingSessions)
+      .set({ ...updates, lastActivityAt: new Date() })
+      .where(eq(innovationCoachingSessions.id, id))
+      .returning();
+    return result;
   }
 }
 
