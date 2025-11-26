@@ -1074,7 +1074,6 @@ export default function AdminDashboard() {
   const getSectionTitle = () => {
     const titles: Record<string, string> = {
       'overview': 'Dashboard Overview',
-      'realtime': 'Real-Time Activity Monitor',
       'kpis': 'Executive KPI Dashboard',
       'users-overview': 'User Management',
       'users-active': 'Active Users',
@@ -1274,7 +1273,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Main Content - Section Based */}
-                {(activeSection === 'overview' || activeSection === 'realtime' || activeSection === 'kpis') && (
+                {(activeSection === 'overview' || activeSection === 'kpis') && (
                   <div className="space-y-6">
               <AnimatePresence mode="wait">
                 {overviewLoading ? (

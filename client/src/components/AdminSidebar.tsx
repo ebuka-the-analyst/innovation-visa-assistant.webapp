@@ -87,7 +87,6 @@ const menuGroups = [
     label: "Dashboard",
     items: [
       { id: "overview", label: "Overview", icon: LayoutDashboard, badge: null },
-      { id: "realtime", label: "Real-Time Activity", icon: Activity, badge: "live" },
       { id: "kpis", label: "Executive KPIs", icon: Target, badge: null },
     ]
   },
