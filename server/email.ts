@@ -238,7 +238,7 @@ export async function sendVerificationEmail(
   });
 }
 
-// Payment receipt email
+// Payment receipt email - PhD-level detailed receipt
 export async function sendPaymentReceiptEmail(
   email: string,
   firstName: string,
@@ -246,7 +246,32 @@ export async function sendPaymentReceiptEmail(
   amount: number,
   sessionId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const formattedAmount = (amount / 100).toFixed(2); // Convert from pence to pounds
+  const formattedAmount = (amount / 100).toFixed(2);
+  const receiptNumber = `INV-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+  const paymentDate = new Date();
+  const formattedDate = paymentDate.toLocaleDateString('en-GB', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  const formattedTime = paymentDate.toLocaleTimeString('en-GB', { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    timeZoneName: 'short'
+  });
+  
+  // Get tier-specific features
+  const tierFeatures: Record<string, { tools: number; features: string[] }> = {
+    'Free': { tools: 13, features: ['Basic visa guidance tools', 'Essential compliance checklists', 'Community support'] },
+    'Basic': { tools: 20, features: ['All Free tools', '7 additional business tools', 'Basic business plan template', 'Email support'] },
+    'Premium': { tools: 83, features: ['All Basic tools', '63 premium AI-powered tools', 'Advanced business plan generator', 'Financial projections', 'Priority email support'] },
+    'Enterprise': { tools: 109, features: ['All Premium tools', '26 enterprise-grade tools', 'Advanced IP & patent strategy', 'Full compliance suite', 'Dedicated support channel'] },
+    'Ultimate': { tools: 109, features: ['All 109 tools unlocked', 'VIP priority support', 'Personal strategy sessions', 'Success guarantee', 'Lifetime updates'] }
+  };
+  
+  const tierInfo = tierFeatures[planName] || tierFeatures['Premium'];
+  const featuresHtml = tierInfo.features.map(f => `<li style="margin-bottom: 8px;">${f}</li>`).join('');
   
   const html = `
     <!DOCTYPE html>
@@ -255,50 +280,144 @@ export async function sendPaymentReceiptEmail(
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px;">Payment Received</h1>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 650px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+      
+      <!-- Header with Receipt Badge -->
+      <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+        <div style="background: rgba(255,255,255,0.2); display: inline-block; padding: 8px 20px; border-radius: 20px; margin-bottom: 15px;">
+          <span style="color: white; font-size: 14px; font-weight: 600;">PAYMENT RECEIPT</span>
+        </div>
+        <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700;">Thank You for Your Purchase!</h1>
+        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Your subscription is now active</p>
       </div>
       
-      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
-        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
+      <div style="background: #ffffff; padding: 35px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
         
-        <p style="font-size: 16px; margin-bottom: 20px;">
-          Thank you for your payment! Your business plan generation is now in progress.
+        <!-- Greeting -->
+        <p style="font-size: 18px; margin-bottom: 25px; color: #333;">Dear ${escapeHtml(firstName)},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
+          Thank you for subscribing to the UK Innovator Founder Visa Assistant. Your payment has been successfully processed and your account has been upgraded. You now have full access to all ${tierInfo.tools} tools included in your ${escapeHtml(planName)} tier.
         </p>
         
-        <div style="background: #fff; border: 2px solid #ffa536; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h2 style="margin: 0 0 15px 0; color: #333; font-size: 20px;">Payment Details</h2>
-          <table style="width: 100%; font-size: 15px;">
-            <tr>
-              <td style="padding: 8px 0; color: #666;">Plan:</td>
-              <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(planName)}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #666;">Amount Paid:</td>
-              <td style="padding: 8px 0; text-align: right; font-weight: bold;">£${formattedAmount} GBP</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #666;">Transaction ID:</td>
-              <td style="padding: 8px 0; text-align: right; font-family: monospace; font-size: 12px;">${escapeHtml(sessionId)}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #666;">Date:</td>
-              <td style="padding: 8px 0; text-align: right;">${new Date().toLocaleDateString('en-GB')}</td>
-            </tr>
-          </table>
+        <!-- Receipt Box -->
+        <div style="background: #fafafa; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; margin: 25px 0;">
+          
+          <!-- Receipt Header -->
+          <div style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); padding: 20px; color: white;">
+            <table style="width: 100%;">
+              <tr>
+                <td>
+                  <span style="font-size: 12px; text-transform: uppercase; opacity: 0.8;">Receipt Number</span><br>
+                  <span style="font-size: 16px; font-weight: bold; font-family: monospace;">${receiptNumber}</span>
+                </td>
+                <td style="text-align: right;">
+                  <span style="font-size: 12px; text-transform: uppercase; opacity: 0.8;">Payment Status</span><br>
+                  <span style="background: #27ae60; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">PAID</span>
+                </td>
+              </tr>
+            </table>
+          </div>
+          
+          <!-- Receipt Details -->
+          <div style="padding: 25px;">
+            <table style="width: 100%; font-size: 15px; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Subscription Plan:</td>
+                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">${escapeHtml(planName)} Tier Access</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Tools Included:</td>
+                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">${tierInfo.tools} Professional Tools</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Access Duration:</td>
+                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">Lifetime Access</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Payment Date:</td>
+                <td style="padding: 12px 0; text-align: right; color: #333; border-bottom: 1px solid #eee;">${formattedDate}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Payment Time:</td>
+                <td style="padding: 12px 0; text-align: right; color: #333; border-bottom: 1px solid #eee;">${formattedTime}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Payment Method:</td>
+                <td style="padding: 12px 0; text-align: right; color: #333; border-bottom: 1px solid #eee;">Credit/Debit Card (via Stripe)</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Transaction ID:</td>
+                <td style="padding: 12px 0; text-align: right; font-family: monospace; font-size: 11px; color: #666; border-bottom: 1px solid #eee; word-break: break-all;">${escapeHtml(sessionId)}</td>
+              </tr>
+            </table>
+            
+            <!-- Total Amount -->
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ffa536;">
+              <table style="width: 100%;">
+                <tr>
+                  <td style="font-size: 18px; font-weight: 700; color: #333;">Total Amount Paid:</td>
+                  <td style="font-size: 24px; font-weight: 700; color: #ffa536; text-align: right;">£${formattedAmount} GBP</td>
+                </tr>
+              </table>
+            </div>
+          </div>
         </div>
         
-        <p style="font-size: 14px; color: #666; margin-top: 30px;">
-          For billing inquiries, please contact <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">billing@innovatorfoundervisaassistant.co.uk</a>
-        </p>
+        <!-- What's Included -->
+        <div style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #c8e6c9; border-radius: 10px; padding: 25px; margin: 25px 0;">
+          <h3 style="margin: 0 0 15px 0; color: #2e7d32; font-size: 18px;">What's Included in Your ${escapeHtml(planName)} Tier:</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #333; font-size: 15px;">
+            ${featuresHtml}
+          </ul>
+        </div>
         
-        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        <!-- Access Your Tools CTA -->
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${BASE_URL}/tools-hub" style="display: inline-block; background: linear-gradient(135deg, #ffa536 0%, #ff8c00 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(255,165,54,0.4);">
+            Access Your Tools Now
+          </a>
+        </div>
         
-        <p style="font-size: 12px; color: #999; text-align: center;">
-          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-          Questions? Contact <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
-        </p>
+        <!-- Quick Start Tips -->
+        <div style="background: #fff3e0; border-left: 4px solid #ffa536; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
+          <h4 style="margin: 0 0 12px 0; color: #e65100; font-size: 16px;">Quick Start Tips:</h4>
+          <ol style="margin: 0; padding-left: 20px; color: #555; font-size: 14px;">
+            <li style="margin-bottom: 8px;">Visit the <a href="${BASE_URL}/tools-hub" style="color: #11b6e9;">Tools Hub</a> to explore all available tools</li>
+            <li style="margin-bottom: 8px;">Start with the <a href="${BASE_URL}/tools/innovation-score" style="color: #11b6e9;">Innovation Score Calculator</a> to assess your readiness</li>
+            <li style="margin-bottom: 8px;">Generate your <a href="${BASE_URL}/tools/business-plan" style="color: #11b6e9;">Business Plan</a> for endorser applications</li>
+            <li style="margin-bottom: 8px;">Practice your pitch with the <a href="${BASE_URL}/tools/pitch-coach" style="color: #11b6e9;">AI Pitch Coach</a></li>
+          </ol>
+        </div>
+        
+        <!-- Support Info -->
+        <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin: 25px 0; text-align: center;">
+          <p style="margin: 0 0 10px 0; font-size: 15px; color: #333;">
+            <strong>Need Help?</strong> Our support team is here for you.
+          </p>
+          <p style="margin: 0; font-size: 14px; color: #666;">
+            Email: <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a><br>
+            Billing: <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">billing@innovatorfoundervisaassistant.co.uk</a>
+          </p>
+        </div>
+        
+        <!-- Legal Footer -->
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+        
+        <div style="text-align: center;">
+          <p style="font-size: 12px; color: #999; margin-bottom: 10px;">
+            This receipt serves as confirmation of your payment. Please save this email for your records.
+          </p>
+          <p style="font-size: 12px; color: #999; margin-bottom: 10px;">
+            UK Innovator Founder Visa Assistant<br>
+            Digital Services Provider | United Kingdom
+          </p>
+          <p style="font-size: 11px; color: #bbb;">
+            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant. All rights reserved.<br>
+            <a href="${BASE_URL}/privacy" style="color: #999;">Privacy Policy</a> | 
+            <a href="${BASE_URL}/terms" style="color: #999;">Terms of Service</a>
+          </p>
+        </div>
       </div>
     </body>
     </html>
