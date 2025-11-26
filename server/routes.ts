@@ -2897,11 +2897,50 @@ ${generatedSections.join('\n\n---\n\n')}`;
   // ADMIN PROMO CODE ROUTES
   // ============================================
 
-  // Get all promo codes (admin)
+  // Get all promo codes (admin) - with comprehensive analytics
   app.get("/api/admin/promos", requireAdmin, async (req, res) => {
     try {
       const codes = await storage.getAllPromoCodes();
-      res.json(codes);
+      const redemptions = await storage.getAllPromoRedemptions();
+      
+      // Calculate analytics per code
+      const codesWithAnalytics = codes.map(code => {
+        const codeRedemptions = redemptions.filter(r => r.promoCodeId === code.id);
+        const totalRevenue = codeRedemptions.reduce((sum, r) => sum + (r.discountAmount || 0), 0);
+        
+        return {
+          ...code,
+          usedCount: code.currentUses || 0,
+          maxUses: code.maxTotalUses,
+          isActive: code.status === 'active',
+          redemptionsCount: codeRedemptions.length,
+          totalRevenueSaved: totalRevenue,
+          uniqueUsers: new Set(codeRedemptions.map(r => r.userId)).size,
+          lastUsedAt: codeRedemptions.length > 0 
+            ? codeRedemptions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0].createdAt 
+            : null,
+        };
+      });
+      
+      // Calculate summary stats
+      const activeCodes = codes.filter(c => c.status === 'active').length;
+      const expiredCodes = codes.filter(c => c.validUntil && new Date(c.validUntil) < new Date()).length;
+      const totalRedemptions = redemptions.length;
+      const totalRevenueSaved = redemptions.reduce((sum, r) => sum + (r.discountAmount || 0), 0);
+      
+      res.json({
+        promoCodes: codesWithAnalytics,
+        total: codes.length,
+        summary: {
+          totalCodes: codes.length,
+          activeCodes,
+          expiredCodes,
+          pausedCodes: codes.filter(c => c.status === 'paused').length,
+          totalRedemptions,
+          totalRevenueSaved,
+          averageDiscount: totalRedemptions > 0 ? totalRevenueSaved / totalRedemptions : 0,
+        }
+      });
     } catch (error) {
       console.error("Admin get promo codes error:", error);
       res.status(500).json({ error: "Failed to fetch promo codes" });

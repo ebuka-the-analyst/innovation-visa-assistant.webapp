@@ -741,24 +741,49 @@ export default function AdminDashboard() {
     refetchInterval: REFRESH_INTERVAL,
   });
 
-  // Promo codes
+  // Promo codes with comprehensive analytics
   const { data: promoCodesData, isLoading: promoCodesLoading, refetch: refetchPromoCodes } = useQuery<{
     promoCodes: Array<{
       id: string;
       code: string;
+      name: string;
+      description: string | null;
       discountType: string;
       discountValue: number;
-      maxUses: number | null;
-      usedCount: number;
-      validFrom: string | null;
+      minPurchaseAmount: number | null;
+      maxTotalUses: number | null;
+      maxUsesPerUser: number | null;
+      currentUses: number;
+      validFrom: string;
       validUntil: string | null;
-      isActive: boolean;
+      eligibleTiers: string[] | null;
+      status: string;
+      ownerId: string | null;
+      createdBy: string;
       createdAt: string;
+      updatedAt: string;
+      usedCount: number;
+      maxUses: number | null;
+      isActive: boolean;
+      redemptionsCount: number;
+      totalRevenueSaved: number;
+      uniqueUsers: number;
+      lastUsedAt: string | null;
     }>;
     total: number;
+    summary: {
+      totalCodes: number;
+      activeCodes: number;
+      expiredCodes: number;
+      pausedCodes: number;
+      totalRedemptions: number;
+      totalRevenueSaved: number;
+      averageDiscount: number;
+    };
   }>({
     queryKey: ['/api/admin/promos'],
     enabled: !!user?.isAdmin && activeSection.startsWith('promos'),
+    refetchInterval: REFRESH_INTERVAL,
   });
 
   // Pending rewards
@@ -7613,127 +7638,336 @@ export default function AdminDashboard() {
                         </Card>
                       )}
 
-                      {/* Promo Codes Overview */}
-                      {(activeSection === 'promos-overview' || activeSection === 'promos-create') && (
+                      {/* PhD-Level Promo Codes Management */}
+                      {activeSection === 'promos-overview' && (
                         <>
+                          {/* Promo Summary Stats */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <Tag className="h-4 w-4" />
+                                  Total Promo Codes
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-purple-500">
+                                  {promoCodesData?.summary?.totalCodes || 0}
+                                </div>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
+                                    {promoCodesData?.summary?.activeCodes || 0} Active
+                                  </Badge>
+                                  <Badge variant="outline" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                                    {promoCodesData?.summary?.pausedCodes || 0} Paused
+                                  </Badge>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            
+                            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <CheckCircle className="h-4 w-4" />
+                                  Total Redemptions
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-green-500">
+                                  {promoCodesData?.summary?.totalRedemptions || 0}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-2">
+                                  Avg {((promoCodesData?.summary?.totalRedemptions || 0) / Math.max(1, promoCodesData?.summary?.totalCodes || 1)).toFixed(1)} per code
+                                </p>
+                              </CardContent>
+                            </Card>
+                            
+                            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <Wallet className="h-4 w-4" />
+                                  Revenue Impact
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-blue-500">
+                                  £{((promoCodesData?.summary?.totalRevenueSaved || 0) / 100).toFixed(0)}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-2">
+                                  Total discounts given
+                                </p>
+                              </CardContent>
+                            </Card>
+                            
+                            <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <TrendingUp className="h-4 w-4" />
+                                  Avg Discount
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-orange-500">
+                                  £{((promoCodesData?.summary?.averageDiscount || 0) / 100).toFixed(2)}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-2">
+                                  Per redemption
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Promo Codes Performance Chart */}
                           <Card>
                             <CardHeader>
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
-                                    <Tag className="h-5 w-5" />
-                                    Promo Codes
+                                    <BarChart3 className="h-5 w-5 text-purple-500" />
+                                    Promo Code Performance
                                   </CardTitle>
-                                  <CardDescription>Manage promotional discount codes</CardDescription>
+                                  <CardDescription>Redemptions and savings by promo code</CardDescription>
                                 </div>
-                                <Button onClick={() => setShowCreatePromoModal(true)}>
-                                  <Plus className="h-4 w-4 mr-2" />
-                                  Create Promo Code
-                                </Button>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              {promoCodesLoading ? (
+                                <Skeleton className="h-[300px] w-full" />
+                              ) : promoCodesData?.promoCodes && promoCodesData.promoCodes.length > 0 ? (
+                                <ResponsiveContainer width="100%" height={300}>
+                                  <BarChart data={promoCodesData.promoCodes.slice(0, 10)}>
+                                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                    <XAxis dataKey="code" className="text-xs" />
+                                    <YAxis yAxisId="left" className="text-xs" />
+                                    <YAxis yAxisId="right" orientation="right" className="text-xs" />
+                                    <Tooltip 
+                                      contentStyle={{ 
+                                        backgroundColor: 'hsl(var(--card))', 
+                                        border: '1px solid hsl(var(--border))',
+                                        borderRadius: '8px'
+                                      }}
+                                      formatter={(value: number, name: string) => {
+                                        if (name === 'totalRevenueSaved') return [`£${(value / 100).toFixed(2)}`, 'Savings'];
+                                        return [value, name === 'usedCount' ? 'Redemptions' : 'Unique Users'];
+                                      }}
+                                    />
+                                    <Legend />
+                                    <Bar yAxisId="left" dataKey="usedCount" fill="#8b5cf6" name="Redemptions" radius={[4, 4, 0, 0]} />
+                                    <Bar yAxisId="left" dataKey="uniqueUsers" fill="#06b6d4" name="Unique Users" radius={[4, 4, 0, 0]} />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              ) : (
+                                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                                  <div className="text-center">
+                                    <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                    <p>No promo code data yet</p>
+                                  </div>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          {/* Promo Codes List */}
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Tag className="h-5 w-5 text-purple-500" />
+                                    All Promo Codes
+                                  </CardTitle>
+                                  <CardDescription>Complete promotional code management</CardDescription>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="outline" size="sm" onClick={() => refetchPromoCodes()}>
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Refresh
+                                  </Button>
+                                  <Button onClick={() => setShowCreatePromoModal(true)}>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Create Promo Code
+                                  </Button>
+                                </div>
                               </div>
                             </CardHeader>
                             <CardContent>
                               {promoCodesLoading ? (
                                 <div className="space-y-3">
                                   {Array.from({ length: 5 }).map((_, i) => (
-                                    <Skeleton key={i} className="h-16 w-full" />
+                                    <Skeleton key={i} className="h-20 w-full" />
                                   ))}
                                 </div>
                               ) : promoCodesData?.promoCodes && promoCodesData.promoCodes.length > 0 ? (
-                                <Table>
-                                  <TableHeader>
-                                    <TableRow>
-                                      <TableHead>Code</TableHead>
-                                      <TableHead>Discount</TableHead>
-                                      <TableHead>Usage</TableHead>
-                                      <TableHead>Valid Period</TableHead>
-                                      <TableHead>Status</TableHead>
-                                      <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {promoCodesData.promoCodes.map((promo) => (
-                                      <TableRow key={promo.id}>
-                                        <TableCell>
-                                          <Badge variant="outline" className="font-mono text-base">
-                                            {promo.code}
-                                          </Badge>
-                                        </TableCell>
-                                        <TableCell className="font-medium">
-                                          {promo.discountType === 'percentage' 
-                                            ? `${promo.discountValue}%` 
-                                            : `£${promo.discountValue}`}
-                                        </TableCell>
-                                        <TableCell>
-                                          {promo.usedCount}{promo.maxUses ? `/${promo.maxUses}` : ''}
-                                        </TableCell>
-                                        <TableCell className="text-sm text-muted-foreground">
-                                          {promo.validFrom && promo.validUntil 
-                                            ? `${format(new Date(promo.validFrom), 'MMM d')} - ${format(new Date(promo.validUntil), 'MMM d, yyyy')}`
-                                            : promo.validUntil 
-                                              ? `Until ${format(new Date(promo.validUntil), 'MMM d, yyyy')}`
-                                              : 'No expiry'}
-                                        </TableCell>
-                                        <TableCell>
-                                          <Badge variant={promo.isActive ? 'default' : 'secondary'}>
-                                            {promo.isActive ? 'Active' : 'Inactive'}
-                                          </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                          <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                              <Button variant="ghost" size="icon">
-                                                <MoreVertical className="h-4 w-4" />
-                                              </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                              <DropdownMenuItem
-                                                onClick={() => togglePromoCodeMutation.mutate({ 
-                                                  promoId: promo.id, 
-                                                  isActive: !promo.isActive 
-                                                })}
-                                              >
-                                                {promo.isActive ? (
-                                                  <>
-                                                    <ToggleLeft className="h-4 w-4 mr-2" />
-                                                    Deactivate
-                                                  </>
-                                                ) : (
-                                                  <>
-                                                    <ToggleRight className="h-4 w-4 mr-2" />
-                                                    Activate
-                                                  </>
-                                                )}
-                                              </DropdownMenuItem>
-                                              <DropdownMenuSeparator />
-                                              <DropdownMenuItem
-                                                className="text-destructive"
-                                                onClick={() => setDeletingPromo(promo.id)}
-                                              >
-                                                <Trash2 className="h-4 w-4 mr-2" />
-                                                Delete
-                                              </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                          </DropdownMenu>
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
+                                <div className="space-y-4">
+                                  {promoCodesData.promoCodes.map((promo) => (
+                                    <Card key={promo.id} className="hover-elevate">
+                                      <CardContent className="p-4">
+                                        <div className="flex items-start justify-between flex-wrap gap-4">
+                                          <div className="flex-1 min-w-[200px]">
+                                            <div className="flex items-center gap-3 mb-2">
+                                              <Badge variant="outline" className="font-mono text-lg px-3 py-1 bg-purple-500/10 text-purple-600 border-purple-500/30">
+                                                {promo.code}
+                                              </Badge>
+                                              <Badge variant={promo.isActive ? 'default' : promo.status === 'paused' ? 'secondary' : 'destructive'}>
+                                                {promo.status === 'active' ? 'Active' : promo.status === 'paused' ? 'Paused' : 'Expired'}
+                                              </Badge>
+                                              {promo.eligibleTiers && promo.eligibleTiers.length > 0 && (
+                                                <div className="flex gap-1">
+                                                  {promo.eligibleTiers.map(tier => (
+                                                    <Badge key={tier} variant="outline" className="text-xs capitalize">
+                                                      {tier}
+                                                    </Badge>
+                                                  ))}
+                                                </div>
+                                              )}
+                                            </div>
+                                            <p className="text-sm font-medium">{promo.name}</p>
+                                            {promo.description && (
+                                              <p className="text-xs text-muted-foreground mt-1">{promo.description}</p>
+                                            )}
+                                          </div>
+                                          
+                                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                                            <div className="bg-muted/50 rounded-lg p-3">
+                                              <p className="text-2xl font-bold text-purple-500">
+                                                {promo.discountType === 'percentage' ? `${promo.discountValue}%` : `£${promo.discountValue}`}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground">Discount</p>
+                                            </div>
+                                            <div className="bg-muted/50 rounded-lg p-3">
+                                              <p className="text-2xl font-bold text-green-500">
+                                                {promo.usedCount}{promo.maxUses ? `/${promo.maxUses}` : ''}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground">Redemptions</p>
+                                            </div>
+                                            <div className="bg-muted/50 rounded-lg p-3">
+                                              <p className="text-2xl font-bold text-blue-500">{promo.uniqueUsers}</p>
+                                              <p className="text-xs text-muted-foreground">Unique Users</p>
+                                            </div>
+                                            <div className="bg-muted/50 rounded-lg p-3">
+                                              <p className="text-2xl font-bold text-orange-500">
+                                                £{(promo.totalRevenueSaved / 100).toFixed(0)}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground">Total Savings</p>
+                                            </div>
+                                          </div>
+                                          
+                                          <div className="flex flex-col gap-2">
+                                            <DropdownMenu>
+                                              <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" size="sm">
+                                                  Actions
+                                                  <ChevronDown className="h-4 w-4 ml-2" />
+                                                </Button>
+                                              </DropdownMenuTrigger>
+                                              <DropdownMenuContent align="end" className="w-48">
+                                                <DropdownMenuItem onClick={() => {
+                                                  navigator.clipboard.writeText(promo.code);
+                                                  toast({ title: "Copied!", description: `Code ${promo.code} copied to clipboard` });
+                                                }}>
+                                                  <Copy className="h-4 w-4 mr-2" />
+                                                  Copy Code
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                  onClick={() => togglePromoCodeMutation.mutate({ 
+                                                    promoId: promo.id, 
+                                                    isActive: !promo.isActive 
+                                                  })}
+                                                >
+                                                  {promo.isActive ? (
+                                                    <>
+                                                      <ToggleLeft className="h-4 w-4 mr-2" />
+                                                      Pause Code
+                                                    </>
+                                                  ) : (
+                                                    <>
+                                                      <ToggleRight className="h-4 w-4 mr-2" />
+                                                      Activate Code
+                                                    </>
+                                                  )}
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                  className="text-destructive"
+                                                  onClick={() => setDeletingPromo(promo.id)}
+                                                >
+                                                  <Trash2 className="h-4 w-4 mr-2" />
+                                                  Delete Code
+                                                </DropdownMenuItem>
+                                              </DropdownMenuContent>
+                                            </DropdownMenu>
+                                            <p className="text-xs text-muted-foreground text-center">
+                                              {promo.validUntil 
+                                                ? `Expires ${format(new Date(promo.validUntil), 'MMM d, yyyy')}`
+                                                : 'No expiry'}
+                                            </p>
+                                          </div>
+                                        </div>
+                                        
+                                        {/* Progress bar for usage */}
+                                        {promo.maxUses && (
+                                          <div className="mt-4">
+                                            <div className="flex items-center justify-between mb-1">
+                                              <span className="text-xs text-muted-foreground">Usage Progress</span>
+                                              <span className="text-xs font-medium">{Math.round((promo.usedCount / promo.maxUses) * 100)}%</span>
+                                            </div>
+                                            <Progress value={(promo.usedCount / promo.maxUses) * 100} className="h-2" />
+                                          </div>
+                                        )}
+                                        
+                                        <div className="flex items-center justify-between mt-3 pt-3 border-t text-xs text-muted-foreground">
+                                          <span>Created {format(new Date(promo.createdAt), 'MMM d, yyyy')}</span>
+                                          {promo.lastUsedAt && (
+                                            <span>Last used {format(new Date(promo.lastUsedAt), 'MMM d, yyyy h:mm a')}</span>
+                                          )}
+                                          {promo.minPurchaseAmount && (
+                                            <span>Min purchase: £{(promo.minPurchaseAmount / 100).toFixed(0)}</span>
+                                          )}
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  ))}
+                                </div>
                               ) : (
-                                <div className="py-12 text-center text-muted-foreground">
-                                  <Tag className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                  <p className="text-lg font-medium">No promo codes yet</p>
-                                  <p className="mb-4">Create your first promotional code</p>
-                                  <Button onClick={() => setShowCreatePromoModal(true)}>
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Create Promo Code
+                                <div className="py-16 text-center">
+                                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-purple-500/10 flex items-center justify-center">
+                                    <Tag className="h-10 w-10 text-purple-500" />
+                                  </div>
+                                  <h3 className="text-xl font-semibold mb-2">No Promo Codes Yet</h3>
+                                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                    Create promotional codes to offer discounts and track customer acquisition through marketing campaigns.
+                                  </p>
+                                  <Button size="lg" onClick={() => setShowCreatePromoModal(true)}>
+                                    <Plus className="h-5 w-5 mr-2" />
+                                    Create Your First Promo Code
                                   </Button>
                                 </div>
                               )}
                             </CardContent>
                           </Card>
                         </>
+                      )}
+
+                      {/* Create Promo Section */}
+                      {activeSection === 'promos-create' && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Plus className="h-5 w-5 text-purple-500" />
+                              Create New Promo Code
+                            </CardTitle>
+                            <CardDescription>Set up a new promotional discount code</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-center py-12">
+                              <Button size="lg" onClick={() => setShowCreatePromoModal(true)}>
+                                <Plus className="h-5 w-5 mr-2" />
+                                Open Promo Code Creator
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
                       )}
                     </motion.div>
                   </div>
