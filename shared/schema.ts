@@ -1361,3 +1361,115 @@ export type InsertNewsArticle = z.infer<typeof insertNewsArticleSchema>;
 
 export type NewsFetchLog = typeof newsFetchLog.$inferSelect;
 export type InsertNewsFetchLog = z.infer<typeof insertNewsFetchLogSchema>;
+
+// ============================================
+// AI ACTION SYSTEM - PhD-Level AI Orchestrator
+// ============================================
+
+// AI Action Logs - Immutable audit trail for all AI-performed actions
+export const aiActionLogs = pgTable("ai_action_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Action details
+  actionType: varchar("action_type", { length: 100 }).notNull(), // e.g., 'change_password', 'get_progress', 'cancel_subscription'
+  actionCategory: varchar("action_category", { length: 50 }).notNull(), // 'account', 'subscription', 'insights', 'documents'
+  parameters: jsonb("parameters"), // Action parameters (sanitized, no passwords)
+  
+  // Execution details
+  status: varchar("status", { length: 20 }).notNull(), // 'success', 'failed', 'pending', 'cancelled', 'requires_confirmation'
+  result: jsonb("result"), // Action result/response data
+  errorMessage: text("error_message"),
+  
+  // Security context
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  sessionId: varchar("session_id", { length: 255 }),
+  
+  // Timing
+  executionTimeMs: integer("execution_time_ms"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_ai_logs_user").on(table.userId),
+  index("idx_ai_logs_action").on(table.actionType),
+  index("idx_ai_logs_status").on(table.status),
+  index("idx_ai_logs_created").on(table.createdAt),
+]);
+
+// AI Pending Confirmations - Actions awaiting user approval
+export const aiPendingConfirmations = pgTable("ai_pending_confirmations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Action details
+  actionType: varchar("action_type", { length: 100 }).notNull(),
+  actionCategory: varchar("action_category", { length: 50 }).notNull(),
+  parameters: jsonb("parameters"), // Sanitized parameters
+  
+  // Confirmation details
+  confirmationMessage: text("confirmation_message").notNull(), // What to show user
+  warningLevel: varchar("warning_level", { length: 20 }).notNull().default('normal'), // 'normal', 'warning', 'critical'
+  requiresTypedConfirmation: boolean("requires_typed_confirmation").notNull().default(false),
+  confirmationPhrase: varchar("confirmation_phrase", { length: 100 }), // e.g., "DELETE MY ACCOUNT"
+  
+  // Expiration
+  expiresAt: timestamp("expires_at").notNull(),
+  
+  // Status
+  confirmed: boolean("confirmed").notNull().default(false),
+  confirmedAt: timestamp("confirmed_at"),
+  cancelled: boolean("cancelled").notNull().default(false),
+  cancelledAt: timestamp("cancelled_at"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_ai_confirm_user").on(table.userId),
+  index("idx_ai_confirm_expires").on(table.expiresAt),
+  index("idx_ai_confirm_status").on(table.confirmed, table.cancelled),
+]);
+
+// AI Rate Limits - Track action frequency per user
+export const aiRateLimits = pgTable("ai_rate_limits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  actionType: varchar("action_type", { length: 100 }).notNull(),
+  windowStart: timestamp("window_start").notNull(),
+  windowEnd: timestamp("window_end").notNull(),
+  actionCount: integer("action_count").notNull().default(1),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_ai_rate_user_action").on(table.userId, table.actionType),
+  index("idx_ai_rate_window").on(table.windowEnd),
+]);
+
+// Insert Schemas
+export const insertAiActionLogSchema = createInsertSchema(aiActionLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAiPendingConfirmationSchema = createInsertSchema(aiPendingConfirmations).omit({
+  id: true,
+  createdAt: true,
+  confirmed: true,
+  confirmedAt: true,
+  cancelled: true,
+  cancelledAt: true,
+});
+
+export const insertAiRateLimitSchema = createInsertSchema(aiRateLimits).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types
+export type AiActionLog = typeof aiActionLogs.$inferSelect;
+export type InsertAiActionLog = z.infer<typeof insertAiActionLogSchema>;
+
+export type AiPendingConfirmation = typeof aiPendingConfirmations.$inferSelect;
+export type InsertAiPendingConfirmation = z.infer<typeof insertAiPendingConfirmationSchema>;
+
+export type AiRateLimit = typeof aiRateLimits.$inferSelect;
+export type InsertAiRateLimit = z.infer<typeof insertAiRateLimitSchema>;

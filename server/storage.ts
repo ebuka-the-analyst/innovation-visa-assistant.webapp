@@ -20,10 +20,13 @@ import {
   type LawyerReviewStatusHistory, type InsertLawyerReviewStatusHistory,
   type NewsArticle, type InsertNewsArticle,
   type NewsFetchLog, type InsertNewsFetchLog,
+  type AiActionLog, type InsertAiActionLog,
+  type AiPendingConfirmation, type InsertAiPendingConfirmation,
+  type AiRateLimit, type InsertAiRateLimit,
   users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics,
   referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits, payoutRequests,
   supportTickets, userDocuments, immigrationLawyers, lawyerDocumentReviews, lawyerReviewComments, lawyerReviewStatusHistory,
-  newsArticles, newsFetchLog
+  newsArticles, newsFetchLog, aiActionLogs, aiPendingConfirmations, aiRateLimits
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gt, lt, desc, sql, count } from "drizzle-orm";
@@ -288,6 +291,28 @@ export interface IStorage {
   deleteNewsArticle(id: string): Promise<void>;
   createNewsFetchLog(log: InsertNewsFetchLog): Promise<NewsFetchLog>;
   getLatestFetchLog(apiSource: string): Promise<NewsFetchLog | undefined>;
+  
+  // ============================================
+  // AI ACTION SYSTEM
+  // ============================================
+  
+  // Action Logs
+  createAiActionLog(log: InsertAiActionLog): Promise<AiActionLog>;
+  getAiActionLog(id: string): Promise<AiActionLog | undefined>;
+  getUserAiActionLogs(userId: string, limit?: number): Promise<AiActionLog[]>;
+  getAiActionLogsByType(userId: string, actionType: string): Promise<AiActionLog[]>;
+  
+  // Pending Confirmations
+  createAiPendingConfirmation(confirmation: InsertAiPendingConfirmation): Promise<AiPendingConfirmation>;
+  getAiPendingConfirmation(id: string): Promise<AiPendingConfirmation | undefined>;
+  getUserPendingConfirmations(userId: string): Promise<AiPendingConfirmation[]>;
+  confirmAiAction(id: string): Promise<AiPendingConfirmation | undefined>;
+  cancelAiAction(id: string): Promise<AiPendingConfirmation | undefined>;
+  cleanupExpiredConfirmations(): Promise<void>;
+  
+  // Rate Limiting
+  checkAiRateLimit(userId: string, actionType: string, maxActions: number, windowMinutes: number): Promise<boolean>;
+  incrementAiRateLimit(userId: string, actionType: string, windowMinutes: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1475,6 +1500,115 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(newsFetchLog.fetchedAt))
       .limit(1);
     return result[0];
+  }
+
+  // ============================================
+  // AI ACTION SYSTEM
+  // ============================================
+
+  async createAiActionLog(log: InsertAiActionLog): Promise<AiActionLog> {
+    const [result] = await db.insert(aiActionLogs).values(log).returning();
+    return result;
+  }
+
+  async getAiActionLog(id: string): Promise<AiActionLog | undefined> {
+    const result = await db.select().from(aiActionLogs).where(eq(aiActionLogs.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserAiActionLogs(userId: string, limit: number = 50): Promise<AiActionLog[]> {
+    return db.select().from(aiActionLogs)
+      .where(eq(aiActionLogs.userId, userId))
+      .orderBy(desc(aiActionLogs.createdAt))
+      .limit(limit);
+  }
+
+  async getAiActionLogsByType(userId: string, actionType: string): Promise<AiActionLog[]> {
+    return db.select().from(aiActionLogs)
+      .where(and(
+        eq(aiActionLogs.userId, userId),
+        eq(aiActionLogs.actionType, actionType)
+      ))
+      .orderBy(desc(aiActionLogs.createdAt));
+  }
+
+  async createAiPendingConfirmation(confirmation: InsertAiPendingConfirmation): Promise<AiPendingConfirmation> {
+    const [result] = await db.insert(aiPendingConfirmations).values(confirmation).returning();
+    return result;
+  }
+
+  async getAiPendingConfirmation(id: string): Promise<AiPendingConfirmation | undefined> {
+    const result = await db.select().from(aiPendingConfirmations)
+      .where(eq(aiPendingConfirmations.id, id))
+      .limit(1);
+    return result[0];
+  }
+
+  async getUserPendingConfirmations(userId: string): Promise<AiPendingConfirmation[]> {
+    const now = new Date();
+    return db.select().from(aiPendingConfirmations)
+      .where(and(
+        eq(aiPendingConfirmations.userId, userId),
+        eq(aiPendingConfirmations.confirmed, false),
+        eq(aiPendingConfirmations.cancelled, false),
+        gt(aiPendingConfirmations.expiresAt, now)
+      ))
+      .orderBy(desc(aiPendingConfirmations.createdAt));
+  }
+
+  async confirmAiAction(id: string): Promise<AiPendingConfirmation | undefined> {
+    const [result] = await db.update(aiPendingConfirmations)
+      .set({ confirmed: true, confirmedAt: new Date() })
+      .where(eq(aiPendingConfirmations.id, id))
+      .returning();
+    return result;
+  }
+
+  async cancelAiAction(id: string): Promise<AiPendingConfirmation | undefined> {
+    const [result] = await db.update(aiPendingConfirmations)
+      .set({ cancelled: true, cancelledAt: new Date() })
+      .where(eq(aiPendingConfirmations.id, id))
+      .returning();
+    return result;
+  }
+
+  async cleanupExpiredConfirmations(): Promise<void> {
+    const now = new Date();
+    await db.delete(aiPendingConfirmations)
+      .where(and(
+        lt(aiPendingConfirmations.expiresAt, now),
+        eq(aiPendingConfirmations.confirmed, false),
+        eq(aiPendingConfirmations.cancelled, false)
+      ));
+  }
+
+  async checkAiRateLimit(userId: string, actionType: string, maxActions: number, windowMinutes: number): Promise<boolean> {
+    const now = new Date();
+    const windowStart = new Date(now.getTime() - windowMinutes * 60 * 1000);
+    
+    const result = await db.select({ count: count() })
+      .from(aiRateLimits)
+      .where(and(
+        eq(aiRateLimits.userId, userId),
+        eq(aiRateLimits.actionType, actionType),
+        gt(aiRateLimits.windowEnd, now)
+      ));
+    
+    const currentCount = result[0]?.count || 0;
+    return currentCount < maxActions;
+  }
+
+  async incrementAiRateLimit(userId: string, actionType: string, windowMinutes: number): Promise<void> {
+    const now = new Date();
+    const windowEnd = new Date(now.getTime() + windowMinutes * 60 * 1000);
+    
+    await db.insert(aiRateLimits).values({
+      userId,
+      actionType,
+      windowStart: now,
+      windowEnd,
+      actionCount: 1
+    });
   }
 }
 

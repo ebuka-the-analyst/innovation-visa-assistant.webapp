@@ -1108,7 +1108,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
-  // Chat API endpoint - Multi-LLM powered visa assistant with news context
+  // Chat API endpoint - PhD-Level AI Orchestrator with action capabilities
   app.post("/api/chat", async (req, res) => {
     try {
       const { message, conversationHistory } = req.body;
@@ -1117,36 +1117,33 @@ ${generatedSections.join('\n\n---\n\n')}`;
         return res.status(400).json({ error: "Message is required" });
       }
 
-      const { chatWithMultipleLLMs } = await import("./chatService");
+      // Import the AI Orchestrator
+      const { orchestrateChat } = await import("./ai-orchestrator");
       
-      // Fetch recent news for context if user mentions news/updates
-      let newsContext: Array<{title: string; source: string; publishedAt: string; summary: string}> = [];
-      const newsKeywords = ['news', 'update', 'recent', 'latest', 'change', 'announce', 'policy'];
-      const mentionsNews = newsKeywords.some(kw => message.toLowerCase().includes(kw));
+      // Get authenticated user if available
+      const user = req.isAuthenticated?.() ? (req.user as any) : null;
       
-      if (mentionsNews) {
-        try {
-          const recentNews = await getLatestNews();
-          newsContext = recentNews.slice(0, 5).map((article: any) => ({
-            title: article.title || '',
-            source: article.source || '',
-            publishedAt: article.publishedAt || new Date().toISOString(),
-            summary: article.summary || '',
-          }));
-        } catch (newsError) {
-          console.warn("Failed to fetch news context for chat:", newsError);
-        }
-      }
+      // Get context for action logging
+      const context = {
+        ipAddress: req.ip || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent'],
+        sessionId: req.sessionID
+      };
       
-      const result = await chatWithMultipleLLMs(
+      // Use the orchestrator for intelligent action handling
+      const result = await orchestrateChat(
         message,
         conversationHistory || [],
-        newsContext
+        user,
+        context
       );
 
       res.json({ 
         response: result.response,
-        provider: result.provider 
+        provider: result.provider,
+        actionExecuted: result.actionExecuted,
+        actionResult: result.actionResult,
+        pendingConfirmation: result.pendingConfirmation
       });
     } catch (error) {
       console.error("Chat API error:", error);
@@ -1154,6 +1151,79 @@ ${generatedSections.join('\n\n---\n\n')}`;
         error: "Failed to process chat message",
         response: "I apologize for the technical difficulty. Please try again shortly. For immediate assistance, please contact support or visit the official Home Office website."
       });
+    }
+  });
+
+  // AI Action - Confirm pending action
+  app.post("/api/ai/confirm-action", isAuthenticated, async (req, res) => {
+    try {
+      const { confirmationId } = req.body;
+      const user = req.user as any;
+      
+      if (!confirmationId) {
+        return res.status(400).json({ error: "Confirmation ID is required" });
+      }
+
+      const { confirmAndExecuteAction } = await import("./ai-orchestrator");
+      
+      const context = {
+        ipAddress: req.ip || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent'],
+        sessionId: req.sessionID
+      };
+      
+      const result = await confirmAndExecuteAction(confirmationId, user, context);
+      res.json(result);
+    } catch (error) {
+      console.error("AI confirm action error:", error);
+      res.status(500).json({ success: false, message: "Failed to confirm action" });
+    }
+  });
+
+  // AI Action - Cancel pending action
+  app.post("/api/ai/cancel-action", isAuthenticated, async (req, res) => {
+    try {
+      const { confirmationId } = req.body;
+      const user = req.user as any;
+      
+      if (!confirmationId) {
+        return res.status(400).json({ error: "Confirmation ID is required" });
+      }
+
+      const { cancelPendingAction } = await import("./ai-orchestrator");
+      const success = await cancelPendingAction(confirmationId, user.id);
+      
+      res.json({ success, message: success ? "Action cancelled" : "Failed to cancel action" });
+    } catch (error) {
+      console.error("AI cancel action error:", error);
+      res.status(500).json({ success: false, message: "Failed to cancel action" });
+    }
+  });
+
+  // AI Action - Get pending confirmations
+  app.get("/api/ai/pending-actions", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { getUserPendingConfirmations } = await import("./ai-orchestrator");
+      const pending = await getUserPendingConfirmations(user.id);
+      res.json(pending);
+    } catch (error) {
+      console.error("AI pending actions error:", error);
+      res.status(500).json({ error: "Failed to get pending actions" });
+    }
+  });
+
+  // AI Action - Get action history
+  app.get("/api/ai/action-history", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const { getUserActionHistory } = await import("./ai-orchestrator");
+      const history = await getUserActionHistory(user.id, limit);
+      res.json(history);
+    } catch (error) {
+      console.error("AI action history error:", error);
+      res.status(500).json({ error: "Failed to get action history" });
     }
   });
 
