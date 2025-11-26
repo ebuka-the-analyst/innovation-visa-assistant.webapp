@@ -1955,6 +1955,41 @@ Keep your response concise (2-3 paragraphs max) but actionable.`;
     }
   });
 
+  // AI Tool Guide Feedback - provides personalized feedback for any tool's AI interview
+  app.post("/api/ai/tool-feedback", isAuthenticated, async (req, res) => {
+    try {
+      const { toolId, question, answer, agentPersonality } = req.body;
+      
+      const prompt = `You are an AI assistant for a UK Innovator Founder Visa application tool.
+Your personality: ${agentPersonality || 'Professional, helpful, detail-oriented'}
+
+The user is completing the "${toolId}" tool and answered this question:
+
+Question: ${question}
+
+User's Answer: ${answer}
+
+Provide brief, encouraging feedback (2-3 sentences max) that:
+1. Acknowledges what they did well
+2. If the answer could be stronger, suggest ONE specific improvement
+3. Relate it to UK visa requirements where relevant
+
+Keep the tone supportive and professional. Do not be overly enthusiastic.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 150
+      });
+
+      res.json({ feedback: response.choices[0].message.content });
+    } catch (error) {
+      console.error("Tool feedback error:", error);
+      res.status(500).json({ error: "Failed to generate feedback" });
+    }
+  });
+
   app.get("/api/news", async (req, res) => {
     try {
       const news = await getLatestNews();

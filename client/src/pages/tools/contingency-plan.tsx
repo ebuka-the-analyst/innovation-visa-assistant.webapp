@@ -11,11 +11,91 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, AlertTriangle, TrendingUp, Shield } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, TrendingUp, Shield, Sparkles } from "lucide-react";
 import {
   ScatterChart, Scatter, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig, type ToolQuestion } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'contingency-plan',
+  toolName: 'Contingency Plan & Risk Register',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. I'll help you build a comprehensive risk register and contingency plan - a critical component for your UK Innovator Founder Visa application. Endorsers want to see you've identified potential risks and have clear mitigation strategies. Let's work through this together!",
+  questions: [
+    {
+      id: 'risk1-desc',
+      question: "Let's start with your biggest financial risk. What's the most significant financial challenge your business might face in the first 2 years?",
+      hint: "Think about funding gaps, cash flow issues, currency fluctuations, or unexpected costs",
+      fieldKey: 'risk_financial_description',
+      minLength: 50
+    },
+    {
+      id: 'risk1-impact',
+      question: "On a scale of 1-10, how severe would this financial risk be if it occurred? And what's the probability (1-10) that it might happen?",
+      hint: "Be realistic - endorsers prefer honest assessments over overly optimistic ones",
+      fieldKey: 'risk_financial_scores'
+    },
+    {
+      id: 'risk1-mitigation',
+      question: "What's your mitigation strategy for this financial risk? How will you prevent it or minimize its impact?",
+      hint: "Include specific actions, timelines, and responsible parties",
+      fieldKey: 'risk_financial_mitigation',
+      minLength: 100
+    },
+    {
+      id: 'risk2-desc',
+      question: "Now let's discuss operational risks. What's your main concern about day-to-day business operations?",
+      hint: "Consider supply chain issues, technology failures, key person dependencies, or process bottlenecks",
+      fieldKey: 'risk_operational_description',
+      minLength: 50
+    },
+    {
+      id: 'risk2-mitigation',
+      question: "How will you mitigate this operational risk? What contingency plans do you have?",
+      hint: "Include backup systems, alternative suppliers, or redundancy measures",
+      fieldKey: 'risk_operational_mitigation',
+      minLength: 100
+    },
+    {
+      id: 'risk3-desc',
+      question: "What market or competitive risks could threaten your business? Think about competitors, market changes, or customer behavior shifts.",
+      hint: "New competitors entering, market saturation, changing regulations, or economic downturns",
+      fieldKey: 'risk_market_description',
+      minLength: 50
+    },
+    {
+      id: 'risk3-mitigation',
+      question: "How will you stay ahead of these market risks? What's your competitive response strategy?",
+      hint: "Diversification, innovation pipeline, customer retention strategies, market monitoring",
+      fieldKey: 'risk_market_mitigation',
+      minLength: 100
+    },
+    {
+      id: 'risk4-desc',
+      question: "Regulatory compliance is crucial for UK businesses. What regulatory or compliance risks have you identified?",
+      hint: "GDPR, industry-specific regulations, visa compliance, employment law, tax obligations",
+      fieldKey: 'risk_regulatory_description',
+      minLength: 50
+    },
+    {
+      id: 'risk4-mitigation',
+      question: "How will you ensure ongoing regulatory compliance? What systems and processes will you put in place?",
+      hint: "Regular audits, legal counsel, compliance training, automated monitoring",
+      fieldKey: 'risk_regulatory_mitigation',
+      minLength: 100
+    },
+    {
+      id: 'overall-review',
+      question: "Finally, how often will you review and update this risk register? Who will be responsible for risk oversight?",
+      hint: "Best practice is quarterly reviews with board-level sign-off on critical risks",
+      fieldKey: 'review_schedule',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent work! You've built a comprehensive risk analysis. This level of preparedness will impress endorsing bodies - they want to see founders who think ahead and plan for challenges. I'm now populating your risk register with these insights. You can fine-tune the details in the form view."
+};
 
 type RiskCategory = 'financial' | 'operational' | 'market' | 'regulatory' | 'team';
 
@@ -48,6 +128,10 @@ const CATEGORY_COLORS: Record<RiskCategory, string> = {
 };
 
 export default function ContingencyPlan() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('contingency-plan-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [risks, setRisks] = useState<Risk[]>([
     {
       id: '1',
@@ -63,6 +147,74 @@ export default function ContingencyPlan() {
   ]);
   const [activeTab, setActiveTab] = useState('planning');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('contingency-plan-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newRisks: Risk[] = [];
+    
+    if (answers.risk_financial_description) {
+      newRisks.push({
+        id: 'ai-financial',
+        category: 'financial',
+        description: answers.risk_financial_description || '',
+        impact: 7,
+        probability: 5,
+        mitigation: answers.risk_financial_mitigation || '',
+        actionPlan: '',
+        owner: '',
+        deadline: ''
+      });
+    }
+    
+    if (answers.risk_operational_description) {
+      newRisks.push({
+        id: 'ai-operational',
+        category: 'operational',
+        description: answers.risk_operational_description || '',
+        impact: 6,
+        probability: 5,
+        mitigation: answers.risk_operational_mitigation || '',
+        actionPlan: '',
+        owner: '',
+        deadline: ''
+      });
+    }
+    
+    if (answers.risk_market_description) {
+      newRisks.push({
+        id: 'ai-market',
+        category: 'market',
+        description: answers.risk_market_description || '',
+        impact: 6,
+        probability: 6,
+        mitigation: answers.risk_market_mitigation || '',
+        actionPlan: '',
+        owner: '',
+        deadline: ''
+      });
+    }
+    
+    if (answers.risk_regulatory_description) {
+      newRisks.push({
+        id: 'ai-regulatory',
+        category: 'regulatory',
+        description: answers.risk_regulatory_description || '',
+        impact: 8,
+        probability: 4,
+        mitigation: answers.risk_regulatory_mitigation || '',
+        actionPlan: answers.review_schedule || '',
+        owner: '',
+        deadline: ''
+      });
+    }
+    
+    if (newRisks.length > 0) {
+      setRisks(newRisks);
+    }
+  };
 
   const addRisk = (category: RiskCategory) => {
     const newRisk: Risk = {
@@ -415,29 +567,65 @@ industry-specific requirements.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-contingency-plan">Business Contingency Plan</h1>
-            <p className="text-lg text-muted-foreground">Comprehensive risk management and business continuity planning</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-contingency-plan">Business Contingency Plan</h1>
+                <p className="text-lg text-muted-foreground">Comprehensive risk management and business continuity planning</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
-          <ToolUtilityBar
-            toolId="contingency-plan"
-            onSave={handleSave}
-            onRestore={handleRestore}
-            onExport={handleExport}
-            getSerializedState={getSerializedState}
-            toolName="Contingency Plan"
-          />
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Sage, our Compliance Expert, helps you build a comprehensive risk register through natural conversation.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Get real-time feedback on your risk assessments</li>
+                    <li>Ensure you cover all critical risk categories</li>
+                    <li>Receive guidance aligned with UK visa requirements</li>
+                    <li>Earn XP as you complete each question</li>
+                  </ul>
+                  <p className="pt-2">Your answers will automatically populate the risk register form when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
+              <ToolUtilityBar
+                toolId="contingency-plan"
+                onSave={handleSave}
+                onRestore={handleRestore}
+                onExport={handleExport}
+                getSerializedState={getSerializedState}
+                toolName="Contingency Plan"
+              />
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5" data-testid="tabs-contingency-plan">
-              <TabsTrigger value="planning" data-testid="tab-planning">Planning</TabsTrigger>
-              <TabsTrigger value="matrix" data-testid="tab-matrix">Risk Matrix</TabsTrigger>
-              <TabsTrigger value="analysis" data-testid="tab-analysis">Analysis</TabsTrigger>
-              <TabsTrigger value="tips" data-testid="tab-tips">Smart Tips</TabsTrigger>
-              <TabsTrigger value="action" data-testid="tab-action">Action Plan</TabsTrigger>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                <TabsList className="grid w-full grid-cols-5" data-testid="tabs-contingency-plan">
+                  <TabsTrigger value="planning" data-testid="tab-planning">Planning</TabsTrigger>
+                  <TabsTrigger value="matrix" data-testid="tab-matrix">Risk Matrix</TabsTrigger>
+                  <TabsTrigger value="analysis" data-testid="tab-analysis">Analysis</TabsTrigger>
+                  <TabsTrigger value="tips" data-testid="tab-tips">Smart Tips</TabsTrigger>
+                  <TabsTrigger value="action" data-testid="tab-action">Action Plan</TabsTrigger>
             </TabsList>
 
             <TabsContent value="planning" className="space-y-6">
@@ -919,7 +1107,9 @@ industry-specific requirements.
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
+              </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>
