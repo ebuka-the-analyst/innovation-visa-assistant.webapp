@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,13 +12,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ALL_TOOLS, Tool } from "@shared/tools-data";
-import { Search, Filter, Lock, CheckCircle } from "lucide-react";
+import { Search, Filter, Lock, CheckCircle, Loader2 } from "lucide-react";
 import * as Icons from "lucide-react";
 import Footer from "@/components/Footer";
 import { useTierAccess, type ToolTier } from "@/hooks/useTierAccess";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createBreadcrumbSchema } from "@/lib/seo-schemas";
 import { SoftUpgradeOverlay } from "@/components/SoftUpgradeOverlay";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 type IconName = keyof typeof Icons;
 
@@ -36,8 +38,49 @@ export default function ToolsHub() {
   const [stageFilter, setStageFilter] = useState<string>("");
   const [tierFilter, setTierFilter] = useState<string>("");
   const [lockedToolInfo, setLockedToolInfo] = useState<LockedToolInfo | null>(null);
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+  const { toast } = useToast();
 
   const { canAccessTool, userTier } = useTierAccess();
+
+  // Verify payment when returning from Stripe checkout
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    const planId = params.get('plan_id');
+    const upgraded = params.get('upgraded');
+
+    if (sessionId && planId && upgraded === 'true') {
+      setIsVerifyingPayment(true);
+      
+      apiRequest('POST', '/api/payment/verify', { sessionId, planId })
+        .then(async (response) => {
+          const data = await response.json();
+          
+          // Invalidate user query to refresh tier access
+          await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+          
+          toast({
+            title: "Payment Successful!",
+            description: `Your subscription has been activated. You now have ${data.tier || 'upgraded'} tier access to all tools.`,
+          });
+          
+          // Clean up URL parameters
+          window.history.replaceState({}, '', '/tools-hub');
+        })
+        .catch((error) => {
+          console.error('Payment verification failed:', error);
+          toast({
+            title: "Payment Verification",
+            description: "Your payment was received. If tools are still locked, please refresh the page or contact support.",
+            variant: "destructive",
+          });
+        })
+        .finally(() => {
+          setIsVerifyingPayment(false);
+        });
+    }
+  }, [toast]);
 
   const handleToolClick = (tool: Tool) => {
     const hasAccess = canAccessTool(tool.tier as ToolTier);
@@ -119,6 +162,18 @@ export default function ToolsHub() {
         keywords="UK innovator visa tools, business plan generator, compliance checker, financial projections, market analysis, visa application tools"
         schema={combinedSchema}
       />
+      
+      {/* Payment verification loading overlay */}
+      {isVerifyingPayment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-lg shadow-xl text-center">
+            <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+            <h3 className="text-lg font-semibold mb-2">Verifying Payment...</h3>
+            <p className="text-muted-foreground">Please wait while we activate your subscription.</p>
+          </div>
+        </div>
+      )}
+      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="w-full px-4 md:px-8 lg:px-12">
           {/* Header */}

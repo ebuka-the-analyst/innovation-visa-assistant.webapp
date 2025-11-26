@@ -702,7 +702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the request if promo processing fails
       }
 
-      res.json({ success: true, verified: true });
+      res.json({ success: true, verified: true, tier: newTier });
     } catch (error) {
       console.error("Payment verification error:", error);
       res.status(500).json({ error: "Failed to verify payment" });
