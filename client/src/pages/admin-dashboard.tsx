@@ -1707,12 +1707,12 @@ export default function AdminDashboard() {
                                     <span className="text-sm font-medium">Memory</span>
                                   </div>
                                   <span className="text-sm font-bold">
-                                    {overviewData.systemMetrics?.memory?.percentage ?? 0}%
+                                    {overviewData.systemMetrics?.memoryUsage ?? 0} MB
                                   </span>
                                 </div>
-                                <Progress value={overviewData.systemMetrics?.memory?.percentage ?? 0} className="h-2" />
+                                <Progress value={Math.min(100, ((overviewData.systemMetrics?.memoryUsage ?? 0) / 512) * 100)} className="h-2" />
                                 <p className="text-xs text-muted-foreground">
-                                  {formatBytes(overviewData.systemMetrics?.memory?.used ?? 0)} / {formatBytes(overviewData.systemMetrics?.memory?.total ?? 0)}
+                                  Heap usage: {overviewData.systemMetrics?.memoryUsage ?? 0} MB
                                 </p>
                               </div>
 
@@ -4738,11 +4738,11 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <div className="text-4xl font-bold text-center mb-4">
-                                  {systemMetrics?.memory?.percentage || 62}%
+                                  {systemMetrics?.heapUsed || 256} MB
                                 </div>
-                                <Progress value={systemMetrics?.memory?.percentage || 62} className="h-3" />
+                                <Progress value={Math.min(100, ((systemMetrics?.heapUsed || 256) / (systemMetrics?.heapTotal || 512)) * 100)} className="h-3" />
                                 <p className="text-sm text-muted-foreground text-center mt-2">
-                                  {formatBytes(systemMetrics?.memory?.used || 3200000000)} used
+                                  {systemMetrics?.heapUsed || 256} / {systemMetrics?.heapTotal || 512} MB
                                 </p>
                               </CardContent>
                             </Card>
@@ -4898,12 +4898,12 @@ export default function AdminDashboard() {
                                         strokeLinecap="round"
                                         strokeDasharray={553}
                                         initial={{ strokeDashoffset: 553 }}
-                                        animate={{ strokeDashoffset: 553 - (553 * (systemMetrics?.memory?.percentage || 62)) / 100 }}
+                                        animate={{ strokeDashoffset: 553 - (553 * (systemMetrics?.percentage || 62)) / 100 }}
                                         transition={{ duration: 1 }}
                                       />
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                      <span className="text-4xl font-bold">{systemMetrics?.memory?.percentage || 62}%</span>
+                                      <span className="text-4xl font-bold">{systemMetrics?.percentage || 62}%</span>
                                       <span className="text-sm text-muted-foreground">RAM</span>
                                     </div>
                                   </div>
