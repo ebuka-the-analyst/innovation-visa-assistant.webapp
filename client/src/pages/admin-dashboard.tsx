@@ -10323,7 +10323,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* Settings Section */}
+                {/* Settings Section - PhD Level */}
                 {activeSection.startsWith('settings') && (
                   <div className="space-y-6">
                     <motion.div
@@ -10332,131 +10332,813 @@ export default function AdminDashboard() {
                       transition={{ duration: 0.5 }}
                       className="space-y-6"
                     >
-                      {/* General Settings */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Settings className="h-5 w-5" />
-                            General Settings
-                          </CardTitle>
-                          <CardDescription>Configure platform-wide settings</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                              <Label>Maintenance Mode</Label>
-                              <p className="text-sm text-muted-foreground">Temporarily disable access for non-admins</p>
-                            </div>
-                            <Switch />
+                      {/* General Settings Section */}
+                      {activeSection === 'settings-general' && (
+                        <>
+                          {/* Platform Settings Overview */}
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                    <Settings className="h-6 w-6 text-blue-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-blue-500">24</p>
+                                  <p className="text-xs text-muted-foreground">Active Settings</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <CheckCircle className="h-6 w-6 text-green-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-green-500">18</p>
+                                  <p className="text-xs text-muted-foreground">Enabled Features</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                    <Clock className="h-6 w-6 text-amber-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-amber-500">3</p>
+                                  <p className="text-xs text-muted-foreground">Pending Changes</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-violet-500/10 flex items-center justify-center">
+                                    <History className="h-6 w-6 text-violet-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-violet-500">12</p>
+                                  <p className="text-xs text-muted-foreground">Config History</p>
+                                </div>
+                              </CardContent>
+                            </Card>
                           </div>
-                          <Separator />
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                              <Label>New User Registration</Label>
-                              <p className="text-sm text-muted-foreground">Allow new users to sign up</p>
-                            </div>
-                            <Switch defaultChecked />
-                          </div>
-                          <Separator />
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                              <Label>Email Notifications</Label>
-                              <p className="text-sm text-muted-foreground">Send email notifications for system events</p>
-                            </div>
-                            <Switch defaultChecked />
-                          </div>
-                          <Separator />
-                          <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                              <Label>Auto-refresh Dashboard</Label>
-                              <p className="text-sm text-muted-foreground">Automatically refresh data every 30 seconds</p>
-                            </div>
-                            <Switch defaultChecked />
-                          </div>
-                        </CardContent>
-                      </Card>
 
-                      {/* Access Control */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <LockKeyhole className="h-5 w-5" />
-                            Access Control
-                          </CardTitle>
-                          <CardDescription>Manage admin access and permissions</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
-                              <div className="flex items-center gap-4">
-                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                  <Shield className="h-5 w-5 text-primary" />
+                          {/* Platform Configuration */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Settings className="h-5 w-5 text-blue-500" />
+                                Platform Configuration
+                              </CardTitle>
+                              <CardDescription>Core platform settings and feature toggles</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Registration Settings */}
+                                <div className="space-y-4 p-4 rounded-lg border border-border/50">
+                                  <h4 className="font-semibold flex items-center gap-2">
+                                    <UserPlus className="h-4 w-4 text-blue-500" />
+                                    User Registration
+                                  </h4>
+                                  <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Allow New Registrations</Label>
+                                        <p className="text-xs text-muted-foreground">Enable public user signups</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Email Verification Required</Label>
+                                        <p className="text-xs text-muted-foreground">Require email verification before access</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Google OAuth Login</Label>
+                                        <p className="text-xs text-muted-foreground">Allow sign-in with Google</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                  </div>
                                 </div>
-                                <div>
-                                  <p className="font-medium">Super Admin Access</p>
-                                  <p className="text-sm text-muted-foreground">Full system access</p>
-                                </div>
-                              </div>
-                              <Badge>Active</Badge>
-                            </div>
-                            <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
-                              <div className="flex items-center gap-4">
-                                <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                                  <Users className="h-5 w-5 text-blue-500" />
-                                </div>
-                                <div>
-                                  <p className="font-medium">User Management</p>
-                                  <p className="text-sm text-muted-foreground">Create, edit, delete users</p>
-                                </div>
-                              </div>
-                              <Badge variant="secondary">Enabled</Badge>
-                            </div>
-                            <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
-                              <div className="flex items-center gap-4">
-                                <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                                  <FileText className="h-5 w-5 text-green-500" />
-                                </div>
-                                <div>
-                                  <p className="font-medium">Plan Management</p>
-                                  <p className="text-sm text-muted-foreground">View and manage business plans</p>
-                                </div>
-                              </div>
-                              <Badge variant="secondary">Enabled</Badge>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
 
-                      {/* System Info */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Server className="h-5 w-5" />
-                            System Information
-                          </CardTitle>
-                          <CardDescription>Platform version and environment details</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 rounded-lg bg-card/50 border border-border/50">
-                              <p className="text-sm text-muted-foreground">Version</p>
-                              <p className="text-lg font-bold">v2.0.0</p>
-                            </div>
-                            <div className="p-4 rounded-lg bg-card/50 border border-border/50">
-                              <p className="text-sm text-muted-foreground">Environment</p>
-                              <p className="text-lg font-bold">Production</p>
-                            </div>
-                            <div className="p-4 rounded-lg bg-card/50 border border-border/50">
-                              <p className="text-sm text-muted-foreground">Node.js</p>
-                              <p className="text-lg font-bold">v20.x</p>
-                            </div>
-                            <div className="p-4 rounded-lg bg-card/50 border border-border/50">
-                              <p className="text-sm text-muted-foreground">Database</p>
-                              <p className="text-lg font-bold">PostgreSQL</p>
-                            </div>
+                                {/* Notification Settings */}
+                                <div className="space-y-4 p-4 rounded-lg border border-border/50">
+                                  <h4 className="font-semibold flex items-center gap-2">
+                                    <Bell className="h-4 w-4 text-amber-500" />
+                                    Notifications
+                                  </h4>
+                                  <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Email Notifications</Label>
+                                        <p className="text-xs text-muted-foreground">System event email alerts</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Welcome Emails</Label>
+                                        <p className="text-xs text-muted-foreground">Send welcome email to new users</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Payment Confirmations</Label>
+                                        <p className="text-xs text-muted-foreground">Send receipt after payment</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Dashboard Settings */}
+                                <div className="space-y-4 p-4 rounded-lg border border-border/50">
+                                  <h4 className="font-semibold flex items-center gap-2">
+                                    <LayoutDashboard className="h-4 w-4 text-green-500" />
+                                    Dashboard Behavior
+                                  </h4>
+                                  <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Auto-Refresh Data</Label>
+                                        <p className="text-xs text-muted-foreground">Refresh every 30 seconds</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Show Analytics</Label>
+                                        <p className="text-xs text-muted-foreground">Display detailed analytics</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Compact Mode</Label>
+                                        <p className="text-xs text-muted-foreground">Reduce spacing for more data</p>
+                                      </div>
+                                      <Switch />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Security Settings */}
+                                <div className="space-y-4 p-4 rounded-lg border border-border/50">
+                                  <h4 className="font-semibold flex items-center gap-2">
+                                    <Shield className="h-4 w-4 text-red-500" />
+                                    Security
+                                  </h4>
+                                  <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Turnstile Bot Protection</Label>
+                                        <p className="text-xs text-muted-foreground">Cloudflare captcha on forms</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Session Timeout</Label>
+                                        <p className="text-xs text-muted-foreground">Auto logout after 24 hours</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <div className="space-y-0.5">
+                                        <Label>Login Rate Limiting</Label>
+                                        <p className="text-xs text-muted-foreground">Limit failed login attempts</p>
+                                      </div>
+                                      <Switch defaultChecked />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* System Information */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Server className="h-5 w-5 text-violet-500" />
+                                System Information
+                              </CardTitle>
+                              <CardDescription>Platform version and environment details</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
+                                  <p className="text-sm text-muted-foreground">Version</p>
+                                  <p className="text-xl font-bold text-blue-500">v2.0.0</p>
+                                </div>
+                                <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
+                                  <p className="text-sm text-muted-foreground">Environment</p>
+                                  <p className="text-xl font-bold text-green-500">Production</p>
+                                </div>
+                                <div className="p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
+                                  <p className="text-sm text-muted-foreground">Node.js</p>
+                                  <p className="text-xl font-bold text-amber-500">v20.x</p>
+                                </div>
+                                <div className="p-4 rounded-lg bg-gradient-to-br from-violet-500/10 to-violet-600/5 border border-violet-500/20">
+                                  <p className="text-sm text-muted-foreground">Database</p>
+                                  <p className="text-xl font-bold text-violet-500">PostgreSQL</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Configuration History */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <History className="h-5 w-5 text-amber-500" />
+                                Recent Configuration Changes
+                              </CardTitle>
+                              <CardDescription>Track who changed what and when</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-4">
+                                {[
+                                  { setting: 'Email Notifications', oldValue: 'Disabled', newValue: 'Enabled', user: 'Admin', time: '2 hours ago' },
+                                  { setting: 'Bot Protection', oldValue: 'Basic', newValue: 'Enhanced', user: 'Admin', time: '1 day ago' },
+                                  { setting: 'Session Timeout', oldValue: '12 hours', newValue: '24 hours', user: 'Admin', time: '3 days ago' },
+                                ].map((change, i) => (
+                                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                                    <div className="flex items-center gap-3">
+                                      <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                        <Settings className="h-4 w-4 text-amber-500" />
+                                      </div>
+                                      <div>
+                                        <p className="font-medium text-sm">{change.setting}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                          <span className="text-red-500">{change.oldValue}</span>
+                                          <ArrowRight className="h-3 w-3 inline mx-1" />
+                                          <span className="text-green-500">{change.newValue}</span>
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-sm font-medium">{change.user}</p>
+                                      <p className="text-xs text-muted-foreground">{change.time}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+
+                      {/* Access Control Section */}
+                      {activeSection === 'settings-access' && (
+                        <>
+                          {/* Access Control Overview */}
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <Card className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-violet-500/10 flex items-center justify-center">
+                                    <Shield className="h-6 w-6 text-violet-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-violet-500">3</p>
+                                  <p className="text-xs text-muted-foreground">Admin Users</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                    <LockKeyhole className="h-6 w-6 text-blue-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-blue-500">12</p>
+                                  <p className="text-xs text-muted-foreground">Permission Sets</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <CheckCircle className="h-6 w-6 text-green-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-green-500">45</p>
+                                  <p className="text-xs text-muted-foreground">Active Sessions</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-red-500/10 to-red-600/5 border-red-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-red-500/10 flex items-center justify-center">
+                                    <AlertTriangle className="h-6 w-6 text-red-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-red-500">2</p>
+                                  <p className="text-xs text-muted-foreground">Security Alerts</p>
+                                </div>
+                              </CardContent>
+                            </Card>
                           </div>
-                        </CardContent>
-                      </Card>
+
+                          {/* Admin Team Management */}
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Shield className="h-5 w-5 text-violet-500" />
+                                    Admin Team
+                                  </CardTitle>
+                                  <CardDescription>Manage administrator accounts and permissions</CardDescription>
+                                </div>
+                                <Button>
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Add Admin
+                                </Button>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-4">
+                                {[
+                                  { name: 'Ebuka Benedict Umeh', email: 'ebuka@example.com', role: 'Super Admin', status: 'Active', lastLogin: '2 hours ago', permissions: ['All'] },
+                                  { name: 'System Administrator', email: 'admin@ukvisaassistant.com', role: 'Admin', status: 'Active', lastLogin: '1 day ago', permissions: ['Users', 'Plans', 'Analytics'] },
+                                  { name: 'Support Manager', email: 'support@ukvisaassistant.com', role: 'Moderator', status: 'Active', lastLogin: '3 days ago', permissions: ['Users', 'Support'] },
+                                ].map((admin, i) => (
+                                  <Card key={i} className="hover-elevate">
+                                    <CardContent className="p-4">
+                                      <div className="flex items-center justify-between gap-4 flex-wrap">
+                                        <div className="flex items-center gap-4">
+                                          <div className={`h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold ${
+                                            admin.role === 'Super Admin' ? 'bg-gradient-to-br from-violet-500/20 to-purple-500/20 text-violet-600' :
+                                            admin.role === 'Admin' ? 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 text-blue-600' :
+                                            'bg-gradient-to-br from-green-500/20 to-emerald-500/20 text-green-600'
+                                          }`}>
+                                            {admin.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                          </div>
+                                          <div>
+                                            <div className="flex items-center gap-2">
+                                              <p className="font-semibold">{admin.name}</p>
+                                              <Badge variant={admin.role === 'Super Admin' ? 'default' : 'secondary'} className="text-xs">
+                                                {admin.role}
+                                              </Badge>
+                                            </div>
+                                            <p className="text-sm text-muted-foreground">{admin.email}</p>
+                                            <div className="flex items-center gap-1 mt-1">
+                                              {admin.permissions.map((perm, j) => (
+                                                <Badge key={j} variant="outline" className="text-xs">{perm}</Badge>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                          <div className="text-right">
+                                            <Badge variant="default" className="text-xs bg-green-500">{admin.status}</Badge>
+                                            <p className="text-xs text-muted-foreground mt-1">Last login: {admin.lastLogin}</p>
+                                          </div>
+                                          <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                              <Button variant="ghost" size="icon">
+                                                <MoreVertical className="h-4 w-4" />
+                                              </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                              <DropdownMenuItem>
+                                                <Edit className="h-4 w-4 mr-2" />
+                                                Edit Permissions
+                                              </DropdownMenuItem>
+                                              <DropdownMenuItem>
+                                                <Eye className="h-4 w-4 mr-2" />
+                                                View Activity
+                                              </DropdownMenuItem>
+                                              <DropdownMenuSeparator />
+                                              <DropdownMenuItem className="text-destructive">
+                                                <Ban className="h-4 w-4 mr-2" />
+                                                Revoke Access
+                                              </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                          </DropdownMenu>
+                                        </div>
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Permission Matrix */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <LockKeyhole className="h-5 w-5 text-blue-500" />
+                                Permission Matrix
+                              </CardTitle>
+                              <CardDescription>Role-based access control settings</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Permission</TableHead>
+                                    <TableHead className="text-center">Super Admin</TableHead>
+                                    <TableHead className="text-center">Admin</TableHead>
+                                    <TableHead className="text-center">Moderator</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {[
+                                    { permission: 'User Management', superAdmin: true, admin: true, moderator: false },
+                                    { permission: 'Business Plan Management', superAdmin: true, admin: true, moderator: false },
+                                    { permission: 'Analytics & Reports', superAdmin: true, admin: true, moderator: true },
+                                    { permission: 'Subscription Management', superAdmin: true, admin: true, moderator: false },
+                                    { permission: 'Promo Codes', superAdmin: true, admin: true, moderator: false },
+                                    { permission: 'Referral Management', superAdmin: true, admin: false, moderator: false },
+                                    { permission: 'Lawyer Review Center', superAdmin: true, admin: true, moderator: false },
+                                    { permission: 'System Settings', superAdmin: true, admin: false, moderator: false },
+                                    { permission: 'Access Control', superAdmin: true, admin: false, moderator: false },
+                                    { permission: 'Maintenance Mode', superAdmin: true, admin: false, moderator: false },
+                                  ].map((row, i) => (
+                                    <TableRow key={i}>
+                                      <TableCell className="font-medium">{row.permission}</TableCell>
+                                      <TableCell className="text-center">
+                                        {row.superAdmin ? <CheckCircle className="h-5 w-5 text-green-500 mx-auto" /> : <XCircle className="h-5 w-5 text-muted-foreground/30 mx-auto" />}
+                                      </TableCell>
+                                      <TableCell className="text-center">
+                                        {row.admin ? <CheckCircle className="h-5 w-5 text-green-500 mx-auto" /> : <XCircle className="h-5 w-5 text-muted-foreground/30 mx-auto" />}
+                                      </TableCell>
+                                      <TableCell className="text-center">
+                                        {row.moderator ? <CheckCircle className="h-5 w-5 text-green-500 mx-auto" /> : <XCircle className="h-5 w-5 text-muted-foreground/30 mx-auto" />}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </CardContent>
+                          </Card>
+
+                          {/* Recent Security Events */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                                Security Events
+                              </CardTitle>
+                              <CardDescription>Recent login attempts and security alerts</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-3">
+                                {[
+                                  { event: 'Successful admin login', user: 'ebuka@example.com', ip: '192.168.1.x', time: '2 hours ago', status: 'success' },
+                                  { event: 'Failed login attempt', user: 'unknown@attacker.com', ip: '45.33.x.x', time: '5 hours ago', status: 'blocked' },
+                                  { event: 'Password reset requested', user: 'support@ukvisaassistant.com', ip: '192.168.1.x', time: '1 day ago', status: 'success' },
+                                  { event: 'New admin added', user: 'System', ip: 'Internal', time: '3 days ago', status: 'success' },
+                                ].map((event, i) => (
+                                  <div key={i} className={`flex items-center justify-between p-3 rounded-lg ${
+                                    event.status === 'blocked' ? 'bg-red-500/10 border border-red-500/20' : 'bg-muted/50'
+                                  }`}>
+                                    <div className="flex items-center gap-3">
+                                      <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                                        event.status === 'blocked' ? 'bg-red-500/20' : 'bg-green-500/20'
+                                      }`}>
+                                        {event.status === 'blocked' ? (
+                                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                                        ) : (
+                                          <CheckCircle className="h-4 w-4 text-green-500" />
+                                        )}
+                                      </div>
+                                      <div>
+                                        <p className="font-medium text-sm">{event.event}</p>
+                                        <p className="text-xs text-muted-foreground">{event.user} • IP: {event.ip}</p>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <Badge variant={event.status === 'blocked' ? 'destructive' : 'default'} className="text-xs">
+                                        {event.status}
+                                      </Badge>
+                                      <p className="text-xs text-muted-foreground mt-1">{event.time}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+
+                      {/* Maintenance Section */}
+                      {activeSection === 'settings-maintenance' && (
+                        <>
+                          {/* Maintenance Status */}
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <CheckCircle className="h-6 w-6 text-green-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-green-500">Online</p>
+                                  <p className="text-xs text-muted-foreground">System Status</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                    <Clock className="h-6 w-6 text-blue-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-blue-500">99.9%</p>
+                                  <p className="text-xs text-muted-foreground">Uptime (30 days)</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                    <Database className="h-6 w-6 text-amber-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-amber-500">1.2GB</p>
+                                  <p className="text-xs text-muted-foreground">Database Size</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/20">
+                              <CardContent className="pt-6">
+                                <div className="text-center">
+                                  <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-violet-500/10 flex items-center justify-center">
+                                    <History className="h-6 w-6 text-violet-500" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-violet-500">2h ago</p>
+                                  <p className="text-xs text-muted-foreground">Last Backup</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Maintenance Mode Control */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                                Maintenance Mode
+                              </CardTitle>
+                              <CardDescription>Temporarily disable access for non-admin users</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                              <div className="flex items-center justify-between p-6 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                <div className="flex items-center gap-4">
+                                  <div className="h-14 w-14 rounded-full bg-amber-500/20 flex items-center justify-center">
+                                    <AlertTriangle className="h-7 w-7 text-amber-500" />
+                                  </div>
+                                  <div>
+                                    <p className="font-semibold text-lg">Enable Maintenance Mode</p>
+                                    <p className="text-sm text-muted-foreground">
+                                      When enabled, only administrators can access the platform. Users will see a maintenance page.
+                                    </p>
+                                  </div>
+                                </div>
+                                <Switch />
+                              </div>
+
+                              <div className="space-y-4">
+                                <Label>Maintenance Message (shown to users)</Label>
+                                <Input
+                                  placeholder="We're performing scheduled maintenance. Please check back soon."
+                                  className="h-12"
+                                />
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label>Scheduled Start</Label>
+                                  <Input type="datetime-local" />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Scheduled End</Label>
+                                  <Input type="datetime-local" />
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* System Maintenance Actions */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Server className="h-5 w-5 text-blue-500" />
+                                System Actions
+                              </CardTitle>
+                              <CardDescription>Database and cache management operations</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Card className="hover-elevate">
+                                  <CardContent className="p-4">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                          <Database className="h-5 w-5 text-blue-500" />
+                                        </div>
+                                        <div>
+                                          <p className="font-medium">Backup Database</p>
+                                          <p className="text-xs text-muted-foreground">Create a full database backup</p>
+                                        </div>
+                                      </div>
+                                      <Button variant="outline" size="sm">
+                                        <Download className="h-4 w-4 mr-2" />
+                                        Backup
+                                      </Button>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card className="hover-elevate">
+                                  <CardContent className="p-4">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                                          <RefreshCw className="h-5 w-5 text-amber-500" />
+                                        </div>
+                                        <div>
+                                          <p className="font-medium">Clear Cache</p>
+                                          <p className="text-xs text-muted-foreground">Clear application cache</p>
+                                        </div>
+                                      </div>
+                                      <Button variant="outline" size="sm">
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Clear
+                                      </Button>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card className="hover-elevate">
+                                  <CardContent className="p-4">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                          <RotateCcw className="h-5 w-5 text-green-500" />
+                                        </div>
+                                        <div>
+                                          <p className="font-medium">Restart Services</p>
+                                          <p className="text-xs text-muted-foreground">Restart application services</p>
+                                        </div>
+                                      </div>
+                                      <Button variant="outline" size="sm">
+                                        <RotateCcw className="h-4 w-4 mr-2" />
+                                        Restart
+                                      </Button>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card className="hover-elevate">
+                                  <CardContent className="p-4">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                                          <FileText className="h-5 w-5 text-violet-500" />
+                                        </div>
+                                        <div>
+                                          <p className="font-medium">View Logs</p>
+                                          <p className="text-xs text-muted-foreground">Access system logs</p>
+                                        </div>
+                                      </div>
+                                      <Button variant="outline" size="sm">
+                                        <Eye className="h-4 w-4 mr-2" />
+                                        View
+                                      </Button>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Backup History */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <History className="h-5 w-5 text-violet-500" />
+                                Backup History
+                              </CardTitle>
+                              <CardDescription>Recent database backups and restore points</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Backup Name</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Size</TableHead>
+                                    <TableHead>Created</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {[
+                                    { name: 'auto_backup_2024_11_26', type: 'Automatic', size: '1.2 GB', created: '2 hours ago', status: 'Completed' },
+                                    { name: 'auto_backup_2024_11_25', type: 'Automatic', size: '1.1 GB', created: '1 day ago', status: 'Completed' },
+                                    { name: 'manual_pre_update', type: 'Manual', size: '1.1 GB', created: '3 days ago', status: 'Completed' },
+                                    { name: 'auto_backup_2024_11_22', type: 'Automatic', size: '1.0 GB', created: '4 days ago', status: 'Completed' },
+                                  ].map((backup, i) => (
+                                    <TableRow key={i}>
+                                      <TableCell className="font-medium">
+                                        <div className="flex items-center gap-2">
+                                          <Database className="h-4 w-4 text-muted-foreground" />
+                                          {backup.name}
+                                        </div>
+                                      </TableCell>
+                                      <TableCell>
+                                        <Badge variant={backup.type === 'Manual' ? 'default' : 'secondary'} className="text-xs">
+                                          {backup.type}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell>{backup.size}</TableCell>
+                                      <TableCell className="text-muted-foreground">{backup.created}</TableCell>
+                                      <TableCell>
+                                        <Badge variant="default" className="text-xs bg-green-500">{backup.status}</Badge>
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        <DropdownMenu>
+                                          <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon">
+                                              <MoreVertical className="h-4 w-4" />
+                                            </Button>
+                                          </DropdownMenuTrigger>
+                                          <DropdownMenuContent align="end">
+                                            <DropdownMenuItem>
+                                              <Download className="h-4 w-4 mr-2" />
+                                              Download
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem>
+                                              <RotateCcw className="h-4 w-4 mr-2" />
+                                              Restore
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem className="text-destructive">
+                                              <Trash2 className="h-4 w-4 mr-2" />
+                                              Delete
+                                            </DropdownMenuItem>
+                                          </DropdownMenuContent>
+                                        </DropdownMenu>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </CardContent>
+                          </Card>
+
+                          {/* Scheduled Tasks */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Clock className="h-5 w-5 text-cyan-500" />
+                                Scheduled Tasks
+                              </CardTitle>
+                              <CardDescription>Automated maintenance tasks and their schedules</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-4">
+                                {[
+                                  { task: 'Database Backup', schedule: 'Daily at 3:00 AM', lastRun: '2 hours ago', nextRun: '22 hours', status: 'Active' },
+                                  { task: 'Clear Expired Sessions', schedule: 'Every 6 hours', lastRun: '1 hour ago', nextRun: '5 hours', status: 'Active' },
+                                  { task: 'Analytics Aggregation', schedule: 'Daily at 1:00 AM', lastRun: '6 hours ago', nextRun: '18 hours', status: 'Active' },
+                                  { task: 'Email Queue Processing', schedule: 'Every 5 minutes', lastRun: '2 minutes ago', nextRun: '3 minutes', status: 'Active' },
+                                ].map((task, i) => (
+                                  <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover-elevate">
+                                    <div className="flex items-center gap-4">
+                                      <div className="h-10 w-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
+                                        <Clock className="h-5 w-5 text-cyan-500" />
+                                      </div>
+                                      <div>
+                                        <p className="font-medium">{task.task}</p>
+                                        <p className="text-xs text-muted-foreground">{task.schedule}</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-6">
+                                      <div className="text-right">
+                                        <p className="text-sm">Last: {task.lastRun}</p>
+                                        <p className="text-xs text-muted-foreground">Next: {task.nextRun}</p>
+                                      </div>
+                                      <Badge variant="default" className="text-xs bg-green-500">{task.status}</Badge>
+                                      <Switch defaultChecked />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
                     </motion.div>
                   </div>
                 )}
