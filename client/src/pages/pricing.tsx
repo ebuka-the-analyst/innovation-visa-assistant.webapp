@@ -5,22 +5,24 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2, Zap, FileText } from "lucide-react";
+import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { TIER_CREDITS, ADDON_PRICING, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
 
 const tiers = [
   {
     id: "free",
     name: "Free Plan",
     price: "Free",
+    credits: 0,
     description: "Start your Innovator Founder Visa journey",
     pages: "10-15 pages",
     features: [
-      "Essential tools access",
+      "Essential tools access (13 tools)",
       "Basic business overview",
       "Innovation introduction",
       "Essential compliance guide",
@@ -34,10 +36,12 @@ const tiers = [
     id: "basic",
     name: "Basic Plan",
     price: "£29",
+    credits: 1,
     description: "Perfect for straightforward businesses",
     pages: "25-35 pages",
     features: [
-      "Extended tools access",
+      "1 business plan credit included",
+      "Extended tools access (20 tools)",
       "Core Innovation criteria coverage",
       "Basic Viability analysis",
       "Essential Scalability points",
@@ -51,11 +55,13 @@ const tiers = [
     id: "premium",
     name: "Premium Plan",
     price: "£49",
+    credits: 3,
     description: "Most popular - comprehensive coverage",
     pages: "40-60 pages",
     popular: true,
     features: [
-      "Comprehensive tools access",
+      "3 business plan credits included",
+      "Comprehensive tools access (83 tools)",
       "Comprehensive Innovation analysis",
       "Detailed Viability with financials",
       "Advanced Scalability strategy",
@@ -71,10 +77,12 @@ const tiers = [
     id: "enterprise",
     name: "Enterprise Plan",
     price: "£89",
+    credits: 6,
     description: "Maximum detail for complex ventures",
     pages: "50-80 pages",
     features: [
-      "Full tools access",
+      "6 business plan credits included",
+      "Full tools access (109 tools)",
       "Deep-dive Innovation coverage",
       "Complete Viability assessment",
       "Multi-market Scalability plan",
@@ -91,10 +99,12 @@ const tiers = [
     id: "ultimate",
     name: "Ultimate Plan",
     price: "£129",
+    credits: "unlimited",
     description: "Everything you need for guaranteed approval",
     pages: "80+ pages",
     features: [
-      "Complete access to 100+ professional-level tools",
+      "Unlimited business plan generations",
+      "Complete access to 109 professional-level tools",
       "All Enterprise features included",
       "24/7 VIP support & live chat",
       "Personal visa strategist",
@@ -105,6 +115,51 @@ const tiers = [
       "1-hour rush delivery",
       "Success guarantee coaching",
     ],
+  },
+];
+
+const addons = [
+  {
+    id: "single_credit",
+    name: "Single Credit",
+    price: "£39",
+    description: "Generate one additional business plan",
+    icon: CreditCard,
+    highlight: false,
+  },
+  {
+    id: "triple_pack",
+    name: "Triple Credit Pack",
+    price: "£99",
+    savings: "Save £18",
+    description: "3 business plan credits - perfect for iterations",
+    icon: Gift,
+    highlight: true,
+  },
+  {
+    id: "partner_bundle",
+    name: "Partner Bundle",
+    price: "£59",
+    description: "Plans for you and your co-founder",
+    icon: Users,
+    highlight: false,
+  },
+  {
+    id: "family_pack",
+    name: "Family Pack",
+    price: "£149",
+    savings: "Save £46",
+    description: "5 business plans - ideal for multiple ventures",
+    icon: Heart,
+    highlight: false,
+  },
+  {
+    id: "ultimate_assurance",
+    name: "Ultimate Assurance",
+    price: "£99/year",
+    description: "Unlimited business plan generations for 1 year",
+    icon: Infinity,
+    highlight: true,
   },
 ];
 
@@ -182,6 +237,36 @@ export default function Pricing() {
       setProcessingTier(null);
     },
   });
+
+  // Addon purchase mutation
+  const addonMutation = useMutation({
+    mutationFn: async (addonType: string) => {
+      const response = await apiRequest('POST', '/api/credits/purchase-addon', { addonType });
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to purchase addon",
+        variant: "destructive",
+      });
+      setProcessingTier(null);
+    },
+  });
+
+  const handlePurchaseAddon = (addonId: string) => {
+    if (!user) {
+      setLocation(`/signup?addon=${addonId}`);
+      return;
+    }
+    setProcessingTier(addonId);
+    addonMutation.mutate(addonId);
+  };
 
   // Direct subscribe - go straight to payment
   const handleDirectSubscribe = (tierId: string) => {
@@ -363,6 +448,83 @@ export default function Pricing() {
             );
           })}
         </div>
+
+        {/* Add-ons Section - Only show for authenticated users */}
+        {user && (
+          <div className="mt-16 max-w-5xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-3">Need More Business Plans?</h2>
+              <p className="text-muted-foreground">
+                Purchase additional credits or get unlimited generations with Ultimate Assurance
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              {addons.map((addon) => {
+                const Icon = addon.icon;
+                return (
+                  <Card 
+                    key={addon.id} 
+                    className={`relative hover-elevate ${addon.highlight ? 'border-primary' : ''}`}
+                    data-testid={`card-addon-${addon.id}`}
+                  >
+                    {addon.savings && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                        <Badge className="bg-green-500 text-white px-3 py-0.5 text-xs">
+                          {addon.savings}
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    <CardHeader className="pb-2 pt-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon className="h-5 w-5 text-primary" />
+                        <CardTitle className="text-lg">{addon.name}</CardTitle>
+                      </div>
+                      <div className="text-2xl font-bold">{addon.price}</div>
+                    </CardHeader>
+                    
+                    <CardContent className="pb-2">
+                      <p className="text-sm text-muted-foreground">{addon.description}</p>
+                    </CardContent>
+                    
+                    <CardFooter className="pt-2">
+                      <Button
+                        className="w-full"
+                        variant={addon.highlight ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handlePurchaseAddon(addon.id)}
+                        disabled={processingTier === addon.id || addonMutation.isPending}
+                        data-testid={`button-purchase-${addon.id}`}
+                      >
+                        {processingTier === addon.id && addonMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          "Purchase"
+                        )}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                );
+              })}
+            </div>
+            
+            {/* Referral Program */}
+            <div className="mt-8 text-center p-6 bg-accent/10 rounded-lg border border-accent/20">
+              <Gift className="h-8 w-8 mx-auto mb-3 text-primary" />
+              <h3 className="text-xl font-semibold mb-2">Earn Free Credits</h3>
+              <p className="text-muted-foreground mb-2">
+                Refer a friend and earn {REFERRAL_REWARDS.creditsPerReferral} free business plan credit when they subscribe
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Maximum {REFERRAL_REWARDS.maxCreditsPerMonth} credits per month
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="mt-12 text-center text-sm text-muted-foreground">
           <p>All plans include AI-powered generation that answers comprehensive expert framework questions</p>
