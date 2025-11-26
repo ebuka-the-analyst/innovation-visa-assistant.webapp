@@ -526,149 +526,154 @@ export function SpotlightTour({ onComplete, isOpen }: SpotlightTourProps) {
       
       <div 
         ref={cardRef}
-        className={`${getPositionClasses()} z-50 w-full max-w-md mx-4 animate-in fade-in slide-in-from-bottom-4 duration-500`}
-        style={getPositionStyles()}
+        className="fixed z-50 w-[90vw] max-w-[420px] animate-in fade-in slide-in-from-bottom-4 duration-500"
+        style={{
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          maxHeight: '85vh',
+        }}
       >
-        <Card className="shadow-2xl border-2 overflow-hidden">
-          <div className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9] p-1">
-            <div className="bg-background p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-[#ffa536] to-[#11b6e9] flex items-center justify-center shadow-lg">
-                    <Icon className="w-7 h-7 text-white" />
+        <Card className="shadow-2xl border-2 flex flex-col" style={{ maxHeight: '85vh' }}>
+          <div className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9] p-0.5 flex-shrink-0">
+            <div className="bg-background p-4">
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#ffa536] to-[#11b6e9] flex items-center justify-center shadow-lg flex-shrink-0">
+                    <Icon className="w-5 h-5 text-white" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                       <p className="text-xs text-muted-foreground">
-                        Step {currentStep + 1} of {COMPREHENSIVE_TOUR_STEPS.length}
+                        Step {currentStep + 1}/{COMPREHENSIVE_TOUR_STEPS.length}
                       </p>
                       {step.category && (
-                        <Badge variant="secondary" className={`text-xs ${categoryColors[step.category]}`}>
+                        <Badge variant="secondary" className={`text-xs px-1.5 py-0 ${categoryColors[step.category]}`}>
                           {step.category}
                         </Badge>
                       )}
                     </div>
-                    <h2 className="text-lg font-bold leading-tight">{step.title}</h2>
+                    <h2 className="text-base font-bold leading-tight">{step.title}</h2>
                   </div>
                 </div>
                 <Button 
                   variant="ghost" 
                   size="icon" 
                   onClick={handleSkip}
-                  className="text-muted-foreground hover:text-foreground flex-shrink-0"
+                  className="text-muted-foreground hover:text-foreground flex-shrink-0 h-8 w-8"
                   data-testid="button-close-spotlight-tour"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </Button>
               </div>
 
-              <Progress value={progress} className="h-1.5 mb-5" />
-
-              <CardContent className="p-0">
-                <p className="text-muted-foreground mb-4 leading-relaxed text-sm whitespace-pre-line">
-                  {step.description}
-                </p>
-
-                {step.tips && step.tips.length > 0 && (
-                  <div className="bg-primary/5 rounded-lg p-3 mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Zap className="w-4 h-4 text-primary" />
-                      <span className="text-xs font-semibold text-primary">Pro Tips</span>
-                    </div>
-                    <ul className="space-y-1.5">
-                      {step.tips.map((tip, index) => (
-                        <li key={index} className="flex items-start gap-2 text-xs text-muted-foreground">
-                          <Star className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" />
-                          <span>{tip}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {step.estimatedTime && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
-                    <Clock className="w-4 h-4" />
-                    <span>Estimated tour time: {step.estimatedTime}</span>
-                  </div>
-                )}
-
-                {step.keyboardShortcut && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
-                    <Keyboard className="w-4 h-4" />
-                    <span>{step.keyboardShortcut}</span>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-1.5 mb-5 flex-wrap">
-                  {COMPREHENSIVE_TOUR_STEPS.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentStep(index)}
-                      className={`transition-all rounded-full ${
-                        index === currentStep 
-                          ? "w-5 h-2 bg-primary" 
-                          : index < currentStep 
-                            ? "w-2 h-2 bg-primary/50 hover:bg-primary/70" 
-                            : "w-2 h-2 bg-muted hover:bg-muted-foreground/30"
-                      }`}
-                      data-testid={`button-spotlight-step-${index}`}
-                    />
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between gap-2">
-                  <Button 
-                    variant="ghost" 
-                    onClick={handlePrev}
-                    disabled={currentStep === 0}
-                    size="sm"
-                    data-testid="button-spotlight-prev"
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Back
-                  </Button>
-
-                  <div className="flex items-center gap-2">
-                    {currentStep < COMPREHENSIVE_TOUR_STEPS.length - 1 && (
-                      <Button 
-                        variant="ghost" 
-                        onClick={handleSkip}
-                        size="sm"
-                        data-testid="button-spotlight-skip"
-                      >
-                        Skip Tour
-                      </Button>
-                    )}
-                    <Button 
-                      onClick={handleNext}
-                      size="sm"
-                      className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9] text-white hover:opacity-90"
-                      data-testid="button-spotlight-next"
-                    >
-                      {currentStep === COMPREHENSIVE_TOUR_STEPS.length - 1 ? (
-                        <>
-                          <CheckCircle2 className="w-4 h-4 mr-1" />
-                          Start Using App
-                        </>
-                      ) : (
-                        <>
-                          Next
-                          <ArrowRight className="w-4 h-4 ml-1" />
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t text-center">
-                  <p className="text-xs text-muted-foreground">
-                    Use arrow keys to navigate • ESC to skip
-                  </p>
-                </div>
-              </CardContent>
+              <Progress value={progress} className="h-1 mb-3" />
             </div>
           </div>
+
+          <CardContent className="p-4 pt-0 overflow-y-auto flex-1">
+            <p className="text-muted-foreground mb-3 leading-relaxed text-sm whitespace-pre-line">
+              {step.description}
+            </p>
+
+            {step.tips && step.tips.length > 0 && (
+              <div className="bg-primary/5 rounded-lg p-2.5 mb-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Zap className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-semibold text-primary">Pro Tips</span>
+                </div>
+                <ul className="space-y-1">
+                  {step.tips.map((tip, index) => (
+                    <li key={index} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                      <Star className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" />
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {step.estimatedTime && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                <Clock className="w-3.5 h-3.5" />
+                <span>Estimated time: {step.estimatedTime}</span>
+              </div>
+            )}
+
+            {step.keyboardShortcut && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                <Keyboard className="w-3.5 h-3.5" />
+                <span>{step.keyboardShortcut}</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-1 mb-4 flex-wrap">
+              {COMPREHENSIVE_TOUR_STEPS.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentStep(index)}
+                  className={`transition-all rounded-full ${
+                    index === currentStep 
+                      ? "w-4 h-1.5 bg-primary" 
+                      : index < currentStep 
+                        ? "w-1.5 h-1.5 bg-primary/50 hover:bg-primary/70" 
+                        : "w-1.5 h-1.5 bg-muted hover:bg-muted-foreground/30"
+                  }`}
+                  data-testid={`button-spotlight-step-${index}`}
+                />
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
+              <Button 
+                variant="ghost" 
+                onClick={handlePrev}
+                disabled={currentStep === 0}
+                size="sm"
+                data-testid="button-spotlight-prev"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Back
+              </Button>
+
+              <div className="flex items-center gap-2">
+                {currentStep < COMPREHENSIVE_TOUR_STEPS.length - 1 && (
+                  <Button 
+                    variant="ghost" 
+                    onClick={handleSkip}
+                    size="sm"
+                    data-testid="button-spotlight-skip"
+                  >
+                    Skip Tour
+                  </Button>
+                )}
+                <Button 
+                  onClick={handleNext}
+                  size="sm"
+                  className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9] text-white hover:opacity-90"
+                  data-testid="button-spotlight-next"
+                >
+                  {currentStep === COMPREHENSIVE_TOUR_STEPS.length - 1 ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 mr-1" />
+                      Start Using App
+                    </>
+                  ) : (
+                    <>
+                      Next
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-2 border-t text-center">
+              <p className="text-xs text-muted-foreground">
+                Use arrow keys to navigate • ESC to skip
+              </p>
+            </div>
+          </CardContent>
         </Card>
       </div>
     </>
