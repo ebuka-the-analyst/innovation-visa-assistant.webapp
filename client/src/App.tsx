@@ -72,6 +72,11 @@ const AdaptiveIntake = lazy(() => import("@/pages/adaptive-intake"));
 const TractionEvidence = lazy(() => import("@/pages/traction-evidence"));
 const FounderPortfolio = lazy(() => import("@/pages/founder-portfolio"));
 const EndorserCoverLetter = lazy(() => import("@/pages/endorser-cover-letter"));
+const CommercialValidation = lazy(() => import("@/pages/commercial-validation"));
+const OISCCompliance = lazy(() => import("@/pages/oisc-compliance"));
+const MarketDataVerifier = lazy(() => import("@/pages/market-data-verifier"));
+const MVPDemoGuide = lazy(() => import("@/pages/mvp-demo-guide"));
+const FinancialResilience = lazy(() => import("@/pages/financial-resilience"));
 
 // Dashboards and analytics
 const FeaturesDashboard = lazy(() => import("@/pages/features-dashboard"));
@@ -217,6 +222,11 @@ function Router() {
       <Route path="/traction-evidence" component={TractionEvidence} />
       <Route path="/founder-portfolio" component={FounderPortfolio} />
       <Route path="/endorser-cover-letter" component={EndorserCoverLetter} />
+      <Route path="/commercial-validation" component={CommercialValidation} />
+      <Route path="/oisc-compliance" component={OISCCompliance} />
+      <Route path="/market-data-verifier" component={MarketDataVerifier} />
+      <Route path="/mvp-demo-guide" component={MVPDemoGuide} />
+      <Route path="/financial-resilience" component={FinancialResilience} />
       <Route path="/faq" component={FAQ} />
       <Route path="/guide" component={Guide} />
       <Route path="/privacy" component={Privacy} />
