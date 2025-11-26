@@ -15,6 +15,7 @@ import { sendPaymentReceiptEmail, sendPasswordResetEmail, generateVerificationTo
 import bcrypt from "bcrypt";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import PDFDocument from "pdfkit";
+import { allQuestions, getQuestion, getRandomQuestion, getTotalQuestionCount } from "./ai-interview-questions";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -5679,9 +5680,6 @@ END:VEVENT
   // AI CONVERSATIONAL INTERVIEW SYSTEM
   // Innovative questionnaire with real-time scoring and gamification
   // ============================================================================
-
-  // Import comprehensive question bank
-  const { allQuestions, getQuestion, getRandomQuestion, getTotalQuestionCount } = require('./ai-interview-questions');
 
   // Achievement definitions for gamification
   const ACHIEVEMENTS = {

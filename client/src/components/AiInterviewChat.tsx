@@ -764,11 +764,11 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
           </div>
           
           <div className="flex items-center gap-3">
-            {session?.level && (
+            {session?.level && session.level.level && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50">
-                <Target className="h-4 w-4" style={{ color: session.level.color }} />
+                <Target className="h-4 w-4" style={{ color: session.level.color || '#94a3b8' }} />
                 <span className="text-sm font-medium">Lv.{session.level.level}</span>
-                <span className="text-xs text-muted-foreground">{session.level.title}</span>
+                <span className="text-xs text-muted-foreground">{session.level.title || 'Newcomer'}</span>
               </div>
             )}
             
@@ -897,17 +897,21 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                         className="p-4 bg-muted/50 backdrop-blur-sm border-l-4"
                         style={{ borderLeftColor: AGENTS[message.agent || 'nova']?.primaryColor }}
                       >
-                        {message.questionData && (
-                          <div className="flex items-center gap-2 mb-3">
+                        {message.questionData && message.questionData.difficulty && (
+                          <div className="flex items-center gap-2 mb-3 flex-wrap">
                             <Badge className={`text-xs ${getDifficultyColor(message.questionData.difficulty)}`}>
                               {message.questionData.difficulty}
                             </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {message.questionData.category}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              +{message.questionData.points} pts
-                            </Badge>
+                            {message.questionData.category && (
+                              <Badge variant="outline" className="text-xs">
+                                {message.questionData.category}
+                              </Badge>
+                            )}
+                            {message.questionData.points && (
+                              <Badge variant="outline" className="text-xs">
+                                +{message.questionData.points} pts
+                              </Badge>
+                            )}
                           </div>
                         )}
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
