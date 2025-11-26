@@ -1279,11 +1279,24 @@ ${generatedSections.join('\n\n---\n\n')}`;
         userId
       );
 
-      res.json({
+      const response = {
         assessmentId: assessment.id,
-        ...result,
-        accessToken: assessment.accessToken
-      });
+        innovationScore: result.scores.innovationScore,
+        scalabilityScore: result.scores.scalabilityScore,
+        viabilityScore: result.scores.viabilityScore,
+        overallScore: result.scores.overallScore,
+        eligibilityBand: result.eligibilityBand,
+        recommendations: result.aiAnalysis.recommendations || [],
+        strengthAreas: result.aiAnalysis.strengths || [],
+        improvementAreas: result.aiAnalysis.weaknesses || [],
+        criticalGaps: result.disqualifiers || [],
+        aiAnalysis: result.aiAnalysis.endorserFit?.join(' ') || 
+          `Your ${industrySlug} business concept shows ${result.eligibilityBand === 'eligible' ? 'strong' : 'moderate'} potential for the Innovator Founder Visa. ` +
+          (result.aiAnalysis.strengths?.[0] || ''),
+        accessToken: assessment.accessToken || ''
+      };
+
+      res.json(response);
     } catch (error) {
       console.error("Eligibility assessment error:", error);
       res.status(500).json({ error: "Failed to assess eligibility" });
