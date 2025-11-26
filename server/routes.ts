@@ -1190,8 +1190,14 @@ ${generatedSections.join('\n\n---\n\n')}`;
         return res.status(400).json({ error: "Confirmation ID is required" });
       }
 
+      const context = {
+        ipAddress: req.ip || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent'],
+        sessionId: req.sessionID
+      };
+
       const { cancelPendingAction } = await import("./ai-orchestrator");
-      const success = await cancelPendingAction(confirmationId, user.id);
+      const success = await cancelPendingAction(confirmationId, user.id, context);
       
       res.json({ success, message: success ? "Action cancelled" : "Failed to cancel action" });
     } catch (error) {

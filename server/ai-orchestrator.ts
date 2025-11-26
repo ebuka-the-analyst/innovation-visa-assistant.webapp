@@ -252,14 +252,42 @@ export async function confirmAndExecuteAction(
   user: User,
   context: { ipAddress?: string; userAgent?: string; sessionId?: string }
 ): Promise<ActionResult> {
+  const startTime = Date.now();
+  
   // Get the pending confirmation
   const confirmation = await storage.getAiPendingConfirmation(confirmationId);
   
   if (!confirmation) {
+    // Log failed confirmation attempt
+    await storage.createAiActionLog({
+      userId: user.id,
+      actionType: 'confirmation_attempt',
+      actionCategory: 'security',
+      parameters: { confirmationId },
+      status: 'failed',
+      errorMessage: 'Confirmation not found or expired',
+      ipAddress: context.ipAddress,
+      userAgent: context.userAgent,
+      sessionId: context.sessionId,
+      executionTimeMs: Date.now() - startTime
+    });
     return { success: false, message: "Confirmation not found or expired." };
   }
   
   if (confirmation.userId !== user.id) {
+    // Log unauthorized attempt - critical security event
+    await storage.createAiActionLog({
+      userId: user.id,
+      actionType: 'unauthorized_confirmation_attempt',
+      actionCategory: 'security',
+      parameters: { confirmationId, attemptedAction: confirmation.actionType },
+      status: 'failed',
+      errorMessage: 'Unauthorized - user mismatch',
+      ipAddress: context.ipAddress,
+      userAgent: context.userAgent,
+      sessionId: context.sessionId,
+      executionTimeMs: Date.now() - startTime
+    });
     return { success: false, message: "Unauthorized." };
   }
   
@@ -271,10 +299,24 @@ export async function confirmAndExecuteAction(
     return { success: false, message: "Confirmation has expired. Please start again." };
   }
 
+  // Log the confirmation event
+  await storage.createAiActionLog({
+    userId: user.id,
+    actionType: `${confirmation.actionType}_confirmed`,
+    actionCategory: confirmation.actionCategory || 'account',
+    parameters: { confirmationId },
+    status: 'success',
+    result: { confirmed: true },
+    ipAddress: context.ipAddress,
+    userAgent: context.userAgent,
+    sessionId: context.sessionId,
+    executionTimeMs: Date.now() - startTime
+  });
+
   // Mark as confirmed
   await storage.confirmAiAction(confirmationId);
 
-  // Execute the action
+  // Execute the action (this will also log the action execution)
   const actionContext: ActionContext = {
     userId: user.id,
     user,
@@ -295,13 +337,28 @@ export async function confirmAndExecuteAction(
 // Cancel a pending action
 export async function cancelPendingAction(
   confirmationId: string,
-  userId: string
+  userId: string,
+  context?: { ipAddress?: string; userAgent?: string; sessionId?: string }
 ): Promise<boolean> {
   const confirmation = await storage.getAiPendingConfirmation(confirmationId);
   
   if (!confirmation || confirmation.userId !== userId) {
     return false;
   }
+  
+  // Log the cancellation
+  await storage.createAiActionLog({
+    userId,
+    actionType: `${confirmation.actionType}_cancelled`,
+    actionCategory: confirmation.actionCategory || 'account',
+    parameters: { confirmationId },
+    status: 'success',
+    result: { cancelled: true },
+    ipAddress: context?.ipAddress,
+    userAgent: context?.userAgent,
+    sessionId: context?.sessionId,
+    executionTimeMs: 0
+  });
   
   await storage.cancelAiAction(confirmationId);
   return true;
