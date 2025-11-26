@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ALL_TOOLS, Tool } from "@shared/tools-data";
-import { Search, Filter, Lock, CheckCircle, Loader2 } from "lucide-react";
+import { Search, Filter, Lock, CheckCircle, Loader2, Star, Clock, Heart, ArrowRight } from "lucide-react";
 import * as Icons from "lucide-react";
 import Footer from "@/components/Footer";
 import { useTierAccess, type ToolTier } from "@/hooks/useTierAccess";
@@ -21,6 +21,46 @@ import { organizationSchema, createBreadcrumbSchema } from "@/lib/seo-schemas";
 import { SoftUpgradeOverlay } from "@/components/SoftUpgradeOverlay";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+const FAVORITES_KEY = 'tools-favorites';
+const RECENT_KEY = 'tools-recently-used';
+
+function useFavorites() {
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+    } catch { return []; }
+  });
+
+  const toggleFavorite = (toolId: string) => {
+    const newFavorites = favorites.includes(toolId)
+      ? favorites.filter(id => id !== toolId)
+      : [...favorites, toolId];
+    setFavorites(newFavorites);
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+  };
+
+  const isFavorite = (toolId: string) => favorites.includes(toolId);
+
+  return { favorites, toggleFavorite, isFavorite };
+}
+
+function useRecentlyUsed() {
+  const [recent, setRecent] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    } catch { return []; }
+  });
+
+  const addRecent = (toolId: string) => {
+    const filtered = recent.filter(id => id !== toolId);
+    const newRecent = [toolId, ...filtered].slice(0, 6);
+    setRecent(newRecent);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(newRecent));
+  };
+
+  return { recent, addRecent };
+}
 
 type IconName = keyof typeof Icons;
 
@@ -42,6 +82,8 @@ export default function ToolsHub() {
   const { toast } = useToast();
 
   const { canAccessTool, userTier } = useTierAccess();
+  const { favorites, toggleFavorite, isFavorite } = useFavorites();
+  const { recent, addRecent } = useRecentlyUsed();
 
   // Verify payment when returning from Stripe checkout
   useEffect(() => {
@@ -85,6 +127,7 @@ export default function ToolsHub() {
   const handleToolClick = (tool: Tool) => {
     const hasAccess = canAccessTool(tool.tier as ToolTier);
     if (hasAccess) {
+      addRecent(tool.id);
       setLocation(`/tools/${tool.id}`);
     } else {
       setLockedToolInfo({
@@ -95,6 +138,18 @@ export default function ToolsHub() {
       });
     }
   };
+
+  const handleFavoriteClick = (e: React.MouseEvent, toolId: string) => {
+    e.stopPropagation();
+    toggleFavorite(toolId);
+    toast({
+      title: isFavorite(toolId) ? "Removed from favorites" : "Added to favorites",
+      description: isFavorite(toolId) ? "Tool removed from your favorites" : "Tool added to your favorites",
+    });
+  };
+
+  const favoriteTools = ALL_TOOLS.filter(tool => favorites.includes(tool.id));
+  const recentTools = recent.map(id => ALL_TOOLS.find(t => t.id === id)).filter(Boolean) as Tool[];
 
   const filteredTools = useMemo(() => {
     return ALL_TOOLS.filter((tool) => {
@@ -177,14 +232,89 @@ export default function ToolsHub() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="w-full px-4 md:px-8 lg:px-12">
           {/* Header */}
-          <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-3" data-testid="heading-tools-hub">
+          <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold mb-3" data-testid="heading-tools-hub">
             UK Innovator Founder Visa Tools
           </h1>
           <p className="text-lg text-muted-foreground">
             100+ powerful tools to help you from application to approval and beyond
           </p>
         </div>
+
+        {/* Favorites Section */}
+        {favoriteTools.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Heart className="h-5 w-5 text-red-500 fill-red-500" />
+              <h2 className="text-xl font-semibold">Your Favorites</h2>
+              <Badge variant="secondary">{favoriteTools.length}</Badge>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {favoriteTools.slice(0, 6).map((tool) => {
+                const hasAccess = canAccessTool(tool.tier as ToolTier);
+                return (
+                  <Card
+                    key={tool.id}
+                    onClick={() => handleToolClick(tool)}
+                    className="p-4 hover-elevate cursor-pointer relative group"
+                    data-testid={`favorite-${tool.id}`}
+                  >
+                    <button
+                      onClick={(e) => handleFavoriteClick(e, tool.id)}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      data-testid={`unfavorite-${tool.id}`}
+                    >
+                      <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                    </button>
+                    <div className="flex flex-col items-center text-center gap-2">
+                      <div className={`p-2 rounded-lg ${hasAccess ? 'bg-primary/10' : 'bg-muted'}`}>
+                        <GetIconComponent name={tool.icon} />
+                      </div>
+                      <span className="text-sm font-medium line-clamp-2">{tool.name}</span>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Recently Used Section */}
+        {recentTools.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="h-5 w-5 text-blue-500" />
+              <h2 className="text-xl font-semibold">Recently Used</h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {recentTools.map((tool) => {
+                const hasAccess = canAccessTool(tool.tier as ToolTier);
+                return (
+                  <Card
+                    key={tool.id}
+                    onClick={() => handleToolClick(tool)}
+                    className="p-4 hover-elevate cursor-pointer relative group"
+                    data-testid={`recent-${tool.id}`}
+                  >
+                    <button
+                      onClick={(e) => handleFavoriteClick(e, tool.id)}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      data-testid={`add-favorite-${tool.id}`}
+                    >
+                      <Heart className={`h-4 w-4 ${isFavorite(tool.id) ? 'text-red-500 fill-red-500' : 'text-muted-foreground'}`} />
+                    </button>
+                    <div className="flex flex-col items-center text-center gap-2">
+                      <div className={`p-2 rounded-lg ${hasAccess ? 'bg-primary/10' : 'bg-muted'}`}>
+                        <GetIconComponent name={tool.icon} />
+                      </div>
+                      <span className="text-sm font-medium line-clamp-2">{tool.name}</span>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Search & Filters */}
         <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm p-6 mb-8 border dark:border-slate-700">
@@ -297,21 +427,30 @@ export default function ToolsHub() {
                   <Card
                     key={tool.id}
                     onClick={() => handleToolClick(tool)}
-                    className={`p-6 hover-elevate cursor-pointer transition-all border-2 relative ${
+                    className={`p-6 hover-elevate cursor-pointer transition-all border-2 relative group ${
                       tierColors[tool.tier as keyof typeof tierColors]
                     } ${!hasAccess ? 'opacity-80' : ''}`}
                     data-testid={`card-tool-${tool.id}`}
                   >
-                    {!hasAccess && (
-                      <div className="absolute top-3 right-3 bg-orange-500 text-white p-1.5 rounded-full" data-testid={`lock-${tool.id}`}>
-                        <Lock className="w-3 h-3" />
-                      </div>
-                    )}
-                    {hasAccess && (
-                      <div className="absolute top-3 right-3 bg-green-500 text-white p-1.5 rounded-full" data-testid={`unlocked-${tool.id}`}>
-                        <CheckCircle className="w-3 h-3" />
-                      </div>
-                    )}
+                    <div className="absolute top-3 right-3 flex items-center gap-1">
+                      <button
+                        onClick={(e) => handleFavoriteClick(e, tool.id)}
+                        className="p-1.5 rounded-full bg-white/80 dark:bg-slate-800/80 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+                        data-testid={`favorite-btn-${tool.id}`}
+                      >
+                        <Heart className={`w-3 h-3 ${isFavorite(tool.id) ? 'text-red-500 fill-red-500' : 'text-muted-foreground'}`} />
+                      </button>
+                      {!hasAccess && (
+                        <div className="bg-orange-500 text-white p-1.5 rounded-full" data-testid={`lock-${tool.id}`}>
+                          <Lock className="w-3 h-3" />
+                        </div>
+                      )}
+                      {hasAccess && (
+                        <div className="bg-green-500 text-white p-1.5 rounded-full" data-testid={`unlocked-${tool.id}`}>
+                          <CheckCircle className="w-3 h-3" />
+                        </div>
+                      )}
+                    </div>
                     <div className="space-y-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">

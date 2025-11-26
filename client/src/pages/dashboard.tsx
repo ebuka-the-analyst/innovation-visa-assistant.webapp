@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award, Eye, EyeOff, RefreshCw } from "lucide-react";
+import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award, Eye, EyeOff, RefreshCw, MessageCircle, Calculator, BookOpen, Users, ArrowRight, Sparkles, Settings, Shield } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 import ChatBot from "@/components/ChatBot";
 import type { BusinessPlan } from "@shared/schema";
@@ -262,7 +263,9 @@ export default function Dashboard() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold mb-2">Dashboard</h2>
+            <h2 className="text-3xl font-bold mb-2">
+              Welcome back{user.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}
+            </h2>
             <p className="text-muted-foreground">Track your UK Innovator Founder Visa applications</p>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -426,6 +429,69 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Quick Actions Panel */}
+            <Card data-testid="card-quick-actions">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <CardTitle>Quick Actions</CardTitle>
+                </div>
+                <CardDescription>Jump to key features to strengthen your visa application</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover-elevate"
+                    onClick={() => setLocation('/tools-hub')}
+                    data-testid="button-quick-tools"
+                  >
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Calculator className="h-5 w-5 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium">109 Tools</span>
+                    <span className="text-xs text-muted-foreground">Access All</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover-elevate"
+                    onClick={() => setLocation('/ai-assistant')}
+                    data-testid="button-quick-assistant"
+                  >
+                    <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                      <MessageCircle className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <span className="text-sm font-medium">AI Assistant</span>
+                    <span className="text-xs text-muted-foreground">Ask Questions</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover-elevate"
+                    onClick={() => setLocation('/template-library')}
+                    data-testid="button-quick-templates"
+                  >
+                    <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                      <BookOpen className="h-5 w-5 text-green-500" />
+                    </div>
+                    <span className="text-sm font-medium">Templates</span>
+                    <span className="text-xs text-muted-foreground">60+ PhD-Level</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2 hover-elevate"
+                    onClick={() => setLocation('/progress')}
+                    data-testid="button-quick-progress"
+                  >
+                    <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                      <Target className="h-5 w-5 text-orange-500" />
+                    </div>
+                    <span className="text-sm font-medium">Progress</span>
+                    <span className="text-xs text-muted-foreground">Track Journey</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Business Plans List */}
             <div>
