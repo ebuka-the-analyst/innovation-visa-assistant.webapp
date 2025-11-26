@@ -322,8 +322,19 @@ interface SpotlightTourProps {
   isOpen: boolean;
 }
 
+// Local storage key for step persistence
+const STEP_STORAGE_KEY = 'spotlight-tour-current-step';
+
 export function SpotlightTour({ onComplete, isOpen }: SpotlightTourProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+  // Load initial step from localStorage to persist across navigation
+  const [currentStep, setCurrentStep] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STEP_STORAGE_KEY);
+      return saved ? Math.min(parseInt(saved, 10), COMPREHENSIVE_TOUR_STEPS.length - 1) : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [isVisible, setIsVisible] = useState(isOpen);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [, setLocation] = useLocation();
@@ -334,8 +345,27 @@ export function SpotlightTour({ onComplete, isOpen }: SpotlightTourProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/onboarding/status'] });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      // Clean up localStorage on completion
+      try {
+        localStorage.removeItem(STEP_STORAGE_KEY);
+        localStorage.removeItem('spotlight-tour-active');
+      } catch {
+        // Ignore
+      }
     }
   });
+
+  // Persist current step to localStorage
+  useEffect(() => {
+    if (isVisible) {
+      try {
+        localStorage.setItem(STEP_STORAGE_KEY, currentStep.toString());
+        localStorage.setItem('spotlight-tour-active', 'true');
+      } catch {
+        // Ignore localStorage errors
+      }
+    }
+  }, [currentStep, isVisible]);
 
   useEffect(() => {
     setIsVisible(isOpen);
@@ -418,6 +448,13 @@ export function SpotlightTour({ onComplete, isOpen }: SpotlightTourProps) {
   const handleComplete = () => {
     completeMutation.mutate();
     setIsVisible(false);
+    // Clean up localStorage
+    try {
+      localStorage.removeItem(STEP_STORAGE_KEY);
+      localStorage.removeItem('spotlight-tour-active');
+    } catch {
+      // Ignore
+    }
     onComplete();
   };
 
@@ -638,8 +675,19 @@ export function SpotlightTour({ onComplete, isOpen }: SpotlightTourProps) {
   );
 }
 
+// Persistent tour step storage key
+const TOUR_STEP_KEY = 'spotlight-tour-step';
+const TOUR_ACTIVE_KEY = 'spotlight-tour-active';
+
 export function useSpotlightTour() {
-  const [showTour, setShowTour] = useState(false);
+  // Load initial state from localStorage for persistence across navigation
+  const [showTour, setShowTour] = useState(() => {
+    try {
+      return localStorage.getItem(TOUR_ACTIVE_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [shouldTrigger, setShouldTrigger] = useState(false);
 
   const { data: onboardingStatus, isLoading } = useQuery<{
@@ -651,6 +699,20 @@ export function useSpotlightTour() {
     retry: false,
     staleTime: 0,
   });
+
+  // Persist tour active state to localStorage
+  useEffect(() => {
+    try {
+      if (showTour) {
+        localStorage.setItem(TOUR_ACTIVE_KEY, 'true');
+      } else {
+        localStorage.removeItem(TOUR_ACTIVE_KEY);
+        localStorage.removeItem(TOUR_STEP_KEY);
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, [showTour]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -666,6 +728,12 @@ export function useSpotlightTour() {
       // Only show tour if explicitly triggered AND has paid plan AND hasn't completed
       if (shouldTrigger && hasPaidPlan && hasNotCompletedTour) {
         setTimeout(() => setShowTour(true), 500);
+      }
+      
+      // Also check if tour was in progress (user navigated away and came back)
+      const tourWasActive = localStorage.getItem(TOUR_ACTIVE_KEY) === 'true';
+      if (tourWasActive && hasPaidPlan && hasNotCompletedTour) {
+        setShowTour(true);
       }
     }
   }, [onboardingStatus, isLoading, shouldTrigger]);
@@ -683,6 +751,13 @@ export function useSpotlightTour() {
   const closeTour = useCallback(() => {
     setShowTour(false);
     setShouldTrigger(false);
+    // Clean up localStorage
+    try {
+      localStorage.removeItem(TOUR_ACTIVE_KEY);
+      localStorage.removeItem(TOUR_STEP_KEY);
+    } catch {
+      // Ignore
+    }
   }, []);
 
   return { 
@@ -694,6 +769,24 @@ export function useSpotlightTour() {
     hasPaidPlan: onboardingStatus?.subscriptionTier !== 'free',
     isLoading
   };
+}
+
+// Helper to get/set persistent step
+export function getTourStep(): number {
+  try {
+    const step = localStorage.getItem(TOUR_STEP_KEY);
+    return step ? parseInt(step, 10) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function setTourStep(step: number): void {
+  try {
+    localStorage.setItem(TOUR_STEP_KEY, step.toString());
+  } catch {
+    // Ignore
+  }
 }
 
 export default SpotlightTour;

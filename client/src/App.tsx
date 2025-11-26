@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Switch, Route, useLocation, Link } from "wouter";
 import { queryClient, apiRequest } from "./lib/queryClient";
 import { QueryClientProvider, useQuery, useMutation } from "@tanstack/react-query";
@@ -12,12 +12,14 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LogOut, Loader2, LayoutDashboard, Wrench, FileText, HelpCircle } from "lucide-react";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
+import { useSpotlightTour } from "@/components/SpotlightTour";
 
 // Lazy load ChatBot and other heavy components
 const ChatBot = lazy(() => import("@/components/ChatBot"));
 const CookieConsent = lazy(() => import("@/components/CookieConsent"));
 const ToolsChronographWheel = lazy(() => import("@/components/ToolsChronographWheel"));
 const BlackNovemberBanner = lazy(() => import("@/components/BlackNovemberBanner"));
+const SpotlightTour = lazy(() => import("@/components/SpotlightTour"));
 
 // ============ LAZY LOADED PAGES ============
 // Public pages (marketing/auth)
@@ -327,6 +329,33 @@ function AppLayout() {
   );
 }
 
+// Global Spotlight Tour wrapper - persists across all page navigation
+function GlobalSpotlightTour() {
+  const { showTour, setShowTour, triggerTour, hasPaidPlan, hasCompletedOnboarding, isLoading } = useSpotlightTour();
+  
+  // Check for tour trigger flag after payment completion
+  useEffect(() => {
+    if (!isLoading && hasPaidPlan && !hasCompletedOnboarding) {
+      const shouldTriggerTour = localStorage.getItem('trigger-onboarding-tour');
+      if (shouldTriggerTour === 'true') {
+        localStorage.removeItem('trigger-onboarding-tour');
+        triggerTour();
+      }
+    }
+  }, [isLoading, hasPaidPlan, hasCompletedOnboarding, triggerTour]);
+
+  if (!showTour) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <SpotlightTour 
+        isOpen={showTour} 
+        onComplete={() => setShowTour(false)} 
+      />
+    </Suspense>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -336,6 +365,7 @@ function App() {
           <ChatBot />
           <ToolsChronographWheel />
         </Suspense>
+        <GlobalSpotlightTour />
         <Toaster />
         <AppLayout />
         <Suspense fallback={null}>
