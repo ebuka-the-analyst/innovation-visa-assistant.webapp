@@ -26,11 +26,14 @@ const FAVORITES_KEY = 'tools-favorites';
 const RECENT_KEY = 'tools-recently-used';
 
 function useFavorites() {
-  const [favorites, setFavorites] = useState<string[]>(() => {
+  const [favorites, setFavorites] = useState<string[]>([]);
+
+  useEffect(() => {
     try {
-      return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
-    } catch { return []; }
-  });
+      const saved = localStorage.getItem(FAVORITES_KEY);
+      if (saved) setFavorites(JSON.parse(saved));
+    } catch { /* ignore */ }
+  }, []);
 
   const toggleFavorite = (toolId: string) => {
     const newFavorites = favorites.includes(toolId)
@@ -46,11 +49,14 @@ function useFavorites() {
 }
 
 function useRecentlyUsed() {
-  const [recent, setRecent] = useState<string[]>(() => {
+  const [recent, setRecent] = useState<string[]>([]);
+
+  useEffect(() => {
     try {
-      return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
-    } catch { return []; }
-  });
+      const saved = localStorage.getItem(RECENT_KEY);
+      if (saved) setRecent(JSON.parse(saved));
+    } catch { /* ignore */ }
+  }, []);
 
   const addRecent = (toolId: string) => {
     const filtered = recent.filter(id => id !== toolId);
