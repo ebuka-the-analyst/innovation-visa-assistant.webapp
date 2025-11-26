@@ -61,7 +61,6 @@ export const ADDON_PRICING = {
 
 export const REFERRAL_REWARDS = {
   creditsPerReferral: 1,
-  maxCreditsPerMonth: 5,
   description: "Earn 1 credit for each friend who signs up and subscribes",
 } as const;
 

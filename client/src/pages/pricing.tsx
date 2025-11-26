@@ -520,7 +520,7 @@ export default function Pricing() {
                 Refer a friend and earn {REFERRAL_REWARDS.creditsPerReferral} free business plan credit when they subscribe
               </p>
               <p className="text-sm text-muted-foreground">
-                Maximum {REFERRAL_REWARDS.maxCreditsPerMonth} credits per month
+                No limit - invite as many friends as you want!
               </p>
             </div>
           </div>
