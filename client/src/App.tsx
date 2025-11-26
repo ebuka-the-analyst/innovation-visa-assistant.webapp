@@ -66,6 +66,7 @@ const SettlementPlanning = lazy(() => import("@/pages/settlement-planning"));
 const InterviewPrep = lazy(() => import("@/pages/interview-prep"));
 const AIAssistant = lazy(() => import("@/pages/ai-assistant"));
 const Handoff = lazy(() => import("@/pages/handoff"));
+const AdaptiveIntake = lazy(() => import("@/pages/adaptive-intake"));
 
 // Dashboards and analytics
 const FeaturesDashboard = lazy(() => import("@/pages/features-dashboard"));
@@ -176,6 +177,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/questionnaire" component={Questionnaire} />
+      <Route path="/adaptive-intake" component={AdaptiveIntake} />
       <Route path="/generation" component={Generation} />
       <Route path="/endorser-comparison" component={EndorserComparison} />
       <Route path="/document-organizer" component={DocumentOrganizer} />

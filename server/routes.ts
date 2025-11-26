@@ -1334,6 +1334,141 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // ============================================
+  // INNOVATION COACHING API
+  // ============================================
+
+  // Analyze form data and return live scores
+  app.post("/api/ai/coach/analyze", isAuthenticated, async (req, res) => {
+    try {
+      const { concept, industry, section, formData } = req.body;
+      
+      if (!concept || !industry) {
+        return res.status(400).json({ error: "Concept and industry required" });
+      }
+
+      const prompt = `You are an expert UK Innovator Founder Visa consultant. Analyze this business concept and provide innovation scoring.
+
+Business Concept: ${concept}
+Industry: ${industry}
+Current Section: ${section || 'general'}
+Form Data: ${JSON.stringify(formData || {})}
+
+Score the following on a scale of 0-100:
+1. Innovation Score - Is this genuinely novel/innovative for the UK market?
+2. Scalability Score - Can this grow significantly in the UK and internationally?
+3. Viability Score - Is this a realistic, executable business plan?
+
+Also provide 2-4 specific insights with types: strength, improvement, critical, or tip.
+
+Respond in JSON format:
+{
+  "innovation": number,
+  "scalability": number,
+  "viability": number,
+  "overall": number,
+  "insights": [
+    {
+      "type": "strength|improvement|critical|tip",
+      "category": "innovation|scalability|viability|general",
+      "message": "specific insight",
+      "actionable": "what to do about it"
+    }
+  ]
+}`;
+
+      const openai = await import("openai");
+      const client = new openai.default({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const response = await client.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        temperature: 0.7
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{}');
+      result.trend = 'stable';
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Coach analyze error:", error);
+      res.status(500).json({ error: "Failed to analyze" });
+    }
+  });
+
+  // Enhance a specific field value
+  app.post("/api/ai/coach/enhance", isAuthenticated, async (req, res) => {
+    try {
+      const { field, currentValue, context } = req.body;
+      
+      const prompt = `You are an expert UK Innovator Founder Visa consultant. Enhance this text for a visa application.
+
+Field: ${field}
+Current Value: ${currentValue}
+Context: ${context}
+
+Provide a more compelling, visa-focused version that:
+1. Emphasizes innovation and novelty
+2. Demonstrates scalability potential
+3. Shows viability and realistic execution
+4. Uses professional language suitable for UK endorser bodies
+
+Keep it concise but impactful. Return only the enhanced text.`;
+
+      const openai = await import("openai");
+      const client = new openai.default({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const response = await client.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7
+      });
+
+      res.json({ suggestion: response.choices[0].message.content });
+    } catch (error) {
+      console.error("Coach enhance error:", error);
+      res.status(500).json({ error: "Failed to enhance" });
+    }
+  });
+
+  // Ask innovation coach a question
+  app.post("/api/ai/coach/ask", isAuthenticated, async (req, res) => {
+    try {
+      const { question, context } = req.body;
+      
+      const prompt = `You are an expert UK Innovator Founder Visa coach. Answer this question helpfully and specifically.
+
+User's Business Context:
+- Concept: ${context?.businessConcept || 'Not provided'}
+- Industry: ${context?.industrySlug || 'Not provided'}
+- Current Section: ${context?.currentSection || 'General'}
+
+Question: ${question}
+
+Provide a helpful, specific answer focused on:
+1. UK Innovator Founder Visa requirements
+2. What endorser bodies look for
+3. Practical advice for this specific business
+
+Keep your response concise (2-3 paragraphs max) but actionable.`;
+
+      const openai = await import("openai");
+      const client = new openai.default({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const response = await client.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7
+      });
+
+      res.json({ response: response.choices[0].message.content });
+    } catch (error) {
+      console.error("Coach ask error:", error);
+      res.status(500).json({ error: "Failed to answer" });
+    }
+  });
+
   app.get("/api/news", async (req, res) => {
     try {
       const news = await getLatestNews();
