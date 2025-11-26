@@ -16,6 +16,47 @@ import bcrypt from "bcrypt";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import PDFDocument from "pdfkit";
 import { allQuestions, getQuestion, getRandomQuestion, getTotalQuestionCount } from "./ai-interview-questions";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+const uploadsDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const documentStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, `doc-${uniqueSuffix}${ext}`);
+  },
+});
+
+const documentUpload = multer({
+  storage: documentStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file type"));
+    }
+  },
+});
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
@@ -4638,26 +4679,33 @@ Keep your response concise (2-3 paragraphs max) but actionable.`;
   });
 
   // Upload document (placeholder - would need object storage integration)
-  app.post("/api/documents/upload", isAuthenticated, async (req, res) => {
+  app.post("/api/documents/upload", isAuthenticated, documentUpload.single("file"), async (req, res) => {
     try {
       const user = req.user as any;
-      
-      // For MVP, we'll store document metadata
-      // Full file storage would use Replit's Object Storage
-      const { name, category, description, fileUrl, fileType, fileSize } = req.body;
+      const file = req.file;
+      const { name, category, description } = req.body;
       
       if (!name || !category) {
+        if (file) {
+          fs.unlinkSync(file.path);
+        }
         return res.status(400).json({ error: "Name and category are required" });
       }
+      
+      if (!file) {
+        return res.status(400).json({ error: "File is required" });
+      }
+      
+      const fileUrl = `/uploads/${file.filename}`;
       
       const document = await storage.createUserDocument({
         userId: user.id,
         name,
         category,
-        description,
-        fileUrl: fileUrl || '/placeholder-document',
-        fileType: fileType || 'application/pdf',
-        fileSize: fileSize || 0,
+        description: description || "",
+        fileUrl,
+        fileType: file.mimetype,
+        fileSize: file.size,
         status: 'pending',
       });
       
