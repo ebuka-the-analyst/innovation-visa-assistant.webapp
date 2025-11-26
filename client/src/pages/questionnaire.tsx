@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import QuestionnaireForm from "@/components/QuestionnaireForm";
 import EvidencePreparationGuide from "@/components/EvidencePreparationGuide";
 import FeatureNavigation from "@/components/FeatureNavigation";
+import { CreditBalanceDisplay } from "@/components/CreditBalanceDisplay";
 
 export default function Questionnaire() {
   const [tier, setTier] = useState('premium');
@@ -27,6 +28,10 @@ export default function Questionnaire() {
             <p className="text-lg text-muted-foreground">
               Our Advanced AI platform evaluates your innovation across all three visa criteria (Innovation, Viability, Scalability) and generates policy-aware business plans, financial projections, and pitch decks—all internally consistent and endorser-ready.
             </p>
+          </div>
+          
+          <div className="mb-6">
+            <CreditBalanceDisplay variant="full" showUpgradeButton={true} />
           </div>
         </div>
         <EvidencePreparationGuide />
