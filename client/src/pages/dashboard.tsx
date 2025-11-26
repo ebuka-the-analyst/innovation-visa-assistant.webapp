@@ -156,8 +156,8 @@ export default function Dashboard() {
   const { hiddenIds, hidePlan, showPlan, showAllPlans } = useHiddenDemoPlans();
   const [redirecting, setRedirecting] = useState(false);
   
-  // Spotlight tour integration - only shows once after plan activation
-  const { showTour, setShowTour, triggerTour, hasCompletedOnboarding, isLoading: tourLoading } = useSpotlightTour();
+  // Spotlight tour integration - only shows ONCE after plan activation (paid plan required)
+  const { showTour, setShowTour, triggerTour, hasCompletedOnboarding, hasPaidPlan, isLoading: tourLoading } = useSpotlightTour();
 
   const { data: user, isLoading: userLoading, isError: userError, refetch: refetchUser } = useQuery<{ id: string; email: string; displayName?: string }>({
     queryKey: ['/api/auth/user'],
@@ -179,16 +179,21 @@ export default function Dashboard() {
     }
   }, [userLoading, user, redirecting, setLocation]);
 
-  // Check for tour trigger flag after payment completion
+  // Check for tour trigger flag after payment completion - ONLY for paid plans
   useEffect(() => {
-    if (user && !tourLoading && !hasCompletedOnboarding) {
+    // Tour only triggers if:
+    // 1. User is logged in
+    // 2. User has a PAID plan (not free)
+    // 3. Tour hasn't been completed yet
+    // 4. Explicit trigger flag was set (by payment flow)
+    if (user && !tourLoading && hasPaidPlan && !hasCompletedOnboarding) {
       const shouldTriggerTour = localStorage.getItem('trigger-onboarding-tour');
       if (shouldTriggerTour === 'true') {
         localStorage.removeItem('trigger-onboarding-tour');
         triggerTour();
       }
     }
-  }, [user, tourLoading, hasCompletedOnboarding, triggerTour]);
+  }, [user, tourLoading, hasPaidPlan, hasCompletedOnboarding, triggerTour]);
 
   // Filter out hidden demo plans
   const displayPlans = businessPlans?.filter(plan => {

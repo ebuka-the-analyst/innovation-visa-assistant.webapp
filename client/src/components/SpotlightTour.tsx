@@ -656,20 +656,26 @@ export function useSpotlightTour() {
     if (isLoading) return;
     
     if (onboardingStatus) {
-      const hasActivePlan = onboardingStatus.subscriptionStatus === 'active' || 
-                           onboardingStatus.subscriptionTier !== 'free' ||
-                           onboardingStatus.subscriptionStatus === 'inactive';
+      // Tour ONLY shows if:
+      // 1. User has a PAID plan (tier is NOT 'free')
+      // 2. AND tour has NOT been completed yet
+      // 3. AND trigger has been explicitly set (via payment flow)
+      const hasPaidPlan = onboardingStatus.subscriptionTier !== 'free';
       const hasNotCompletedTour = !onboardingStatus.hasCompletedOnboarding;
       
-      if (shouldTrigger && hasNotCompletedTour) {
+      // Only show tour if explicitly triggered AND has paid plan AND hasn't completed
+      if (shouldTrigger && hasPaidPlan && hasNotCompletedTour) {
         setTimeout(() => setShowTour(true), 500);
       }
     }
   }, [onboardingStatus, isLoading, shouldTrigger]);
 
   const triggerTour = useCallback(() => {
-    setShouldTrigger(true);
-    if (onboardingStatus && !onboardingStatus.hasCompletedOnboarding) {
+    // Only trigger if user has paid plan and hasn't completed tour
+    if (onboardingStatus && 
+        onboardingStatus.subscriptionTier !== 'free' && 
+        !onboardingStatus.hasCompletedOnboarding) {
+      setShouldTrigger(true);
       setTimeout(() => setShowTour(true), 500);
     }
   }, [onboardingStatus]);
@@ -685,6 +691,7 @@ export function useSpotlightTour() {
     triggerTour,
     closeTour,
     hasCompletedOnboarding: onboardingStatus?.hasCompletedOnboarding ?? true,
+    hasPaidPlan: onboardingStatus?.subscriptionTier !== 'free',
     isLoading
   };
 }
