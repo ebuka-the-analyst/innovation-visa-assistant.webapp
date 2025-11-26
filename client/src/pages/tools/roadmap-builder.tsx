@@ -353,7 +353,7 @@ ${completenessScore >= 80 ? 'EXCELLENT - Comprehensive roadmap with detailed mil
 Strengths:
 ${milestones.filter(m => m.ukImpact && m.ukImpact.length > 30).length > 2 ? '- Strong articulation of UK market impact across milestones' : '- [IMPROVE] UK market impact needs more detail'}
 ${avgInnovation >= 70 ? '- Solid innovation trajectory supporting visa Innovation Criterion' : '- [IMPROVE] Innovation metrics need strengthening'}
-${totalBudget >= 50000 ? '- Budget allocation meets minimum investment requirement' : '- [CRITICAL] Budget allocation below £50k minimum requirement'}
+${totalBudget >= 50000 ? '- Budget allocation demonstrates adequate funding for plan' : '- [NOTE] Budget below £50k - ensure this aligns with your business plan requirements'}
 
 SMART RECOMMENDATIONS
 ${'-'.repeat(80)}
@@ -369,7 +369,7 @@ Innovation Criterion:
   ${avgInnovation >= 75 ? 'STRONG - Roadmap demonstrates continuous innovation and R&D commitment' : avgInnovation >= 60 ? 'ACCEPTABLE - Innovation present but could be strengthened with more breakthrough features' : 'WEAK - Limited innovation trajectory may concern endorsing bodies'}
 
 Viability Criterion:
-  ${completenessScore >= 70 && totalBudget >= 50000 ? 'STRONG - Detailed planning and adequate funding demonstrate business viability' : completenessScore >= 50 ? 'ACCEPTABLE - Basic viability shown but needs more comprehensive financial planning' : 'WEAK - Insufficient detail on execution and resource deployment'}
+  ${completenessScore >= 70 && totalBudget >= 50000 ? 'STRONG - Detailed planning and funding appropriate for your business plan' : completenessScore >= 50 ? 'ACCEPTABLE - Basic viability shown but needs more comprehensive financial planning' : 'WEAK - Insufficient detail on execution and resource deployment'}
 
 Scalability Criterion:
   ${totalRevenue > 100000 && totalTeam >= 5 ? 'STRONG - Clear growth trajectory with team expansion and revenue scaling' : totalRevenue > 0 ? 'ACCEPTABLE - Growth shown but could strengthen hiring and revenue projections' : 'WEAK - Limited evidence of scalability and market traction'}
@@ -381,7 +381,7 @@ Based on this roadmap, your endorsement readiness is: ${completenessScore >= 75 
 Next Steps:
 1. ${completenessScore < 70 ? 'Complete all milestone details with specific deliverables and metrics' : 'Maintain detailed documentation of milestone progress'}
 2. ${avgInnovation < 70 ? 'Strengthen innovation metrics and R&D roadmap' : 'Continue tracking innovation KPIs'}
-3. ${totalBudget < 50000 ? 'CRITICAL: Ensure budget allocation meets £50k minimum requirement' : 'Document evidence of fund availability'}
+3. ${totalBudget < 50000 ? 'Review: Ensure budget allocation is appropriate for your business plan' : 'Document evidence of fund availability'}
 4. Align this roadmap with your business plan and endorsement application narrative
 
 ${'='.repeat(80)}

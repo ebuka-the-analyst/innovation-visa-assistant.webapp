@@ -393,7 +393,7 @@ export default function SupplyChain() {
     }
     
     if (totalInventoryValue > 50000) {
-      tips.push("Inventory value of £" + totalInventoryValue.toLocaleString() + " represents significant capital allocation. Ensure this aligns with your £50k minimum investment plan and demonstrate how inventory turnover supports revenue projections.");
+      tips.push("Inventory value of £" + totalInventoryValue.toLocaleString() + " represents significant capital allocation. Ensure this aligns with your investment plan and demonstrate how inventory turnover supports revenue projections.");
     }
     
     tips.push("UK Post-Brexit Compliance: All EU suppliers must now comply with UK customs and regulatory standards. Verify CE/UKCA marking compliance, obtain EORI numbers, and factor customs clearance into lead times (typically 2-5 additional days).");
@@ -724,7 +724,7 @@ ${suppliers.every(s => s.description.length > 0) ? '[✓]' : '[✗]'} Supplier d
 
 INVENTORY MANAGEMENT (Operational Readiness):
 ${lowStockItems === 0 ? '[✓]' : '[✗]'} Inventory levels aligned with 12-month financial projections (no stockouts)
-${totalInventoryValue <= 50000 * 0.3 ? '[✓]' : '[✗]'} Stock valuation reasonable vs £50k minimum investment (<30% allocation)
+${totalInventoryValue <= 50000 * 0.3 ? '[✓]' : '[✗]'} Stock valuation reasonable vs total investment (<30% allocation)
 ${inventory.every(i => i.maxStock > 0) ? '[✓]' : '[✗]'} Warehouse or fulfillment capacity documented for all items
 ${inventory.every(i => i.reorderPoint > 0) ? '[✓]' : '[✗]'} Reorder systems and procurement processes clearly defined
 ${inventory.length > 0 ? '[✓]' : '[✗]'} Stock holding costs integrated into cash flow forecasting

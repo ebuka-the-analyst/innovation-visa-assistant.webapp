@@ -150,7 +150,7 @@ export default function RedFlagFixer() {
       fixed: false,
       homeOfficeImpact: 'low',
       evidenceRequired: [
-        'Bank statements showing £50,000+ available',
+        'Bank statements showing investment funds appropriate for your plan',
         'Source of funds documentation',
         'Verification letters from banks/investors',
         'Evidence of fund transferability to UK'

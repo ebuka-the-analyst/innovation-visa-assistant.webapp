@@ -73,7 +73,7 @@ export default function FundingStrategy() {
     if (businessStage === 'idea') {
       sources.push({
         type: 'Personal Savings',
-        description: 'Use personal funds for initial £50k investment requirement',
+        description: 'Use personal funds for initial business investment',
         suitability: 'High',
         timeline: '0-1 months',
         pros: 'Full control, no dilution, meets visa requirement immediately',

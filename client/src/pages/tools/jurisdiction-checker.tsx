@@ -127,9 +127,9 @@ export default function JurisdictionChecker() {
     }
 
     if (formData.investmentAmount === "50k+") {
-      checks.push({ criterion: "Investment Amount", status: "pass", message: "Investment exceeds £50,000 - strong position" });
+      checks.push({ criterion: "Investment Amount", status: "pass", message: "Investment exceeds £50,000 - typically strong for endorsement" });
     } else if (formData.investmentAmount === "under50k") {
-      checks.push({ criterion: "Investment Amount", status: "warning", message: "Under £50,000 - ensure business plan justifies investment level" });
+      checks.push({ criterion: "Investment Amount", status: "pass", message: "Under £50,000 - acceptable if business plan justifies this level" });
     } else if (formData.investmentAmount === "none") {
       checks.push({ criterion: "Investment Amount", status: "warning", message: "Self-funding - ensure evidence of personal investment" });
     } else {

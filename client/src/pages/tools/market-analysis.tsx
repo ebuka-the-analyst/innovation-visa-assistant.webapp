@@ -429,7 +429,7 @@ ${'='.repeat(70)}
 • Cite credible third-party sources for all market sizing claims
 • Demonstrate realistic market capture assumptions (not overly optimistic)
 • Show clear connection between market size and job creation potential
-• Align market opportunity with your funding requirements (minimum £50k)
+• Align market opportunity with your funding requirements (appropriate for your plan)
 • Provide evidence of market validation (customer interest, partnerships, pilots)
 
 ${'='.repeat(70)}
