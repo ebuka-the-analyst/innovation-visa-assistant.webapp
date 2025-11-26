@@ -143,7 +143,7 @@ export default function Pricing() {
   const checkoutMutation = useMutation({
     mutationFn: async ({ planId, newTier }: { planId: string; newTier: string }) => {
       const response = await apiRequest('POST', '/api/payment/create-checkout', { planId });
-      return response;
+      return response.json();
     },
     onSuccess: (data: any) => {
       if (data.skipCheckout) {
@@ -166,7 +166,7 @@ export default function Pricing() {
   const directSubscribeMutation = useMutation({
     mutationFn: async (tier: string) => {
       const response = await apiRequest('POST', '/api/payment/direct-subscribe', { tier });
-      return response;
+      return response.json();
     },
     onSuccess: (data: any) => {
       if (data.url) {
