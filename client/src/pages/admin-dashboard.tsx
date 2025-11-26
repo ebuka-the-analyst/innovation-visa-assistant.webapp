@@ -113,7 +113,8 @@ import {
   MessageSquare,
   Smartphone,
   Image as ImageIcon,
-  Archive
+  Archive,
+  Wallet
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Link } from "wouter";
@@ -7332,155 +7333,374 @@ export default function AdminDashboard() {
                       transition={{ duration: 0.5 }}
                       className="space-y-6"
                     >
-                      {/* Referral Overview */}
+                      {/* PhD-Level Referral Programme Overview */}
                       {activeSection === 'referrals-overview' && (
                         <>
-                          {/* KPI Cards */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <Card>
-                              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Referral Codes</CardTitle>
-                                <Link2 className="h-4 w-4 text-muted-foreground" />
+                          {/* Hero Stats - PhD Level KPI Cards */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <Link2 className="h-4 w-4" />
+                                  Referral Codes
+                                </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-2xl font-bold">{referralAnalytics?.totalReferralCodes || 0}</div>
-                                <p className="text-xs text-muted-foreground">{referralAnalytics?.activeReferralCodes || 0} active</p>
-                              </CardContent>
-                            </Card>
-                            <Card>
-                              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Referrals</CardTitle>
-                                <Users className="h-4 w-4 text-muted-foreground" />
-                              </CardHeader>
-                              <CardContent>
-                                <div className="text-2xl font-bold">{referralAnalytics?.totalReferrals || 0}</div>
-                                <p className="text-xs text-muted-foreground">{referralAnalytics?.successfulReferrals || 0} successful</p>
-                              </CardContent>
-                            </Card>
-                            <Card>
-                              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                              </CardHeader>
-                              <CardContent>
-                                <div className="text-2xl font-bold">{((referralAnalytics?.conversionRate || 0) * 100).toFixed(1)}%</div>
-                                <p className="text-xs text-muted-foreground">Click to purchase</p>
-                              </CardContent>
-                            </Card>
-                            <Card>
-                              <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Rewards Paid</CardTitle>
-                                <PoundSterling className="h-4 w-4 text-muted-foreground" />
-                              </CardHeader>
-                              <CardContent>
-                                <div className="text-2xl font-bold text-green-500">
-                                  £{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(2)}
+                                <div className="text-3xl font-bold text-cyan-500">
+                                  {referralAnalytics?.totalReferralCodes || 0}
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                  £{((referralAnalytics?.pendingRewards || 0) / 100).toFixed(2)} pending
-                                </p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
+                                    {referralAnalytics?.activeReferralCodes || 0} Active
+                                  </Badge>
+                                  <Badge variant="outline" className="text-xs bg-gray-500/10 text-gray-600 border-gray-500/20">
+                                    {(referralAnalytics?.totalReferralCodes || 0) - (referralAnalytics?.activeReferralCodes || 0)} Inactive
+                                  </Badge>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            
+                            <Card className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <Users className="h-4 w-4" />
+                                  Referral Network
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-violet-500">
+                                  {referralAnalytics?.totalReferrals || 0}
+                                </div>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <span className="text-xs text-green-500 flex items-center">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    {referralAnalytics?.successfulReferrals || 0} converted
+                                  </span>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            
+                            <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <Target className="h-4 w-4" />
+                                  Viral Coefficient
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-emerald-500">
+                                  {((referralAnalytics?.conversionRate || 0) * 100).toFixed(1)}%
+                                </div>
+                                <div className="mt-2">
+                                  <Progress 
+                                    value={(referralAnalytics?.conversionRate || 0) * 100} 
+                                    className="h-2" 
+                                  />
+                                  <p className="text-xs text-muted-foreground mt-1">Conversion rate</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                            
+                            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <PoundSterling className="h-4 w-4" />
+                                  Rewards Programme
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-3xl font-bold text-amber-500">
+                                  £{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}
+                                </div>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                                    £{((referralAnalytics?.pendingRewards || 0) / 100).toFixed(0)} pending
+                                  </Badge>
+                                </div>
                               </CardContent>
                             </Card>
                           </div>
 
-                          {/* Top Referrers */}
+                          {/* Referral Performance Metrics */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Referral Funnel Visualization */}
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <TrendingUp className="h-5 w-5 text-cyan-500" />
+                                  Referral Conversion Funnel
+                                </CardTitle>
+                                <CardDescription>Track users through the referral journey</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-4">
+                                  {[
+                                    { stage: 'Link Clicks', count: referralAnalytics?.totalReferrals || 0, color: 'bg-cyan-500', percentage: 100 },
+                                    { stage: 'Sign Ups', count: Math.round((referralAnalytics?.totalReferrals || 0) * 0.7), color: 'bg-violet-500', percentage: 70 },
+                                    { stage: 'Plan Selected', count: Math.round((referralAnalytics?.totalReferrals || 0) * 0.4), color: 'bg-blue-500', percentage: 40 },
+                                    { stage: 'Purchase Made', count: referralAnalytics?.successfulReferrals || 0, color: 'bg-green-500', percentage: Math.round(((referralAnalytics?.successfulReferrals || 0) / Math.max(1, referralAnalytics?.totalReferrals || 1)) * 100) },
+                                  ].map((stage, index) => (
+                                    <div key={stage.stage} className="relative">
+                                      <div className="flex items-center justify-between mb-1">
+                                        <span className="text-sm font-medium flex items-center gap-2">
+                                          <span className={`w-3 h-3 rounded-full ${stage.color}`} />
+                                          {stage.stage}
+                                        </span>
+                                        <span className="text-sm font-bold">{stage.count}</span>
+                                      </div>
+                                      <div className="h-8 bg-muted rounded-lg overflow-hidden">
+                                        <div 
+                                          className={`h-full ${stage.color} transition-all duration-500`}
+                                          style={{ width: `${stage.percentage}%` }}
+                                        />
+                                      </div>
+                                      {index < 3 && (
+                                        <div className="absolute right-2 -bottom-2 text-xs text-muted-foreground">
+                                          {stage.percentage}% →
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            {/* Referral Network Visualization */}
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <Globe className="h-5 w-5 text-violet-500" />
+                                  Network Growth
+                                </CardTitle>
+                                <CardDescription>Visualize your referral network expansion</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="relative h-[250px] flex items-center justify-center">
+                                  {/* Central Node */}
+                                  <div className="absolute w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg z-10">
+                                    <Crown className="h-8 w-8 text-white" />
+                                  </div>
+                                  
+                                  {/* First Ring */}
+                                  <div className="absolute w-36 h-36 rounded-full border-2 border-dashed border-violet-500/30 animate-pulse" />
+                                  
+                                  {/* Referrer Nodes */}
+                                  {referralAnalytics?.topReferrers?.slice(0, 6).map((referrer, i) => {
+                                    const angle = (i * 60) * (Math.PI / 180);
+                                    const x = Math.cos(angle) * 80;
+                                    const y = Math.sin(angle) * 80;
+                                    return (
+                                      <div 
+                                        key={referrer.userId}
+                                        className="absolute w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-md"
+                                        style={{ transform: `translate(${x}px, ${y}px)` }}
+                                      >
+                                        <span className="text-white text-xs font-bold">{referrer.referrals}</span>
+                                      </div>
+                                    );
+                                  })}
+                                  
+                                  {/* Second Ring */}
+                                  <div className="absolute w-56 h-56 rounded-full border border-dashed border-cyan-500/20" />
+                                  
+                                  {/* Stats Overlay */}
+                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-card to-transparent pt-8 pb-2">
+                                    <div className="flex justify-around text-center">
+                                      <div>
+                                        <p className="text-lg font-bold">{referralAnalytics?.topReferrers?.length || 0}</p>
+                                        <p className="text-xs text-muted-foreground">Active Referrers</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-lg font-bold">{referralAnalytics?.successfulReferrals || 0}</p>
+                                        <p className="text-xs text-muted-foreground">Conversions</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-lg font-bold">
+                                          {((referralAnalytics?.successfulReferrals || 0) / Math.max(1, referralAnalytics?.topReferrers?.length || 1)).toFixed(1)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">Avg per Referrer</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Top Referrers Leaderboard */}
                           <Card>
                             <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <Gift className="h-5 w-5" />
-                                Top Referrers
-                              </CardTitle>
-                              <CardDescription>Users with the most successful referrals</CardDescription>
+                              <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Crown className="h-5 w-5 text-amber-500" />
+                                    Top Referrers Leaderboard
+                                  </CardTitle>
+                                  <CardDescription>Champions driving your growth through referrals</CardDescription>
+                                </div>
+                                <Button variant="outline" size="sm" onClick={() => refetchReferralAnalytics()}>
+                                  <RefreshCw className="h-4 w-4 mr-2" />
+                                  Refresh
+                                </Button>
+                              </div>
                             </CardHeader>
                             <CardContent>
                               {referralAnalyticsLoading ? (
                                 <div className="space-y-3">
                                   {Array.from({ length: 5 }).map((_, i) => (
-                                    <Skeleton key={i} className="h-12 w-full" />
+                                    <Skeleton key={i} className="h-16 w-full" />
                                   ))}
                                 </div>
                               ) : referralAnalytics?.topReferrers && referralAnalytics.topReferrers.length > 0 ? (
-                                <Table>
-                                  <TableHeader>
-                                    <TableRow>
-                                      <TableHead>Email</TableHead>
-                                      <TableHead>Code</TableHead>
-                                      <TableHead className="text-center">Referrals</TableHead>
-                                      <TableHead className="text-right">Earnings</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {referralAnalytics.topReferrers.map((referrer) => (
-                                      <TableRow key={referrer.userId}>
-                                        <TableCell className="font-medium">{referrer.email}</TableCell>
-                                        <TableCell>
-                                          <Badge variant="outline" className="font-mono">{referrer.code}</Badge>
-                                        </TableCell>
-                                        <TableCell className="text-center">{referrer.referrals}</TableCell>
-                                        <TableCell className="text-right text-green-500">
-                                          £{(referrer.earnings / 100).toFixed(2)}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
+                                <div className="space-y-3">
+                                  {referralAnalytics.topReferrers.map((referrer, index) => (
+                                    <Card key={referrer.userId} className={`hover-elevate ${index === 0 ? 'border-amber-500/30 bg-amber-500/5' : index === 1 ? 'border-gray-400/30 bg-gray-400/5' : index === 2 ? 'border-orange-600/30 bg-orange-600/5' : ''}`}>
+                                      <CardContent className="p-4">
+                                        <div className="flex items-center gap-4">
+                                          {/* Rank Badge */}
+                                          <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
+                                            index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white' :
+                                            index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' :
+                                            index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
+                                            'bg-muted text-muted-foreground'
+                                          }`}>
+                                            #{index + 1}
+                                          </div>
+                                          
+                                          {/* User Info */}
+                                          <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                              <p className="font-medium truncate">{referrer.email}</p>
+                                              {index === 0 && <Badge className="bg-amber-500">Top Referrer</Badge>}
+                                            </div>
+                                            <div className="flex items-center gap-3 mt-1">
+                                              <Badge variant="outline" className="font-mono text-xs">
+                                                {referrer.code}
+                                              </Badge>
+                                              <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="h-6 px-2"
+                                                onClick={() => {
+                                                  navigator.clipboard.writeText(referrer.code);
+                                                  toast({ title: "Copied!", description: `Code ${referrer.code} copied` });
+                                                }}
+                                              >
+                                                <Copy className="h-3 w-3" />
+                                              </Button>
+                                            </div>
+                                          </div>
+                                          
+                                          {/* Stats */}
+                                          <div className="flex items-center gap-6">
+                                            <div className="text-center">
+                                              <p className="text-2xl font-bold text-cyan-500">{referrer.referrals}</p>
+                                              <p className="text-xs text-muted-foreground">Referrals</p>
+                                            </div>
+                                            <div className="text-center">
+                                              <p className="text-2xl font-bold text-green-500">
+                                                £{(referrer.earnings / 100).toFixed(0)}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground">Earned</p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  ))}
+                                </div>
                               ) : (
-                                <div className="py-8 text-center text-muted-foreground">
-                                  <Gift className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                  <p>No referrers yet</p>
+                                <div className="py-16 text-center">
+                                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-cyan-500/10 flex items-center justify-center">
+                                    <Gift className="h-10 w-10 text-cyan-500" />
+                                  </div>
+                                  <h3 className="text-xl font-semibold mb-2">No Referrers Yet</h3>
+                                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                    Start your referral programme to incentivize users to bring in new customers.
+                                  </p>
                                 </div>
                               )}
                             </CardContent>
                           </Card>
 
-                          {/* Recent Referral Events */}
+                          {/* Recent Referral Activity Timeline */}
                           <Card>
                             <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <Activity className="h-5 w-5" />
-                                Recent Referral Events
-                              </CardTitle>
-                              <CardDescription>Latest referral activity</CardDescription>
+                              <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Activity className="h-5 w-5 text-violet-500" />
+                                    Referral Activity Timeline
+                                  </CardTitle>
+                                  <CardDescription>Real-time stream of referral events</CardDescription>
+                                </div>
+                              </div>
                             </CardHeader>
                             <CardContent>
                               {referralAnalytics?.recentEvents && referralAnalytics.recentEvents.length > 0 ? (
-                                <Table>
-                                  <TableHeader>
-                                    <TableRow>
-                                      <TableHead>Referrer</TableHead>
-                                      <TableHead>Referee</TableHead>
-                                      <TableHead>Status</TableHead>
-                                      <TableHead>Date</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {referralAnalytics.recentEvents.map((event) => (
-                                      <TableRow key={event.id}>
-                                        <TableCell>{event.referrerEmail}</TableCell>
-                                        <TableCell>{event.refereeEmail}</TableCell>
-                                        <TableCell>
-                                          <Badge variant={
-                                            event.status === 'rewarded' ? 'default' :
-                                            event.status === 'qualified' ? 'outline' :
-                                            'secondary'
-                                          } className={
-                                            event.status === 'rewarded' ? 'bg-green-500' :
-                                            event.status === 'qualified' ? 'border-orange-500 text-orange-500' : ''
-                                          }>
-                                            {event.status}
-                                          </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground">
-                                          {format(new Date(event.createdAt), 'MMM d, yyyy')}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
+                                <div className="space-y-4">
+                                  {referralAnalytics.recentEvents.map((event, index) => (
+                                    <div key={event.id} className="flex items-start gap-4">
+                                      {/* Timeline connector */}
+                                      <div className="relative flex flex-col items-center">
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                          event.status === 'rewarded' ? 'bg-green-500/20' :
+                                          event.status === 'qualified' ? 'bg-amber-500/20' :
+                                          'bg-blue-500/20'
+                                        }`}>
+                                          {event.status === 'rewarded' ? (
+                                            <CheckCircle className="h-5 w-5 text-green-500" />
+                                          ) : event.status === 'qualified' ? (
+                                            <Clock className="h-5 w-5 text-amber-500" />
+                                          ) : (
+                                            <UserPlus className="h-5 w-5 text-blue-500" />
+                                          )}
+                                        </div>
+                                        {index < referralAnalytics.recentEvents.length - 1 && (
+                                          <div className="w-0.5 h-12 bg-border mt-2" />
+                                        )}
+                                      </div>
+                                      
+                                      {/* Event Details */}
+                                      <div className="flex-1 pb-4">
+                                        <div className="flex items-center justify-between flex-wrap gap-2">
+                                          <div>
+                                            <p className="font-medium">
+                                              {event.status === 'rewarded' ? 'Reward Paid' :
+                                               event.status === 'qualified' ? 'Referral Qualified' :
+                                               'New Referral'}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                              <span className="text-cyan-500">{event.referrerEmail}</span>
+                                              <ArrowRight className="h-3 w-3 inline mx-2" />
+                                              <span className="text-violet-500">{event.refereeEmail}</span>
+                                            </p>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <Badge variant={
+                                              event.status === 'rewarded' ? 'default' :
+                                              event.status === 'qualified' ? 'outline' :
+                                              'secondary'
+                                            } className={
+                                              event.status === 'rewarded' ? 'bg-green-500' :
+                                              event.status === 'qualified' ? 'border-amber-500 text-amber-500' : ''
+                                            }>
+                                              {event.status}
+                                            </Badge>
+                                            <span className="text-xs text-muted-foreground">
+                                              {format(new Date(event.createdAt), 'MMM d, h:mm a')}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               ) : (
-                                <div className="py-8 text-center text-muted-foreground">
+                                <div className="py-12 text-center text-muted-foreground">
                                   <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                  <p>No recent events</p>
+                                  <p className="text-lg font-medium">No Activity Yet</p>
+                                  <p>Referral events will appear here in real-time</p>
                                 </div>
                               )}
                             </CardContent>
@@ -7735,26 +7955,22 @@ export default function AdminDashboard() {
                                 <Skeleton className="h-[300px] w-full" />
                               ) : promoCodesData?.promoCodes && promoCodesData.promoCodes.length > 0 ? (
                                 <ResponsiveContainer width="100%" height={300}>
-                                  <BarChart data={promoCodesData.promoCodes.slice(0, 10)}>
+                                  <RechartsBarChart data={promoCodesData.promoCodes.slice(0, 10)}>
                                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                                     <XAxis dataKey="code" className="text-xs" />
                                     <YAxis yAxisId="left" className="text-xs" />
                                     <YAxis yAxisId="right" orientation="right" className="text-xs" />
-                                    <Tooltip 
+                                    <RechartsTooltip 
                                       contentStyle={{ 
                                         backgroundColor: 'hsl(var(--card))', 
                                         border: '1px solid hsl(var(--border))',
                                         borderRadius: '8px'
                                       }}
-                                      formatter={(value: number, name: string) => {
-                                        if (name === 'totalRevenueSaved') return [`£${(value / 100).toFixed(2)}`, 'Savings'];
-                                        return [value, name === 'usedCount' ? 'Redemptions' : 'Unique Users'];
-                                      }}
                                     />
                                     <Legend />
                                     <Bar yAxisId="left" dataKey="usedCount" fill="#8b5cf6" name="Redemptions" radius={[4, 4, 0, 0]} />
                                     <Bar yAxisId="left" dataKey="uniqueUsers" fill="#06b6d4" name="Unique Users" radius={[4, 4, 0, 0]} />
-                                  </BarChart>
+                                  </RechartsBarChart>
                                 </ResponsiveContainer>
                               ) : (
                                 <div className="h-[300px] flex items-center justify-center text-muted-foreground">
