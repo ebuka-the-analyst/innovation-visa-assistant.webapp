@@ -8,52 +8,62 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 
 const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "validation-report",
+  toolName: "Validation Report",
   agent: 'nova',
   greeting: "I'm Nova, your innovation validation specialist. Let's build a comprehensive evidence portfolio that demonstrates genuine market validation and customer demand for your Innovator Founder visa application.",
   questions: [
     {
       id: 'validation-methods',
-      text: "What validation methods have you used to test your business idea? Describe any customer interviews, surveys, MVP testing, pilot programs, or beta testing you've conducted.",
+      question: "What validation methods have you used to test your business idea? Describe any customer interviews, surveys, MVP testing, pilot programs, or beta testing you've conducted.",
+      hint: "Describe customer interviews, surveys, MVP testing, pilot programs, or beta testing",
       fieldKey: 'validationMethods',
       minLength: 100
     },
     {
       id: 'participants',
-      text: "How many people have participated in your validation activities? Include numbers for each method (e.g., 25 customer interviews, 150 survey responses, 40 beta users).",
+      question: "How many people have participated in your validation activities? Include numbers for each method (e.g., 25 customer interviews, 150 survey responses, 40 beta users).",
+      hint: "Include specific numbers for each validation method",
       fieldKey: 'participants',
       minLength: 50
     },
     {
       id: 'key-findings',
-      text: "What were your most important findings from customer validation? What pain points did customers confirm, and what feedback shaped your product development?",
+      question: "What were your most important findings from customer validation? What pain points did customers confirm, and what feedback shaped your product development?",
+      hint: "Focus on pain points confirmed and feedback that shaped your product",
       fieldKey: 'keyFindings',
       minLength: 100
     },
     {
       id: 'traction-metrics',
-      text: "What traction metrics can you demonstrate? Include active users, revenue, engagement rates, customer retention, or growth metrics with specific numbers.",
+      question: "What traction metrics can you demonstrate? Include active users, revenue, engagement rates, customer retention, or growth metrics with specific numbers.",
+      hint: "Include active users, revenue, engagement rates, retention, and growth metrics",
       fieldKey: 'tractionMetrics',
       minLength: 75
     },
     {
       id: 'mvp-status',
-      text: "Describe your MVP or prototype status. When was it launched, how many iterations have you completed, and what key learnings emerged from real user feedback?",
+      question: "Describe your MVP or prototype status. When was it launched, how many iterations have you completed, and what key learnings emerged from real user feedback?",
+      hint: "Include launch date, iterations completed, and key learnings",
       fieldKey: 'mvpStatus',
       minLength: 75
     },
     {
       id: 'product-market-fit',
-      text: "What evidence suggests product-market fit? Include customer retention rates, NPS scores, organic referrals, or testimonials demonstrating sustained demand.",
+      question: "What evidence suggests product-market fit? Include customer retention rates, NPS scores, organic referrals, or testimonials demonstrating sustained demand.",
+      hint: "Include retention rates, NPS scores, referrals, and testimonials",
       fieldKey: 'productMarketFit',
       minLength: 75
     },
     {
       id: 'documentation',
-      text: "What documentation do you have to support your validation claims? List available evidence like interview transcripts, survey data, analytics exports, or customer testimonials.",
+      question: "What documentation do you have to support your validation claims? List available evidence like interview transcripts, survey data, analytics exports, or customer testimonials.",
+      hint: "List interview transcripts, survey data, analytics, and testimonials",
       fieldKey: 'documentation',
       minLength: 75
     }
-  ]
+  ],
+  completionMessage: "Your validation evidence has been captured. This comprehensive portfolio will demonstrate genuine market demand to endorsers."
 };
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";

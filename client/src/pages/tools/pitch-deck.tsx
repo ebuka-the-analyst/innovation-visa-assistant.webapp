@@ -21,68 +21,60 @@ import {
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "pitch-deck",
   toolName: "Pitch Deck Builder",
-  agentId: "nova",
-  agentName: "Nova",
-  agentTitle: "Innovation Strategist",
-  description: "Build a compelling investor pitch deck aligned with UK endorsing body requirements",
+  agent: "nova",
+  greeting: "Hello! I'm Nova, your innovation strategist. Let's build a compelling investor pitch deck that aligns with UK endorsing body requirements and showcases your innovation effectively.",
   questions: [
     {
       id: "problem",
       question: "What critical problem does your business solve and how big is this problem?",
-      placeholder: "Describe the problem you're solving, who is affected, and the magnitude of the pain point...",
+      hint: "Be specific and quantifiable. Include market pain points and why existing solutions are inadequate",
       fieldKey: "problemStatement",
-      minLength: 100,
-      helpText: "Be specific and quantifiable. Include market pain points and why existing solutions are inadequate"
+      minLength: 100
     },
     {
       id: "solution",
       question: "Describe your innovative solution and what makes it genuinely different from competitors.",
-      placeholder: "Explain your product/service, key features, and technological or business model innovation...",
+      hint: "Focus on what's genuinely innovative - not just incremental improvement",
       fieldKey: "solutionOverview",
-      minLength: 150,
-      helpText: "Focus on what's genuinely innovative - not just incremental improvement"
+      minLength: 150
     },
     {
       id: "market",
       question: "What is your UK market opportunity? Include TAM/SAM/SOM and why the UK is strategic.",
-      placeholder: "Define target market, market size with sources, UK-specific opportunity, and growth trends...",
+      hint: "Include UK-specific data and explain why the UK market is strategic for your business",
       fieldKey: "marketOpportunity",
-      minLength: 120,
-      helpText: "Include UK-specific data and explain why the UK market is strategic for your business"
+      minLength: 120
     },
     {
       id: "businessModel",
       question: "How does your business make money? Explain your revenue streams and unit economics.",
-      placeholder: "Revenue model, pricing strategy, customer acquisition cost, lifetime value, path to profitability...",
+      hint: "Be specific about how you generate revenue and your path to profitability",
       fieldKey: "businessModel",
-      minLength: 100,
-      helpText: "Be specific about how you generate revenue and your path to profitability"
+      minLength: 100
     },
     {
       id: "traction",
       question: "What traction and validation have you achieved so far?",
-      placeholder: "Customers, revenue, users, partnerships, pilots, testimonials, growth metrics...",
+      hint: "Include specific metrics and evidence that can be verified",
       fieldKey: "tractionEvidence",
-      minLength: 100,
-      helpText: "Include specific metrics and evidence that can be verified"
+      minLength: 100
     },
     {
       id: "team",
       question: "Who is on your founding team and what makes you uniquely qualified to execute this vision?",
-      placeholder: "Founder backgrounds, relevant experience, past successes, advisors, key hires planned...",
+      hint: "Highlight achievements and expertise that demonstrate ability to execute",
       fieldKey: "teamCredentials",
-      minLength: 80,
-      helpText: "Highlight achievements and expertise that demonstrate ability to execute"
+      minLength: 80
     },
     {
       id: "ask",
       question: "What investment are you seeking and how will you use the funds?",
-      placeholder: "Funding amount, use of funds breakdown, milestones this funding will achieve, exit vision...",
+      hint: "Be specific about how funding aligns with your milestones",
       fieldKey: "fundingAsk",
-      minLength: 80,
-      helpText: "Be specific about how funding aligns with your milestones"
+      minLength: 80
     }
-  ]
+  ],
+  completionMessage: "Excellent! Your pitch deck content has been captured. This will help create a compelling presentation for investors and endorsers."
 };
 
 type SlideField = {

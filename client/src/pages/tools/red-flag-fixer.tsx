@@ -18,60 +18,53 @@ import {
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "red-flag-fixer",
   toolName: "Red Flag Fixer",
-  agentId: "atlas",
-  agentName: "Atlas",
-  agentTitle: "Growth Strategist",
-  description: "Identify and resolve common application red flags before submission",
+  agent: "atlas",
+  greeting: "Hello! I'm Atlas, your growth strategist. Let's identify and resolve common application red flags before you submit, maximizing your chances of endorsement approval.",
   questions: [
     {
       id: "innovation",
       question: "Describe your innovation claims - are they specific and measurable or vague?",
-      placeholder: "My innovation is [specific technology/method]. It is measurable through [metrics]. Unlike competitors, we [specific differentiator]...",
+      hint: "Vague buzzwords like 'cutting-edge' or 'revolutionary' are red flags",
       fieldKey: "innovationClaims",
-      minLength: 100,
-      helpText: "Vague buzzwords like 'cutting-edge' or 'revolutionary' are red flags"
+      minLength: 100
     },
     {
       id: "validation",
       question: "What customer validation evidence do you have? (interviews, LOIs, beta users)",
-      placeholder: "We have conducted [X] customer interviews. We have [X] LOIs from [companies]. Our beta users include...",
+      hint: "Minimum 20-30 interview summaries or 5+ LOIs are expected",
       fieldKey: "customerValidation",
-      minLength: 80,
-      helpText: "Minimum 20-30 interview summaries or 5+ LOIs are expected"
+      minLength: 80
     },
     {
       id: "financials",
       question: "Describe your financial projections - do you have detailed monthly cashflow?",
-      placeholder: "Our 36-month projections show [revenue targets]. Monthly burn rate is [amount]. Break-even expected in [timeframe]...",
+      hint: "Unrealistic 'hockey stick' projections are a major red flag",
       fieldKey: "financialProjections",
-      minLength: 80,
-      helpText: "Unrealistic 'hockey stick' projections are a major red flag"
+      minLength: 80
     },
     {
       id: "competition",
       question: "How many UK competitors have you identified and analyzed?",
-      placeholder: "We have identified [X] UK competitors including [names]. Our competitive analysis covers [features/pricing/positioning]...",
+      hint: "Less than 5 named competitors is a red flag",
       fieldKey: "competitiveAnalysis",
-      minLength: 80,
-      helpText: "Less than 5 named competitors is a red flag"
+      minLength: 80
     },
     {
       id: "ip",
       question: "What intellectual property protection do you have or plan to obtain?",
-      placeholder: "We have filed [patents/trademarks]. Trade secrets are protected by [measures]. Our IP strategy includes...",
+      hint: "No IP protection for an 'innovative' business is a contradiction",
       fieldKey: "ipProtection",
-      minLength: 60,
-      helpText: "No IP protection for an 'innovative' business is a contradiction"
+      minLength: 60
     },
     {
       id: "scalability",
       question: "What are your specific job creation targets and hiring timeline?",
-      placeholder: "By Year 2, we will hire [X] employees in roles including [specific roles]. By Year 5, we target [X] UK-based employees...",
+      hint: "Vague 'we will hire as needed' is a red flag - need specific numbers",
       fieldKey: "jobCreation",
-      minLength: 80,
-      helpText: "Vague 'we will hire as needed' is a red flag - need specific numbers"
+      minLength: 80
     }
-  ]
+  ],
+  completionMessage: "Great work! We've identified potential red flags in your application. Now let's work on fixing them to strengthen your case."
 };
 
 type RedFlagCategory = {

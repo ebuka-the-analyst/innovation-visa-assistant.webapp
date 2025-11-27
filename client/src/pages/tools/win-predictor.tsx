@@ -17,61 +17,61 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "win-predictor",
-  agentId: "atlas",
-  agentName: "Atlas",
-  agentTitle: "Growth & Strategy Expert",
+  toolName: "Win Predictor",
+  agent: "atlas",
   greeting: "Hello! I'm Atlas, your growth strategy specialist. Let me help you predict your endorsement success rate by evaluating your application strength across key criteria.",
   questions: [
     {
       id: "innovation",
-      text: "Describe your business innovation. What makes your solution genuinely new, improved, or different from existing alternatives?",
+      question: "Describe your business innovation. What makes your solution genuinely new, improved, or different from existing alternatives?",
+      hint: "Describe your unique technology, novel approach, or market-first solution",
       fieldKey: "innovation",
-      minLength: 80,
-      placeholder: "Describe your innovation, unique technology, novel approach, or market-first solution..."
+      minLength: 80
     },
     {
       id: "viability",
-      text: "What evidence demonstrates your business viability? Include revenue, customers, partnerships, or validation data.",
+      question: "What evidence demonstrates your business viability? Include revenue, customers, partnerships, or validation data.",
+      hint: "Share your traction metrics, revenue figures, customer count, partnerships, and market validation",
       fieldKey: "viability",
-      minLength: 80,
-      placeholder: "Share your traction metrics, revenue figures, customer count, partnerships, and market validation..."
+      minLength: 80
     },
     {
       id: "scalability",
-      text: "How will your business scale? What's your growth strategy and expansion potential?",
+      question: "How will your business scale? What's your growth strategy and expansion potential?",
+      hint: "Describe your scaling strategy, target markets, growth projections, and expansion plans",
       fieldKey: "scalability",
-      minLength: 70,
-      placeholder: "Describe your scaling strategy, target markets, growth projections, and expansion plans..."
+      minLength: 70
     },
     {
       id: "evidence",
-      text: "What supporting evidence and documentation do you have ready for your application?",
+      question: "What supporting evidence and documentation do you have ready for your application?",
+      hint: "List your prepared documents: business plan, financial projections, market research, IP filings, testimonials",
       fieldKey: "evidence",
-      minLength: 60,
-      placeholder: "List your prepared documents: business plan, financial projections, market research, IP filings, testimonials..."
+      minLength: 60
     },
     {
       id: "team",
-      text: "Describe your team's relevant experience and capabilities for executing your business plan.",
+      question: "Describe your team's relevant experience and capabilities for executing your business plan.",
+      hint: "Detail your team's background, industry experience, technical skills, and track record",
       fieldKey: "team",
-      minLength: 60,
-      placeholder: "Detail your team's background, industry experience, technical skills, and track record..."
+      minLength: 60
     },
     {
       id: "market",
-      text: "What UK market opportunity are you addressing? Why is the UK the right market for your business?",
+      question: "What UK market opportunity are you addressing? Why is the UK the right market for your business?",
+      hint: "Describe your target UK market, addressable opportunity, and why the UK is strategically important",
       fieldKey: "market",
-      minLength: 70,
-      placeholder: "Describe your target UK market, addressable opportunity, and why the UK is strategically important..."
+      minLength: 70
     },
     {
       id: "endorser",
-      text: "Which endorsing body are you targeting and why? How does your business align with their focus area?",
+      question: "Which endorsing body are you targeting and why? How does your business align with their focus area?",
+      hint: "Name your target endorser and explain the alignment with their criteria and focus areas",
       fieldKey: "endorser",
-      minLength: 60,
-      placeholder: "Name your target endorser and explain the alignment with their criteria and focus areas..."
+      minLength: 60
     }
-  ]
+  ],
+  completionMessage: "Your application strength has been assessed. Use these insights to optimize your endorsement strategy."
 };
 
 type CriteriaScores = {

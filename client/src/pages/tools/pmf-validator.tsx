@@ -21,60 +21,53 @@ import {
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "pmf-validator",
   toolName: "PMF Validator",
-  agentId: "nova",
-  agentName: "Nova",
-  agentTitle: "Innovation Strategist",
-  description: "Validate your product-market fit with the Sean Ellis test and comprehensive PMF metrics",
+  agent: "nova",
+  greeting: "Hello! I'm Nova, your innovation strategist. Let's validate your product-market fit using the Sean Ellis test and comprehensive PMF metrics to demonstrate genuine market demand for your visa application.",
   questions: [
     {
       id: "customers",
       question: "How many customers/users do you have and what is your monthly retention rate?",
-      placeholder: "We have [X] customers with [X]% monthly retention. Active users are [X] out of total...",
+      hint: "Include total customers, active users, and retention percentages",
       fieldKey: "customerMetrics",
-      minLength: 50,
-      helpText: "Include total customers, active users, and retention percentages"
+      minLength: 50
     },
     {
       id: "seanEllis",
       question: "What percentage of users would be 'very disappointed' if they could no longer use your product?",
-      placeholder: "Based on our survey of [X] users, [X]% said they would be very disappointed. Our methodology was...",
+      hint: "40%+ is the threshold for strong PMF. Describe your survey methodology",
       fieldKey: "seanEllisData",
-      minLength: 80,
-      helpText: "40%+ is the threshold for strong PMF. Describe your survey methodology"
+      minLength: 80
     },
     {
       id: "feedback",
       question: "What do customers love most about your product? Include specific testimonials or feedback.",
-      placeholder: "Customers consistently praise [specific features]. Key quotes: '...'. Main pain point we solve is...",
+      hint: "Include direct quotes and specific benefits customers mention",
       fieldKey: "customerFeedback",
-      minLength: 100,
-      helpText: "Include direct quotes and specific benefits customers mention"
+      minLength: 100
     },
     {
       id: "nps",
       question: "What is your Net Promoter Score (NPS) and how do you track customer satisfaction?",
-      placeholder: "Our NPS is [X]. We survey customers [frequency] using [method]. Promoters cite [reasons]...",
+      hint: "NPS 50+ is world-class, 30-50 is good, 0-30 needs improvement",
       fieldKey: "npsScore",
-      minLength: 60,
-      helpText: "NPS 50+ is world-class, 30-50 is good, 0-30 needs improvement"
+      minLength: 60
     },
     {
       id: "growth",
       question: "What is your month-over-month growth rate and referral rate?",
-      placeholder: "We're growing at [X]% monthly. [X]% of new customers come from referrals. Growth drivers are...",
+      hint: "Strong PMF typically shows 15-20%+ monthly growth",
       fieldKey: "growthMetrics",
-      minLength: 60,
-      helpText: "Strong PMF typically shows 15-20%+ monthly growth"
+      minLength: 60
     },
     {
       id: "competition",
       question: "What is your competitive advantage and why do customers choose you over alternatives?",
-      placeholder: "Customers choose us over [competitors] because [specific advantages]. Our moat is...",
+      hint: "Focus on unique value that competitors cannot easily replicate",
       fieldKey: "competitiveAdvantage",
-      minLength: 80,
-      helpText: "Focus on unique value that competitors cannot easily replicate"
+      minLength: 80
     }
-  ]
+  ],
+  completionMessage: "Great work! Your product-market fit evidence has been captured. Strong PMF indicators are crucial for endorsement approval."
 };
 
 type PMFMetric = {

@@ -8,6 +8,7 @@ import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, 
 import { Progress } from "@/components/ui/progress";
 
 import ChatBot from "@/components/ChatBot";
+import { MyWorkSection } from "@/components/MyWorkSection";
 import type { BusinessPlan } from "@shared/schema";
 import { format } from "date-fns";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip } from "recharts";
@@ -502,6 +503,9 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* My Saved Work Section */}
+            <MyWorkSection />
 
             {/* Business Plans List */}
             <div>

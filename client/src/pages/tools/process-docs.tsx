@@ -22,60 +22,53 @@ import {
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "process-docs",
   toolName: "Process Documentation",
-  agentId: "nova",
-  agentName: "Nova",
-  agentTitle: "Innovation Strategist",
-  description: "Document your operational processes to demonstrate business maturity for visa applications",
+  agent: "nova",
+  greeting: "Hello! I'm Nova, your innovation strategist. Let's document your operational processes to demonstrate business maturity and operational excellence for your UK Innovator Founder visa application.",
   questions: [
     {
       id: "coreOps",
       question: "Describe your core operational processes - how do you deliver value to customers?",
-      placeholder: "Our core processes include customer onboarding, order fulfillment, and quality control. Customer onboarding involves...",
+      hint: "Include customer onboarding, order fulfillment, quality control workflows",
       fieldKey: "coreOperations",
-      minLength: 120,
-      helpText: "Include customer onboarding, order fulfillment, quality control workflows"
+      minLength: 120
     },
     {
       id: "finance",
       question: "What financial management processes do you have in place?",
-      placeholder: "Our financial processes include invoicing, expense approval, financial reporting, and audit procedures...",
+      hint: "Include invoicing, expense approval, financial reporting procedures",
       fieldKey: "financialProcesses",
-      minLength: 100,
-      helpText: "Include invoicing, expense approval, financial reporting procedures"
+      minLength: 100
     },
     {
       id: "hr",
       question: "Describe your HR and compliance processes for managing employees.",
-      placeholder: "Our HR processes include recruitment workflow, employee onboarding, performance reviews, health and safety...",
+      hint: "Include recruitment, onboarding, performance reviews, compliance procedures",
       fieldKey: "hrProcesses",
-      minLength: 100,
-      helpText: "Include recruitment, onboarding, performance reviews, compliance procedures"
+      minLength: 100
     },
     {
       id: "product",
       question: "How do you manage product development and quality assurance?",
-      placeholder: "Our product development follows [methodology]. We document requirements, conduct code reviews, testing, and have deployment procedures...",
+      hint: "Include requirements documentation, code review, testing, deployment",
       fieldKey: "productDev",
-      minLength: 100,
-      helpText: "Include requirements documentation, code review, testing, deployment"
+      minLength: 100
     },
     {
       id: "customer",
       question: "What customer service and support processes do you have?",
-      placeholder: "We handle customer support through [channels]. Our escalation process is... We track customer feedback by...",
+      hint: "Include support escalation, complaint resolution, feedback collection",
       fieldKey: "customerService",
-      minLength: 80,
-      helpText: "Include support escalation, complaint resolution, feedback collection"
+      minLength: 80
     },
     {
       id: "maturity",
       question: "How mature are your processes? Are they documented, standardized, or measured?",
-      placeholder: "Our processes are at [level] maturity. We have SOPs documented for [areas]. We measure performance using [metrics]...",
+      hint: "Describe documentation level, standardization, and measurement practices",
       fieldKey: "processMaturity",
-      minLength: 80,
-      helpText: "Describe documentation level, standardization, and measurement practices"
+      minLength: 80
     }
-  ]
+  ],
+  completionMessage: "Excellent! Your process documentation has been captured. This demonstrates the operational maturity endorsers look for in viable UK businesses."
 };
 
 type MaturityLevel = 'ad-hoc' | 'documented' | 'standardized' | 'managed' | 'optimized';

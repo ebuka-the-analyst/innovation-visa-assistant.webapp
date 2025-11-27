@@ -16,54 +16,54 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "visa-timeline",
-  agentId: "sage",
-  agentName: "Sage",
-  agentTitle: "Compliance & Documentation Expert",
+  toolName: "Visa Journey Timeline Planner",
+  agent: "sage",
   greeting: "Hello! I'm Sage, your compliance specialist. Let me help you create a comprehensive visa journey timeline with realistic milestones and deadlines.",
   questions: [
     {
       id: "targetDate",
-      text: "When would you ideally like to arrive in the UK and start your business? What's driving this timeline?",
+      question: "When would you ideally like to arrive in the UK and start your business? What's driving this timeline?",
+      hint: "Consider business launch dates, lease agreements, or personal commitments",
       fieldKey: "targetDate",
-      minLength: 60,
-      placeholder: "Describe your ideal arrival date and the business/personal reasons driving this timeline..."
+      minLength: 60
     },
     {
       id: "currentPhase",
-      text: "What phase are you currently in? (Research, business plan development, endorsement application, visa application, or post-approval)",
+      question: "What phase are you currently in? (Research, business plan development, endorsement application, visa application, or post-approval)",
+      hint: "Be specific about what you've completed so far",
       fieldKey: "currentPhase",
-      minLength: 50,
-      placeholder: "Describe your current phase and what you've completed so far..."
+      minLength: 50
     },
     {
       id: "endorsementStatus",
-      text: "What is your endorsement application status? Have you selected an endorsing body?",
+      question: "What is your endorsement application status? Have you selected an endorsing body?",
+      hint: "Name your chosen endorser and describe your progress",
       fieldKey: "endorsementStatus",
-      minLength: 60,
-      placeholder: "Describe your endorsing body selection and application progress..."
+      minLength: 60
     },
     {
       id: "documentationStatus",
-      text: "What documentation have you prepared? What still needs to be completed?",
+      question: "What documentation have you prepared? What still needs to be completed?",
+      hint: "List prepared documents and identify gaps",
       fieldKey: "documentationStatus",
-      minLength: 60,
-      placeholder: "List prepared documents and identify gaps in your documentation..."
+      minLength: 60
     },
     {
       id: "challenges",
-      text: "What potential delays or challenges do you anticipate in your timeline?",
+      question: "What potential delays or challenges do you anticipate in your timeline?",
+      hint: "Consider document procurement, interview scheduling, or external factors",
       fieldKey: "challenges",
-      minLength: 50,
-      placeholder: "Describe potential blockers like document procurement, interview scheduling, or external factors..."
+      minLength: 50
     },
     {
       id: "priorities",
-      text: "What are your top 3 priorities to keep your visa journey on track?",
+      question: "What are your top 3 priorities to keep your visa journey on track?",
+      hint: "Focus on critical path items that could impact your timeline",
       fieldKey: "priorities",
-      minLength: 50,
-      placeholder: "List your key priorities and why they matter for your timeline..."
+      minLength: 50
     }
-  ]
+  ],
+  completionMessage: "I've captured your timeline details. Switch to the traditional view to see your personalized milestone schedule and track your progress."
 };
 
 type MilestoneStatus = "completed" | "in-progress" | "pending";

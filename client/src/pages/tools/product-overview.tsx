@@ -15,52 +15,46 @@ import { Input } from "@/components/ui/input";
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "product-overview",
   toolName: "Product Overview",
-  agentId: "nova",
-  agentName: "Nova",
-  agentTitle: "Innovation Strategist",
-  description: "Create a comprehensive overview of your product offering for visa applications",
+  agent: "nova",
+  greeting: "Hello! I'm Nova, your innovation strategist. Let's create a comprehensive product overview that clearly communicates your offering's value for your visa application.",
   questions: [
     {
       id: "name",
       question: "What is the name of your product or service?",
-      placeholder: "Enter your product/service name...",
+      hint: "The official name of your product or service",
       fieldKey: "productName",
-      minLength: 2,
-      helpText: "The official name of your product or service"
+      minLength: 2
     },
     {
       id: "description",
       question: "Describe what your product does and the problem it solves.",
-      placeholder: "Our product is a [type] that helps [target users] to [achieve outcome] by [method]...",
+      hint: "Explain the core functionality and value proposition",
       fieldKey: "description",
-      minLength: 100,
-      helpText: "Explain the core functionality and value proposition"
+      minLength: 100
     },
     {
       id: "features",
       question: "What are the key features and capabilities of your product?",
-      placeholder: "Key features include:\n- Feature 1: [description]\n- Feature 2: [description]\n- Feature 3: [description]...",
+      hint: "List 3-5 main features that differentiate your product",
       fieldKey: "features",
-      minLength: 80,
-      helpText: "List 3-5 main features that differentiate your product"
+      minLength: 80
     },
     {
       id: "usp",
       question: "What makes your product unique compared to existing solutions?",
-      placeholder: "Unlike [competitors], our product offers [unique benefit] because of [reason/technology]...",
+      hint: "Focus on genuine differentiation, not just improvements",
       fieldKey: "usp",
-      minLength: 80,
-      helpText: "Focus on genuine differentiation, not just improvements"
+      minLength: 80
     },
     {
       id: "target",
       question: "Who are your ideal customers and target market?",
-      placeholder: "Our primary customers are [demographic/industry] who need [solution] because [pain point]...",
+      hint: "Be specific about customer segments and their needs",
       fieldKey: "targetMarket",
-      minLength: 60,
-      helpText: "Be specific about customer segments and their needs"
+      minLength: 60
     }
-  ]
+  ],
+  completionMessage: "Great! Your product overview has been captured. This clear articulation of your offering will strengthen your visa application."
 };
 
 export default function ProductOverview() {

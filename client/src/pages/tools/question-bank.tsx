@@ -20,60 +20,53 @@ import {
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "question-bank",
   toolName: "Question Bank",
-  agentId: "sage",
-  agentName: "Sage",
-  agentTitle: "Compliance Specialist",
-  description: "Prepare for endorsing body interviews with comprehensive question preparation",
+  agent: "sage",
+  greeting: "Hello! I'm Sage, your compliance specialist. Let's prepare you for endorsing body interviews by practicing the most common and challenging questions assessors ask.",
   questions: [
     {
       id: "innovation",
       question: "How would you explain what makes your business genuinely innovative to an assessor?",
-      placeholder: "Our innovation is [type of innovation]. Unlike existing solutions, we [key differentiator]. This is new to the UK market because...",
+      hint: "Prepare for the most common interview question - what's genuinely innovative",
       fieldKey: "innovationExplanation",
-      minLength: 100,
-      helpText: "Prepare for the most common interview question - what's genuinely innovative"
+      minLength: 100
     },
     {
       id: "viability",
       question: "How will you demonstrate your business is commercially viable?",
-      placeholder: "Our business model is viable because [revenue evidence]. We have [traction metrics]. The path to profitability is...",
+      hint: "Include revenue projections, unit economics, and market validation",
       fieldKey: "viabilityEvidence",
-      minLength: 100,
-      helpText: "Include revenue projections, unit economics, and market validation"
+      minLength: 100
     },
     {
       id: "scalability",
       question: "Explain how your business will create UK jobs and scale nationally/internationally.",
-      placeholder: "We plan to hire [X] employees by Year [X]. Our scaling strategy involves [approach]. UK job creation will be focused on...",
+      hint: "Include specific hiring plans and growth milestones",
       fieldKey: "scalabilityPlan",
-      minLength: 100,
-      helpText: "Include specific hiring plans and growth milestones"
+      minLength: 100
     },
     {
       id: "whyUK",
       question: "Why is the UK specifically important for your business?",
-      placeholder: "The UK is strategic because [market reasons]. We will locate in [city] due to [specific advantages]. UK-specific opportunities include...",
+      hint: "Demonstrate genuine commitment to the UK market",
       fieldKey: "ukRationale",
-      minLength: 80,
-      helpText: "Demonstrate genuine commitment to the UK market"
+      minLength: 80
     },
     {
       id: "competition",
       question: "Who are your competitors and why will customers choose you?",
-      placeholder: "Our main competitors are [names]. Customers choose us because [differentiators]. Our competitive moat is...",
+      hint: "Show market awareness and clear positioning",
       fieldKey: "competitivePosition",
-      minLength: 80,
-      helpText: "Show market awareness and clear positioning"
+      minLength: 80
     },
     {
       id: "experience",
       question: "What qualifies you to execute this business plan successfully?",
-      placeholder: "My background includes [experience]. I have previously [achievements]. My team brings [complementary skills]...",
+      hint: "Highlight relevant experience and past successes",
       fieldKey: "founderQualifications",
-      minLength: 80,
-      helpText: "Highlight relevant experience and past successes"
+      minLength: 80
     }
-  ]
+  ],
+  completionMessage: "Excellent! Your interview preparation is taking shape. Practice these answers until they feel natural and confident."
 };
 
 type QuestionCategory = 

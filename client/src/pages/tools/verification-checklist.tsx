@@ -5,52 +5,62 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 
 const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'verification-checklist',
+  toolName: 'Verification Document Checklist',
   agent: 'sage',
   greeting: "I'm Sage, your document compliance specialist. Let's verify you have all required documents ready for your UK Innovator Founder visa application.",
   questions: [
     {
       id: 'identity-documents',
-      text: "Which identity documents do you have ready? List passport validity, previous visa stamps, birth certificate, and any marriage/name change documents.",
+      question: "Which identity documents do you have ready? List passport validity, previous visa stamps, birth certificate, and any marriage/name change documents.",
+      hint: "Passport must be valid for entire visa duration plus 6 months",
       fieldKey: 'identityDocuments',
       minLength: 50
     },
     {
       id: 'financial-evidence',
-      text: "What financial evidence have you gathered? Include bank statements (28-day period), investment fund proof, source of funds documentation, and bank reference letters.",
+      question: "What financial evidence have you gathered? Include bank statements (28-day period), investment fund proof, source of funds documentation, and bank reference letters.",
+      hint: "Bank statements must show minimum £1,270 maintenance funds",
       fieldKey: 'financialEvidence',
       minLength: 75
     },
     {
       id: 'business-documents',
-      text: "What business documents are ready? List Companies House certificate, business plan status, shareholding evidence, and company accounts if applicable.",
+      question: "What business documents are ready? List Companies House certificate, business plan status, shareholding evidence, and company accounts if applicable.",
+      hint: "Certificate of Incorporation is mandatory for UK company registration",
       fieldKey: 'businessDocuments',
       minLength: 75
     },
     {
       id: 'endorsement-status',
-      text: "What is your endorsement application status? Have you received your endorsement letter, approval certificate, and business assessment report from your endorsing body?",
+      question: "What is your endorsement application status? Have you received your endorsement letter, approval certificate, and business assessment report from your endorsing body?",
+      hint: "Endorsement letter is the most critical document for your application",
       fieldKey: 'endorsementStatus',
       minLength: 50
     },
     {
       id: 'qualifications',
-      text: "What qualifications and experience documents have you prepared? Include degrees, professional certifications, employment references, and CV/resume.",
+      question: "What qualifications and experience documents have you prepared? Include degrees, professional certifications, employment references, and CV/resume.",
+      hint: "All certificates should be originals or certified copies",
       fieldKey: 'qualifications',
       minLength: 50
     },
     {
       id: 'address-proof',
-      text: "What UK address documentation do you have? Describe your intended UK residence proof - tenancy agreement, property deed, or landlord confirmation.",
+      question: "What UK address documentation do you have? Describe your intended UK residence proof - tenancy agreement, property deed, or landlord confirmation.",
+      hint: "Must be a UK address for your initial residence",
       fieldKey: 'addressProof',
       minLength: 50
     },
     {
       id: 'translation-certification',
-      text: "Which documents require translation or certification? List any non-English documents and their current translation/certification status.",
+      question: "Which documents require translation or certification? List any non-English documents and their current translation/certification status.",
+      hint: "Translations must be certified by a professional translator",
       fieldKey: 'translationCertification',
       minLength: 50
     }
-  ]
+  ],
+  completionMessage: "Document verification complete! Switch to the traditional view to track the status of each document and identify any remaining gaps."
 };
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";

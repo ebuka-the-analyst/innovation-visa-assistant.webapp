@@ -19,61 +19,61 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "zone-planning",
-  agentId: "atlas",
-  agentName: "Atlas",
-  agentTitle: "Growth & Strategy Expert",
+  toolName: "Zone Planning",
+  agent: "atlas",
   greeting: "Hello! I'm Atlas, your growth strategy specialist. Let me help you evaluate UK business zones and find the optimal location for your innovative venture.",
   questions: [
     {
       id: "businessType",
-      text: "What type of business are you launching? What industry sector and technology focus?",
+      question: "What type of business are you launching? What industry sector and technology focus?",
+      hint: "Describe your business type, industry sector, technology focus, and key operations",
       fieldKey: "businessType",
-      minLength: 60,
-      placeholder: "Describe your business type, industry sector, technology focus, and key operations..."
+      minLength: 60
     },
     {
       id: "talentNeeds",
-      text: "What talent and skills do you need to hire? How important is access to specialist talent pools?",
+      question: "What talent and skills do you need to hire? How important is access to specialist talent pools?",
+      hint: "Describe your hiring needs, required skills, and talent access priorities",
       fieldKey: "talentNeeds",
-      minLength: 60,
-      placeholder: "Describe your hiring needs, required skills, and talent access priorities..."
+      minLength: 60
     },
     {
       id: "fundingNeeds",
-      text: "What are your funding requirements? How important is proximity to investors and VCs?",
+      question: "What are your funding requirements? How important is proximity to investors and VCs?",
+      hint: "Share your funding needs, investor access requirements, and networking priorities",
       fieldKey: "fundingNeeds",
-      minLength: 60,
-      placeholder: "Share your funding needs, investor access requirements, and networking priorities..."
+      minLength: 60
     },
     {
       id: "costSensitivity",
-      text: "How cost-sensitive is your business? What's your budget for office space and operations?",
+      question: "How cost-sensitive is your business? What's your budget for office space and operations?",
+      hint: "Describe your budget constraints and cost priorities for location selection",
       fieldKey: "costSensitivity",
-      minLength: 50,
-      placeholder: "Describe your budget constraints and cost priorities for location selection..."
+      minLength: 50
     },
     {
       id: "networkNeeds",
-      text: "How important is access to industry networks, accelerators, and ecosystem support?",
+      question: "How important is access to industry networks, accelerators, and ecosystem support?",
+      hint: "Describe your networking needs and ecosystem access priorities",
       fieldKey: "networkNeeds",
-      minLength: 50,
-      placeholder: "Describe your networking needs and ecosystem access priorities..."
+      minLength: 50
     },
     {
       id: "qualityOfLife",
-      text: "How important is quality of life for you and your team? What lifestyle factors matter?",
+      question: "How important is quality of life for you and your team? What lifestyle factors matter?",
+      hint: "Consider housing, transport, culture, and family considerations",
       fieldKey: "qualityOfLife",
-      minLength: 50,
-      placeholder: "Describe quality of life priorities: housing, transport, culture, family considerations..."
+      minLength: 50
     },
     {
       id: "governmentSupport",
-      text: "Are you interested in government incentives, tax benefits, or enterprise zone advantages?",
+      question: "Are you interested in government incentives, tax benefits, or enterprise zone advantages?",
+      hint: "Describe your interest in grants, tax incentives, or special zone benefits",
       fieldKey: "governmentSupport",
-      minLength: 50,
-      placeholder: "Describe your interest in grants, tax incentives, or special zone benefits..."
+      minLength: 50
     }
-  ]
+  ],
+  completionMessage: "Your location preferences have been captured. Let's find the optimal UK zone for your business."
 };
 
 type Zone = {

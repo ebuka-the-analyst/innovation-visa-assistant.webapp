@@ -8,52 +8,62 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 
 const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "viability-checker",
+  toolName: "Viability Checker",
   agent: 'sage',
   greeting: "I'm Sage, your business viability assessment specialist. Let's evaluate your business against the UK Innovator Founder visa viability criteria to ensure you meet endorsement requirements.",
   questions: [
     {
       id: 'market-demand',
-      text: "Describe your market demand evidence. What is your total addressable market size, who are your target customers, and what validation proves they need your solution?",
+      question: "Describe your market demand evidence. What is your total addressable market size, who are your target customers, and what validation proves they need your solution?",
+      hint: "Include TAM, target customers, and validation evidence",
       fieldKey: 'marketDemand',
       minLength: 100
     },
     {
       id: 'competitive-advantage',
-      text: "What is your competitive advantage? Describe your IP protection, proprietary technology, or unique capabilities that differentiate you from existing UK market solutions.",
+      question: "What is your competitive advantage? Describe your IP protection, proprietary technology, or unique capabilities that differentiate you from existing UK market solutions.",
+      hint: "Focus on IP protection, proprietary technology, and unique capabilities",
       fieldKey: 'competitiveAdvantage',
       minLength: 100
     },
     {
       id: 'financial-health',
-      text: "Describe your financial sustainability. Include annual revenue, monthly burn rate, cash runway, funding sources, and path to profitability.",
+      question: "Describe your financial sustainability. Include annual revenue, monthly burn rate, cash runway, funding sources, and path to profitability.",
+      hint: "Include revenue, burn rate, runway, funding, and profitability path",
       fieldKey: 'financialHealth',
       minLength: 100
     },
     {
       id: 'team-strength',
-      text: "Assess your team's capabilities. Describe founder expertise, relevant industry experience, key team members, and advisory board composition.",
+      question: "Assess your team's capabilities. Describe founder expertise, relevant industry experience, key team members, and advisory board composition.",
+      hint: "Include founder expertise, industry experience, and advisory board",
       fieldKey: 'teamStrength',
       minLength: 75
     },
     {
       id: 'scalability',
-      text: "What is your scalability potential? Describe your growth roadmap, job creation plan (minimum 2 FTE by Year 3), and technology/infrastructure that supports scaling.",
+      question: "What is your scalability potential? Describe your growth roadmap, job creation plan (minimum 2 FTE by Year 3), and technology/infrastructure that supports scaling.",
+      hint: "Include growth roadmap, job creation plan, and scaling infrastructure",
       fieldKey: 'scalability',
       minLength: 100
     },
     {
       id: 'customer-traction',
-      text: "What customer traction can you demonstrate? Include customer count, gross margin, customer acquisition cost, and any revenue or engagement metrics.",
+      question: "What customer traction can you demonstrate? Include customer count, gross margin, customer acquisition cost, and any revenue or engagement metrics.",
+      hint: "Include customer count, margins, CAC, and engagement metrics",
       fieldKey: 'customerTraction',
       minLength: 75
     },
     {
       id: 'viability-evidence',
-      text: "What documentation supports your viability claims? List financial statements, customer contracts, market research reports, and third-party validation you can provide.",
+      question: "What documentation supports your viability claims? List financial statements, customer contracts, market research reports, and third-party validation you can provide.",
+      hint: "List financial statements, contracts, research, and validation",
       fieldKey: 'viabilityEvidence',
       minLength: 75
     }
-  ]
+  ],
+  completionMessage: "Your viability assessment is complete. This evaluation helps identify areas to strengthen before endorsement submission."
 };
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";

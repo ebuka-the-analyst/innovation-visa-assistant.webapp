@@ -19,60 +19,53 @@ import {
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "rebuttal-letter",
   toolName: "Rebuttal Letter Builder",
-  agentId: "sage",
-  agentName: "Sage",
-  agentTitle: "Compliance Specialist",
-  description: "Build a professional rebuttal letter to address Home Office concerns",
+  agent: "sage",
+  greeting: "Hello! I'm Sage, your compliance specialist. Let's build a professional rebuttal letter to address Home Office concerns effectively and strengthen your application.",
   questions: [
     {
       id: "applicant",
       question: "What is your full name and visa application reference number?",
-      placeholder: "Full name: [Your Name], Application Reference: [GWFXXX-XXXX-XXXXX-XXXXX]",
+      hint: "Provide your legal name as it appears on your visa application",
       fieldKey: "applicantInfo",
-      minLength: 20,
-      helpText: "Provide your legal name as it appears on your visa application"
+      minLength: 20
     },
     {
       id: "concern",
       question: "What specific concern did the Home Office raise in their response?",
-      placeholder: "The Home Office stated that [exact concern from letter]. They questioned [specific issue]...",
+      hint: "Quote directly from the Home Office letter where possible",
       fieldKey: "homeOfficeConcern",
-      minLength: 100,
-      helpText: "Quote directly from the Home Office letter where possible"
+      minLength: 100
     },
     {
       id: "response",
       question: "How do you refute or address this concern?",
-      placeholder: "In response to this concern, I clarify that [explanation]. The evidence shows [facts]. This misunderstanding arose because...",
+      hint: "Be factual, professional, and avoid emotional language",
       fieldKey: "rebuttalResponse",
-      minLength: 150,
-      helpText: "Be factual, professional, and avoid emotional language"
+      minLength: 150
     },
     {
       id: "evidence",
       question: "What new or additional evidence will you provide to support your case?",
-      placeholder: "I am providing: 1) [Document type] demonstrating [point], 2) [Expert letter] confirming [validation], 3) [Updated data] showing...",
+      hint: "List specific documents and what each one proves",
       fieldKey: "supportingEvidence",
-      minLength: 100,
-      helpText: "List specific documents and what each one proves"
+      minLength: 100
     },
     {
       id: "timeline",
       question: "When did you receive the RFE and what is your response deadline?",
-      placeholder: "RFE received: [date]. Deadline: [date]. I have [X] days remaining to respond...",
+      hint: "Tracking deadlines is critical for timely submission",
       fieldKey: "timeline",
-      minLength: 30,
-      helpText: "Tracking deadlines is critical for timely submission"
+      minLength: 30
     },
     {
       id: "closing",
       question: "What is your key closing statement emphasizing why the application should be approved?",
-      placeholder: "Given the evidence presented, I respectfully request approval because [key reason]. My commitment to the UK is demonstrated by...",
+      hint: "End with a strong, professional statement of your case",
       fieldKey: "closingStatement",
-      minLength: 80,
-      helpText: "End with a strong, professional statement of your case"
+      minLength: 80
     }
-  ]
+  ],
+  completionMessage: "Your rebuttal letter content has been captured. Review it carefully to ensure all concerns are addressed professionally."
 };
 
 type RFEConcern = {

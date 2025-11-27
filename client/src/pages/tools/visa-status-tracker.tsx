@@ -18,61 +18,61 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "visa-status-tracker",
-  agentId: "sage",
-  agentName: "Sage",
-  agentTitle: "Compliance & Documentation Expert",
+  toolName: "Visa Status Tracker",
+  agent: "sage",
   greeting: "Hello! I'm Sage, your compliance specialist. I'll help you track your visa application status effectively. Let's set up your application tracking details.",
   questions: [
     {
       id: "applicationId",
-      text: "What is your application reference number or tracking ID from the endorsing body?",
+      question: "What is your application reference number or tracking ID from the endorsing body?",
+      hint: "Include your application reference and any secondary tracking numbers",
       fieldKey: "applicationId",
-      minLength: 50,
-      placeholder: "Describe your application reference, when you received it, and any secondary tracking numbers..."
+      minLength: 50
     },
     {
       id: "endorsingBody",
-      text: "Which endorsing body is processing your application? (e.g., Tech Nation, Innovator International, UK universities)",
+      question: "Which endorsing body is processing your application? (e.g., Tech Nation, Innovator International, UK universities)",
+      hint: "Name the endorsing body and describe why you chose them",
       fieldKey: "endorsingBody",
-      minLength: 50,
-      placeholder: "Name the endorsing body and describe why you chose them..."
+      minLength: 50
     },
     {
       id: "submissionDate",
-      text: "When did you submit your application to the endorsing body? What documents were included?",
+      question: "When did you submit your application to the endorsing body? What documents were included?",
+      hint: "Provide the submission date and list the key documents you submitted",
       fieldKey: "submissionDate",
-      minLength: 60,
-      placeholder: "Provide the submission date and list the key documents you submitted..."
+      minLength: 60
     },
     {
       id: "currentStatus",
-      text: "What is the current status of your application? (draft, submitted, under review, additional info requested, decision pending, approved, rejected)",
+      question: "What is the current status of your application? (draft, submitted, under review, additional info requested, decision pending, approved, rejected)",
+      hint: "Describe the current status and any recent communications",
       fieldKey: "currentStatus",
-      minLength: 50,
-      placeholder: "Describe the current status and any recent communications..."
+      minLength: 50
     },
     {
       id: "lastUpdate",
-      text: "When was the last update you received? What did it say?",
+      question: "When was the last update you received? What did it say?",
+      hint: "Describe the most recent communication and its contents",
       fieldKey: "lastUpdate",
-      minLength: 60,
-      placeholder: "Describe the most recent communication and its contents..."
+      minLength: 60
     },
     {
       id: "nextSteps",
-      text: "What are your expected next steps or pending actions?",
+      question: "What are your expected next steps or pending actions?",
+      hint: "Describe any pending actions, upcoming deadlines, or expected milestones",
       fieldKey: "nextSteps",
-      minLength: 50,
-      placeholder: "Describe any pending actions, upcoming deadlines, or expected milestones..."
+      minLength: 50
     },
     {
       id: "notes",
-      text: "Are there any additional notes or concerns about your application status?",
+      question: "Are there any additional notes or concerns about your application status?",
+      hint: "Share any concerns, questions for the endorsing body, or observations",
       fieldKey: "notes",
-      minLength: 50,
-      placeholder: "Share any concerns, questions for the endorsing body, or observations..."
+      minLength: 50
     }
-  ]
+  ],
+  completionMessage: "Your application status is now tracked. Stay on top of deadlines and communications for a smooth approval process."
 };
 
 type StatusUpdate = {

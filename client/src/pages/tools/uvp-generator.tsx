@@ -33,52 +33,55 @@ type ValueComponent = {
 };
 
 const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "uvp-generator",
+  toolName: "UVP Generator",
   agent: "nova",
   greeting: "Hello! I'm Nova, your innovation strategist. I'll help you craft a compelling Unique Value Proposition that demonstrates your innovation's distinctiveness and market fit for your UK Innovator Founder visa application. Let's build a powerful UVP together!",
   questions: [
     {
       id: "customer-segment",
-      text: "Who is your primary target customer? Describe them specifically including their industry, size, role, and characteristics.",
-      placeholder: "e.g., Mid-sized UK fintech companies (50-200 employees) with compliance teams struggling to meet FCA regulatory requirements...",
+      question: "Who is your primary target customer? Describe them specifically including their industry, size, role, and characteristics.",
+      hint: "Be specific about industry, company size, role, and characteristics",
       fieldKey: "customerSegment",
       minLength: 50
     },
     {
       id: "pain-point",
-      text: "What critical problem or pain point does your target customer experience? Be specific about the impact and urgency.",
-      placeholder: "e.g., Manual compliance reporting takes 40+ hours per month, leads to 30% error rates, and risks £500k+ in regulatory fines...",
+      question: "What critical problem or pain point does your target customer experience? Be specific about the impact and urgency.",
+      hint: "Focus on the impact and urgency of the problem",
       fieldKey: "painPoint",
       minLength: 50
     },
     {
       id: "solution",
-      text: "What is your innovative solution? Describe how it uniquely addresses the pain point.",
-      placeholder: "e.g., AI-powered compliance automation platform that reduces manual work by 90% through intelligent document processing and real-time regulatory updates...",
+      question: "What is your innovative solution? Describe how it uniquely addresses the pain point.",
+      hint: "Explain how your solution uniquely addresses the pain point",
       fieldKey: "solution",
       minLength: 50
     },
     {
       id: "benefit",
-      text: "What is the primary benefit customers receive from your solution? Focus on outcomes, not features.",
-      placeholder: "e.g., Achieve full regulatory compliance with confidence, freeing up 35+ hours monthly for strategic initiatives and eliminating fine risks...",
+      question: "What is the primary benefit customers receive from your solution? Focus on outcomes, not features.",
+      hint: "Focus on outcomes and results, not just features",
       fieldKey: "benefit",
       minLength: 50
     },
     {
       id: "differentiation",
-      text: "What makes your solution uniquely different from existing alternatives? What's your competitive moat?",
-      placeholder: "e.g., Only platform with real-time FCA rule integration, proprietary NLP trained on 10 years of UK regulatory decisions, and automated audit trail generation...",
+      question: "What makes your solution uniquely different from existing alternatives? What's your competitive moat?",
+      hint: "Describe your competitive moat and unique differentiators",
       fieldKey: "differentiation",
       minLength: 50
     },
     {
       id: "quantifiable-outcome",
-      text: "What specific, measurable results can customers expect? Include numbers, timeframes, and metrics.",
-      placeholder: "e.g., 90% reduction in compliance time, 99.5% accuracy in regulatory filings, 60% cost savings within 3 months, zero regulatory penalties...",
+      question: "What specific, measurable results can customers expect? Include numbers, timeframes, and metrics.",
+      hint: "Include specific numbers, timeframes, and measurable metrics",
       fieldKey: "quantifiableOutcome",
       minLength: 50
     }
-  ]
+  ],
+  completionMessage: "Excellent! Your Unique Value Proposition is now defined. A clear UVP is essential for demonstrating innovation to endorsers."
 };
 
 export default function UVPGenerator() {

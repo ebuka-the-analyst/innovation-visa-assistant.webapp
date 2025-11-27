@@ -15,52 +15,46 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "quality-checklist",
   toolName: "Quality Checklist",
-  agentId: "sage",
-  agentName: "Sage",
-  agentTitle: "Compliance Specialist",
-  description: "Verify quality assurance requirements before product release and visa submission",
+  agent: "sage",
+  greeting: "Hello! I'm Sage, your compliance specialist. Let's verify your quality assurance practices to ensure your product meets the standards expected by UK endorsing bodies.",
   questions: [
     {
       id: "codeQuality",
       question: "Describe your code quality practices - testing, reviews, and automation.",
-      placeholder: "We have [X]% unit test coverage, code reviews are required for all changes, we use [CI/CD tools] for automation...",
+      hint: "Include test coverage, code review process, linting, automated testing",
       fieldKey: "codeQuality",
-      minLength: 80,
-      helpText: "Include test coverage, code review process, linting, automated testing"
+      minLength: 80
     },
     {
       id: "productQuality",
       question: "How do you ensure product quality before release?",
-      placeholder: "We conduct user acceptance testing with [X] users, performance benchmarks include [metrics], security audits are done [frequency]...",
+      hint: "Include UAT, performance testing, security audits, accessibility",
       fieldKey: "productQuality",
-      minLength: 80,
-      helpText: "Include UAT, performance testing, security audits, accessibility"
+      minLength: 80
     },
     {
       id: "documentation",
       question: "What documentation do you maintain for your product and processes?",
-      placeholder: "We maintain API documentation using [tools], user guides are published at [location], code is documented with...",
+      hint: "Include API docs, user guides, code documentation, deployment procedures",
       fieldKey: "documentation",
-      minLength: 60,
-      helpText: "Include API docs, user guides, code documentation, deployment procedures"
+      minLength: 60
     },
     {
       id: "releaseProcess",
       question: "Describe your release process and rollback procedures.",
-      placeholder: "Our release process includes [steps]. We have documented rollback procedures that involve [process]. Monitoring includes...",
+      hint: "Include release notes, rollback plan, monitoring, support training",
       fieldKey: "releaseProcess",
-      minLength: 80,
-      helpText: "Include release notes, rollback plan, monitoring, support training"
+      minLength: 80
     },
     {
       id: "compliance",
       question: "What compliance and regulatory requirements do you meet?",
-      placeholder: "We comply with GDPR through [measures], accessibility standards [WCAG level], industry regulations include...",
+      hint: "Include data protection, accessibility, industry-specific requirements",
       fieldKey: "compliance",
-      minLength: 60,
-      helpText: "Include data protection, accessibility, industry-specific requirements"
+      minLength: 60
     }
-  ]
+  ],
+  completionMessage: "Excellent! Your quality assurance practices have been documented. This demonstrates the operational maturity endorsers expect."
 };
 
 const QUALITY_ITEMS = [

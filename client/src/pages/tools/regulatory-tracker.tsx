@@ -12,60 +12,53 @@ import { Download, AlertTriangle, TrendingUp, Save, Lightbulb, Calendar, Refresh
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "regulatory-tracker",
   toolName: "Regulatory Tracker",
-  agentId: "atlas",
-  agentName: "Atlas",
-  agentTitle: "Growth Strategist",
-  description: "Track regulatory changes affecting your UK business and visa application",
+  agent: "atlas",
+  greeting: "Hello! I'm Atlas, your growth strategist. Let's track the key regulatory changes affecting your UK business and visa application to ensure full compliance.",
   questions: [
     {
       id: "industry",
       question: "What industry or sector does your business operate in?",
-      placeholder: "We operate in [industry sector]. Key regulatory bodies governing us include [FCA/ICO/CQC/etc]...",
+      hint: "Different industries have different regulatory requirements",
       fieldKey: "industrySector",
-      minLength: 50,
-      helpText: "Different industries have different regulatory requirements"
+      minLength: 50
     },
     {
       id: "dataHandling",
       question: "How does your business handle personal data and what GDPR compliance measures do you have?",
-      placeholder: "We process personal data for [purposes]. GDPR compliance measures include [specific measures]...",
+      hint: "ICO enforcement is increasing - data protection is critical",
       fieldKey: "gdprCompliance",
-      minLength: 80,
-      helpText: "ICO enforcement is increasing - data protection is critical"
+      minLength: 80
     },
     {
       id: "employment",
       question: "Describe your employment plans and awareness of UK employment regulations.",
-      placeholder: "We plan to hire [X] employees. We are aware of National Minimum Wage (£11.44), right-to-work checks, workplace pensions...",
+      hint: "Minimum wage and employment rights are frequently audited",
       fieldKey: "employmentCompliance",
-      minLength: 80,
-      helpText: "Minimum wage and employment rights are frequently audited"
+      minLength: 80
     },
     {
       id: "tax",
       question: "What UK tax obligations are you prepared for?",
-      placeholder: "We understand Corporation Tax (25%), VAT registration threshold (£85k), PAYE requirements...",
+      hint: "Tax awareness demonstrates business viability",
       fieldKey: "taxAwareness",
-      minLength: 60,
-      helpText: "Tax awareness demonstrates business viability"
+      minLength: 60
     },
     {
       id: "immigration",
       question: "How are you tracking immigration rule changes that affect your visa?",
-      placeholder: "I monitor [sources] for immigration updates. Recent changes affecting me include [specific changes]...",
+      hint: "Points-based system rules change frequently",
       fieldKey: "immigrationTracking",
-      minLength: 60,
-      helpText: "Points-based system rules change frequently"
+      minLength: 60
     },
     {
       id: "compliance",
       question: "What ongoing compliance monitoring system will you implement?",
-      placeholder: "We will monitor regulatory changes through [methods]. Quarterly reviews will cover [areas]. Professional advisors include...",
+      hint: "Demonstrating a compliance system shows business maturity",
       fieldKey: "complianceSystem",
-      minLength: 80,
-      helpText: "Demonstrating a compliance system shows business maturity"
+      minLength: 80
     }
-  ]
+  ],
+  completionMessage: "Your regulatory awareness has been documented. Staying on top of compliance is essential for visa success."
 };
 
 const REGULATORY_CHANGES = [

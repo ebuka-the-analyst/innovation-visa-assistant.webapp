@@ -17,61 +17,61 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "zero-approved",
-  agentId: "sterling",
-  agentName: "Sterling",
-  agentTitle: "Financial & Investment Expert",
+  toolName: "Zero to Approved",
+  agent: "sterling",
   greeting: "Hello! I'm Sterling, your financial planning specialist. Let me help you navigate the complete journey from zero to approved Innovator Founder visa status.",
   questions: [
     {
       id: "currentPhase",
-      text: "Which phase are you currently in? (Foundation, Business Planning, Endorsement Prep, Endorsement Application, Visa Application, Settlement)",
+      question: "Which phase are you currently in? (Foundation, Business Planning, Endorsement Prep, Endorsement Application, Visa Application, Settlement)",
+      hint: "Describe your current phase and what tasks you've already completed",
       fieldKey: "currentPhase",
-      minLength: 50,
-      placeholder: "Describe your current phase and what tasks you've already completed..."
+      minLength: 50
     },
     {
       id: "businessIdea",
-      text: "Describe your innovative business idea. What problem does it solve and how is it innovative?",
+      question: "Describe your innovative business idea. What problem does it solve and how is it innovative?",
+      hint: "Share your business concept, target market, innovation elements, and competitive advantage",
       fieldKey: "businessIdea",
-      minLength: 80,
-      placeholder: "Share your business concept, target market, innovation elements, and competitive advantage..."
+      minLength: 80
     },
     {
       id: "financialReadiness",
-      text: "What is your financial readiness? Do you have the required maintenance funds (£1,270) and initial capital?",
+      question: "What is your financial readiness? Do you have the required maintenance funds (£1,270) and initial capital?",
+      hint: "Describe your financial situation, available funds, and investment plans",
       fieldKey: "financialReadiness",
-      minLength: 60,
-      placeholder: "Describe your financial situation, available funds, and investment plans..."
+      minLength: 60
     },
     {
       id: "documentationStatus",
-      text: "What business documentation have you prepared? (Business plan, financial projections, market research)",
+      question: "What business documentation have you prepared? (Business plan, financial projections, market research)",
+      hint: "List prepared documents and identify what still needs to be completed",
       fieldKey: "documentationStatus",
-      minLength: 60,
-      placeholder: "List prepared documents and identify what still needs to be completed..."
+      minLength: 60
     },
     {
       id: "endorserSelection",
-      text: "Have you selected an endorsing body? Which one and why?",
+      question: "Have you selected an endorsing body? Which one and why?",
+      hint: "Name your target endorser and explain why they're the right fit for your business",
       fieldKey: "endorserSelection",
-      minLength: 50,
-      placeholder: "Name your target endorser and explain why they're the right fit for your business..."
+      minLength: 50
     },
     {
       id: "timeline",
-      text: "What is your target timeline for visa approval? When do you need to be in the UK?",
+      question: "What is your target timeline for visa approval? When do you need to be in the UK?",
+      hint: "Share your target approval date and any deadline constraints",
       fieldKey: "timeline",
-      minLength: 50,
-      placeholder: "Share your target approval date and any deadline constraints..."
+      minLength: 50
     },
     {
       id: "blockers",
-      text: "What are your current blockers or concerns about completing the visa journey?",
+      question: "What are your current blockers or concerns about completing the visa journey?",
+      hint: "Describe any challenges, uncertainties, or areas where you need guidance",
       fieldKey: "blockers",
-      minLength: 60,
-      placeholder: "Describe any challenges, uncertainties, or areas where you need guidance..."
+      minLength: 60
     }
-  ]
+  ],
+  completionMessage: "Great! Your visa journey roadmap is now clear. Let's work through each phase systematically to get you approved."
 };
 
 type Phase = {

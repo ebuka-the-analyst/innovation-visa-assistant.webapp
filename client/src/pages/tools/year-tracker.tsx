@@ -18,54 +18,54 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "year-tracker",
-  agentId: "atlas",
-  agentName: "Atlas",
-  agentTitle: "Growth & Strategy Expert",
+  toolName: "Year Tracker",
+  agent: "atlas",
   greeting: "Hello! I'm Atlas, your growth strategy specialist. Let me help you plan your year-by-year business growth trajectory and key milestones.",
   questions: [
     {
       id: "currentYear",
-      text: "What is your current business status? Describe your revenue, team size, and customer base today.",
+      question: "What is your current business status? Describe your revenue, team size, and customer base today.",
+      hint: "Share current revenue, employee count, customer numbers, and operational status",
       fieldKey: "currentYear",
-      minLength: 70,
-      placeholder: "Share current revenue, employee count, customer numbers, and operational status..."
+      minLength: 70
     },
     {
       id: "year1Goals",
-      text: "What are your Year 1 goals in the UK? Include revenue, hiring, and customer targets.",
+      question: "What are your Year 1 goals in the UK? Include revenue, hiring, and customer targets.",
+      hint: "Describe Year 1 targets for revenue, team growth, customers, and key milestones",
       fieldKey: "year1Goals",
-      minLength: 70,
-      placeholder: "Describe Year 1 targets for revenue, team growth, customers, and key milestones..."
+      minLength: 70
     },
     {
       id: "year2Goals",
-      text: "What growth do you expect in Year 2? How will your metrics evolve?",
+      question: "What growth do you expect in Year 2? How will your metrics evolve?",
+      hint: "Share Year 2 projections for revenue, employees, customers, and strategic milestones",
       fieldKey: "year2Goals",
-      minLength: 60,
-      placeholder: "Share Year 2 projections for revenue, employees, customers, and strategic milestones..."
+      minLength: 60
     },
     {
       id: "year3Goals",
-      text: "What does Year 3 success look like? What major milestones will you achieve?",
+      question: "What does Year 3 success look like? What major milestones will you achieve?",
+      hint: "Describe Year 3 targets, profitability goals, and ILR eligibility milestones",
       fieldKey: "year3Goals",
-      minLength: 60,
-      placeholder: "Describe Year 3 targets, profitability goals, and ILR eligibility milestones..."
+      minLength: 60
     },
     {
       id: "keyMilestones",
-      text: "What are your most critical milestones across the 3-5 year period?",
+      question: "What are your most critical milestones across the 3-5 year period?",
+      hint: "List key milestones: funding rounds, product launches, market entries, team expansions",
       fieldKey: "keyMilestones",
-      minLength: 70,
-      placeholder: "List key milestones: funding rounds, product launches, market entries, team expansions..."
+      minLength: 70
     },
     {
       id: "growthStrategy",
-      text: "What is your growth strategy? How will you achieve these year-over-year improvements?",
+      question: "What is your growth strategy? How will you achieve these year-over-year improvements?",
+      hint: "Describe your growth levers: marketing, sales, partnerships, product development",
       fieldKey: "growthStrategy",
-      minLength: 70,
-      placeholder: "Describe your growth levers: marketing, sales, partnerships, product development, geographic expansion..."
+      minLength: 70
     }
-  ]
+  ],
+  completionMessage: "Your growth trajectory is mapped out. These milestones will guide your visa journey and business planning."
 };
 
 type YearData = {
