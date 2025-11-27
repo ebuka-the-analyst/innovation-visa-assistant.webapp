@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -12,6 +12,51 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'founder-bio',
+  toolName: 'Founder Biography Builder',
+  agent: 'nova',
+  greeting: "Hi! I'm Nova, your Innovation Specialist. I'll help you craft a compelling founder biography that showcases your expertise and credibility to endorsing bodies. Let's tell your story!",
+  questions: [
+    {
+      id: 'name-role',
+      question: "What's your full name and your role/title in the company?",
+      hint: "Include any relevant suffixes or titles (e.g., Dr., PhD, MBA)",
+      fieldKey: 'nameRole',
+      minLength: 10
+    },
+    {
+      id: 'education',
+      question: "What's your educational background? Include degrees, institutions, and any relevant certifications.",
+      hint: "List degrees chronologically, including field of study and institution name",
+      fieldKey: 'education',
+      minLength: 50
+    },
+    {
+      id: 'experience',
+      question: "Describe your professional experience. What relevant roles have you held and at which companies?",
+      hint: "Focus on experience relevant to your current venture - highlight leadership roles, industry expertise, and achievements",
+      fieldKey: 'experience',
+      minLength: 100
+    },
+    {
+      id: 'achievements',
+      question: "What are your key achievements and recognitions? Include awards, publications, patents, or notable accomplishments.",
+      hint: "Be specific with numbers and outcomes - e.g., 'Grew revenue by 300%' or 'Led team of 50 engineers'",
+      fieldKey: 'achievements',
+      minLength: 80
+    },
+    {
+      id: 'uk-connection',
+      question: "What's your connection to the UK and why are you committed to building your business here?",
+      hint: "Include UK education, work experience, partnerships, or strategic reasons for UK expansion",
+      fieldKey: 'ukConnection',
+      minLength: 50
+    }
+  ],
+  completionMessage: "Great work! Your founder biography details are complete. I've populated the form fields - click 'Generate Biography' to create your formatted bio, then export it for your visa application."
+};
+
 export default function FounderBio() {
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
@@ -21,6 +66,25 @@ export default function FounderBio() {
   const [experience, setExperience] = useState("");
   const [achievements, setAchievements] = useState("");
   const [bio, setBio] = useState("");
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('founder-bio-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('founder-bio-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.nameRole) {
+      const parts = answers.nameRole.split(',');
+      setName(parts[0]?.trim() || '');
+      setRole(parts[1]?.trim() || parts.length > 1 ? parts.slice(1).join(',').trim() : '');
+    }
+    if (answers.education) setEducation(answers.education);
+    if (answers.experience) setExperience(answers.experience);
+    if (answers.achievements) setAchievements(answers.achievements);
+    setMode('traditional');
+  };
 
   const saveProgress = () => {
     localStorage.setItem('founderBioFiles', JSON.stringify(uploadedFiles));
@@ -79,6 +143,18 @@ export default function FounderBio() {
             getSerializedState={getSerializedState}
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <div className="mb-4">
             <FileUploadButton config={fileUploadConfigs.documentOrganizer} onFileSelected={handleFileUpload} variant="secondary" />
           </div>
@@ -115,6 +191,8 @@ export default function FounderBio() {
             <Download className="w-4 h-4" />
             Export Founder Biography
           </Button>
+          </>
+          )}
         </div>
       </div>
     </>

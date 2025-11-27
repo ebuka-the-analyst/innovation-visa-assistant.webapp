@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,57 @@ interface Survey {
   keyFindings: string;
   source: string;
 }
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'traction-evidence',
+  toolName: 'Traction Evidence Builder',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. Building traction evidence is crucial for demonstrating market validation to endorsers. Let me guide you through documenting your waitlists, letters of intent, partnerships, and customer surveys systematically.",
+  questions: [
+    {
+      id: 'waitlist-source',
+      question: "Have you built a waitlist? If so, what platform or source did you use to collect signups?",
+      hint: "Examples: Landing page, Product Hunt, social media campaigns",
+      fieldKey: 'waitlist_source',
+      minLength: 10
+    },
+    {
+      id: 'waitlist-count',
+      question: "How many people are on your waitlist? Provide the total number of signups across all sources.",
+      hint: "Aim for 100+ signups to demonstrate meaningful market interest",
+      fieldKey: 'waitlist_count',
+      fieldType: 'number'
+    },
+    {
+      id: 'loi-companies',
+      question: "Have you secured any Letters of Intent from potential customers? List the company names and their potential contract values.",
+      hint: "LOIs are powerful evidence of commercial viability",
+      fieldKey: 'loi_companies',
+      minLength: 20
+    },
+    {
+      id: 'partnerships',
+      question: "Do you have any strategic partnerships in place? Describe your key partnerships and what value they bring.",
+      hint: "Include distribution partners, technology partners, or referral agreements",
+      fieldKey: 'partnerships',
+      minLength: 20
+    },
+    {
+      id: 'survey-insights',
+      question: "Have you conducted customer validation surveys? What were the key findings and how many people responded?",
+      hint: "Surveys with 50+ respondents provide quantitative validation",
+      fieldKey: 'survey_insights',
+      minLength: 30
+    },
+    {
+      id: 'evidence-docs',
+      question: "What documentation do you have to verify your traction? List the types of evidence you can provide.",
+      hint: "Screenshots, signed agreements, email confirmations, analytics dashboards",
+      fieldKey: 'evidence_docs',
+      minLength: 20
+    }
+  ]
+};
 
 export default function TractionEvidence() {
   const { generateWord } = useWordExport();

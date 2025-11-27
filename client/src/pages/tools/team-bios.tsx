@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
@@ -19,7 +19,85 @@ interface TeamMember {
   background: string;
 }
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'team-bios',
+  toolName: 'Team Bios',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. I'll help you craft compelling team biographies that showcase your team's expertise and credibility - essential for demonstrating capability to endorsing bodies. Let's build your team profiles together!",
+  questions: [
+    {
+      id: 'founder-name',
+      question: "What is the full name and title of your lead founder or CEO?",
+      hint: "This will be the primary contact for your visa application",
+      fieldKey: 'founder_name'
+    },
+    {
+      id: 'founder-background',
+      question: "Describe the founder's professional background, including education, previous roles, and key achievements. What makes them uniquely qualified to lead this venture?",
+      hint: "Include degrees, certifications, notable companies, and specific accomplishments",
+      fieldKey: 'founder_background',
+      minLength: 100
+    },
+    {
+      id: 'cofounder-info',
+      question: "Do you have co-founders? If so, provide their names, roles, and brief backgrounds.",
+      hint: "Complementary skills among co-founders strengthen your team profile",
+      fieldKey: 'cofounder_info'
+    },
+    {
+      id: 'key-team-members',
+      question: "List any other key team members (employees or advisors) with their roles and relevant expertise.",
+      hint: "Include anyone who significantly contributes to your business success",
+      fieldKey: 'key_team'
+    },
+    {
+      id: 'industry-experience',
+      question: "What collective industry experience does your team have? How many years in your target market or related sectors?",
+      hint: "Domain expertise demonstrates credibility and reduces execution risk",
+      fieldKey: 'industry_experience'
+    },
+    {
+      id: 'uk-connections',
+      question: "Does anyone on your team have UK business experience, education, or professional connections?",
+      hint: "UK ties strengthen your application and demonstrate market understanding",
+      fieldKey: 'uk_connections'
+    }
+  ]
+};
+
 export default function TeamBios() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('team-bios-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('team-bios-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const newTeam: TeamMember[] = [];
+    if (answers.founder_name && answers.founder_background) {
+      newTeam.push({
+        id: Date.now().toString(),
+        name: answers.founder_name,
+        role: 'Founder & CEO',
+        background: answers.founder_background
+      });
+    }
+    if (answers.cofounder_info) {
+      newTeam.push({
+        id: (Date.now() + 1).toString(),
+        name: 'Co-Founder',
+        role: 'Co-Founder',
+        background: answers.cofounder_info
+      });
+    }
+    if (newTeam.length > 0) {
+      setTeam(newTeam);
+    }
+    setMode('traditional');
+  };
+
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [team, setTeam] = useState<TeamMember[]>([{ id: "1", name: "", role: "", background: "" }]);
@@ -74,9 +152,18 @@ export default function TeamBios() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Team Bios</h1>
-          <p className="text-muted-foreground mb-6">Create team member profiles and biographies</p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Team Bios</h1>
+              <p className="text-muted-foreground">Create team member profiles and biographies</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="team-bios"
             toolName="Team Bios"
@@ -119,6 +206,8 @@ export default function TeamBios() {
             <Download className="w-4 h-4" />
             Export Team Bios
           </Button>
+          </>
+          )}
         </div>
       </div>
     </>

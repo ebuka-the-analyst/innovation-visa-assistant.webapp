@@ -14,6 +14,53 @@ import {
   LineChart, Line, BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'growth-metrics',
+  toolName: 'Growth Metrics Dashboard',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Expert. I'll help you define and track the key growth metrics that endorsing bodies look for in UK Innovator Founder Visa applications. Let's quantify your business traction and growth trajectory!",
+  questions: [
+    {
+      id: 'mrr',
+      question: "What's your current Monthly Recurring Revenue (MRR) in GBP? If you're pre-revenue, enter 0.",
+      hint: "This shows revenue predictability - a key indicator endorsers look for",
+      fieldKey: 'currentMRR'
+    },
+    {
+      id: 'growth-rate',
+      question: "What's your month-over-month growth rate percentage? Consider your average over the past 3-6 months.",
+      hint: "15-20% monthly growth is typical for high-growth startups. Be realistic.",
+      fieldKey: 'monthlyGrowthRate'
+    },
+    {
+      id: 'cac-ltv',
+      question: "What's your Customer Acquisition Cost (CAC) and estimated Customer Lifetime Value (LTV)? Provide both in GBP.",
+      hint: "A healthy LTV:CAC ratio is 3:1 or higher. Format: CAC £X, LTV £Y",
+      fieldKey: 'cacLtv'
+    },
+    {
+      id: 'churn',
+      question: "What's your monthly customer churn rate? This is the percentage of customers who stop using your service each month.",
+      hint: "For SaaS, under 5% monthly churn is considered healthy",
+      fieldKey: 'churnRate'
+    },
+    {
+      id: 'users',
+      question: "How many total users/customers do you have, and how many are active monthly? Also, how many new users did you acquire this month?",
+      hint: "Active users demonstrate product-market fit",
+      fieldKey: 'userMetrics'
+    },
+    {
+      id: 'activation',
+      question: "What's your activation rate - the percentage of new users who complete a key action that indicates they've found value?",
+      hint: "This could be completing onboarding, making first purchase, etc. Target 60%+",
+      fieldKey: 'activationRate'
+    }
+  ],
+  completionMessage: "Excellent! You've provided comprehensive growth metrics. These demonstrate your business traction and will help endorsing bodies assess your scalability potential. I'm now populating your metrics dashboard."
+};
 
 type MonthlyMetrics = {
   month: string;
@@ -36,6 +83,10 @@ type CohortData = {
 };
 
 export default function GrowthMetrics() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('growth-metrics-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [activeTab, setActiveTab] = useState('overview');
   const [savedDate, setSavedDate] = useState('');
 
@@ -249,6 +300,44 @@ export default function GrowthMetrics() {
       restoreSerializedState(state);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('growth-metrics-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.currentMRR) {
+      const mrrMatch = answers.currentMRR.match(/[\d,]+/);
+      if (mrrMatch) setCurrentMRR(parseInt(mrrMatch[0].replace(/,/g, '')));
+    }
+    if (answers.monthlyGrowthRate) {
+      const rateMatch = answers.monthlyGrowthRate.match(/[\d.]+/);
+      if (rateMatch) setMonthlyGrowthRate(parseFloat(rateMatch[0]));
+    }
+    if (answers.cacLtv) {
+      const cacMatch = answers.cacLtv.match(/cac[^\d]*(\d[\d,]*)/i);
+      const ltvMatch = answers.cacLtv.match(/ltv[^\d]*(\d[\d,]*)/i);
+      if (cacMatch) setCAC(parseInt(cacMatch[1].replace(/,/g, '')));
+      if (ltvMatch) setLTV(parseInt(ltvMatch[1].replace(/,/g, '')));
+    }
+    if (answers.churnRate) {
+      const churnMatch = answers.churnRate.match(/[\d.]+/);
+      if (churnMatch) setChurnRate(parseFloat(churnMatch[0]));
+    }
+    if (answers.userMetrics) {
+      const totalMatch = answers.userMetrics.match(/total[^\d]*(\d[\d,]*)/i);
+      const activeMatch = answers.userMetrics.match(/active[^\d]*(\d[\d,]*)/i);
+      const newMatch = answers.userMetrics.match(/new[^\d]*(\d[\d,]*)/i);
+      if (totalMatch) setTotalUsers(parseInt(totalMatch[1].replace(/,/g, '')));
+      if (activeMatch) setActiveUsers(parseInt(activeMatch[1].replace(/,/g, '')));
+      if (newMatch) setNewUsersThisMonth(parseInt(newMatch[1].replace(/,/g, '')));
+    }
+    if (answers.activationRate) {
+      const rateMatch = answers.activationRate.match(/[\d.]+/);
+      if (rateMatch) setActivationRate(parseFloat(rateMatch[0]));
+    }
+    setMode('traditional');
+  };
 
   const handleSave = () => {
     const state = getSerializedState();
@@ -567,13 +656,49 @@ Report generated by UK Innovator Founder Visa Assistant
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-growth-metrics">Growth Metrics Dashboard</h1>
-            <p className="text-lg text-muted-foreground">Track CAC, LTV, churn, MRR growth, and unit economics for scalability validation</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-growth-metrics">Growth Metrics Dashboard</h1>
+                <p className="text-lg text-muted-foreground">Track CAC, LTV, churn, MRR growth, and unit economics for scalability validation</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Atlas, our Growth Expert, helps you track the metrics that matter for your visa application.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Get guidance on key SaaS metrics like MRR, CAC, LTV</li>
+                    <li>Understand unit economics benchmarks</li>
+                    <li>Track growth rates that demonstrate scalability</li>
+                    <li>Earn XP as you complete each question</li>
+                  </ul>
+                  <p className="pt-2">Your answers will automatically populate the dashboard when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="growth-metrics"
             onSave={handleSave}
@@ -1287,6 +1412,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

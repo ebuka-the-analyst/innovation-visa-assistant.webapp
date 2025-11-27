@@ -14,10 +14,67 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'fee-estimator',
+  toolName: 'Fee Estimator',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your Financial Analyst. Understanding the full cost of your visa application is crucial for planning. I'll help you estimate all fees - government, professional, and relocation costs. Let's build your complete cost picture!",
+  questions: [
+    {
+      id: 'visa-duration',
+      question: "How many years of visa are you applying for? The Innovator Founder visa is typically granted for 3 years, with possible extension to 5 years. Which duration are you planning?",
+      hint: "IHS surcharge is calculated per year of visa duration",
+      fieldKey: 'visa_duration',
+      minLength: 10
+    },
+    {
+      id: 'endorsing-body',
+      question: "Which endorsing body are you using? Options include Tech Nation, Global Entrepreneurs Programme, Innovator International, or another approved endorser.",
+      hint: "Endorsement fees vary significantly between bodies",
+      fieldKey: 'endorser_choice',
+      minLength: 10
+    },
+    {
+      id: 'legal-support',
+      question: "Are you using an immigration lawyer or consultant? If so, what's your estimated budget range for legal fees? Typical range is £3,000-£7,000.",
+      hint: "Professional support is highly recommended for first applications",
+      fieldKey: 'legal_fees_info',
+      minLength: 20
+    },
+    {
+      id: 'dependents-info',
+      question: "Are you bringing any dependents (spouse/partner and/or children)? If so, how many? Each dependent has their own application fee and IHS surcharge.",
+      hint: "Each dependent adds approximately £4,000+ to total costs",
+      fieldKey: 'dependents_info',
+      minLength: 10
+    },
+    {
+      id: 'relocation-needs',
+      question: "What relocation costs do you anticipate? Consider flights, shipping, initial accommodation (how many months deposit?), and setup costs.",
+      hint: "London accommodation deposit is typically 3-6 months rent",
+      fieldKey: 'relocation_costs',
+      minLength: 30
+    },
+    {
+      id: 'budget-comfort',
+      question: "What's your overall budget comfort level for visa-related costs? Are you trying to minimize costs, or prioritize speed and quality of support?",
+      hint: "This helps tailor recommendations to your situation",
+      fieldKey: 'budget_comfort',
+      minLength: 20
+    }
+  ],
+  completionMessage: "Excellent! I've captured your fee estimation parameters. Switch to the traditional view to see the detailed cost breakdown, comparison charts, and money-saving tips for your specific situation."
+};
 
 type EndorsingBody = 'techNation' | 'globalEntrepreneurs' | 'other';
 
 export default function FeeEstimator() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('fee-estimator-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [visaYears, setVisaYears] = useState(3);
   const [endorsingBody, setEndorsingBody] = useState<EndorsingBody>('techNation');
   const [legalFeesLow, setLegalFeesLow] = useState(3000);
@@ -30,6 +87,63 @@ export default function FeeEstimator() {
   const [accommodationCostPerMonth, setAccommodationCostPerMonth] = useState(1500);
   const [activeTab, setActiveTab] = useState('estimator');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('fee-estimator-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.visa_duration) {
+      const yearsMatch = answers.visa_duration.match(/(\d+)/);
+      if (yearsMatch) {
+        const years = parseInt(yearsMatch[1]);
+        if (years >= 1 && years <= 5) setVisaYears(years);
+      }
+    }
+    
+    if (answers.endorser_choice) {
+      const lower = answers.endorser_choice.toLowerCase();
+      if (lower.includes('tech nation')) setEndorsingBody('techNation');
+      else if (lower.includes('global')) setEndorsingBody('globalEntrepreneurs');
+      else setEndorsingBody('other');
+    }
+    
+    if (answers.legal_fees_info) {
+      const amountMatch = answers.legal_fees_info.match(/£?(\d[\d,]*)/);
+      if (amountMatch) {
+        const amount = parseInt(amountMatch[1].replace(/,/g, ''));
+        setLegalFeesLow(Math.max(1000, amount - 2000));
+        setLegalFeesHigh(amount + 2000);
+      }
+    }
+    
+    if (answers.dependents_info) {
+      const depMatch = answers.dependents_info.match(/(\d+)/);
+      if (depMatch) {
+        const deps = parseInt(depMatch[1]);
+        if (deps > 0) {
+          setIncludeDependents(true);
+          setNumDependents(deps);
+        }
+      } else if (answers.dependents_info.toLowerCase().includes('no')) {
+        setIncludeDependents(false);
+        setNumDependents(0);
+      }
+    }
+    
+    if (answers.relocation_costs) {
+      const amountMatch = answers.relocation_costs.match(/£?(\d[\d,]*)/);
+      if (amountMatch) {
+        setRelocationCost(parseInt(amountMatch[1].replace(/,/g, '')));
+      }
+    }
+    
+    const date = new Date().toLocaleString('en-GB');
+    setSavedDate(date);
+    
+    setActiveTab('estimator');
+    setMode('traditional');
+  };
 
   const BASE_APPLICATION_FEE = 1191;
   const IHS_SURCHARGE_PER_YEAR = 1035;
@@ -314,6 +428,13 @@ current fees on official government websites before making financial commitments
             toolName="Fee Estimator"
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4" data-testid="tabs-fee-estimator">
               <TabsTrigger value="estimator" data-testid="tab-estimator">Estimator</TabsTrigger>
@@ -888,6 +1009,7 @@ current fees on official government websites before making financial commitments
               </Alert>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

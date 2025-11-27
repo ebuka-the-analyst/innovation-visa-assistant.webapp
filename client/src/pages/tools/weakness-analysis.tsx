@@ -3,9 +3,57 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  agent: 'nova',
+  greeting: "I'm Nova, your innovation assessment specialist. Let's conduct a thorough weakness analysis to identify gaps in your Innovator Founder visa application and create an improvement plan.",
+  questions: [
+    {
+      id: 'innovation-strength',
+      text: "How would you rate your innovation strength? Describe your novel technology, unique approach, or IP protection (patents, trade secrets) that differentiates your solution.",
+      fieldKey: 'innovationStrength',
+      minLength: 100
+    },
+    {
+      id: 'market-viability',
+      text: "What evidence demonstrates market viability? Include customer validation, revenue model proof, market size data, and any paying customers or letters of intent.",
+      fieldKey: 'marketViability',
+      minLength: 100
+    },
+    {
+      id: 'financial-sustainability',
+      text: "Describe your financial sustainability. Include current funding, cash runway, revenue projections, and path to profitability with supporting evidence.",
+      fieldKey: 'financialSustainability',
+      minLength: 100
+    },
+    {
+      id: 'scalability-plan',
+      text: "What is your scalability plan? Describe your growth strategy, job creation targets (minimum 2 FTE by Year 3), and geographic expansion plans.",
+      fieldKey: 'scalabilityPlan',
+      minLength: 75
+    },
+    {
+      id: 'team-capability',
+      text: "Assess your team's capability. Describe founder expertise, relevant track record, advisory board composition, and any key capability gaps.",
+      fieldKey: 'teamCapability',
+      minLength: 75
+    },
+    {
+      id: 'competitive-advantage',
+      text: "What is your sustainable competitive advantage? Explain your moat, barriers to entry, and why competitors cannot easily replicate your solution.",
+      fieldKey: 'competitiveAdvantage',
+      minLength: 75
+    },
+    {
+      id: 'known-weaknesses',
+      text: "What weaknesses or gaps are you already aware of in your application? Be honest about areas needing improvement.",
+      fieldKey: 'knownWeaknesses',
+      minLength: 50
+    }
+  ]
+};
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -30,6 +78,43 @@ type WeaknessDetail = {
 };
 
 export default function WeaknessAnalysis() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('weakness-analysis-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('weakness-analysis-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const updatedCategories = [...categories];
+    if (answers.innovationStrength) {
+      const idx = updatedCategories.findIndex(c => c.name === 'Innovation Strength');
+      if (idx >= 0) updatedCategories[idx].score = Math.min(100, answers.innovationStrength.length > 150 ? 75 : 60);
+    }
+    if (answers.marketViability) {
+      const idx = updatedCategories.findIndex(c => c.name === 'Market Viability');
+      if (idx >= 0) updatedCategories[idx].score = Math.min(100, answers.marketViability.length > 150 ? 70 : 55);
+    }
+    if (answers.financialSustainability) {
+      const idx = updatedCategories.findIndex(c => c.name === 'Financial Sustainability');
+      if (idx >= 0) updatedCategories[idx].score = Math.min(100, answers.financialSustainability.length > 150 ? 70 : 50);
+    }
+    if (answers.scalabilityPlan) {
+      const idx = updatedCategories.findIndex(c => c.name === 'Scalability Plan');
+      if (idx >= 0) updatedCategories[idx].score = Math.min(100, answers.scalabilityPlan.length > 100 ? 65 : 50);
+    }
+    if (answers.teamCapability) {
+      const idx = updatedCategories.findIndex(c => c.name === 'Team Capability');
+      if (idx >= 0) updatedCategories[idx].score = Math.min(100, answers.teamCapability.length > 100 ? 70 : 60);
+    }
+    if (answers.competitiveAdvantage) {
+      const idx = updatedCategories.findIndex(c => c.name === 'Competitive Advantage');
+      if (idx >= 0) updatedCategories[idx].score = Math.min(100, answers.competitiveAdvantage.length > 100 ? 70 : 55);
+    }
+    setCategories(updatedCategories.map(c => ({ ...c, severity: getSeverity(c.score) })));
+  };
+
   const [categories, setCategories] = useState<WeaknessCategory[]>([
     { name: 'Innovation Strength', description: 'Novelty and IP protection', score: 60, severity: 'medium' },
     { name: 'Market Viability', description: 'Market validation and revenue model', score: 55, severity: 'high' },
@@ -498,13 +583,27 @@ This tool provides educational guidance only and does not constitute legal advic
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-weakness-analysis">Application Weakness Analysis</h1>
-            <p className="text-lg text-muted-foreground">Comprehensive pre-submission gap analysis and risk assessment</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-weakness-analysis">Application Weakness Analysis</h1>
+                <p className="text-lg text-muted-foreground">Comprehensive pre-submission gap analysis and risk assessment</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="weakness-analysis"
             onSave={handleSave}
@@ -1048,6 +1147,8 @@ This tool provides educational guidance only and does not constitute legal advic
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

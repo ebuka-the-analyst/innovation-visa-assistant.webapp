@@ -11,12 +11,69 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'cac-calculator',
+  toolName: 'Customer Acquisition Cost Calculator',
+  agent: 'sterling',
+  greeting: "Hi! I'm Sterling, your Financial Analyst. Understanding your Customer Acquisition Cost (CAC) and Lifetime Value (LTV) is essential for demonstrating business viability. Endorsers want to see healthy unit economics. Let's analyze your customer acquisition strategy!",
+  questions: [
+    {
+      id: 'marketing-spend',
+      question: "What's your total marketing spend for customer acquisition? Break down your channels and investments.",
+      hint: "Include digital ads, content marketing, events, PR, and any paid acquisition channels",
+      fieldKey: 'marketing_spend_description',
+      minLength: 80
+    },
+    {
+      id: 'sales-spend',
+      question: "What's your total sales spend? Include sales team costs, tools, and outbound activities.",
+      hint: "Salaries, commissions, CRM tools, travel, and any direct sales expenses",
+      fieldKey: 'sales_spend_description',
+      minLength: 60
+    },
+    {
+      id: 'customer-acquisition',
+      question: "How many new customers do you acquire monthly? Describe your typical conversion funnel.",
+      hint: "Be specific about sources, conversion rates, and what defines a 'customer'",
+      fieldKey: 'customer_acquisition_description',
+      minLength: 80
+    },
+    {
+      id: 'customer-value',
+      question: "What's your average customer value? Describe typical spending patterns and contract length.",
+      hint: "Annual contract value, monthly recurring revenue, or average order value",
+      fieldKey: 'customer_value_description',
+      minLength: 60
+    },
+    {
+      id: 'retention-metrics',
+      question: "What's your customer retention like? Describe your churn rate and retention strategies.",
+      hint: "Monthly churn percentage, reasons for churn, and what you're doing to improve retention",
+      fieldKey: 'retention_metrics_description',
+      minLength: 80
+    },
+    {
+      id: 'ltv-improvement',
+      question: "How do you plan to improve your LTV:CAC ratio over time? What optimizations are planned?",
+      hint: "Reduce acquisition costs, improve retention, increase ARPU, or expand product offerings",
+      fieldKey: 'ltv_improvement_plan',
+      minLength: 100
+    }
+  ],
+  completionMessage: "Excellent analysis! You've demonstrated clear understanding of your unit economics. A healthy LTV:CAC ratio (3x+) is exactly what endorsers want to see for viability. I'm now calculating your acquisition metrics."
+};
 
 // UK Innovator Founder Visa Context (November 2025)
 // Viability Criterion: Healthy CAC/LTV ratio demonstrates business sustainability
 // Scalability Criterion: Efficient customer acquisition enables growth
 
 export default function CACCalculator() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('cac-calculator-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [marketingSpend, setMarketingSpend] = useState(50000);
@@ -325,6 +382,10 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
   };
 
   useEffect(() => {
+    localStorage.setItem('cac-calculator-mode', mode);
+  }, [mode]);
+
+  useEffect(() => {
     const s = localStorage.getItem('cacCalculatorData');
     if (s) {
       const data = JSON.parse(s);
@@ -341,6 +402,40 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
     if (d) setSavedDate(d);
   }, []);
 
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.marketing_spend_description) {
+      const spendMatch = answers.marketing_spend_description.match(/(\d+[\d,]*)/);
+      if (spendMatch) {
+        setMarketingSpend(parseInt(spendMatch[1].replace(/,/g, '')) || 50000);
+      }
+    }
+    if (answers.sales_spend_description) {
+      const salesMatch = answers.sales_spend_description.match(/(\d+[\d,]*)/);
+      if (salesMatch) {
+        setSalesSpend(parseInt(salesMatch[1].replace(/,/g, '')) || 30000);
+      }
+    }
+    if (answers.customer_acquisition_description) {
+      const customersMatch = answers.customer_acquisition_description.match(/(\d+)/);
+      if (customersMatch) {
+        setNewCustomers(parseInt(customersMatch[1]) || 100);
+      }
+    }
+    if (answers.customer_value_description) {
+      const valueMatch = answers.customer_value_description.match(/(\d+[\d,]*)/);
+      if (valueMatch) {
+        setAvgRevenue(parseInt(valueMatch[1].replace(/,/g, '')) || 5000);
+      }
+    }
+    if (answers.retention_metrics_description) {
+      const churnMatch = answers.retention_metrics_description.match(/(\d+)/);
+      if (churnMatch) {
+        setChurnRate(parseInt(churnMatch[1]) || 5);
+      }
+    }
+    setMode('traditional');
+  };
+
   const { cac, ltv, ltvCacRatio, paybackMonths } = getMetrics();
   const { score: healthScore, grade } = getUnitEconomicsHealth();
   const COLORS = ['#ffa536', '#11b6e9', '#10b981', '#8b5cf6'];
@@ -351,9 +446,22 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Customer Acquisition Cost (CAC)</h1>
-          <p className="text-muted-foreground mb-6">Analyze unit economics for viability (Innovator Founder Visa)</p>
+          <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Customer Acquisition Cost (CAC)</h1>
+              <p className="text-muted-foreground">Analyze unit economics for viability (Innovator Founder Visa)</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar toolId="cac-calculator" toolName="CAC Calculator" onSave={saveProgress} onExport={exportReport} getSerializedState={() => ({ uploadedFiles, marketingSpend, salesSpend, newCustomers, avgRevenue, churnRate, grossMargin, savedDate })} />
 
           {savedDate && <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950"><AlertCircle className="h-4 w-4 text-green-600" /><AlertDescription className="text-green-700 dark:text-green-300">Last saved: {savedDate}</AlertDescription></Alert>}
@@ -516,6 +624,8 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
               </div>
             )}
           </Card>
+          </>
+          )}
         </div>
       </div>
     </>

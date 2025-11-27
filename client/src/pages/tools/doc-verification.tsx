@@ -13,6 +13,59 @@ import { useState, useEffect } from "react";
 import { Download, Save, Lightbulb, Calendar, RefreshCw, FileCheck, X } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { UploadedFile } from "@/components/FileUploadButton";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'doc-verification',
+  toolName: 'Document Verification',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. I'll help you verify that all your visa application documents meet Home Office requirements. Document verification is critical - incomplete or incorrect documents are a leading cause of visa refusals. Let's ensure everything is in order!",
+  questions: [
+    {
+      id: 'identity-docs',
+      question: "Let's start with Identity Documents. Do you have a valid passport with at least 6 months validity beyond your visa period, birth certificate, and previous passports from the last 10 years?",
+      hint: "Passport validity is strictly enforced - check expiry dates carefully",
+      fieldKey: 'identity_status',
+      minLength: 30
+    },
+    {
+      id: 'business-docs',
+      question: "For Business Documents, have you obtained your Companies House registration certificate, Articles of Association, and Board Meeting minutes from the last 12 months?",
+      hint: "All documents must be current and match your company registration number",
+      fieldKey: 'business_status',
+      minLength: 30
+    },
+    {
+      id: 'financial-verification',
+      question: "Regarding Financial Documents, do you have 28-day bank statements showing £1,270 minimum, annual accounts for the last 3 years, and filed tax returns?",
+      hint: "Bank statements must be from a UK regulated bank with your name clearly visible",
+      fieldKey: 'financial_status',
+      minLength: 30
+    },
+    {
+      id: 'employment-ip',
+      question: "What's the status of your Employment Documents (contracts, payroll records) and Intellectual Property documentation (patents, IP assignments, copyrights)?",
+      hint: "IP documentation strengthens your innovation claim significantly",
+      fieldKey: 'employment_ip_status',
+      minLength: 30
+    },
+    {
+      id: 'endorsement-docs',
+      question: "Most critically - do you have your Endorsement Letter signed by an approved body, supporting evidence bundle, and verified endorser registration number?",
+      hint: "The endorsement letter is mandatory and must reference specific visa criteria",
+      fieldKey: 'endorsement_status',
+      minLength: 30
+    },
+    {
+      id: 'verification-gaps',
+      question: "Are there any documents you're struggling to obtain or verify? What's your main concern about document compliance?",
+      hint: "Identifying gaps early allows time to resolve issues before submission",
+      fieldKey: 'verification_gaps',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Great! I've captured your document verification status. I'm updating your checklist to reflect which documents are verified and which need attention. Switch to the traditional view to see your complete verification dashboard and mark items as complete."
+};
 
 const DOC_CATEGORIES = [
   {category:"Identity Documents",critical:true,items:[
@@ -48,12 +101,50 @@ const DOC_CATEGORIES = [
 ];
 
 export default function DocVerification() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('doc-verification-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+
+  useEffect(() => {
+    localStorage.setItem('doc-verification-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newChecks = { ...checks };
+    
+    if (answers.identity_status?.toLowerCase().includes('yes') || answers.identity_status?.toLowerCase().includes('have')) {
+      newChecks["Identity Documents-Valid Passport"] = true;
+    }
+    
+    if (answers.business_status?.toLowerCase().includes('yes') || answers.business_status?.toLowerCase().includes('have')) {
+      newChecks["Business Documents-Companies House Registration"] = true;
+    }
+    
+    if (answers.financial_status?.toLowerCase().includes('yes') || answers.financial_status?.toLowerCase().includes('have')) {
+      newChecks["Financial Documents-Bank Statements (28 days)"] = true;
+    }
+    
+    if (answers.endorsement_status?.toLowerCase().includes('yes') || answers.endorsement_status?.toLowerCase().includes('have')) {
+      newChecks["Endorsement Documents-Endorsement Letter"] = true;
+    }
+    
+    setChecks(newChecks);
+    
+    const date = new Date().toLocaleDateString();
+    localStorage.setItem('docVerificationProgress', JSON.stringify(newChecks));
+    localStorage.setItem('docVerificationDate', date);
+    setSavedDate(date);
+    
+    setTab('overview');
+    setMode('traditional');
+  };
 
   const totalDocs = DOC_CATEGORIES.reduce((sum, c) => sum + c.items.length, 0);
   const completedDocs = Object.values(checks).filter(Boolean).length;
@@ -167,9 +258,16 @@ export default function DocVerification() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Document Verification</h1>
+          <div className="flex items-center justify-between mb-2 gap-4 flex-wrap">
+            <h1 className="text-4xl font-bold">Document Verification</h1>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
           <p className="text-muted-foreground mb-6">Critical and supporting documents checklist</p>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="doc-verification"
             toolName="Document Verification"
@@ -303,6 +401,8 @@ export default function DocVerification() {
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

@@ -4,9 +4,57 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  agent: 'nova',
+  greeting: "I'm Nova, your innovation validation specialist. Let's build a comprehensive evidence portfolio that demonstrates genuine market validation and customer demand for your Innovator Founder visa application.",
+  questions: [
+    {
+      id: 'validation-methods',
+      text: "What validation methods have you used to test your business idea? Describe any customer interviews, surveys, MVP testing, pilot programs, or beta testing you've conducted.",
+      fieldKey: 'validationMethods',
+      minLength: 100
+    },
+    {
+      id: 'participants',
+      text: "How many people have participated in your validation activities? Include numbers for each method (e.g., 25 customer interviews, 150 survey responses, 40 beta users).",
+      fieldKey: 'participants',
+      minLength: 50
+    },
+    {
+      id: 'key-findings',
+      text: "What were your most important findings from customer validation? What pain points did customers confirm, and what feedback shaped your product development?",
+      fieldKey: 'keyFindings',
+      minLength: 100
+    },
+    {
+      id: 'traction-metrics',
+      text: "What traction metrics can you demonstrate? Include active users, revenue, engagement rates, customer retention, or growth metrics with specific numbers.",
+      fieldKey: 'tractionMetrics',
+      minLength: 75
+    },
+    {
+      id: 'mvp-status',
+      text: "Describe your MVP or prototype status. When was it launched, how many iterations have you completed, and what key learnings emerged from real user feedback?",
+      fieldKey: 'mvpStatus',
+      minLength: 75
+    },
+    {
+      id: 'product-market-fit',
+      text: "What evidence suggests product-market fit? Include customer retention rates, NPS scores, organic referrals, or testimonials demonstrating sustained demand.",
+      fieldKey: 'productMarketFit',
+      minLength: 75
+    },
+    {
+      id: 'documentation',
+      text: "What documentation do you have to support your validation claims? List available evidence like interview transcripts, survey data, analytics exports, or customer testimonials.",
+      fieldKey: 'documentation',
+      minLength: 75
+    }
+  ]
+};
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -38,6 +86,45 @@ type TractionMetric = {
 };
 
 export default function ValidationReport() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('validation-report-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('validation-report-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.validationMethods) {
+      setEvidence(prev => [{
+        ...prev[0],
+        description: answers.validationMethods,
+        findings: answers.keyFindings || ''
+      }]);
+    }
+    if (answers.tractionMetrics) {
+      setTraction(prev => [{
+        ...prev[0],
+        metric: 'Key Metrics',
+        value: 0,
+        unit: 'various'
+      }]);
+    }
+    if (answers.mvpStatus) {
+      setMvpDetails(prev => ({
+        ...prev,
+        launched: true,
+        keyLearnings: answers.mvpStatus
+      }));
+    }
+    if (answers.productMarketFit) {
+      setProductMarketFit(prev => ({
+        ...prev,
+        uniqueValue: answers.productMarketFit
+      }));
+    }
+  };
+
   const [evidence, setEvidence] = useState<ValidationEvidence[]>([
     {
       id: '1',
@@ -460,13 +547,27 @@ can be substantiated with documentary evidence before submission to endorsers.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-validation-report">Validation Report</h1>
-            <p className="text-lg text-muted-foreground">Comprehensive market validation and traction evidence generator</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-validation-report">Validation Report</h1>
+                <p className="text-lg text-muted-foreground">Comprehensive market validation and traction evidence generator</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="validation-report"
             onSave={handleSave}
@@ -1313,6 +1414,8 @@ can be substantiated with documentary evidence before submission to endorsers.
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

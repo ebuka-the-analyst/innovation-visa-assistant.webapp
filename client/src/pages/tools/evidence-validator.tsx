@@ -15,6 +15,59 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'evidence-validator',
+  toolName: 'Evidence Validator',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Expert. I'll help you validate that your evidence meets Home Office standards. Quality evidence is just as important as quantity - let me assess your evidence strength!",
+  questions: [
+    {
+      id: 'innovation-evidence',
+      question: "Describe your Innovation Evidence. What documents demonstrate your innovation? Do you have patent applications, technical architecture documentation, IP filings, or competitive analysis?",
+      hint: "Rate authenticity and relevance of each piece of evidence",
+      fieldKey: 'innovation_evidence',
+      minLength: 40
+    },
+    {
+      id: 'viability-evidence',
+      question: "What Viability Evidence do you have? Do you have customer validation letters, a proven revenue model, market research from credible sources, and detailed financial projections?",
+      hint: "Third-party validation carries more weight",
+      fieldKey: 'viability_evidence',
+      minLength: 40
+    },
+    {
+      id: 'scalability-evidence',
+      question: "What demonstrates your Scalability? Do you have a growth plan, team recruitment strategy, infrastructure scaling plan, and geographic expansion documentation?",
+      hint: "Endorsers want to see ambitious but realistic growth plans",
+      fieldKey: 'scalability_evidence',
+      minLength: 40
+    },
+    {
+      id: 'team-evidence',
+      question: "What Team Evidence supports your application? Do you have detailed founder CVs, a skills matrix, advisory board documentation, and professional references?",
+      hint: "Strong team credentials can compensate for early-stage businesses",
+      fieldKey: 'team_evidence',
+      minLength: 40
+    },
+    {
+      id: 'document-quality',
+      question: "How would you assess the quality of your documents? Are they all originals or certified copies? Are they in English or with certified translations? Are they dated within required timeframes?",
+      hint: "Financial evidence should be within 3 months, technical within 12 months",
+      fieldKey: 'document_quality',
+      minLength: 40
+    },
+    {
+      id: 'weakest-area',
+      question: "Which category of evidence is your weakest? Innovation, Viability, Scalability, or Team? What's missing or needs improvement?",
+      hint: "Identifying weak areas allows focused improvement",
+      fieldKey: 'weakest_area',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Great! I've assessed your evidence quality. Switch to the traditional view to add specific evidence items with detailed scoring for authenticity, relevance, completeness, recency, and format compliance."
+};
 
 type EvidenceItem = {
   name: string;
@@ -85,9 +138,56 @@ const HOME_OFFICE_STANDARDS = [
 ];
 
 export default function EvidenceValidator() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('evidence-validator-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [evidenceItems, setEvidenceItems] = useState<EvidenceItem[]>([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('evidence-validator-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newItems: EvidenceItem[] = [];
+    
+    const addItem = (category: 'innovation' | 'viability' | 'scalability' | 'team', answerKey: string, name: string) => {
+      const answer = answers[answerKey] || '';
+      if (answer.length > 20) {
+        newItems.push({
+          name,
+          category,
+          authenticity: 3,
+          relevance: 3,
+          completeness: 3,
+          recency: 3,
+          formatCompliance: 3,
+          notes: answer.substring(0, 200),
+          dateProvided: new Date().toISOString().split('T')[0]
+        });
+      }
+    };
+    
+    addItem('innovation', 'innovation_evidence', 'Innovation Documentation');
+    addItem('viability', 'viability_evidence', 'Viability Evidence');
+    addItem('scalability', 'scalability_evidence', 'Scalability Plan');
+    addItem('team', 'team_evidence', 'Team Credentials');
+    
+    setEvidenceItems(newItems);
+    
+    const date = new Date().toLocaleString('en-GB');
+    localStorage.setItem('evidence-validator-state', JSON.stringify({
+      evidenceItems: newItems,
+      activeTab: 'overview',
+      savedDate: date
+    }));
+    setSavedDate(date);
+    
+    setActiveTab('overview');
+    setMode('traditional');
+  };
 
   const addEvidenceItem = (category: 'innovation' | 'viability' | 'scalability' | 'team') => {
     setEvidenceItems([...evidenceItems, {
@@ -396,6 +496,13 @@ Report generated by UK Innovator Founder Visa Assistant
             getSerializedState={getSerializedState}
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5" data-testid="tabs-evidence-validator">
               <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
@@ -987,6 +1094,7 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

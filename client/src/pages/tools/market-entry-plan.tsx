@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -18,7 +18,57 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 // Scalability Criterion: International expansion demonstrates growth potential
 // Innovation Criterion: Novel market entry approach
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'market-entry-plan',
+  toolName: 'Market Entry Plan',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. A strong market entry plan demonstrates scalability to endorsers. Let me help you develop a comprehensive international expansion strategy. Ready to explore your growth potential?",
+  questions: [
+    {
+      id: 'target-market',
+      question: "Which market are you planning to enter? (e.g., United States, Germany, Australia)",
+      hint: "Consider markets with similar business culture or strong trade ties to the UK",
+      fieldKey: 'targetMarket',
+      required: true
+    },
+    {
+      id: 'entry-strategy',
+      question: "What entry strategy are you considering? (e.g., direct sales, partnerships, local subsidiary)",
+      hint: "Each approach has different cost/risk profiles",
+      fieldKey: 'entryStrategy'
+    },
+    {
+      id: 'regulatory-barriers',
+      question: "What regulatory or compliance barriers exist in your target market?",
+      hint: "Consider licenses, certifications, data protection laws, industry regulations",
+      fieldKey: 'regulatoryBarriers'
+    },
+    {
+      id: 'localization',
+      question: "What localization will your product/service need? (language, pricing, features)",
+      hint: "Local adaptation often determines market success",
+      fieldKey: 'localization'
+    },
+    {
+      id: 'investment-required',
+      question: "What investment do you estimate for market entry? (in GBP)",
+      hint: "Include setup costs, marketing, hiring, legal, and 12-month runway",
+      fieldKey: 'investmentRequired'
+    },
+    {
+      id: 'competitive-landscape',
+      question: "Who are the main competitors in your target market? What's your competitive advantage?",
+      hint: "Understanding local competition is crucial for positioning",
+      fieldKey: 'competitiveLandscape'
+    }
+  ],
+  completionMessage: "Excellent! I've captured your market entry strategy. I'm now populating the readiness assessment. Review and adjust the scores for each dimension."
+};
+
 export default function MarketEntryPlan() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('market-entry-plan-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [targetMarket, setTargetMarket] = useState("United States");
@@ -27,6 +77,22 @@ export default function MarketEntryPlan() {
   const [localizationPlan, setLocalizationPlan] = useState("English only, USD pricing, US support hours");
   const [investmentRequired, setInvestmentRequired] = useState(250000);
   const [scores, setScores] = useState({ marketFit: 75, regulatory: 70, competition: 65, resources: 70, timing: 75 });
+
+  useEffect(() => {
+    localStorage.setItem('market-entry-plan-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.targetMarket) setTargetMarket(answers.targetMarket);
+    if (answers.entryStrategy) setEntryStrategy(answers.entryStrategy);
+    if (answers.regulatoryBarriers) setRegulatoryBarriers(answers.regulatoryBarriers);
+    if (answers.localization) setLocalizationPlan(answers.localization);
+    if (answers.investmentRequired) {
+      const amount = parseInt(answers.investmentRequired.replace(/[^0-9]/g, '')) || 250000;
+      setInvestmentRequired(amount);
+    }
+    setMode('traditional');
+  };
 
   const saveProgress = () => {
     localStorage.setItem('marketEntryFiles', JSON.stringify(uploadedFiles));
@@ -222,9 +288,22 @@ Market Entry Methodology: International expansion framework
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Market Entry Plan</h1>
-          <p className="text-muted-foreground mb-6">Plan international expansion (Innovator Founder Visa)</p>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Market Entry Plan</h1>
+              <p className="text-muted-foreground">Plan international expansion (Innovator Founder Visa)</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar toolId="market-entry-plan" toolName="Market Entry Plan" onSave={saveProgress} onExport={exportReport} getSerializedState={() => ({ uploadedFiles, targetMarket, entryStrategy, regulatoryBarriers, localizationPlan, investmentRequired, scores, savedDate })} />
 
           {savedDate && <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950"><AlertCircle className="h-4 w-4 text-green-600" /><AlertDescription className="text-green-700 dark:text-green-300">Last saved: {savedDate}</AlertDescription></Alert>}
@@ -404,6 +483,8 @@ Market Entry Methodology: International expansion framework
               </div>
             )}
           </Card>
+          </>
+          )}
         </div>
       </div>
     </>

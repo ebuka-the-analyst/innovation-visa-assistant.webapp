@@ -21,6 +21,66 @@ import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from "@/lib/seo-schemas";
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "pitch-coach",
+  toolName: "Endorser Pitch Coach",
+  agent: "sage",
+  greeting: "Hello! I'm Sage, your pitch preparation specialist. Let's craft compelling pitch scripts and prepare you for endorser meetings. A well-prepared pitch can make the difference between approval and rejection.",
+  questions: [
+    {
+      id: "elevator_pitch",
+      question: "Give me your 30-second elevator pitch. What's the essence of your business in a few sentences?",
+      hint: "Hook + Problem + Solution + Why You in 30 seconds",
+      fieldKey: "elevatorPitch",
+      minLength: 100
+    },
+    {
+      id: "problem_solution",
+      question: "Describe the problem you're solving and your solution. Why is your approach innovative?",
+      hint: "Be specific about customer pain points and how you address them differently",
+      fieldKey: "problemSolution",
+      minLength: 100
+    },
+    {
+      id: "traction",
+      question: "What traction have you achieved? Include specific metrics and milestones.",
+      hint: "Users, revenue, partnerships, pilots, customer testimonials",
+      fieldKey: "traction",
+      minLength: 60
+    },
+    {
+      id: "business_model",
+      question: "Explain your business model. How do you make money?",
+      hint: "Revenue streams, pricing strategy, unit economics",
+      fieldKey: "businessModel",
+      minLength: 50
+    },
+    {
+      id: "team_strength",
+      question: "Why is your team uniquely positioned to execute this vision?",
+      hint: "Relevant experience, complementary skills, domain expertise",
+      fieldKey: "teamStrength",
+      minLength: 50
+    },
+    {
+      id: "uk_opportunity",
+      question: "Why the UK market specifically? What's the opportunity?",
+      hint: "Market size, regulatory advantages, strategic reasons",
+      fieldKey: "ukOpportunity",
+      minLength: 50
+    },
+    {
+      id: "ask",
+      question: "What are you asking for from the endorser? What do you need to succeed?",
+      hint: "Be clear about your asks: endorsement, introductions, advice",
+      fieldKey: "ask",
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent! I've captured the key elements of your pitch. Let me now help you structure this into scripts for different durations and prepare for Q&A."
+};
 
 type PitchDuration = '30s' | '3min' | '10min' | '20min';
 
@@ -128,12 +188,42 @@ const PRESENTATION_MATERIALS: Omit<PresentationMaterial, 'prepared' | 'reviewed'
 export default function PitchCoach() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('pitch-coach-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('pitch-coach-mode', mode);
+  }, [mode]);
+
   const [pitchScripts, setPitchScripts] = useState<PitchScript[]>([
     { duration: '30s', content: '', keyPoints: [], completed: false, lastPracticed: '' },
     { duration: '3min', content: '', keyPoints: [], completed: false, lastPracticed: '' },
     { duration: '10min', content: '', keyPoints: [], completed: false, lastPracticed: '' },
     { duration: '20min', content: '', keyPoints: [], completed: false, lastPracticed: '' },
   ]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const elevatorPitch = answers.elevatorPitch || '';
+    const problemSolution = answers.problemSolution || '';
+    const traction = answers.traction || '';
+    const businessModel = answers.businessModel || '';
+    const teamStrength = answers.teamStrength || '';
+    const ukOpportunity = answers.ukOpportunity || '';
+    const ask = answers.ask || '';
+    
+    const fullPitch = `${elevatorPitch}\n\nProblem & Solution:\n${problemSolution}\n\nTraction:\n${traction}\n\nBusiness Model:\n${businessModel}\n\nTeam:\n${teamStrength}\n\nUK Opportunity:\n${ukOpportunity}\n\nOur Ask:\n${ask}`;
+    
+    setPitchScripts([
+      { duration: '30s', content: elevatorPitch, keyPoints: ['Hook', 'Problem', 'Solution'], completed: elevatorPitch.length > 50, lastPracticed: '' },
+      { duration: '3min', content: `${elevatorPitch}\n\n${problemSolution}\n\n${traction}`, keyPoints: ['Elevator', 'Problem-Solution', 'Traction'], completed: false, lastPracticed: '' },
+      { duration: '10min', content: fullPitch, keyPoints: ['Full pitch elements'], completed: false, lastPracticed: '' },
+      { duration: '20min', content: fullPitch + '\n\n[Q&A Section]', keyPoints: ['Extended pitch with Q&A'], completed: false, lastPracticed: '' },
+    ]);
+    
+    setMode('traditional');
+    toast({ title: "Pitch Scripts Created", description: "Your pitch content has been populated from your answers" });
+  };
 
   const [practiceSessions, setPracticeSessions] = useState<PracticeSession[]>([]);
   const [qaItems, setQaItems] = useState<QAItem[]>(
@@ -717,6 +807,16 @@ Report generated by UK Innovator Founder Visa Assistant
             getSerializedState={getSerializedState}
           />
 
+          <div className="flex justify-end mt-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <div className="mt-6">
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            </div>
+          ) : (
+          <>
           {showTips && (
             <Card className="mb-6 border-blue-500">
               <CardHeader>
@@ -1327,6 +1427,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </div>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </ToolAccessGuard>

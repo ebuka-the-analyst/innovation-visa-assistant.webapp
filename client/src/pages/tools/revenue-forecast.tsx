@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,58 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { CheckCircle2, AlertTriangle, TrendingUp, DollarSign, Users, Calendar } from "lucide-react";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'revenue-forecast',
+  toolName: 'Revenue Forecast',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your Financial Analyst. A credible revenue forecast is essential for demonstrating business viability to endorsing bodies. Let's build a comprehensive 3-year projection that aligns with UK Innovator Founder Visa requirements.",
+  questions: [
+    {
+      id: 'current-revenue',
+      question: "What is your current Monthly Recurring Revenue (MRR) and how many paying customers do you have?",
+      hint: "If pre-revenue, describe your current traction (beta users, waitlist, LOIs).",
+      fieldKey: 'currentRevenue',
+      minLength: 10
+    },
+    {
+      id: 'pricing-model',
+      question: "What is your pricing model and what are your key revenue streams?",
+      hint: "Describe subscription tiers, one-time fees, usage-based pricing, or other revenue models.",
+      fieldKey: 'pricingModel',
+      minLength: 30
+    },
+    {
+      id: 'growth-assumptions',
+      question: "What are your key growth assumptions for the next 3 years?",
+      hint: "Include expected customer acquisition rate, churn rate, and pricing changes.",
+      fieldKey: 'growthAssumptions',
+      minLength: 30
+    },
+    {
+      id: 'customer-acquisition',
+      question: "What is your Customer Acquisition Cost (CAC) and expected Lifetime Value (LTV)?",
+      hint: "If not calculated yet, describe your acquisition channels and expected customer tenure.",
+      fieldKey: 'customerAcquisition',
+      minLength: 20
+    },
+    {
+      id: 'market-validation',
+      question: "What market validation evidence supports your revenue projections?",
+      hint: "Include customer interviews, pilot results, letters of intent, or competitor benchmarks.",
+      fieldKey: 'marketValidation',
+      minLength: 30
+    },
+    {
+      id: 'ilr-target',
+      question: "Are you targeting the £1M ARR ILR criterion? What's your timeline to achieve this?",
+      hint: "The £1M ARR is one of seven ILR achievement criteria (need 2 for settlement).",
+      fieldKey: 'ilrTarget',
+      minLength: 15
+    }
+  ],
+  completionMessage: "Excellent financial insights! I've captured your revenue model and growth assumptions. I'm now populating your forecast with revenue streams and projections aligned with UK visa requirements."
+};
 import {
   LineChart, Line, BarChart, Bar, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
@@ -32,6 +84,10 @@ type GrowthScenario = 'conservative' | 'base' | 'optimistic';
 export default function RevenueForecast() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('revenue-forecast-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
   const [streams, setStreams] = useState<RevenueStream[]>([
     { 
       name: 'SaaS Subscriptions', 
@@ -47,6 +103,27 @@ export default function RevenueForecast() {
   const [ltv, setLTV] = useState(3000);
   const [activeTab, setActiveTab] = useState('forecast');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('revenue-forecast-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.currentRevenue) {
+      const revenueMatch = answers.currentRevenue.match(/\d+/);
+      if (revenueMatch) {
+        setStreams([{
+          name: 'Primary Revenue',
+          monthlyRevenue: parseInt(revenueMatch[0]) || 8000,
+          growthRate: 30,
+          pricingModel: 'subscription',
+          customers: 40,
+          seasonalityFactor: 1.0
+        }]);
+      }
+    }
+    setMode('traditional');
+  };
 
   const addStream = () => {
     setStreams([...streams, { 
@@ -671,13 +748,20 @@ www.innovatorfoundervisaassistant.co.uk
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-revenue-forecast">Revenue Forecast</h1>
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-4xl font-bold" data-testid="heading-revenue-forecast">Revenue Forecast</h1>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
             <p className="text-lg text-muted-foreground">Multi-stream revenue projections with growth scenarios and unit economics</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
             )}
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="revenue-forecast"
             onSave={handleSave}
@@ -1239,6 +1323,8 @@ www.innovatorfoundervisaassistant.co.uk
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

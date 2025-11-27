@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,55 @@ import { Badge } from "@/components/ui/badge";
 import { Shield, AlertTriangle, CheckCircle, Info, Copy } from "lucide-react";
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'oisc-compliance',
+  toolName: 'OISC Compliance Guide',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. Understanding OISC regulations is crucial for any platform dealing with immigration-related services. Let me help you assess your compliance status and generate appropriate disclaimers for your business.",
+  questions: [
+    {
+      id: 'business-name',
+      question: "What is your business or platform name?",
+      hint: "This will be used in your compliance disclaimer",
+      fieldKey: 'business_name',
+      minLength: 2
+    },
+    {
+      id: 'platform-type',
+      question: "What type of service does your platform provide? Describe it briefly.",
+      hint: "Examples: business planning tool, document preparation software, educational platform",
+      fieldKey: 'platform_type',
+      minLength: 10
+    },
+    {
+      id: 'services-offered',
+      question: "What specific services do you offer to users? List the main features.",
+      hint: "Be specific about what your platform does and doesn't do",
+      fieldKey: 'services_offered',
+      minLength: 50
+    },
+    {
+      id: 'visa-advice-concern',
+      question: "Do you ever provide specific visa advice or recommend visa categories to users?",
+      hint: "This is a key compliance question - only OISC-registered advisers can give immigration advice",
+      fieldKey: 'visa_advice_concern'
+    },
+    {
+      id: 'form-completion',
+      question: "Does your platform complete or help fill in visa application forms for users?",
+      hint: "Form completion on behalf of applicants typically requires OISC registration",
+      fieldKey: 'form_completion'
+    },
+    {
+      id: 'referral-process',
+      question: "Do you have a process to refer users to qualified immigration advisers when needed?",
+      hint: "Having clear referral pathways is important for compliance",
+      fieldKey: 'referral_process',
+      minLength: 20
+    }
+  ]
+};
 
 export default function OiscCompliance() {
   const { generateWord } = useWordExport();

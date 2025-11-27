@@ -12,6 +12,59 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, CheckCircle2, Clock, Plus, Trash2, Flag, Target, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "milestone-timeline",
+  toolName: "Milestone Timeline Planner",
+  agent: "nova",
+  greeting: "Hello! I'm Nova, your innovation strategist. Let's map out the key milestones for your UK Innovator Founder visa journey. I'll help you create a realistic timeline that demonstrates your business planning capabilities to endorsers.",
+  questions: [
+    {
+      id: "first_milestone",
+      question: "What is your most critical milestone that needs to be achieved first? Describe what it is, why it's important, and your target timeframe.",
+      hint: "Example: 'Complete comprehensive business plan by January 2025 - this is critical for endorsement application'",
+      fieldKey: "firstMilestone",
+      minLength: 50
+    },
+    {
+      id: "endorsement_milestone",
+      question: "What are your key milestones related to the visa endorsement process? Include application submission, interview preparation, and expected approval timeline.",
+      hint: "Example: 'Submit endorsement application by February, prepare for interview by March, expect decision by April'",
+      fieldKey: "endorsementMilestone",
+      minLength: 50
+    },
+    {
+      id: "funding_milestone",
+      question: "What are your funding-related milestones? Include initial capital, any planned funding rounds, and target amounts.",
+      hint: "Example: 'Secure £50,000 initial investment by Q1, pursue seed funding of £250,000 by Q3'",
+      fieldKey: "fundingMilestone",
+      minLength: 40
+    },
+    {
+      id: "team_milestone",
+      question: "What are your key team-building milestones? When do you plan to make critical hires?",
+      hint: "Example: 'Hire technical co-founder by Month 3, first developer by Month 6, operations manager by Month 9'",
+      fieldKey: "teamMilestone",
+      minLength: 40
+    },
+    {
+      id: "product_milestone",
+      question: "What are your product development milestones? Include MVP, beta testing, and full launch timelines.",
+      hint: "Example: 'Complete MVP by Month 4, beta testing Month 5-6, public launch Month 7'",
+      fieldKey: "productMilestone",
+      minLength: 40
+    },
+    {
+      id: "priority_assessment",
+      question: "How would you prioritize these milestones? Which ones are critical vs nice-to-have?",
+      hint: "Consider which milestones are dependencies for others and which are essential for visa endorsement",
+      fieldKey: "priorityAssessment",
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent! I've captured your milestone timeline. Let me now organize these into a structured view where you can track progress and adjust dates as needed."
+};
 
 type Milestone = {
   id: string;
@@ -59,6 +112,85 @@ export default function MilestoneTimeline() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('milestone-timeline-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('milestone-timeline-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((answers: Record<string, string>) => {
+    const newMilestones: Milestone[] = [];
+    
+    if (answers.firstMilestone) {
+      newMilestones.push({
+        id: Date.now().toString(),
+        title: "Critical First Milestone",
+        description: answers.firstMilestone,
+        targetDate: "",
+        category: "business",
+        status: "pending",
+        priority: "critical"
+      });
+    }
+    
+    if (answers.endorsementMilestone) {
+      newMilestones.push({
+        id: (Date.now() + 1).toString(),
+        title: "Endorsement Process",
+        description: answers.endorsementMilestone,
+        targetDate: "",
+        category: "visa",
+        status: "pending",
+        priority: "critical"
+      });
+    }
+    
+    if (answers.fundingMilestone) {
+      newMilestones.push({
+        id: (Date.now() + 2).toString(),
+        title: "Funding Milestone",
+        description: answers.fundingMilestone,
+        targetDate: "",
+        category: "funding",
+        status: "pending",
+        priority: "high"
+      });
+    }
+    
+    if (answers.teamMilestone) {
+      newMilestones.push({
+        id: (Date.now() + 3).toString(),
+        title: "Team Building",
+        description: answers.teamMilestone,
+        targetDate: "",
+        category: "team",
+        status: "pending",
+        priority: "high"
+      });
+    }
+    
+    if (answers.productMilestone) {
+      newMilestones.push({
+        id: (Date.now() + 4).toString(),
+        title: "Product Development",
+        description: answers.productMilestone,
+        targetDate: "",
+        category: "product",
+        status: "pending",
+        priority: "medium"
+      });
+    }
+    
+    if (newMilestones.length > 0) {
+      setMilestones(newMilestones);
+      triggerAutoSave(newMilestones);
+    }
+    setMode('traditional');
+    toast({ title: "Milestones Created", description: "Your milestone timeline has been populated from your answers" });
+  }, [toast]);
 
   const [milestones, setMilestones] = useState<Milestone[]>(() => {
     const saved = localStorage.getItem("milestone-timeline-state");
@@ -182,6 +314,16 @@ export default function MilestoneTimeline() {
               onExportWord={handleExportWord}
             />
 
+            <div className="flex justify-end mt-4">
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
+
+            {mode === 'ai' ? (
+              <div className="mt-6">
+                <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+              </div>
+            ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 mb-6">
               <Card>
                 <CardContent className="pt-6">
@@ -446,6 +588,8 @@ export default function MilestoneTimeline() {
                 </Card>
               </TabsContent>
             </Tabs>
+            </>
+            )}
           </div>
         </div>
       </div>

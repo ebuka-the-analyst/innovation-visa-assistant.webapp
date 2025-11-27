@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,6 +25,22 @@ type SettlementCategory = {
   title: string;
   icon: string;
   items: ChecklistItem[];
+};
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'settlement-guide',
+  toolName: 'Post-Approval Settlement Guide',
+  agent: 'sage',
+  greeting: "Welcome! I'm Sage, your compliance expert. Congratulations on your visa approval! Let me guide you through the essential steps for settling in the UK. I'll help you understand what needs to be done and in what order.",
+  questions: [
+    { id: 'arrival', question: "When are you planning to arrive in the UK?", hint: "You must collect your BRP within 10 days of arrival", fieldKey: 'arrivalDate', fieldType: 'text' },
+    { id: 'location', question: "Which UK city or region will you be settling in?", hint: "This affects local council registration and GP options", fieldKey: 'location', fieldType: 'text' },
+    { id: 'accommodation', question: "Do you have accommodation arranged for your arrival?", hint: "You'll need a UK address for BRP collection and official registration", fieldKey: 'hasAccommodation', fieldType: 'text' },
+    { id: 'banking', question: "Have you researched UK banking options for personal and business accounts?", hint: "Some banks offer startup-friendly accounts with faster verification", fieldKey: 'bankingResearch', fieldType: 'text' },
+    { id: 'company', question: "Is your company already registered with Companies House?", hint: "If not, this is a priority task within the first week", fieldKey: 'companyRegistered', fieldType: 'text' },
+    { id: 'support', question: "Do you have professional contacts in the UK (accountant, solicitor, mentors)?", hint: "Building your support network early accelerates your settlement", fieldKey: 'hasSupport', fieldType: 'text' },
+  ],
+  completionMessage: "I've understood your settlement situation. Let me show you a prioritized checklist tailored to your circumstances."
 };
 
 const DEFAULT_CATEGORIES: SettlementCategory[] = [
@@ -91,6 +108,18 @@ export default function SettlementGuide() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('settlement-guide-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('settlement-guide-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    setMode('traditional');
+  };
 
   const [categories, setCategories] = useState<SettlementCategory[]>(() => {
     const saved = localStorage.getItem("settlement-guide-state");
@@ -199,6 +228,10 @@ export default function SettlementGuide() {
             onExportWord={handleExportWord}
           />
 
+          <div className="flex justify-end mt-4 mb-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
           {showAutoSave && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
               <Save className="w-4 h-4" />
@@ -206,6 +239,9 @@ export default function SettlementGuide() {
             </div>
           )}
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <div className="mt-6">
             <Card className="mb-6">
               <CardHeader>
@@ -366,6 +402,7 @@ export default function SettlementGuide() {
               </TabsContent>
             </Tabs>
           </div>
+          )}
         </div>
       </div>
     </ToolAccessGuard>

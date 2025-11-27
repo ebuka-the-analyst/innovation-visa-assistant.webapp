@@ -17,6 +17,66 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'doc-organizer',
+  toolName: 'Document Organizer',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. I'll help you organize your visa application documents systematically. A well-organized document portfolio is crucial for endorsing body review and Home Office submission. Let me guide you through assessing your document readiness!",
+  questions: [
+    {
+      id: 'doc-priorities',
+      question: "Let's start by understanding your current document status. Which document categories have you started preparing: Business Documents, Financial Records, Innovation Evidence, Market Validation, Team Credentials, or Legal Documents?",
+      hint: "List all categories you've begun work on, even if partially complete",
+      fieldKey: 'document_categories',
+      minLength: 20
+    },
+    {
+      id: 'business-plan-status',
+      question: "What's the current status of your Business Plan? This is the most critical document. Have you drafted it, and does it include Executive Summary, Market Analysis, Financial Projections, and Team Bios?",
+      hint: "Be specific about which sections are complete and which need work",
+      fieldKey: 'business_plan_status',
+      minLength: 50
+    },
+    {
+      id: 'financial-docs',
+      question: "For Financial Records, do you have bank statements covering the last 6 months, source of funds documentation, and 3-year financial projections?",
+      hint: "These are heavily scrutinized - mention if statements are from UK regulated banks",
+      fieldKey: 'financial_docs_status',
+      minLength: 40
+    },
+    {
+      id: 'innovation-evidence',
+      question: "What innovation evidence have you gathered? Do you have technical documentation, product demos/screenshots, R&D records, or any patent/IP filings?",
+      hint: "Include any prototypes, architecture diagrams, or unique technology evidence",
+      fieldKey: 'innovation_evidence_status',
+      minLength: 40
+    },
+    {
+      id: 'market-validation',
+      question: "Describe your market validation documents. Do you have customer interview transcripts, market research reports, or letters of intent from potential customers?",
+      hint: "Home Office looks for evidence of genuine market demand",
+      fieldKey: 'market_validation_status',
+      minLength: 40
+    },
+    {
+      id: 'team-legal-docs',
+      question: "What's the status of Team Credentials (CVs, certificates) and Legal Documents (passport, endorsement letter, Companies House registration)?",
+      hint: "Endorsement letter is mandatory - mention if you've applied to an endorsing body",
+      fieldKey: 'team_legal_status',
+      minLength: 40
+    },
+    {
+      id: 'deadline-concerns',
+      question: "What's your target visa application date, and which documents are you most concerned about completing on time?",
+      hint: "Understanding your timeline helps prioritize document preparation",
+      fieldKey: 'deadline_concerns',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent work! I now have a comprehensive understanding of your document organization status. I'm setting up your document tracker with the appropriate priorities and deadlines based on your inputs. You can review and adjust the details in the traditional form view."
+};
 
 type DocumentStatus = 'not-started' | 'in-progress' | 'completed' | 'overdue';
 type DocumentPriority = 'Critical' | 'High' | 'Medium' | 'Low';
@@ -297,10 +357,66 @@ const INITIAL_DOCUMENTS: DocumentItem[] = [
 ];
 
 export default function DocOrganizer() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('doc-organizer-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [documents, setDocuments] = useState<DocumentItem[]>(INITIAL_DOCUMENTS);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('organizer');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('doc-organizer-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const updatedDocs = [...documents];
+    
+    if (answers.business_plan_status) {
+      const businessPlanDoc = updatedDocs.find(d => d.id === 'bus-1');
+      if (businessPlanDoc) {
+        businessPlanDoc.status = answers.business_plan_status.toLowerCase().includes('complete') ? 'completed' : 'in-progress';
+      }
+    }
+    
+    if (answers.financial_docs_status) {
+      const financialDocs = updatedDocs.filter(d => d.category === 'Financial Records');
+      financialDocs.forEach(doc => {
+        if (answers.financial_docs_status.toLowerCase().includes('bank statement')) {
+          if (doc.id === 'fin-1') doc.status = 'in-progress';
+        }
+      });
+    }
+    
+    if (answers.innovation_evidence_status) {
+      const innovationDocs = updatedDocs.filter(d => d.category === 'Innovation Evidence');
+      innovationDocs.forEach(doc => {
+        doc.status = 'in-progress';
+      });
+    }
+    
+    if (answers.market_validation_status) {
+      const marketDocs = updatedDocs.filter(d => d.category === 'Market Validation');
+      marketDocs.forEach(doc => {
+        doc.status = 'in-progress';
+      });
+    }
+    
+    setDocuments(updatedDocs);
+    
+    const date = new Date().toLocaleString('en-GB');
+    localStorage.setItem('doc-organizer-state', JSON.stringify({
+      documents: updatedDocs,
+      uploadedFiles,
+      activeTab: 'organizer',
+      savedDate: date
+    }));
+    setSavedDate(date);
+    
+    setActiveTab('organizer');
+    setMode('traditional');
+  };
 
   const totalDocuments = documents.length;
   const notStarted = documents.filter(d => d.status === 'not-started').length;
@@ -686,13 +802,20 @@ Report generated by UK Innovator Founder Visa Assistant
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-doc-organizer">Document Organizer</h1>
+            <div className="flex items-center justify-between mb-2 gap-4 flex-wrap">
+              <h1 className="text-4xl font-bold" data-testid="heading-doc-organizer">Document Organizer</h1>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
             <p className="text-lg text-muted-foreground">Comprehensive document management for visa application</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
             )}
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="doc-organizer"
             onSave={handleSave}
@@ -1207,6 +1330,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

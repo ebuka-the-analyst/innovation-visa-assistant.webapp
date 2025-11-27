@@ -11,6 +11,59 @@ import { TrendingUp, LineChart as LineChartIcon, BarChart3, DollarSign } from "l
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'financial-modeling',
+  toolName: 'Financial Modeling Tool',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your Financial Analyst. A strong financial model is essential for endorsement success. I'll help you build realistic projections that demonstrate viability and growth potential. Let's model your business finances!",
+  questions: [
+    {
+      id: 'initial-capital',
+      question: "What's your initial capital or investment amount in pounds? This is the total funding available for your business operations.",
+      hint: "Be accurate - endorsers verify all financial claims",
+      fieldKey: 'initial_capital_info',
+      minLength: 10
+    },
+    {
+      id: 'revenue-model',
+      question: "Describe your revenue model. What's your current or expected monthly revenue, and what's your realistic monthly growth rate (%)?",
+      hint: "Be conservative - overoptimistic projections raise red flags",
+      fieldKey: 'revenue_model_info',
+      minLength: 30
+    },
+    {
+      id: 'cost-structure',
+      question: "What's your cost structure? Describe your monthly fixed costs (rent, salaries, subscriptions) and variable costs as a percentage of revenue.",
+      hint: "Include all recurring business expenses",
+      fieldKey: 'cost_structure_info',
+      minLength: 30
+    },
+    {
+      id: 'cash-reserves',
+      question: "What cash reserves do you have access to? How many months of runway does this provide at your current burn rate?",
+      hint: "Endorsers look for at least 12 months of runway",
+      fieldKey: 'cash_reserves_info',
+      minLength: 20
+    },
+    {
+      id: 'projection-timeline',
+      question: "What projection period do you need? Are you modeling 12 months, 24 months, or 36 months of financial projections?",
+      hint: "3-year projections are typically required for endorsement",
+      fieldKey: 'projection_period',
+      minLength: 10
+    },
+    {
+      id: 'scenario-preference',
+      question: "Which scenario are you most interested in? Optimistic (best case), Base (realistic), or Pessimistic (worst case)? Or do you want to compare all three?",
+      hint: "Presenting multiple scenarios shows thorough planning",
+      fieldKey: 'scenario_preference',
+      minLength: 10
+    }
+  ],
+  completionMessage: "Great! I've captured your financial parameters. Switch to the traditional view to see detailed projections, scenario comparisons, cash flow analysis, and key metrics that endorsers look for."
+};
 
 type ScenarioType = 'optimistic' | 'base' | 'pessimistic';
 
@@ -25,6 +78,10 @@ type FinancialInputs = {
 };
 
 export default function FinancialModeling() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('financial-modeling-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [inputs, setInputs] = useState<FinancialInputs>({
     initialCapital: 50000,
     monthlyRevenue: 5000,
@@ -37,6 +94,81 @@ export default function FinancialModeling() {
   const [selectedScenario, setSelectedScenario] = useState<ScenarioType>('base');
   const [activeTab, setActiveTab] = useState('modeling');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('financial-modeling-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newInputs = { ...inputs };
+    
+    if (answers.initial_capital_info) {
+      const amountMatch = answers.initial_capital_info.match(/£?(\d[\d,]*)/);
+      if (amountMatch) {
+        newInputs.initialCapital = parseInt(amountMatch[1].replace(/,/g, ''));
+      }
+    }
+    
+    if (answers.revenue_model_info) {
+      const revenueMatch = answers.revenue_model_info.match(/£?(\d[\d,]*)/);
+      if (revenueMatch) {
+        newInputs.monthlyRevenue = parseInt(revenueMatch[1].replace(/,/g, ''));
+      }
+      const growthMatch = answers.revenue_model_info.match(/(\d+)%/);
+      if (growthMatch) {
+        newInputs.revenueGrowthRate = parseInt(growthMatch[1]);
+      }
+    }
+    
+    if (answers.cost_structure_info) {
+      const fixedMatch = answers.cost_structure_info.match(/£?(\d[\d,]*)/);
+      if (fixedMatch) {
+        newInputs.fixedCosts = parseInt(fixedMatch[1].replace(/,/g, ''));
+      }
+      const varMatch = answers.cost_structure_info.match(/(\d+)%/);
+      if (varMatch) {
+        newInputs.variableCostPercent = parseInt(varMatch[1]);
+      }
+    }
+    
+    if (answers.cash_reserves_info) {
+      const cashMatch = answers.cash_reserves_info.match(/£?(\d[\d,]*)/);
+      if (cashMatch) {
+        newInputs.cashReserves = parseInt(cashMatch[1].replace(/,/g, ''));
+      }
+    }
+    
+    if (answers.projection_period) {
+      if (answers.projection_period.includes('36') || answers.projection_period.includes('3 year')) {
+        newInputs.projectionMonths = 36;
+      } else if (answers.projection_period.includes('24') || answers.projection_period.includes('2 year')) {
+        newInputs.projectionMonths = 24;
+      } else {
+        newInputs.projectionMonths = 12;
+      }
+    }
+    
+    if (answers.scenario_preference) {
+      const lower = answers.scenario_preference.toLowerCase();
+      if (lower.includes('optimistic')) setSelectedScenario('optimistic');
+      else if (lower.includes('pessimistic')) setSelectedScenario('pessimistic');
+      else setSelectedScenario('base');
+    }
+    
+    setInputs(newInputs);
+    
+    const date = new Date().toLocaleString('en-GB');
+    localStorage.setItem('financial-modeling-state', JSON.stringify({
+      inputs: newInputs,
+      selectedScenario,
+      activeTab: 'modeling',
+      savedDate: date
+    }));
+    setSavedDate(date);
+    
+    setActiveTab('modeling');
+    setMode('traditional');
+  };
 
   const getSerializedState = () => {
     return {
@@ -388,6 +520,13 @@ Consult with qualified accountants and financial advisors before making business
             toolName="Financial Modeling"
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4" data-testid="tabs-financial-modeling">
               <TabsTrigger value="modeling" data-testid="tab-modeling">Modeling</TabsTrigger>
@@ -893,6 +1032,7 @@ Consult with qualified accountants and financial advisors before making business
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

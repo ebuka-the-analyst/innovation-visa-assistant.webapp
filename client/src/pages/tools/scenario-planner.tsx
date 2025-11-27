@@ -12,6 +12,59 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Zap, TrendingUp, TrendingDown, AlertTriangle, Target, Plus, Trash2, Save, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'scenario-planner',
+  toolName: 'Scenario Planner',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Advisor. Scenario planning demonstrates strategic thinking and risk awareness to endorsing bodies. Let's model best, expected, and worst-case scenarios for your venture.",
+  questions: [
+    {
+      id: 'best-case-scenario',
+      question: "Describe your best-case scenario for Year 1. What would exceptional success look like?",
+      hint: "Include revenue, customer growth, team size, and key milestones achieved.",
+      fieldKey: 'bestCase',
+      minLength: 50
+    },
+    {
+      id: 'best-case-assumptions',
+      question: "What assumptions underpin your best-case scenario?",
+      hint: "Consider market conditions, funding, customer adoption, and competitive dynamics.",
+      fieldKey: 'bestCaseAssumptions',
+      minLength: 40
+    },
+    {
+      id: 'expected-scenario',
+      question: "What is your expected (most likely) scenario for Year 1?",
+      hint: "Be realistic - this should be your working assumption for planning.",
+      fieldKey: 'expectedCase',
+      minLength: 50
+    },
+    {
+      id: 'worst-case-scenario',
+      question: "Describe your worst-case scenario. What challenges could derail your plans?",
+      hint: "Consider funding gaps, market rejection, technical failures, or regulatory issues.",
+      fieldKey: 'worstCase',
+      minLength: 50
+    },
+    {
+      id: 'mitigation-strategies',
+      question: "What contingency plans do you have for the worst-case scenario?",
+      hint: "Include pivot options, cost reduction strategies, and runway extension plans.",
+      fieldKey: 'mitigationStrategies',
+      minLength: 40
+    },
+    {
+      id: 'scenario-probabilities',
+      question: "What probability do you assign to each scenario (best/expected/worst)?",
+      hint: "Be honest - endorsing bodies appreciate realistic risk assessment.",
+      fieldKey: 'scenarioProbabilities',
+      minLength: 20
+    }
+  ],
+  completionMessage: "Excellent strategic thinking! I've captured your scenario analysis. I'm now populating your planner with detailed scenarios, probability assessments, and mitigation strategies."
+};
 
 type ScenarioType = "best" | "expected" | "worst";
 
@@ -102,6 +155,10 @@ export default function ScenarioPlanner() {
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('scenario-planner-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
   const [scenarios, setScenarios] = useState<Scenario[]>(() => {
     const saved = localStorage.getItem("scenario-planner-state");
     if (saved) {
@@ -113,6 +170,45 @@ export default function ScenarioPlanner() {
   });
 
   const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    localStorage.setItem('scenario-planner-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const updatedScenarios = [...scenarios];
+    if (answers.bestCase) {
+      const bestIdx = updatedScenarios.findIndex(s => s.type === 'best');
+      if (bestIdx >= 0) {
+        updatedScenarios[bestIdx] = {
+          ...updatedScenarios[bestIdx],
+          description: answers.bestCase,
+          assumptions: answers.bestCaseAssumptions ? [answers.bestCaseAssumptions] : updatedScenarios[bestIdx].assumptions
+        };
+      }
+    }
+    if (answers.expectedCase) {
+      const expectedIdx = updatedScenarios.findIndex(s => s.type === 'expected');
+      if (expectedIdx >= 0) {
+        updatedScenarios[expectedIdx] = {
+          ...updatedScenarios[expectedIdx],
+          description: answers.expectedCase
+        };
+      }
+    }
+    if (answers.worstCase) {
+      const worstIdx = updatedScenarios.findIndex(s => s.type === 'worst');
+      if (worstIdx >= 0) {
+        updatedScenarios[worstIdx] = {
+          ...updatedScenarios[worstIdx],
+          description: answers.worstCase,
+          mitigations: answers.mitigationStrategies ? [answers.mitigationStrategies] : updatedScenarios[worstIdx].mitigations
+        };
+      }
+    }
+    setScenarios(updatedScenarios);
+    setMode('traditional');
+  };
 
   useEffect(() => {
     return () => {
@@ -247,10 +343,17 @@ export default function ScenarioPlanner() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Scenario Planner</h1>
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-3xl font-bold">Scenario Planner</h1>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
             <p className="text-muted-foreground">Plan for best, expected, and worst case scenarios</p>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="scenario-planner"
             toolName="Scenario Planner"
@@ -599,6 +702,8 @@ export default function ScenarioPlanner() {
               </TabsContent>
             </Tabs>
           </div>
+          </>
+          )}
         </div>
       </div>
     </ToolAccessGuard>

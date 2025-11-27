@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -59,9 +59,81 @@ type InvestmentRequirement = {
   priority: 'critical' | 'high' | 'medium' | 'low';
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'geographic-expansion',
+  toolName: 'Geographic Expansion Planner',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Global Growth Strategist. I'll help you develop a compelling international expansion strategy that demonstrates scalability to endorsing bodies. Let's map your global ambitions!",
+  questions: [
+    {
+      id: 'expansion-rationale',
+      question: "Why is geographic expansion part of your business strategy? What's driving the need?",
+      hint: "E.g., market saturation, customer demand, competitive positioning, growth targets",
+      fieldKey: 'expansionObjective',
+      minLength: 60
+    },
+    {
+      id: 'target-markets',
+      question: "Which international markets are you targeting and why? List your top 2-3 priority markets.",
+      hint: "Include market size, growth rates, and strategic fit for each market",
+      fieldKey: 'targetMarketsList',
+      minLength: 80
+    },
+    {
+      id: 'entry-strategy',
+      question: "How do you plan to enter these markets? (Direct sales, partnerships, subsidiaries, licensing?)",
+      hint: "Different strategies suit different markets - explain your approach for each priority market",
+      fieldKey: 'entryStrategyPlan',
+      minLength: 60
+    },
+    {
+      id: 'uk-scalability',
+      question: "How does your UK success translate to international markets? What evidence supports this?",
+      hint: "Include product-market fit indicators, customer feedback, and replicability factors",
+      fieldKey: 'homeMarketSuccess',
+      minLength: 60
+    },
+    {
+      id: 'uk-jobs-impact',
+      question: "How will international expansion create jobs and value in the UK?",
+      hint: "E.g., UK-based sales teams, central operations, R&D hub",
+      fieldKey: 'ukJobsImpact',
+      minLength: 50
+    },
+    {
+      id: 'investment-timeline',
+      question: "What investment is required and what's your expansion timeline?",
+      hint: "Include budget per market and key milestones over 12-24 months",
+      fieldKey: 'investmentPlan',
+      minLength: 50
+    }
+  ],
+  completionMessage: "Your global expansion vision is captured! Head to the Markets tab to add detailed market analysis, then configure entry strategies and milestones for a complete expansion plan."
+};
+
 export default function GeographicExpansion() {
   const [activeTab, setActiveTab] = useState('markets');
   const [savedDate, setSavedDate] = useState('');
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('geographic-expansion-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('geographic-expansion-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    setStrategicRationale(prev => ({
+      ...prev,
+      expansionObjective: answers.expansionObjective || prev.expansionObjective
+    }));
+    setUkScalabilityEvidence(prev => ({
+      ...prev,
+      homeMarketSuccess: answers.homeMarketSuccess || prev.homeMarketSuccess
+    }));
+    setMode('traditional');
+    setActiveTab('markets');
+  };
 
   const [targetMarkets, setTargetMarkets] = useState<TargetMarket[]>([
     {
@@ -678,6 +750,18 @@ executing expansion plans or submitting visa applications.
             toolName="Geographic Expansion Planner"
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <Card className="mb-6">
             <CardContent className="pt-6">
               <div className="space-y-4">
@@ -1571,6 +1655,8 @@ executing expansion plans or submitting visa applications.
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,62 @@ interface Reference {
   relationship: string;
   email: string;
 }
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'founder-portfolio',
+  toolName: 'Founder Capability Portfolio',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. Your founder portfolio demonstrates your capability to execute your business plan. Let me help you compile your professional background, projects, credentials, and references in a compelling way.",
+  questions: [
+    {
+      id: 'full-name',
+      question: "What is your full name as it appears on official documents?",
+      hint: "This should match your passport and visa application",
+      fieldKey: 'full_name',
+      minLength: 3
+    },
+    {
+      id: 'professional-title',
+      question: "What is your professional title or role? How do you describe yourself professionally?",
+      hint: "Examples: CEO & Founder, CTO, Technical Director",
+      fieldKey: 'professional_title',
+      minLength: 3
+    },
+    {
+      id: 'years-experience',
+      question: "How many years of relevant professional experience do you have?",
+      hint: "Focus on experience relevant to your visa business",
+      fieldKey: 'years_experience'
+    },
+    {
+      id: 'key-projects',
+      question: "Describe 2-3 of your most impressive past projects. What were the outcomes?",
+      hint: "Include quantifiable results and technologies used",
+      fieldKey: 'key_projects',
+      minLength: 100
+    },
+    {
+      id: 'credentials',
+      question: "What certifications, degrees, or credentials do you hold that are relevant to your business?",
+      hint: "Include university degrees, professional certifications, and relevant training",
+      fieldKey: 'credentials',
+      minLength: 30
+    },
+    {
+      id: 'linkedin-url',
+      question: "What is your LinkedIn profile URL? Endorsers often verify founder backgrounds online.",
+      hint: "Ensure your LinkedIn is up-to-date and professional",
+      fieldKey: 'linkedin_url'
+    },
+    {
+      id: 'references',
+      question: "Who can vouch for your professional capabilities? List 2-3 references with their roles and companies.",
+      hint: "Include people who can speak to your business and technical abilities",
+      fieldKey: 'references',
+      minLength: 50
+    }
+  ]
+};
 
 export default function FounderPortfolio() {
   const { generateWord } = useWordExport();

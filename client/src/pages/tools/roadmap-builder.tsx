@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +14,58 @@ import { CheckCircle2, AlertTriangle, TrendingUp, Target, Calendar, Users, Dolla
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Area
 } from 'recharts';
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'roadmap-builder',
+  toolName: 'Strategic Roadmap Builder',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. A well-structured business roadmap demonstrates clear vision and execution capability to endorsing bodies. Let's build a compelling growth roadmap for your UK Innovator Founder Visa application.",
+  questions: [
+    {
+      id: 'company-context',
+      question: "What is your company's name, industry, and current stage of development?",
+      hint: "Include your sector, whether you're pre-revenue or revenue-generating, and time since founding.",
+      fieldKey: 'companyName',
+      minLength: 20
+    },
+    {
+      id: 'vision-statement',
+      question: "What is your 3-year vision for the business in the UK market?",
+      hint: "Describe where you see the company, including market position, revenue, and team size.",
+      fieldKey: 'vision',
+      minLength: 50
+    },
+    {
+      id: 'q1-priorities',
+      question: "What are your key milestones and deliverables for the first quarter (Q1)?",
+      hint: "Include product development, customer acquisition, team hires, and funding goals.",
+      fieldKey: 'q1Milestones',
+      minLength: 40
+    },
+    {
+      id: 'year1-goals',
+      question: "What are your primary business objectives for Year 1?",
+      hint: "Consider revenue targets, customer numbers, team growth, and market expansion.",
+      fieldKey: 'year1Goals',
+      minLength: 40
+    },
+    {
+      id: 'uk-market-strategy',
+      question: "How will you approach the UK market specifically?",
+      hint: "Include go-to-market strategy, partnerships, and competitive positioning.",
+      fieldKey: 'ukMarketStrategy',
+      minLength: 40
+    },
+    {
+      id: 'resource-requirements',
+      question: "What key resources (funding, team, infrastructure) do you need to execute this roadmap?",
+      hint: "Include budget requirements, hiring plans, and technology investments.",
+      fieldKey: 'resourceRequirements',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent strategic thinking! I've captured your roadmap vision. I'm now populating your milestone planner with quarterly objectives and success metrics aligned with UK visa requirements."
+};
 
 type Milestone = {
   id: string;
@@ -36,6 +88,10 @@ type QuarterlyMetrics = {
 };
 
 export default function RoadmapBuilder() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('roadmap-builder-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
   const [milestones, setMilestones] = useState<Milestone[]>([
     {
       id: '1',
@@ -66,6 +122,33 @@ export default function RoadmapBuilder() {
 
   const [activeTab, setActiveTab] = useState('builder');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('roadmap-builder-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    setBusinessContext({
+      companyName: answers.companyName || '',
+      industry: '',
+      vision: answers.vision || '',
+      ukMarketStrategy: answers.ukMarketStrategy || ''
+    });
+    if (answers.q1Milestones) {
+      setMilestones([{
+        id: '1',
+        quarter: 'Q1',
+        name: 'Q1 Objectives',
+        deliverables: answers.q1Milestones,
+        resourceAllocation: answers.resourceRequirements || '',
+        successMetrics: '',
+        status: 'planned',
+        ukImpact: answers.ukMarketStrategy || '',
+        budget: 0
+      }]);
+    }
+    setMode('traditional');
+  };
 
   const addMilestone = () => {
     setMilestones([...milestones, {
@@ -412,13 +495,20 @@ for personalized guidance on your UK Innovator Founder visa application.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-roadmap-builder">Business Roadmap Builder</h1>
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-4xl font-bold" data-testid="heading-roadmap-builder">Business Roadmap Builder</h1>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
             <p className="text-lg text-muted-foreground">Strategic quarterly planning demonstrating innovation and scalability for UK visa endorsement</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
             )}
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="roadmap-builder"
             onSave={handleSave}
@@ -968,6 +1058,8 @@ for personalized guidance on your UK Innovator Founder visa application.
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

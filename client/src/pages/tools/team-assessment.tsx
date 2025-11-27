@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
@@ -27,7 +27,81 @@ interface TeamMember {
   notes: string;
 }
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'team-assessment',
+  toolName: 'Team Talent Assessment',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. I'll help you assess your team's capabilities across key dimensions - demonstrating you have the talent to execute your vision, which is critical for endorsing body approval. Let's evaluate your team together!",
+  questions: [
+    {
+      id: 'team-size',
+      question: "How many people are currently on your team? Include co-founders, employees, and key contractors.",
+      hint: "Endorsers want to see a capable team that can deliver on your business plan",
+      fieldKey: 'team_size'
+    },
+    {
+      id: 'key-member',
+      question: "Tell me about your most experienced team member. What is their role, background, and what unique skills do they bring?",
+      hint: "Highlight relevant experience and achievements",
+      fieldKey: 'key_member',
+      minLength: 50
+    },
+    {
+      id: 'technical-capabilities',
+      question: "Rate your team's overall technical capabilities on a scale of 1-10. What technical skills are strongest?",
+      hint: "Consider development, design, data analysis, and other technical competencies",
+      fieldKey: 'technical_rating'
+    },
+    {
+      id: 'leadership-experience',
+      question: "What leadership and management experience does your team have? Include previous startup or corporate leadership roles.",
+      hint: "Prior leadership experience strengthens your application",
+      fieldKey: 'leadership_experience'
+    },
+    {
+      id: 'skill-gaps',
+      question: "What skill gaps exist in your current team? How do you plan to address them?",
+      hint: "Being honest about gaps shows self-awareness and planning ability",
+      fieldKey: 'skill_gaps'
+    },
+    {
+      id: 'team-culture',
+      question: "How would you describe your team culture and collaboration style? What values drive your team?",
+      hint: "Strong culture indicates a cohesive, effective team",
+      fieldKey: 'team_culture'
+    }
+  ]
+};
+
 export default function TeamAssessment() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('team-assessment-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('team-assessment-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.key_member) {
+      const parts = answers.key_member.split(' ');
+      const name = parts.slice(0, 2).join(' ') || 'Key Member';
+      const role = parts.slice(2, 4).join(' ') || 'Team Lead';
+      setMembers([{
+        id: Date.now().toString(),
+        name,
+        role,
+        technicalSkill: 8,
+        leadership: 7,
+        collaboration: 8,
+        innovation: 7,
+        reliability: 8,
+        notes: answers.key_member
+      }]);
+    }
+    setMode('traditional');
+  };
+
   const { generateWord } = useWordExport();
   const { toast } = useToast();
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
@@ -173,9 +247,18 @@ export default function TeamAssessment() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Team Talent Assessment</h1>
-          <p className="text-muted-foreground mb-6">Evaluate team capabilities across multiple dimensions</p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Team Talent Assessment</h1>
+              <p className="text-muted-foreground">Evaluate team capabilities across multiple dimensions</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="team-assessment"
             toolName="Team Assessment"
@@ -232,6 +315,8 @@ export default function TeamAssessment() {
             <Download className="w-4 h-4" />
             Export Assessment Report
           </Button>
+          </>
+          )}
         </div>
       </div>
     </>

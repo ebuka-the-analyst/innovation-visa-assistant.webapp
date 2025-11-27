@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,6 +18,65 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "process-docs",
+  toolName: "Process Documentation",
+  agentId: "nova",
+  agentName: "Nova",
+  agentTitle: "Innovation Strategist",
+  description: "Document your operational processes to demonstrate business maturity for visa applications",
+  questions: [
+    {
+      id: "coreOps",
+      question: "Describe your core operational processes - how do you deliver value to customers?",
+      placeholder: "Our core processes include customer onboarding, order fulfillment, and quality control. Customer onboarding involves...",
+      fieldKey: "coreOperations",
+      minLength: 120,
+      helpText: "Include customer onboarding, order fulfillment, quality control workflows"
+    },
+    {
+      id: "finance",
+      question: "What financial management processes do you have in place?",
+      placeholder: "Our financial processes include invoicing, expense approval, financial reporting, and audit procedures...",
+      fieldKey: "financialProcesses",
+      minLength: 100,
+      helpText: "Include invoicing, expense approval, financial reporting procedures"
+    },
+    {
+      id: "hr",
+      question: "Describe your HR and compliance processes for managing employees.",
+      placeholder: "Our HR processes include recruitment workflow, employee onboarding, performance reviews, health and safety...",
+      fieldKey: "hrProcesses",
+      minLength: 100,
+      helpText: "Include recruitment, onboarding, performance reviews, compliance procedures"
+    },
+    {
+      id: "product",
+      question: "How do you manage product development and quality assurance?",
+      placeholder: "Our product development follows [methodology]. We document requirements, conduct code reviews, testing, and have deployment procedures...",
+      fieldKey: "productDev",
+      minLength: 100,
+      helpText: "Include requirements documentation, code review, testing, deployment"
+    },
+    {
+      id: "customer",
+      question: "What customer service and support processes do you have?",
+      placeholder: "We handle customer support through [channels]. Our escalation process is... We track customer feedback by...",
+      fieldKey: "customerService",
+      minLength: 80,
+      helpText: "Include support escalation, complaint resolution, feedback collection"
+    },
+    {
+      id: "maturity",
+      question: "How mature are your processes? Are they documented, standardized, or measured?",
+      placeholder: "Our processes are at [level] maturity. We have SOPs documented for [areas]. We measure performance using [metrics]...",
+      fieldKey: "processMaturity",
+      minLength: 80,
+      helpText: "Describe documentation level, standardization, and measurement practices"
+    }
+  ]
+};
 
 type MaturityLevel = 'ad-hoc' | 'documented' | 'standardized' | 'managed' | 'optimized';
 type ProcessStatus = 'not-started' | 'in-progress' | 'documented' | 'verified';
@@ -86,6 +145,9 @@ const MATURITY_LEVELS = {
 };
 
 export default function ProcessDocs() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('process-docs-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [processes, setProcesses] = useState<ProcessDocument[]>(INITIAL_PROCESSES);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('tracker');
@@ -199,6 +261,10 @@ export default function ProcessDocs() {
   };
 
   useEffect(() => {
+    localStorage.setItem('process-docs-mode', mode);
+  }, [mode]);
+
+  useEffect(() => {
     const handoffKey = 'process-docs_handoff';
     const handoffData = localStorage.getItem(handoffKey);
     
@@ -218,6 +284,25 @@ export default function ProcessDocs() {
       }
     }
   }, []);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const newProcesses = [...processes];
+    const updateProcessByCategory = (category: string, description: string) => {
+      const proc = newProcesses.find(p => p.category === category && p.status === 'not-started');
+      if (proc) {
+        proc.description = description;
+        proc.status = 'in-progress';
+        proc.lastUpdated = new Date().toLocaleDateString('en-GB');
+      }
+    };
+    if (answers.coreOperations) updateProcessByCategory('Core Operations', answers.coreOperations);
+    if (answers.financialProcesses) updateProcessByCategory('Financial Management', answers.financialProcesses);
+    if (answers.hrProcesses) updateProcessByCategory('HR & Compliance', answers.hrProcesses);
+    if (answers.productDev) updateProcessByCategory('Product Development', answers.productDev);
+    if (answers.customerService) updateProcessByCategory('Customer Service', answers.customerService);
+    setProcesses(newProcesses);
+    setMode('traditional');
+  };
 
   const handleSave = () => {
     const state = getSerializedState();
@@ -489,12 +574,15 @@ Report generated by UK Innovator Founder Visa Assistant
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-process-docs">Process Documentation Tracker</h1>
-            <p className="text-lg text-muted-foreground">Document business processes and demonstrate operational readiness for visa application</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-process-docs">Process Documentation Tracker</h1>
+              <p className="text-lg text-muted-foreground">Document business processes and demonstrate operational readiness for visa application</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
           <ToolUtilityBar
@@ -506,6 +594,10 @@ Report generated by UK Innovator Founder Visa Assistant
             toolName="Process Documentation Tracker"
           />
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5" data-testid="tabs-process-docs">
               <TabsTrigger value="tracker" data-testid="tab-tracker">Tracker</TabsTrigger>
@@ -1230,6 +1322,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

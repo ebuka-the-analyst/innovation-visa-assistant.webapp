@@ -15,6 +15,59 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'company-formation',
+  toolName: 'Company Formation Guide',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. Forming a UK company correctly is essential for your Innovator Founder Visa. A properly structured limited company with all compliance requirements met demonstrates you're ready to do business in the UK. Let's get you registered!",
+  questions: [
+    {
+      id: 'company-type-choice',
+      question: "What type of company structure are you considering? Explain why this structure fits your business.",
+      hint: "Ltd is most common for visa applicants - it offers liability protection and is preferred by endorsers",
+      fieldKey: 'company_type_choice',
+      minLength: 80
+    },
+    {
+      id: 'company-name',
+      question: "What company name have you chosen or are considering? Have you checked availability on Companies House?",
+      hint: "Name must be unique and not contain restricted words. Consider .co.uk domain availability too.",
+      fieldKey: 'company_name_info',
+      minLength: 40
+    },
+    {
+      id: 'registered-office',
+      question: "Where will your registered office address be? This must be a UK address.",
+      hint: "Can be your home, serviced office, or registered agent. All official mail goes here.",
+      fieldKey: 'registered_office_info',
+      minLength: 50
+    },
+    {
+      id: 'directors-shareholders',
+      question: "Who will be the directors and shareholders? Describe the ownership structure.",
+      hint: "You must be a director. Include any co-founders, investors, or ESOP details.",
+      fieldKey: 'directors_shareholders_info',
+      minLength: 80
+    },
+    {
+      id: 'share-capital',
+      question: "What will be your initial share capital and share structure?",
+      hint: "Most startups start with £100-1000 in £1 ordinary shares. Consider future investment rounds.",
+      fieldKey: 'share_capital_info',
+      minLength: 60
+    },
+    {
+      id: 'compliance-plan',
+      question: "How will you handle ongoing compliance? Describe your plan for accounts, tax, and filings.",
+      hint: "Annual accounts, confirmation statement, Corporation Tax, VAT registration, payroll",
+      fieldKey: 'compliance_plan_info',
+      minLength: 100
+    }
+  ],
+  completionMessage: "Excellent preparation! You've covered all the key aspects of UK company formation. This thorough planning will ensure smooth registration and demonstrate compliance readiness to endorsers. I'm now updating your formation checklist."
+};
 
 type CompanyType = 'ltd' | 'llp' | 'plc' | 'sole-trader' | 'partnership' | '';
 
@@ -229,6 +282,10 @@ const INITIAL_STEPS: FormationStep[] = [
 ];
 
 export default function CompanyFormation() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('company-formation-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [companyType, setCompanyType] = useState<CompanyType>('');
   const [steps, setSteps] = useState<FormationStep[]>(INITIAL_STEPS);
   const [activeTab, setActiveTab] = useState('overview');
@@ -265,6 +322,10 @@ export default function CompanyFormation() {
   };
 
   useEffect(() => {
+    localStorage.setItem('company-formation-mode', mode);
+  }, [mode]);
+
+  useEffect(() => {
     const handoffKey = 'company-formation_handoff';
     const handoffData = localStorage.getItem(handoffKey);
     
@@ -284,6 +345,34 @@ export default function CompanyFormation() {
       }
     }
   }, []);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.company_type_choice) {
+      if (answers.company_type_choice.toLowerCase().includes('ltd') || answers.company_type_choice.toLowerCase().includes('limited')) {
+        setCompanyType('ltd');
+      } else if (answers.company_type_choice.toLowerCase().includes('llp')) {
+        setCompanyType('llp');
+      } else if (answers.company_type_choice.toLowerCase().includes('plc')) {
+        setCompanyType('plc');
+      }
+    }
+    if (answers.company_name_info) {
+      setSteps(prev => prev.map(s => 
+        s.id === 'company-name' ? { ...s, completed: true } : s
+      ));
+    }
+    if (answers.registered_office_info) {
+      setSteps(prev => prev.map(s => 
+        s.id === 'registered-office' ? { ...s, completed: true } : s
+      ));
+    }
+    if (answers.directors_shareholders_info) {
+      setSteps(prev => prev.map(s => 
+        s.id === 'directors-shareholders' ? { ...s, completed: true } : s
+      ));
+    }
+    setMode('traditional');
+  };
 
   const handleSave = () => {
     const state = getSerializedState();
@@ -520,14 +609,25 @@ Report generated by UK Innovator Founder Visa Assistant
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-company-formation">Company Formation Guide</h1>
-            <p className="text-lg text-muted-foreground">Complete UK company registration and setup tracker</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
-            )}
+          <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-company-formation">Company Formation Guide</h1>
+              <p className="text-lg text-muted-foreground">Complete UK company registration and setup tracker</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="company-formation"
             toolName="Company Formation Guide"
@@ -1049,6 +1149,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

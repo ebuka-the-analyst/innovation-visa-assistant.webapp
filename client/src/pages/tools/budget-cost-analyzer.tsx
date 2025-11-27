@@ -14,6 +14,59 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'budget-cost-analyzer',
+  toolName: 'Budget & Cost Analyzer',
+  agent: 'sterling',
+  greeting: "Hi! I'm Sterling, your Financial Analyst. Proper budget management is crucial for demonstrating financial discipline to UK visa endorsers. Let's analyze your costs and ensure you're tracking expenses effectively. Let's build your budget!",
+  questions: [
+    {
+      id: 'personnel-costs',
+      question: "What are your personnel costs? Include salaries, benefits, contractors, and any planned hires.",
+      hint: "Personnel typically represents 50-70% of startup costs. Be specific about roles and compensation.",
+      fieldKey: 'personnel_costs_description',
+      minLength: 80
+    },
+    {
+      id: 'technology-costs',
+      question: "What are your technology and software costs? Include infrastructure, tools, and development expenses.",
+      hint: "Cloud hosting, SaaS subscriptions, development tools, APIs, and IT equipment",
+      fieldKey: 'technology_costs_description',
+      minLength: 60
+    },
+    {
+      id: 'marketing-costs',
+      question: "What's your marketing budget? How do you plan to acquire customers cost-effectively?",
+      hint: "Digital ads, content marketing, events, PR, partnerships. Include expected ROI.",
+      fieldKey: 'marketing_costs_description',
+      minLength: 80
+    },
+    {
+      id: 'operational-costs',
+      question: "What are your operational and administrative costs? Include legal, accounting, insurance, and office expenses.",
+      hint: "Don't forget compliance costs, professional services, and ongoing regulatory requirements",
+      fieldKey: 'operational_costs_description',
+      minLength: 60
+    },
+    {
+      id: 'revenue-projections',
+      question: "What's your expected monthly revenue? How does it compare to your total costs?",
+      hint: "Show clear path to positive cash flow. Endorsers want to see sustainable unit economics.",
+      fieldKey: 'revenue_projections_description',
+      minLength: 80
+    },
+    {
+      id: 'cost-controls',
+      question: "What cost control measures do you have in place? How will you manage budget variance?",
+      hint: "Regular reviews, approval processes, contingency reserves, expense policies",
+      fieldKey: 'cost_controls_description',
+      minLength: 80
+    }
+  ],
+  completionMessage: "Great budget analysis! You've demonstrated financial discipline and clear cost awareness. Endorsers will appreciate seeing organized budget management. I'm now populating your budget tracker."
+};
 
 type BudgetCategory = {
   name: string;
@@ -23,6 +76,10 @@ type BudgetCategory = {
 };
 
 export default function BudgetCostAnalyzer() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('budget-cost-analyzer-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [categories, setCategories] = useState<BudgetCategory[]>([
     { name: 'Salaries & Wages', budgeted: 20000, actual: 18500, category: 'personnel' },
     { name: 'Software & Tools', budgeted: 5000, actual: 5200, category: 'technology' },
@@ -34,6 +91,40 @@ export default function BudgetCostAnalyzer() {
   const [activeTab, setActiveTab] = useState('budget');
   const [savedDate, setSavedDate] = useState('');
   const [monthlyRevenue, setMonthlyRevenue] = useState(25000);
+
+  useEffect(() => {
+    localStorage.setItem('budget-cost-analyzer-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.personnel_costs_description) {
+      const personnelMatch = answers.personnel_costs_description.match(/(\d+[\d,]*)/);
+      if (personnelMatch) {
+        setCategories(prev => prev.map(c => 
+          c.category === 'personnel' 
+            ? { ...c, budgeted: parseInt(personnelMatch[1].replace(/,/g, '')) || 20000 }
+            : c
+        ));
+      }
+    }
+    if (answers.technology_costs_description) {
+      const techMatch = answers.technology_costs_description.match(/(\d+[\d,]*)/);
+      if (techMatch) {
+        setCategories(prev => prev.map(c => 
+          c.category === 'technology' 
+            ? { ...c, budgeted: parseInt(techMatch[1].replace(/,/g, '')) || 5000 }
+            : c
+        ));
+      }
+    }
+    if (answers.revenue_projections_description) {
+      const revenueMatch = answers.revenue_projections_description.match(/(\d+[\d,]*)/);
+      if (revenueMatch) {
+        setMonthlyRevenue(parseInt(revenueMatch[1].replace(/,/g, '')) || 25000);
+      }
+    }
+    setMode('traditional');
+  };
 
   const addCategory = () => {
     setCategories([...categories, { name: '', budgeted: 0, actual: 0, category: 'operations' }]);
@@ -374,14 +465,25 @@ and actual results may vary significantly based on market conditions and executi
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-budget-cost-analyzer">Budget & Cost Analyzer</h1>
-            <p className="text-lg text-muted-foreground">Comprehensive budget tracking, variance analysis, and cost optimization</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+          <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-budget-cost-analyzer">Budget & Cost Analyzer</h1>
+              <p className="text-lg text-muted-foreground">Comprehensive budget tracking, variance analysis, and cost optimization</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="budget-cost-analyzer"
             onSave={handleSave}
@@ -905,6 +1007,8 @@ and actual results may vary significantly based on market conditions and executi
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

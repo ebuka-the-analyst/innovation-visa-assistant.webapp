@@ -9,6 +9,59 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { Download, Save, Lightbulb, Calendar, RefreshCw, LineChart as LineChartIcon, TrendingUp } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter } from "recharts";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'compliance-xray',
+  toolName: 'Compliance X-Ray',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. I'll help you conduct a deep compliance analysis of your business readiness. This assessment covers key areas that endorsing bodies evaluate - from business model validation to IP protection. Let's ensure you're fully prepared!",
+  questions: [
+    {
+      id: 'revenue-model',
+      question: "Describe your revenue model. What are your primary revenue streams and how have you validated them?",
+      hint: "Include pricing strategy, customer segments, and any evidence of willingness to pay",
+      fieldKey: 'revenueModel',
+      minLength: 80
+    },
+    {
+      id: 'unit-economics',
+      question: "What are your unit economics? Have you calculated Customer Acquisition Cost (CAC) and Lifetime Value (LTV)?",
+      hint: "Even estimates help - show you understand the business fundamentals",
+      fieldKey: 'unitEconomics',
+      minLength: 50
+    },
+    {
+      id: 'ip-portfolio',
+      question: "Describe your IP portfolio. What patents, trademarks, or proprietary technology do you have?",
+      hint: "Include pending applications, trade secrets, and any IP strategy",
+      fieldKey: 'ipPortfolio',
+      minLength: 60
+    },
+    {
+      id: 'team-track-record',
+      question: "What is your founding team's track record? Include relevant experience, previous exits, or domain expertise.",
+      hint: "Endorsers want evidence you can execute - be specific about achievements",
+      fieldKey: 'teamTrackRecord',
+      minLength: 80
+    },
+    {
+      id: 'market-validation',
+      question: "How have you validated your market? Describe your TAM/SAM/SOM analysis and competitive positioning.",
+      hint: "Include data sources, market research, and customer validation evidence",
+      fieldKey: 'marketValidation',
+      minLength: 70
+    },
+    {
+      id: 'growth-plan',
+      question: "What is your user acquisition and growth plan? How will you scale customer acquisition?",
+      hint: "Include channels, customer acquisition costs, and retention strategy",
+      fieldKey: 'growthPlan',
+      minLength: 60
+    }
+  ],
+  completionMessage: "Excellent work! You've completed a thorough compliance assessment. Your responses demonstrate strong business fundamentals across key areas. I'm now updating your compliance checklist with these insights."
+};
 
 const BUSINESS_CATEGORIES = [
   {
@@ -54,11 +107,46 @@ const BUSINESS_CATEGORIES = [
 ];
 
 export default function ComplianceXRay() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('compliance-xray-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('compliance-xray-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newChecks: any = { ...checks };
+    
+    if (answers.revenueModel && answers.revenueModel.length > 50) {
+      newChecks["Business Model & Revenue-Clear revenue streams"] = true;
+    }
+    if (answers.unitEconomics && answers.unitEconomics.length > 30) {
+      newChecks["Business Model & Revenue-Unit economics validated"] = true;
+    }
+    if (answers.ipPortfolio && answers.ipPortfolio.length > 40) {
+      newChecks["Innovation & IP-IP portfolio documented"] = true;
+    }
+    if (answers.teamTrackRecord && answers.teamTrackRecord.length > 50) {
+      newChecks["Team & Execution-Founding team track record"] = true;
+    }
+    if (answers.marketValidation && answers.marketValidation.length > 40) {
+      newChecks["Market & Competition-Market size calculated"] = true;
+      newChecks["Market & Competition-Competitive landscape mapped"] = true;
+    }
+    if (answers.growthPlan && answers.growthPlan.length > 40) {
+      newChecks["Growth Trajectory-User acquisition plan"] = true;
+    }
+    
+    setChecks(newChecks);
+    setMode('traditional');
+  };
 
   const totalItems = BUSINESS_CATEGORIES.reduce((sum, c) => sum + c.items.length, 0);
   const completedItems = Object.values(checks).filter(Boolean).length;
@@ -155,135 +243,182 @@ export default function ComplianceXRay() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Compliance X-Ray</h1>
-          <p className="text-muted-foreground mb-6">Deep compliance analysis with business scoring</p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Compliance X-Ray</h1>
+              <p className="text-muted-foreground">Deep compliance analysis with business scoring</p>
+            </div>
+            <AiTraditionalToggle
+              mode={mode}
+              onModeChange={setMode}
+              aiLabel="AI-Guided"
+              traditionalLabel="Traditional Form"
+            />
+          </div>
 
-          <ToolUtilityBar
-            toolId="compliance-xray"
-            toolName="Compliance X-Ray"
-            onSave={saveProgress}
-            onRestore={loadProgress}
-            onExport={exportReport}
-            onSmartTips={() => setShowRecommendations(!showRecommendations)}
-            onActionPlan={() => setShowActionPlan(!showActionPlan)}
-            getSerializedState={getSerializedState}
-          />
-
-          {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
-
-          {showRecommendations && (
-            <Card className="p-4 mb-4 bg-blue-50 border-blue-200">
-              <h3 className="font-bold mb-2">Smart Recommendations</h3>
-              <ul className="space-y-1">{getRecommendations().map((r, i) => <li key={i} className="text-sm">• {r}</li>)}</ul>
-            </Card>
-          )}
-
-          {showActionPlan && (
-            <Card className="p-4 mb-4 bg-green-50 border-green-200">
-              <h3 className="font-bold mb-3">Action Plan Timeline</h3>
-              <div className="space-y-2">{generateActionPlan().map((item, i) => (
-                <div key={i} className="flex gap-3">
-                  <span className="font-bold text-sm">{item.week}</span>
-                  <div><p className="text-sm">{item.action}</p>
-                    <span className={`text-xs ${item.priority==="Critical"?"text-red-600":"text-yellow-600"}`}>{item.priority}</span>
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <div className="space-y-4">
+                <Card className="p-6">
+                  <h3 className="font-bold mb-4">Business Readiness Assessment</h3>
+                  <div className="space-y-3 text-sm text-muted-foreground">
+                    <p>This analysis covers the key areas endorsing bodies evaluate:</p>
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li><strong>Business Model:</strong> Revenue clarity and unit economics</li>
+                      <li><strong>Innovation & IP:</strong> Defensible competitive advantage</li>
+                      <li><strong>Team Capability:</strong> Track record and execution ability</li>
+                      <li><strong>Market Position:</strong> Validated market opportunity</li>
+                      <li><strong>Growth Strategy:</strong> Scalable acquisition plans</li>
+                    </ul>
                   </div>
-                </div>
-              ))}</div>
-            </Card>
-          )}
-
-          <Tabs value={tab} onValueChange={setTab} className="mb-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="overview">Analysis Score</TabsTrigger>
-              <TabsTrigger value="details">Deep Dive</TabsTrigger>
-              <TabsTrigger value="timeline">Risk Timeline</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-4">
-              <div className="grid md:grid-cols-4 gap-4">
-                <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
-                  <p className="text-xs text-muted-foreground">Analysis Score</p>
-                  <p className="text-4xl font-bold mt-2">{analysisScore}%</p>
-                  <p className="text-xs mt-2">{completedItems}/{totalItems} complete</p>
                 </Card>
-                <Card className="p-4">
-                  <p className="text-xs text-muted-foreground">Strategic Strength</p>
-                  <p className={`text-2xl font-bold ${analysisScore>=80?"text-green-600":analysisScore>=60?"text-yellow-600":"text-orange-600"}`}>
-                    {strategicStrength}
-                  </p>
-                </Card>
-                <Card className="p-4">
-                  <p className="text-xs text-muted-foreground">Risk Level</p>
-                  <p className={`text-2xl font-bold ${analysisScore>=80?"text-green-600":"text-red-600"}`}>
-                    {analysisScore>=80?"Low":"High"}
-                  </p>
-                </Card>
-                <Card className="p-4">
-                  <p className="text-xs text-muted-foreground">Readiness</p>
-                  <p className="text-2xl font-bold">{analysisScore>=70?"Ready":"Developing"}</p>
+                <Card className="p-6">
+                  <h3 className="font-bold mb-4">Current Score</h3>
+                  <div className="text-center">
+                    <p className="text-5xl font-bold text-primary">{analysisScore}%</p>
+                    <p className="text-muted-foreground">{completedItems}/{totalItems} items complete</p>
+                    <p className={`font-semibold mt-2 ${analysisScore >= 80 ? 'text-green-600' : analysisScore >= 60 ? 'text-yellow-600' : 'text-orange-600'}`}>
+                      {strategicStrength} Position
+                    </p>
+                  </div>
                 </Card>
               </div>
+            </div>
+          ) : (
+            <>
+              <ToolUtilityBar
+                toolId="compliance-xray"
+                toolName="Compliance X-Ray"
+                onSave={saveProgress}
+                onRestore={loadProgress}
+                onExport={exportReport}
+                onSmartTips={() => setShowRecommendations(!showRecommendations)}
+                onActionPlan={() => setShowActionPlan(!showActionPlan)}
+                getSerializedState={getSerializedState}
+              />
 
-              <Alert className="border-blue-200 bg-blue-50">
-                <TrendingUp className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-700">
-                  Complete all 15 business analysis items to achieve strong visa application support.
-                </AlertDescription>
-              </Alert>
-            </TabsContent>
+              {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
 
-            <TabsContent value="details" className="space-y-4">
-              {BUSINESS_CATEGORIES.map((cat, i) => (
-                <Card key={i} className="p-4 border-l-4 border-primary">
-                  <h3 className="font-bold mb-3">{cat.name}</h3>
-                  <div className="space-y-3">
-                    {cat.items.map((item, j) => (
-                      <div key={j} className="border border-gray-200 p-3 rounded hover:bg-gray-50">
-                        <label className="flex gap-3">
-                          <Checkbox checked={checks[`${cat.name}-${item.name}`]||false}
-                            onCheckedChange={() => setChecks({...checks,[`${cat.name}-${item.name}`]:!checks[`${cat.name}-${item.name}`]})} />
-                          <div className="flex-1">
-                            <p className="font-semibold text-sm">{item.name}</p>
-                            <p className="text-xs text-muted-foreground">{item.detail}</p>
-                          </div>
-                        </label>
-                      </div>
-                    ))}
-                  </div>
+              {showRecommendations && (
+                <Card className="p-4 mb-4 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+                  <h3 className="font-bold mb-2">Smart Recommendations</h3>
+                  <ul className="space-y-1">{getRecommendations().map((r, i) => <li key={i} className="text-sm">• {r}</li>)}</ul>
                 </Card>
-              ))}
-            </TabsContent>
+              )}
 
-            <TabsContent value="timeline" className="space-y-4">
-              <Card className="p-4">
-                <h3 className="font-bold mb-4">Risk Mitigation Timeline</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={riskTimelineData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="marketRisk" stroke="#ef4444" strokeWidth={2} name="Market Risk" />
-                    <Line type="monotone" dataKey="executionRisk" stroke="#f59e0b" strokeWidth={2} name="Execution Risk" />
-                    <Line type="monotone" dataKey="fundingRisk" stroke="#8b5cf6" strokeWidth={2} name="Funding Risk" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Card>
+              {showActionPlan && (
+                <Card className="p-4 mb-4 bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+                  <h3 className="font-bold mb-3">Action Plan Timeline</h3>
+                  <div className="space-y-2">{generateActionPlan().map((item, i) => (
+                    <div key={i} className="flex gap-3">
+                      <span className="font-bold text-sm">{item.week}</span>
+                      <div><p className="text-sm">{item.action}</p>
+                        <span className={`text-xs ${item.priority==="Critical"?"text-red-600":"text-yellow-600"}`}>{item.priority}</span>
+                      </div>
+                    </div>
+                  ))}</div>
+                </Card>
+              )}
 
-              <Card className="p-4">
-                <h3 className="font-bold mb-3">Risk Mitigation Strategy</h3>
-                <div className="space-y-2">
-                  <div className="p-2 border-l-4 border-red-500 bg-red-50 dark:bg-red-950"><p className="text-sm font-semibold">Market Risk</p>
-                    <p className="text-xs">Validate product-market fit with 20+ customer interviews</p></div>
-                  <div className="p-2 border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-950"><p className="text-sm font-semibold">Execution Risk</p>
-                    <p className="text-xs">Hire experienced CTOs and ops leads with proven track records</p></div>
-                  <div className="p-2 border-l-4 border-purple-500 bg-purple-50 dark:bg-purple-950"><p className="text-sm font-semibold">Funding Risk</p>
-                    <p className="text-xs">Build 18-month runway; secure bridge financing options</p></div>
-                </div>
-              </Card>
-            </TabsContent>
-          </Tabs>
+              <Tabs value={tab} onValueChange={setTab} className="mb-6">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="overview">Analysis Score</TabsTrigger>
+                  <TabsTrigger value="details">Deep Dive</TabsTrigger>
+                  <TabsTrigger value="timeline">Risk Timeline</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="space-y-4">
+                  <div className="grid md:grid-cols-4 gap-4">
+                    <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
+                      <p className="text-xs text-muted-foreground">Analysis Score</p>
+                      <p className="text-4xl font-bold mt-2">{analysisScore}%</p>
+                      <p className="text-xs mt-2">{completedItems}/{totalItems} complete</p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="text-xs text-muted-foreground">Strategic Strength</p>
+                      <p className={`text-2xl font-bold ${analysisScore>=80?"text-green-600":analysisScore>=60?"text-yellow-600":"text-orange-600"}`}>
+                        {strategicStrength}
+                      </p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="text-xs text-muted-foreground">Risk Level</p>
+                      <p className={`text-2xl font-bold ${analysisScore>=80?"text-green-600":"text-red-600"}`}>
+                        {analysisScore>=80?"Low":"High"}
+                      </p>
+                    </Card>
+                    <Card className="p-4">
+                      <p className="text-xs text-muted-foreground">Readiness</p>
+                      <p className="text-2xl font-bold">{analysisScore>=70?"Ready":"Developing"}</p>
+                    </Card>
+                  </div>
+
+                  <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+                    <TrendingUp className="h-4 w-4 text-blue-600" />
+                    <AlertDescription className="text-blue-700 dark:text-blue-300">
+                      Complete all 15 business analysis items to achieve strong visa application support.
+                    </AlertDescription>
+                  </Alert>
+                </TabsContent>
+
+                <TabsContent value="details" className="space-y-4">
+                  {BUSINESS_CATEGORIES.map((cat, i) => (
+                    <Card key={i} className="p-4 border-l-4 border-primary">
+                      <h3 className="font-bold mb-3">{cat.name}</h3>
+                      <div className="space-y-3">
+                        {cat.items.map((item, j) => (
+                          <div key={j} className="border border-gray-200 dark:border-gray-700 p-3 rounded hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <label className="flex gap-3">
+                              <Checkbox checked={checks[`${cat.name}-${item.name}`]||false}
+                                onCheckedChange={() => setChecks({...checks,[`${cat.name}-${item.name}`]:!checks[`${cat.name}-${item.name}`]})} />
+                              <div className="flex-1">
+                                <p className="font-semibold text-sm">{item.name}</p>
+                                <p className="text-xs text-muted-foreground">{item.detail}</p>
+                              </div>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  ))}
+                </TabsContent>
+
+                <TabsContent value="timeline" className="space-y-4">
+                  <Card className="p-4">
+                    <h3 className="font-bold mb-4">Risk Mitigation Timeline</h3>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={riskTimelineData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="marketRisk" stroke="#ef4444" strokeWidth={2} name="Market Risk" />
+                        <Line type="monotone" dataKey="executionRisk" stroke="#f59e0b" strokeWidth={2} name="Execution Risk" />
+                        <Line type="monotone" dataKey="fundingRisk" stroke="#8b5cf6" strokeWidth={2} name="Funding Risk" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Card>
+
+                  <Card className="p-4">
+                    <h3 className="font-bold mb-3">Risk Mitigation Strategy</h3>
+                    <div className="space-y-2">
+                      <div className="p-2 border-l-4 border-red-500 bg-red-50 dark:bg-red-950"><p className="text-sm font-semibold">Market Risk</p>
+                        <p className="text-xs">Validate product-market fit with 20+ customer interviews</p></div>
+                      <div className="p-2 border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-950"><p className="text-sm font-semibold">Execution Risk</p>
+                        <p className="text-xs">Hire experienced CTOs and ops leads with proven track records</p></div>
+                      <div className="p-2 border-l-4 border-purple-500 bg-purple-50 dark:bg-purple-950"><p className="text-sm font-semibold">Funding Risk</p>
+                        <p className="text-xs">Build 18-month runway; secure bridge financing options</p></div>
+                    </div>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

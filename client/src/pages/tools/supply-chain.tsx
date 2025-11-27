@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -90,7 +90,82 @@ const METHOD_COLORS = {
   rail: '#8b5cf6'
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'supply-chain',
+  toolName: 'Supply Chain Strategy',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. I'll help you design a robust supply chain strategy that demonstrates operational excellence and UK market integration - key factors endorsing bodies look for in your visa application. Let's build your supplier network together!",
+  questions: [
+    {
+      id: 'primary-supplier',
+      question: "Who is your primary supplier and what products or services do they provide? Include their location and any UK compliance certifications they hold.",
+      hint: "UK-based suppliers strengthen your application by showing local economic contribution",
+      fieldKey: 'primary_supplier',
+      minLength: 50
+    },
+    {
+      id: 'supplier-diversity',
+      question: "How many suppliers do you have across different categories (primary, secondary, backup)? Describe your supplier diversification strategy.",
+      hint: "Endorsers want to see resilience through multiple sourcing options",
+      fieldKey: 'supplier_diversity'
+    },
+    {
+      id: 'lead-times',
+      question: "What are the typical lead times from your key suppliers? How do these vary by location (UK, EU, Asia)?",
+      hint: "Understanding lead times demonstrates operational planning capability",
+      fieldKey: 'lead_times'
+    },
+    {
+      id: 'logistics-routes',
+      question: "Describe your main logistics and distribution routes. What shipping methods do you use and what are the typical delivery times?",
+      hint: "Include UK customs and post-Brexit considerations for non-UK suppliers",
+      fieldKey: 'logistics_routes'
+    },
+    {
+      id: 'inventory-management',
+      question: "How do you manage inventory levels? What are your reorder points and maximum stock thresholds?",
+      hint: "Effective inventory management shows financial prudence and operational maturity",
+      fieldKey: 'inventory_management'
+    },
+    {
+      id: 'risk-mitigation',
+      question: "What supply chain risks have you identified and what mitigation strategies do you have in place?",
+      hint: "Document backup suppliers and contingency plans for disruptions",
+      fieldKey: 'risk_mitigation',
+      minLength: 50
+    }
+  ]
+};
+
 export default function SupplyChain() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('supply-chain-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('supply-chain-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.primary_supplier) {
+      const newSupplier: Supplier = {
+        id: Date.now().toString(),
+        name: answers.primary_supplier.split(' ')[0] || 'Primary Supplier',
+        type: 'primary',
+        location: 'uk',
+        leadTime: 7,
+        reliability: 85,
+        riskLevel: 'low',
+        costPerUnit: 0,
+        minOrder: 100,
+        description: answers.primary_supplier,
+        ukCompliant: true
+      };
+      setSuppliers([newSupplier]);
+    }
+    setMode('traditional');
+  };
+
   const [suppliers, setSuppliers] = useState<Supplier[]>([
     {
       id: '1',
@@ -1009,13 +1084,21 @@ supply chain documentation as part of your business viability assessment.
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-supply-chain">Supply Chain Management</h1>
-            <p className="text-lg text-muted-foreground">Map suppliers, assess risks, plan contingencies, and track performance for UK visa compliance</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
-            )}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-supply-chain">Supply Chain Management</h1>
+              <p className="text-lg text-muted-foreground">Map suppliers, assess risks, plan contingencies, and track performance for UK visa compliance</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
 
           <ToolUtilityBar
             toolId="supply-chain"
@@ -1782,6 +1865,8 @@ supply chain documentation as part of your business viability assessment.
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

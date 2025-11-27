@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { useWordExport } from "@/hooks/useWordExport";
@@ -17,6 +17,53 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'market-research',
+  toolName: 'Market Research Tracker',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. Strong market research is crucial evidence for your visa application - it demonstrates you understand your market. Let me help you plan and track your research activities. Ready?",
+  questions: [
+    {
+      id: 'research-title',
+      question: "What market research are you planning or conducting? Give it a descriptive title.",
+      hint: "E.g., 'UK SME Pain Point Survey', 'Competitor Feature Analysis'",
+      fieldKey: 'researchTitle',
+      required: true
+    },
+    {
+      id: 'research-type',
+      question: "Is this primary research (you collect data) or secondary research (existing data/reports)?",
+      hint: "Primary research is more valuable for visa evidence but requires more effort",
+      fieldKey: 'researchType'
+    },
+    {
+      id: 'research-method',
+      question: "What research method are you using? (survey, interview, focus group, industry report analysis, etc.)",
+      hint: "Multiple methods provide stronger evidence",
+      fieldKey: 'researchMethod'
+    },
+    {
+      id: 'sample-size',
+      question: "What is your target sample size for this research?",
+      hint: "For surveys, aim for 50-100+; for interviews, 10-20 is valuable",
+      fieldKey: 'sampleSize'
+    },
+    {
+      id: 'key-questions',
+      question: "What are the 3 key questions you want to answer with this research?",
+      hint: "Focus on questions that validate your business assumptions",
+      fieldKey: 'keyQuestions'
+    },
+    {
+      id: 'data-sources',
+      question: "What are your data sources? (For secondary research, name specific reports or databases)",
+      hint: "Credible sources like ONS, Tech Nation, or industry associations strengthen evidence",
+      fieldKey: 'dataSources'
+    }
+  ],
+  completionMessage: "Perfect! I've captured your research activity. I'm now adding it to your research tracker. You can add more activities and log findings as you complete them."
+};
 
 type ResearchType = 'primary' | 'secondary' | 'competitor' | 'customer-discovery';
 type ResearchMethod = 'survey' | 'interview' | 'focus-group' | 'observation' | 'industry-report' | 'academic-paper' | 'market-data' | 'competitor-analysis' | 'customer-interview' | 'user-testing' | 'other';
@@ -59,6 +106,9 @@ type CustomerSegment = {
 export default function MarketResearch() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('market-research-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [activities, setActivities] = useState<ResearchActivity[]>([
     {
       id: '1',
@@ -110,6 +160,34 @@ export default function MarketResearch() {
 
   const [activeTab, setActiveTab] = useState('research');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('market-research-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.researchTitle) {
+      const newActivity: ResearchActivity = {
+        id: Date.now().toString(),
+        type: answers.researchType?.toLowerCase().includes('primary') ? 'primary' : 'secondary',
+        method: answers.researchMethod?.toLowerCase().includes('survey') ? 'survey' : 
+                answers.researchMethod?.toLowerCase().includes('interview') ? 'interview' : 'other',
+        title: answers.researchTitle || '',
+        description: answers.keyQuestions || '',
+        targetSampleSize: answers.sampleSize ? parseInt(answers.sampleSize) || 50 : 50,
+        actualSampleSize: 0,
+        startDate: '',
+        completionDate: '',
+        status: 'planned',
+        budget: 0,
+        keyFindings: '',
+        dataSource: answers.dataSources || '',
+        verified: false
+      };
+      setActivities(prev => prev.length === 1 && !prev[0].title ? [newActivity] : [...prev, newActivity]);
+    }
+    setMode('traditional');
+  };
 
   const addActivity = () => {
     setActivities([...activities, {
@@ -677,13 +755,26 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-research">Market Research Planner</h1>
-            <p className="text-lg text-muted-foreground">Comprehensive market research planning and evidence tracker</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-research">Market Research Planner</h1>
+                <p className="text-lg text-muted-foreground">Comprehensive market research planning and evidence tracker</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="market-research"
             onSave={handleSave}
@@ -1539,6 +1630,8 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

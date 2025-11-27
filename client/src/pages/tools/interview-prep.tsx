@@ -18,6 +18,66 @@ import {
   PieChart, Pie, Cell, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'interview-prep',
+  toolName: 'Endorsement Interview Prep',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Expert. The endorsement interview is your opportunity to demonstrate innovation, viability, and scalability. Let me help you prepare compelling answers to the questions endorsing bodies typically ask!",
+  questions: [
+    {
+      id: 'business-pitch',
+      question: "Can you give me your 60-second business pitch? Explain what your business does, the problem it solves, and why it's innovative.",
+      hint: "Practice until this flows naturally. Cover: problem, solution, innovation, market",
+      fieldKey: 'businessPitch',
+      minLength: 100
+    },
+    {
+      id: 'innovation',
+      question: "What makes your business genuinely innovative? How is it different from existing solutions in the market?",
+      hint: "Be specific about your unique technology, approach, or business model",
+      fieldKey: 'innovationAnswer',
+      minLength: 80
+    },
+    {
+      id: 'market-validation',
+      question: "How have you validated market demand? What evidence do you have that customers want your solution?",
+      hint: "Include customer interviews, letters of intent, pilot results, or early sales",
+      fieldKey: 'marketValidation',
+      minLength: 80
+    },
+    {
+      id: 'scalability',
+      question: "How will you scale this business? Describe your growth strategy and key milestones.",
+      hint: "Demonstrate the scalability endorsers look for - think big but realistic",
+      fieldKey: 'scalabilityAnswer',
+      minLength: 80
+    },
+    {
+      id: 'uk-benefit',
+      question: "Why the UK? What specific benefit will your business bring to the UK economy and how many UK jobs will you create?",
+      hint: "Endorsers need to see genuine UK benefit - be specific about jobs and impact",
+      fieldKey: 'ukBenefit',
+      minLength: 80
+    },
+    {
+      id: 'financial-plan',
+      question: "Walk me through your financial plan. How will you fund the business and when do you expect to reach profitability?",
+      hint: "Show you understand your numbers and have realistic financial projections",
+      fieldKey: 'financialPlan',
+      minLength: 80
+    },
+    {
+      id: 'team-gaps',
+      question: "What are the current gaps in your team and how do you plan to address them?",
+      hint: "Show self-awareness and a concrete hiring plan",
+      fieldKey: 'teamGaps',
+      minLength: 50
+    }
+  ],
+  completionMessage: "Excellent preparation! You've crafted strong answers covering the key areas endorsers will assess. I'm populating your interview preparation guide now so you can practice and refine your responses."
+};
 
 type QuestionCategory = 'business-model' | 'innovation' | 'scalability' | 'team' | 'financials' | 'uk-impact';
 
@@ -226,6 +286,10 @@ const CATEGORY_LABELS: Record<QuestionCategory, string> = {
 export default function InterviewPrep() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('interview-prep-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [questions, setQuestions] = useState<InterviewQuestion[]>(
     INTERVIEW_QUESTIONS.map(q => ({
       ...q,
@@ -316,6 +380,51 @@ export default function InterviewPrep() {
     if ('activeTab' in state) setActiveTab(state.activeTab);
     if ('selectedCategory' in state) setSelectedCategory(state.selectedCategory);
     if ('savedDate' in state) setSavedDate(state.savedDate || '');
+  };
+
+  useEffect(() => {
+    localStorage.setItem('interview-prep-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const updatedQuestions = [...questions];
+    if (answers.businessPitch) {
+      const q = updatedQuestions.find(q => q.id === 'q1');
+      if (q) {
+        q.answer = answers.businessPitch;
+        q.prepared = true;
+      }
+    }
+    if (answers.innovation) {
+      const q = updatedQuestions.find(q => q.id === 'q3');
+      if (q) {
+        q.answer = answers.innovation;
+        q.prepared = true;
+      }
+    }
+    if (answers.scalability) {
+      const q = updatedQuestions.find(q => q.id === 'q8');
+      if (q) {
+        q.answer = answers.scalability;
+        q.prepared = true;
+      }
+    }
+    if (answers.ukImpact) {
+      const q = updatedQuestions.find(q => q.id === 'q18');
+      if (q) {
+        q.answer = answers.ukImpact;
+        q.prepared = true;
+      }
+    }
+    if (answers.challengeResponse) {
+      const q = updatedQuestions.find(q => q.id === 'q5');
+      if (q) {
+        q.answer = answers.challengeResponse;
+        q.prepared = true;
+      }
+    }
+    setQuestions(updatedQuestions);
+    setMode('traditional');
   };
 
   useEffect(() => {
@@ -633,19 +742,55 @@ Report generated by UK Innovator Founder Visa Assistant
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-interview-prep">
-              Endorsement Interview Preparation
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Comprehensive interview readiness for endorsing body assessment
-            </p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">
-                Last saved: {savedDate}
-              </p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-interview-prep">
+                  Endorsement Interview Preparation
+                </h1>
+                <p className="text-lg text-muted-foreground">
+                  Comprehensive interview readiness for endorsing body assessment
+                </p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">
+                    Last saved: {savedDate}
+                  </p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <MessageSquare className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Nova, our Innovation Expert, helps you prepare for your endorsement interview.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Practice your business pitch and value proposition</li>
+                    <li>Prepare innovation and scalability answers</li>
+                    <li>Understand how to handle challenging questions</li>
+                    <li>Earn XP as you complete each question</li>
+                  </ul>
+                  <p className="pt-2">Your answers will automatically populate the interview prep when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="interview-prep"
             toolName="Interview Preparation"
@@ -1327,6 +1472,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

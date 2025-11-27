@@ -2,12 +2,71 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { Download, AlertTriangle, TrendingUp, Save, Lightbulb, Calendar, RefreshCw } from "lucide-react";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "regulatory-tracker",
+  toolName: "Regulatory Tracker",
+  agentId: "atlas",
+  agentName: "Atlas",
+  agentTitle: "Growth Strategist",
+  description: "Track regulatory changes affecting your UK business and visa application",
+  questions: [
+    {
+      id: "industry",
+      question: "What industry or sector does your business operate in?",
+      placeholder: "We operate in [industry sector]. Key regulatory bodies governing us include [FCA/ICO/CQC/etc]...",
+      fieldKey: "industrySector",
+      minLength: 50,
+      helpText: "Different industries have different regulatory requirements"
+    },
+    {
+      id: "dataHandling",
+      question: "How does your business handle personal data and what GDPR compliance measures do you have?",
+      placeholder: "We process personal data for [purposes]. GDPR compliance measures include [specific measures]...",
+      fieldKey: "gdprCompliance",
+      minLength: 80,
+      helpText: "ICO enforcement is increasing - data protection is critical"
+    },
+    {
+      id: "employment",
+      question: "Describe your employment plans and awareness of UK employment regulations.",
+      placeholder: "We plan to hire [X] employees. We are aware of National Minimum Wage (£11.44), right-to-work checks, workplace pensions...",
+      fieldKey: "employmentCompliance",
+      minLength: 80,
+      helpText: "Minimum wage and employment rights are frequently audited"
+    },
+    {
+      id: "tax",
+      question: "What UK tax obligations are you prepared for?",
+      placeholder: "We understand Corporation Tax (25%), VAT registration threshold (£85k), PAYE requirements...",
+      fieldKey: "taxAwareness",
+      minLength: 60,
+      helpText: "Tax awareness demonstrates business viability"
+    },
+    {
+      id: "immigration",
+      question: "How are you tracking immigration rule changes that affect your visa?",
+      placeholder: "I monitor [sources] for immigration updates. Recent changes affecting me include [specific changes]...",
+      fieldKey: "immigrationTracking",
+      minLength: 60,
+      helpText: "Points-based system rules change frequently"
+    },
+    {
+      id: "compliance",
+      question: "What ongoing compliance monitoring system will you implement?",
+      placeholder: "We will monitor regulatory changes through [methods]. Quarterly reviews will cover [areas]. Professional advisors include...",
+      fieldKey: "complianceSystem",
+      minLength: 80,
+      helpText: "Demonstrating a compliance system shows business maturity"
+    }
+  ]
+};
 
 const REGULATORY_CHANGES = [
   {topic:"Immigration Rules",item:"Points-Based System refinements",date:"Apr 2024",impact:"High",status:"In Effect"},
@@ -18,6 +77,9 @@ const REGULATORY_CHANGES = [
 ];
 
 export default function RegulatoryTracker() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('regulatory-tracker-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [tracked, setTracked] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
@@ -79,6 +141,31 @@ export default function RegulatoryTracker() {
   };
 
   useEffect(() => {
+    localStorage.setItem('regulatory-tracker-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const newTracked = { ...tracked };
+    if (answers.industrySector?.length > 50) {
+      newTracked["Company Law"] = true;
+    }
+    if (answers.gdprCompliance?.length > 80) {
+      newTracked["GDPR enforcement increase by ICO"] = true;
+    }
+    if (answers.employmentCompliance?.length > 80) {
+      newTracked["National Minimum Wage increase to 11.44 pounds"] = true;
+    }
+    if (answers.taxAwareness?.length > 60) {
+      newTracked["Corporation tax rate change"] = true;
+    }
+    if (answers.immigrationTracking?.length > 60) {
+      newTracked["Points-Based System refinements"] = true;
+    }
+    setTracked(newTracked);
+    setMode('traditional');
+  };
+
+  useEffect(() => {
     const handoffKey = 'regulatory-tracker_handoff';
     const handoffData = localStorage.getItem(handoffKey);
     
@@ -103,8 +190,13 @@ export default function RegulatoryTracker() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Regulatory Tracker</h1>
-          <p className="text-muted-foreground mb-6">Monitor UK regulatory changes affecting visa applications</p>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-bold" data-testid="heading-regulatory-tracker">Regulatory Tracker</h1>
+              <p className="text-muted-foreground">Monitor UK regulatory changes affecting visa applications</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
           <ToolUtilityBar
             toolId="regulatory-tracker"
@@ -117,6 +209,10 @@ export default function RegulatoryTracker() {
             getSerializedState={getSerializedState}
           />
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
 
           {showRecommendations && (
@@ -197,6 +293,8 @@ export default function RegulatoryTracker() {
               ))}
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

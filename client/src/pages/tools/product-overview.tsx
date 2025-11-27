@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
@@ -12,7 +12,61 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "product-overview",
+  toolName: "Product Overview",
+  agentId: "nova",
+  agentName: "Nova",
+  agentTitle: "Innovation Strategist",
+  description: "Create a comprehensive overview of your product offering for visa applications",
+  questions: [
+    {
+      id: "name",
+      question: "What is the name of your product or service?",
+      placeholder: "Enter your product/service name...",
+      fieldKey: "productName",
+      minLength: 2,
+      helpText: "The official name of your product or service"
+    },
+    {
+      id: "description",
+      question: "Describe what your product does and the problem it solves.",
+      placeholder: "Our product is a [type] that helps [target users] to [achieve outcome] by [method]...",
+      fieldKey: "description",
+      minLength: 100,
+      helpText: "Explain the core functionality and value proposition"
+    },
+    {
+      id: "features",
+      question: "What are the key features and capabilities of your product?",
+      placeholder: "Key features include:\n- Feature 1: [description]\n- Feature 2: [description]\n- Feature 3: [description]...",
+      fieldKey: "features",
+      minLength: 80,
+      helpText: "List 3-5 main features that differentiate your product"
+    },
+    {
+      id: "usp",
+      question: "What makes your product unique compared to existing solutions?",
+      placeholder: "Unlike [competitors], our product offers [unique benefit] because of [reason/technology]...",
+      fieldKey: "usp",
+      minLength: 80,
+      helpText: "Focus on genuine differentiation, not just improvements"
+    },
+    {
+      id: "target",
+      question: "Who are your ideal customers and target market?",
+      placeholder: "Our primary customers are [demographic/industry] who need [solution] because [pain point]...",
+      fieldKey: "targetMarket",
+      minLength: 60,
+      helpText: "Be specific about customer segments and their needs"
+    }
+  ]
+};
+
 export default function ProductOverview() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('product-overview-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [productName, setProductName] = useState("");
@@ -49,6 +103,19 @@ export default function ProductOverview() {
   const getSerializedState = () => ({ uploadedFiles, productName, description, features, usp, targetMarket, overview, savedDate });
 
   useEffect(() => {
+    localStorage.setItem('product-overview-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.productName) setProductName(answers.productName);
+    if (answers.description) setDescription(answers.description);
+    if (answers.features) setFeatures(answers.features);
+    if (answers.usp) setUsp(answers.usp);
+    if (answers.targetMarket) setTargetMarket(answers.targetMarket);
+    setMode('traditional');
+  };
+
+  useEffect(() => {
     const s = localStorage.getItem('productOverviewData');
     if (s) {
       const data = JSON.parse(s);
@@ -62,14 +129,61 @@ export default function ProductOverview() {
     if (f) setUploadedFiles(JSON.parse(f));
   }, []);
 
+  const traditionalContent = (
+    <>
+      <div className="mb-4">
+        <FileUploadButton config={fileUploadConfigs.documentOrganizer} onFileSelected={handleFileUpload} variant="secondary" />
+      </div>
+      <FileList files={uploadedFiles} onRemove={handleRemoveFile} />
+      {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
+
+      <Card className="p-6 mb-6">
+        <h3 className="font-bold mb-4 flex gap-2"><Zap className="w-5 h-5" />Product Details</h3>
+        <div className="space-y-4">
+          <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name" data-testid="input-product-name" />
+          <div>
+            <label className="text-sm font-medium">Description</label>
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What does your product do?" rows={3} data-testid="textarea-description" />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Key Features</label>
+            <Textarea value={features} onChange={(e) => setFeatures(e.target.value)} placeholder="• Feature 1\n• Feature 2" rows={3} data-testid="textarea-features" />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Unique Value Proposition</label>
+            <Textarea value={usp} onChange={(e) => setUsp(e.target.value)} placeholder="What makes your product unique?" rows={2} data-testid="textarea-usp" />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Target Market</label>
+            <Textarea value={targetMarket} onChange={(e) => setTargetMarket(e.target.value)} placeholder="Who are your ideal customers?" rows={2} data-testid="textarea-target-market" />
+          </div>
+          <Button onClick={generateOverview} className="w-full gap-2 bg-secondary" data-testid="button-generate-overview">
+            <Target className="w-4 h-4" />
+            Generate Overview
+          </Button>
+        </div>
+      </Card>
+
+      {overview && <Card className="p-6 mb-6 bg-orange-50 dark:bg-orange-950"><p className="text-sm whitespace-pre-wrap">{overview}</p></Card>}
+
+      <Button className="w-full gap-2 bg-primary" onClick={exportOverview} data-testid="button-export-overview">
+        <Download className="w-4 h-4" />
+        Export Product Overview
+      </Button>
+    </>
+  );
+
   return (
     <>
-      
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Product Overview</h1>
-          <p className="text-muted-foreground mb-6">Create a comprehensive overview of your product offering</p>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-bold" data-testid="heading-product-overview">Product Overview</h1>
+              <p className="text-muted-foreground">Create a comprehensive overview of your product offering</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
           <ToolUtilityBar
             toolId="product-overview"
@@ -79,45 +193,9 @@ export default function ProductOverview() {
             getSerializedState={getSerializedState}
           />
 
-          <div className="mb-4">
-            <FileUploadButton config={fileUploadConfigs.documentOrganizer} onFileSelected={handleFileUpload} variant="secondary" />
-          </div>
-          <FileList files={uploadedFiles} onRemove={handleRemoveFile} />
-          {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
-
-          <Card className="p-6 mb-6">
-            <h3 className="font-bold mb-4 flex gap-2"><Zap className="w-5 h-5" />Product Details</h3>
-            <div className="space-y-4">
-              <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name" />
-              <div>
-                <label className="text-sm font-medium">Description</label>
-                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What does your product do?" rows={3} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Key Features</label>
-                <Textarea value={features} onChange={(e) => setFeatures(e.target.value)} placeholder="• Feature 1\n• Feature 2" rows={3} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Unique Value Proposition</label>
-                <Textarea value={usp} onChange={(e) => setUsp(e.target.value)} placeholder="What makes your product unique?" rows={2} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Target Market</label>
-                <Textarea value={targetMarket} onChange={(e) => setTargetMarket(e.target.value)} placeholder="Who are your ideal customers?" rows={2} />
-              </div>
-              <Button onClick={generateOverview} className="w-full gap-2 bg-secondary">
-                <Target className="w-4 h-4" />
-                Generate Overview
-              </Button>
-            </div>
-          </Card>
-
-          {overview && <Card className="p-6 mb-6 bg-orange-50 dark:bg-orange-950"><p className="text-sm whitespace-pre-wrap">{overview}</p></Card>}
-
-          <Button className="w-full gap-2 bg-primary" onClick={exportOverview} data-testid="button-export-overview">
-            <Download className="w-4 h-4" />
-            Export Product Overview
-          </Button>
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : traditionalContent}
         </div>
       </div>
     </>

@@ -14,6 +14,59 @@ import { Calendar, CheckCircle2, TrendingUp, Target, Plus, Trash2, BarChart3 } f
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "year-tracker",
+  agentId: "atlas",
+  agentName: "Atlas",
+  agentTitle: "Growth & Strategy Expert",
+  greeting: "Hello! I'm Atlas, your growth strategy specialist. Let me help you plan your year-by-year business growth trajectory and key milestones.",
+  questions: [
+    {
+      id: "currentYear",
+      text: "What is your current business status? Describe your revenue, team size, and customer base today.",
+      fieldKey: "currentYear",
+      minLength: 70,
+      placeholder: "Share current revenue, employee count, customer numbers, and operational status..."
+    },
+    {
+      id: "year1Goals",
+      text: "What are your Year 1 goals in the UK? Include revenue, hiring, and customer targets.",
+      fieldKey: "year1Goals",
+      minLength: 70,
+      placeholder: "Describe Year 1 targets for revenue, team growth, customers, and key milestones..."
+    },
+    {
+      id: "year2Goals",
+      text: "What growth do you expect in Year 2? How will your metrics evolve?",
+      fieldKey: "year2Goals",
+      minLength: 60,
+      placeholder: "Share Year 2 projections for revenue, employees, customers, and strategic milestones..."
+    },
+    {
+      id: "year3Goals",
+      text: "What does Year 3 success look like? What major milestones will you achieve?",
+      fieldKey: "year3Goals",
+      minLength: 60,
+      placeholder: "Describe Year 3 targets, profitability goals, and ILR eligibility milestones..."
+    },
+    {
+      id: "keyMilestones",
+      text: "What are your most critical milestones across the 3-5 year period?",
+      fieldKey: "keyMilestones",
+      minLength: 70,
+      placeholder: "List key milestones: funding rounds, product launches, market entries, team expansions..."
+    },
+    {
+      id: "growthStrategy",
+      text: "What is your growth strategy? How will you achieve these year-over-year improvements?",
+      fieldKey: "growthStrategy",
+      minLength: 70,
+      placeholder: "Describe your growth levers: marketing, sales, partnerships, product development, geographic expansion..."
+    }
+  ]
+};
 
 type YearData = {
   year: number;
@@ -45,6 +98,22 @@ export default function YearTracker() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('year-tracker-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('year-tracker-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((_answers: Record<string, string>) => {
+    setMode('traditional');
+    toast({
+      title: "AI Guidance Complete",
+      description: "Your year-by-year growth plan has been captured. Now refine your milestones."
+    });
+  }, [toast]);
 
   const [years, setYears] = useState<YearData[]>(() => {
     const saved = localStorage.getItem("year-tracker-state");
@@ -163,13 +232,25 @@ export default function YearTracker() {
                 </h1>
                 <p className="text-muted-foreground mt-1">Track yearly progress and milestones</p>
               </div>
-              {showAutoSave && (
-                <Badge variant="secondary" className="animate-pulse">
-                  <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
-                </Badge>
-              )}
+              <div className="flex items-center gap-3">
+                {showAutoSave && (
+                  <Badge variant="secondary" className="animate-pulse">
+                    <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
+                  </Badge>
+                )}
+                <AiTraditionalToggle
+                  mode={mode}
+                  onModeChange={setMode}
+                  aiLabel="AI-Guided"
+                  traditionalLabel="Traditional Form"
+                />
+              </div>
             </div>
 
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+              <>
             <ToolUtilityBar
               toolId="year-tracker"
               toolName="Year-by-Year Progress Tracker"
@@ -427,6 +508,8 @@ export default function YearTracker() {
                 </div>
               </TabsContent>
             </Tabs>
+              </>
+            )}
           </div>
         </div>
       </div>

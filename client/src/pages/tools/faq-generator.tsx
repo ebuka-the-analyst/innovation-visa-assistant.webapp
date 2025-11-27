@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -45,6 +45,58 @@ const DIFFICULTY_LABELS: Record<DifficultyLevel, string> = {
   'basic': 'Basic',
   'intermediate': 'Intermediate',
   'advanced': 'Advanced',
+};
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'faq-generator',
+  toolName: 'FAQ & Interview Prep',
+  agent: 'nova',
+  greeting: "Hi! I'm Nova, your Innovation Specialist. I'll help you prepare comprehensive answers to the most common questions endorsing bodies ask. Let's make sure you're ready for any interview scenario!",
+  questions: [
+    {
+      id: 'business-model-qa',
+      question: "How would you explain your business model and revenue strategy to an endorsing body in 2-3 sentences?",
+      hint: "Include your main revenue streams, target customers, and why your approach is sustainable",
+      fieldKey: 'businessModelAnswer',
+      minLength: 100
+    },
+    {
+      id: 'innovation-qa',
+      question: "What makes your product or service genuinely innovative? What's your competitive moat?",
+      hint: "Focus on technical innovation, unique IP, or novel approaches that differentiate you",
+      fieldKey: 'innovationAnswer',
+      minLength: 100
+    },
+    {
+      id: 'team-qa',
+      question: "Describe your founding team's relevant experience and why you're the right people to build this business.",
+      hint: "Highlight domain expertise, previous ventures, complementary skills, and UK connections",
+      fieldKey: 'teamAnswer',
+      minLength: 100
+    },
+    {
+      id: 'market-qa',
+      question: "What's your target market size and why is the UK the right place to build this company?",
+      hint: "Include TAM/SAM figures with sources, UK-specific advantages, and job creation plans",
+      fieldKey: 'marketAnswer',
+      minLength: 100
+    },
+    {
+      id: 'traction-qa',
+      question: "What evidence do you have of customer validation or market traction?",
+      hint: "Include specific metrics: customers, revenue, pilots, partnerships, waitlist signups",
+      fieldKey: 'tractionAnswer',
+      minLength: 80
+    },
+    {
+      id: 'funding-qa',
+      question: "How will you use your investment funds and what milestones will they help you achieve?",
+      hint: "Provide percentage breakdown and specific 12-month milestones",
+      fieldKey: 'fundingAnswer',
+      minLength: 80
+    }
+  ],
+  completionMessage: "Excellent preparation! I've captured your key talking points. Review your answers in the Generator tab and use them to craft complete responses for each FAQ category."
 };
 
 const DEFAULT_FAQ_ITEMS: Omit<FAQItem, 'yourAnswer' | 'preparednessScore' | 'isComplete'>[] = [
@@ -210,6 +262,18 @@ export default function FAQGenerator() {
   const [showActionPlan, setShowActionPlan] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<QuestionCategory | 'all'>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel | 'all'>('all');
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('faq-generator-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('faq-generator-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    setMode('traditional');
+    setActiveTab('generator');
+  };
 
   const updateFAQItem = (id: string, field: keyof FAQItem, value: any) => {
     const updateItem = (item: FAQItem) => {
@@ -657,6 +721,18 @@ physical evidence folders organized by category.
             getSerializedState={getSerializedState}
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           {showTips && (
             <Card className="mb-6 border-blue-500">
               <CardHeader>
@@ -1394,6 +1470,8 @@ physical evidence folders organized by category.
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

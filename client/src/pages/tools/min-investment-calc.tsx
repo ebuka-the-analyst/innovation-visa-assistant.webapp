@@ -14,6 +14,64 @@ import { Calculator, CheckCircle2, PoundSterling, TrendingUp, AlertTriangle, Inf
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "min-investment-calc",
+  toolName: "Investment Calculator",
+  agent: "sterling",
+  greeting: "Hello! I'm Sterling, your financial planning advisor. Let's work through your investment requirements for the UK Innovator Founder visa. I'll help you calculate realistic budget allocations that demonstrate sound financial planning to endorsers.",
+  questions: [
+    {
+      id: "product_budget",
+      question: "How much do you estimate needing for product development? Include MVP development, technology infrastructure, and ongoing development costs.",
+      hint: "Example: '£50,000 for MVP development including tech stack setup and first 6 months of development'",
+      fieldKey: "productBudget",
+      minLength: 30
+    },
+    {
+      id: "marketing_budget",
+      question: "What is your marketing and sales budget? Include initial campaigns, sales setup, and customer acquisition costs.",
+      hint: "Example: '£25,000 for initial marketing campaigns, website, and sales infrastructure'",
+      fieldKey: "marketingBudget",
+      minLength: 30
+    },
+    {
+      id: "operations_budget",
+      question: "What are your operational costs? Include office space, equipment, and administrative expenses.",
+      hint: "Example: '£15,000 for co-working space, equipment, and admin costs for first year'",
+      fieldKey: "operationsBudget",
+      minLength: 30
+    },
+    {
+      id: "team_budget",
+      question: "What is your team and salary budget? Include founder salaries and planned hires.",
+      hint: "Example: '£35,000 for initial team including minimal founder salary and first hire'",
+      fieldKey: "teamBudget",
+      minLength: 30
+    },
+    {
+      id: "legal_budget",
+      question: "What are your legal and compliance costs? Include company formation, visa fees, and legal advice.",
+      hint: "Example: '£10,000 for legal setup, visa application fees, and compliance'",
+      fieldKey: "legalBudget",
+      minLength: 20
+    },
+    {
+      id: "funding_source",
+      question: "What is your primary funding source? (Self-funded, angel investment, VC, grants, or mixed)",
+      hint: "Endorsers want to see realistic and verified funding sources",
+      fieldKey: "fundingSource"
+    },
+    {
+      id: "runway_months",
+      question: "How many months of runway do you need? (6, 12, 18, or 24 months recommended)",
+      hint: "12-18 months is typically recommended for visa applications",
+      fieldKey: "runwayMonths"
+    }
+  ],
+  completionMessage: "Excellent! I've captured your investment details. Let me now calculate your total investment requirements and provide recommendations to strengthen your financial plan."
+};
 
 type InvestmentCategory = {
   id: string;
@@ -39,6 +97,60 @@ export default function MinInvestmentCalc() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('min-investment-calc-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('min-investment-calc-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((answers: Record<string, string>) => {
+    const extractAmount = (text: string): number => {
+      const match = text.match(/£?([\d,]+)/);
+      return match ? parseInt(match[1].replace(/,/g, '')) : 0;
+    };
+    
+    const newCategories: InvestmentCategory[] = [
+      { id: "1", name: "Product Development", amount: extractAmount(answers.productBudget) || 50000, description: answers.productBudget || "MVP development, tech infrastructure" },
+      { id: "2", name: "Marketing & Sales", amount: extractAmount(answers.marketingBudget) || 25000, description: answers.marketingBudget || "Initial marketing campaigns, sales setup" },
+      { id: "3", name: "Operations", amount: extractAmount(answers.operationsBudget) || 15000, description: answers.operationsBudget || "Office, equipment, admin costs" },
+      { id: "4", name: "Team & Salaries", amount: extractAmount(answers.teamBudget) || 35000, description: answers.teamBudget || "Initial team hiring and salaries" },
+      { id: "5", name: "Legal & Compliance", amount: extractAmount(answers.legalBudget) || 10000, description: answers.legalBudget || "Company formation, visa fees, legal" },
+      { id: "6", name: "Contingency", amount: 15000, description: "Emergency buffer (10-15% recommended)" },
+    ];
+    
+    setCategories(newCategories);
+    
+    if (answers.fundingSource) {
+      const sourceMap: Record<string, string> = {
+        'self': 'self-funded',
+        'angel': 'angel',
+        'vc': 'vc',
+        'grant': 'grants',
+        'mix': 'mixed'
+      };
+      const sourceLower = answers.fundingSource.toLowerCase();
+      for (const [key, value] of Object.entries(sourceMap)) {
+        if (sourceLower.includes(key)) {
+          setFundingSource(value);
+          break;
+        }
+      }
+    }
+    
+    if (answers.runwayMonths) {
+      const months = parseInt(answers.runwayMonths.match(/\d+/)?.[0] || '12');
+      if ([6, 12, 18, 24].includes(months)) {
+        setRunwayMonths(months);
+      }
+    }
+    
+    triggerAutoSave();
+    setMode('traditional');
+    toast({ title: "Investment Plan Created", description: "Your investment breakdown has been populated from your answers" });
+  }, [toast]);
 
   const [categories, setCategories] = useState<InvestmentCategory[]>(() => {
     const saved = localStorage.getItem("min-investment-calc-state");
@@ -163,6 +275,16 @@ export default function MinInvestmentCalc() {
               onExportWord={handleExportWord}
             />
 
+            <div className="flex justify-end mt-4">
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
+
+            {mode === 'ai' ? (
+              <div className="mt-6">
+                <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+              </div>
+            ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 mb-6">
               <Card>
                 <CardContent className="pt-6">
@@ -433,6 +555,8 @@ export default function MinInvestmentCalc() {
                 </div>
               </TabsContent>
             </Tabs>
+            </>
+            )}
           </div>
         </div>
       </div>

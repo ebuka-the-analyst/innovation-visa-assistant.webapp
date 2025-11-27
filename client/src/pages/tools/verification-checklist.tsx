@@ -1,9 +1,57 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  agent: 'sage',
+  greeting: "I'm Sage, your document compliance specialist. Let's verify you have all required documents ready for your UK Innovator Founder visa application.",
+  questions: [
+    {
+      id: 'identity-documents',
+      text: "Which identity documents do you have ready? List passport validity, previous visa stamps, birth certificate, and any marriage/name change documents.",
+      fieldKey: 'identityDocuments',
+      minLength: 50
+    },
+    {
+      id: 'financial-evidence',
+      text: "What financial evidence have you gathered? Include bank statements (28-day period), investment fund proof, source of funds documentation, and bank reference letters.",
+      fieldKey: 'financialEvidence',
+      minLength: 75
+    },
+    {
+      id: 'business-documents',
+      text: "What business documents are ready? List Companies House certificate, business plan status, shareholding evidence, and company accounts if applicable.",
+      fieldKey: 'businessDocuments',
+      minLength: 75
+    },
+    {
+      id: 'endorsement-status',
+      text: "What is your endorsement application status? Have you received your endorsement letter, approval certificate, and business assessment report from your endorsing body?",
+      fieldKey: 'endorsementStatus',
+      minLength: 50
+    },
+    {
+      id: 'qualifications',
+      text: "What qualifications and experience documents have you prepared? Include degrees, professional certifications, employment references, and CV/resume.",
+      fieldKey: 'qualifications',
+      minLength: 50
+    },
+    {
+      id: 'address-proof',
+      text: "What UK address documentation do you have? Describe your intended UK residence proof - tenancy agreement, property deed, or landlord confirmation.",
+      fieldKey: 'addressProof',
+      minLength: 50
+    },
+    {
+      id: 'translation-certification',
+      text: "Which documents require translation or certification? List any non-English documents and their current translation/certification status.",
+      fieldKey: 'translationCertification',
+      minLength: 50
+    }
+  ]
+};
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +118,43 @@ const INITIAL_DOCUMENTS: Document[] = [
 ];
 
 export default function VerificationChecklist() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('verification-checklist-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('verification-checklist-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const updatedDocs = [...documents];
+    if (answers.identityDocuments && answers.identityDocuments.length > 30) {
+      updatedDocs.filter(d => d.category === 'Identity').forEach(d => {
+        if (answers.identityDocuments.toLowerCase().includes(d.name.toLowerCase())) {
+          d.status = 'in-progress';
+        }
+      });
+    }
+    if (answers.financialEvidence && answers.financialEvidence.length > 30) {
+      updatedDocs.filter(d => d.category === 'Financial').forEach(d => {
+        if (answers.financialEvidence.toLowerCase().includes('bank') || answers.financialEvidence.toLowerCase().includes('statement')) {
+          d.status = 'in-progress';
+        }
+      });
+    }
+    if (answers.businessDocuments && answers.businessDocuments.length > 30) {
+      updatedDocs.filter(d => d.category === 'Business').forEach(d => {
+        d.status = 'in-progress';
+      });
+    }
+    if (answers.endorsementStatus && answers.endorsementStatus.toLowerCase().includes('received')) {
+      updatedDocs.filter(d => d.category === 'Endorsement').forEach(d => {
+        d.status = 'verified';
+      });
+    }
+    setDocuments(updatedDocs);
+  };
+
   const [documents, setDocuments] = useState<Document[]>(INITIAL_DOCUMENTS);
   const [activeTab, setActiveTab] = useState('overview');
   const [savedDate, setSavedDate] = useState('');
@@ -419,13 +504,27 @@ professional immigration advice for your specific situation.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-verification-checklist">Document Verification Checklist</h1>
-            <p className="text-lg text-muted-foreground">Complete document verification for UK Innovator Founder Visa application</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-verification-checklist">Document Verification Checklist</h1>
+                <p className="text-lg text-muted-foreground">Complete document verification for UK Innovator Founder Visa application</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="verification-checklist"
             onSave={handleSave}
@@ -877,6 +976,8 @@ professional immigration advice for your specific situation.
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

@@ -14,6 +14,66 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Clock, CheckCircle2, Circle, AlertTriangle, Calendar, FileText, Send, Eye, Timer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "visa-status-tracker",
+  agentId: "sage",
+  agentName: "Sage",
+  agentTitle: "Compliance & Documentation Expert",
+  greeting: "Hello! I'm Sage, your compliance specialist. I'll help you track your visa application status effectively. Let's set up your application tracking details.",
+  questions: [
+    {
+      id: "applicationId",
+      text: "What is your application reference number or tracking ID from the endorsing body?",
+      fieldKey: "applicationId",
+      minLength: 50,
+      placeholder: "Describe your application reference, when you received it, and any secondary tracking numbers..."
+    },
+    {
+      id: "endorsingBody",
+      text: "Which endorsing body is processing your application? (e.g., Tech Nation, Innovator International, UK universities)",
+      fieldKey: "endorsingBody",
+      minLength: 50,
+      placeholder: "Name the endorsing body and describe why you chose them..."
+    },
+    {
+      id: "submissionDate",
+      text: "When did you submit your application to the endorsing body? What documents were included?",
+      fieldKey: "submissionDate",
+      minLength: 60,
+      placeholder: "Provide the submission date and list the key documents you submitted..."
+    },
+    {
+      id: "currentStatus",
+      text: "What is the current status of your application? (draft, submitted, under review, additional info requested, decision pending, approved, rejected)",
+      fieldKey: "currentStatus",
+      minLength: 50,
+      placeholder: "Describe the current status and any recent communications..."
+    },
+    {
+      id: "lastUpdate",
+      text: "When was the last update you received? What did it say?",
+      fieldKey: "lastUpdate",
+      minLength: 60,
+      placeholder: "Describe the most recent communication and its contents..."
+    },
+    {
+      id: "nextSteps",
+      text: "What are your expected next steps or pending actions?",
+      fieldKey: "nextSteps",
+      minLength: 50,
+      placeholder: "Describe any pending actions, upcoming deadlines, or expected milestones..."
+    },
+    {
+      id: "notes",
+      text: "Are there any additional notes or concerns about your application status?",
+      fieldKey: "notes",
+      minLength: 50,
+      placeholder: "Share any concerns, questions for the endorsing body, or observations..."
+    }
+  ]
+};
 
 type StatusUpdate = {
   id: string;
@@ -60,6 +120,27 @@ export default function VisaStatusTracker() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('visa-status-tracker-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('visa-status-tracker-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((answers: Record<string, string>) => {
+    const newData = { ...data };
+    if (answers.applicationId) newData.applicationId = answers.applicationId;
+    if (answers.endorsingBody) newData.endorsingBody = answers.endorsingBody;
+    if (answers.notes) newData.notes = answers.notes;
+    setData(newData);
+    setMode('traditional');
+    toast({
+      title: "AI Guidance Complete",
+      description: "Your responses have been captured. Review and refine your tracking details."
+    });
+  }, [data, toast]);
 
   const [data, setData] = useState<ApplicationData>(() => {
     const saved = localStorage.getItem("visa-status-tracker-state");
@@ -178,13 +259,25 @@ export default function VisaStatusTracker() {
                 </h1>
                 <p className="text-muted-foreground mt-1">Track your visa application status in real-time</p>
               </div>
-              {showAutoSave && (
-                <Badge variant="secondary" className="animate-pulse">
-                  <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
-                </Badge>
-              )}
+              <div className="flex items-center gap-3">
+                {showAutoSave && (
+                  <Badge variant="secondary" className="animate-pulse">
+                    <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
+                  </Badge>
+                )}
+                <AiTraditionalToggle
+                  mode={mode}
+                  onModeChange={setMode}
+                  aiLabel="AI-Guided"
+                  traditionalLabel="Traditional Form"
+                />
+              </div>
             </div>
 
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+              <>
             <ToolUtilityBar
               toolId="visa-status-tracker"
               toolName="Visa Status Tracker"
@@ -488,6 +581,8 @@ export default function VisaStatusTracker() {
                 </Card>
               </TabsContent>
             </Tabs>
+              </>
+            )}
           </div>
         </div>
       </div>

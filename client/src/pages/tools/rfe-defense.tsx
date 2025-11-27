@@ -12,6 +12,59 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, CheckCircle2, AlertTriangle, Plus, Trash2, FileText, Target, Lightbulb, Scale } from "lucide-react";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'rfe-defense',
+  toolName: 'RFE Defence Lab',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. Receiving a Request for Evidence (RFE) is an opportunity to strengthen your application. Let's build comprehensive defenses for each concern raised by the Home Office.",
+  questions: [
+    {
+      id: 'rfe-overview',
+      question: "What is the primary concern raised in your RFE, and which visa criterion does it relate to?",
+      hint: "Identify if it's about Innovation, Viability, or Scalability.",
+      fieldKey: 'rfeOverview',
+      minLength: 30
+    },
+    {
+      id: 'innovation-issue',
+      question: "If innovation-related: What specific aspect of your innovation is being questioned?",
+      hint: "Is it about technical differentiation, IP protection, or novel approach?",
+      fieldKey: 'innovationIssue',
+      minLength: 20
+    },
+    {
+      id: 'viability-issue',
+      question: "If viability-related: What evidence is being requested about your business model?",
+      hint: "Consider market validation, revenue proof, or customer evidence requests.",
+      fieldKey: 'viabilityIssue',
+      minLength: 20
+    },
+    {
+      id: 'available-evidence',
+      question: "What evidence do you currently have available to address these concerns?",
+      hint: "List documents, testimonials, data, or expert opinions you can provide.",
+      fieldKey: 'availableEvidence',
+      minLength: 30
+    },
+    {
+      id: 'defense-strategy',
+      question: "What is your initial defense strategy for the most critical RFE point?",
+      hint: "How will you demonstrate that you meet the requirement in question?",
+      fieldKey: 'defenseStrategy',
+      minLength: 30
+    },
+    {
+      id: 'response-deadline',
+      question: "What is your RFE response deadline and what additional evidence can you gather?",
+      hint: "Consider expert letters, updated financials, customer testimonials, or technical assessments.",
+      fieldKey: 'responseDeadline',
+      minLength: 15
+    }
+  ],
+  completionMessage: "Excellent! I've captured the key RFE concerns and your defense approach. I'm now populating your defense strategy with structured responses and evidence requirements for each issue."
+};
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
@@ -87,6 +140,10 @@ export default function RFEDefense() {
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('rfe-defense-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
   const [issues, setIssues] = useState<RFEIssue[]>(() => {
     const saved = localStorage.getItem("rfe-defense-state");
     if (saved) {
@@ -108,6 +165,27 @@ export default function RFEDefense() {
 
   const [activeTab, setActiveTab] = useState("issues");
   const [selectedIssue, setSelectedIssue] = useState<string | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem('rfe-defense-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.rfeOverview) {
+      setNewIssue(prev => ({
+        ...prev,
+        issue: answers.rfeOverview,
+        category: answers.innovationIssue ? 'innovation' : answers.viabilityIssue ? 'viability' : 'innovation'
+      }));
+    }
+    if (answers.defenseStrategy) {
+      setNewIssue(prev => ({ ...prev, defense: answers.defenseStrategy }));
+    }
+    if (answers.availableEvidence) {
+      setNewIssue(prev => ({ ...prev, evidence: answers.availableEvidence }));
+    }
+    setMode('traditional');
+  };
 
   useEffect(() => {
     return () => {
@@ -206,13 +284,20 @@ export default function RFEDefense() {
                 </h1>
                 <p className="text-muted-foreground mt-1">Build comprehensive defenses against RFE challenges</p>
               </div>
-              {showAutoSave && (
-                <Badge variant="secondary" className="animate-pulse">
-                  <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
-                </Badge>
-              )}
+              <div className="flex items-center gap-3">
+                <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+                {showAutoSave && (
+                  <Badge variant="secondary" className="animate-pulse">
+                    <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
+                  </Badge>
+                )}
+              </div>
             </div>
 
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+            <>
             <ToolUtilityBar
               toolId="rfe-defense"
               toolName="RFE Defence Lab"
@@ -522,6 +607,8 @@ export default function RFEDefense() {
                 </div>
               </TabsContent>
             </Tabs>
+            </>
+            )}
           </div>
         </div>
       </div>

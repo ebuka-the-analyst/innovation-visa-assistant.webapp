@@ -13,6 +13,66 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Map, CheckCircle2, Circle, ArrowRight, Rocket, Target, Calendar, Clock, FileText, Users, PoundSterling, Shield, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "zero-approved",
+  agentId: "sterling",
+  agentName: "Sterling",
+  agentTitle: "Financial & Investment Expert",
+  greeting: "Hello! I'm Sterling, your financial planning specialist. Let me help you navigate the complete journey from zero to approved Innovator Founder visa status.",
+  questions: [
+    {
+      id: "currentPhase",
+      text: "Which phase are you currently in? (Foundation, Business Planning, Endorsement Prep, Endorsement Application, Visa Application, Settlement)",
+      fieldKey: "currentPhase",
+      minLength: 50,
+      placeholder: "Describe your current phase and what tasks you've already completed..."
+    },
+    {
+      id: "businessIdea",
+      text: "Describe your innovative business idea. What problem does it solve and how is it innovative?",
+      fieldKey: "businessIdea",
+      minLength: 80,
+      placeholder: "Share your business concept, target market, innovation elements, and competitive advantage..."
+    },
+    {
+      id: "financialReadiness",
+      text: "What is your financial readiness? Do you have the required maintenance funds (£1,270) and initial capital?",
+      fieldKey: "financialReadiness",
+      minLength: 60,
+      placeholder: "Describe your financial situation, available funds, and investment plans..."
+    },
+    {
+      id: "documentationStatus",
+      text: "What business documentation have you prepared? (Business plan, financial projections, market research)",
+      fieldKey: "documentationStatus",
+      minLength: 60,
+      placeholder: "List prepared documents and identify what still needs to be completed..."
+    },
+    {
+      id: "endorserSelection",
+      text: "Have you selected an endorsing body? Which one and why?",
+      fieldKey: "endorserSelection",
+      minLength: 50,
+      placeholder: "Name your target endorser and explain why they're the right fit for your business..."
+    },
+    {
+      id: "timeline",
+      text: "What is your target timeline for visa approval? When do you need to be in the UK?",
+      fieldKey: "timeline",
+      minLength: 50,
+      placeholder: "Share your target approval date and any deadline constraints..."
+    },
+    {
+      id: "blockers",
+      text: "What are your current blockers or concerns about completing the visa journey?",
+      fieldKey: "blockers",
+      minLength: 60,
+      placeholder: "Describe any challenges, uncertainties, or areas where you need guidance..."
+    }
+  ]
+};
 
 type Phase = {
   id: string;
@@ -114,6 +174,22 @@ export default function ZeroApproved() {
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('zero-approved-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('zero-approved-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((_answers: Record<string, string>) => {
+    setMode('traditional');
+    toast({
+      title: "AI Guidance Complete",
+      description: "Your visa journey roadmap has been initialized. Start tracking your progress."
+    });
+  }, [toast]);
+
   const [phases, setPhases] = useState<Phase[]>(() => {
     const saved = localStorage.getItem("zero-approved-state");
     if (saved) {
@@ -214,13 +290,25 @@ export default function ZeroApproved() {
                 </h1>
                 <p className="text-muted-foreground mt-1">Complete roadmap from zero to visa approved</p>
               </div>
-              {showAutoSave && (
-                <Badge variant="secondary" className="animate-pulse">
-                  <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
-                </Badge>
-              )}
+              <div className="flex items-center gap-3">
+                {showAutoSave && (
+                  <Badge variant="secondary" className="animate-pulse">
+                    <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
+                  </Badge>
+                )}
+                <AiTraditionalToggle
+                  mode={mode}
+                  onModeChange={setMode}
+                  aiLabel="AI-Guided"
+                  traditionalLabel="Traditional Form"
+                />
+              </div>
             </div>
 
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+              <>
             <ToolUtilityBar
               toolId="zero-approved"
               toolName="Zero-to-Approved Roadmap"
@@ -451,6 +539,8 @@ export default function ZeroApproved() {
                 </Card>
               </TabsContent>
             </Tabs>
+              </>
+            )}
           </div>
         </div>
       </div>

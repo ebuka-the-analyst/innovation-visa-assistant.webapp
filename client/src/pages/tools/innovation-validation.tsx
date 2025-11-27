@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,7 +33,64 @@ type RiskAssessment = {
   mitigation: string;
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'innovation-validation',
+  toolName: 'Innovation Validation',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. I'll help you validate your innovation for the UK Innovator Founder visa. Let's explore what makes your idea truly innovative and document strong evidence for endorsers. Ready to begin?",
+  questions: [
+    {
+      id: 'innovation-name',
+      question: "What is the name of your innovation or business concept?",
+      hint: "Give a clear, memorable name that captures the essence of what you're building",
+      fieldKey: 'innovationName',
+      required: true
+    },
+    {
+      id: 'innovation-description',
+      question: "Describe your innovation in detail. What problem does it solve and how does it work differently from existing solutions?",
+      hint: "Aim for 200+ words covering the problem, your solution, and what makes it unique",
+      fieldKey: 'innovationDescription',
+      minLength: 100
+    },
+    {
+      id: 'novelty-evidence',
+      question: "What evidence do you have that your innovation is genuinely novel? Have you conducted any prior art searches or patent research?",
+      hint: "Mention patent searches, academic research reviews, or competitor analysis you've done",
+      fieldKey: 'noveltyEvidence'
+    },
+    {
+      id: 'technical-feasibility',
+      question: "How have you validated the technical feasibility of your innovation? Do you have a prototype or proof-of-concept?",
+      hint: "Describe any prototypes, MVPs, technical testing, or expert validations",
+      fieldKey: 'technicalFeasibility'
+    },
+    {
+      id: 'competitive-advantage',
+      question: "What are your key competitive advantages over existing solutions in the market?",
+      hint: "Be specific about what makes you better - technology, cost, speed, user experience, etc.",
+      fieldKey: 'competitiveAdvantage'
+    },
+    {
+      id: 'market-validation',
+      question: "How have you validated market demand for your innovation? Any customer interviews, surveys, or letters of intent?",
+      hint: "Quantify your validation - number of interviews, survey responses, pilot customers",
+      fieldKey: 'marketValidation'
+    },
+    {
+      id: 'key-risks',
+      question: "What are the top 3 risks to your innovation's success, and how do you plan to mitigate them?",
+      hint: "Consider technical, market, competitive, and resource risks",
+      fieldKey: 'keyRisks'
+    }
+  ],
+  completionMessage: "Excellent work! I've captured your innovation details. I'm now populating the validation form with your responses. Review and add supporting evidence to strengthen your case for endorsement!"
+};
+
 export default function InnovationValidation() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('innovation-validation-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [innovationName, setInnovationName] = useState('');
   const [innovationDescription, setInnovationDescription] = useState('');
   const [validationItems, setValidationItems] = useState<ValidationItem[]>([
@@ -69,6 +126,59 @@ export default function InnovationValidation() {
     ? Math.round(validationItems.reduce((sum, item) => sum + item.score, 0) / validationItems.length)
     : 0;
   const validationScore = Math.round((completionRate * 0.6) + (averageScore * 0.4));
+
+  useEffect(() => {
+    localStorage.setItem('innovation-validation-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.innovationName) setInnovationName(answers.innovationName);
+    if (answers.innovationDescription) setInnovationDescription(answers.innovationDescription);
+    if (answers.noveltyEvidence) {
+      const updated = [...validationItems];
+      const noveltyItems = updated.filter(i => i.category === 'novelty');
+      noveltyItems.forEach(item => {
+        item.evidence = answers.noveltyEvidence;
+        item.completed = true;
+        item.score = 7;
+      });
+      setValidationItems(updated);
+    }
+    if (answers.technicalFeasibility) {
+      const updated = [...validationItems];
+      const techItems = updated.filter(i => i.category === 'technical');
+      techItems.forEach(item => {
+        item.evidence = answers.technicalFeasibility;
+        item.completed = true;
+        item.score = 7;
+      });
+      setValidationItems(updated);
+    }
+    if (answers.competitiveAdvantage) {
+      const updated = [...validationItems];
+      const compItems = updated.filter(i => i.category === 'competitive');
+      compItems.forEach(item => {
+        item.evidence = answers.competitiveAdvantage;
+        item.completed = true;
+        item.score = 7;
+      });
+      setValidationItems(updated);
+    }
+    if (answers.marketValidation) {
+      const updated = [...validationItems];
+      const marketItems = updated.filter(i => i.category === 'market');
+      marketItems.forEach(item => {
+        item.evidence = answers.marketValidation;
+        item.completed = true;
+        item.score = 7;
+      });
+      setValidationItems(updated);
+    }
+    if (answers.keyRisks) {
+      setRisks([{ area: 'Identified Risks', level: 'medium', description: answers.keyRisks, mitigation: 'See details' }]);
+    }
+    setMode('traditional');
+  };
 
   const updateValidationItem = (index: number, field: keyof ValidationItem, value: any) => {
     const updated = [...validationItems];
@@ -421,13 +531,26 @@ Report generated by UK Innovator Founder Visa Assistant
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-innovation-validation">Innovation Validation</h1>
-            <p className="text-lg text-muted-foreground">Comprehensive validation of innovation novelty, feasibility, and market potential</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-innovation-validation">Innovation Validation</h1>
+                <p className="text-lg text-muted-foreground">Comprehensive validation of innovation novelty, feasibility, and market potential</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="innovation-validation"
             onSave={handleSave}
@@ -884,6 +1007,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

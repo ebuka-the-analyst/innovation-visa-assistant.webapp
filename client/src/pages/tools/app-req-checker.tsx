@@ -9,6 +9,59 @@ import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { useState, useEffect } from "react";
 import { Download, AlertTriangle, CheckCircle2, Info, TrendingUp, Save, Share2, Lightbulb, Calendar, RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'app-req-checker',
+  toolName: 'Application Requirements Checker',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. I'll help you assess your readiness for the UK Innovator Founder Visa application. Understanding the 70-point scoring system is crucial - let's evaluate where you stand and identify any gaps. Let's check your requirements!",
+  questions: [
+    {
+      id: 'innovation-evidence',
+      question: "Describe your business innovation. What makes your product, service, or business model genuinely new and different?",
+      hint: "Focus on novel technology, unique approach, or solving problems in ways not done before",
+      fieldKey: 'innovation_evidence',
+      minLength: 100
+    },
+    {
+      id: 'market-validation',
+      question: "How have you validated market demand? Describe your evidence of customer interest or traction.",
+      hint: "Customer interviews, letters of intent, pilot users, revenue, waiting lists, or market research",
+      fieldKey: 'market_validation',
+      minLength: 100
+    },
+    {
+      id: 'scalability-plan',
+      question: "How will your business scale? Describe your growth trajectory and job creation potential.",
+      hint: "Endorsers want to see potential for 5+ UK jobs and significant revenue growth within 3 years",
+      fieldKey: 'scalability_plan',
+      minLength: 100
+    },
+    {
+      id: 'financial-readiness',
+      question: "Describe your financial readiness. Do you have the required £1,270 maintenance funds and can cover visa fees?",
+      hint: "Total costs: ~£5,000+ including application fees, health surcharge, and maintenance funds",
+      fieldKey: 'financial_readiness',
+      minLength: 60
+    },
+    {
+      id: 'english-proficiency',
+      question: "How will you demonstrate English language proficiency? What test have you taken or will take?",
+      hint: "IELTS, TOEFL, or proof of degree taught in English. B2 level minimum required.",
+      fieldKey: 'english_proficiency',
+      minLength: 40
+    },
+    {
+      id: 'endorsement-readiness',
+      question: "Which endorsing body are you targeting? How prepared are you for their specific requirements?",
+      hint: "Envestors, UKES, Innovator International, or GEP. Each has different focus areas.",
+      fieldKey: 'endorsement_readiness',
+      minLength: 80
+    }
+  ],
+  completionMessage: "Great assessment! You've identified your current readiness level and any gaps to address. This clarity will help you prepare a stronger application. I'm now updating your requirements checklist with your responses."
+};
 
 const CRITERIA = [
   {id:"1",category:"Innovation (16.7 points)",items:[
@@ -37,6 +90,10 @@ const FINANCIAL_REQS = [
 ];
 
 export default function AppReqChecker() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('app-req-checker-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [checks, setChecks] = useState<any>({});
   const [expanded, setExpanded] = useState<any>({});
   const [tab, setTab] = useState("overview");
@@ -133,6 +190,10 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
   };
 
   useEffect(() => {
+    localStorage.setItem('app-req-checker-mode', mode);
+  }, [mode]);
+
+  useEffect(() => {
     // Check for handoff payload from QR code scan
     const handoffKey = 'app-req-checker_handoff';
     const handoffData = localStorage.getItem(handoffKey);
@@ -156,15 +217,43 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
     }
   }, []);
 
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newChecks: any = { ...checks };
+    if (answers.innovation_evidence) {
+      newChecks["1-Tech-driven innovation"] = true;
+    }
+    if (answers.market_validation) {
+      newChecks["2-Market validation"] = true;
+    }
+    if (answers.scalability_plan) {
+      newChecks["3-Growth trajectory"] = true;
+    }
+    setChecks(newChecks);
+    setMode('traditional');
+  };
+
   return (
     <>
       
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Application Requirements Checker</h1>
-          <p className="text-muted-foreground mb-6">Comprehensive assessment of your 70-point application readiness</p>
+          <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Application Requirements Checker</h1>
+              <p className="text-muted-foreground">Comprehensive assessment of your 70-point application readiness</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="app-req-checker"
             toolName="Application Requirements Checker"
@@ -357,6 +446,8 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
             <Download className="w-4 h-4" />
             Export Complete Assessment
           </Button>
+          </>
+          )}
         </div>
       </div>
     </>

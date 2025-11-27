@@ -17,6 +17,58 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'growth-strategy',
+  toolName: 'Growth Strategy Planner',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Expert. Let's build a comprehensive growth strategy that demonstrates scalability - a key criterion for UK Innovator Founder Visa endorsement. I'll guide you through defining your goals, markets, and acquisition channels.",
+  questions: [
+    {
+      id: 'growth-goal',
+      question: "What's your primary growth goal for the next 12 months? Be specific about the metric and target value.",
+      hint: "Example: Reach £100k MRR, acquire 1000 customers, expand to 3 new markets",
+      fieldKey: 'primaryGoal',
+      minLength: 30
+    },
+    {
+      id: 'target-market',
+      question: "Describe your primary target market segment. Who are your ideal customers, what's the market size, and where are they located?",
+      hint: "Include demographics, company size (if B2B), geography, and pain points",
+      fieldKey: 'targetMarket',
+      minLength: 50
+    },
+    {
+      id: 'acquisition-channels',
+      question: "What are your top 3 customer acquisition channels? For each, estimate the monthly budget, expected CAC, and conversion rate.",
+      hint: "Consider: content marketing, paid ads, partnerships, direct sales, referrals",
+      fieldKey: 'acquisitionChannels',
+      minLength: 50
+    },
+    {
+      id: 'retention-strategy',
+      question: "What's your customer retention strategy? How will you reduce churn and increase lifetime value?",
+      hint: "Think about onboarding, support, product improvements, loyalty programs",
+      fieldKey: 'retentionStrategy',
+      minLength: 50
+    },
+    {
+      id: 'revenue-projection',
+      question: "What are your revenue projections for months 6, 12, 18, and 24? Provide the figures in GBP.",
+      hint: "Be realistic - endorsers prefer conservative but achievable projections",
+      fieldKey: 'revenueProjection'
+    },
+    {
+      id: 'uk-job-creation',
+      question: "How will your growth strategy create UK jobs? Describe your hiring plan and the types of roles you'll create.",
+      hint: "Job creation is a key criterion for visa endorsement - be specific about numbers and timeline",
+      fieldKey: 'ukJobCreation',
+      minLength: 50
+    }
+  ],
+  completionMessage: "Brilliant! You've outlined a solid growth strategy. This demonstrates the scalability endorsing bodies are looking for. I'm populating your strategy planner with these insights now."
+};
 
 type GrowthGoal = {
   id: string;
@@ -64,6 +116,10 @@ type RevenueExpansion = {
 export default function GrowthStrategy() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('growth-strategy-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [activeTab, setActiveTab] = useState('strategy');
   const [savedDate, setSavedDate] = useState('');
 
@@ -302,6 +358,60 @@ export default function GrowthStrategy() {
       restoreSerializedState(state);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('growth-strategy-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.primaryGoal) {
+      setGrowthGoals([{
+        id: '1',
+        goal: answers.primaryGoal,
+        timeframe: 'medium',
+        metric: 'Revenue/Customers',
+        targetValue: '',
+        currentValue: ''
+      }]);
+    }
+    if (answers.targetMarket) {
+      setTargetMarkets([{
+        id: '1',
+        segment: answers.targetMarket,
+        size: '',
+        geography: 'UK',
+        demographics: '',
+        painPoints: ''
+      }]);
+    }
+    if (answers.acquisitionChannels) {
+      const channels = answers.acquisitionChannels.split(/[,;]/).slice(0, 3);
+      setAcquisitionChannels(channels.map((ch: string, i: number) => ({
+        id: (i + 1).toString(),
+        channel: ch.trim(),
+        budget: 0,
+        expectedCAC: 0,
+        expectedConversion: 0,
+        priority: 'high' as const
+      })));
+    }
+    if (answers.retentionStrategy) {
+      setRetentionTactics([{
+        id: '1',
+        tactic: 'Customer Retention',
+        description: answers.retentionStrategy,
+        frequency: 'Ongoing',
+        expectedImpact: 'Reduced churn'
+      }]);
+    }
+    if (answers.ukJobCreation) {
+      setUkScalabilityNotes(prev => ({
+        ...prev,
+        jobCreationPlan: answers.ukJobCreation
+      }));
+    }
+    setMode('traditional');
+  };
 
   const handleSave = () => {
     const state = getSerializedState();
@@ -666,13 +776,49 @@ qualified business advisors and immigration specialists before submitting visa a
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-growth-strategy">Growth Strategy Planner</h1>
-            <p className="text-lg text-muted-foreground">UK-focused scalability and growth strategy for visa compliance</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-growth-strategy">Growth Strategy Planner</h1>
+                <p className="text-lg text-muted-foreground">UK-focused scalability and growth strategy for visa compliance</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Atlas, our Growth Expert, helps you build a compelling growth strategy for your visa application.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Define clear growth goals and milestones</li>
+                    <li>Identify target markets and acquisition channels</li>
+                    <li>Plan customer retention strategies</li>
+                    <li>Earn XP as you complete each question</li>
+                  </ul>
+                  <p className="pt-2">Your answers will automatically populate the strategy form when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="growth-strategy"
             onSave={handleSave}
@@ -1454,6 +1600,8 @@ qualified business advisors and immigration specialists before submitting visa a
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

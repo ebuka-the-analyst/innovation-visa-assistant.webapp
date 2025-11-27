@@ -1,6 +1,6 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -13,6 +13,58 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, Cell, PieChart, Pie } from "recharts";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'role-designer',
+  toolName: 'Role Designer',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Advisor. A well-designed organizational structure demonstrates your capability to build and scale a UK-based team. Let's create role definitions that align with your growth plans and visa requirements.",
+  questions: [
+    {
+      id: 'current-team',
+      question: "Describe your current team structure. How many people and what roles do you have?",
+      hint: "Include founders, employees, contractors, and advisors.",
+      fieldKey: 'currentTeam',
+      minLength: 20
+    },
+    {
+      id: 'first-hires',
+      question: "What are the first 3 roles you plan to hire for, and why are they critical?",
+      hint: "Consider technical, commercial, and operational needs.",
+      fieldKey: 'firstHires',
+      minLength: 40
+    },
+    {
+      id: 'uk-job-creation',
+      question: "How many UK-based jobs do you plan to create in the first 2 years?",
+      hint: "Job creation is a key ILR criterion. Include full-time and part-time positions.",
+      fieldKey: 'ukJobCreation',
+      minLength: 20
+    },
+    {
+      id: 'skill-gaps',
+      question: "What are the key skill gaps in your current team that new hires will address?",
+      hint: "Consider technical skills, market knowledge, and operational experience.",
+      fieldKey: 'skillGaps',
+      minLength: 30
+    },
+    {
+      id: 'hiring-timeline',
+      question: "What is your hiring timeline and budget for the first 12 months?",
+      hint: "Include expected salaries, recruitment costs, and onboarding investments.",
+      fieldKey: 'hiringTimeline',
+      minLength: 30
+    },
+    {
+      id: 'organizational-structure',
+      question: "How will your organizational structure evolve as you scale?",
+      hint: "Describe department structure, reporting lines, and leadership development.",
+      fieldKey: 'organizationalStructure',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent organizational planning! I've captured your team structure and hiring strategy. I'm now populating your role definitions with detailed job descriptions aligned with your growth trajectory."
+};
 
 // UK Innovator Founder Visa Context (November 2025)
 // Scalability Criterion: Clear organizational structure demonstrates growth potential
@@ -35,6 +87,10 @@ interface RoleDefinition {
 }
 
 export default function RoleDesigner() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('role-designer-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [roles, setRoles] = useState<RoleDefinition[]>([
@@ -53,6 +109,30 @@ export default function RoleDesigner() {
       impactOnScaling: "Critical - enables product development and technical foundation for growth"
     }
   ]);
+
+  useEffect(() => {
+    localStorage.setItem('role-designer-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.firstHires) {
+      setRoles([{
+        id: "1",
+        title: "Priority Hire",
+        department: "To Be Defined",
+        seniority: "Senior",
+        purpose: answers.firstHires,
+        responsibilities: answers.skillGaps ? [answers.skillGaps] : [""],
+        keySkills: [""],
+        hiringPriority: 1,
+        hiringMonth: 3,
+        fullTime: true,
+        estimatedSalary: 65000,
+        impactOnScaling: answers.ukJobCreation || ""
+      }]);
+    }
+    setMode('traditional');
+  };
 
   const saveProgress = () => {
     localStorage.setItem('roleDesignerFiles', JSON.stringify(uploadedFiles));
@@ -520,9 +600,16 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Organizational Design & Role Framework</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-4xl font-bold">Organizational Design & Role Framework</h1>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
           <p className="text-muted-foreground mb-6">Build scalable team structure with clear roles (Innovator Founder Visa)</p>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="role-designer"
             toolName="Organizational Design & Role Framework"
@@ -811,7 +898,6 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
             </div>
           </Card>
 
-          {/* File Upload */}
           <Card className="p-6 mb-6">
             <h3 className="font-semibold mb-4">Upload Supporting Documents</h3>
             <FileUploadButton onFileSelected={handleFileUpload} config={fileUploadConfigs.companyDocuments} />
@@ -821,6 +907,8 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
               </div>
             )}
           </Card>
+          </>
+          )}
         </div>
       </div>
     </>

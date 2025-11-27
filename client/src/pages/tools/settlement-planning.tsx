@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,6 +24,22 @@ type SettlementTask = {
   notes: string;
   priority: "low" | "medium" | "high";
   timeline: string;
+};
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'settlement-planning',
+  toolName: 'Settlement Planning',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your compliance expert. I'll help you create a comprehensive UK settlement plan. Let's understand your situation so I can tailor the planning tasks to your needs.",
+  questions: [
+    { id: 'city', question: "Which UK city are you planning to settle in?", hint: "Consider proximity to your business, talent pool, and cost of living", fieldKey: 'targetCity', fieldType: 'select', options: ['London', 'Manchester', 'Birmingham', 'Edinburgh', 'Bristol', 'Leeds', 'Glasgow', 'Cambridge', 'Oxford'] },
+    { id: 'arrival', question: "What is your planned arrival date in the UK?", hint: "This helps prioritize tasks on your timeline", fieldKey: 'arrivalDate', fieldType: 'text' },
+    { id: 'family', question: "Will family members be relocating with you?", hint: "This affects school research, healthcare registration, and housing needs", fieldKey: 'hasFamily', fieldType: 'text' },
+    { id: 'housing', question: "Have you started researching housing options in your target area?", hint: "Consider rental costs, proximity to business, and transport links", fieldKey: 'housingResearch', fieldType: 'text' },
+    { id: 'business', question: "Is your business already registered in the UK?", hint: "If not, Companies House registration is a priority", fieldKey: 'businessRegistered', fieldType: 'text' },
+    { id: 'priorities', question: "What are your top 3 priorities for the first month in the UK?", hint: "This helps me customize your task list", fieldKey: 'priorities', fieldType: 'text' },
+  ],
+  completionMessage: "Excellent! I've understood your settlement needs. Let me create a personalized task list for your UK journey."
 };
 
 const INITIAL_TASKS: SettlementTask[] = [
@@ -57,6 +74,20 @@ export default function SettlementPlanning() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('settlement-planning-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('settlement-planning-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.targetCity) setTargetCity(answers.targetCity);
+    if (answers.arrivalDate) setArrivalDate(answers.arrivalDate);
+    setMode('traditional');
+  };
 
   const [tasks, setTasks] = useState<SettlementTask[]>(() => {
     const saved = localStorage.getItem("settlement-planning-state");
@@ -177,6 +208,14 @@ export default function SettlementPlanning() {
               onExportWord={handleExportWord}
             />
 
+            <div className="flex justify-end mt-4 mb-4">
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
+
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 mb-6">
               <Card>
                 <CardContent className="pt-6">
@@ -381,6 +420,8 @@ export default function SettlementPlanning() {
                 </Card>
               </TabsContent>
             </Tabs>
+            </>
+            )}
           </div>
         </div>
       </div>

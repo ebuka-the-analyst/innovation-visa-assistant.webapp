@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +16,22 @@ import {
 } from 'recharts';
 
 type UKRegion = 'london' | 'southeast' | 'southwest' | 'midlands' | 'north' | 'scotland' | 'wales' | 'ni';
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'salary-threshold',
+  toolName: 'Salary Threshold Calculator',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your financial analyst. Let me help you understand your salary requirements for the UK Innovator Founder Visa. I'll guide you through the key financial factors that affect your visa compliance.",
+  questions: [
+    { id: 'salary', question: "What is your planned annual gross salary from your UK business?", hint: "This should be at least £25,600 to meet minimum visa requirements", fieldKey: 'annualSalary', fieldType: 'number' },
+    { id: 'region', question: "Which UK region are you planning to live in?", hint: "London has the highest cost of living, while Northern regions are more affordable", fieldKey: 'region', fieldType: 'select', options: ['london', 'southeast', 'southwest', 'midlands', 'north', 'scotland', 'wales', 'ni'] },
+    { id: 'dependents', question: "How many dependents will be relocating with you to the UK?", hint: "Each dependent adds approximately £600/month to your living costs", fieldKey: 'dependents', fieldType: 'number' },
+    { id: 'additional', question: "Do you have any additional income sources beyond your salary?", hint: "Include dividends, investments, rental income, etc.", fieldKey: 'additionalIncome', fieldType: 'number' },
+    { id: 'savings', question: "What are your current savings that could support the transition period?", hint: "Having 6-12 months of expenses saved is recommended", fieldKey: 'savings', fieldType: 'text' },
+    { id: 'timeline', question: "When do you plan to start drawing your salary from the UK business?", hint: "Consider your runway and business cash flow projections", fieldKey: 'timeline', fieldType: 'text' },
+  ],
+  completionMessage: "Excellent! I've gathered all the financial details needed. Let me now show you your salary compliance analysis and recommendations."
+};
 
 const REGION_COST_OF_LIVING: Record<UKRegion, { name: string; monthlyCost: number; rentIndex: number }> = {
   london: { name: 'London', monthlyCost: 2800, rentIndex: 1.0 },
@@ -76,12 +92,27 @@ const calculateNationalInsurance = (annualIncome: number): number => {
 };
 
 export default function SalaryThreshold() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('salary-threshold-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [annualSalary, setAnnualSalary] = useState(45000);
   const [region, setRegion] = useState<UKRegion>('london');
   const [dependents, setDependents] = useState(0);
   const [additionalIncome, setAdditionalIncome] = useState(0);
   const [activeTab, setActiveTab] = useState('calculator');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('salary-threshold-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.annualSalary) setAnnualSalary(parseFloat(answers.annualSalary) || 45000);
+    if (answers.region) setRegion(answers.region as UKRegion);
+    if (answers.dependents) setDependents(parseInt(answers.dependents) || 0);
+    if (answers.additionalIncome) setAdditionalIncome(parseFloat(answers.additionalIncome) || 0);
+    setMode('traditional');
+  };
 
   const totalIncome = annualSalary + additionalIncome;
   const incomeTax = calculateIncomeTax(totalIncome);
@@ -403,6 +434,13 @@ Consult a qualified UK accountant or tax advisor for personalized advice.
             toolName="Salary Threshold Calculator"
           />
 
+          <div className="flex justify-end mt-4 mb-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4" data-testid="tabs-salary-threshold">
               <TabsTrigger value="calculator" data-testid="tab-calculator">Calculator</TabsTrigger>
@@ -1019,6 +1057,7 @@ Consult a qualified UK accountant or tax advisor for personalized advice.
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

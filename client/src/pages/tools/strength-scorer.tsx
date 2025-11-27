@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,6 +31,22 @@ type EndorserProfile = {
   scalabilityWeight: number;
   evidenceWeight: number;
   presentationWeight: number;
+};
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'strength-scorer',
+  toolName: 'Application Strength Scorer',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your innovation advisor. Let me help you assess the strength of your Innovator Founder Visa application across the key criteria that endorsing bodies evaluate.",
+  questions: [
+    { id: 'innovation', question: "How would you describe the innovation in your business idea?", hint: "Consider novel technology, unique approach, or market disruption", fieldKey: 'innovation', fieldType: 'text' },
+    { id: 'viability', question: "What evidence do you have that your business is viable?", hint: "Revenue, customer validation, funding, partnerships", fieldKey: 'viability', fieldType: 'text' },
+    { id: 'scalability', question: "How does your business plan to scale in the UK market?", hint: "Consider hiring plans, market expansion, growth projections", fieldKey: 'scalability', fieldType: 'text' },
+    { id: 'evidence', question: "What supporting evidence can you provide for your claims?", hint: "Market research, financial projections, testimonials, LOIs", fieldKey: 'evidence', fieldType: 'text' },
+    { id: 'presentation', question: "How prepared is your pitch and documentation?", hint: "Business plan quality, pitch deck, supporting materials", fieldKey: 'presentation', fieldType: 'text' },
+    { id: 'endorser', question: "Which endorsing body are you targeting for your application?", hint: "Tech Nation, Innovator International, UK University Routes, Envestors", fieldKey: 'targetEndorser', fieldType: 'select', options: ['Tech Nation', 'Innovator International', 'UK University Routes', 'Envestors'] },
+  ],
+  completionMessage: "I've assessed your application inputs. Let me calculate your strength scores and endorsement probability."
 };
 
 const ENDORSERS: EndorserProfile[] = [
@@ -73,6 +89,9 @@ const ENDORSERS: EndorserProfile[] = [
 ];
 
 export default function StrengthScorer() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('strength-scorer-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [scores, setScores] = useState<StrengthScores>({
     innovation: 50,
     viability: 50,
@@ -83,6 +102,14 @@ export default function StrengthScorer() {
 
   const [activeTab, setActiveTab] = useState('overview');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('strength-scorer-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    setMode('traditional');
+  };
 
   const updateScore = (field: keyof StrengthScores, value: number) => {
     setScores(prev => ({ ...prev, [field]: value }));
@@ -554,6 +581,13 @@ application-specific advice. Endorser criteria and requirements may change.
             toolName="Strength Scorer"
           />
 
+          <div className="flex justify-end mt-4 mb-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5" data-testid="tabs-strength-scorer">
               <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
@@ -1272,6 +1306,7 @@ application-specific advice. Endorser criteria and requirements may change.
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

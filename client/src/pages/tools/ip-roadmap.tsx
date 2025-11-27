@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -71,6 +71,51 @@ const UK_IPO_COSTS = {
   'trade-secret': { filing: 0, professional: 500, total: 500 },
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'ip-roadmap',
+  toolName: 'IP Filing Roadmap',
+  agent: 'nova',
+  greeting: "Hi! I'm Nova, your Innovation Specialist. I'll help you create a strategic IP filing roadmap with realistic timelines and budgets. A clear IP plan shows endorsing bodies you're serious about protection!",
+  questions: [
+    {
+      id: 'business-info',
+      question: "What's your business name and what's your overall IP filing strategy?",
+      hint: "E.g., 'TechCorp - prioritizing UK patents first, then international expansion'",
+      fieldKey: 'businessFilingStrategy',
+      minLength: 30
+    },
+    {
+      id: 'priority-filings',
+      question: "What are your most critical IP filings planned for the next 12 months?",
+      hint: "List patents, trademarks, or other IP with target dates and priority level",
+      fieldKey: 'priorityFilings',
+      minLength: 60
+    },
+    {
+      id: 'ip-budget',
+      question: "What's your estimated budget for IP protection over the next 12-24 months?",
+      hint: "UK patents: £4-8K, trademarks: £1-2K, designs: £1K. Include professional fees",
+      fieldKey: 'ipBudget',
+      minLength: 30
+    },
+    {
+      id: 'jurisdictions',
+      question: "Which jurisdictions are most important for your IP protection?",
+      hint: "E.g., UK first, then EU, US, or specific markets based on business strategy",
+      fieldKey: 'jurisdictions',
+      minLength: 40
+    },
+    {
+      id: 'dependencies',
+      question: "Are there any dependencies or milestones that affect your IP timeline?",
+      hint: "E.g., product launch, funding round, market entry, prior art searches",
+      fieldKey: 'dependencies',
+      minLength: 40
+    }
+  ],
+  completionMessage: "Your IP roadmap framework is ready! Add specific milestones to the Roadmap tab with dates and costs to create a visual timeline and budget tracker."
+};
+
 export default function IPRoadmap() {
   const [milestones, setMilestones] = useState<IPMilestone[]>([
     {
@@ -91,6 +136,23 @@ export default function IPRoadmap() {
   const [savedDate, setSavedDate] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [filingStrategy, setFilingStrategy] = useState('');
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('ip-roadmap-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('ip-roadmap-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.businessFilingStrategy) {
+      const parts = answers.businessFilingStrategy.split('-');
+      setBusinessName(parts[0]?.trim() || '');
+      setFilingStrategy(parts[1]?.trim() || answers.businessFilingStrategy);
+    }
+    setMode('traditional');
+    setActiveTab('roadmap');
+  };
 
   const addMilestone = () => {
     setMilestones([...milestones, {
@@ -544,6 +606,17 @@ filing and protection matters. UK IPO requirements and fees subject to change.
             toolName="IP Development Roadmap"
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5" data-testid="tabs-ip-roadmap">
               <TabsTrigger value="roadmap" data-testid="tab-roadmap">Roadmap</TabsTrigger>
@@ -1208,6 +1281,7 @@ filing and protection matters. UK IPO requirements and fees subject to change.
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

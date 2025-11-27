@@ -12,6 +12,53 @@ import { Gauge, TrendingUp, TrendingDown, Users, DollarSign, Target, BarChart3, 
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'kpi-dashboard',
+  toolName: 'KPI Dashboard',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your Financial Advisor. Key Performance Indicators (KPIs) are essential for tracking your business progress and demonstrating traction to endorsing bodies. Let me help you set up meaningful KPIs for your visa application!",
+  questions: [
+    {
+      id: 'mrr',
+      question: "What's your current Monthly Recurring Revenue (MRR) and your 12-month target? If pre-revenue, what's your projected MRR at launch?",
+      hint: "MRR demonstrates predictable revenue - a key indicator endorsers look for",
+      fieldKey: 'mrrTarget'
+    },
+    {
+      id: 'customers',
+      question: "How many paying customers do you have, and what's your target for the next 12 months?",
+      hint: "Customer count validates market demand and product-market fit",
+      fieldKey: 'customerTarget'
+    },
+    {
+      id: 'cac-ltv',
+      question: "What's your Customer Acquisition Cost (CAC) and estimated Customer Lifetime Value (LTV)? What ratio are you targeting?",
+      hint: "A healthy LTV:CAC ratio of 3:1 or higher demonstrates efficient growth",
+      fieldKey: 'cacLtvTarget'
+    },
+    {
+      id: 'churn',
+      question: "What's your current monthly churn rate, and what's your target to reduce it to?",
+      hint: "Lower churn indicates product satisfaction. Target under 5% for SaaS.",
+      fieldKey: 'churnTarget'
+    },
+    {
+      id: 'runway',
+      question: "What's your current runway in months? How long can you operate with your existing funds?",
+      hint: "12-18 months runway provides security. Endorsers want to see financial stability.",
+      fieldKey: 'runwayTarget'
+    },
+    {
+      id: 'key-metric',
+      question: "What's your North Star metric - the single most important indicator of your business success?",
+      hint: "This should be the metric that best captures customer value",
+      fieldKey: 'northStarMetric'
+    }
+  ],
+  completionMessage: "Excellent! You've defined key performance indicators that will help you track progress and demonstrate traction. I'm populating your KPI dashboard now."
+};
 
 type KPI = {
   id: string;
@@ -37,6 +84,10 @@ const DEFAULT_KPIS: KPI[] = [
 export default function KPIDashboard() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('kpi-dashboard-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
@@ -59,6 +110,51 @@ export default function KPIDashboard() {
       if (hideIndicatorRef.current) clearTimeout(hideIndicatorRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('kpi-dashboard-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const updatedKpis = [...kpis];
+    if (answers.revenue) {
+      const match = answers.revenue.match(/[\d,]+/);
+      if (match) {
+        const kpi = updatedKpis.find(k => k.id === 'mrr');
+        if (kpi) kpi.value = parseInt(match[0].replace(/,/g, ''));
+      }
+    }
+    if (answers.customers) {
+      const match = answers.customers.match(/[\d,]+/);
+      if (match) {
+        const kpi = updatedKpis.find(k => k.id === 'customers');
+        if (kpi) kpi.value = parseInt(match[0].replace(/,/g, ''));
+      }
+    }
+    if (answers.churnRate) {
+      const match = answers.churnRate.match(/[\d.]+/);
+      if (match) {
+        const kpi = updatedKpis.find(k => k.id === 'churn');
+        if (kpi) kpi.value = parseFloat(match[0]);
+      }
+    }
+    if (answers.runway) {
+      const match = answers.runway.match(/(\d+)/);
+      if (match) {
+        const kpi = updatedKpis.find(k => k.id === 'runway');
+        if (kpi) kpi.value = parseInt(match[1]);
+      }
+    }
+    if (answers.nps) {
+      const match = answers.nps.match(/-?[\d]+/);
+      if (match) {
+        const kpi = updatedKpis.find(k => k.id === 'nps');
+        if (kpi) kpi.value = parseInt(match[0]);
+      }
+    }
+    setKpis(updatedKpis);
+    setMode('traditional');
+  };
 
   const triggerAutoSave = useCallback((newKpis: KPI[]) => {
     if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
@@ -149,10 +245,46 @@ export default function KPIDashboard() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">KPI Dashboard</h1>
-            <p className="text-muted-foreground">Monitor and track your key business performance indicators</p>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">KPI Dashboard</h1>
+                <p className="text-muted-foreground">Monitor and track your key business performance indicators</p>
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <BarChart2 className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Sterling, our Financial Expert, helps you set up key performance indicators.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Define revenue and customer metrics</li>
+                    <li>Set growth and churn targets</li>
+                    <li>Track operational KPIs like runway</li>
+                    <li>Earn XP as you complete each question</li>
+                  </ul>
+                  <p className="pt-2">Your answers will automatically populate the dashboard when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="kpi-dashboard"
             toolName="KPI Dashboard"
@@ -363,6 +495,8 @@ export default function KPIDashboard() {
               </TabsContent>
             </Tabs>
           </div>
+            </>
+          )}
         </div>
       </div>
     </ToolAccessGuard>

@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -17,7 +17,64 @@ const TAX_ITEMS = [
   {category:"Record Keeping",items:["Sales invoices retained for 6 years","Purchase invoices and receipts filed","Bank reconciliations completed monthly"]}
 ];
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'tax-compliance',
+  toolName: 'Tax Compliance Checker',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your Financial Analyst. I'll help you ensure your business is fully compliant with UK tax regulations - essential for demonstrating business viability to endorsing bodies. Let's review your tax compliance status together!",
+  questions: [
+    {
+      id: 'company-structure',
+      question: "What is your company structure (Limited Company, Sole Trader, Partnership)? When was it incorporated or established?",
+      hint: "Your structure affects which tax obligations apply",
+      fieldKey: 'company_structure'
+    },
+    {
+      id: 'corporation-tax',
+      question: "Have you filed your Corporation Tax return (CT600) within 12 months of your accounting period end? Is your corporation tax paid on time?",
+      hint: "Late CT600 filing can result in penalties and interest",
+      fieldKey: 'corporation_tax_status'
+    },
+    {
+      id: 'vat-status',
+      question: "Is your business VAT registered? If so, are you filing returns monthly or quarterly? Are you using Making Tax Digital (MTD)?",
+      hint: "VAT registration is mandatory above £85,000 turnover",
+      fieldKey: 'vat_status'
+    },
+    {
+      id: 'payroll-compliance',
+      question: "Have you registered for PAYE with HMRC? Are monthly payroll submissions being made on time?",
+      hint: "Payroll compliance is critical when employing staff, including directors",
+      fieldKey: 'payroll_status'
+    },
+    {
+      id: 'record-keeping',
+      question: "How do you maintain your financial records? Are sales invoices, purchase receipts, and bank statements organized and retained for 6 years?",
+      hint: "Good record keeping is essential for HMRC audits",
+      fieldKey: 'record_keeping'
+    },
+    {
+      id: 'tax-advisor',
+      question: "Do you have a qualified UK accountant or tax advisor? What accounting software do you use?",
+      hint: "Professional support demonstrates business maturity to endorsers",
+      fieldKey: 'tax_advisor'
+    }
+  ]
+};
+
 export default function TaxCompliance() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('tax-compliance-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('tax-compliance-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    setMode('traditional');
+  };
+
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
@@ -105,9 +162,18 @@ export default function TaxCompliance() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Tax Compliance Checker</h1>
-          <p className="text-muted-foreground mb-6">Corporation tax, VAT, PAYE and personal tax verification</p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Tax Compliance Checker</h1>
+              <p className="text-muted-foreground">Corporation tax, VAT, PAYE and personal tax verification</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="tax-compliance"
             toolName="Tax Compliance Checker"
@@ -190,6 +256,8 @@ export default function TaxCompliance() {
               ))}
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

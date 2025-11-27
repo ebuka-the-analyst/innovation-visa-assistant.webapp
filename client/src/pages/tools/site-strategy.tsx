@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,6 +37,22 @@ const UK_LOCATIONS: LocationScore[] = [
   { location: "Cambridge", talentPool: 88, costEfficiency: 55, infrastructure: 80, businessEcosystem: 90, qualityOfLife: 88, transportLinks: 70 },
 ];
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'site-strategy',
+  toolName: 'Site/Location Strategy',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your financial and strategic analyst. I'll help you evaluate UK locations for your business. Let's understand your priorities so I can recommend the best location for your startup.",
+  questions: [
+    { id: 'industry', question: "What industry is your business in?", hint: "Different sectors thrive in different UK regions", fieldKey: 'industry', fieldType: 'text' },
+    { id: 'talent', question: "What skills are most critical for your team?", hint: "Tech talent concentrates in London, Cambridge, Manchester; fintech in London, Edinburgh", fieldKey: 'talentNeeds', fieldType: 'text' },
+    { id: 'budget', question: "What is your approximate monthly budget for office space?", hint: "London averages £50-80/sqft, regional cities £20-35/sqft", fieldKey: 'officeBudget', fieldType: 'number' },
+    { id: 'lifestyle', question: "How important is quality of life vs business ecosystem?", hint: "Bristol/Edinburgh score high on lifestyle, London/Cambridge on ecosystem", fieldKey: 'lifestylePriority', fieldType: 'text' },
+    { id: 'connectivity', question: "How often will you need to travel to London or internationally?", hint: "Consider airport access and high-speed rail connections", fieldKey: 'travelNeeds', fieldType: 'text' },
+    { id: 'growth', question: "Where do you see your business in 3 years (team size, office needs)?", hint: "This affects scalability of your location choice", fieldKey: 'growthPlans', fieldType: 'text' },
+  ],
+  completionMessage: "I've analyzed your requirements. Let me show you the location comparison based on your priorities."
+};
+
 const FACTOR_WEIGHTS = {
   talentPool: { label: "Talent Pool", icon: Users, description: "Access to skilled workforce" },
   costEfficiency: { label: "Cost Efficiency", icon: PoundSterling, description: "Office and living costs" },
@@ -51,6 +68,19 @@ export default function SiteStrategy() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('site-strategy-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('site-strategy-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.notes) setNotes(answers.notes);
+    setMode('traditional');
+  };
 
   const [weights, setWeights] = useState<Record<string, number>>(() => {
     const saved = localStorage.getItem("site-strategy-state");
@@ -196,6 +226,14 @@ export default function SiteStrategy() {
               onExportWord={handleExportWord}
             />
 
+            <div className="flex justify-end mt-4 mb-4">
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
+
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 mb-6">
               <Card>
                 <CardContent className="pt-6">
@@ -383,6 +421,8 @@ export default function SiteStrategy() {
                 </Card>
               </TabsContent>
             </Tabs>
+            </>
+            )}
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,9 +22,59 @@ import {
 // Viability Criterion: Addressable market supports business sustainability
 // Evidence Requirement: UK-specific market sizing with credible sources
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'market-size',
+  toolName: 'Market Size Calculator',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. Accurate market sizing is crucial for demonstrating scalability to endorsers. Let me help you calculate TAM, SAM, and SOM for your business. Ready to size your opportunity?",
+  questions: [
+    {
+      id: 'target-segment',
+      question: "Who is your target customer segment? Be as specific as possible.",
+      hint: "E.g., 'UK SMBs with 10-50 employees using cloud-based business software'",
+      fieldKey: 'targetSegment',
+      required: true
+    },
+    {
+      id: 'tam-estimate',
+      question: "What is your Total Addressable Market (TAM)? The entire market for your category globally.",
+      hint: "Use industry reports, government statistics, or analyst estimates",
+      fieldKey: 'tamEstimate'
+    },
+    {
+      id: 'sam-estimate',
+      question: "What is your Serviceable Addressable Market (SAM)? The portion you could realistically reach.",
+      hint: "Consider geographic, industry, and capability constraints",
+      fieldKey: 'samEstimate'
+    },
+    {
+      id: 'som-estimate',
+      question: "What is your Serviceable Obtainable Market (SOM)? What you can capture in 3-5 years.",
+      hint: "Be realistic - 1-5% of SAM is typical for startups",
+      fieldKey: 'somEstimate'
+    },
+    {
+      id: 'growth-rate',
+      question: "What is the annual growth rate of your market? (as a percentage)",
+      hint: "Growing markets (15%+) are more attractive to endorsers",
+      fieldKey: 'growthRate'
+    },
+    {
+      id: 'evidence-sources',
+      question: "What sources support your market sizing? (List 3+ credible sources)",
+      hint: "ONS, Tech Nation, Statista, industry associations, analyst reports",
+      fieldKey: 'evidenceSources'
+    }
+  ],
+  completionMessage: "Excellent! I've captured your market sizing data. I'm now populating the calculator with your estimates. You can adjust the values and see how confidence scores change."
+};
+
 type MarketApproach = 'top-down' | 'bottom-up' | 'both';
 
 export default function MarketSizing() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('market-size-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [tam, setTam] = useState(5000000000);
   const [sam, setSam] = useState(500000000);
   const [som, setSom] = useState(50000000);
@@ -37,6 +87,32 @@ export default function MarketSizing() {
   const [evidenceSources, setEvidenceSources] = useState("ONS Digital Economy Survey 2024, Tech Nation Report, UK SaaS Market Analysis");
   const [activeTab, setActiveTab] = useState('calculator');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('market-size-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.targetSegment) setTargetSegment(answers.targetSegment);
+    if (answers.tamEstimate) {
+      const amount = parseInt(answers.tamEstimate.replace(/[^0-9]/g, '')) || 5000000000;
+      setTam(amount);
+    }
+    if (answers.samEstimate) {
+      const amount = parseInt(answers.samEstimate.replace(/[^0-9]/g, '')) || 500000000;
+      setSam(amount);
+    }
+    if (answers.somEstimate) {
+      const amount = parseInt(answers.somEstimate.replace(/[^0-9]/g, '')) || 50000000;
+      setSom(amount);
+    }
+    if (answers.growthRate) {
+      const rate = parseInt(answers.growthRate.replace(/[^0-9]/g, '')) || 25;
+      setGrowthRate(rate);
+    }
+    if (answers.evidenceSources) setEvidenceSources(answers.evidenceSources);
+    setMode('traditional');
+  };
 
   // Advanced: Market Sizing Confidence Score
   // Formula: Based on approach, evidence quality, and ratio validation
@@ -604,13 +680,26 @@ Report generated: ${new Date().toLocaleString('en-GB')}
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-sizing">Market Sizing</h1>
-            <p className="text-lg text-muted-foreground">Calculate TAM/SAM/SOM with UK evidence (Innovator Founder Visa)</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-sizing">Market Sizing</h1>
+                <p className="text-lg text-muted-foreground">Calculate TAM/SAM/SOM with UK evidence (Innovator Founder Visa)</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="market-size"
             onSave={handleSave}
@@ -1384,6 +1473,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

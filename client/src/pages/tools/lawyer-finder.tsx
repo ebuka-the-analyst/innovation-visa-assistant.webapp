@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -113,6 +114,53 @@ const LAWYERS: Lawyer[] = [
   },
 ];
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'lawyer-finder',
+  toolName: 'Lawyer Finder',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Legal & Compliance Specialist. I'll help you find the right immigration lawyer for your Innovator Founder visa application. Let me understand your needs to make personalized recommendations. Ready to start?",
+  questions: [
+    {
+      id: 'visa-type',
+      question: "Which visa type are you applying for? (Innovator Founder is most common for entrepreneurs)",
+      hint: "E.g., Innovator Founder Visa, Start-up Visa, Global Talent Visa",
+      fieldKey: 'visaType',
+      required: true
+    },
+    {
+      id: 'location-preference',
+      question: "Do you have a preferred location for your lawyer? (e.g., London, Manchester, or anywhere in UK)",
+      hint: "London has the most options, but regional lawyers can offer more personalized service",
+      fieldKey: 'locationPreference'
+    },
+    {
+      id: 'language-needs',
+      question: "Do you need a lawyer who speaks any language besides English?",
+      hint: "Many UK immigration lawyers speak multiple languages",
+      fieldKey: 'languageNeeds'
+    },
+    {
+      id: 'budget-range',
+      question: "What is your budget range for legal services? (typical consultation fees: £100-£200)",
+      hint: "Consider both initial consultation and full application support costs",
+      fieldKey: 'budgetRange'
+    },
+    {
+      id: 'specialization',
+      question: "Are there any specific areas of expertise you need? (e.g., tech startups, investor visas, family immigration)",
+      hint: "Some lawyers specialize in specific industries or visa types",
+      fieldKey: 'specialization'
+    },
+    {
+      id: 'urgency',
+      question: "How urgent is your visa application? Do you have any deadlines?",
+      hint: "This helps prioritize lawyers with faster turnaround times",
+      fieldKey: 'urgency'
+    }
+  ],
+  completionMessage: "Perfect! Based on your requirements, I'll filter the lawyer directory to show the most suitable matches. You can browse and save your favorites for comparison."
+};
+
 export default function LawyerFinder() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
@@ -120,6 +168,9 @@ export default function LawyerFinder() {
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('lawyer-finder-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [sortBy, setSortBy] = useState("rating");
@@ -142,6 +193,20 @@ export default function LawyerFinder() {
       if (hideIndicatorRef.current) clearTimeout(hideIndicatorRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('lawyer-finder-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.locationPreference && answers.locationPreference !== 'anywhere') {
+      setLocationFilter(answers.locationPreference);
+    }
+    if (answers.specialization) {
+      setSearchTerm(answers.specialization);
+    }
+    setMode('traditional');
+  };
 
   const triggerAutoSave = useCallback((newFavorites: string[]) => {
     if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
@@ -293,10 +358,23 @@ export default function LawyerFinder() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Lawyer Finder & Booking</h1>
-            <p className="text-muted-foreground">Find and connect with experienced immigration lawyers</p>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Lawyer Finder & Booking</h1>
+                <p className="text-muted-foreground">Find and connect with experienced immigration lawyers</p>
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="lawyer-finder"
             toolName="Lawyer Finder & Booking"
@@ -408,7 +486,9 @@ export default function LawyerFinder() {
                 )}
               </TabsContent>
             </Tabs>
-          </div>
+          </>
+          )}
+        </div>
         </div>
       </div>
     </ToolAccessGuard>

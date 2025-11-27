@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +22,59 @@ import {
 // Viability Criterion: Addressing underserved segments validates business model
 // Scalability Criterion: White space opportunities show growth potential
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'market-gap',
+  toolName: 'Market Gap Analysis',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. Identifying market gaps is essential for demonstrating innovation to endorsers. Let me help you analyze opportunities in your market. Ready to uncover white space?",
+  questions: [
+    {
+      id: 'gap-name',
+      question: "What is the main market gap you've identified? Give it a clear, descriptive name.",
+      hint: "E.g., 'SME Digital Transformation Gap', 'Affordable Legal Tech Gap'",
+      fieldKey: 'gapName',
+      required: true
+    },
+    {
+      id: 'gap-description',
+      question: "Describe this market gap in detail. What need is currently unmet or underserved?",
+      hint: "Be specific about who is affected and why current solutions fall short",
+      fieldKey: 'gapDescription'
+    },
+    {
+      id: 'gap-severity',
+      question: "How severe is this gap? Rate from 1 (minor inconvenience) to 10 (critical pain point).",
+      hint: "Higher severity gaps often indicate better opportunities",
+      fieldKey: 'gapSeverity'
+    },
+    {
+      id: 'opportunity-size',
+      question: "What is the estimated market opportunity in millions GBP?",
+      hint: "Use industry reports, government statistics, or bottom-up calculations",
+      fieldKey: 'opportunitySize'
+    },
+    {
+      id: 'competitive-intensity',
+      question: "How competitive is addressing this gap? Rate 1 (no competition) to 10 (highly competitive).",
+      hint: "Lower competition may indicate an overlooked opportunity",
+      fieldKey: 'competitiveIntensity'
+    },
+    {
+      id: 'your-differentiator',
+      question: "What is your unique approach to addressing this gap?",
+      hint: "This is your competitive advantage - be specific",
+      fieldKey: 'yourDifferentiator'
+    },
+    {
+      id: 'underserved-segments',
+      question: "Which customer segments are most underserved by current solutions?",
+      hint: "Specific segments help focus your go-to-market strategy",
+      fieldKey: 'underservedSegments'
+    }
+  ],
+  completionMessage: "Great analysis! I've captured your market gap insights. I'm now populating the gap analyzer with your data. You can add more gaps and adjust the competitive landscape metrics."
+};
+
 type MarketGap = {
   id: string;
   name: string;
@@ -33,6 +86,9 @@ type MarketGap = {
 };
 
 export default function MarketGap() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('market-gap-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [gaps, setGaps] = useState<MarketGap[]>([
     { 
       id: '1', 
@@ -59,6 +115,28 @@ export default function MarketGap() {
   
   const [activeTab, setActiveTab] = useState('analyzer');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('market-gap-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.gapName || answers.gapDescription) {
+      const newGap: MarketGap = {
+        id: Date.now().toString(),
+        name: answers.gapName || 'New Gap',
+        description: answers.gapDescription || '',
+        severity: answers.gapSeverity ? parseInt(answers.gapSeverity) || 7 : 7,
+        opportunitySize: answers.opportunitySize ? parseInt(answers.opportunitySize) || 100 : 100,
+        competitiveIntensity: answers.competitiveIntensity ? parseInt(answers.competitiveIntensity) || 5 : 5,
+        innovationPotential: 7
+      };
+      setGaps(prev => prev.length === 1 && prev[0].name === 'SME Digital Transformation Gap' ? [newGap] : [...prev, newGap]);
+    }
+    if (answers.yourDifferentiator) setYourDifferentiator(answers.yourDifferentiator);
+    if (answers.underservedSegments) setUnderservedSegments(answers.underservedSegments);
+    setMode('traditional');
+  };
 
   // Advanced: Market Gap Opportunity Score
   // Formula: Weighted average of gap severity, opportunity size, and innovation potential
@@ -647,13 +725,26 @@ Report generated: ${new Date().toLocaleString('en-GB')}
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-gap">Market Gap Analysis</h1>
-            <p className="text-lg text-muted-foreground">Identify unmet needs, underserved segments, and white space opportunities for UK Innovator Founder visa innovation criterion</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-gap">Market Gap Analysis</h1>
+                <p className="text-lg text-muted-foreground">Identify unmet needs, underserved segments, and white space opportunities for UK Innovator Founder visa innovation criterion</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="market-gap"
             onSave={handleSave}
@@ -1255,6 +1346,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

@@ -17,6 +17,59 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'evidence-collection',
+  toolName: 'Evidence Collection Tracker',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Expert. I'll help you systematically collect and organize all the evidence needed for your visa application. Strong evidence collection is the foundation of a successful endorsement. Let's assess your evidence portfolio!",
+  questions: [
+    {
+      id: 'business-docs-status',
+      question: "What's the status of your Business Documents? Do you have a comprehensive business plan, Companies House certificate, Articles of Association, and IP registrations?",
+      hint: "The business plan is the most critical document",
+      fieldKey: 'business_docs_status',
+      minLength: 40
+    },
+    {
+      id: 'financial-records-status',
+      question: "Describe your Financial Records collection. Do you have 3-6 month bank statements, source of funds declaration, 3-year projections, and investment agreements?",
+      hint: "All financial evidence must show appropriate funds for your plan",
+      fieldKey: 'financial_records_status',
+      minLength: 40
+    },
+    {
+      id: 'innovation-evidence-status',
+      question: "What Innovation Evidence have you gathered? Do you have technology documentation, product demos/screenshots, R&D records, and an innovation comparison matrix?",
+      hint: "This is critical for demonstrating your unique value proposition",
+      fieldKey: 'innovation_evidence_status',
+      minLength: 40
+    },
+    {
+      id: 'market-validation-status',
+      question: "What's your Market Validation evidence? Do you have market research reports, customer interview transcripts (20-30 minimum), survey results, and letters of intent?",
+      hint: "Endorsers look for evidence of genuine market demand",
+      fieldKey: 'market_validation_status',
+      minLength: 40
+    },
+    {
+      id: 'traction-metrics-status',
+      question: "What Traction Metrics can you demonstrate? Do you have user analytics, revenue evidence, growth trajectory charts, and customer testimonials?",
+      hint: "Even early-stage metrics show product-market fit progress",
+      fieldKey: 'traction_metrics_status',
+      minLength: 40
+    },
+    {
+      id: 'team-credentials-status',
+      question: "Describe your Team Credentials evidence. Do you have founder CVs, education certificates, LinkedIn profiles with recommendations, and advisor bios?",
+      hint: "Strong team credentials significantly boost your application",
+      fieldKey: 'team_credentials_status',
+      minLength: 40
+    }
+  ],
+  completionMessage: "Excellent! I've captured your evidence collection status. Your responses will update the evidence tracker with appropriate status levels. Switch to the traditional view to mark individual items as verified and track your progress."
+};
 
 type DocumentStatus = 'not-started' | 'in-progress' | 'verified';
 
@@ -75,10 +128,52 @@ const INITIAL_DOCUMENTS: EvidenceDocument[] = [
 ];
 
 export default function EvidenceCollection() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('evidence-collection-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [documents, setDocuments] = useState<EvidenceDocument[]>(INITIAL_DOCUMENTS);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('tracker');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('evidence-collection-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const updatedDocs = [...documents];
+    
+    const updateCategoryStatus = (category: string, answerKey: string) => {
+      const answer = answers[answerKey]?.toLowerCase() || '';
+      updatedDocs.filter(d => d.category === category).forEach(doc => {
+        if (answer.includes('have') || answer.includes('complete') || answer.includes('yes')) {
+          doc.status = 'in-progress';
+        }
+      });
+    };
+    
+    updateCategoryStatus('Business Documents', 'business_docs_status');
+    updateCategoryStatus('Financial Records', 'financial_records_status');
+    updateCategoryStatus('Innovation Evidence', 'innovation_evidence_status');
+    updateCategoryStatus('Market Validation', 'market_validation_status');
+    updateCategoryStatus('Traction Metrics', 'traction_metrics_status');
+    updateCategoryStatus('Team Credentials', 'team_credentials_status');
+    
+    setDocuments(updatedDocs);
+    
+    const date = new Date().toLocaleString('en-GB');
+    localStorage.setItem('evidence-collection-state', JSON.stringify({
+      documents: updatedDocs,
+      uploadedFiles,
+      activeTab: 'tracker',
+      savedDate: date
+    }));
+    setSavedDate(date);
+    
+    setActiveTab('tracker');
+    setMode('traditional');
+  };
 
   const totalDocuments = documents.length;
   const notStarted = documents.filter(d => d.status === 'not-started').length;
@@ -426,6 +521,13 @@ Report generated by UK Innovator Founder Visa Assistant
             toolName="Evidence Collection Tracker"
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5" data-testid="tabs-evidence-collection">
               <TabsTrigger value="tracker" data-testid="tab-tracker">Tracker</TabsTrigger>
@@ -1106,6 +1208,7 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

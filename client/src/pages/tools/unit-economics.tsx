@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -23,7 +23,86 @@ type UnitEconomicsInputs = {
   cogsPerCustomer: number;
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'unit-economics',
+  toolName: 'Unit Economics Calculator',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. I'll help you calculate and optimize your unit economics - demonstrating the financial viability and scalability that endorsing bodies require. Let's analyze your customer economics together!",
+  questions: [
+    {
+      id: 'acquisition-spend',
+      question: "How much have you spent on customer acquisition in the last period? How many customers did you acquire?",
+      hint: "Include all marketing, sales, and promotional costs",
+      fieldKey: 'acquisition_data'
+    },
+    {
+      id: 'revenue-per-customer',
+      question: "What is your average monthly revenue per customer (ARPU)? What pricing tier is most common?",
+      hint: "For SaaS, this is your monthly subscription fee",
+      fieldKey: 'arpu_data'
+    },
+    {
+      id: 'customer-lifetime',
+      question: "What is your average customer lifetime in months? What's your monthly churn rate?",
+      hint: "Calculate as 1 / monthly churn rate, or use actual retention data",
+      fieldKey: 'lifetime_data'
+    },
+    {
+      id: 'cogs',
+      question: "What is your monthly cost of goods sold (COGS) per customer? Include hosting, support, and delivery costs.",
+      hint: "Exclude fixed costs like R&D and overhead",
+      fieldKey: 'cogs_data'
+    },
+    {
+      id: 'acquisition-channels',
+      question: "What are your main customer acquisition channels? Which is most cost-effective?",
+      hint: "Document CAC by channel to show optimization potential",
+      fieldKey: 'channels'
+    },
+    {
+      id: 'improvement-plans',
+      question: "How do you plan to improve unit economics over time? What levers can you pull?",
+      hint: "Consider reducing CAC, increasing ARPU, or improving retention",
+      fieldKey: 'improvement_plans'
+    }
+  ]
+};
+
 export default function UnitEconomics() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('unit-economics-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('unit-economics-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.acquisition_data) {
+      const numbers = answers.acquisition_data.match(/\d+/g);
+      if (numbers && numbers.length >= 2) {
+        setInputs(prev => ({
+          ...prev,
+          customerAcquisitionSpend: parseInt(numbers[0]) || 10000,
+          customersAcquired: parseInt(numbers[1]) || 50
+        }));
+      }
+    }
+    if (answers.arpu_data) {
+      const arpu = parseInt(answers.arpu_data.match(/\d+/)?.[0] || '99');
+      setInputs(prev => ({ ...prev, monthlyRevenuePerCustomer: arpu }));
+    }
+    if (answers.lifetime_data) {
+      const lifetime = parseInt(answers.lifetime_data.match(/\d+/)?.[0] || '24');
+      setInputs(prev => ({ ...prev, averageCustomerLifetimeMonths: lifetime }));
+    }
+    if (answers.cogs_data) {
+      const cogs = parseInt(answers.cogs_data.match(/\d+/)?.[0] || '30');
+      setInputs(prev => ({ ...prev, cogsPerCustomer: cogs }));
+    }
+    setMode('traditional');
+  };
+
   const [inputs, setInputs] = useState<UnitEconomicsInputs>({
     customerAcquisitionSpend: 10000,
     customersAcquired: 50,
@@ -526,13 +605,21 @@ business decisions or visa applications.
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-unit-economics">Unit Economics</h1>
-            <p className="text-lg text-muted-foreground">SaaS subscription business metrics: CAC, LTV, churn, and profitability analysis</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-unit-economics">Unit Economics</h1>
+              <p className="text-lg text-muted-foreground">SaaS subscription business metrics: CAC, LTV, churn, and profitability analysis</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
 
           <ToolUtilityBar
             toolId="unit-economics"
@@ -1161,6 +1248,8 @@ business decisions or visa applications.
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

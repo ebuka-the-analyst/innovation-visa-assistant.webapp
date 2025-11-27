@@ -16,6 +16,59 @@ import {
   LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'advisor-prep-guide',
+  toolName: 'Advisor Preparation Guide',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. I'll help you prepare for effective advisor onboarding and engagement - crucial evidence for your UK Innovator Founder Visa application. Endorsers want to see you can build and manage meaningful advisory relationships. Let's work through this together!",
+  questions: [
+    {
+      id: 'advisor-background',
+      question: "Tell me about the advisor you're onboarding. What's their name, title, and key expertise area?",
+      hint: "Include their industry experience, current role, and why they're a valuable addition to your advisory board",
+      fieldKey: 'advisor_background',
+      minLength: 50
+    },
+    {
+      id: 'onboarding-goals',
+      question: "What are your top 3 objectives for this advisor relationship? What specific value do you expect them to bring?",
+      hint: "Think introductions, strategic guidance, technical validation, fundraising support, or industry insights",
+      fieldKey: 'onboarding_goals',
+      minLength: 80
+    },
+    {
+      id: 'first-meeting-agenda',
+      question: "What will you cover in your first advisory meeting? What key topics and questions will you discuss?",
+      hint: "Include your company overview, current challenges, specific asks, and their advisory approach",
+      fieldKey: 'first_meeting_agenda',
+      minLength: 100
+    },
+    {
+      id: 'deliverables-expected',
+      question: "What specific deliverables do you expect from this advisor in the first 3 months?",
+      hint: "Customer introductions, strategic feedback on business plan, fundraising connections, technical reviews",
+      fieldKey: 'deliverables_expected',
+      minLength: 80
+    },
+    {
+      id: 'meeting-cadence',
+      question: "How often will you meet with this advisor? What's your planned communication cadence?",
+      hint: "Best practice is quarterly formal meetings with monthly async updates via email",
+      fieldKey: 'meeting_cadence',
+      minLength: 40
+    },
+    {
+      id: 'success-metrics',
+      question: "How will you measure the success of this advisor relationship? What KPIs will you track?",
+      hint: "Consider introductions made, strategic decisions influenced, support letters provided, meeting attendance",
+      fieldKey: 'success_metrics',
+      minLength: 60
+    }
+  ],
+  completionMessage: "Excellent preparation! You've created a solid foundation for a productive advisor relationship. This level of planning will impress endorsing bodies - they want to see founders who maximize advisory value. I'm now populating your preparation guide."
+};
 
 type OnboardingTask = {
   id: string;
@@ -57,6 +110,10 @@ type AdvisorRelationship = {
 };
 
 export default function AdvisorPrepGuide() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('advisor-prep-guide-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [onboardingTasks, setOnboardingTasks] = useState<OnboardingTask[]>([
     {
       id: '1',
@@ -106,6 +163,50 @@ export default function AdvisorPrepGuide() {
 
   const [activeTab, setActiveTab] = useState('onboarding');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('advisor-prep-guide-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.advisor_background) {
+      const newTask: OnboardingTask = {
+        id: 'ai-' + Date.now(),
+        advisorName: answers.advisor_background?.split(',')[0]?.trim() || 'New Advisor',
+        task: answers.first_meeting_agenda || 'Complete advisor onboarding',
+        completed: false,
+        dueDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0],
+        priority: 'critical'
+      };
+      setOnboardingTasks([newTask]);
+    }
+    if (answers.first_meeting_agenda) {
+      const newMeeting: Meeting = {
+        id: 'ai-' + Date.now(),
+        date: new Date(Date.now() + 14*24*60*60*1000).toISOString().split('T')[0],
+        attendees: [answers.advisor_background?.split(',')[0]?.trim() || 'Advisor'],
+        agenda: answers.first_meeting_agenda,
+        notes: answers.onboarding_goals || '',
+        actionItems: answers.deliverables_expected || '',
+        duration: 60,
+        status: 'scheduled'
+      };
+      setMeetings([newMeeting]);
+    }
+    if (answers.deliverables_expected) {
+      const newDeliverable: Deliverable = {
+        id: 'ai-' + Date.now(),
+        title: 'Advisory deliverables',
+        assignedTo: answers.advisor_background?.split(',')[0]?.trim() || 'Advisor',
+        dueDate: new Date(Date.now() + 90*24*60*60*1000).toISOString().split('T')[0],
+        status: 'pending',
+        description: answers.deliverables_expected,
+        priority: 'high'
+      };
+      setDeliverables([newDeliverable]);
+    }
+    setMode('traditional');
+  };
 
   const addOnboardingTask = () => {
     const newTask: OnboardingTask = {
@@ -659,14 +760,25 @@ Report generated by UK Innovator Founder Visa Assistant
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-advisor-prep-guide">Advisor Prep Guide</h1>
-            <p className="text-lg text-muted-foreground">Advisory board onboarding, meeting management, and engagement tracking</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+          <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-advisor-prep-guide">Advisor Prep Guide</h1>
+              <p className="text-lg text-muted-foreground">Advisory board onboarding, meeting management, and engagement tracking</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="advisor-prep-guide"
             onSave={handleSave}
@@ -1381,6 +1493,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

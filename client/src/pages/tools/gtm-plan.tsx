@@ -16,6 +16,65 @@ import {
   BarChart, Bar, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, ComposedChart, Area
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'gtm-plan',
+  toolName: 'Go-to-Market Strategy',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Expert. A strong Go-to-Market strategy is essential for demonstrating viability and scalability to UK Innovator Founder Visa endorsers. Let's build your market entry plan together!",
+  questions: [
+    {
+      id: 'business-name',
+      question: "What's the name of your business and what product or service are you bringing to market?",
+      hint: "Provide a brief description of your offering",
+      fieldKey: 'businessName'
+    },
+    {
+      id: 'target-market',
+      question: "Who is your target market in the UK? Describe the customer segments you'll focus on initially.",
+      hint: "Be specific: B2B/B2C, industry, company size, demographics, geographic focus",
+      fieldKey: 'targetMarket',
+      minLength: 50
+    },
+    {
+      id: 'value-proposition',
+      question: "What's your unique value proposition? Why will UK customers choose you over alternatives?",
+      hint: "Focus on the specific problem you solve and the benefits you deliver",
+      fieldKey: 'valueProposition',
+      minLength: 50
+    },
+    {
+      id: 'competitive-advantage',
+      question: "What's your competitive advantage and how is it defensible? How do you differentiate from competitors?",
+      hint: "Consider IP, technology, expertise, network effects, brand, pricing",
+      fieldKey: 'competitiveAdvantage',
+      minLength: 50
+    },
+    {
+      id: 'pricing-distribution',
+      question: "What's your pricing strategy and how will you distribute your product/service? List your main channels.",
+      hint: "Include pricing tiers if applicable, and specify sales/distribution channels",
+      fieldKey: 'pricingDistribution',
+      minLength: 30
+    },
+    {
+      id: 'launch-timeline',
+      question: "What's your launch timeline? Describe your key milestones for the first 6 months.",
+      hint: "Include pre-launch, soft launch, and full market entry phases",
+      fieldKey: 'launchTimeline',
+      minLength: 50
+    },
+    {
+      id: 'success-metrics',
+      question: "How will you measure success? What are your key performance indicators for the first year?",
+      hint: "Include revenue targets, customer acquisition goals, market share objectives",
+      fieldKey: 'successMetrics',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent! You've crafted a comprehensive go-to-market strategy. This demonstrates market readiness and execution capability to endorsing bodies. I'm populating your GTM plan now."
+};
 
 type ChannelStrategy = {
   channel: string;
@@ -33,6 +92,10 @@ type LaunchPhase = {
 };
 
 export default function GoToMarketStrategy() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('gtm-plan-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   // Core GTM Strategy Fields
   const [businessName, setBusinessName] = useState('');
   const [targetMarket, setTargetMarket] = useState('');
@@ -142,6 +205,24 @@ export default function GoToMarketStrategy() {
       restoreSerializedState(state);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('gtm-plan-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.businessName) setBusinessName(answers.businessName);
+    if (answers.targetMarket) setTargetMarket(answers.targetMarket);
+    if (answers.valueProposition) setValueProposition(answers.valueProposition);
+    if (answers.competitiveAdvantage) setCompetitiveAdvantage(answers.competitiveAdvantage);
+    if (answers.pricingDistribution) {
+      setPricingStrategy(answers.pricingDistribution);
+      setDistributionChannels(answers.pricingDistribution);
+    }
+    if (answers.launchTimeline) setLaunchTimeline(answers.launchTimeline);
+    if (answers.successMetrics) setSuccessMetrics(answers.successMetrics);
+    setMode('traditional');
+  };
 
   const handleSave = () => {
     const state = getSerializedState();
@@ -496,13 +577,49 @@ https://www.gov.uk/innovator-founder-visa
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-gtm-plan">Go-to-Market Strategy</h1>
-            <p className="text-lg text-muted-foreground">Build scalable market entry plan for UK Innovator Founder Visa</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-gtm-plan">Go-to-Market Strategy</h1>
+                <p className="text-lg text-muted-foreground">Build scalable market entry plan for UK Innovator Founder Visa</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Rocket className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Atlas, our Growth Expert, helps you build a compelling go-to-market strategy for your visa application.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Define your target market and value proposition</li>
+                    <li>Plan pricing and distribution channels</li>
+                    <li>Set launch timeline and success metrics</li>
+                    <li>Earn XP as you complete each question</li>
+                  </ul>
+                  <p className="pt-2">Your answers will automatically populate the GTM form when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="gtm-plan"
             toolName="Go-to-Market Strategy"
@@ -1310,6 +1427,8 @@ https://www.gov.uk/innovator-founder-visa
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

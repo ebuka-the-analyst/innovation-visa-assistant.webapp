@@ -13,6 +13,59 @@ import {
   BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'due-diligence',
+  toolName: 'Due Diligence Checklist',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. Due diligence is the foundation of a successful visa application. Endorsing bodies will conduct thorough checks on your business - let me help you prepare by walking through the key compliance areas!",
+  questions: [
+    {
+      id: 'legal-status',
+      question: "Let's start with Legal Compliance. Is your company registered with Companies House, are your Articles of Association verified, and are all director appointments confirmed?",
+      hint: "Include your company registration number if available",
+      fieldKey: 'legal_compliance_status',
+      minLength: 30
+    },
+    {
+      id: 'financial-records',
+      question: "For Financial Records, do you have filed annual accounts, current management accounts, verified bank statements, and documented funding sources?",
+      hint: "Endorsers require evidence of £50k+ investment availability",
+      fieldKey: 'financial_records_status',
+      minLength: 30
+    },
+    {
+      id: 'ip-protection',
+      question: "What Intellectual Property protections have you secured? Have you completed an IP audit, filed any patents, registered trademarks, or documented copyright ownership?",
+      hint: "IP protection demonstrates innovation credibility to endorsers",
+      fieldKey: 'ip_protection_status',
+      minLength: 30
+    },
+    {
+      id: 'company-structure',
+      question: "Describe your Company Structure documentation. Do you have an up-to-date cap table, PSC register, registered office confirmation, and standardized employee contracts?",
+      hint: "UK employment law compliant contracts are essential",
+      fieldKey: 'company_structure_status',
+      minLength: 30
+    },
+    {
+      id: 'tax-compliance',
+      question: "For Tax Compliance, have you filed corporation tax returns, completed VAT registration (if applicable), and set up PAYE? Are there any outstanding tax liabilities?",
+      hint: "Outstanding tax issues significantly impact visa approval",
+      fieldKey: 'tax_compliance_status',
+      minLength: 30
+    },
+    {
+      id: 'contracts-agreements',
+      question: "What's the status of your Contracts & Agreements? Do you have reviewed customer contracts, verified supplier agreements, active insurance policies, and lease agreements?",
+      hint: "Professional indemnity insurance is highly recommended",
+      fieldKey: 'contracts_status',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent! I've assessed your due diligence readiness. Your responses will be reflected in the checklist with appropriate priorities. Switch to the traditional view to mark individual items as complete and track your progress toward 100% compliance."
+};
 
 type ChecklistItem = {
   id: string;
@@ -70,6 +123,10 @@ const CHECKLIST_ITEMS: Omit<ChecklistItem, 'completed'>[] = [
 ];
 
 export default function DueDiligence() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('due-diligence-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [checklist, setChecklist] = useState<ChecklistItem[]>(
     CHECKLIST_ITEMS.map(item => ({ ...item, completed: false }))
   );
@@ -77,6 +134,45 @@ export default function DueDiligence() {
   const [savedDate, setSavedDate] = useState('');
   const [showSmartTips, setShowSmartTips] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('due-diligence-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const updatedChecklist = [...checklist];
+    
+    const checkAndUpdate = (categoryName: string, answerKey: string) => {
+      const answer = answers[answerKey]?.toLowerCase() || '';
+      if (answer.includes('yes') || answer.includes('have') || answer.includes('complete')) {
+        updatedChecklist.forEach(item => {
+          if (item.category === categoryName && item.priority === 'Critical') {
+            item.completed = true;
+          }
+        });
+      }
+    };
+    
+    checkAndUpdate('Legal Compliance', 'legal_compliance_status');
+    checkAndUpdate('Financial Records', 'financial_records_status');
+    checkAndUpdate('IP Protection', 'ip_protection_status');
+    checkAndUpdate('Company Structure', 'company_structure_status');
+    checkAndUpdate('Tax Compliance', 'tax_compliance_status');
+    checkAndUpdate('Contracts & Agreements', 'contracts_status');
+    
+    setChecklist(updatedChecklist);
+    
+    const date = new Date().toLocaleString('en-GB');
+    localStorage.setItem('due-diligence-state', JSON.stringify({
+      checklist: updatedChecklist,
+      activeTab: 'checklist',
+      savedDate: date
+    }));
+    setSavedDate(date);
+    
+    setActiveTab('checklist');
+    setMode('traditional');
+  };
 
   const toggleItem = (id: string) => {
     setChecklist(prev => prev.map(item => 
@@ -293,13 +389,20 @@ endorsing body and individual circumstances.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-due-diligence">Due Diligence Checklist</h1>
+            <div className="flex items-center justify-between mb-2 gap-4 flex-wrap">
+              <h1 className="text-4xl font-bold" data-testid="heading-due-diligence">Due Diligence Checklist</h1>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
             <p className="text-lg text-muted-foreground">Comprehensive visa application compliance audit</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
             )}
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="due-diligence"
             onSave={handleSave}
@@ -877,6 +980,8 @@ endorsing body and individual circumstances.
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

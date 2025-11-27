@@ -11,6 +11,52 @@ import { Download, Award, Plus, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'advisory-board-profiles',
+  toolName: 'Advisory Board Profiles',
+  agent: 'atlas',
+  greeting: "Hi! I'm Atlas, your Growth Strategist. Let's create compelling advisor profiles for your UK Innovator Founder Visa application. Endorsers carefully evaluate your advisory board's credentials - strong profiles demonstrate you've attracted quality mentors. Let's document your advisors!",
+  questions: [
+    {
+      id: 'advisor-name-title',
+      question: "Tell me about your first advisor. What's their full name, current title, and company?",
+      hint: "Include their current position and any notable past roles or achievements",
+      fieldKey: 'advisor1_name_title',
+      minLength: 30
+    },
+    {
+      id: 'advisor-expertise',
+      question: "What are this advisor's key areas of expertise? What makes them uniquely qualified to advise your business?",
+      hint: "Specific skills, industry knowledge, technical expertise, or network connections",
+      fieldKey: 'advisor1_expertise',
+      minLength: 80
+    },
+    {
+      id: 'advisor-contribution',
+      question: "How will this advisor contribute to your business? What specific value will they bring?",
+      hint: "Strategic guidance, introductions, technical validation, fundraising support, industry insights",
+      fieldKey: 'advisor1_contribution',
+      minLength: 100
+    },
+    {
+      id: 'advisor-credentials',
+      question: "What credentials, achievements, or experience make this advisor credible for visa purposes?",
+      hint: "Years of experience, notable companies, board positions, investments, or industry recognition",
+      fieldKey: 'advisor1_credentials',
+      minLength: 80
+    },
+    {
+      id: 'additional-advisors',
+      question: "Do you have additional advisors to document? Briefly describe any other advisory board members.",
+      hint: "Name, title, expertise, and key contribution for each additional advisor",
+      fieldKey: 'additional_advisors',
+      minLength: 50
+    }
+  ],
+  completionMessage: "Excellent profiles! You've documented compelling advisor credentials that will strengthen your visa application. Endorsers will appreciate seeing the caliber of expertise supporting your venture. I'm now creating your advisor profile cards."
+};
 
 interface AdvisorProfile {
   id: string;
@@ -21,6 +67,10 @@ interface AdvisorProfile {
 }
 
 export default function AdvisoryBoardProfiles() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('advisory-board-profiles-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [advisors, setAdvisors] = useState<AdvisorProfile[]>([{ id: "1", name: "", title: "", expertise: "", contribution: "" }]);
@@ -60,6 +110,10 @@ export default function AdvisoryBoardProfiles() {
   const getSerializedState = () => ({ uploadedFiles, advisors, savedDate });
 
   useEffect(() => {
+    localStorage.setItem('advisory-board-profiles-mode', mode);
+  }, [mode]);
+
+  useEffect(() => {
     const s = localStorage.getItem('advisoryBoardData');
     if (s) {
       const data = JSON.parse(s);
@@ -69,15 +123,59 @@ export default function AdvisoryBoardProfiles() {
     if (f) setUploadedFiles(JSON.parse(f));
   }, []);
 
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newAdvisors: AdvisorProfile[] = [];
+    if (answers.advisor1_name_title) {
+      newAdvisors.push({
+        id: 'ai-1-' + Date.now(),
+        name: answers.advisor1_name_title?.split(',')[0]?.trim() || 'Advisor 1',
+        title: answers.advisor1_name_title?.split(',')[1]?.trim() || 'Industry Expert',
+        expertise: answers.advisor1_expertise || '',
+        contribution: answers.advisor1_contribution || ''
+      });
+    }
+    if (answers.additional_advisors) {
+      const additionalNames = answers.additional_advisors.split(',');
+      additionalNames.forEach((name: string, idx: number) => {
+        if (name.trim()) {
+          newAdvisors.push({
+            id: `ai-${idx + 2}-` + Date.now(),
+            name: name.trim(),
+            title: 'Advisory Board Member',
+            expertise: '',
+            contribution: ''
+          });
+        }
+      });
+    }
+    if (newAdvisors.length > 0) {
+      setAdvisors(newAdvisors);
+    }
+    setMode('traditional');
+  };
+
   return (
     <>
       
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Advisory Board Profiles</h1>
-          <p className="text-muted-foreground mb-6">Document your advisory board members and their expertise</p>
+          <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Advisory Board Profiles</h1>
+              <p className="text-muted-foreground">Document your advisory board members and their expertise</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="advisory-board-profiles"
             toolName="Advisory Board Profiles"
@@ -127,6 +225,8 @@ export default function AdvisoryBoardProfiles() {
             <Download className="w-4 h-4" />
             Export Advisory Board Profiles
           </Button>
+          </>
+          )}
         </div>
       </div>
     </>

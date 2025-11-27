@@ -15,6 +15,66 @@ import { MapPin, CheckCircle2, Building, Users, TrendingUp, PoundSterling, Globe
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "zone-planning",
+  agentId: "atlas",
+  agentName: "Atlas",
+  agentTitle: "Growth & Strategy Expert",
+  greeting: "Hello! I'm Atlas, your growth strategy specialist. Let me help you evaluate UK business zones and find the optimal location for your innovative venture.",
+  questions: [
+    {
+      id: "businessType",
+      text: "What type of business are you launching? What industry sector and technology focus?",
+      fieldKey: "businessType",
+      minLength: 60,
+      placeholder: "Describe your business type, industry sector, technology focus, and key operations..."
+    },
+    {
+      id: "talentNeeds",
+      text: "What talent and skills do you need to hire? How important is access to specialist talent pools?",
+      fieldKey: "talentNeeds",
+      minLength: 60,
+      placeholder: "Describe your hiring needs, required skills, and talent access priorities..."
+    },
+    {
+      id: "fundingNeeds",
+      text: "What are your funding requirements? How important is proximity to investors and VCs?",
+      fieldKey: "fundingNeeds",
+      minLength: 60,
+      placeholder: "Share your funding needs, investor access requirements, and networking priorities..."
+    },
+    {
+      id: "costSensitivity",
+      text: "How cost-sensitive is your business? What's your budget for office space and operations?",
+      fieldKey: "costSensitivity",
+      minLength: 50,
+      placeholder: "Describe your budget constraints and cost priorities for location selection..."
+    },
+    {
+      id: "networkNeeds",
+      text: "How important is access to industry networks, accelerators, and ecosystem support?",
+      fieldKey: "networkNeeds",
+      minLength: 50,
+      placeholder: "Describe your networking needs and ecosystem access priorities..."
+    },
+    {
+      id: "qualityOfLife",
+      text: "How important is quality of life for you and your team? What lifestyle factors matter?",
+      fieldKey: "qualityOfLife",
+      minLength: 50,
+      placeholder: "Describe quality of life priorities: housing, transport, culture, family considerations..."
+    },
+    {
+      id: "governmentSupport",
+      text: "Are you interested in government incentives, tax benefits, or enterprise zone advantages?",
+      fieldKey: "governmentSupport",
+      minLength: 50,
+      placeholder: "Describe your interest in grants, tax incentives, or special zone benefits..."
+    }
+  ]
+};
 
 type Zone = {
   id: string;
@@ -96,6 +156,22 @@ export default function ZonePlanning() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('zone-planning-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('zone-planning-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((_answers: Record<string, string>) => {
+    setMode('traditional');
+    toast({
+      title: "AI Guidance Complete",
+      description: "Your zone preferences have been captured. Now explore and compare UK zones."
+    });
+  }, [toast]);
 
   const [zones, setZones] = useState<Zone[]>(() => {
     const saved = localStorage.getItem("zone-planning-state");
@@ -205,13 +281,25 @@ export default function ZonePlanning() {
                 </h1>
                 <p className="text-muted-foreground mt-1">Plan for UK tech zones and expansion areas</p>
               </div>
-              {showAutoSave && (
-                <Badge variant="secondary" className="animate-pulse">
-                  <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
-                </Badge>
-              )}
+              <div className="flex items-center gap-3">
+                {showAutoSave && (
+                  <Badge variant="secondary" className="animate-pulse">
+                    <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
+                  </Badge>
+                )}
+                <AiTraditionalToggle
+                  mode={mode}
+                  onModeChange={setMode}
+                  aiLabel="AI-Guided"
+                  traditionalLabel="Traditional Form"
+                />
+              </div>
             </div>
 
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+              <>
             <ToolUtilityBar
               toolId="zone-planning"
               toolName="Zone Planning"
@@ -451,6 +539,8 @@ export default function ZonePlanning() {
                 </div>
               </TabsContent>
             </Tabs>
+              </>
+            )}
           </div>
         </div>
       </div>

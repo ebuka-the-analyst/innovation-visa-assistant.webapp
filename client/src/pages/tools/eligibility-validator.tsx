@@ -15,6 +15,59 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'eligibility-validator',
+  toolName: 'Eligibility Validator',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. Before investing time in your visa application, let's verify you meet all eligibility requirements for the UK Innovator Founder visa. I'll walk you through each criterion systematically!",
+  questions: [
+    {
+      id: 'age-passport',
+      question: "Let's start with basic requirements. How old are you, and do you have a valid passport with at least 6 months validity beyond your intended visa period?",
+      hint: "You must be at least 18 years old to apply",
+      fieldKey: 'age_passport_status',
+      minLength: 20
+    },
+    {
+      id: 'english-level',
+      question: "What's your English language proficiency? Have you taken an approved test like IELTS or PTE Academic, and what level did you achieve?",
+      hint: "Minimum CEFR B2 level required - that's equivalent to IELTS 5.5-6.5",
+      fieldKey: 'english_status',
+      minLength: 30
+    },
+    {
+      id: 'funding-available',
+      question: "Describe your financial situation. How much investment funding do you have access to, and can you prove these funds have been held for at least 90 days?",
+      hint: "There's no fixed minimum, but funds must be appropriate for your business plan",
+      fieldKey: 'funding_status',
+      minLength: 40
+    },
+    {
+      id: 'entrepreneur-evidence',
+      question: "What evidence do you have of genuine entrepreneurial intent? Do you have prior business experience, a comprehensive business plan, and evidence of innovation?",
+      hint: "Include any previous ventures, industry expertise, or relevant qualifications",
+      fieldKey: 'entrepreneur_status',
+      minLength: 50
+    },
+    {
+      id: 'immigration-history',
+      question: "Regarding your immigration history - have you had any visa refusals, overstays, or violations in any country? Do you have any criminal convictions?",
+      hint: "Be completely honest - undisclosed issues cause automatic refusals",
+      fieldKey: 'immigration_status',
+      minLength: 30
+    },
+    {
+      id: 'dependents-info',
+      question: "Will you be bringing any dependents (spouse/partner or children)? If so, how many, and do you have funds for their maintenance (£200 per dependent)?",
+      hint: "Main applicant needs £1,270 plus £200 per dependent",
+      fieldKey: 'dependents_status',
+      minLength: 20
+    }
+  ],
+  completionMessage: "I've assessed your eligibility profile. Based on your responses, I'll populate the validator with your information. Switch to the traditional view to see your complete eligibility score and address any gaps before applying."
+};
 
 type EligibilityState = {
   age: number;
@@ -32,6 +85,10 @@ type EligibilityState = {
 };
 
 export default function EligibilityValidator() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('eligibility-validator-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [state, setState] = useState<EligibilityState>({
     age: 0,
     hasEnglishProof: false,
@@ -49,6 +106,88 @@ export default function EligibilityValidator() {
   
   const [activeTab, setActiveTab] = useState('checker');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('eligibility-validator-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newState = { ...state };
+    
+    if (answers.age_passport_status) {
+      const ageMatch = answers.age_passport_status.match(/(\d+)/);
+      if (ageMatch) {
+        newState.age = parseInt(ageMatch[1]);
+      }
+      if (answers.age_passport_status.toLowerCase().includes('valid') || 
+          answers.age_passport_status.toLowerCase().includes('yes')) {
+        newState.hasValidPassport = true;
+      }
+    }
+    
+    if (answers.english_status) {
+      const lower = answers.english_status.toLowerCase();
+      if (lower.includes('b2') || lower.includes('c1') || lower.includes('c2') ||
+          lower.includes('ielts') || lower.includes('pte')) {
+        newState.hasEnglishProof = true;
+        if (lower.includes('c2')) newState.englishLevel = 'C2';
+        else if (lower.includes('c1')) newState.englishLevel = 'C1';
+        else newState.englishLevel = 'B2';
+      }
+    }
+    
+    if (answers.funding_status) {
+      const amountMatch = answers.funding_status.match(/£?(\d[\d,]*)/);
+      if (amountMatch) {
+        newState.fundingAmount = parseInt(amountMatch[1].replace(/,/g, ''));
+        newState.hasFundingProof = true;
+      }
+    }
+    
+    if (answers.entrepreneur_status) {
+      const lower = answers.entrepreneur_status.toLowerCase();
+      if (lower.includes('business') || lower.includes('experience') || lower.includes('founded')) {
+        newState.isGenuineEntrepreneur = true;
+      }
+      if (lower.includes('plan')) {
+        newState.hasBusinessPlan = true;
+      }
+      if (lower.includes('innovat') || lower.includes('patent') || lower.includes('unique')) {
+        newState.hasInnovationEvidence = true;
+      }
+    }
+    
+    if (answers.immigration_status) {
+      const lower = answers.immigration_status.toLowerCase();
+      if (lower.includes('no') || lower.includes('clean') || lower.includes('none')) {
+        newState.hasNoImmigrationViolations = true;
+        newState.hasCriminalRecord = false;
+      } else if (lower.includes('yes') || lower.includes('violation') || lower.includes('criminal')) {
+        newState.hasNoImmigrationViolations = false;
+        newState.hasCriminalRecord = true;
+      }
+    }
+    
+    if (answers.dependents_status) {
+      const depMatch = answers.dependents_status.match(/(\d+)/);
+      if (depMatch) {
+        newState.dependents = parseInt(depMatch[1]);
+      }
+    }
+    
+    setState(newState);
+    
+    const date = new Date().toLocaleString('en-GB');
+    localStorage.setItem('eligibility-validator-state', JSON.stringify({
+      state: newState,
+      activeTab: 'checker',
+      savedDate: date
+    }));
+    setSavedDate(date);
+    
+    setActiveTab('checker');
+    setMode('traditional');
+  };
 
   // Eligibility calculations
   const meetsAge = state.age >= 18;
@@ -338,13 +477,20 @@ Report generated by UK Innovator Founder Visa Assistant
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-eligibility-validator">Eligibility Validator</h1>
+            <div className="flex items-center justify-between mb-2 gap-4 flex-wrap">
+              <h1 className="text-4xl font-bold" data-testid="heading-eligibility-validator">Eligibility Validator</h1>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
             <p className="text-lg text-muted-foreground">UK Innovator Founder Visa eligibility assessment</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
             )}
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="eligibility-validator"
             toolName="Eligibility Validator"
@@ -886,6 +1032,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

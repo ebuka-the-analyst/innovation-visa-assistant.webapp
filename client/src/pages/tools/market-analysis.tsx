@@ -18,6 +18,54 @@ import {
 } from 'recharts';
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'market-analysis',
+  toolName: 'Market Analysis',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Expert. Strong market analysis is essential for demonstrating scalability to UK Innovator Founder Visa endorsers. Let's quantify your market opportunity using the TAM/SAM/SOM framework!",
+  questions: [
+    {
+      id: 'tam',
+      question: "What's your Total Addressable Market (TAM) in GBP? This is the total market demand for your product/service globally or in your target region.",
+      hint: "Endorsers look for TAM of at least £50M, ideally £100M+ for strong scalability",
+      fieldKey: 'tam'
+    },
+    {
+      id: 'sam',
+      question: "What's your Serviceable Addressable Market (SAM)? This is the portion of TAM you can realistically serve with your business model.",
+      hint: "SAM is typically 10-50% of TAM based on your geographic and segment focus",
+      fieldKey: 'sam'
+    },
+    {
+      id: 'som',
+      question: "What's your Serviceable Obtainable Market (SOM)? This is the realistic market share you can capture in the first 1-3 years.",
+      hint: "SOM is typically 1-15% of SAM for early-stage businesses",
+      fieldKey: 'som'
+    },
+    {
+      id: 'growth-rate',
+      question: "What's the annual growth rate (CAGR) of your market? Include the source of this data.",
+      hint: "15%+ CAGR indicates a high-growth market, which strengthens your case",
+      fieldKey: 'marketGrowth'
+    },
+    {
+      id: 'competition',
+      question: "How many direct competitors exist in your market? Is the market emerging, growth-stage, mature, or declining?",
+      hint: "Growth-stage markets with moderate competition are ideal",
+      fieldKey: 'competition'
+    },
+    {
+      id: 'trends',
+      question: "What are the key market trends driving growth? How does your innovation align with these trends?",
+      hint: "Link trends to your unique value proposition and innovation",
+      fieldKey: 'keyTrends',
+      minLength: 50
+    }
+  ],
+  completionMessage: "Excellent market analysis! This demonstrates the scalability potential endorsing bodies look for. I'm populating your market sizing framework now."
+};
 
 // UK Innovator Founder Visa Context (November 2025)
 // Scalability Criterion: Large addressable market demonstrates growth potential
@@ -27,6 +75,10 @@ import { useToast } from "@/hooks/use-toast";
 export default function MarketAnalysis() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('market-analysis-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [tam, setTam] = useState(5000000000); // Total Addressable Market
   const [sam, setSam] = useState(500000000); // Serviceable Addressable Market
   const [som, setSom] = useState(50000000); // Serviceable Obtainable Market
@@ -139,6 +191,41 @@ export default function MarketAnalysis() {
       restoreSerializedState(state);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('market-analysis-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.tam) {
+      const numMatch = answers.tam.match(/[\d,]+/);
+      if (numMatch) setTam(parseInt(numMatch[0].replace(/,/g, '')));
+    }
+    if (answers.sam) {
+      const numMatch = answers.sam.match(/[\d,]+/);
+      if (numMatch) setSam(parseInt(numMatch[0].replace(/,/g, '')));
+    }
+    if (answers.som) {
+      const numMatch = answers.som.match(/[\d,]+/);
+      if (numMatch) setSom(parseInt(numMatch[0].replace(/,/g, '')));
+    }
+    if (answers.marketGrowth) {
+      const rateMatch = answers.marketGrowth.match(/[\d.]+/);
+      if (rateMatch) setMarketGrowth(parseFloat(rateMatch[0]));
+    }
+    if (answers.competition) {
+      const countMatch = answers.competition.match(/(\d+)/);
+      if (countMatch) setCompetitorCount(parseInt(countMatch[1]));
+      if (answers.competition.toLowerCase().includes('emerging')) setMarketMaturity('emerging');
+      else if (answers.competition.toLowerCase().includes('growth')) setMarketMaturity('growth');
+      else if (answers.competition.toLowerCase().includes('mature')) setMarketMaturity('mature');
+      else if (answers.competition.toLowerCase().includes('declining')) setMarketMaturity('declining');
+    }
+    if (answers.keyTrends) {
+      setKeyTrends(answers.keyTrends);
+    }
+    setMode('traditional');
+  };
 
   const handleSave = () => {
     const state = getSerializedState();
@@ -612,13 +699,49 @@ Report generated: ${new Date().toLocaleString('en-GB')}
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-analysis">Market Analysis</h1>
-            <p className="text-lg text-muted-foreground">Comprehensive TAM/SAM/SOM analysis for UK Innovator Founder visa scalability assessment</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-analysis">Market Analysis</h1>
+                <p className="text-lg text-muted-foreground">Comprehensive TAM/SAM/SOM analysis for UK Innovator Founder visa scalability assessment</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Atlas, our Growth Expert, helps you define your market opportunity for visa scalability.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Calculate TAM, SAM, and SOM properly</li>
+                    <li>Understand market growth dynamics</li>
+                    <li>Identify competitive landscape</li>
+                    <li>Earn XP as you complete each question</li>
+                  </ul>
+                  <p className="pt-2">Your answers will automatically populate the market analysis when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="market-analysis"
             onSave={handleSave}
@@ -1282,6 +1405,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

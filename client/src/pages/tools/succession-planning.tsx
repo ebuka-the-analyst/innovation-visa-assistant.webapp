@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -34,7 +34,26 @@ interface SuccessionRole {
   timeToCompetence: number; // months
 }
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'succession-planning',
+  toolName: 'Succession Planning Tool',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your innovation advisor. Succession planning demonstrates business maturity and risk management. Let me help you identify critical roles and develop succession strategies.",
+  questions: [
+    { id: 'criticalRoles', question: "What are the most critical roles in your organization?", hint: "Consider technical leads, founders, key managers", fieldKey: 'criticalRoles', fieldType: 'text' },
+    { id: 'founderRole', question: "What happens if a founder becomes unavailable?", hint: "This is a key concern for endorsing bodies", fieldKey: 'founderCoverage', fieldType: 'text' },
+    { id: 'successors', question: "Have you identified potential successors for critical roles?", hint: "Internal promotions, external hires, or training plans", fieldKey: 'successorStatus', fieldType: 'text' },
+    { id: 'timeline', question: "How long would it take to train successors for key positions?", hint: "Consider months to competence for each critical role", fieldKey: 'trainingTimeline', fieldType: 'text' },
+    { id: 'budget', question: "What budget do you have for leadership development?", hint: "Annual investment in training and succession planning", fieldKey: 'developmentBudget', fieldType: 'number' },
+    { id: 'documentation', question: "Do you have documented processes and knowledge transfer systems?", hint: "SOPs, wikis, mentorship programs", fieldKey: 'documentation', fieldType: 'text' },
+  ],
+  completionMessage: "I've gathered your succession planning information. Let me analyze your business continuity risk and provide recommendations."
+};
+
 export default function SuccessionPlanning() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('succession-planning-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [roles, setRoles] = useState<SuccessionRole[]>([
@@ -58,6 +77,14 @@ export default function SuccessionPlanning() {
     localStorage.setItem('successionPlanningData', JSON.stringify({ roles }));
     localStorage.setItem('successionPlanningDate', new Date().toLocaleDateString());
     setSavedDate(new Date().toLocaleDateString());
+  };
+
+  useEffect(() => {
+    localStorage.setItem('succession-planning-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    setMode('traditional');
   };
 
   const handleFileUpload = (file: any) => setUploadedFiles(prev => [...prev, file]);
@@ -489,6 +516,10 @@ Assessment: Innovation, Viability, Scalability criteria
             getSerializedState={getSerializedState}
           />
 
+          <div className="flex justify-end mt-4 mb-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
           {savedDate && (
             <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
               <AlertCircle className="h-4 w-4 text-green-600" />
@@ -496,7 +527,10 @@ Assessment: Innovation, Viability, Scalability criteria
             </Alert>
           )}
 
-          {/* Advanced KPI Dashboard */}
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
@@ -755,6 +789,8 @@ Assessment: Innovation, Viability, Scalability criteria
               </div>
             )}
           </Card>
+          </>
+          )}
         </div>
       </div>
     </>

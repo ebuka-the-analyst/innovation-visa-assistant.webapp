@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,6 +15,65 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "rebuttal-letter",
+  toolName: "Rebuttal Letter Builder",
+  agentId: "sage",
+  agentName: "Sage",
+  agentTitle: "Compliance Specialist",
+  description: "Build a professional rebuttal letter to address Home Office concerns",
+  questions: [
+    {
+      id: "applicant",
+      question: "What is your full name and visa application reference number?",
+      placeholder: "Full name: [Your Name], Application Reference: [GWFXXX-XXXX-XXXXX-XXXXX]",
+      fieldKey: "applicantInfo",
+      minLength: 20,
+      helpText: "Provide your legal name as it appears on your visa application"
+    },
+    {
+      id: "concern",
+      question: "What specific concern did the Home Office raise in their response?",
+      placeholder: "The Home Office stated that [exact concern from letter]. They questioned [specific issue]...",
+      fieldKey: "homeOfficeConcern",
+      minLength: 100,
+      helpText: "Quote directly from the Home Office letter where possible"
+    },
+    {
+      id: "response",
+      question: "How do you refute or address this concern?",
+      placeholder: "In response to this concern, I clarify that [explanation]. The evidence shows [facts]. This misunderstanding arose because...",
+      fieldKey: "rebuttalResponse",
+      minLength: 150,
+      helpText: "Be factual, professional, and avoid emotional language"
+    },
+    {
+      id: "evidence",
+      question: "What new or additional evidence will you provide to support your case?",
+      placeholder: "I am providing: 1) [Document type] demonstrating [point], 2) [Expert letter] confirming [validation], 3) [Updated data] showing...",
+      fieldKey: "supportingEvidence",
+      minLength: 100,
+      helpText: "List specific documents and what each one proves"
+    },
+    {
+      id: "timeline",
+      question: "When did you receive the RFE and what is your response deadline?",
+      placeholder: "RFE received: [date]. Deadline: [date]. I have [X] days remaining to respond...",
+      fieldKey: "timeline",
+      minLength: 30,
+      helpText: "Tracking deadlines is critical for timely submission"
+    },
+    {
+      id: "closing",
+      question: "What is your key closing statement emphasizing why the application should be approved?",
+      placeholder: "Given the evidence presented, I respectfully request approval because [key reason]. My commitment to the UK is demonstrated by...",
+      fieldKey: "closingStatement",
+      minLength: 80,
+      helpText: "End with a strong, professional statement of your case"
+    }
+  ]
+};
 
 type RFEConcern = {
   id: string;
@@ -37,6 +96,9 @@ type LetterData = {
 };
 
 export default function RebuttalLetter() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('rebuttal-letter-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [letterData, setLetterData] = useState<LetterData>({
     applicantName: '',
     visaType: 'UK Innovator Founder Visa',
@@ -188,6 +250,56 @@ export default function RebuttalLetter() {
     if ('activeTab' in state) setActiveTab(state.activeTab);
     if ('generatedLetter' in state) setGeneratedLetter(state.generatedLetter);
     if ('savedDate' in state) setSavedDate(state.savedDate || '');
+  };
+
+  useEffect(() => {
+    localStorage.setItem('rebuttal-letter-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.applicantInfo) {
+      const parts = answers.applicantInfo.split(/[,;]/);
+      if (parts.length >= 1) {
+        const namePart = parts[0].replace(/Full name:?/i, '').trim();
+        setLetterData(prev => ({ ...prev, applicantName: namePart }));
+      }
+      if (parts.length >= 2) {
+        const refPart = parts[1].replace(/Application Reference:?/i, '').trim();
+        setLetterData(prev => ({ ...prev, applicationReference: refPart }));
+      }
+    }
+    if (answers.homeOfficeConcern) {
+      setLetterData(prev => ({
+        ...prev,
+        concerns: [{
+          ...prev.concerns[0],
+          concernArea: 'Primary Concern',
+          homeOfficeStatement: answers.homeOfficeConcern
+        }]
+      }));
+    }
+    if (answers.rebuttalResponse) {
+      setLetterData(prev => ({
+        ...prev,
+        concerns: [{
+          ...prev.concerns[0],
+          yourResponse: answers.rebuttalResponse
+        }]
+      }));
+    }
+    if (answers.supportingEvidence) {
+      setLetterData(prev => ({
+        ...prev,
+        concerns: [{
+          ...prev.concerns[0],
+          evidenceProvided: answers.supportingEvidence
+        }]
+      }));
+    }
+    if (answers.closingStatement) {
+      setLetterData(prev => ({ ...prev, closingStatement: answers.closingStatement }));
+    }
+    setMode('traditional');
   };
 
   useEffect(() => {
@@ -548,16 +660,19 @@ each case individually based on specific circumstances and evidence provided.
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-rebuttal-letter">
-              RFE Rebuttal Letter Generator
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Respond to Home Office Requests for Evidence with professional, evidence-backed arguments
-            </p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-rebuttal-letter">
+                RFE Rebuttal Letter Generator
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                Respond to Home Office Requests for Evidence with professional, evidence-backed arguments
+              </p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
           <ToolUtilityBar
@@ -569,6 +684,10 @@ each case individually based on specific circumstances and evidence provided.
             toolName="RFE Rebuttal Letter"
           />
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5" data-testid="tabs-rebuttal-letter">
               <TabsTrigger value="builder" data-testid="tab-builder">Builder</TabsTrigger>
@@ -1134,6 +1253,8 @@ each case individually based on specific circumstances and evidence provided.
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

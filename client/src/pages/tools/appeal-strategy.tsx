@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -82,6 +82,55 @@ const EVIDENCE_TYPES = {
   commercial: 'Commercial Contracts',
   legal: 'Legal Documentation',
   testimonial: 'Witness Statements'
+};
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'appeal-strategy',
+  toolName: 'Appeal Strategy Planner',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. I understand facing a visa refusal is challenging. Let me help you build a strong appeal strategy that addresses each rejection ground systematically. We'll create a comprehensive plan together.",
+  questions: [
+    {
+      id: 'application-ref',
+      question: "What is your application reference number from the Home Office decision letter?",
+      hint: "This is typically a combination of letters and numbers on your refusal notice",
+      fieldKey: 'application_reference',
+      minLength: 5
+    },
+    {
+      id: 'decision-date',
+      question: "When was your application refused? What is the date on your decision letter?",
+      hint: "This is important for calculating appeal deadlines",
+      fieldKey: 'decision_date'
+    },
+    {
+      id: 'primary-rejection',
+      question: "What was the primary reason given for your refusal? Please describe the main rejection ground from your decision letter.",
+      hint: "Quote directly from the refusal letter if possible",
+      fieldKey: 'primary_rejection',
+      minLength: 50
+    },
+    {
+      id: 'factual-errors',
+      question: "Were there any factual errors in the decision? Did the Home Office misunderstand or misstate any facts about your application?",
+      hint: "Factual errors are often the strongest grounds for appeal",
+      fieldKey: 'factual_errors',
+      minLength: 30
+    },
+    {
+      id: 'new-evidence',
+      question: "Do you have any new evidence that wasn't in your original application? What additional documentation can you now provide?",
+      hint: "This could include contracts signed after submission, new partnerships, or additional financial proof",
+      fieldKey: 'new_evidence',
+      minLength: 30
+    },
+    {
+      id: 'legal-rep',
+      question: "Do you have legal representation for your appeal? Have you instructed an OISC-registered adviser or immigration barrister?",
+      hint: "Legal representation significantly improves success rates",
+      fieldKey: 'legal_representation'
+    }
+  ]
 };
 
 export default function AppealStrategy() {

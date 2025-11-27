@@ -13,6 +13,59 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend } from "recharts";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "performance-management",
+  toolName: "Performance Management",
+  agent: "atlas",
+  greeting: "Hello! I'm Atlas, your growth and team performance advisor. Let's set up a performance management system that demonstrates your ability to build and manage high-performing teams.",
+  questions: [
+    {
+      id: "team_overview",
+      question: "Describe your current team. How many people, what roles, and how do you currently track performance?",
+      hint: "Example: 'Tech Lead and 2 developers, currently using informal weekly check-ins'",
+      fieldKey: "teamOverview",
+      minLength: 40
+    },
+    {
+      id: "performance_criteria",
+      question: "What criteria do you use to evaluate employee performance? What makes someone a top performer?",
+      hint: "Include both quantitative metrics and qualitative factors",
+      fieldKey: "performanceCriteria",
+      minLength: 50
+    },
+    {
+      id: "goals_framework",
+      question: "How do you set and track goals for your team members?",
+      hint: "Example: 'Quarterly OKRs aligned with company objectives, reviewed monthly'",
+      fieldKey: "goalsFramework",
+      minLength: 40
+    },
+    {
+      id: "feedback_process",
+      question: "How often do you provide feedback and conduct performance reviews?",
+      hint: "Describe your review cycle and feedback approach",
+      fieldKey: "feedbackProcess",
+      minLength: 30
+    },
+    {
+      id: "compensation_link",
+      question: "How is performance linked to compensation and career progression?",
+      hint: "Describe salary reviews, bonuses, promotion criteria",
+      fieldKey: "compensationLink",
+      minLength: 40
+    },
+    {
+      id: "development_plans",
+      question: "How do you support employee development and growth?",
+      hint: "Training, mentoring, skill development opportunities",
+      fieldKey: "developmentPlans",
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent! I've captured your performance management approach. Let me now help you create structured employee reviews and tracking."
+};
 
 // UK Innovator Founder Visa Context (November 2025)
 // Viability Criterion: Strong performance management = better execution
@@ -30,11 +83,36 @@ interface EmployeeReview {
 }
 
 export default function PerformanceManagement() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('performance-management-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('performance-management-mode', mode);
+  }, [mode]);
+
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [reviews, setReviews] = useState<EmployeeReview[]>([
     { id: "1", name: "Tech Lead", role: "Senior Engineer", rating: "exceeds", goals: ["Complete MVP", "Mentor 2 juniors"], feedback: "Excellent technical leadership", nextReviewDate: "2025-06-01", salary: 75000 }
   ]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.teamOverview) {
+      const newReview: EmployeeReview = {
+        id: Date.now().toString(),
+        name: "Team Member",
+        role: answers.teamOverview.split(',')[0] || "Team Member",
+        rating: "meets",
+        goals: answers.goalsFramework ? answers.goalsFramework.split('\n').filter(g => g.trim()) : [],
+        feedback: answers.feedbackProcess || "",
+        nextReviewDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        salary: 60000
+      };
+      setReviews(prev => [...prev, newReview]);
+    }
+    setMode('traditional');
+  };
 
   const saveProgress = () => {
     localStorage.setItem('performanceMgmtFiles', JSON.stringify(uploadedFiles));
@@ -264,8 +342,18 @@ GOV.UK: Innovator Founder Visa viability criterion
 
           <ToolUtilityBar toolId="performance-management" toolName="Performance Management" onSave={saveProgress} onExport={exportReviews} getSerializedState={getSerializedState} />
 
+          <div className="flex justify-end mt-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
           {savedDate && <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950"><AlertCircle className="h-4 w-4 text-green-600" /><AlertDescription className="text-green-700 dark:text-green-300">Last saved: {savedDate}</AlertDescription></Alert>}
 
+          {mode === 'ai' ? (
+            <div className="mt-6">
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            </div>
+          ) : (
+          <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
@@ -459,6 +547,8 @@ GOV.UK: Innovator Founder Visa viability criterion
               </div>
             )}
           </Card>
+          </>
+          )}
         </div>
       </div>
     </>

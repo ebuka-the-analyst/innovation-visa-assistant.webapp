@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -61,6 +61,58 @@ const PROTECTION_STRENGTH_COLORS: Record<ProtectionStrength, string> = {
   'none': '#6b7280',
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'ip-audit',
+  toolName: 'IP Portfolio Audit',
+  agent: 'nova',
+  greeting: "Hi! I'm Nova, your Innovation Specialist. I'll help you audit your intellectual property portfolio to identify strengths, gaps, and opportunities. A strong IP position is critical for visa endorsement!",
+  questions: [
+    {
+      id: 'business-context',
+      question: "What's your business name and industry sector?",
+      hint: "This helps contextualize your IP needs against industry standards",
+      fieldKey: 'businessContext',
+      minLength: 20
+    },
+    {
+      id: 'core-innovation',
+      question: "What are your core innovations that give you competitive advantage?",
+      hint: "Describe the key technology, processes, or methods that differentiate your business",
+      fieldKey: 'coreInnovation',
+      minLength: 80
+    },
+    {
+      id: 'existing-ip',
+      question: "What intellectual property do you currently have? (Patents, trademarks, copyrights, trade secrets, designs)",
+      hint: "List each type with status: pending, filed, granted, or informal protection",
+      fieldKey: 'existingIP',
+      minLength: 60
+    },
+    {
+      id: 'ip-ownership',
+      question: "Who owns your IP assets? Are there any shared ownership or assignment issues?",
+      hint: "Clear ownership is crucial - include any agreements with co-founders, contractors, or employers",
+      fieldKey: 'ipOwnership',
+      minLength: 50
+    },
+    {
+      id: 'ip-documentation',
+      question: "What documentation do you have for your IP? (Registration certificates, assignment agreements, inventor declarations)",
+      hint: "Endorsing bodies will want to verify IP claims - complete documentation is essential",
+      fieldKey: 'ipDocumentation',
+      minLength: 50
+    },
+    {
+      id: 'ip-gaps',
+      question: "What IP protection gaps or vulnerabilities concern you most?",
+      hint: "E.g., unprotected brand, patentable innovations not filed, weak trade secret policies",
+      fieldKey: 'ipGaps',
+      minLength: 40
+    }
+  ],
+  completionMessage: "Your IP landscape is mapped! Add each asset to the Audit tab with detailed information to get a comprehensive IP score and gap analysis."
+};
+
 export default function IPAudit() {
   const [assets, setAssets] = useState<IPAsset[]>([
     {
@@ -85,6 +137,23 @@ export default function IPAudit() {
   const [savedDate, setSavedDate] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [industrySector, setIndustrySector] = useState('');
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('ip-audit-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('ip-audit-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.businessContext) {
+      const parts = answers.businessContext.split(',');
+      setBusinessName(parts[0]?.trim() || '');
+      setIndustrySector(parts[1]?.trim() || '');
+    }
+    setMode('traditional');
+    setActiveTab('audit');
+  };
 
   const addAsset = () => {
     setAssets([...assets, {
@@ -517,6 +586,17 @@ IP attorney or patent agent for professional advice on IP protection strategy.
             toolName="IP Portfolio Audit"
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4" data-testid="tabs-ip-audit">
               <TabsTrigger value="audit" data-testid="tab-audit">Audit</TabsTrigger>
@@ -1116,6 +1196,7 @@ IP attorney or patent agent for professional advice on IP protection strategy.
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

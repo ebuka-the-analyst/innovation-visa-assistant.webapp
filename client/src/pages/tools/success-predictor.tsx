@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +23,22 @@ type PredictionFactor = {
   weight: number;
   score: number;
   category: "innovation" | "viability" | "scalability" | "applicant" | "documentation";
+};
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'success-predictor',
+  toolName: 'Success Probability Predictor',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your growth strategist. I'll help you predict your Innovator Founder Visa application success probability by analyzing key factors that endorsing bodies evaluate.",
+  questions: [
+    { id: 'innovation', question: "How innovative is your business concept?", hint: "Consider novel technology, unique approach, or market disruption", fieldKey: 'innovationScore', fieldType: 'text' },
+    { id: 'market', question: "What evidence do you have for market demand?", hint: "Customer validation, LOIs, pilot programs, waitlists", fieldKey: 'marketEvidence', fieldType: 'text' },
+    { id: 'experience', question: "What relevant experience do you bring as a founder?", hint: "Industry expertise, previous startups, technical background", fieldKey: 'founderExperience', fieldType: 'text' },
+    { id: 'funding', question: "What is your current funding status?", hint: "Self-funded, angel investment, VC funding, grants", fieldKey: 'fundingStatus', fieldType: 'select', options: ['Self-funded', 'Friends & Family', 'Angel Investment', 'VC Funding', 'Grants', 'No funding yet'] },
+    { id: 'jobs', question: "How many UK jobs do you plan to create in 3 years?", hint: "Job creation is weighted heavily in visa decisions", fieldKey: 'jobCreation', fieldType: 'number' },
+    { id: 'documents', question: "How complete is your application documentation?", hint: "Business plan, financials, market research, pitch deck", fieldKey: 'documentationQuality', fieldType: 'text' },
+  ],
+  completionMessage: "I've analyzed your application factors. Let me calculate your success probability and identify areas for improvement."
 };
 
 const DEFAULT_FACTORS: PredictionFactor[] = [
@@ -43,6 +60,18 @@ export default function SuccessPredictor() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('success-predictor-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('success-predictor-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    setMode('traditional');
+  };
 
   const [factors, setFactors] = useState<PredictionFactor[]>(() => {
     const saved = localStorage.getItem("success-predictor-state");
@@ -189,6 +218,10 @@ export default function SuccessPredictor() {
             onExportWord={handleExportWord}
           />
 
+          <div className="flex justify-end mt-4 mb-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
           {showAutoSave && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
               <Save className="w-4 h-4" />
@@ -196,6 +229,9 @@ export default function SuccessPredictor() {
             </div>
           )}
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <div className="mt-6">
             <Card className="mb-6">
               <CardContent className="pt-6">
@@ -430,6 +466,7 @@ export default function SuccessPredictor() {
               </TabsContent>
             </Tabs>
           </div>
+          )}
         </div>
       </div>
     </ToolAccessGuard>

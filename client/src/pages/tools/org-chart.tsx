@@ -15,6 +15,59 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, ComposedChart, Treemap,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "org-chart",
+  toolName: "Organizational Chart Builder",
+  agent: "nova",
+  greeting: "Hello! I'm Nova, your organizational design expert. Let's build a team structure that demonstrates your UK job creation commitment - a critical factor for visa approval. The visa requires creating at least 2 FTE UK jobs by Year 3.",
+  questions: [
+    {
+      id: "current_team",
+      question: "Describe your current team. Who are the founders and any existing team members? Include their roles and whether they're UK-based.",
+      hint: "Example: 'CEO (founder, UK-based), CTO (co-founder, remote), 1 developer (UK-based part-time)'",
+      fieldKey: "currentTeam",
+      minLength: 40
+    },
+    {
+      id: "year1_hires",
+      question: "What positions do you plan to hire in Year 1? Include job titles, departments, and whether they'll be UK-based.",
+      hint: "Focus on roles critical for business execution and visa compliance (UK jobs)",
+      fieldKey: "year1Hires",
+      minLength: 50
+    },
+    {
+      id: "year2_3_growth",
+      question: "What is your team growth plan for Years 2-3? How will you scale to meet the 2 FTE UK jobs requirement?",
+      hint: "Endorsers want to see realistic, milestone-driven hiring plans",
+      fieldKey: "year2_3Growth",
+      minLength: 50
+    },
+    {
+      id: "dept_structure",
+      question: "What departments will you have? Describe the organizational structure and reporting lines.",
+      hint: "Example: 'Product (CTO leads), Sales (Sales Director leads), Operations (CEO leads)'",
+      fieldKey: "deptStructure",
+      minLength: 40
+    },
+    {
+      id: "salary_budget",
+      question: "What is your salary budget for team growth? Include salary ranges for key positions.",
+      hint: "UK roles typically need £25,000+ to meet Skilled Worker visa thresholds if sponsorship needed",
+      fieldKey: "salaryBudget",
+      minLength: 30
+    },
+    {
+      id: "retention_strategy",
+      question: "How will you attract and retain talent? Describe your compensation, culture, and career development approach.",
+      hint: "Include equity, benefits, flexible working, and growth opportunities",
+      fieldKey: "retentionStrategy",
+      minLength: 50
+    }
+  ],
+  completionMessage: "Excellent! I've captured your team structure plans. Let me now create a visual organizational chart and calculate your UK job creation metrics."
+};
 
 type OrgPosition = {
   id: string;
@@ -57,8 +110,71 @@ type GrowthPlan = {
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316'];
 
 export default function OrgChart() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('org-chart-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('org-chart-mode', mode);
+  }, [mode]);
+
   const [activeTab, setActiveTab] = useState('structure');
   const [savedDate, setSavedDate] = useState('');
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const newPositions: OrgPosition[] = [{
+      id: '1',
+      title: 'Chief Executive Officer',
+      department: 'Executive',
+      level: 1,
+      reportsTo: 'Board',
+      salary: 120000,
+      headcount: 1,
+      ukBased: true,
+      fte: 1,
+      responsibilities: answers.currentTeam || 'Overall company strategy and execution',
+      requiredSkills: 'Leadership, Vision, Strategy',
+      growthYear: 0,
+      priority: 'critical'
+    }];
+    
+    if (answers.year1Hires) {
+      newPositions.push({
+        id: '2',
+        title: 'Year 1 Hire',
+        department: 'Operations',
+        level: 2,
+        reportsTo: '1',
+        salary: 50000,
+        headcount: 1,
+        ukBased: true,
+        fte: 1,
+        responsibilities: answers.year1Hires,
+        requiredSkills: '',
+        growthYear: 1,
+        priority: 'high'
+      });
+    }
+    
+    setPositions(newPositions);
+    
+    if (answers.retentionStrategy) {
+      setGrowthPlan(prev => ({
+        ...prev,
+        retentionPlan: answers.retentionStrategy,
+        scalingStrategy: answers.year2_3Growth || ''
+      }));
+    }
+    
+    if (answers.salaryBudget) {
+      setOrgStructure(prev => ({
+        ...prev,
+        reportingStructure: answers.deptStructure || ''
+      }));
+    }
+    
+    setMode('traditional');
+  };
 
   const [positions, setPositions] = useState<OrgPosition[]>([
     {
@@ -579,6 +695,16 @@ This organizational chart demonstrates your commitment to UK job creation and st
             toolName="Organizational Chart Builder"
           />
 
+          <div className="flex justify-end mt-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <div className="mt-6">
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            </div>
+          ) : (
+          <>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-6" data-testid="tabs-org-chart">
               <TabsTrigger value="structure" data-testid="tab-structure">Structure</TabsTrigger>
@@ -1371,6 +1497,8 @@ This organizational chart demonstrates your commitment to UK job creation and st
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

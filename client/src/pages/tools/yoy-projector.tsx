@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -12,6 +10,59 @@ import { TrendingUp, TrendingDown, Calendar, Target, Users, DollarSign } from "l
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "yoy-projector",
+  agentId: "atlas",
+  agentName: "Atlas",
+  agentTitle: "Growth & Strategy Expert",
+  greeting: "Hello! I'm Atlas, your growth strategy specialist. Let me help you create realistic year-over-year growth projections for your UK business.",
+  questions: [
+    {
+      id: "currentMetrics",
+      text: "What are your current business metrics? Include revenue, ARR (if applicable), and customer count.",
+      fieldKey: "currentMetrics",
+      minLength: 60,
+      placeholder: "Share your current revenue, annual recurring revenue, and total customer count..."
+    },
+    {
+      id: "revenueGrowth",
+      text: "What annual revenue growth rate do you project? What assumptions support this rate?",
+      fieldKey: "revenueGrowth",
+      minLength: 70,
+      placeholder: "Describe your projected revenue growth rate and the market/operational factors driving it..."
+    },
+    {
+      id: "customerGrowth",
+      text: "What customer growth rate do you expect? How will you acquire and retain customers?",
+      fieldKey: "customerGrowth",
+      minLength: 70,
+      placeholder: "Share your customer acquisition strategy, expected growth rate, and retention approach..."
+    },
+    {
+      id: "keyDrivers",
+      text: "What are the key drivers of your growth? How will they compound over time?",
+      fieldKey: "keyDrivers",
+      minLength: 60,
+      placeholder: "Describe your growth drivers: product development, market expansion, partnerships, pricing..."
+    },
+    {
+      id: "projectionHorizon",
+      text: "How many years are you projecting? What major milestones do you expect to hit?",
+      fieldKey: "projectionHorizon",
+      minLength: 60,
+      placeholder: "Describe your projection timeline (3-5 years) and key milestones at each stage..."
+    },
+    {
+      id: "assumptions",
+      text: "What key assumptions underpin your projections? What could impact your growth trajectory?",
+      fieldKey: "assumptions",
+      minLength: 70,
+      placeholder: "List key assumptions about market conditions, funding, team growth, and potential risks..."
+    }
+  ]
+};
 
 type MetricInputs = {
   currentRevenue: number;
@@ -44,6 +95,14 @@ type Milestone = {
 };
 
 export default function YoYProjector() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('yoy-projector-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('yoy-projector-mode', mode);
+  }, [mode]);
+
   const [inputs, setInputs] = useState<MetricInputs>({
     currentRevenue: 100000,
     currentCustomers: 50,
@@ -55,6 +114,10 @@ export default function YoYProjector() {
   });
   const [activeTab, setActiveTab] = useState('projector');
   const [savedDate, setSavedDate] = useState('');
+
+  const handleAiComplete = useCallback((_answers: Record<string, string>) => {
+    setMode('traditional');
+  }, []);
 
   const getSerializedState = () => {
     return {
@@ -945,6 +1008,8 @@ ensure all assumptions are defensible with market evidence.
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

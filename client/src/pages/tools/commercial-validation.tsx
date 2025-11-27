@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,57 @@ interface CaseStudy {
   solution: string;
   results: string;
 }
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'commercial-validation',
+  toolName: 'Commercial Validation Suite',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. Commercial validation is essential for proving your business viability to endorsers. Let me guide you through competitor analysis, user interviews, and building case studies that demonstrate market demand.",
+  questions: [
+    {
+      id: 'target-market',
+      question: "Who is your target market? Define your ideal customer segments with specifics.",
+      hint: "Include demographics, industry, company size, and geographic focus",
+      fieldKey: 'target_market',
+      minLength: 50
+    },
+    {
+      id: 'market-size',
+      question: "What is the size of your target market? Provide market size data with sources.",
+      hint: "Use TAM, SAM, SOM figures with credible sources like Statista or ONS",
+      fieldKey: 'market_size',
+      minLength: 30
+    },
+    {
+      id: 'main-competitors',
+      question: "Who are your main competitors? List 3-5 competitors and briefly describe what they do.",
+      hint: "Include both direct competitors and alternative solutions",
+      fieldKey: 'main_competitors',
+      minLength: 50
+    },
+    {
+      id: 'competitive-advantage',
+      question: "What is your competitive advantage? Why will customers choose you over alternatives?",
+      hint: "Be specific about unique features, pricing, technology, or approach",
+      fieldKey: 'competitive_advantage',
+      minLength: 80
+    },
+    {
+      id: 'user-interviews',
+      question: "Have you conducted user interviews? How many and what were the key pain points identified?",
+      hint: "5-10 interviews provide meaningful qualitative validation",
+      fieldKey: 'user_interviews',
+      minLength: 50
+    },
+    {
+      id: 'willingness-to-pay',
+      question: "What have potential customers indicated they would pay for your solution?",
+      hint: "Include price points from interviews or survey responses",
+      fieldKey: 'willingness_to_pay',
+      minLength: 20
+    }
+  ]
+};
 
 export default function CommercialValidation() {
   const { generateWord } = useWordExport();

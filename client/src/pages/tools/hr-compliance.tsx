@@ -14,6 +14,53 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'hr-compliance',
+  toolName: 'UK HR Compliance Checker',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Advisor. UK employment law is complex, and ensuring compliance is essential for your Innovator Founder Visa - endorsers will assess your understanding of legal obligations. Let me help you assess your HR compliance status!",
+  questions: [
+    {
+      id: 'employee-count',
+      question: "How many employees do you currently have or plan to hire in the UK? This determines which compliance requirements apply to you.",
+      hint: "Different rules apply at thresholds of 1, 5, and 250+ employees",
+      fieldKey: 'employeeCount'
+    },
+    {
+      id: 'contracts',
+      question: "Have you prepared UK-compliant employment contracts? These must be issued within 2 months of start date and include specific statutory terms.",
+      hint: "Key elements: job title, salary, hours, holiday entitlement, notice period, pension details",
+      fieldKey: 'contracts'
+    },
+    {
+      id: 'paye',
+      question: "Is your PAYE scheme registered with HMRC? As an employer, you must register before your first payday and submit Real Time Information.",
+      hint: "Registration can take up to 2 weeks - plan ahead",
+      fieldKey: 'payeStatus'
+    },
+    {
+      id: 'pension',
+      question: "Have you set up auto-enrolment workplace pension? What pension provider have you chosen, and are you meeting the minimum 3% employer contribution?",
+      hint: "NEST is a popular choice for startups. Failure to comply can result in fines.",
+      fieldKey: 'pension'
+    },
+    {
+      id: 'right-to-work',
+      question: "Do you have a process for Right to Work checks? These must be completed before employment starts, with copies retained securely.",
+      hint: "You may need a sponsor licence for non-settled workers",
+      fieldKey: 'rightToWork'
+    },
+    {
+      id: 'health-safety',
+      question: "Have you completed workplace risk assessments and documented your Health & Safety policy (required if 5+ employees)?",
+      hint: "Include DSE assessments for computer workers and accident book procedures",
+      fieldKey: 'healthSafety'
+    }
+  ],
+  completionMessage: "Excellent! I've assessed your HR compliance status. Understanding these requirements demonstrates to endorsers that you can responsibly manage UK employees. I'm populating your compliance checklist now."
+};
 
 type ComplianceArea = {
   id: string;
@@ -308,6 +355,10 @@ const COMPLIANCE_ITEMS: ComplianceArea[] = [
 ];
 
 export default function HRCompliance() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('hr-compliance-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [completedItems, setCompletedItems] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState('overview');
   const [savedDate, setSavedDate] = useState('');
@@ -338,6 +389,36 @@ export default function HRCompliance() {
     if ('completedItems' in state) setCompletedItems(state.completedItems);
     if ('activeTab' in state) setActiveTab(state.activeTab);
     if ('savedDate' in state) setSavedDate(state.savedDate || '');
+  };
+
+  useEffect(() => {
+    localStorage.setItem('hr-compliance-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newCompleted: Record<string, boolean> = {};
+    if (answers.contracts && answers.contracts.toLowerCase().includes('yes')) {
+      newCompleted['contracts-1'] = true;
+      newCompleted['contracts-2'] = true;
+    }
+    if (answers.rightToWork && answers.rightToWork.toLowerCase().includes('yes')) {
+      newCompleted['rtw-1'] = true;
+      newCompleted['rtw-2'] = true;
+    }
+    if (answers.healthSafety && answers.healthSafety.toLowerCase().includes('yes')) {
+      newCompleted['health-1'] = true;
+      newCompleted['health-2'] = true;
+    }
+    if (answers.dataProtection && answers.dataProtection.toLowerCase().includes('yes')) {
+      newCompleted['data-1'] = true;
+      newCompleted['data-2'] = true;
+    }
+    if (answers.equalityPolicies && answers.equalityPolicies.toLowerCase().includes('yes')) {
+      newCompleted['equality-1'] = true;
+      newCompleted['equality-2'] = true;
+    }
+    setCompletedItems(prev => ({ ...prev, ...newCompleted }));
+    setMode('traditional');
   };
 
   useEffect(() => {
@@ -693,13 +774,49 @@ solicitor or HR professional for specific compliance matters.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-hr-compliance">HR Compliance Tracker</h1>
-            <p className="text-lg text-muted-foreground">UK Employment Law 2025 - Track PAYE/NI, contracts, right to work, policies compliance</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-hr-compliance">HR Compliance Tracker</h1>
+                <p className="text-lg text-muted-foreground">UK Employment Law 2025 - Track PAYE/NI, contracts, right to work, policies compliance</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Sage, our Compliance Expert, helps you navigate UK employment law requirements.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Understand contract and right to work requirements</li>
+                    <li>Ensure health & safety compliance</li>
+                    <li>Meet data protection obligations</li>
+                    <li>Earn XP as you complete each question</li>
+                  </ul>
+                  <p className="pt-2">Your answers will automatically update compliance status when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="hr-compliance"
             onSave={handleSave}
@@ -1232,6 +1349,8 @@ solicitor or HR professional for specific compliance matters.
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

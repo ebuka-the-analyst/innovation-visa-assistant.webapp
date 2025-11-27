@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,73 @@ import {
   BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "pitch-deck",
+  toolName: "Pitch Deck Builder",
+  agentId: "nova",
+  agentName: "Nova",
+  agentTitle: "Innovation Strategist",
+  description: "Build a compelling investor pitch deck aligned with UK endorsing body requirements",
+  questions: [
+    {
+      id: "problem",
+      question: "What critical problem does your business solve and how big is this problem?",
+      placeholder: "Describe the problem you're solving, who is affected, and the magnitude of the pain point...",
+      fieldKey: "problemStatement",
+      minLength: 100,
+      helpText: "Be specific and quantifiable. Include market pain points and why existing solutions are inadequate"
+    },
+    {
+      id: "solution",
+      question: "Describe your innovative solution and what makes it genuinely different from competitors.",
+      placeholder: "Explain your product/service, key features, and technological or business model innovation...",
+      fieldKey: "solutionOverview",
+      minLength: 150,
+      helpText: "Focus on what's genuinely innovative - not just incremental improvement"
+    },
+    {
+      id: "market",
+      question: "What is your UK market opportunity? Include TAM/SAM/SOM and why the UK is strategic.",
+      placeholder: "Define target market, market size with sources, UK-specific opportunity, and growth trends...",
+      fieldKey: "marketOpportunity",
+      minLength: 120,
+      helpText: "Include UK-specific data and explain why the UK market is strategic for your business"
+    },
+    {
+      id: "businessModel",
+      question: "How does your business make money? Explain your revenue streams and unit economics.",
+      placeholder: "Revenue model, pricing strategy, customer acquisition cost, lifetime value, path to profitability...",
+      fieldKey: "businessModel",
+      minLength: 100,
+      helpText: "Be specific about how you generate revenue and your path to profitability"
+    },
+    {
+      id: "traction",
+      question: "What traction and validation have you achieved so far?",
+      placeholder: "Customers, revenue, users, partnerships, pilots, testimonials, growth metrics...",
+      fieldKey: "tractionEvidence",
+      minLength: 100,
+      helpText: "Include specific metrics and evidence that can be verified"
+    },
+    {
+      id: "team",
+      question: "Who is on your founding team and what makes you uniquely qualified to execute this vision?",
+      placeholder: "Founder backgrounds, relevant experience, past successes, advisors, key hires planned...",
+      fieldKey: "teamCredentials",
+      minLength: 80,
+      helpText: "Highlight achievements and expertise that demonstrate ability to execute"
+    },
+    {
+      id: "ask",
+      question: "What investment are you seeking and how will you use the funds?",
+      placeholder: "Funding amount, use of funds breakdown, milestones this funding will achieve, exit vision...",
+      fieldKey: "fundingAsk",
+      minLength: 80,
+      helpText: "Be specific about how funding aligns with your milestones"
+    }
+  ]
+};
 
 type SlideField = {
   id: string;
@@ -39,6 +106,9 @@ type PitchSlide = {
 export default function PitchDeck() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('pitch-deck-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [slides, setSlides] = useState<PitchSlide[]>([
     {
       id: 'problem',
@@ -204,12 +274,64 @@ export default function PitchDeck() {
   };
 
   useEffect(() => {
+    localStorage.setItem('pitch-deck-mode', mode);
+  }, [mode]);
+
+  useEffect(() => {
     const saved = localStorage.getItem('pitch-deck-state');
     if (saved) {
       const state = JSON.parse(saved);
       restoreSerializedState(state);
     }
   }, []);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const newSlides = [...slides];
+    if (answers.problemStatement) {
+      const problemSlide = newSlides.find(s => s.id === 'problem');
+      if (problemSlide) {
+        problemSlide.fields[0].value = answers.problemStatement;
+      }
+    }
+    if (answers.solutionOverview) {
+      const solutionSlide = newSlides.find(s => s.id === 'solution');
+      if (solutionSlide) {
+        solutionSlide.fields[0].value = answers.solutionOverview;
+      }
+    }
+    if (answers.marketOpportunity) {
+      const marketSlide = newSlides.find(s => s.id === 'market');
+      if (marketSlide) {
+        marketSlide.fields[2].value = answers.marketOpportunity;
+      }
+    }
+    if (answers.businessModel) {
+      const businessSlide = newSlides.find(s => s.id === 'business-model');
+      if (businessSlide) {
+        businessSlide.fields[0].value = answers.businessModel;
+      }
+    }
+    if (answers.tractionEvidence) {
+      const tractionSlide = newSlides.find(s => s.id === 'traction');
+      if (tractionSlide) {
+        tractionSlide.fields[0].value = answers.tractionEvidence;
+      }
+    }
+    if (answers.teamCredentials) {
+      const teamSlide = newSlides.find(s => s.id === 'team');
+      if (teamSlide) {
+        teamSlide.fields[0].value = answers.teamCredentials;
+      }
+    }
+    if (answers.fundingAsk) {
+      const askSlide = newSlides.find(s => s.id === 'ask');
+      if (askSlide) {
+        askSlide.fields[1].value = answers.fundingAsk;
+      }
+    }
+    setSlides(newSlides);
+    setMode('traditional');
+  };
 
   const handleSave = () => {
     const state = getSerializedState();
@@ -468,12 +590,15 @@ Ensure all claims are accurate and can be verified.
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-pitch-deck">Pitch Deck Builder</h1>
-            <p className="text-lg text-muted-foreground">Create a compelling investor pitch deck aligned with endorsing body requirements</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-pitch-deck">Pitch Deck Builder</h1>
+              <p className="text-lg text-muted-foreground">Create a compelling investor pitch deck aligned with endorsing body requirements</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
           <ToolUtilityBar
@@ -488,6 +613,10 @@ Ensure all claims are accurate and can be verified.
             toolName="Pitch Deck Builder"
           />
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <div className="grid md:grid-cols-3 gap-6 mb-6">
             <Card>
               <CardContent className="pt-6">
@@ -908,6 +1037,8 @@ Ensure all claims are accurate and can be verified.
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

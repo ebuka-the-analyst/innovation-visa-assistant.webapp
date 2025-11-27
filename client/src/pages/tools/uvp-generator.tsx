@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,7 +32,59 @@ type ValueComponent = {
   quantifiableOutcome: string;
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  agent: "nova",
+  greeting: "Hello! I'm Nova, your innovation strategist. I'll help you craft a compelling Unique Value Proposition that demonstrates your innovation's distinctiveness and market fit for your UK Innovator Founder visa application. Let's build a powerful UVP together!",
+  questions: [
+    {
+      id: "customer-segment",
+      text: "Who is your primary target customer? Describe them specifically including their industry, size, role, and characteristics.",
+      placeholder: "e.g., Mid-sized UK fintech companies (50-200 employees) with compliance teams struggling to meet FCA regulatory requirements...",
+      fieldKey: "customerSegment",
+      minLength: 50
+    },
+    {
+      id: "pain-point",
+      text: "What critical problem or pain point does your target customer experience? Be specific about the impact and urgency.",
+      placeholder: "e.g., Manual compliance reporting takes 40+ hours per month, leads to 30% error rates, and risks £500k+ in regulatory fines...",
+      fieldKey: "painPoint",
+      minLength: 50
+    },
+    {
+      id: "solution",
+      text: "What is your innovative solution? Describe how it uniquely addresses the pain point.",
+      placeholder: "e.g., AI-powered compliance automation platform that reduces manual work by 90% through intelligent document processing and real-time regulatory updates...",
+      fieldKey: "solution",
+      minLength: 50
+    },
+    {
+      id: "benefit",
+      text: "What is the primary benefit customers receive from your solution? Focus on outcomes, not features.",
+      placeholder: "e.g., Achieve full regulatory compliance with confidence, freeing up 35+ hours monthly for strategic initiatives and eliminating fine risks...",
+      fieldKey: "benefit",
+      minLength: 50
+    },
+    {
+      id: "differentiation",
+      text: "What makes your solution uniquely different from existing alternatives? What's your competitive moat?",
+      placeholder: "e.g., Only platform with real-time FCA rule integration, proprietary NLP trained on 10 years of UK regulatory decisions, and automated audit trail generation...",
+      fieldKey: "differentiation",
+      minLength: 50
+    },
+    {
+      id: "quantifiable-outcome",
+      text: "What specific, measurable results can customers expect? Include numbers, timeframes, and metrics.",
+      placeholder: "e.g., 90% reduction in compliance time, 99.5% accuracy in regulatory filings, 60% cost savings within 3 months, zero regulatory penalties...",
+      fieldKey: "quantifiableOutcome",
+      minLength: 50
+    }
+  ]
+};
+
 export default function UVPGenerator() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('uvp-generator-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [valueComponent, setValueComponent] = useState<ValueComponent>({
     customerSegment: '',
     painPoint: '',
@@ -55,6 +107,22 @@ export default function UVPGenerator() {
   });
   const [activeTab, setActiveTab] = useState('builder');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('uvp-generator-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    setValueComponent({
+      customerSegment: answers['customerSegment'] || '',
+      painPoint: answers['painPoint'] || '',
+      solution: answers['solution'] || '',
+      benefit: answers['benefit'] || '',
+      differentiation: answers['differentiation'] || '',
+      quantifiableOutcome: answers['quantifiableOutcome'] || ''
+    });
+    setMode('traditional');
+  };
 
   const addCompetitor = () => {
     setCompetitors([...competitors, { name: '', innovation: 50, marketFit: 50 }]);
@@ -479,13 +547,27 @@ Scalability Criterion: Significant growth potential in UK market
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-uvp-generator">Unique Value Proposition Generator</h1>
-            <p className="text-lg text-muted-foreground">Create compelling value proposition demonstrating innovation and viability</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-uvp-generator">Unique Value Proposition Generator</h1>
+                <p className="text-lg text-muted-foreground">Create compelling value proposition demonstrating innovation and viability</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="uvp-generator"
             onSave={handleSave}
@@ -1333,6 +1415,8 @@ Scalability Criterion: Significant growth potential in UK market
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

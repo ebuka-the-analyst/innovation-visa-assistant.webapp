@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,12 +25,43 @@ type SavingsAccount = {
   accountType: 'current' | 'savings' | 'investment' | 'business' | 'other';
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'savings-validator',
+  toolName: 'Personal Savings Validator',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your compliance expert. I'll help you verify that your personal savings meet the UK Innovator Founder Visa requirements. Let's review your financial documentation together.",
+  questions: [
+    { id: 'total', question: "What is the total balance across all your savings accounts?", hint: "UK requires at least £1,270 held for 28 consecutive days", fieldKey: 'totalSavings', fieldType: 'number' },
+    { id: 'accounts', question: "How many bank accounts do you have that hold these savings?", hint: "List all accounts that will be used to demonstrate financial capacity", fieldKey: 'accountCount', fieldType: 'number' },
+    { id: 'statements', question: "Do you have 6 months of consecutive bank statements for each account?", hint: "GOV.UK requires unbroken statement history with no gaps", fieldKey: 'hasStatements', fieldType: 'text' },
+    { id: 'verified', question: "Have you obtained official bank letters confirming your balances?", hint: "Letters must be on bank letterhead and dated within 1 month", fieldKey: 'hasVerification', fieldType: 'text' },
+    { id: 'source', question: "Can you document the source of funds for deposits over £5,000?", hint: "Salary slips, sale agreements, inheritance letters, gift documentation", fieldKey: 'sourceDocumented', fieldType: 'text' },
+    { id: 'accessibility', question: "Are all your savings immediately accessible without penalties?", hint: "Fixed deposits or locked investments may not qualify", fieldKey: 'accessibility', fieldType: 'text' },
+  ],
+  completionMessage: "I've gathered your savings information. Let me analyze your documentation compliance and identify any gaps."
+};
+
 export default function SavingsValidator() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('savings-validator-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [accounts, setAccounts] = useState<SavingsAccount[]>([
     { accountName: '', bankName: '', balance: 0, verified: false, monthsOfStatements: 0, sourceDocumented: false, accountType: 'savings' }
   ]);
   const [activeTab, setActiveTab] = useState('validator');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('savings-validator-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.totalSavings && accounts.length > 0) {
+      const balance = parseFloat(answers.totalSavings) || 0;
+      setAccounts([{ ...accounts[0], balance }]);
+    }
+    setMode('traditional');
+  };
 
   const addAccount = () => {
     setAccounts([...accounts, { accountName: '', bankName: '', balance: 0, verified: false, monthsOfStatements: 0, sourceDocumented: false, accountType: 'savings' }]);
@@ -299,6 +330,13 @@ Consult with a qualified immigration lawyer before submitting your application.
             toolName="Savings Validator"
           />
 
+          <div className="flex justify-end mt-4 mb-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4" data-testid="tabs-savings-validator">
               <TabsTrigger value="validator" data-testid="tab-validator">Validator</TabsTrigger>
@@ -788,6 +826,7 @@ Consult with a qualified immigration lawyer before submitting your application.
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

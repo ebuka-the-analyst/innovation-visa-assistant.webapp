@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +16,58 @@ import {
 } from 'recharts';
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'scalability-roadmap',
+  toolName: 'Scalability Roadmap',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. Demonstrating clear scalability plans is essential for your UK Innovator Founder Visa. Let's build a comprehensive roadmap covering infrastructure, team growth, and process automation.",
+  questions: [
+    {
+      id: 'current-scale',
+      question: "What is your current operational scale? (Users, transactions, team size)",
+      hint: "Include active users, monthly transactions, and current team headcount.",
+      fieldKey: 'currentScale',
+      minLength: 20
+    },
+    {
+      id: 'target-scale',
+      question: "What scale are you targeting in 3 years? (Users, revenue, team)",
+      hint: "Be specific about growth multiples - endorsing bodies look for 10x potential.",
+      fieldKey: 'targetScale',
+      minLength: 30
+    },
+    {
+      id: 'infrastructure-plan',
+      question: "How will you scale your technical infrastructure to handle growth?",
+      hint: "Include cloud strategy, capacity planning, and redundancy measures.",
+      fieldKey: 'infrastructurePlan',
+      minLength: 40
+    },
+    {
+      id: 'team-scaling',
+      question: "What is your team scaling plan? How many UK jobs will you create?",
+      hint: "Job creation is a key ILR criterion. Include hiring timeline and key roles.",
+      fieldKey: 'teamScaling',
+      minLength: 40
+    },
+    {
+      id: 'process-automation',
+      question: "What processes will you automate to enable scaling without proportional headcount growth?",
+      hint: "Include customer onboarding, support, operations, and back-office processes.",
+      fieldKey: 'processAutomation',
+      minLength: 30
+    },
+    {
+      id: 'scalability-risks',
+      question: "What are the main risks to your scalability plans, and how will you mitigate them?",
+      hint: "Consider technical debt, talent acquisition, funding gaps, and market changes.",
+      fieldKey: 'scalabilityRisks',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent scalability vision! I've captured your growth strategy. I'm now populating your roadmap with milestones, infrastructure plans, and team growth projections."
+};
 
 type Milestone = {
   id: string;
@@ -80,6 +132,10 @@ type CapacityPlan = {
 export default function ScalabilityRoadmap() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('scalability-roadmap-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
   const [activeTab, setActiveTab] = useState('roadmap');
   const [savedDate, setSavedDate] = useState('');
 
@@ -115,6 +171,41 @@ export default function ScalabilityRoadmap() {
     trainingPlan: '',
     retentionStrategy: ''
   });
+
+  useEffect(() => {
+    localStorage.setItem('scalability-roadmap-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.currentScale) {
+      setInfrastructure(prev => ({
+        ...prev,
+        currentCapacity: answers.currentScale,
+        targetCapacity: answers.targetScale || '',
+        scalingStrategy: answers.infrastructurePlan || ''
+      }));
+    }
+    if (answers.teamScaling) {
+      setTeamGrowth(prev => ({
+        ...prev,
+        hiringTimeline: answers.teamScaling,
+        retentionStrategy: ''
+      }));
+    }
+    if (answers.processAutomation) {
+      setMilestones([{
+        id: '1',
+        name: 'Process Automation',
+        category: 'process',
+        targetDate: '',
+        status: 'planned',
+        description: answers.processAutomation,
+        resourcesRequired: '',
+        ukImpact: ''
+      }]);
+    }
+    setMode('traditional');
+  };
 
   const [processAutomation, setProcessAutomation] = useState<ProcessAutomation[]>([
     {
@@ -698,13 +789,20 @@ submitting visa applications.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-scalability-roadmap">Scalability Roadmap</h1>
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-4xl font-bold" data-testid="heading-scalability-roadmap">Scalability Roadmap</h1>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
             <p className="text-lg text-muted-foreground">Infrastructure, team, and technology scaling plan for UK visa compliance</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
             )}
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="scalability-roadmap"
             onSave={handleSave}
@@ -1565,6 +1663,8 @@ submitting visa applications.
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

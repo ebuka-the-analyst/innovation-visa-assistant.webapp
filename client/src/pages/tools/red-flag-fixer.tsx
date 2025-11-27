@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -14,6 +14,65 @@ import {
   BarChart, Bar, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "red-flag-fixer",
+  toolName: "Red Flag Fixer",
+  agentId: "atlas",
+  agentName: "Atlas",
+  agentTitle: "Growth Strategist",
+  description: "Identify and resolve common application red flags before submission",
+  questions: [
+    {
+      id: "innovation",
+      question: "Describe your innovation claims - are they specific and measurable or vague?",
+      placeholder: "My innovation is [specific technology/method]. It is measurable through [metrics]. Unlike competitors, we [specific differentiator]...",
+      fieldKey: "innovationClaims",
+      minLength: 100,
+      helpText: "Vague buzzwords like 'cutting-edge' or 'revolutionary' are red flags"
+    },
+    {
+      id: "validation",
+      question: "What customer validation evidence do you have? (interviews, LOIs, beta users)",
+      placeholder: "We have conducted [X] customer interviews. We have [X] LOIs from [companies]. Our beta users include...",
+      fieldKey: "customerValidation",
+      minLength: 80,
+      helpText: "Minimum 20-30 interview summaries or 5+ LOIs are expected"
+    },
+    {
+      id: "financials",
+      question: "Describe your financial projections - do you have detailed monthly cashflow?",
+      placeholder: "Our 36-month projections show [revenue targets]. Monthly burn rate is [amount]. Break-even expected in [timeframe]...",
+      fieldKey: "financialProjections",
+      minLength: 80,
+      helpText: "Unrealistic 'hockey stick' projections are a major red flag"
+    },
+    {
+      id: "competition",
+      question: "How many UK competitors have you identified and analyzed?",
+      placeholder: "We have identified [X] UK competitors including [names]. Our competitive analysis covers [features/pricing/positioning]...",
+      fieldKey: "competitiveAnalysis",
+      minLength: 80,
+      helpText: "Less than 5 named competitors is a red flag"
+    },
+    {
+      id: "ip",
+      question: "What intellectual property protection do you have or plan to obtain?",
+      placeholder: "We have filed [patents/trademarks]. Trade secrets are protected by [measures]. Our IP strategy includes...",
+      fieldKey: "ipProtection",
+      minLength: 60,
+      helpText: "No IP protection for an 'innovative' business is a contradiction"
+    },
+    {
+      id: "scalability",
+      question: "What are your specific job creation targets and hiring timeline?",
+      placeholder: "By Year 2, we will hire [X] employees in roles including [specific roles]. By Year 5, we target [X] UK-based employees...",
+      fieldKey: "jobCreation",
+      minLength: 80,
+      helpText: "Vague 'we will hire as needed' is a red flag - need specific numbers"
+    }
+  ]
+};
 
 type RedFlagCategory = {
   name: string;
@@ -25,6 +84,9 @@ type RedFlagCategory = {
 };
 
 export default function RedFlagFixer() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('red-flag-fixer-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [flags, setFlags] = useState<RedFlagCategory[]>([
     {
       name: 'Vague Innovation Claims',
@@ -247,6 +309,52 @@ export default function RedFlagFixer() {
     if ('flags' in state) setFlags(state.flags);
     if ('activeTab' in state) setActiveTab(state.activeTab);
     if ('savedDate' in state) setSavedDate(state.savedDate || '');
+  };
+
+  useEffect(() => {
+    localStorage.setItem('red-flag-fixer-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const newFlags = [...flags];
+    if (answers.innovationClaims?.length > 100) {
+      const flagIndex = newFlags.findIndex(f => f.name === 'Vague Innovation Claims');
+      if (flagIndex >= 0) {
+        newFlags[flagIndex] = { ...newFlags[flagIndex], severity: 40, fixed: false };
+      }
+    }
+    if (answers.customerValidation?.length > 80) {
+      const flagIndex = newFlags.findIndex(f => f.name === 'Insufficient Customer Validation');
+      if (flagIndex >= 0) {
+        newFlags[flagIndex] = { ...newFlags[flagIndex], severity: 35, fixed: false };
+      }
+    }
+    if (answers.financialProjections?.length > 80) {
+      const flagIndex = newFlags.findIndex(f => f.name === 'Weak Financial Projections');
+      if (flagIndex >= 0) {
+        newFlags[flagIndex] = { ...newFlags[flagIndex], severity: 30, fixed: false };
+      }
+    }
+    if (answers.competitiveAnalysis?.length > 80) {
+      const flagIndex = newFlags.findIndex(f => f.name === 'Generic Competitive Analysis');
+      if (flagIndex >= 0) {
+        newFlags[flagIndex] = { ...newFlags[flagIndex], severity: 30, fixed: false };
+      }
+    }
+    if (answers.ipProtection?.length > 60) {
+      const flagIndex = newFlags.findIndex(f => f.name === 'Inadequate IP Protection');
+      if (flagIndex >= 0) {
+        newFlags[flagIndex] = { ...newFlags[flagIndex], severity: 25, fixed: false };
+      }
+    }
+    if (answers.jobCreation?.length > 80) {
+      const flagIndex = newFlags.findIndex(f => f.name === 'Unclear Scalability Plan');
+      if (flagIndex >= 0) {
+        newFlags[flagIndex] = { ...newFlags[flagIndex], severity: 25, fixed: false };
+      }
+    }
+    setFlags(newFlags);
+    setMode('traditional');
   };
 
   useEffect(() => {
@@ -772,12 +880,15 @@ Do not submit application until risk score is below 30 and all critical flags ar
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-red-flag-fixer">Red Flag Fixer</h1>
-            <p className="text-lg text-muted-foreground">Identify and fix common application red flags before submission</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-red-flag-fixer">Red Flag Fixer</h1>
+              <p className="text-lg text-muted-foreground">Identify and fix common application red flags before submission</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
           <ToolUtilityBar
@@ -789,6 +900,10 @@ Do not submit application until risk score is below 30 and all critical flags ar
             toolName="Red Flag Fixer"
           />
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5" data-testid="tabs-red-flag-fixer">
               <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
@@ -1324,6 +1439,8 @@ Do not submit application until risk score is below 30 and all critical flags ar
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

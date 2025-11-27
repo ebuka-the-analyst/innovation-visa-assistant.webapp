@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -36,9 +37,59 @@ const DEFAULT_MILESTONES: Milestone[] = [
   { id: "5", title: "Hire First Employee", description: "Make first full-time hire", category: "team", targetDate: "", completedDate: "", status: "pending", evidence: "" },
 ];
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'milestones-tracker',
+  toolName: 'Milestones Tracker',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. Tracking milestones is essential for demonstrating progress to endorsers and meeting visa requirements. Let me help you define key milestones for your business. Ready to plan your journey?",
+  questions: [
+    {
+      id: 'next-milestone',
+      question: "What is the next major milestone you're working toward?",
+      hint: "E.g., 'Launch MVP', 'First 10 customers', 'Secure seed funding'",
+      fieldKey: 'nextMilestone',
+      required: true
+    },
+    {
+      id: 'milestone-category',
+      question: "What category does this milestone fall under? (product, business, funding, team, visa)",
+      hint: "Endorsers look for progress across multiple areas",
+      fieldKey: 'milestoneCategory'
+    },
+    {
+      id: 'target-date',
+      question: "What is your target date for achieving this milestone?",
+      hint: "Be realistic - missed deadlines can raise concerns with endorsers",
+      fieldKey: 'targetDate'
+    },
+    {
+      id: 'milestone-evidence',
+      question: "What evidence will you have when this milestone is complete?",
+      hint: "E.g., 'Screenshot of live product', 'Signed customer contract', 'Bank statement showing investment'",
+      fieldKey: 'milestoneEvidence'
+    },
+    {
+      id: 'blockers',
+      question: "What are the main obstacles or risks to achieving this milestone?",
+      hint: "Identifying risks shows maturity and planning capability",
+      fieldKey: 'blockers'
+    },
+    {
+      id: 'support-needed',
+      question: "What support or resources do you need to achieve this milestone?",
+      hint: "Consider team, funding, partnerships, or expertise needed",
+      fieldKey: 'supportNeeded'
+    }
+  ],
+  completionMessage: "Great! I've captured your milestone details. I'm now adding it to your tracker. You can add more milestones and update their status as you make progress."
+};
+
 export default function MilestonesTracker() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('milestones-tracker-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
@@ -70,6 +121,32 @@ export default function MilestonesTracker() {
       if (hideIndicatorRef.current) clearTimeout(hideIndicatorRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('milestones-tracker-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.nextMilestone) {
+      const categoryMap: Record<string, Milestone['category']> = {
+        product: 'product', business: 'business', funding: 'funding', team: 'team', visa: 'visa'
+      };
+      const category = answers.milestoneCategory?.toLowerCase() || 'business';
+      const newMilestone: Milestone = {
+        id: Date.now().toString(),
+        title: answers.nextMilestone,
+        description: answers.blockers ? `Risks: ${answers.blockers}` : '',
+        category: categoryMap[category] || 'business',
+        targetDate: answers.targetDate || '',
+        completedDate: '',
+        status: 'pending',
+        evidence: answers.milestoneEvidence || ''
+      };
+      setMilestones(prev => [...prev, newMilestone]);
+      triggerAutoSave([...milestones, newMilestone]);
+    }
+    setMode('traditional');
+  };
 
   const triggerAutoSave = useCallback((newMilestones: Milestone[]) => {
     if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
@@ -189,10 +266,23 @@ export default function MilestonesTracker() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Key Milestones Tracker</h1>
-            <p className="text-muted-foreground">Track and document your business achievements and progress</p>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Key Milestones Tracker</h1>
+                <p className="text-muted-foreground">Track and document your business achievements and progress</p>
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="milestones-tracker"
             toolName="Key Milestones Tracker"
@@ -409,7 +499,9 @@ export default function MilestonesTracker() {
                 </Card>
               )}
             </div>
-          </div>
+          </>
+          )}
+        </div>
         </div>
       </div>
     </ToolAccessGuard>

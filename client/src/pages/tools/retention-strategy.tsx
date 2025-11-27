@@ -1,19 +1,71 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
 import { fileUploadConfigs } from "@/lib/fileUploadConfigs";
 import { useState, useEffect } from "react";
-import { Plus, X, Users, AlertTriangle, TrendingDown, Target, DollarSign, Award } from "lucide-react";
+import { Plus, X, Users, AlertTriangle, TrendingDown, Target, DollarSign, Award, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, ScatterChart, Scatter } from "recharts";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'retention-strategy',
+  toolName: 'Retention Strategy',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. Employee retention is crucial for demonstrating business viability and scalability to endorsing bodies. Let's build a comprehensive retention strategy that supports your UK Innovator Founder Visa application.",
+  questions: [
+    {
+      id: 'team-size',
+      question: "What is your current team size and how many employees are you planning to have in 12 months?",
+      hint: "Include both UK-based and any remote team members.",
+      fieldKey: 'teamSize',
+      fieldType: 'number'
+    },
+    {
+      id: 'current-turnover',
+      question: "What is your current annual employee turnover rate, and what's your target rate?",
+      hint: "UK tech average is around 13-15%. Express as a percentage.",
+      fieldKey: 'currentTurnover',
+      minLength: 5
+    },
+    {
+      id: 'at-risk-employees',
+      question: "Which key employees or roles do you consider at highest risk of leaving, and why?",
+      hint: "Consider factors like limited growth opportunities, compensation gaps, or workload issues.",
+      fieldKey: 'atRiskEmployees',
+      minLength: 30
+    },
+    {
+      id: 'retention-challenges',
+      question: "What are the main challenges you face in retaining top talent in your industry?",
+      hint: "Consider competition for talent, remote work policies, career development, etc.",
+      fieldKey: 'retentionChallenges',
+      minLength: 30
+    },
+    {
+      id: 'current-interventions',
+      question: "What retention initiatives do you currently have in place?",
+      hint: "Include career development programs, equity schemes, flexible working, mentorship, etc.",
+      fieldKey: 'currentInterventions',
+      minLength: 20
+    },
+    {
+      id: 'budget-allocation',
+      question: "What annual budget do you allocate for employee development and retention activities?",
+      hint: "Include training, team events, benefits, and retention bonuses.",
+      fieldKey: 'budgetAllocation',
+      minLength: 10
+    }
+  ],
+  completionMessage: "Great insights! I've captured your retention landscape. I'm now populating your strategy form with at-risk employee profiles and recommended interventions to strengthen your team stability."
+};
 
 // UK Innovator Founder Visa Context (November 2025)
 // Viability Criterion: Low turnover demonstrates stable, well-managed team
@@ -31,6 +83,10 @@ interface RetentionRisk {
 }
 
 export default function RetentionStrategy() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('retention-strategy-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [currentTurnoverRate, setCurrentTurnoverRate] = useState(15);
@@ -39,6 +95,27 @@ export default function RetentionStrategy() {
   const [risks, setRisks] = useState<RetentionRisk[]>([
     { id: "1", employee: "Senior Engineer A", role: "Software Engineer", riskLevel: "high", turnoverLikelihood: 75, keyReasons: "Limited growth opportunities", interventions: "Career development plan, mentorship", estimatedSalary: 75000 }
   ]);
+
+  useEffect(() => {
+    localStorage.setItem('retention-strategy-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.teamSize) setTeamSize(parseInt(answers.teamSize) || 12);
+    if (answers.atRiskEmployees) {
+      setRisks([{
+        id: "1",
+        employee: "At-Risk Employee",
+        role: "Key Role",
+        riskLevel: "high",
+        turnoverLikelihood: 70,
+        keyReasons: answers.atRiskEmployees,
+        interventions: answers.currentInterventions || "",
+        estimatedSalary: 65000
+      }]);
+    }
+    setMode('traditional');
+  };
 
   const saveProgress = () => {
     localStorage.setItem('retentionStrategyFiles', JSON.stringify(uploadedFiles));
@@ -240,9 +317,16 @@ GOV.UK: Innovator Founder Visa viability criterion
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Retention Strategy</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-4xl font-bold">Retention Strategy</h1>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
           <p className="text-muted-foreground mb-6">Reduce turnover for viability and scalability (Innovator Founder Visa)</p>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar toolId="retention-strategy" toolName="Retention Strategy" onSave={saveProgress} onExport={exportStrategy} getSerializedState={getSerializedState} />
 
           {savedDate && <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950"><AlertCircle className="h-4 w-4 text-green-600" /><AlertDescription className="text-green-700 dark:text-green-300">Last saved: {savedDate}</AlertDescription></Alert>}
@@ -468,6 +552,8 @@ GOV.UK: Innovator Founder Visa viability criterion
               </div>
             )}
           </Card>
+          </>
+          )}
         </div>
       </div>
     </>

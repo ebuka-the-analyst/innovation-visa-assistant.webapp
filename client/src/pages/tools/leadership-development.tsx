@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -28,12 +28,82 @@ interface LeaderProfile {
   developmentCost: number;
 }
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'leadership-development',
+  toolName: 'Leadership Development',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. Strong leadership is crucial for scaling your business and demonstrating viability to endorsers. Let me help you assess and develop your leadership team. Ready to begin?",
+  questions: [
+    {
+      id: 'leader-name',
+      question: "Who is the key leader you want to assess? This could be yourself as founder or a team member.",
+      hint: "E.g., 'Founder/CEO', 'CTO', 'Head of Operations'",
+      fieldKey: 'leaderName',
+      required: true
+    },
+    {
+      id: 'current-role',
+      question: "What is this leader's current role and main responsibilities?",
+      hint: "Describe their day-to-day responsibilities and scope of authority",
+      fieldKey: 'currentRole'
+    },
+    {
+      id: 'strengths',
+      question: "What are this leader's top 3 strengths? Rate each area: strategic thinking, communication, technical skills, people management, innovation (1-100)",
+      hint: "Be specific - endorsers value evidence-based self-awareness",
+      fieldKey: 'strengths'
+    },
+    {
+      id: 'development-areas',
+      question: "What are the key areas this leader needs to develop to scale the business?",
+      hint: "Consider skills needed for next stage of growth",
+      fieldKey: 'developmentAreas'
+    },
+    {
+      id: 'mentor',
+      question: "Does this leader have a mentor or advisor? Who guides their development?",
+      hint: "Strong mentorship relationships demonstrate commitment to growth",
+      fieldKey: 'mentor'
+    },
+    {
+      id: 'development-budget',
+      question: "What annual budget is allocated for this leader's development? (training, coaching, courses)",
+      hint: "Typical range: £5,000-£25,000 per year for senior leaders",
+      fieldKey: 'developmentBudget'
+    }
+  ],
+  completionMessage: "Excellent! I've captured the leadership profile. I'm now populating the development tracker. You can adjust skill scores and add more details to build a comprehensive leadership development plan."
+};
+
 export default function LeadershipDevelopment() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('leadership-development-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [leaders, setLeaders] = useState<LeaderProfile[]>([
     { id: "1", name: "Tech Lead", currentRole: "Engineering Manager", skillScores: { strategic: 70, communication: 85, technical: 90, peopleManagement: 75, innovation: 80 }, developmentGoals: "Improve strategic planning and business acumen", mentor: "Founder", developmentCost: 15000 }
   ]);
+
+  useEffect(() => {
+    localStorage.setItem('leadership-development-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.leaderName || answers.currentRole) {
+      const newLeader: LeaderProfile = {
+        id: Date.now().toString(),
+        name: answers.leaderName || 'New Leader',
+        currentRole: answers.currentRole || '',
+        skillScores: { strategic: 70, communication: 70, technical: 70, peopleManagement: 70, innovation: 70 },
+        developmentGoals: answers.developmentAreas || '',
+        mentor: answers.mentor || '',
+        developmentCost: answers.developmentBudget ? parseInt(answers.developmentBudget.replace(/[^0-9]/g, '')) || 15000 : 15000
+      };
+      setLeaders(prev => prev.length === 1 && prev[0].name === 'Tech Lead' ? [newLeader] : [...prev, newLeader]);
+    }
+    setMode('traditional');
+  };
 
   const saveProgress = () => {
     localStorage.setItem('leadershipDevFiles', JSON.stringify(uploadedFiles));
@@ -250,9 +320,22 @@ Productivity = (Avg Leadership Score / 100) × 25%
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Leadership Development</h1>
-          <p className="text-muted-foreground mb-6">Build leadership bench for scaling (Innovator Founder Visa)</p>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Leadership Development</h1>
+              <p className="text-muted-foreground">Build leadership bench for scaling (Innovator Founder Visa)</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="leadership-development"
             toolName="Leadership Development"
@@ -436,6 +519,8 @@ Productivity = (Avg Leadership Score / 100) × 25%
               </div>
             )}
           </Card>
+          </>
+          )}
         </div>
       </div>
     </>

@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
@@ -23,7 +23,76 @@ interface ScalingPhase {
   risks: string;
 }
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'team-scaling',
+  toolName: 'Team Scaling Strategy',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. I'll help you develop a strategic team scaling plan with budget forecasting - demonstrating your ability to create UK jobs, a key criterion for endorsing bodies. Let's plan your growth together!",
+  questions: [
+    {
+      id: 'current-team',
+      question: "What is your current team size? Include all employees, contractors, and co-founders.",
+      hint: "This establishes your baseline for growth projections",
+      fieldKey: 'current_headcount'
+    },
+    {
+      id: 'target-headcount',
+      question: "What is your target headcount in 12-24 months? What's driving this growth target?",
+      hint: "Endorsers want to see realistic, justified hiring plans",
+      fieldKey: 'target_headcount'
+    },
+    {
+      id: 'key-hires',
+      question: "What are the most critical roles you need to hire for in the next 6-12 months?",
+      hint: "Prioritize roles that directly support revenue growth and product development",
+      fieldKey: 'key_hires'
+    },
+    {
+      id: 'salary-budget',
+      question: "What is your average expected salary for new hires? What's your total annual hiring budget?",
+      hint: "UK tech salaries typically range £40-80k depending on seniority",
+      fieldKey: 'salary_budget'
+    },
+    {
+      id: 'hiring-timeline',
+      question: "What's your hiring timeline by quarter? When do you expect to make key hires?",
+      hint: "Phased hiring shows financial prudence and operational planning",
+      fieldKey: 'hiring_timeline'
+    },
+    {
+      id: 'hiring-risks',
+      question: "What are the main risks to your hiring plan? How will you mitigate talent competition and onboarding challenges?",
+      hint: "Consider UK talent market, visa sponsorship, and remote work policies",
+      fieldKey: 'hiring_risks'
+    }
+  ]
+};
+
 export default function TeamScaling() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('team-scaling-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('team-scaling-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.current_headcount) {
+      const current = parseInt(answers.current_headcount.replace(/\D/g, '')) || 15;
+      setCurrentHeadcount(current);
+    }
+    if (answers.target_headcount) {
+      const target = parseInt(answers.target_headcount.replace(/\D/g, '')) || 50;
+      setTargetHeadcount(target);
+    }
+    if (answers.salary_budget) {
+      const salary = parseInt(answers.salary_budget.replace(/\D/g, '')) || 75000;
+      setAvgSalary(salary);
+    }
+    setMode('traditional');
+  };
+
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [currentHeadcount, setCurrentHeadcount] = useState(15);
@@ -175,9 +244,18 @@ ${getSmartRecommendations().join('\n')}
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Team Scaling Strategy</h1>
-          <p className="text-muted-foreground mb-6">Plan strategic team growth with budget forecasting</p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Team Scaling Strategy</h1>
+              <p className="text-muted-foreground">Plan strategic team growth with budget forecasting</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="team-scaling"
             toolName="Team Scaling Strategy"
@@ -395,6 +473,8 @@ ${getSmartRecommendations().join('\n')}
               </div>
             )}
           </Card>
+          </>
+          )}
         </div>
       </div>
     </>

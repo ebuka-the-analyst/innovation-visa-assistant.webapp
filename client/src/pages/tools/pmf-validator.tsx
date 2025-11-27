@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -17,6 +17,65 @@ import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "pmf-validator",
+  toolName: "PMF Validator",
+  agentId: "nova",
+  agentName: "Nova",
+  agentTitle: "Innovation Strategist",
+  description: "Validate your product-market fit with the Sean Ellis test and comprehensive PMF metrics",
+  questions: [
+    {
+      id: "customers",
+      question: "How many customers/users do you have and what is your monthly retention rate?",
+      placeholder: "We have [X] customers with [X]% monthly retention. Active users are [X] out of total...",
+      fieldKey: "customerMetrics",
+      minLength: 50,
+      helpText: "Include total customers, active users, and retention percentages"
+    },
+    {
+      id: "seanEllis",
+      question: "What percentage of users would be 'very disappointed' if they could no longer use your product?",
+      placeholder: "Based on our survey of [X] users, [X]% said they would be very disappointed. Our methodology was...",
+      fieldKey: "seanEllisData",
+      minLength: 80,
+      helpText: "40%+ is the threshold for strong PMF. Describe your survey methodology"
+    },
+    {
+      id: "feedback",
+      question: "What do customers love most about your product? Include specific testimonials or feedback.",
+      placeholder: "Customers consistently praise [specific features]. Key quotes: '...'. Main pain point we solve is...",
+      fieldKey: "customerFeedback",
+      minLength: 100,
+      helpText: "Include direct quotes and specific benefits customers mention"
+    },
+    {
+      id: "nps",
+      question: "What is your Net Promoter Score (NPS) and how do you track customer satisfaction?",
+      placeholder: "Our NPS is [X]. We survey customers [frequency] using [method]. Promoters cite [reasons]...",
+      fieldKey: "npsScore",
+      minLength: 60,
+      helpText: "NPS 50+ is world-class, 30-50 is good, 0-30 needs improvement"
+    },
+    {
+      id: "growth",
+      question: "What is your month-over-month growth rate and referral rate?",
+      placeholder: "We're growing at [X]% monthly. [X]% of new customers come from referrals. Growth drivers are...",
+      fieldKey: "growthMetrics",
+      minLength: 60,
+      helpText: "Strong PMF typically shows 15-20%+ monthly growth"
+    },
+    {
+      id: "competition",
+      question: "What is your competitive advantage and why do customers choose you over alternatives?",
+      placeholder: "Customers choose us over [competitors] because [specific advantages]. Our moat is...",
+      fieldKey: "competitiveAdvantage",
+      minLength: 80,
+      helpText: "Focus on unique value that competitors cannot easily replicate"
+    }
+  ]
+};
 
 type PMFMetric = {
   month: string;
@@ -37,6 +96,9 @@ type CustomerSegment = {
 };
 
 export default function PMFValidator() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('pmf-validator-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [activeTab, setActiveTab] = useState('metrics');
   const [savedDate, setSavedDate] = useState('');
 
@@ -235,12 +297,46 @@ export default function PMFValidator() {
   };
 
   useEffect(() => {
+    localStorage.setItem('pmf-validator-mode', mode);
+  }, [mode]);
+
+  useEffect(() => {
     const saved = localStorage.getItem('pmf-validator-state');
     if (saved) {
       const state = JSON.parse(saved);
       restoreSerializedState(state);
     }
   }, []);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.customerFeedback) {
+      setCustomerFeedback(answers.customerFeedback);
+    }
+    if (answers.competitiveAdvantage) {
+      setCompetitiveAdvantage(answers.competitiveAdvantage);
+    }
+    if (answers.customerMetrics) {
+      const match = answers.customerMetrics.match(/(\d+)\s*customers/i);
+      if (match) setTotalCustomers(parseInt(match[1]));
+      const retMatch = answers.customerMetrics.match(/(\d+)%?\s*retention/i);
+      if (retMatch) setRetentionRate(parseInt(retMatch[1]));
+    }
+    if (answers.seanEllisData) {
+      const match = answers.seanEllisData.match(/(\d+)%/);
+      if (match) setSeanEllisScore(parseInt(match[1]));
+    }
+    if (answers.npsScore) {
+      const match = answers.npsScore.match(/NPS\s*(?:is\s*)?(\d+)/i);
+      if (match) setNps(parseInt(match[1]));
+    }
+    if (answers.growthMetrics) {
+      const match = answers.growthMetrics.match(/(\d+)%?\s*monthly/i);
+      if (match) setMonthlyGrowthRate(parseInt(match[1]));
+      const refMatch = answers.growthMetrics.match(/(\d+)%?\s*(?:from\s*)?referrals/i);
+      if (refMatch) setReferralRate(parseInt(refMatch[1]));
+    }
+    setMode('traditional');
+  };
 
   const handleSave = () => {
     const state = getSerializedState();
@@ -539,12 +635,15 @@ Report generated by UK Innovator Founder Visa Assistant
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-pmf-validator">Product-Market Fit Validator</h1>
-            <p className="text-lg text-muted-foreground">Measure customer validation with Sean Ellis test and PMF metrics</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
-            )}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-pmf-validator">Product-Market Fit Validator</h1>
+              <p className="text-lg text-muted-foreground">Measure customer validation with Sean Ellis test and PMF metrics</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
           <ToolUtilityBar
@@ -556,6 +655,10 @@ Report generated by UK Innovator Founder Visa Assistant
             toolName="Product-Market Fit Validator"
           />
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5" data-testid="tabs-pmf-validator">
               <TabsTrigger value="metrics" data-testid="tab-metrics">Core Metrics</TabsTrigger>
@@ -1317,6 +1420,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

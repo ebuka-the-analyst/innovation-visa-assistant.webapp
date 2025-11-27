@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -49,6 +49,51 @@ const EIS_RELIEF = {
   incomeTaxRelief: 0.30,
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'tax-planning',
+  toolName: 'UK Tax Planning',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your Financial Analyst. I'll help you develop a tax-efficient structure for your UK business - demonstrating financial acumen that endorsing bodies value. Let's optimize your tax position together!",
+  questions: [
+    {
+      id: 'business-structure',
+      question: "Is your business structured as a Limited Company or Sole Trader? When was it incorporated?",
+      hint: "Limited companies offer more tax planning flexibility",
+      fieldKey: 'structure'
+    },
+    {
+      id: 'annual-revenue',
+      question: "What is your projected annual revenue for the next 12 months? And what are your expected annual costs/expenses?",
+      hint: "Be realistic - endorsers will scrutinize your financial projections",
+      fieldKey: 'revenue_costs'
+    },
+    {
+      id: 'salary-dividends',
+      question: "If you're a Limited Company director, how much do you plan to take as salary vs dividends annually?",
+      hint: "Optimal salary is typically around the NI threshold (£12,570)",
+      fieldKey: 'salary_dividends'
+    },
+    {
+      id: 'vat-registration',
+      question: "Is your business VAT registered or will you need to register? What is your expected VAT-eligible turnover?",
+      hint: "VAT registration is mandatory above £85,000 turnover",
+      fieldKey: 'vat_registration'
+    },
+    {
+      id: 'investment-relief',
+      question: "Are you planning to raise investment through SEIS or EIS schemes? What investment amount are you targeting?",
+      hint: "SEIS offers 50% income tax relief, EIS offers 30%",
+      fieldKey: 'investment_relief'
+    },
+    {
+      id: 'rd-credits',
+      question: "Does your business conduct qualifying R&D activities? Are you claiming R&D tax credits?",
+      hint: "R&D credits can provide up to 27% relief for SMEs",
+      fieldKey: 'rd_credits'
+    }
+  ]
+};
+
 type TaxScenario = {
   name: string;
   structure: string;
@@ -62,6 +107,32 @@ type TaxScenario = {
 };
 
 export default function TaxPlanning() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('tax-planning-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('tax-planning-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.revenue_costs) {
+      const parts = answers.revenue_costs.split(/[,\s]+/);
+      const revenue = parseInt(parts[0]?.replace(/\D/g, '')) || 250000;
+      const costs = parseInt(parts[1]?.replace(/\D/g, '')) || 100000;
+      setAnnualRevenue(revenue);
+      setAnnualCosts(costs);
+    }
+    if (answers.salary_dividends) {
+      const parts = answers.salary_dividends.split(/[,\s]+/);
+      const salary = parseInt(parts[0]?.replace(/\D/g, '')) || 50000;
+      const dividend = parseInt(parts[1]?.replace(/\D/g, '')) || 30000;
+      setSalaries(salary);
+      setDividends(dividend);
+    }
+    setMode('traditional');
+  };
+
   const [activeTab, setActiveTab] = useState('calculator');
   const [savedDate, setSavedDate] = useState('');
 
@@ -529,13 +600,21 @@ for personalized guidance and HMRC compliance verification.
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-tax-planning">UK Tax Planning</h1>
-            <p className="text-lg text-muted-foreground">Calculate annual tax liability, quarterly estimates, and tax-efficient structures for UK startups</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-tax-planning">UK Tax Planning</h1>
+              <p className="text-lg text-muted-foreground">Calculate annual tax liability, quarterly estimates, and tax-efficient structures for UK startups</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
 
           <ToolUtilityBar
             toolId="tax-planning"
@@ -1176,6 +1255,8 @@ for personalized guidance and HMRC compliance verification.
               </Alert>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

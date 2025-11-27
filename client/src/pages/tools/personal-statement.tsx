@@ -13,10 +13,70 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "personal-statement",
+  toolName: "Personal Statement Builder",
+  agent: "sage",
+  greeting: "Hello! I'm Sage, your compliance and documentation specialist. Let's craft a compelling personal statement that demonstrates your qualifications and vision for your UK business venture.",
+  questions: [
+    {
+      id: "full_name",
+      question: "What is your full legal name?",
+      hint: "As it appears on your official documents",
+      fieldKey: "fullName"
+    },
+    {
+      id: "background",
+      question: "Tell me about your educational and professional background. What experiences have prepared you for this venture?",
+      hint: "Include degrees, work experience, relevant achievements",
+      fieldKey: "background",
+      minLength: 100
+    },
+    {
+      id: "achievements",
+      question: "What are your key achievements and accomplishments? Include specific metrics where possible.",
+      hint: "Example: 'Led a team of 15, grew revenue by 200%, launched products used by 50,000 users'",
+      fieldKey: "achievements",
+      minLength: 80
+    },
+    {
+      id: "skills",
+      question: "What unique skills and expertise do you bring to this business?",
+      hint: "Technical skills, leadership abilities, industry knowledge",
+      fieldKey: "skills",
+      minLength: 50
+    },
+    {
+      id: "vision",
+      question: "What is your vision for your business in the UK? Why are you passionate about this venture?",
+      hint: "Describe your long-term goals and personal motivation",
+      fieldKey: "vision",
+      minLength: 80
+    },
+    {
+      id: "uk_commitment",
+      question: "Why the UK specifically? What commitment are you making to building your business here?",
+      hint: "Endorsers want to see genuine commitment to the UK market",
+      fieldKey: "ukCommitment",
+      minLength: 50
+    }
+  ],
+  completionMessage: "Wonderful! I've captured the key elements of your personal statement. Let me now help you format this into a compelling narrative."
+};
 
 export default function PersonalStatement() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('personal-statement-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('personal-statement-mode', mode);
+  }, [mode]);
+
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [name, setName] = useState("");
@@ -24,6 +84,17 @@ export default function PersonalStatement() {
   const [achievements, setAchievements] = useState("");
   const [vision, setVision] = useState("");
   const [statement, setStatement] = useState("");
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.fullName) setName(answers.fullName);
+    if (answers.background) setBackground(answers.background);
+    if (answers.achievements) setAchievements(answers.achievements);
+    if (answers.vision) setVision(answers.vision + (answers.ukCommitment ? '\n\n' + answers.ukCommitment : ''));
+    if (answers.skills) {
+      setAchievements(prev => prev + '\n\nKey Skills:\n' + answers.skills);
+    }
+    setMode('traditional');
+  };
 
   const saveProgress = () => {
     localStorage.setItem('personalStatementFiles', JSON.stringify(uploadedFiles));
@@ -120,6 +191,16 @@ export default function PersonalStatement() {
             getSerializedState={getSerializedState}
           />
 
+          <div className="flex justify-end mt-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <div className="mt-6">
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            </div>
+          ) : (
+          <>
           <div className="mb-4">
             <FileUploadButton config={fileUploadConfigs.documentOrganizer} onFileSelected={handleFileUpload} variant="secondary" />
           </div>
@@ -163,6 +244,8 @@ export default function PersonalStatement() {
             <Download className="w-4 h-4" />
             Export Personal Statement
           </Button>
+          </>
+          )}
         </div>
       </div>
     </>

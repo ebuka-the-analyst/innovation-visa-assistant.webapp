@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,6 +24,53 @@ type LegalTemplate = {
   ukLegalReference: string;
   pages: number;
   completed: boolean;
+};
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'legal-templates',
+  toolName: 'Legal Templates Library',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Legal & Compliance Specialist. Having proper legal documentation is crucial for your visa application - it demonstrates business viability and professional governance. Let me help you identify which templates you need. Ready?",
+  questions: [
+    {
+      id: 'business-type',
+      question: "What type of business are you building? (e.g., SaaS, marketplace, consultancy, hardware)",
+      hint: "This helps prioritize which legal templates are most critical for you",
+      fieldKey: 'businessType',
+      required: true
+    },
+    {
+      id: 'team-size',
+      question: "How many employees or contractors do you have or plan to hire in the next 12 months?",
+      hint: "Employment documentation is critical for UK businesses",
+      fieldKey: 'teamSize'
+    },
+    {
+      id: 'founders-count',
+      question: "How many co-founders are there? Do you have a founder agreement in place?",
+      hint: "Founder agreements prevent future disputes - highly recommended",
+      fieldKey: 'foundersCount'
+    },
+    {
+      id: 'ip-assets',
+      question: "What intellectual property does your business have? (software, patents, trademarks, trade secrets)",
+      hint: "IP protection is essential for innovation-based visas",
+      fieldKey: 'ipAssets'
+    },
+    {
+      id: 'customer-contracts',
+      question: "Do you sell B2B or B2C? What kind of customer agreements do you need?",
+      hint: "Commercial contracts protect your business interests",
+      fieldKey: 'customerContracts'
+    },
+    {
+      id: 'data-handling',
+      question: "Does your business collect or process personal data? Are you aware of UK GDPR requirements?",
+      hint: "Data protection compliance is mandatory in the UK",
+      fieldKey: 'dataHandling'
+    }
+  ],
+  completionMessage: "Perfect! Based on your business profile, I've identified the most relevant legal templates. I'm highlighting the priority items you should focus on first."
 };
 
 const LEGAL_TEMPLATES: LegalTemplate[] = [
@@ -340,9 +387,27 @@ const LEGAL_TEMPLATES: LegalTemplate[] = [
 ];
 
 export default function LegalTemplates() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('legal-templates-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [templates, setTemplates] = useState<LegalTemplate[]>(LEGAL_TEMPLATES);
   const [activeTab, setActiveTab] = useState('overview');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('legal-templates-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const priorityCategories: string[] = [];
+    if (answers.teamSize && parseInt(answers.teamSize) > 0) priorityCategories.push('Employment');
+    if (answers.foundersCount && parseInt(answers.foundersCount) > 1) priorityCategories.push('Governance');
+    if (answers.ipAssets) priorityCategories.push('IP');
+    if (answers.customerContracts) priorityCategories.push('Commercial');
+    if (answers.dataHandling?.toLowerCase().includes('yes')) priorityCategories.push('Data Protection');
+    setActiveTab('all');
+    setMode('traditional');
+  };
 
   const toggleTemplate = (id: string) => {
     setTemplates(prev => prev.map(t => 
@@ -707,13 +772,26 @@ All statutory references and penalty amounts are current as of 2025 but may chan
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-legal-templates">Legal Templates</h1>
-            <p className="text-lg text-muted-foreground">Professional legal documents for UK Innovator Founder visa compliance</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
-            )}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-legal-templates">Legal Templates</h1>
+                <p className="text-lg text-muted-foreground">Professional legal documents for UK Innovator Founder visa compliance</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="legal-templates"
             onSave={handleSave}
@@ -1249,6 +1327,8 @@ All statutory references and penalty amounts are current as of 2025 but may chan
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

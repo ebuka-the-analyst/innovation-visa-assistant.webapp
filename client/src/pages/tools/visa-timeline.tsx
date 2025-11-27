@@ -12,6 +12,59 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckCircle2, Circle, Clock, Calendar, AlertTriangle, ArrowRight, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "visa-timeline",
+  agentId: "sage",
+  agentName: "Sage",
+  agentTitle: "Compliance & Documentation Expert",
+  greeting: "Hello! I'm Sage, your compliance specialist. Let me help you create a comprehensive visa journey timeline with realistic milestones and deadlines.",
+  questions: [
+    {
+      id: "targetDate",
+      text: "When would you ideally like to arrive in the UK and start your business? What's driving this timeline?",
+      fieldKey: "targetDate",
+      minLength: 60,
+      placeholder: "Describe your ideal arrival date and the business/personal reasons driving this timeline..."
+    },
+    {
+      id: "currentPhase",
+      text: "What phase are you currently in? (Research, business plan development, endorsement application, visa application, or post-approval)",
+      fieldKey: "currentPhase",
+      minLength: 50,
+      placeholder: "Describe your current phase and what you've completed so far..."
+    },
+    {
+      id: "endorsementStatus",
+      text: "What is your endorsement application status? Have you selected an endorsing body?",
+      fieldKey: "endorsementStatus",
+      minLength: 60,
+      placeholder: "Describe your endorsing body selection and application progress..."
+    },
+    {
+      id: "documentationStatus",
+      text: "What documentation have you prepared? What still needs to be completed?",
+      fieldKey: "documentationStatus",
+      minLength: 60,
+      placeholder: "List prepared documents and identify gaps in your documentation..."
+    },
+    {
+      id: "challenges",
+      text: "What potential delays or challenges do you anticipate in your timeline?",
+      fieldKey: "challenges",
+      minLength: 50,
+      placeholder: "Describe potential blockers like document procurement, interview scheduling, or external factors..."
+    },
+    {
+      id: "priorities",
+      text: "What are your top 3 priorities to keep your visa journey on track?",
+      fieldKey: "priorities",
+      minLength: 50,
+      placeholder: "List your key priorities and why they matter for your timeline..."
+    }
+  ]
+};
 
 type MilestoneStatus = "completed" | "in-progress" | "pending";
 
@@ -40,6 +93,22 @@ export default function VisaTimeline() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('visa-timeline-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('visa-timeline-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((_answers: Record<string, string>) => {
+    setMode('traditional');
+    toast({
+      title: "AI Guidance Complete",
+      description: "Your timeline information has been captured. Now customize your milestones and dates."
+    });
+  }, [toast]);
 
   const [milestones, setMilestones] = useState<Milestone[]>(() => {
     const saved = localStorage.getItem("visa-timeline-state");
@@ -143,10 +212,24 @@ export default function VisaTimeline() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Visa Journey Timeline Planner</h1>
-            <p className="text-muted-foreground">Plan and track your UK Innovator Founder Visa application milestones</p>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Visa Journey Timeline Planner</h1>
+                <p className="text-muted-foreground">Plan and track your UK Innovator Founder Visa application milestones</p>
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="visa-timeline"
             toolName="Visa Journey Timeline Planner"
@@ -337,6 +420,8 @@ export default function VisaTimeline() {
               </CardContent>
             </Card>
           </div>
+            </>
+          )}
         </div>
       </div>
     </ToolAccessGuard>

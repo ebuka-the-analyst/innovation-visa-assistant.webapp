@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { useWordExport } from "@/hooks/useWordExport";
@@ -53,6 +53,72 @@ const WORD_TARGETS = {
   vision: 50
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'exec-summary',
+  toolName: 'Executive Summary Builder',
+  agent: 'nova',
+  greeting: "Hi! I'm Nova, your Innovation Specialist. I'll help you craft a compelling executive summary that will impress endorsing bodies. Let's build your story section by section. Ready to get started?",
+  questions: [
+    {
+      id: 'company-overview',
+      question: "Let's start with your company overview. Tell me about your business - what does it do, when was it founded, and what stage is it at?",
+      hint: "Include your company name, core offering, founding date, and current stage (pre-revenue, early revenue, scaling)",
+      fieldKey: 'companyOverview',
+      minLength: 50
+    },
+    {
+      id: 'problem-statement',
+      question: "What problem are you solving? Describe the pain point your target customers face and why existing solutions fall short.",
+      hint: "Quantify the problem if possible - how many people affected, cost of the problem, etc.",
+      fieldKey: 'problemStatement',
+      minLength: 50
+    },
+    {
+      id: 'solution',
+      question: "How does your product or service solve this problem? What makes your approach unique and innovative?",
+      hint: "Focus on your differentiation and why your solution is better than alternatives",
+      fieldKey: 'solution',
+      minLength: 50
+    },
+    {
+      id: 'market-opportunity',
+      question: "Describe your market opportunity. What's the size of your addressable market and what's driving growth?",
+      hint: "Include TAM/SAM/SOM figures with sources, market trends, and UK-specific opportunity",
+      fieldKey: 'marketOpportunity',
+      minLength: 50
+    },
+    {
+      id: 'business-model',
+      question: "How do you make money? Explain your revenue model, pricing strategy, and path to profitability.",
+      hint: "Include specific pricing, customer acquisition cost, lifetime value if known",
+      fieldKey: 'businessModel',
+      minLength: 50
+    },
+    {
+      id: 'traction',
+      question: "What traction have you achieved so far? Share your key metrics, milestones, and validation.",
+      hint: "Include customers, revenue, partnerships, pilots, user growth - specific numbers are powerful",
+      fieldKey: 'traction',
+      minLength: 50
+    },
+    {
+      id: 'team',
+      question: "Tell me about your founding team. What relevant experience and expertise do you bring?",
+      hint: "Highlight domain expertise, previous ventures, years of experience, complementary skills",
+      fieldKey: 'team',
+      minLength: 50
+    },
+    {
+      id: 'funding-ask',
+      question: "How much funding are you seeking and how will you use it? What milestones will this enable?",
+      hint: "Be specific about allocation: X% product, Y% sales, Z% operations with timeline",
+      fieldKey: 'fundingAsk',
+      minLength: 40
+    }
+  ],
+  completionMessage: "Excellent work! Your executive summary sections are now complete. I've populated all the fields - review them in the Builder tab and refine as needed. Remember, endorsers spend about 2-3 minutes on this section, so make every word count!"
+};
+
 export default function ExecutiveSummary() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
@@ -69,6 +135,29 @@ export default function ExecutiveSummary() {
   });
   const [activeTab, setActiveTab] = useState('builder');
   const [savedDate, setSavedDate] = useState('');
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('exec-summary-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('exec-summary-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    setSections(prev => ({
+      ...prev,
+      companyOverview: answers.companyOverview || prev.companyOverview,
+      problemStatement: answers.problemStatement || prev.problemStatement,
+      solution: answers.solution || prev.solution,
+      marketOpportunity: answers.marketOpportunity || prev.marketOpportunity,
+      businessModel: answers.businessModel || prev.businessModel,
+      traction: answers.traction || prev.traction,
+      team: answers.team || prev.team,
+      fundingAsk: answers.fundingAsk || prev.fundingAsk
+    }));
+    setMode('traditional');
+    setActiveTab('builder');
+  };
 
   const updateSection = (field: keyof SectionData, value: string) => {
     setSections(prev => ({ ...prev, [field]: value }));
@@ -487,6 +576,17 @@ Report generated by UK Innovator Founder Visa Assistant
             toolName="Executive Summary Builder"
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4" data-testid="tabs-executive-summary">
               <TabsTrigger value="builder" data-testid="tab-builder">Builder</TabsTrigger>
@@ -884,6 +984,7 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

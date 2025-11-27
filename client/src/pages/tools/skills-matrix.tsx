@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -28,7 +28,26 @@ interface SkillEntry {
 const SKILL_CATEGORIES = ["JavaScript", "Python", "React", "Node.js", "SQL", "AWS", "Leadership", "Communication"];
 const SKILL_WEIGHTS = { expert: 100, proficient: 75, basic: 40, none: 0 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'skills-matrix',
+  toolName: 'Team Skills Matrix',
+  agent: 'nova',
+  greeting: "Hi there! I'm Nova, your innovation advisor. Let me help you assess your team's skill coverage for your Innovator Founder Visa application. Strong skill diversity demonstrates your team's ability to execute and scale.",
+  questions: [
+    { id: 'teamSize', question: "How many people are currently on your team?", hint: "Include founders, full-time employees, and key contractors", fieldKey: 'teamSize', fieldType: 'number' },
+    { id: 'primarySkills', question: "What are your team's primary technical skills?", hint: "E.g., JavaScript, Python, Cloud, Data Science, etc.", fieldKey: 'primarySkills', fieldType: 'text' },
+    { id: 'softSkills', question: "What leadership and soft skills does your team have?", hint: "E.g., project management, sales, marketing, communication", fieldKey: 'softSkills', fieldType: 'text' },
+    { id: 'gaps', question: "Where do you see skill gaps in your current team?", hint: "Identifying gaps shows self-awareness and planning capability", fieldKey: 'skillGaps', fieldType: 'text' },
+    { id: 'hiring', question: "What roles are you planning to hire in the next 12 months?", hint: "This demonstrates growth planning for scalability criterion", fieldKey: 'hiringPlans', fieldType: 'text' },
+    { id: 'training', question: "Do you have any training or upskilling plans for your team?", hint: "Investment in team development shows long-term viability", fieldKey: 'trainingPlans', fieldType: 'text' },
+  ],
+  completionMessage: "I've gathered your team skills information. Let me help you visualize your skill coverage and identify any critical gaps."
+};
+
 export default function SkillsMatrix() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('skills-matrix-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [skillEntries, setSkillEntries] = useState<SkillEntry[]>([
@@ -48,6 +67,14 @@ export default function SkillsMatrix() {
   const addEmployee = () => {
     const defaultSkills = SKILL_CATEGORIES.reduce((acc, skill) => ({ ...acc, [skill]: "none" }), {});
     setSkillEntries([...skillEntries, { id: Date.now().toString(), employee: "New Employee", role: "", skills: defaultSkills as any, salary: 60000 }]);
+  };
+
+  useEffect(() => {
+    localStorage.setItem('skills-matrix-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    setMode('traditional');
   };
 
   const removeEmployee = (id: string) => setSkillEntries(skillEntries.filter(e => e.id !== id));
@@ -281,8 +308,16 @@ GOV.UK: Innovator Founder Visa scalability criterion
 
           <ToolUtilityBar toolId="skills-matrix" toolName="Skills Matrix" onSave={saveProgress} onExport={exportMatrix} getSerializedState={getSerializedState} />
 
+          <div className="flex justify-end mt-4 mb-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
           {savedDate && <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950"><AlertCircle className="h-4 w-4 text-green-600" /><AlertDescription className="text-green-700 dark:text-green-300">Last saved: {savedDate}</AlertDescription></Alert>}
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <Card className="p-4">
               <div className="flex items-center gap-3 mb-2">
@@ -446,6 +481,8 @@ GOV.UK: Innovator Founder Visa scalability criterion
               </div>
             )}
           </Card>
+          </>
+          )}
         </div>
       </div>
     </>

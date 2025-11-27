@@ -12,6 +12,53 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CheckCircle2, XCircle, AlertTriangle, MapPin, Globe, FileCheck, Save, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'jurisdiction-checker',
+  toolName: 'UK Jurisdiction & Eligibility Checker',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Advisor. Before applying for the UK Innovator Founder Visa, you need to verify you meet the eligibility requirements. Let me guide you through a comprehensive eligibility assessment!",
+  questions: [
+    {
+      id: 'nationality',
+      question: "What is your nationality and current country of residence? Some nationalities have different requirements or exemptions.",
+      hint: "EU/EEA citizens have different pathways since Brexit",
+      fieldKey: 'nationality'
+    },
+    {
+      id: 'endorsement',
+      question: "Have you secured or applied for endorsement from an approved endorsing body? This is a mandatory requirement.",
+      hint: "You must have endorsement BEFORE applying for the visa",
+      fieldKey: 'hasEndorsement'
+    },
+    {
+      id: 'business-registration',
+      question: "Is your business registered in the UK, or do you plan to register before your visa application?",
+      hint: "Your business must be registered with Companies House",
+      fieldKey: 'businessRegistration'
+    },
+    {
+      id: 'english',
+      question: "What's your English language proficiency level? Do you have a qualifying test result (IELTS, PTE, etc.) or exemption?",
+      hint: "B1 level minimum required. Some nationalities are exempt.",
+      fieldKey: 'englishLevel'
+    },
+    {
+      id: 'funds',
+      question: "Do you have the required maintenance funds of £1,270 available for at least 28 consecutive days?",
+      hint: "Evidence must be from a regulated financial institution",
+      fieldKey: 'hasMaintenanceFunds'
+    },
+    {
+      id: 'investment',
+      question: "What level of investment do you have secured for your business? Include both personal funds and external investment.",
+      hint: "While no minimum is required, £50k+ strengthens your application",
+      fieldKey: 'investmentAmount'
+    }
+  ],
+  completionMessage: "I've assessed your eligibility for the UK Innovator Founder Visa. Based on your answers, I'll populate the eligibility checker with your status and highlight any areas that need attention."
+};
 
 type EligibilityCheck = {
   criterion: string;
@@ -27,6 +74,10 @@ const COUNTRIES = [
 export default function JurisdictionChecker() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('jurisdiction-checker-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
@@ -68,6 +119,31 @@ export default function JurisdictionChecker() {
       if (hideIndicatorRef.current) clearTimeout(hideIndicatorRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('jurisdiction-checker-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const updates: Partial<typeof formData> = {};
+    if (answers.countryOfOrigin) {
+      updates.countryOfOrigin = answers.countryOfOrigin;
+    }
+    if (answers.businessActivities) {
+      updates.businessActivities = answers.businessActivities;
+    }
+    if (answers.internationalOperations) {
+      updates.internationalOperations = answers.internationalOperations;
+    }
+    if (answers.regulatedSectors) {
+      updates.regulatedSectors = answers.regulatedSectors;
+    }
+    if (answers.taxConsiderations) {
+      updates.taxConsiderations = answers.taxConsiderations;
+    }
+    setFormData(prev => ({ ...prev, ...updates }));
+    setMode('traditional');
+  };
 
   const triggerAutoSave = useCallback((data: typeof formData) => {
     if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
@@ -191,10 +267,46 @@ export default function JurisdictionChecker() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">UK Jurisdiction & Eligibility Checker</h1>
-            <p className="text-muted-foreground">Verify your eligibility for the UK Innovator Founder Visa</p>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">UK Jurisdiction & Eligibility Checker</h1>
+                <p className="text-muted-foreground">Verify your eligibility for the UK Innovator Founder Visa</p>
+              </div>
+              <AiTraditionalToggle
+                mode={mode}
+                onModeChange={setMode}
+                aiLabel="AI-Guided"
+                traditionalLabel="Traditional Form"
+              />
+            </div>
           </div>
 
+          {mode === 'ai' ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AiToolGuide
+                config={AI_TOOL_CONFIG}
+                onComplete={handleAiComplete}
+                onSwitchToTraditional={() => setMode('traditional')}
+              />
+              <Card className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Globe className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Why AI-Guided?</h3>
+                </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Sage, our Compliance Expert, helps you verify UK visa eligibility.</p>
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>Check your country of origin and nationality</li>
+                    <li>Understand business activity requirements</li>
+                    <li>Identify regulated sectors considerations</li>
+                    <li>Earn XP as you complete each question</li>
+                  </ul>
+                  <p className="pt-2">Your answers will automatically populate the checker when complete.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
           <ToolUtilityBar
             toolId="jurisdiction-checker"
             toolName="UK Jurisdiction & Eligibility Checker"
@@ -465,6 +577,8 @@ export default function JurisdictionChecker() {
               </TabsContent>
             </Tabs>
           </div>
+            </>
+          )}
         </div>
       </div>
     </ToolAccessGuard>

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -54,7 +54,99 @@ const INDUSTRY_BENCHMARKS: IndustryBenchmark[] = [
   { sector: "EdTech", avgScore: 72 },
 ];
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'tech-stack-assess',
+  toolName: 'Tech Stack Assessment',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. I'll help you assess your technology stack to demonstrate technical innovation and scalability - critical factors that endorsing bodies evaluate. Let's review your tech architecture together!",
+  questions: [
+    {
+      id: 'frontend-tech',
+      question: "What frontend technologies and frameworks does your product use? Rate your frontend architecture maturity from 1-100.",
+      hint: "Include frameworks (React, Vue, Angular), state management, and design systems",
+      fieldKey: 'frontend_tech'
+    },
+    {
+      id: 'backend-tech',
+      question: "What backend technologies power your product? Rate your backend architecture maturity from 1-100.",
+      hint: "Include languages, frameworks, API design (REST/GraphQL), and microservices if applicable",
+      fieldKey: 'backend_tech'
+    },
+    {
+      id: 'database-tech',
+      question: "What database technologies do you use? Rate your database architecture maturity from 1-100.",
+      hint: "Include SQL/NoSQL choices, indexing strategies, and data modeling approach",
+      fieldKey: 'database_tech'
+    },
+    {
+      id: 'infrastructure',
+      question: "What cloud infrastructure do you use? Rate your infrastructure maturity from 1-100.",
+      hint: "Include AWS/Azure/GCP services, containerization, and auto-scaling capabilities",
+      fieldKey: 'infrastructure_tech'
+    },
+    {
+      id: 'devops',
+      question: "Describe your DevOps practices. Rate your DevOps maturity from 1-100.",
+      hint: "Include CI/CD pipelines, automated testing, monitoring, and deployment automation",
+      fieldKey: 'devops_tech'
+    },
+    {
+      id: 'security',
+      question: "What security measures are implemented in your stack? Rate your security posture from 1-100.",
+      hint: "Include encryption, authentication, vulnerability scanning, and GDPR compliance",
+      fieldKey: 'security_rating'
+    },
+    {
+      id: 'scalability',
+      question: "How scalable is your current architecture? What evidence do you have of scalability (load tests, user growth)?",
+      hint: "Endorsers want to see technical capability to support growth projections",
+      fieldKey: 'scalability_evidence'
+    }
+  ]
+};
+
 export default function TechStackAssess() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('tech-stack-assess-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('tech-stack-assess-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.frontend_tech) {
+      const score = parseInt(answers.frontend_tech.match(/\d+/)?.[0] || '50');
+      setCategories(prev => ({ ...prev, frontend: Math.min(100, score) }));
+      setDetails(prev => ({ ...prev, frontendTech: answers.frontend_tech }));
+    }
+    if (answers.backend_tech) {
+      const score = parseInt(answers.backend_tech.match(/\d+/)?.[0] || '50');
+      setCategories(prev => ({ ...prev, backend: Math.min(100, score) }));
+      setDetails(prev => ({ ...prev, backendTech: answers.backend_tech }));
+    }
+    if (answers.database_tech) {
+      const score = parseInt(answers.database_tech.match(/\d+/)?.[0] || '50');
+      setCategories(prev => ({ ...prev, database: Math.min(100, score) }));
+      setDetails(prev => ({ ...prev, databaseTech: answers.database_tech }));
+    }
+    if (answers.infrastructure_tech) {
+      const score = parseInt(answers.infrastructure_tech.match(/\d+/)?.[0] || '50');
+      setCategories(prev => ({ ...prev, infrastructure: Math.min(100, score) }));
+      setDetails(prev => ({ ...prev, infrastructureTech: answers.infrastructure_tech }));
+    }
+    if (answers.devops_tech) {
+      const score = parseInt(answers.devops_tech.match(/\d+/)?.[0] || '50');
+      setCategories(prev => ({ ...prev, devops: Math.min(100, score) }));
+      setDetails(prev => ({ ...prev, devopsTech: answers.devops_tech }));
+    }
+    if (answers.security_rating) {
+      const score = parseInt(answers.security_rating.match(/\d+/)?.[0] || '50');
+      setFactors(prev => ({ ...prev, security: Math.min(100, score) }));
+    }
+    setMode('traditional');
+  };
+
   const [categories, setCategories] = useState<TechStackCategories>({
     frontend: 50,
     backend: 50,
@@ -596,13 +688,21 @@ and technical architecture review for official assessment and application prepar
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-tech-stack-assess">Technology Stack Assessment</h1>
-            <p className="text-lg text-muted-foreground">Evaluate technical architecture for innovation visa compliance</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
-            )}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-tech-stack-assess">Technology Stack Assessment</h1>
+              <p className="text-lg text-muted-foreground">Evaluate technical architecture for innovation visa compliance</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
 
           <ToolUtilityBar
             toolId="tech-stack-assess"
@@ -1203,6 +1303,8 @@ and technical architecture review for official assessment and application prepar
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

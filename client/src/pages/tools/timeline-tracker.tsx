@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,7 +47,70 @@ const STATUS_ICONS = {
   completed: CheckCircle2,
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'timeline-tracker',
+  toolName: 'Timeline Tracker',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. I'll help you plan and track your visa application timeline - ensuring you stay on schedule for a successful endorsement. Let's map out your journey together!",
+  questions: [
+    {
+      id: 'start-date',
+      question: "When did you start (or plan to start) your visa application journey? What's your target completion date?",
+      hint: "Typical timeline is 3-5 months from start to visa approval",
+      fieldKey: 'journey_dates'
+    },
+    {
+      id: 'current-stage',
+      question: "What stage are you currently at? (Research, Business Plan, Document Prep, Endorsement Application, Visa Application)",
+      hint: "Be honest about where you are - this helps plan next steps",
+      fieldKey: 'current_stage'
+    },
+    {
+      id: 'endorsing-body',
+      question: "Which endorsing body are you targeting or have you applied to? Have you had any initial contact with them?",
+      hint: "Each endorsing body has different processing times and requirements",
+      fieldKey: 'endorsing_body'
+    },
+    {
+      id: 'documents-ready',
+      question: "What documents do you already have prepared? What's still outstanding?",
+      hint: "Key documents include business plan, financial projections, evidence of innovation",
+      fieldKey: 'documents_status'
+    },
+    {
+      id: 'blockers',
+      question: "Are there any blockers or challenges that might delay your application?",
+      hint: "Identifying blockers early allows you to address them proactively",
+      fieldKey: 'blockers'
+    },
+    {
+      id: 'processing-speed',
+      question: "Are you planning to use standard or priority visa processing? What's your budget for the application?",
+      hint: "Priority processing is 5 working days vs 3-8 weeks for standard",
+      fieldKey: 'processing_preference'
+    }
+  ]
+};
+
 export default function TimelineTracker() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('timeline-tracker-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('timeline-tracker-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.journey_dates) {
+      const dateMatch = answers.journey_dates.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/);
+      if (dateMatch) {
+        setStartDate(dateMatch[0]);
+      }
+    }
+    setMode('traditional');
+  };
+
   const { toast } = useToast();
   const { generateWord } = useWordExport();
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
@@ -138,13 +202,20 @@ export default function TimelineTracker() {
                 </h1>
                 <p className="text-muted-foreground mt-1">Track your visa application timeline stages</p>
               </div>
-              {showAutoSave && (
-                <Badge variant="secondary" className="animate-pulse">
-                  <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
-                </Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {showAutoSave && (
+                  <Badge variant="secondary" className="animate-pulse">
+                    <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
+                  </Badge>
+                )}
+                <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              </div>
             </div>
 
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+            <>
             <ToolUtilityBar
               toolId="timeline-tracker"
               toolName="Timeline Tracker"
@@ -378,6 +449,8 @@ export default function TimelineTracker() {
                 </Card>
               </TabsContent>
             </Tabs>
+            </>
+            )}
           </div>
         </div>
       </div>

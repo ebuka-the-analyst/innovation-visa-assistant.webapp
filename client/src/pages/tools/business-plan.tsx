@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,6 +21,71 @@ import {
 } from 'recharts';
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from "@/lib/seo-schemas";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'business-plan',
+  toolName: 'Business Plan Generator',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. I'll help you create a compelling business plan for your UK Innovator Founder Visa application. Let's build something that demonstrates genuine innovation and scalability. Ready to begin?",
+  questions: [
+    {
+      id: 'business-name',
+      question: "What is the name of your business? This will be the title of your business plan.",
+      hint: "Use your registered or intended company name",
+      fieldKey: 'business-name',
+      minLength: 3
+    },
+    {
+      id: 'business-concept',
+      question: "Describe your business concept in 2-3 sentences. What does your company do?",
+      hint: "Focus on what makes your business unique and the problem it solves",
+      fieldKey: 'business-concept',
+      minLength: 100
+    },
+    {
+      id: 'problem-statement',
+      question: "What specific problem does your business solve? Why is this problem important?",
+      hint: "Be specific about the pain points your target customers experience",
+      fieldKey: 'problem-statement',
+      minLength: 100
+    },
+    {
+      id: 'solution-description',
+      question: "How does your product or service solve this problem? What's your unique approach?",
+      hint: "Highlight what makes your solution innovative and different from existing alternatives",
+      fieldKey: 'solution-description',
+      minLength: 100
+    },
+    {
+      id: 'target-market',
+      question: "Who is your target market? Define your ideal customer segments.",
+      hint: "Include demographics, industry, company size, or other relevant characteristics",
+      fieldKey: 'target-market',
+      minLength: 80
+    },
+    {
+      id: 'revenue-streams',
+      question: "How will your business generate revenue? Describe your pricing model.",
+      hint: "Include subscription models, one-time fees, licensing, or other revenue sources",
+      fieldKey: 'revenue-streams',
+      minLength: 80
+    },
+    {
+      id: 'scalability',
+      question: "How will your business scale in the UK market? What's your growth strategy?",
+      hint: "Endorsers want to see clear plans for job creation and expansion",
+      fieldKey: 'scalability',
+      minLength: 100
+    },
+    {
+      id: 'founder-background',
+      question: "What relevant experience do you bring as a founder? Why are you the right person to execute this business?",
+      hint: "Highlight skills, past successes, and industry expertise that qualify you",
+      fieldKey: 'founder-background',
+      minLength: 100
+    }
+  ]
+};
 
 type BusinessPlanSection = {
   id: string;

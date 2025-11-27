@@ -12,6 +12,59 @@ import { TrendingUp, DollarSign, Target, AlertTriangle, CheckCircle2 } from "luc
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'breakeven-calculator',
+  toolName: 'Breakeven Calculator',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your Financial Analyst. Understanding your breakeven point is essential for demonstrating business viability to UK visa endorsers. Let's work through your unit economics to show a clear path to profitability. Let's crunch the numbers!",
+  questions: [
+    {
+      id: 'fixed-costs',
+      question: "What are your monthly fixed costs? Include rent, salaries, utilities, software subscriptions, and other regular expenses.",
+      hint: "Be thorough - endorsers expect accurate cost projections. Include all recurring overhead costs.",
+      fieldKey: 'fixed_costs_description',
+      minLength: 80
+    },
+    {
+      id: 'variable-costs',
+      question: "What are your variable costs per unit sold? Describe the costs that increase with each sale.",
+      hint: "Materials, shipping, commissions, payment processing fees, or delivery costs",
+      fieldKey: 'variable_costs_description',
+      minLength: 60
+    },
+    {
+      id: 'pricing-strategy',
+      question: "What's your pricing strategy? What will you charge per unit or per customer?",
+      hint: "Explain how you determined this price and how it compares to competitors",
+      fieldKey: 'pricing_strategy',
+      minLength: 80
+    },
+    {
+      id: 'initial-revenue',
+      question: "What's your current or projected initial monthly revenue? How many customers or units do you expect?",
+      hint: "Be realistic - endorsers prefer conservative projections backed by evidence",
+      fieldKey: 'initial_revenue_description',
+      minLength: 60
+    },
+    {
+      id: 'growth-assumptions',
+      question: "What growth rate do you expect? How quickly can you scale revenue month over month?",
+      hint: "Typical early-stage startups see 10-20% monthly growth. Justify your assumptions.",
+      fieldKey: 'growth_assumptions',
+      minLength: 80
+    },
+    {
+      id: 'profitability-timeline',
+      question: "When do you expect to reach profitability? What milestones need to be achieved?",
+      hint: "Endorsers expect breakeven within 18-24 months. Describe key milestones.",
+      fieldKey: 'profitability_timeline',
+      minLength: 100
+    }
+  ],
+  completionMessage: "Excellent analysis! You've outlined a clear path to profitability. This level of financial planning demonstrates business viability to endorsing bodies. I'm now calculating your breakeven metrics."
+};
 
 type BreakevenInputs = {
   fixedCostsMonthly: number;
@@ -22,6 +75,10 @@ type BreakevenInputs = {
 };
 
 export default function BreakevenCalculator() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('breakeven-calculator-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [inputs, setInputs] = useState<BreakevenInputs>({
     fixedCostsMonthly: 15000,
     variableCostPerUnit: 30,
@@ -31,6 +88,32 @@ export default function BreakevenCalculator() {
   });
   const [activeTab, setActiveTab] = useState('calculator');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('breakeven-calculator-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.fixed_costs_description) {
+      const costMatch = answers.fixed_costs_description.match(/(\d+[\d,]*)/);
+      if (costMatch) {
+        setInputs(prev => ({ ...prev, fixedCostsMonthly: parseInt(costMatch[1].replace(/,/g, '')) || 15000 }));
+      }
+    }
+    if (answers.pricing_strategy) {
+      const priceMatch = answers.pricing_strategy.match(/£?(\d+)/);
+      if (priceMatch) {
+        setInputs(prev => ({ ...prev, pricePerUnit: parseInt(priceMatch[1]) || 100 }));
+      }
+    }
+    if (answers.initial_revenue_description) {
+      const revenueMatch = answers.initial_revenue_description.match(/(\d+[\d,]*)/);
+      if (revenueMatch) {
+        setInputs(prev => ({ ...prev, initialRevenue: parseInt(revenueMatch[1].replace(/,/g, '')) || 5000 }));
+      }
+    }
+    setMode('traditional');
+  };
 
   const updateInput = (field: keyof BreakevenInputs, value: number) => {
     setInputs({ ...inputs, [field]: value });
@@ -346,14 +429,25 @@ Endorsing bodies require evidence-backed projections. Consult qualified advisors
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-breakeven-calculator">Breakeven Calculator</h1>
-            <p className="text-lg text-muted-foreground">Comprehensive unit economics and path to profitability analysis</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+          <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-breakeven-calculator">Breakeven Calculator</h1>
+              <p className="text-lg text-muted-foreground">Comprehensive unit economics and path to profitability analysis</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="breakeven-calculator"
             onSave={handleSave}
@@ -824,6 +918,8 @@ Endorsing bodies require evidence-backed projections. Consult qualified advisors
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

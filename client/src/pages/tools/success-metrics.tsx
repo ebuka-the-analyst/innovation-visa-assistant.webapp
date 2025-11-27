@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,6 +28,22 @@ type SuccessMetric = {
   unit: string;
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'success-metrics',
+  toolName: 'Success Metrics Planner',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your innovation advisor. Defining clear success metrics is crucial for your visa application. Let me help you establish KPIs that demonstrate business viability and growth potential.",
+  questions: [
+    { id: 'revenue', question: "What are your revenue targets for the first 12 months?", hint: "Include MRR, ARR, or total revenue projections", fieldKey: 'revenueTarget', fieldType: 'number' },
+    { id: 'customers', question: "How many customers do you plan to acquire in year one?", hint: "Be realistic and explain how you'll achieve this", fieldKey: 'customerTarget', fieldType: 'number' },
+    { id: 'team', question: "How many people do you plan to hire in the UK?", hint: "Job creation is a key criterion for the visa", fieldKey: 'hiringTarget', fieldType: 'number' },
+    { id: 'pmf', question: "How will you measure product-market fit?", hint: "NPS score, retention rate, engagement metrics", fieldKey: 'pmfMetric', fieldType: 'text' },
+    { id: 'growth', question: "What growth rate are you targeting month-over-month?", hint: "Be ambitious but realistic with your projections", fieldKey: 'growthRate', fieldType: 'text' },
+    { id: 'priority', question: "Which metrics are most important for your business model?", hint: "Prioritize 3-5 key metrics that define success", fieldKey: 'priorityMetrics', fieldType: 'text' },
+  ],
+  completionMessage: "I've captured your success metrics. Let me help you organize them and create a tracking framework."
+};
+
 const DEFAULT_METRICS: SuccessMetric[] = [
   { id: "1", name: "Monthly Recurring Revenue", description: "Target MRR within first year", category: "revenue", currentValue: 0, targetValue: 10000, timeframe: "12 months", priority: "high", unit: "£" },
   { id: "2", name: "Customer Count", description: "Total paying customers", category: "customer", currentValue: 0, targetValue: 100, timeframe: "12 months", priority: "high", unit: "" },
@@ -41,6 +58,18 @@ export default function SuccessMetrics() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('success-metrics-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('success-metrics-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    setMode('traditional');
+  };
 
   const [metrics, setMetrics] = useState<SuccessMetric[]>(() => {
     const saved = localStorage.getItem("success-metrics-state");
@@ -210,6 +239,10 @@ export default function SuccessMetrics() {
             onExportWord={handleExportWord}
           />
 
+          <div className="flex justify-end mt-4 mb-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
           {showAutoSave && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
               <Save className="w-4 h-4" />
@@ -217,6 +250,9 @@ export default function SuccessMetrics() {
             </div>
           )}
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <div className="mt-6">
             <div className="grid gap-4 md:grid-cols-3 mb-6">
               <Card>
@@ -508,6 +544,7 @@ export default function SuccessMetrics() {
               </TabsContent>
             </Tabs>
           </div>
+          )}
         </div>
       </div>
     </ToolAccessGuard>

@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,6 +53,58 @@ const IP_TYPE_COLORS: Record<IPType, string> = {
   'designs': '#ec4899',
 };
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'ip-strategy',
+  toolName: 'IP Strategy Builder',
+  agent: 'nova',
+  greeting: "Hi! I'm Nova, your Innovation Specialist. I'll help you develop a comprehensive IP strategy that protects your innovations and impresses endorsing bodies. Let's build your intellectual property fortress!",
+  questions: [
+    {
+      id: 'business-sector',
+      question: "What's your business sector and what gives you competitive advantage?",
+      hint: "E.g., 'HealthTech - our AI algorithm processes medical images 10x faster than competitors'",
+      fieldKey: 'businessSectorAdvantage',
+      minLength: 50
+    },
+    {
+      id: 'patentable-innovation',
+      question: "Do you have any patentable innovations? Describe the technical advancement.",
+      hint: "Patents protect novel, non-obvious inventions with industrial application",
+      fieldKey: 'patentableInnovation',
+      minLength: 60
+    },
+    {
+      id: 'brand-protection',
+      question: "What brand elements need trademark protection? (Name, logo, taglines)",
+      hint: "Include your company name, product names, and distinctive brand elements",
+      fieldKey: 'brandProtection',
+      minLength: 40
+    },
+    {
+      id: 'trade-secrets',
+      question: "What confidential information or trade secrets does your business rely on?",
+      hint: "E.g., algorithms, customer lists, manufacturing processes, business methods",
+      fieldKey: 'tradeSecrets',
+      minLength: 40
+    },
+    {
+      id: 'ip-risk-assessment',
+      question: "What IP risks concern you most? (Infringement, copying, expiry, disputes)",
+      hint: "Understanding risks helps prioritize protection efforts and budget",
+      fieldKey: 'ipRisks',
+      minLength: 40
+    },
+    {
+      id: 'ip-investment',
+      question: "What's your planned investment in IP protection over the next 12 months?",
+      hint: "Include budget for filings, legal fees, and ongoing maintenance",
+      fieldKey: 'ipInvestment',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Your IP strategy framework is complete! Add specific assets to the Strategy tab to track filings, costs, and timelines for a comprehensive IP portfolio view."
+};
+
 export default function IPStrategy() {
   const [assets, setAssets] = useState<IPAsset[]>([
     { 
@@ -71,6 +123,23 @@ export default function IPStrategy() {
   const [savedDate, setSavedDate] = useState('');
   const [businessSector, setBusinessSector] = useState('');
   const [competitiveAdvantage, setCompetitiveAdvantage] = useState('');
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('ip-strategy-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('ip-strategy-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.businessSectorAdvantage) {
+      const parts = answers.businessSectorAdvantage.split('-');
+      setBusinessSector(parts[0]?.trim() || '');
+      setCompetitiveAdvantage(parts[1]?.trim() || answers.businessSectorAdvantage);
+    }
+    setMode('traditional');
+    setActiveTab('strategy');
+  };
 
   const addAsset = () => {
     setAssets([...assets, { 
@@ -408,6 +477,17 @@ IP attorney or patent agent for professional advice on specific IP matters.
             toolName="IP Protection Strategy"
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4" data-testid="tabs-ip-strategy">
               <TabsTrigger value="strategy" data-testid="tab-strategy">Strategy</TabsTrigger>
@@ -975,6 +1055,7 @@ IP attorney or patent agent for professional advice on specific IP matters.
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

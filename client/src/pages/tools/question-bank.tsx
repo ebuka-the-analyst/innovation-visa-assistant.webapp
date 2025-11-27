@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -16,6 +16,65 @@ import {
   PieChart, Pie, Cell, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "question-bank",
+  toolName: "Question Bank",
+  agentId: "sage",
+  agentName: "Sage",
+  agentTitle: "Compliance Specialist",
+  description: "Prepare for endorsing body interviews with comprehensive question preparation",
+  questions: [
+    {
+      id: "innovation",
+      question: "How would you explain what makes your business genuinely innovative to an assessor?",
+      placeholder: "Our innovation is [type of innovation]. Unlike existing solutions, we [key differentiator]. This is new to the UK market because...",
+      fieldKey: "innovationExplanation",
+      minLength: 100,
+      helpText: "Prepare for the most common interview question - what's genuinely innovative"
+    },
+    {
+      id: "viability",
+      question: "How will you demonstrate your business is commercially viable?",
+      placeholder: "Our business model is viable because [revenue evidence]. We have [traction metrics]. The path to profitability is...",
+      fieldKey: "viabilityEvidence",
+      minLength: 100,
+      helpText: "Include revenue projections, unit economics, and market validation"
+    },
+    {
+      id: "scalability",
+      question: "Explain how your business will create UK jobs and scale nationally/internationally.",
+      placeholder: "We plan to hire [X] employees by Year [X]. Our scaling strategy involves [approach]. UK job creation will be focused on...",
+      fieldKey: "scalabilityPlan",
+      minLength: 100,
+      helpText: "Include specific hiring plans and growth milestones"
+    },
+    {
+      id: "whyUK",
+      question: "Why is the UK specifically important for your business?",
+      placeholder: "The UK is strategic because [market reasons]. We will locate in [city] due to [specific advantages]. UK-specific opportunities include...",
+      fieldKey: "ukRationale",
+      minLength: 80,
+      helpText: "Demonstrate genuine commitment to the UK market"
+    },
+    {
+      id: "competition",
+      question: "Who are your competitors and why will customers choose you?",
+      placeholder: "Our main competitors are [names]. Customers choose us because [differentiators]. Our competitive moat is...",
+      fieldKey: "competitivePosition",
+      minLength: 80,
+      helpText: "Show market awareness and clear positioning"
+    },
+    {
+      id: "experience",
+      question: "What qualifies you to execute this business plan successfully?",
+      placeholder: "My background includes [experience]. I have previously [achievements]. My team brings [complementary skills]...",
+      fieldKey: "founderQualifications",
+      minLength: 80,
+      helpText: "Highlight relevant experience and past successes"
+    }
+  ]
+};
 
 type QuestionCategory = 
   | 'visa-interview' 
@@ -429,6 +488,9 @@ const STATUS_COLORS = {
 };
 
 export default function QuestionBank() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('question-bank-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [questions, setQuestions] = useState<Question[]>(
     QUESTION_BANK.map(q => ({
       ...q,
@@ -576,6 +638,58 @@ export default function QuestionBank() {
     if ('selectedDifficulty' in state) setSelectedDifficulty(state.selectedDifficulty);
     if ('selectedQuestion' in state) setSelectedQuestion(state.selectedQuestion);
     if ('savedDate' in state) setSavedDate(state.savedDate || '');
+  };
+
+  useEffect(() => {
+    localStorage.setItem('question-bank-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const newQuestions = [...questions];
+    if (answers.innovationExplanation) {
+      const innovationQ = newQuestions.find(q => q.category === 'innovation' && q.status === 'not-started');
+      if (innovationQ) {
+        innovationQ.answer = answers.innovationExplanation;
+        innovationQ.status = 'in-progress';
+      }
+    }
+    if (answers.viabilityEvidence) {
+      const viabilityQ = newQuestions.find(q => q.category === 'business-model' && q.status === 'not-started');
+      if (viabilityQ) {
+        viabilityQ.answer = answers.viabilityEvidence;
+        viabilityQ.status = 'in-progress';
+      }
+    }
+    if (answers.scalabilityPlan) {
+      const scaleQ = newQuestions.find(q => q.category === 'uk-impact' && q.status === 'not-started');
+      if (scaleQ) {
+        scaleQ.answer = answers.scalabilityPlan;
+        scaleQ.status = 'in-progress';
+      }
+    }
+    if (answers.ukRationale) {
+      const ukQ = newQuestions.find(q => q.subcategory === 'UK Location' && q.status === 'not-started');
+      if (ukQ) {
+        ukQ.answer = answers.ukRationale;
+        ukQ.status = 'in-progress';
+      }
+    }
+    if (answers.competitivePosition) {
+      const compQ = newQuestions.find(q => q.category === 'market' && q.status === 'not-started');
+      if (compQ) {
+        compQ.answer = answers.competitivePosition;
+        compQ.status = 'in-progress';
+      }
+    }
+    if (answers.founderQualifications) {
+      const teamQ = newQuestions.find(q => q.category === 'team' && q.status === 'not-started');
+      if (teamQ) {
+        teamQ.answer = answers.founderQualifications;
+        teamQ.status = 'in-progress';
+      }
+    }
+    setQuestions(newQuestions);
+    setMode('traditional');
   };
 
   useEffect(() => {
@@ -875,18 +989,21 @@ Report generated by UK Innovator Founder Visa Assistant
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-question-bank">
-              Comprehensive Interview Question Bank
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Master visa interviews, endorser evaluations, and investor pitches
-            </p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">
-                Last saved: {savedDate}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-question-bank">
+                Comprehensive Interview Question Bank
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                Master visa interviews, endorser evaluations, and investor pitches
               </p>
-            )}
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">
+                  Last saved: {savedDate}
+                </p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
           <ToolUtilityBar
@@ -900,6 +1017,10 @@ Report generated by UK Innovator Founder Visa Assistant
             getSerializedState={getSerializedState}
           />
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           {showTips && (
             <Card className="mb-6 border-blue-500">
               <CardHeader>
@@ -1651,6 +1772,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

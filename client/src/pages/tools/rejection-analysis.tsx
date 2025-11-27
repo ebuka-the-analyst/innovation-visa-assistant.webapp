@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +13,65 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { CheckCircle2, XCircle, AlertTriangle, FileText, TrendingUp, Scale, Shield } from "lucide-react";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'rejection-analysis',
+  toolName: 'Rejection Analysis',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Compliance Expert. I'm here to help you systematically analyze your visa rejection and create a robust remediation strategy. Let's work through the key issues together so you can prepare a stronger reapplication.",
+  questions: [
+    {
+      id: 'application-reference',
+      question: "What is your visa application reference number and when was your application refused?",
+      hint: "Include the GWF reference number and the exact date from your refusal letter.",
+      fieldKey: 'applicationReference',
+      minLength: 5
+    },
+    {
+      id: 'endorsing-body',
+      question: "Which endorsing body assessed your application, and what was their primary feedback?",
+      hint: "Name the endorsing body (e.g., Tech Nation, Envestors) and summarize their main concerns.",
+      fieldKey: 'endorsingBody',
+      minLength: 10
+    },
+    {
+      id: 'primary-rejection-reason',
+      question: "What was the main reason for your visa rejection according to the refusal letter?",
+      hint: "Quote or closely paraphrase the key paragraph from your Home Office decision letter.",
+      fieldKey: 'primaryRejectionReason',
+      minLength: 30
+    },
+    {
+      id: 'innovation-concerns',
+      question: "Were there any concerns raised about your innovation or technical differentiation?",
+      hint: "Describe any feedback about lack of novelty, insufficient IP, or weak technical evidence.",
+      fieldKey: 'innovationConcerns',
+      minLength: 20
+    },
+    {
+      id: 'viability-concerns',
+      question: "Were there concerns about your business viability or market validation?",
+      hint: "Include feedback about revenue projections, customer evidence, or business model credibility.",
+      fieldKey: 'viabilityConcerns',
+      minLength: 20
+    },
+    {
+      id: 'scalability-concerns',
+      question: "Were there concerns raised about scalability or UK job creation potential?",
+      hint: "Describe any feedback about growth plans, hiring roadmap, or market expansion strategy.",
+      fieldKey: 'scalabilityConcerns',
+      minLength: 20
+    },
+    {
+      id: 'remediation-progress',
+      question: "What steps have you already taken to address the rejection grounds?",
+      hint: "List any new evidence gathered, business changes made, or expert opinions obtained.",
+      fieldKey: 'remediationProgress',
+      minLength: 20
+    }
+  ],
+  completionMessage: "Excellent work! I've gathered all the key information about your rejection. I'm now populating your remediation analysis form. You can review the details and add specific evidence for each issue to build a stronger reapplication case."
+};
 import {
   PieChart, Pie, Cell, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
@@ -134,6 +193,10 @@ const COMMON_REJECTION_PATTERNS_2025 = [
 ];
 
 export default function RejectionAnalysis() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('rejection-analysis-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
   const [rejectionIssues, setRejectionIssues] = useState<RejectionIssue[]>([
     { id: '1', category: 'innovation', description: '', homeOfficeReference: '', severity: 5, remediationStatus: 'not_started' }
   ]);
@@ -153,6 +216,26 @@ export default function RejectionAnalysis() {
   const [reapplicationTarget, setReapplicationTarget] = useState('');
   const [activeTab, setActiveTab] = useState('analysis');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('rejection-analysis-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    if (answers.applicationReference) setApplicationReference(answers.applicationReference);
+    if (answers.endorsingBody) setEndorsingBody(answers.endorsingBody);
+    if (answers.primaryRejectionReason) {
+      setRejectionIssues([{
+        id: '1',
+        category: 'innovation',
+        description: answers.primaryRejectionReason,
+        homeOfficeReference: '',
+        severity: 7,
+        remediationStatus: 'not_started'
+      }]);
+    }
+    setMode('traditional');
+  };
 
   const addRejectionIssue = () => {
     setRejectionIssues([...rejectionIssues, {
@@ -577,13 +660,20 @@ Report generated by UK Innovator Founder Visa Assistant
           
 
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-rejection-analysis">Rejection Analysis</h1>
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-4xl font-bold" data-testid="heading-rejection-analysis">Rejection Analysis</h1>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
             <p className="text-lg text-muted-foreground">Systematic refusal remediation and reapplication readiness assessment</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
             )}
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="rejection-analysis"
             onSave={handleSave}
@@ -1343,6 +1433,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

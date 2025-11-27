@@ -17,6 +17,59 @@ import {
 } from 'recharts';
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'endorser-comparison',
+  toolName: 'Endorser Comparison Tool',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. Choosing the right endorsing body is one of the most important decisions in your visa journey. Let me help you compare options and find the best match for your business!",
+  questions: [
+    {
+      id: 'business-sector',
+      question: "What sector is your business in? Are you primarily tech-focused (AI, SaaS, FinTech) or do you operate in another innovative sector (services, manufacturing, creative)?",
+      hint: "Tech Nation focuses on tech; others are more flexible",
+      fieldKey: 'sector_info',
+      minLength: 20
+    },
+    {
+      id: 'funding-stage',
+      question: "What's your current funding situation? Are you self-funded, have angel investors, VC-backed, or planning to raise investment soon?",
+      hint: "Global Entrepreneurs Programme is for VC-backed ventures",
+      fieldKey: 'funding_stage',
+      minLength: 20
+    },
+    {
+      id: 'timeline-urgency',
+      question: "What's your timeline urgency? Do you need fast processing (6-8 weeks), or can you wait for a more thorough process (10-12 weeks)?",
+      hint: "Tech Nation typically processes faster than others",
+      fieldKey: 'timeline_urgency',
+      minLength: 20
+    },
+    {
+      id: 'budget-constraints',
+      question: "What's your budget for endorsement fees? Are you looking for the most affordable option, or is speed and success rate more important than cost?",
+      hint: "Global Entrepreneurs Programme is free but invitation-only",
+      fieldKey: 'budget_info',
+      minLength: 20
+    },
+    {
+      id: 'innovation-type',
+      question: "How would you describe your innovation? Is it technical innovation (patents, proprietary technology) or business model innovation (new market approach, unique delivery)?",
+      hint: "Different endorsers value different types of innovation",
+      fieldKey: 'innovation_type',
+      minLength: 30
+    },
+    {
+      id: 'uk-plans',
+      question: "What are your specific plans for the UK? How many jobs do you expect to create, and what's your expected R&D spend as a percentage of budget?",
+      hint: "Endorsers have different job creation and R&D requirements",
+      fieldKey: 'uk_plans',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Great! Based on your profile, I can now help you compare endorsers. Switch to the traditional view to see the detailed comparison matrix, success rate analysis, and personalized recommendations for your situation."
+};
 
 type EndorserBody = {
   id: string;
@@ -169,6 +222,10 @@ type BusinessProfile = {
 };
 
 export default function EndorserComparison() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('endorser-comparison-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const { generateWord } = useWordExport();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
@@ -184,6 +241,65 @@ export default function EndorserComparison() {
     isVCBacked: false,
     hasInternationalRecognition: false
   });
+
+  useEffect(() => {
+    localStorage.setItem('endorser-comparison-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newProfile = { ...businessProfile };
+    
+    if (answers.sector_info) {
+      newProfile.sector = answers.sector_info;
+      if (answers.sector_info.toLowerCase().includes('tech') || 
+          answers.sector_info.toLowerCase().includes('ai') ||
+          answers.sector_info.toLowerCase().includes('saas')) {
+        newProfile.hasTechIP = true;
+      }
+    }
+    
+    if (answers.funding_stage) {
+      if (answers.funding_stage.toLowerCase().includes('vc') || 
+          answers.funding_stage.toLowerCase().includes('venture')) {
+        newProfile.isVCBacked = true;
+      }
+      const amountMatch = answers.funding_stage.match(/£?(\d[\d,]*)/);
+      if (amountMatch) {
+        newProfile.fundingAmount = parseInt(amountMatch[1].replace(/,/g, ''));
+      }
+    }
+    
+    if (answers.uk_plans) {
+      const jobMatch = answers.uk_plans.match(/(\d+)\s*job/i);
+      if (jobMatch) {
+        newProfile.jobsPlanned = parseInt(jobMatch[1]);
+      }
+      const rdMatch = answers.uk_plans.match(/(\d+)%/);
+      if (rdMatch) {
+        newProfile.rdPercentage = parseInt(rdMatch[1]);
+      }
+    }
+    
+    if (answers.innovation_type) {
+      if (answers.innovation_type.toLowerCase().includes('patent') ||
+          answers.innovation_type.toLowerCase().includes('technical')) {
+        newProfile.hasTechIP = true;
+      }
+    }
+    
+    setBusinessProfile(newProfile);
+    
+    const date = new Date().toLocaleString('en-GB');
+    localStorage.setItem('endorser-comparison-state', JSON.stringify({
+      businessProfile: newProfile,
+      activeTab: 'overview',
+      savedDate: date
+    }));
+    setSavedDate(date);
+    
+    setActiveTab('overview');
+    setMode('traditional');
+  };
 
   const calculateMatchScore = (endorser: EndorserBody): number => {
     let score = 50;
@@ -587,6 +703,13 @@ Report generated by UK Innovator Founder Visa Assistant
             toolName="Endorser Comparison"
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5" data-testid="tabs-endorser-comparison">
               <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
@@ -1010,6 +1133,7 @@ Report generated by UK Innovator Founder Visa Assistant
               </Alert>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </>

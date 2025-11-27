@@ -13,6 +13,59 @@ import { BarChart3, TrendingUp, TrendingDown, Target, ArrowUpRight, ArrowDownRig
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "performance-bench",
+  toolName: "Performance Benchmarking",
+  agent: "sterling",
+  greeting: "Hello! I'm Sterling, your financial performance analyst. Let's compare your business metrics against industry standards to strengthen your visa application with data-driven insights.",
+  questions: [
+    {
+      id: "industry",
+      question: "What industry is your business in? (FinTech, HealthTech, SaaS, E-Commerce, EdTech)",
+      hint: "This helps us select the right benchmark comparisons",
+      fieldKey: "industry"
+    },
+    {
+      id: "mrr_growth",
+      question: "What is your current monthly recurring revenue (MRR) growth rate?",
+      hint: "Example: '15% month-over-month growth'",
+      fieldKey: "mrrGrowth"
+    },
+    {
+      id: "cac",
+      question: "What is your customer acquisition cost (CAC)?",
+      hint: "Example: '£150 per customer'",
+      fieldKey: "cac"
+    },
+    {
+      id: "ltv",
+      question: "What is your customer lifetime value (LTV)?",
+      hint: "Example: '£1,200 average revenue per customer over their lifetime'",
+      fieldKey: "ltv"
+    },
+    {
+      id: "churn",
+      question: "What is your monthly customer churn rate?",
+      hint: "Example: '3% of customers leave each month'",
+      fieldKey: "churn"
+    },
+    {
+      id: "nps",
+      question: "What is your Net Promoter Score (NPS)?",
+      hint: "Scale from -100 to 100, with 50+ being excellent",
+      fieldKey: "nps"
+    },
+    {
+      id: "runway",
+      question: "How many months of runway do you have at current burn rate?",
+      hint: "Example: '18 months of runway remaining'",
+      fieldKey: "runway"
+    }
+  ],
+  completionMessage: "Great! I've captured your metrics. Let me now compare them against industry benchmarks and provide recommendations."
+};
 
 type BenchmarkMetric = {
   id: string;
@@ -75,6 +128,62 @@ export default function PerformanceBench() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('performance-bench-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('performance-bench-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((answers: Record<string, string>) => {
+    const extractNumber = (text: string): number => {
+      const match = text.match(/[\d,]+/);
+      return match ? parseFloat(match[0].replace(/,/g, '')) : 0;
+    };
+    
+    if (answers.industry) {
+      const industryLower = answers.industry.toLowerCase();
+      const industries: Industry[] = ['fintech', 'healthtech', 'saas', 'ecommerce', 'edtech'];
+      for (const ind of industries) {
+        if (industryLower.includes(ind)) {
+          setSelectedIndustry(ind);
+          break;
+        }
+      }
+    }
+    
+    const newMetrics = metrics.map(m => {
+      let value = 0;
+      switch (m.id) {
+        case 'mrr-growth':
+          value = extractNumber(answers.mrrGrowth || '');
+          break;
+        case 'cac':
+          value = extractNumber(answers.cac || '');
+          break;
+        case 'ltv':
+          value = extractNumber(answers.ltv || '');
+          break;
+        case 'churn':
+          value = extractNumber(answers.churn || '');
+          break;
+        case 'nps':
+          value = extractNumber(answers.nps || '');
+          break;
+        case 'runway':
+          value = extractNumber(answers.runway || '');
+          break;
+      }
+      return value > 0 ? { ...m, yourValue: value } : m;
+    });
+    
+    setMetrics(newMetrics);
+    triggerAutoSave(newMetrics, selectedIndustry);
+    setMode('traditional');
+    toast({ title: "Metrics Updated", description: "Your benchmark data has been populated from your answers" });
+  }, [metrics, selectedIndustry, toast]);
 
   const [selectedIndustry, setSelectedIndustry] = useState<Industry>(() => {
     const saved = localStorage.getItem("performance-bench-state");
@@ -227,6 +336,10 @@ export default function PerformanceBench() {
             onExportWord={handleExportWord}
           />
 
+          <div className="flex justify-end mt-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
           {showAutoSave && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
               <Save className="w-4 h-4" />
@@ -234,6 +347,12 @@ export default function PerformanceBench() {
             </div>
           )}
 
+          {mode === 'ai' ? (
+            <div className="mt-6">
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            </div>
+          ) : (
+          <>
           <div className="mt-6">
             <Card className="mb-6">
               <CardHeader>
@@ -415,6 +534,8 @@ export default function PerformanceBench() {
               </TabsContent>
             </Tabs>
           </div>
+          </>
+          )}
         </div>
       </div>
     </ToolAccessGuard>

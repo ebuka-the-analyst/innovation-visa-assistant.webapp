@@ -15,6 +15,59 @@ import {
   BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: "operations-plan",
+  toolName: "Operations Plan Builder",
+  agent: "nova",
+  greeting: "Hello! I'm Nova, your operations strategist. Let's design a comprehensive operations plan that demonstrates your business execution capability to endorsers. Strong operational foundations are key to visa approval.",
+  questions: [
+    {
+      id: "core_processes",
+      question: "What are your core operational processes? Describe your main business workflows from customer acquisition to delivery.",
+      hint: "Example: 'Customer onboarding workflow, order fulfillment process, quality control procedures'",
+      fieldKey: "coreProcesses",
+      minLength: 80
+    },
+    {
+      id: "resource_needs",
+      question: "What key resources do you need for operations? Include staff, equipment, technology, and facilities.",
+      hint: "Example: 'Operations manager (£45k), CRM system (£5k/year), co-working space (£500/month)'",
+      fieldKey: "resourceNeeds",
+      minLength: 60
+    },
+    {
+      id: "kpi_targets",
+      question: "What KPIs will you track to measure operational success? Include targets and how you'll measure them.",
+      hint: "Example: 'Customer acquisition cost under £100, satisfaction score above 90%, fulfillment time under 24 hours'",
+      fieldKey: "kpiTargets",
+      minLength: 60
+    },
+    {
+      id: "quality_assurance",
+      question: "How will you ensure quality in your operations? Describe your quality control processes.",
+      hint: "Include testing procedures, feedback loops, and continuous improvement methods",
+      fieldKey: "qualityAssurance",
+      minLength: 50
+    },
+    {
+      id: "scaling_plan",
+      question: "How will your operations scale as you grow? What processes need to be automated or optimized?",
+      hint: "Think about what works for 10 customers vs 1000 customers",
+      fieldKey: "scalingPlan",
+      minLength: 50
+    },
+    {
+      id: "risk_mitigation",
+      question: "What operational risks do you foresee and how will you mitigate them?",
+      hint: "Consider supply chain, staffing, technology, and regulatory risks",
+      fieldKey: "riskMitigation",
+      minLength: 50
+    }
+  ],
+  completionMessage: "Excellent! I've captured your operations plan. Let me now organize this into a structured framework with KPIs and resource tracking."
+};
 
 type ProcessCategory = 'core-operations' | 'customer-service' | 'finance' | 'hr' | 'product' | 'quality';
 type ProcessStatus = 'not-started' | 'in-progress' | 'documented' | 'optimized';
@@ -79,11 +132,63 @@ const INITIAL_KPIS: KPI[] = [
 ];
 
 export default function OperationsPlan() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('operations-plan-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('operations-plan-mode', mode);
+  }, [mode]);
+
   const [processes, setProcesses] = useState<OperationalProcess[]>(INITIAL_PROCESSES);
   const [resources, setResources] = useState<ResourceRequirement[]>(INITIAL_RESOURCES);
   const [kpis, setKPIs] = useState<KPI[]>(INITIAL_KPIS);
   const [activeTab, setActiveTab] = useState('processes');
   const [savedDate, setSavedDate] = useState('');
+
+  const handleAiComplete = (answers: Record<string, string>) => {
+    const newProcesses: OperationalProcess[] = [];
+    
+    if (answers.coreProcesses) {
+      newProcesses.push({
+        id: 'ai-1',
+        name: 'Core Business Operations',
+        category: 'core-operations',
+        description: answers.coreProcesses,
+        owner: '',
+        status: 'not-started',
+        efficiency: 0,
+        completeness: 50
+      });
+    }
+    
+    if (answers.qualityAssurance) {
+      newProcesses.push({
+        id: 'ai-2',
+        name: 'Quality Assurance',
+        category: 'quality',
+        description: answers.qualityAssurance,
+        owner: '',
+        status: 'not-started',
+        efficiency: 0,
+        completeness: 50
+      });
+    }
+    
+    if (newProcesses.length > 0) {
+      setProcesses([...INITIAL_PROCESSES, ...newProcesses]);
+    }
+    
+    if (answers.kpiTargets) {
+      const newKpis: KPI[] = [
+        ...INITIAL_KPIS,
+        { id: 'ai-k1', name: 'AI-Defined KPI', category: 'Operations', target: 100, current: 0, unit: '%', critical: true }
+      ];
+      setKPIs(newKpis);
+    }
+    
+    setMode('traditional');
+  };
 
   // Calculations
   const totalProcesses = processes.length;
@@ -636,6 +741,16 @@ innovatorfoundervisaassistant.co.uk
             toolName="Operations Plan"
           />
 
+          <div className="flex justify-end mt-4">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <div className="mt-6">
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            </div>
+          ) : (
+          <>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5" data-testid="tabs-operations-plan">
               <TabsTrigger value="processes" data-testid="tab-processes">Processes</TabsTrigger>
@@ -1366,6 +1481,8 @@ innovatorfoundervisaassistant.co.uk
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

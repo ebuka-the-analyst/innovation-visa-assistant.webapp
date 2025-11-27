@@ -13,6 +13,59 @@ import {
   PieChart, Pie, Cell, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'endorsement-readiness',
+  toolName: 'Endorsement Readiness Checker',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. I'll help you assess your readiness for endorsement applications. Choosing the right endorsing body and preparing a strong application is crucial for visa success. Let's evaluate your readiness!",
+  questions: [
+    {
+      id: 'preferred-endorser',
+      question: "Which endorsing body are you targeting? Options include Tech Nation (tech focus), Innovator International (sector flexible), Global Entrepreneurs Programme (VC-backed), or Endorsement Direct.",
+      hint: "Choose based on your business sector and funding stage",
+      fieldKey: 'endorser_choice',
+      minLength: 10
+    },
+    {
+      id: 'documentation-status',
+      question: "What's the status of your core documentation? Do you have a comprehensive business plan, financial projections for 3 years, company structure documentation, and team CVs?",
+      hint: "These are mandatory documents for all endorsing bodies",
+      fieldKey: 'documentation_status',
+      minLength: 40
+    },
+    {
+      id: 'business-criteria',
+      question: "Describe your business's innovation and scalability. What makes your product/service innovative? Do you have evidence of market validation and UK economic benefit?",
+      hint: "Endorsers assess innovation, viability, and scalability",
+      fieldKey: 'business_criteria_status',
+      minLength: 50
+    },
+    {
+      id: 'financial-requirements',
+      question: "What's your financial position? Do you have appropriate investment funds for your business plan, with source of funds documentation and bank statements showing availability?",
+      hint: "Investment should be appropriate for your specific business plan",
+      fieldKey: 'financial_status',
+      minLength: 40
+    },
+    {
+      id: 'team-composition',
+      question: "Describe your team. Do you have founder expertise aligned with the business, technical capability evidence, an advisory board, and a UK hiring plan?",
+      hint: "Strong teams significantly improve endorsement success rates",
+      fieldKey: 'team_status',
+      minLength: 40
+    },
+    {
+      id: 'biggest-gap',
+      question: "What do you consider your biggest weakness or gap in your endorsement application? Where do you need the most improvement?",
+      hint: "Identifying gaps helps prioritize preparation efforts",
+      fieldKey: 'gap_analysis',
+      minLength: 30
+    }
+  ],
+  completionMessage: "Excellent! I've assessed your endorsement readiness. Your responses will populate the readiness tracker with appropriate status levels. Switch to the traditional view to see your complete readiness score and mark items as complete."
+};
 
 type EndorsingBody = 'technation' | 'innovator-international' | 'global-entrepreneurs' | 'endorsement-direct';
 
@@ -251,6 +304,10 @@ const ENDORSER_DATA: EndorserRequirements = {
 };
 
 export default function EndorsementReadiness() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('endorsement-readiness-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [selectedEndorser, setSelectedEndorser] = useState<EndorsingBody>('technation');
   const [categories, setCategories] = useState<RequirementCategory[]>(
     JSON.parse(JSON.stringify(ENDORSER_DATA['technation'].categories))
@@ -261,8 +318,54 @@ export default function EndorsementReadiness() {
   const [showActionPlan, setShowActionPlan] = useState(false);
 
   useEffect(() => {
+    localStorage.setItem('endorsement-readiness-mode', mode);
+  }, [mode]);
+
+  useEffect(() => {
     setCategories(JSON.parse(JSON.stringify(ENDORSER_DATA[selectedEndorser].categories)));
   }, [selectedEndorser]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const updatedCategories = [...categories];
+    
+    const markCategoryProgress = (categoryName: string, answerKey: string) => {
+      const answer = answers[answerKey]?.toLowerCase() || '';
+      if (answer.includes('yes') || answer.includes('have') || answer.includes('complete')) {
+        updatedCategories.forEach(cat => {
+          if (cat.name === categoryName) {
+            cat.requirements.forEach(req => {
+              if (req.critical) req.completed = true;
+            });
+          }
+        });
+      }
+    };
+    
+    markCategoryProgress('Documentation Completeness', 'documentation_status');
+    markCategoryProgress('Business Criteria Alignment', 'business_criteria_status');
+    markCategoryProgress('Financial Requirements', 'financial_status');
+    markCategoryProgress('Team Composition', 'team_status');
+    
+    updatedCategories.forEach((cat, i) => {
+      const totalReqs = cat.requirements.length;
+      const completedReqs = cat.requirements.filter(r => r.completed).length;
+      cat.score = Math.round((completedReqs / totalReqs) * cat.maxScore);
+    });
+    
+    setCategories(updatedCategories);
+    
+    const date = new Date().toLocaleString('en-GB');
+    localStorage.setItem('endorsement-readiness-state', JSON.stringify({
+      selectedEndorser,
+      categories: updatedCategories,
+      activeTab: 'overview',
+      savedDate: date
+    }));
+    setSavedDate(date);
+    
+    setActiveTab('overview');
+    setMode('traditional');
+  };
 
   const toggleRequirement = (categoryIndex: number, requirementId: string) => {
     const updated = [...categories];
@@ -529,6 +632,14 @@ Report generated by UK Innovator Founder Visa Assistant
             getSerializedState={getSerializedState}
           />
 
+          <div className="mb-6">
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
+
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           {showTips && (
             <Card className="mb-6 border-blue-500">
               <CardHeader>
@@ -927,6 +1038,8 @@ Report generated by UK Innovator Founder Visa Assistant
               </Card>
             </TabsContent>
           </Tabs>
+            </>
+          )}
         </div>
       </div>
     </>

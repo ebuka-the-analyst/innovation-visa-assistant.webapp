@@ -15,6 +15,66 @@ import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'business-model-validator',
+  toolName: 'Business Model Canvas Validator',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. The Business Model Canvas is a powerful tool for validating your business against UK visa criteria - Innovation, Viability, and Scalability. Let's work through all 9 building blocks to ensure you're ready for endorsement!",
+  questions: [
+    {
+      id: 'customer-segments',
+      question: "Who are your target customers? Describe your primary customer segments and why you're focusing on them.",
+      hint: "Be specific about demographics, behaviors, needs, and market size (TAM/SAM/SOM)",
+      fieldKey: 'customer_segments_text',
+      minLength: 100
+    },
+    {
+      id: 'value-propositions',
+      question: "What's your unique value proposition? How do you solve customer problems differently than competitors?",
+      hint: "This is critical for the Innovation criterion. Focus on novel approaches and differentiation.",
+      fieldKey: 'value_propositions_text',
+      minLength: 100
+    },
+    {
+      id: 'revenue-streams',
+      question: "How will you make money? Describe your revenue model, pricing strategy, and expected revenue sources.",
+      hint: "Subscription, one-time purchase, licensing, marketplace fees - explain why this model fits your market",
+      fieldKey: 'revenue_streams_text',
+      minLength: 80
+    },
+    {
+      id: 'key-resources',
+      question: "What key resources do you need to deliver your value proposition? Include technology, people, and intellectual property.",
+      hint: "Technical capabilities, team expertise, patents, partnerships, or unique data",
+      fieldKey: 'key_resources_text',
+      minLength: 80
+    },
+    {
+      id: 'key-partnerships',
+      question: "Who are your key partners? What strategic relationships will help you succeed in the UK market?",
+      hint: "Technology partners, distribution partners, industry associations, or advisors",
+      fieldKey: 'key_partnerships_text',
+      minLength: 80
+    },
+    {
+      id: 'cost-structure',
+      question: "What's your cost structure? Describe your major cost drivers and path to profitability.",
+      hint: "Fixed vs variable costs, key investments, and how costs scale with growth",
+      fieldKey: 'cost_structure_text',
+      minLength: 80
+    },
+    {
+      id: 'scalability-potential',
+      question: "How will you scale this business in the UK? Describe your growth strategy and job creation potential.",
+      hint: "Endorsers want to see 5+ UK jobs within 3 years and significant revenue growth",
+      fieldKey: 'scalability_potential',
+      minLength: 100
+    }
+  ],
+  completionMessage: "Brilliant work! You've validated all key elements of your business model. This comprehensive analysis demonstrates strong understanding of your business across all 9 building blocks. I'm now calculating your visa readiness scores."
+};
 
 type BusinessModelScores = {
   customerSegments: number;
@@ -41,6 +101,10 @@ type BusinessModelInputs = {
 };
 
 export default function BusinessModelValidator() {
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('business-model-validator-mode');
+    return (saved === 'traditional') ? 'traditional' : 'ai';
+  });
   const [scores, setScores] = useState<BusinessModelScores>({
     customerSegments: 70,
     valuePropositions: 75,
@@ -67,6 +131,38 @@ export default function BusinessModelValidator() {
 
   const [activeTab, setActiveTab] = useState('canvas');
   const [savedDate, setSavedDate] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('business-model-validator-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.customer_segments_text) {
+      setInputs(prev => ({ ...prev, customerSegmentsText: answers.customer_segments_text }));
+      setScores(prev => ({ ...prev, customerSegments: 75 }));
+    }
+    if (answers.value_propositions_text) {
+      setInputs(prev => ({ ...prev, valuePropositionsText: answers.value_propositions_text }));
+      setScores(prev => ({ ...prev, valuePropositions: 80 }));
+    }
+    if (answers.revenue_streams_text) {
+      setInputs(prev => ({ ...prev, revenueStreamsText: answers.revenue_streams_text }));
+      setScores(prev => ({ ...prev, revenueStreams: 75 }));
+    }
+    if (answers.key_resources_text) {
+      setInputs(prev => ({ ...prev, keyResourcesText: answers.key_resources_text }));
+      setScores(prev => ({ ...prev, keyResources: 75 }));
+    }
+    if (answers.key_partnerships_text) {
+      setInputs(prev => ({ ...prev, keyPartnershipsText: answers.key_partnerships_text }));
+      setScores(prev => ({ ...prev, keyPartnerships: 70 }));
+    }
+    if (answers.cost_structure_text) {
+      setInputs(prev => ({ ...prev, costStructureText: answers.cost_structure_text }));
+      setScores(prev => ({ ...prev, costStructure: 75 }));
+    }
+    setMode('traditional');
+  };
 
   const updateScore = (field: keyof BusinessModelScores, value: number) => {
     setScores({ ...scores, [field]: value });
@@ -377,14 +473,25 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
         <div className="max-w-7xl mx-auto">
           
           
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-business-model-validator">Business Model Canvas Validator</h1>
-            <p className="text-lg text-muted-foreground">Validate 9 building blocks for UK Innovator Founder Visa criteria</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+          <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2" data-testid="heading-business-model-validator">Business Model Canvas Validator</h1>
+              <p className="text-lg text-muted-foreground">Validate 9 building blocks for UK Innovator Founder Visa criteria</p>
+              {savedDate && (
+                <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+              )}
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="business-model-validator"
             onSave={handleSave}
@@ -956,6 +1063,8 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
               </Card>
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>

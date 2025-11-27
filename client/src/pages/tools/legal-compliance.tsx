@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-
+import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,9 +19,59 @@ const LEGAL_ITEMS = [
   {category:"Contracts",items:["Customer contracts documented","Supplier agreements in place","Employee contracts executed"]}
 ];
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'legal-compliance',
+  toolName: 'Legal Compliance Checker',
+  agent: 'sage',
+  greeting: "Hello! I'm Sage, your Legal & Compliance Specialist. Legal compliance is essential for your Innovator Founder visa - endorsers verify your business operates within UK law. Let me guide you through the key requirements. Ready?",
+  questions: [
+    {
+      id: 'company-registered',
+      question: "Is your company registered at Companies House? What is your company registration number?",
+      hint: "If not yet registered, you'll need to do this before visa application",
+      fieldKey: 'companyRegistered',
+      required: true
+    },
+    {
+      id: 'articles-status',
+      question: "Do you have your Memorandum & Articles of Association in place? Have they been reviewed by a lawyer?",
+      hint: "These define how your company is governed - critical for investor confidence",
+      fieldKey: 'articlesStatus'
+    },
+    {
+      id: 'shareholding-structure',
+      question: "Describe your current shareholding structure. Are share certificates issued and shareholder agreements signed?",
+      hint: "Clear ownership documentation is essential for visa and funding",
+      fieldKey: 'shareholdingStructure'
+    },
+    {
+      id: 'board-meetings',
+      question: "How often does your board meet? Are meetings minuted and decisions properly authorized?",
+      hint: "Regular documented governance demonstrates viability",
+      fieldKey: 'boardMeetings'
+    },
+    {
+      id: 'regulatory-filings',
+      question: "Are all statutory filings up to date? (Annual accounts, confirmation statement, tax returns)",
+      hint: "Outstanding filings can delay or prevent visa approval",
+      fieldKey: 'regulatoryFilings'
+    },
+    {
+      id: 'contract-status',
+      question: "Do you have written contracts for customers, suppliers, and employees?",
+      hint: "Documented commercial relationships support business viability",
+      fieldKey: 'contractStatus'
+    }
+  ],
+  completionMessage: "Thank you! I've captured your compliance status. I'm now populating the checklist with your responses. Review each item and check off what's complete."
+};
+
 export default function LegalCompliance() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('legal-compliance-mode') as 'ai' | 'traditional') || 'ai';
+  });
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
@@ -31,6 +81,41 @@ export default function LegalCompliance() {
   const totalItems = LEGAL_ITEMS.reduce((sum, c) => sum + c.items.length, 0);
   const completedItems = Object.values(checks).filter(Boolean).length;
   const complianceScore = Math.round((completedItems / totalItems) * 100);
+
+  useEffect(() => {
+    localStorage.setItem('legal-compliance-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = (answers: Record<string, any>) => {
+    const newChecks: Record<string, boolean> = { ...checks };
+    if (answers.companyRegistered?.toLowerCase().includes('yes')) {
+      newChecks['Company Formation-Incorporated at Companies House'] = true;
+      newChecks['Company Formation-Company registration certificate'] = true;
+    }
+    if (answers.articlesStatus?.toLowerCase().includes('yes')) {
+      newChecks['Company Formation-Memorandum & Articles of Association'] = true;
+    }
+    if (answers.shareholdingStructure?.toLowerCase().includes('yes') || answers.shareholdingStructure?.toLowerCase().includes('issued')) {
+      newChecks['Shareholding-Shares properly allotted'] = true;
+      newChecks['Shareholding-Share certificates issued'] = true;
+    }
+    if (answers.boardMeetings?.toLowerCase().includes('regular') || answers.boardMeetings?.toLowerCase().includes('yes')) {
+      newChecks['Board Governance-Board meetings held regularly'] = true;
+      newChecks['Board Governance-Minutes documented'] = true;
+    }
+    if (answers.regulatoryFilings?.toLowerCase().includes('yes') || answers.regulatoryFilings?.toLowerCase().includes('up to date')) {
+      newChecks['Regulatory Filings-Annual accounts filed'] = true;
+      newChecks['Regulatory Filings-Confirmation statement filed annually'] = true;
+      newChecks['Regulatory Filings-Tax returns submitted on time'] = true;
+    }
+    if (answers.contractStatus?.toLowerCase().includes('yes')) {
+      newChecks['Contracts-Customer contracts documented'] = true;
+      newChecks['Contracts-Supplier agreements in place'] = true;
+      newChecks['Contracts-Employee contracts executed'] = true;
+    }
+    setChecks(newChecks);
+    setMode('traditional');
+  };
 
   const saveProgress = () => {
     localStorage.setItem('legalComplianceProgress', JSON.stringify(checks));
@@ -147,9 +232,22 @@ export default function LegalCompliance() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Legal Compliance Checker</h1>
-          <p className="text-muted-foreground mb-6">UK company law requirements validation</p>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Legal Compliance Checker</h1>
+              <p className="text-muted-foreground">UK company law requirements validation</p>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          </div>
 
+          {mode === 'ai' ? (
+            <AiToolGuide 
+              config={AI_TOOL_CONFIG} 
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+            />
+          ) : (
+          <>
           <ToolUtilityBar
             toolId="legal-compliance"
             toolName="Legal Compliance Checker"
@@ -227,6 +325,8 @@ export default function LegalCompliance() {
               ))}
             </TabsContent>
           </Tabs>
+          </>
+          )}
         </div>
       </div>
     </>
