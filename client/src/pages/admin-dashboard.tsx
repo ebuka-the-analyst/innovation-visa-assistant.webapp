@@ -2062,42 +2062,44 @@ export default function AdminDashboard() {
                         </Card>
                       </motion.div>
 
-                      {/* Top 15 Tools - Radial Bar Chart */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6, duration: 0.5 }}
-                      >
-                        <Card data-testid="card-top-tools">
-                          <CardHeader>
-                            <CardTitle>Top 10 Most Used Tools</CardTitle>
-                            <CardDescription>Platform feature utilization {hideDemoUsers && <span className="text-orange-500">(all users - tool usage not filtered)</span>}</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <ResponsiveContainer width="100%" height={400}>
-                              <RechartsBarChart data={filteredOverviewData?.topTools?.slice(0, 10)} layout="vertical">
-                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                                <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} />
-                                <YAxis
-                                  type="category"
-                                  dataKey="toolName"
-                                  stroke="hsl(var(--foreground))"
-                                  fontSize={11}
-                                  width={120}
-                                />
-                                <RechartsTooltip
-                                  contentStyle={{
-                                    backgroundColor: 'hsl(var(--card))',
-                                    border: '1px solid hsl(var(--border))',
-                                    borderRadius: '8px'
-                                  }}
-                                />
-                                <Bar dataKey="usageCount" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                              </RechartsBarChart>
-                            </ResponsiveContainer>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
+                      {/* Top 10 Tools - Hidden when demo filter is active */}
+                      {!hideDemoUsers && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.6, duration: 0.5 }}
+                        >
+                          <Card data-testid="card-top-tools">
+                            <CardHeader>
+                              <CardTitle>Top 10 Most Used Tools</CardTitle>
+                              <CardDescription>Platform feature utilization</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <ResponsiveContainer width="100%" height={400}>
+                                <RechartsBarChart data={filteredOverviewData?.topTools?.slice(0, 10)} layout="vertical">
+                                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                  <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} />
+                                  <YAxis
+                                    type="category"
+                                    dataKey="toolName"
+                                    stroke="hsl(var(--foreground))"
+                                    fontSize={11}
+                                    width={120}
+                                  />
+                                  <RechartsTooltip
+                                    contentStyle={{
+                                      backgroundColor: 'hsl(var(--card))',
+                                      border: '1px solid hsl(var(--border))',
+                                      borderRadius: '8px'
+                                    }}
+                                  />
+                                  <Bar dataKey="usageCount" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                                </RechartsBarChart>
+                              </ResponsiveContainer>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      )}
                     </div>
 
                     {/* System Health Overview */}
