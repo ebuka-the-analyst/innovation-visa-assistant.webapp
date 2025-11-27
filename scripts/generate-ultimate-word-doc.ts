@@ -4,14 +4,14 @@ import * as fs from 'fs';
 const FOUNDER = {
   name: "Ebuka Benedict Umeh",
   email: "benedict.umeh@innovatorfoundervisaassistant.co.uk",
-  phone: "+44 7438 791754",
+  phone: "+44 7493 363351",
   address: "13 Village Place, Burley, Leeds, LS4 2NT, United Kingdom",
   nationality: "Nigerian",
-  dateOfBirth: "April 17, 1995",
-  passportNumber: "B50350937",
+  dateOfBirth: "October 15, 1989",
+  passportNumber: "B00558762",
   visaStatus: "Post-Study Work (PSW) Visa",
-  education: "MSc Data Science, Leeds Beckett University (2023)",
-  experience: "7+ years Full Stack Development, 50+ client projects",
+  education: "MSc Data Science, Leeds Beckett University (2023); BSc IT & Business Information Systems, Middlesex University (2017); Advanced Diploma Software Engineering, Aptech Computer Education",
+  experience: "7+ years Full Stack Development, 15+ client projects",
   funding: "£8,000 personal savings"
 };
 
@@ -162,13 +162,14 @@ async function generateDocument() {
         ),
         createParagraph(""),
         createParagraph("PROFESSIONAL SUMMARY", true),
-        createParagraph("Experienced Full Stack Developer with 7+ years in software development, specialising in AI-powered applications, web development, and SaaS platforms. Proven track record of delivering 50+ successful client projects across Nigeria and the UK. Combines technical expertise with entrepreneurial vision to create innovative solutions that democratise access to complex services."),
+        createParagraph("Experienced Full Stack Developer with 7+ years in software development, specialising in AI-powered applications, web development, and SaaS platforms. Proven track record of delivering 15+ successful client projects across Nigeria and the UK. Combines technical expertise with entrepreneurial vision to create innovative solutions that democratise access to complex services."),
         createParagraph(""),
         createParagraph("QUALIFICATIONS", true),
         createBullet("MSc Data Science - Leeds Beckett University (2023)"),
-        createBullet("BSc Computer Engineering - University of Benin, Nigeria"),
+        createBullet("BSc IT & Business Information Systems - Middlesex University (2017)"),
+        createBullet("Advanced Diploma Software Engineering - Aptech Computer Education"),
         createBullet("7+ years Full Stack Development experience"),
-        createBullet("50+ successful client projects delivered"),
+        createBullet("15+ successful client projects delivered"),
         createBullet("Expertise: React, Node.js, Python, AI/ML, PostgreSQL"),
 
         new Paragraph({ children: [new PageBreak()] }),

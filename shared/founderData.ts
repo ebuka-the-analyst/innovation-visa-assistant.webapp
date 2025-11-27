@@ -29,6 +29,7 @@ export interface FounderProfile {
     country: string;
     email: string;
     phone: string;
+    passportNumber: string;
     linkedIn: string;
     github: string;
     portfolio: string;
@@ -236,7 +237,7 @@ export const FOUNDER_DATA: FounderProfile = {
     fullName: "Ebuka Benedict Umeh",
     firstName: "Ebuka Benedict",
     lastName: "Umeh",
-    dateOfBirth: "", // To be provided by founder
+    dateOfBirth: "October 15, 1989",
     nationality: "Nigerian",
     currentVisaStatus: "Post-Study Work (PSW) Visa",
     visaExpiryDate: "", // To be provided - typically 2 years from graduation
@@ -246,9 +247,10 @@ export const FOUNDER_DATA: FounderProfile = {
     postcode: "LS4 2NT",
     country: "United Kingdom",
     email: "benedict.umeh@innovatorfoundervisaassistant.co.uk",
-    phone: "", // To be provided
-    linkedIn: "", // To be provided
-    github: "", // To be provided
+    phone: "+44 7493 363351",
+    passportNumber: "B00558762",
+    linkedIn: "",
+    github: "",
     portfolio: "https://bhenmedia.com",
     website: "https://innovatorfoundervisaassistant.co.uk"
   },
@@ -299,7 +301,7 @@ export const FOUNDER_DATA: FounderProfile = {
         endDate: "Present",
         description: "Web development company delivering custom platforms, AI chatbots, automation systems, and high-performance websites",
         achievements: [
-          "Delivered 50+ projects for clients across hospitality, healthcare, and corporate sectors",
+          "Delivered 15+ projects for clients across hospitality, healthcare, and corporate sectors",
           "Built custom platforms, AI chatbots, and automation systems",
           "Demonstrated entrepreneurial capability and client management skills"
         ]
