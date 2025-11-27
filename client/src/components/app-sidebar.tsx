@@ -41,6 +41,10 @@ import {
   Trophy,
   CalendarDays,
   Newspaper,
+  Rocket,
+  Mic,
+  Globe2,
+  Bot,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -171,6 +175,60 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           url: "/evidence-graph",
           icon: Network,
           description: "Evidence mapping & analysis",
+        },
+      ],
+    },
+    {
+      label: "2040 AI Brain",
+      items: [
+        {
+          title: "ORACLE Supervisor",
+          url: "/oracle-supervisor",
+          icon: Brain,
+          description: "Master AI with 4 specialist agents",
+          badge: "NEW",
+        },
+        {
+          title: "Founder Autopilot",
+          url: "/founder-autopilot",
+          icon: Rocket,
+          description: "Full visa automation mode",
+          badge: "NEW",
+        },
+        {
+          title: "Neural Twin",
+          url: "/neural-twin",
+          icon: Bot,
+          description: "AI simulation of you for practice",
+          badge: "NEW",
+        },
+        {
+          title: "Voice Builder",
+          url: "/voice-builder",
+          icon: Mic,
+          description: "Speak to build your documents",
+          badge: "NEW",
+        },
+        {
+          title: "Regulatory Copilot",
+          url: "/regulatory-copilot",
+          icon: Shield,
+          description: "Real-time UK law monitoring",
+          badge: "NEW",
+        },
+        {
+          title: "Economic Impact",
+          url: "/economic-impact",
+          icon: Globe2,
+          description: "UK job & GDP calculator",
+          badge: "NEW",
+        },
+        {
+          title: "Knowledge Graph",
+          url: "/knowledge-graph",
+          icon: Network,
+          description: "Visual UK visa rules map",
+          badge: "NEW",
         },
       ],
     },
