@@ -157,6 +157,43 @@ Tools now support dual-mode operation: AI-Guided conversational interface or Tra
 - `client/src/components/AiToolGuide.tsx` - Reusable AI interview component for tools
 - `server/routes.ts` - `/api/ai/tool-feedback` endpoint for AI responses
 
+### Founder Visa Application Prefill System
+The platform includes a comprehensive founder data prefill infrastructure designed to help the founder (Ebuka Benedict Umeh) complete their own visa application with 100% accuracy and professional submission quality.
+
+**Founder Profile Data:**
+- `shared/founderData.ts` - Centralized founder data with 11 sections (~150 fields):
+  - Personal: fullName, dateOfBirth, nationality, currentVisaStatus, passportNumber
+  - Contact: email, phone, currentAddress (Leeds, UK), linkedinUrl, github
+  - Immigration: entryDate, visaType, ukResidence timeline
+  - Education: MSc Data Science (Leeds Beckett 2023), BSc Computer Engineering
+  - Experience: 7+ years Full Stack Dev, 50+ client projects
+  - Financial: £8,000 personal savings, personal bank account
+  - Business: UK Innovator Founder Visa Assistant, SaaS platform
+
+**Prefill Integration Pattern:**
+1. Check `localStorage.getItem("prefillEnabled") !== "false"` for user toggle
+2. Initialize form state with `FOUNDER_DATA.section.field` values
+3. Add "Pre-filled" badge with Sparkles icon when data is loaded
+4. Include "Load Founder Data" button for manual trigger
+5. Show "Data loaded from profile" confirmation when prefilled
+6. Persist to localStorage for session continuity
+
+**OISC Compliance Integration:**
+- Every prefilled tool displays `<OISCDisclaimer variant="compact" />` 
+- Exports include `ExportDocumentHeader()` with document metadata
+- Exports include `ExportOISCFooter()` with legal disclaimer
+- No platform branding in exported documents - 100% submission-ready
+
+**Key Files:**
+- `shared/founderData.ts` - Centralized founder profile data
+- `client/src/contexts/FounderDataContext.tsx` - React context for prefill state
+- `client/src/components/OISCDisclaimer.tsx` - OISC compliance component + export helpers
+- `client/src/pages/visa-prefill-dashboard.tsx` - Central prefill management dashboard
+- `client/src/pages/tools/founder-bio.tsx` - Example tool with full prefill integration
+
+**Implemented Tools with Prefill:**
+- Founder Biography Builder (`founder-bio.tsx`) - Full prefill with OISC compliance
+
 ## External Dependencies
 - **Database:** `PostgreSQL` managed by `Neon`.
 - **ORM:** `Drizzle ORM`.

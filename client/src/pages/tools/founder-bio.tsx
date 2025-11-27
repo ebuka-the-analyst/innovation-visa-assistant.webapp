@@ -7,10 +7,14 @@ import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
 import { fileUploadConfigs } from "@/lib/fileUploadConfigs";
 import { useState, useEffect } from "react";
-import { Download, User, Award, Briefcase } from "lucide-react";
+import { Download, User, Award, Briefcase, Sparkles, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { OISCDisclaimer } from "@/components/OISCDisclaimer";
+import { ExportDocumentHeader, ExportOISCFooter } from "@/components/OISCDisclaimer";
+import { FOUNDER_DATA, getFormattedFounderBio } from "@shared/founderData";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'founder-bio',
@@ -60,11 +64,47 @@ const AI_TOOL_CONFIG: ToolConfig = {
 export default function FounderBio() {
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("");
-  const [education, setEducation] = useState("");
-  const [experience, setExperience] = useState("");
-  const [achievements, setAchievements] = useState("");
+  const [isPrefilled, setIsPrefilled] = useState(false);
+  
+  const isPrefillEnabled = localStorage.getItem("prefillEnabled") !== "false";
+  
+  const getEducationText = () => {
+    return FOUNDER_DATA.education.degrees.map(d => 
+      `${d.degree} ${d.field}, ${d.institution} (${d.year})${d.focus ? ` - Focus: ${d.focus}` : ''}`
+    ).join('\n');
+  };
+  
+  const getExperienceText = () => {
+    return FOUNDER_DATA.experience.positions.map(p => 
+      `${p.title} at ${p.company} (${p.startDate} - ${p.endDate})\n${p.achievements.map(a => `• ${a}`).join('\n')}`
+    ).join('\n\n');
+  };
+  
+  const getAchievementsText = () => {
+    const achievements = [];
+    achievements.push(`${FOUNDER_DATA.experience.totalYears}+ years of professional experience`);
+    achievements.push(`Delivered 50+ client projects across hospitality, healthcare, and corporate sectors`);
+    achievements.push(`Built AI-powered virtual concierge automating 200+ daily guest queries`);
+    achievements.push(`Reduced manual healthcare processes by 60% through automation`);
+    achievements.push(`Improved client website performance and SEO visibility by over 40%`);
+    return achievements.join('\n• ');
+  };
+  
+  const [name, setName] = useState(() => 
+    isPrefillEnabled ? FOUNDER_DATA.personal.fullName : (localStorage.getItem('founderBioData') ? JSON.parse(localStorage.getItem('founderBioData')!).name || '' : '')
+  );
+  const [role, setRole] = useState(() => 
+    isPrefillEnabled ? `${FOUNDER_DATA.experience.currentRole}, ${FOUNDER_DATA.business.companyName}` : (localStorage.getItem('founderBioData') ? JSON.parse(localStorage.getItem('founderBioData')!).role || '' : '')
+  );
+  const [education, setEducation] = useState(() => 
+    isPrefillEnabled ? getEducationText() : (localStorage.getItem('founderBioData') ? JSON.parse(localStorage.getItem('founderBioData')!).education || '' : '')
+  );
+  const [experience, setExperience] = useState(() => 
+    isPrefillEnabled ? getExperienceText() : (localStorage.getItem('founderBioData') ? JSON.parse(localStorage.getItem('founderBioData')!).experience || '' : '')
+  );
+  const [achievements, setAchievements] = useState(() => 
+    isPrefillEnabled ? `• ${getAchievementsText()}` : (localStorage.getItem('founderBioData') ? JSON.parse(localStorage.getItem('founderBioData')!).achievements || '' : '')
+  );
   const [bio, setBio] = useState("");
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     return (localStorage.getItem('founder-bio-mode') as 'ai' | 'traditional') || 'ai';
@@ -73,6 +113,12 @@ export default function FounderBio() {
   useEffect(() => {
     localStorage.setItem('founder-bio-mode', mode);
   }, [mode]);
+  
+  useEffect(() => {
+    if (isPrefillEnabled && name === FOUNDER_DATA.personal.fullName) {
+      setIsPrefilled(true);
+    }
+  }, [isPrefillEnabled, name]);
 
   const handleAiComplete = (answers: Record<string, any>) => {
     if (answers.nameRole) {
@@ -102,12 +148,26 @@ export default function FounderBio() {
   const handleRemoveFile = (id: string) => setUploadedFiles(prev => prev.filter(f => f.id !== id));
 
   const exportBio = () => {
-    const blob = new Blob([bio], { type: 'text/plain' });
+    const header = ExportDocumentHeader(name);
+    const footer = ExportOISCFooter();
+    const content = header + bio + footer;
+    
+    const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `founder-bio-${name}.txt`;
+    a.download = `Founder_Biography_${name.split(' ').pop()}.txt`;
     a.click();
+    URL.revokeObjectURL(url);
+  };
+  
+  const loadPrefillData = () => {
+    setName(FOUNDER_DATA.personal.fullName);
+    setRole(`${FOUNDER_DATA.experience.currentRole}, ${FOUNDER_DATA.business.companyName}`);
+    setEducation(getEducationText());
+    setExperience(getExperienceText());
+    setAchievements(`• ${getAchievementsText()}`);
+    setIsPrefilled(true);
   };
 
   const getSerializedState = () => ({ uploadedFiles, name, role, education, experience, achievements, bio, savedDate });
@@ -132,8 +192,18 @@ export default function FounderBio() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Founder Biography</h1>
-          <p className="text-muted-foreground mb-6">Create a compelling founder biography for investors</p>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-4xl font-bold">Founder Biography</h1>
+            {isPrefilled && (
+              <Badge variant="secondary" className="gap-1" data-testid="badge-prefilled">
+                <Sparkles className="w-3 h-3" />
+                Pre-filled
+              </Badge>
+            )}
+          </div>
+          <p className="text-muted-foreground mb-4">Create a compelling founder biography for endorsement applications</p>
+          
+          <OISCDisclaimer variant="compact" className="mb-6" />
 
           <ToolUtilityBar
             toolId="founder-bio"
@@ -162,7 +232,21 @@ export default function FounderBio() {
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
 
           <Card className="p-6 mb-6">
-            <h3 className="font-bold mb-4 flex gap-2"><User className="w-5 h-5" />Founder Information</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold flex gap-2"><User className="w-5 h-5" />Founder Information</h3>
+              {!isPrefilled && (
+                <Button variant="outline" size="sm" onClick={loadPrefillData} className="gap-2" data-testid="button-load-prefill">
+                  <Sparkles className="w-4 h-4" />
+                  Load Founder Data
+                </Button>
+              )}
+              {isPrefilled && (
+                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Data loaded from profile
+                </div>
+              )}
+            </div>
             <div className="space-y-4">
               <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name" />
               <Input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Founder Title (e.g., CEO & Co-Founder)" />

@@ -105,6 +105,9 @@ const RegulatoryCopilot = lazy(() => import("@/pages/regulatory-copilot"));
 const EconomicImpact = lazy(() => import("@/pages/economic-impact"));
 const KnowledgeGraph = lazy(() => import("@/pages/knowledge-graph"));
 
+// Visa Application Prefill
+const VisaPrefillDashboard = lazy(() => import("@/pages/visa-prefill-dashboard"));
+
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
 
@@ -246,6 +249,7 @@ function Router() {
       <Route path="/market-data-verifier" component={MarketDataVerifier} />
       <Route path="/mvp-demo-guide" component={MVPDemoGuide} />
       <Route path="/financial-resilience" component={FinancialResilience} />
+      <Route path="/visa-prefill" component={VisaPrefillDashboard} />
       <Route path="/faq" component={FAQ} />
       <Route path="/guide" component={Guide} />
       <Route path="/privacy" component={Privacy} />
