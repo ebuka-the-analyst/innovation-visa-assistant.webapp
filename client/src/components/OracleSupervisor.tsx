@@ -142,8 +142,9 @@ interface Message {
 interface AgentRecommendation {
   agentId: AgentType;
   analysis: string;
-  score: number;
+  score: number | null;
   suggestions: string[];
+  isDirectAnswer?: boolean;
 }
 
 interface OracleTask {
@@ -401,9 +402,10 @@ What would you like to explore today?`,
         recommendations.push({
           agentId,
           analysis: data.analysis || `${agent.name} analyzed your query regarding ${agent.criterion}.`,
-          score: data.score || Math.floor(Math.random() * 20) + 70,
-          suggestions: data.suggestions || [`Consider strengthening your ${agent.criterion} aspects.`]
-        });
+          score: data.score ?? null, // Allow null for direct answers
+          suggestions: data.suggestions || [],
+          isDirectAnswer: data.isDirectAnswer || false
+        } as AgentRecommendation);
       } catch (error) {
         recommendations.push({
           agentId,
@@ -418,7 +420,28 @@ What would you like to explore today?`,
   };
 
   const synthesizeRecommendations = (recommendations: AgentRecommendation[]): string => {
-    const avgScore = Math.round(recommendations.reduce((sum, r) => sum + r.score, 0) / recommendations.length);
+    // Check if all recommendations are direct answers (no scores)
+    const allDirectAnswers = recommendations.every(r => r.score === null || (r as any).isDirectAnswer);
+    
+    if (allDirectAnswers) {
+      // For direct Q&A, just combine the answers without scores
+      let synthesis = `## ORACLE Response\n\n`;
+      
+      for (const rec of recommendations) {
+        const agent = AGENTS[rec.agentId];
+        synthesis += `**${agent.name}** (${agent.criterion}):\n`;
+        synthesis += `${rec.analysis}\n\n`;
+      }
+      
+      synthesis += `\n*Ask me anything else about your UK Innovator Founder Visa!*`;
+      return synthesis;
+    }
+    
+    // For assessments, show scores and recommendations
+    const validScores = recommendations.filter(r => r.score !== null);
+    const avgScore = validScores.length > 0 
+      ? Math.round(validScores.reduce((sum, r) => sum + (r.score || 0), 0) / validScores.length)
+      : 0;
     
     let synthesis = `## ORACLE Intelligence Report\n\n`;
     synthesis += `**Visa Readiness Score: ${avgScore}/100**\n\n`;
@@ -427,16 +450,22 @@ What would you like to explore today?`,
     
     for (const rec of recommendations) {
       const agent = AGENTS[rec.agentId];
-      synthesis += `**${agent.name}** (${agent.criterion.toUpperCase()}): ${rec.score}/100\n`;
+      if (rec.score !== null) {
+        synthesis += `**${agent.name}** (${agent.criterion.toUpperCase()}): ${rec.score}/100\n`;
+      } else {
+        synthesis += `**${agent.name}** (${agent.criterion.toUpperCase()}):\n`;
+      }
       synthesis += `${rec.analysis}\n\n`;
     }
     
-    synthesis += `### Key Recommendations:\n`;
-    recommendations.forEach(rec => {
-      rec.suggestions.forEach(s => {
-        synthesis += `• ${s}\n`;
+    if (recommendations.some(r => r.suggestions && r.suggestions.length > 0)) {
+      synthesis += `### Key Recommendations:\n`;
+      recommendations.forEach(rec => {
+        rec.suggestions?.forEach(s => {
+          synthesis += `• ${s}\n`;
+        });
       });
-    });
+    }
     
     synthesis += `\n### Strategic Next Steps:\n`;
     if (avgScore >= 80) {
@@ -534,12 +563,26 @@ What would you like to explore today?`,
       
       for (const rec of recommendations) {
         const agent = AGENTS[rec.agentId];
+        
+        // Format content based on whether this is a direct answer or an assessment
+        let messageContent: string;
+        if (rec.isDirectAnswer || rec.score === null) {
+          // Direct answer format - no score, just the analysis
+          messageContent = `**${agent.name}'s Response**\n\n${rec.analysis}`;
+        } else {
+          // Assessment format with score and suggestions
+          messageContent = `**${agent.name}'s Analysis** (Score: ${rec.score}/100)\n\n${rec.analysis}`;
+          if (rec.suggestions && rec.suggestions.length > 0) {
+            messageContent += `\n\n**Suggestions:**\n${rec.suggestions.map(s => `• ${s}`).join('\n')}`;
+          }
+        }
+        
         const agentResponse: Message = {
           id: `agent-response-${rec.agentId}-${Date.now()}`,
           role: 'agent',
           agentId: rec.agentId,
           agentName: agent.name,
-          content: `**${agent.name}'s Analysis** (Score: ${rec.score}/100)\n\n${rec.analysis}\n\n**Suggestions:**\n${rec.suggestions.map(s => `• ${s}`).join('\n')}`,
+          content: messageContent,
           timestamp: new Date()
         };
         setMessages(prev => [...prev, agentResponse]);
