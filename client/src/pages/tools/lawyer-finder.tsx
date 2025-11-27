@@ -247,7 +247,7 @@ export default function LawyerFinder() {
     });
 
   const favoriteLawyers = LAWYERS.filter(l => favorites.includes(l.id));
-  const locations = [...new Set(LAWYERS.map(l => l.location))];
+  const locations = Array.from(new Set(LAWYERS.map(l => l.location)));
 
   const handleExportWord = () => {
     const lawyersToExport = activeTab === "favorites" ? favoriteLawyers : filteredLawyers;
@@ -256,9 +256,9 @@ export default function LawyerFinder() {
       subtitle: activeTab === "favorites" ? "Your Saved Lawyers" : "Search Results",
       filename: "lawyer-finder",
       sections: [
-        { type: "heading", content: "Lawyer List", level: 1 },
+        { type: "heading" as const, content: "Lawyer List", level: 1 as const },
         ...lawyersToExport.map(lawyer => [
-          { type: "heading" as const, content: lawyer.name, level: 2 },
+          { type: "heading" as const, content: lawyer.name, level: 2 as const },
           { type: "paragraph" as const, content: `Firm: ${lawyer.firm}` },
           { type: "paragraph" as const, content: `Location: ${lawyer.location}` },
           { type: "paragraph" as const, content: `Rating: ${lawyer.rating}/5 (${lawyer.reviewCount} reviews)` },
@@ -486,9 +486,9 @@ export default function LawyerFinder() {
                 )}
               </TabsContent>
             </Tabs>
+          </div>
           </>
           )}
-        </div>
         </div>
       </div>
     </ToolAccessGuard>

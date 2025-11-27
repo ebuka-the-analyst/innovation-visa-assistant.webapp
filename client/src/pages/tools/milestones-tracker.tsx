@@ -499,9 +499,9 @@ export default function MilestonesTracker() {
                 </Card>
               )}
             </div>
+          </div>
           </>
           )}
-        </div>
         </div>
       </div>
     </ToolAccessGuard>
