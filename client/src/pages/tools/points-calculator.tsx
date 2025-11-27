@@ -13,60 +13,53 @@ import { CheckCircle2, AlertTriangle, Calculator } from "lucide-react";
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "points-calculator",
   toolName: "Points Calculator",
-  agentId: "sage",
-  agentName: "Sage",
-  agentTitle: "Compliance Specialist",
-  description: "Calculate your UK Innovator Founder visa points and eligibility score",
+  agent: "sage",
+  greeting: "Hello! I'm Sage, your Compliance Expert. Let's calculate your UK Innovator Founder Visa points score. The visa requires meeting specific criteria across endorsement, English, funding, innovation, viability, and scalability. I'll help you assess where you stand!",
   questions: [
     {
       id: "english",
       question: "What is your English language proficiency level and how was it assessed?",
-      placeholder: "E.g., IELTS 7.0 overall, CEFR B2, native English speaker, degree taught in English...",
+      hint: "IELTS 7.0, CEFR B2, native speaker, or degree taught in English",
       fieldKey: "englishLevel",
-      minLength: 20,
-      helpText: "Include test scores, certificates, or qualifications demonstrating English proficiency"
+      minLength: 20
     },
     {
       id: "funding",
       question: "What funding do you have available for your UK business venture?",
-      placeholder: "E.g., £50,000 from personal savings, £100,000 investment commitment from...",
+      hint: "Include amounts, sources, and evidence of accessibility",
       fieldKey: "fundingAmount",
-      minLength: 30,
-      helpText: "Include amounts, sources, and evidence of accessibility"
+      minLength: 30
     },
     {
       id: "endorsement",
       question: "Have you secured or are you pursuing endorsement from an approved body?",
-      placeholder: "E.g., Applied to Tech Nation, in discussion with Seedcamp, received conditional endorsement from...",
+      hint: "Name the endorsing body and current status of your application",
       fieldKey: "endorsementStatus",
-      minLength: 30,
-      helpText: "Name the endorsing body and current status of your application"
+      minLength: 30
     },
     {
       id: "innovation",
       question: "Describe your innovative business idea and what makes it genuinely new to the UK market.",
-      placeholder: "My business solves [problem] using [innovation]. This is different from existing solutions because...",
+      hint: "Focus on what's genuinely innovative, not just a new implementation",
       fieldKey: "innovationDetails",
-      minLength: 100,
-      helpText: "Focus on what's genuinely innovative, not just a new implementation"
+      minLength: 100
     },
     {
       id: "scalability",
       question: "How will your business create jobs and scale in the UK within 3-5 years?",
-      placeholder: "We plan to hire [X] employees by Year 2, expand to [locations], achieve £[X] revenue...",
+      hint: "Include specific job creation targets and growth milestones",
       fieldKey: "scalabilityPlan",
-      minLength: 80,
-      helpText: "Include specific job creation targets and growth milestones"
+      minLength: 80
     },
     {
       id: "experience",
       question: "What relevant business or entrepreneurial experience do you bring?",
-      placeholder: "I have [X] years experience in [industry], previously founded/led [companies/projects]...",
+      hint: "Highlight achievements that demonstrate ability to execute your business plan",
       fieldKey: "founderExperience",
-      minLength: 50,
-      helpText: "Highlight achievements that demonstrate ability to execute your business plan"
+      minLength: 50
     }
-  ]
+  ],
+  completionMessage: "Excellent! I've gathered your points information. I'll now calculate your eligibility score and show you where you need to focus. Switch to the traditional view to see your complete breakdown."
 };
 
 type PointsCategory = {
