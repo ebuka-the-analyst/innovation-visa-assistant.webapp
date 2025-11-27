@@ -332,18 +332,21 @@ export async function setupAuth(app: Express) {
       // Authenticate user directly
       passport.authenticate("local", (err: any, user: any, info: any) => {
         if (err) {
-          return res.status(500).json({ message: "Authentication error" });
+          console.error("Passport authentication error:", err);
+          return res.status(500).json({ message: "Authentication error: " + (err.message || "Unknown error") });
         }
         if (!user) {
           return res.status(401).json({ message: info?.message || "Invalid credentials" });
         }
-        req.login({ id: user.id }, (err) => {
-          if (err) {
-            return res.status(500).json({ message: "Login failed" });
+        req.login({ id: user.id }, (loginErr) => {
+          if (loginErr) {
+            console.error("Session login error:", loginErr);
+            return res.status(500).json({ message: "Login failed: " + (loginErr.message || "Session error") });
           }
-          req.session.save((err) => {
-            if (err) {
-              console.error("Session save error:", err);
+          req.session.save((saveErr) => {
+            if (saveErr) {
+              console.error("Session save error:", saveErr);
+              // Still return success since login worked, session might persist on next request
             }
             // Return user without password
             const { password: _, ...safeUser } = user;
@@ -352,8 +355,8 @@ export async function setupAuth(app: Express) {
         });
       })(req, res, next);
     } catch (error: any) {
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Login failed" });
+      console.error("Login route error:", error);
+      res.status(500).json({ message: "Login failed: " + (error.message || "Unknown error") });
     }
   });
 
