@@ -723,36 +723,51 @@ export default function AdminDashboard() {
     refetchInterval: REFRESH_INTERVAL,
   });
 
-  // Users data - fetch on overview too for demo user filtering
+  // Users data for the current page
   const { data: usersData, isLoading: usersLoading } = useQuery<{ users: User[]; total: number; page: number; pageSize: number }>({
     queryKey: ['/api/admin/users', { page: usersPage, pageSize: usersPageSize, search: usersSearch, ...userFilters }],
-    enabled: !!user?.isAdmin && (activeSection.startsWith('users') || activeSection === 'overview'),
+    enabled: !!user?.isAdmin && activeSection.startsWith('users'),
   });
 
-  // Filter users to exclude demo users when toggle is on
+  // Fetch ALL users for accurate demo user counting (only on overview)
+  const { data: allUsersData } = useQuery<{ users: User[]; total: number }>({
+    queryKey: ['/api/admin/users', { page: 1, pageSize: 1000 }],
+    enabled: !!user?.isAdmin && activeSection === 'overview',
+  });
+
+  // Count real (non-demo) users from all users data
+  const { totalUsers, realUserCount, demoUserCount } = useMemo(() => {
+    const total = allUsersData?.total || overviewData?.kpiMetrics?.[0]?.value || 0;
+    
+    if (!allUsersData?.users || !hideDemoUsers) {
+      return { totalUsers: total, realUserCount: total, demoUserCount: 0 };
+    }
+    
+    // Count users created on or after November 27, 2025 (real users) + admins
+    const realUsers = allUsersData.users.filter(u => 
+      u.isAdmin || 
+      new Date(u.createdAt) >= DEMO_CUTOFF_DATE
+    );
+    
+    const demoCount = total - realUsers.length;
+    return { totalUsers: total, realUserCount: realUsers.length, demoUserCount: demoCount };
+  }, [allUsersData?.users, allUsersData?.total, overviewData?.kpiMetrics, hideDemoUsers, DEMO_CUTOFF_DATE]);
+
+  // Filter current page users to exclude demo users when toggle is on
   const filteredUsers = useMemo(() => {
     if (!usersData?.users) return [];
     if (!hideDemoUsers) return usersData.users;
     
-    // Keep admin users and users created on or after November 27, 2025
     return usersData.users.filter(u => 
       u.isAdmin || 
       new Date(u.createdAt) >= DEMO_CUTOFF_DATE
     );
   }, [usersData?.users, hideDemoUsers, DEMO_CUTOFF_DATE]);
 
-  // Count of real users (non-demo) for accurate statistics
-  const realUserCount = useMemo(() => {
-    if (!hideDemoUsers) return usersData?.total || 0;
-    return filteredUsers.length;
-  }, [hideDemoUsers, filteredUsers.length, usersData?.total]);
-
   // Filtered overview data excluding demo users when toggle is on
   const filteredOverviewData = useMemo(() => {
-    if (!overviewData || !hideDemoUsers) return overviewData;
-    
-    // Calculate real user stats by subtracting demo users
-    const demoUserCount = (usersData?.total || 0) - filteredUsers.length;
+    if (!overviewData) return overviewData;
+    if (!hideDemoUsers) return overviewData;
     
     return {
       ...overviewData,
@@ -769,13 +784,11 @@ export default function AdminDashboard() {
         count: tier.tier === 'Free' ? Math.max(0, tier.count - demoUserCount) : tier.count
       })),
     };
-  }, [overviewData, hideDemoUsers, usersData?.total, filteredUsers.length]);
+  }, [overviewData, hideDemoUsers, demoUserCount]);
 
   // Filtered users analytics excluding demo users
   const filteredUsersAnalytics = useMemo(() => {
     if (!usersAnalytics || !hideDemoUsers) return usersAnalytics;
-    
-    const demoUserCount = (usersData?.total || 0) - filteredUsers.length;
     
     return {
       ...usersAnalytics,
@@ -785,7 +798,7 @@ export default function AdminDashboard() {
         users: Math.max(0, data.users - demoUserCount)
       })),
     };
-  }, [usersAnalytics, hideDemoUsers, usersData?.total, filteredUsers.length]);
+  }, [usersAnalytics, hideDemoUsers, demoUserCount]);
 
   // Plans analytics
   const { data: plansAnalytics, isLoading: plansAnalyticsLoading } = useQuery<PlansAnalytics>({
