@@ -5,7 +5,8 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart, Tag, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
@@ -163,10 +164,20 @@ const addons = [
   },
 ];
 
+interface PromoValidation {
+  valid: boolean;
+  message?: string;
+  discount?: number;
+  discountType?: string;
+}
+
 export default function Pricing() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [processingTier, setProcessingTier] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoValidation, setPromoValidation] = useState<PromoValidation | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   
   const { data: user } = useQuery<{ 
     id: string; 
@@ -217,10 +228,44 @@ export default function Pricing() {
     },
   });
 
+  // Validate promo code
+  const validatePromoCode = async () => {
+    if (!promoCode.trim()) {
+      setPromoValidation(null);
+      return;
+    }
+    
+    setIsValidatingPromo(true);
+    try {
+      const response = await fetch(`/api/promos/validate/${encodeURIComponent(promoCode.trim())}`);
+      const data = await response.json();
+      setPromoValidation({
+        valid: data.valid,
+        message: data.message,
+        discount: data.discountValue,
+        discountType: data.discountType,
+      });
+      if (data.valid) {
+        toast({
+          title: "Promo code applied!",
+          description: `${data.discountValue}% discount will be applied at checkout`,
+        });
+      }
+    } catch (error) {
+      setPromoValidation({ valid: false, message: 'Failed to validate promo code' });
+    } finally {
+      setIsValidatingPromo(false);
+    }
+  };
+
   // Direct subscription mutation - allows immediate payment without questionnaire
   const directSubscribeMutation = useMutation({
     mutationFn: async (tier: string) => {
-      const response = await apiRequest('POST', '/api/payment/direct-subscribe', { tier });
+      const payload: { tier: string; promoCode?: string } = { tier };
+      if (promoValidation?.valid && promoCode.trim()) {
+        payload.promoCode = promoCode.trim();
+      }
+      const response = await apiRequest('POST', '/api/payment/direct-subscribe', payload);
       return response.json();
     },
     onSuccess: (data: any) => {
@@ -229,6 +274,10 @@ export default function Pricing() {
       }
     },
     onError: (error: any) => {
+      if (error.promoError) {
+        setPromoValidation({ valid: false, message: error.message });
+        setPromoCode('');
+      }
       toast({
         title: "Error",
         description: error.message || "Failed to start subscription",
@@ -321,6 +370,54 @@ export default function Pricing() {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Select the tier that best matches your business complexity for your Innovator Founder Visa application
           </p>
+        </div>
+
+        {/* Promo Code Section */}
+        <div className="max-w-md mx-auto mb-8">
+          <div className="flex items-center gap-2 justify-center mb-2">
+            <Tag className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">Have a promo code?</span>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Enter promo code"
+              value={promoCode}
+              onChange={(e) => {
+                setPromoCode(e.target.value.toUpperCase());
+                setPromoValidation(null);
+              }}
+              className="uppercase text-center"
+              data-testid="input-pricing-promo-code"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={validatePromoCode}
+              disabled={isValidatingPromo || !promoCode.trim()}
+              data-testid="button-validate-pricing-promo"
+            >
+              {isValidatingPromo ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Apply"
+              )}
+            </Button>
+          </div>
+          {promoValidation && (
+            <div className="mt-2 text-center">
+              {promoValidation.valid ? (
+                <Badge className="bg-green-500 text-white">
+                  <Check className="w-3 h-3 mr-1" />
+                  {promoValidation.discount}% discount will be applied
+                </Badge>
+              ) : (
+                <Badge variant="destructive">
+                  <X className="w-3 h-3 mr-1" />
+                  {promoValidation.message || 'Invalid code'}
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 max-w-7xl mx-auto">

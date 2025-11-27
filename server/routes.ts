@@ -471,7 +471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Direct subscription endpoint - allows immediate payment from pricing page without questionnaire
   app.post("/api/payment/direct-subscribe", isAuthenticated, async (req, res) => {
     try {
-      const { tier } = req.body;
+      const { tier, promoCode } = req.body;
       const user = req.user as any;
       
       if (!tier || !['basic', 'premium', 'enterprise', 'ultimate'].includes(tier)) {
@@ -481,6 +481,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pricing = PRICING[tier as keyof typeof PRICING];
       if (!pricing || pricing.amount === 0) {
         return res.status(400).json({ error: "Invalid tier for direct subscription" });
+      }
+
+      // Validate and apply promo code discount
+      let finalAmount = pricing.amount;
+      let validPromoCode = null;
+      
+      if (promoCode) {
+        const promoCodeRecord = await storage.getPromoCodeByCode(promoCode.toUpperCase());
+        
+        if (!promoCodeRecord) {
+          return res.status(400).json({ error: "Invalid promo code", promoError: true });
+        }
+        
+        if (promoCodeRecord.status !== 'active') {
+          return res.status(400).json({ error: "This promo code is no longer active", promoError: true });
+        }
+        
+        const now = new Date();
+        if (now < promoCodeRecord.validFrom) {
+          return res.status(400).json({ error: "This promo code is not yet active", promoError: true });
+        }
+        
+        if (promoCodeRecord.validUntil && now > promoCodeRecord.validUntil) {
+          return res.status(400).json({ error: "This promo code has expired", promoError: true });
+        }
+        
+        if (promoCodeRecord.maxTotalUses && promoCodeRecord.currentUses >= promoCodeRecord.maxTotalUses) {
+          return res.status(400).json({ error: "This promo code has reached its usage limit", promoError: true });
+        }
+        
+        // Check tier eligibility
+        if (promoCodeRecord.eligibleTiers && promoCodeRecord.eligibleTiers.length > 0 && !promoCodeRecord.eligibleTiers.includes(tier)) {
+          return res.status(400).json({ error: `This promo code is not valid for the ${tier} tier`, promoError: true });
+        }
+        
+        // Check minimum purchase amount
+        if (promoCodeRecord.minPurchaseAmount && pricing.amount < promoCodeRecord.minPurchaseAmount) {
+          return res.status(400).json({ error: `Minimum purchase of £${(promoCodeRecord.minPurchaseAmount / 100).toFixed(2)} required`, promoError: true });
+        }
+        
+        // Apply the discount
+        validPromoCode = promoCodeRecord;
+        if (validPromoCode.discountType === 'percentage') {
+          finalAmount = Math.round(pricing.amount * (1 - validPromoCode.discountValue / 100));
+        } else {
+          finalAmount = Math.max(0, pricing.amount - validPromoCode.discountValue * 100);
+        }
       }
 
       // Create a minimal business plan for this direct subscription with all required fields
@@ -571,9 +618,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               currency: "gbp",
               product_data: {
                 name: `UK Innovator Founder Visa - ${pricing.name} Access`,
-                description: `Unlock ${pricing.name} tier access to all tools and features`,
+                description: validPromoCode 
+                  ? `Unlock ${pricing.name} tier access (${validPromoCode.discountValue}% discount applied)`
+                  : `Unlock ${pricing.name} tier access to all tools and features`,
               },
-              unit_amount: pricing.amount,
+              unit_amount: finalAmount,
             },
             quantity: 1,
           },
@@ -585,7 +634,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           planId: businessPlan.id,
           directSubscription: 'true',
           tier: tier,
+          promoCode: validPromoCode?.code || '',
+          promoCodeId: validPromoCode?.id || '',
           originalAmount: pricing.amount.toString(),
+          discountAmount: (pricing.amount - finalAmount).toString(),
         },
       });
 
