@@ -306,7 +306,7 @@ async function generateUltimateBusinessPlan() {
 
           createStyledParagraph("Business Experience:", { bold: true }),
           createBulletPoint("BhenMedia: Founded and operated web development agency serving international clients"),
-          createBulletPoint("Client Portfolio: Successfully delivered 50+ projects across e-commerce, SaaS, and enterprise solutions"),
+          createBulletPoint("Client Portfolio: Successfully delivered 15+ projects across e-commerce, SaaS, and enterprise solutions"),
           createBulletPoint("Revenue Generation: Achieved consistent revenue growth year-over-year through quality delivery and client retention"),
           createBulletPoint("Team Leadership: Managed remote teams of developers and designers across multiple time zones"),
           new Paragraph({ children: [], spacing: { after: 200 } }),

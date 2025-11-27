@@ -3,10 +3,8 @@
 
 ---
 
-**Document Reference:** IFV-2025-BP-001
 **Prepared by:** Ebuka Benedict Umeh
 **Date:** November 2025
-**Version:** 1.0
 
 ---
 
@@ -306,7 +304,7 @@ UK Innovator Founder Visa Assistant represents a genuine innovation in the UK im
 4. **Shows scalability** - Platform model enables global reach with minimal marginal costs
 5. **Creates UK value** - 12 jobs by Year 3, £100,000+ annual tax contribution
 
-The founder brings unique qualifications combining technical expertise (MSc Data Science, 7+ years development), entrepreneurial experience (50+ client projects), and first-hand immigration experience.
+The founder brings unique qualifications combining technical expertise (MSc Data Science, 7+ years development), entrepreneurial experience (15+ client projects), and first-hand immigration experience.
 
 ---
 

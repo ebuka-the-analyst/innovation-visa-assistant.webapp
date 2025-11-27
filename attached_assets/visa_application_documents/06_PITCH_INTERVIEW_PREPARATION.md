@@ -4,10 +4,8 @@
 
 ---
 
-**Document Reference:** IFV-2025-PI-001
 **Prepared by:** Ebuka Benedict Umeh
 **Date:** November 2025
-**Version:** 1.0
 
 ---
 
@@ -117,13 +115,13 @@ We're already live, with a working platform and growing user base. By Year 3, we
 
 **Q10: Why are you the right person to build this business?**
 
-**Answer:** "I bring three essential qualities: First, technical expertise - MSc in Data Science from Leeds Beckett, 7+ years of full-stack development, and proven AI integration experience. Second, entrepreneurial experience - through BhenMedia I've delivered 50+ projects and managed client relationships. Third, domain understanding - I've personally navigated the UK visa process and understand the frustrations applicants face. I'm not just building software; I'm solving a problem I've experienced firsthand."
+**Answer:** "I bring three essential qualities: First, technical expertise - MSc in Data Science from Leeds Beckett, 7+ years of full-stack development, and proven AI integration experience. Second, entrepreneurial experience - through BhenMedia I've delivered 15+ projects and managed client relationships. Third, domain understanding - I've personally navigated the UK visa process and understand the frustrations applicants face. I'm not just building software; I'm solving a problem I've experienced firsthand."
 
 ---
 
 **Q11: Tell me about your relevant experience.**
 
-**Answer:** "At BhenMedia, my web development company, I've delivered 50+ projects across hospitality, healthcare, and corporate sectors. Notable work includes building an AI virtual concierge for Ibis Styles Leeds that handles 200+ guest queries daily. At Qalhata Technology, I built AI-driven analytics dashboards. At Eden Health Care, my automation tools reduced manual processes by 60%. This demonstrates I can build complex technical solutions that solve real business problems."
+**Answer:** "At BhenMedia, my web development company, I've delivered 15+ projects across hospitality, healthcare, and corporate sectors. Notable work includes building an AI virtual concierge for Ibis Styles Leeds that handles 200+ guest queries daily. At Qalhata Technology, I built AI-driven analytics dashboards. At Eden Health Care, my automation tools reduced manual processes by 60%. This demonstrates I can build complex technical solutions that solve real business problems."
 
 ---
 

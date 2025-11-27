@@ -292,7 +292,7 @@ COST ASSUMPTIONS:
 
 FOUNDER CAPABILITY:
 I have demonstrated ability to deliver business results:
-- BhenMedia: 50+ client projects with 95% satisfaction rate
+- BhenMedia: 15+ client projects with 95% satisfaction rate
 - Ibis Styles Leeds: AI system processing 200+ queries daily
 - Track record of projects delivered on time and within budget
 [See Attachment F: Client Testimonials and Project Outcomes]

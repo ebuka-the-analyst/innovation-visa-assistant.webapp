@@ -741,7 +741,7 @@ ${personal.fullName} entered the UK on a Student visa on ${ukCommitment.ukEntry.
 
 FOUNDER FIT
 
-The founder's unique combination of technical expertise (MSc Data Science, ${experience.totalYears}+ years development), entrepreneurial experience (50+ client projects), and first-hand immigration experience creates an ideal profile for building and scaling this platform. He understands both the technical requirements for building AI-powered tools and the real-world challenges faced by visa applicants.`;
+The founder's unique combination of technical expertise (MSc Data Science, ${experience.totalYears}+ years development), entrepreneurial experience (15+ client projects), and first-hand immigration experience creates an ideal profile for building and scaling this platform. He understands both the technical requirements for building AI-powered tools and the real-world challenges faced by visa applicants.`;
 }
 
 // Helper function to get business plan executive summary

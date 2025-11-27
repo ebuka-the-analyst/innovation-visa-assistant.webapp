@@ -80,7 +80,7 @@ To become the UK's leading AI-powered visa application assistant, enabling talen
 Over 7 years of experience as a Full Stack Developer, AI Integration Specialist, and Data-Driven Digital Solutions Architect. Key achievements include:
 
 **BhenMedia (Founder and Lead Developer)**
-- Delivered 50+ projects building custom platforms, AI chatbots, automation systems, and high-performance websites
+- Delivered 15+ projects building custom platforms, AI chatbots, automation systems, and high-performance websites
 - Clients span hospitality, healthcare, and corporate sectors
 - Demonstrated entrepreneurial capability and client management skills
 
@@ -112,7 +112,7 @@ Over 7 years of experience as a Full Stack Developer, AI Integration Specialist,
 
 **Founder Fit:**
 
-The founder's unique combination of technical expertise (MSc Data Science, 7+ years development), entrepreneurial experience (50+ client projects), and first-hand immigration experience creates an ideal profile for building and scaling this platform. The founder understands both the technical requirements for building AI-powered tools and the real-world challenges faced by visa applicants.
+The founder's unique combination of technical expertise (MSc Data Science, 7+ years development), entrepreneurial experience (15+ client projects), and first-hand immigration experience creates an ideal profile for building and scaling this platform. The founder understands both the technical requirements for building AI-powered tools and the real-world challenges faced by visa applicants.
 
 ---
 
@@ -993,7 +993,7 @@ The UK Innovator Founder Visa requires businesses to demonstrate genuine innovat
 - BSc IT/BIS, Middlesex University (2017)
 - Advanced Diploma Software Engineering (2016)
 - 7+ years professional development experience
-- 50+ client projects delivered
+- 15+ client projects delivered
 - AI integration specialist
 
 ---

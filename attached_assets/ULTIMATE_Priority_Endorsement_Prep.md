@@ -91,12 +91,12 @@ For UK Innovator Founder Visa Assistant:
 |-------------------|----------|
 | Complete platform developed | Live platform demonstration |
 | Founder qualifications | MSc Data Science, BSc IT, 7+ years experience |
-| Track record | 50+ client projects, AI implementations |
+| Track record | 15+ client projects, AI implementations |
 | Financial projections | 3-year model with documented assumptions |
 | Resources | £12,000 capital, platform ready |
 
 **Strong Viability Statement:**
-"The business demonstrates strong viability through: (1) Founder qualifications including MSc Data Science and 7+ years professional development experience; (2) Proven track record of 50+ successful client projects including AI implementation for Ibis Styles Leeds processing 200+ queries daily; (3) Platform already developed and ready for launch, reducing execution risk; (4) Conservative financial projections showing path to profitability within 6 months."
+"The business demonstrates strong viability through: (1) Founder qualifications including MSc Data Science and 7+ years professional development experience; (2) Proven track record of 15+ successful client projects including AI implementation for Ibis Styles Leeds processing 200+ queries daily; (3) Platform already developed and ready for launch, reducing execution risk; (4) Conservative financial projections showing path to profitability within 6 months."
 
 ### Criterion 3: Scalability
 

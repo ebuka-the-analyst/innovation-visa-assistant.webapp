@@ -34,7 +34,7 @@ For Ebuka Benedict Umeh and UK Innovator Founder Visa Assistant:
 |-----------|----------------|
 | Platform Already Built | Reduces execution risk - proof of capability |
 | Strong Technical Background | MSc Data Science + 7 years experience |
-| Proven Track Record | 50+ client projects with measurable outcomes |
+| Proven Track Record | 15+ client projects with measurable outcomes |
 | Clear Market Gap | No comprehensive competitor exists |
 | Genuine Innovation | AI + accessibility + comprehensive coverage |
 | Personal Experience | First-hand understanding of visa challenges |
@@ -153,7 +153,7 @@ Time yourself. Refine until natural and compelling.
 
 Practice explaining your unique qualification:
 
-"I'm uniquely positioned to build this business because of three things: First, my technical expertise - MSc in Data Science and 7 years of development experience, including building AI systems for real businesses. Second, my entrepreneurial track record - I've run BhenMedia for 7 years, delivering 50+ successful projects. Third, my personal experience - as someone who has navigated UK immigration myself, I understand the challenges our users face. I'm not just building a business; I'm solving a problem I've lived."
+"I'm uniquely positioned to build this business because of three things: First, my technical expertise - MSc in Data Science and 7 years of development experience, including building AI systems for real businesses. Second, my entrepreneurial track record - I've run BhenMedia for 7 years, delivering 15+ successful projects. Third, my personal experience - as someone who has navigated UK immigration myself, I understand the challenges our users face. I'm not just building a business; I'm solving a problem I've lived."
 
 **Exercise 3: Handling Objections (2 minutes)**
 
@@ -270,7 +270,7 @@ Response: "The global market for UK business immigration services exceeds £250 
 
 **Strongest Evidence:**
 - Ibis Styles Leeds: 200+ daily AI queries
-- BhenMedia: 50+ successful projects
+- BhenMedia: 15+ successful projects
 - Qualifications: MSc Data Science + BSc IT
 
 ---

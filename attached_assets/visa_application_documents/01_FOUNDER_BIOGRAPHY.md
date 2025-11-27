@@ -4,7 +4,6 @@
 
 ---
 
-**Document Reference:** IFV-2025-FB-001
 **Prepared for:** Innovator Founder Visa Application
 **Date:** November 2025
 
@@ -12,7 +11,7 @@
 
 ## Executive Summary
 
-Ebuka Benedict Umeh is a highly skilled technology entrepreneur with over 7 years of professional experience in full-stack development, AI integration, and digital transformation. With a Master's degree in Data Science from Leeds Beckett University and a proven track record of delivering 50+ successful client projects, Ebuka brings the technical expertise, entrepreneurial capability, and innovative vision required to build a transformative business in the UK.
+Ebuka Benedict Umeh is a highly skilled technology entrepreneur with over 7 years of professional experience in full-stack development, AI integration, and digital transformation. With a Master's degree in Data Science from Leeds Beckett University and a proven track record of delivering 15+ successful client projects, Ebuka brings the technical expertise, entrepreneurial capability, and innovative vision required to build a transformative business in the UK.
 
 ---
 
@@ -54,7 +53,7 @@ Ebuka Benedict Umeh is a highly skilled technology entrepreneur with over 7 year
 As founder of BhenMedia, Ebuka has established a successful web development company delivering custom platforms, AI chatbots, automation systems, and high-performance websites to clients across multiple sectors.
 
 **Key Achievements:**
-- Delivered 50+ projects for clients across hospitality, healthcare, and corporate sectors
+- Delivered 15+ projects for clients across hospitality, healthcare, and corporate sectors
 - Built custom platforms, AI chatbots, and automation systems demonstrating technical versatility
 - Demonstrated entrepreneurial capability and client management skills
 - Established reputation for quality delivery and client satisfaction

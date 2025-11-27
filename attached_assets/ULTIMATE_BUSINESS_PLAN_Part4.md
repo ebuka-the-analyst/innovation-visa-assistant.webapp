@@ -667,7 +667,7 @@ Environmental benefits of our operating model:
 
 **Experience:**
 - 7+ years full-stack development
-- 50+ client projects delivered
+- 15+ client projects delivered
 - AI integration specialist
 - Entrepreneurial founder (BhenMedia)
 

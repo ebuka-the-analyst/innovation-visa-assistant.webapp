@@ -4,10 +4,8 @@
 
 ---
 
-**Document Reference:** IFV-2025-IA-001
 **Prepared by:** Ebuka Benedict Umeh
 **Date:** November 2025
-**Version:** 1.0
 
 ---
 

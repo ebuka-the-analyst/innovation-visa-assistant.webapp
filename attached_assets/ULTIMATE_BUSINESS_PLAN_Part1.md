@@ -167,7 +167,7 @@ The business demonstrates strong viability through:
 - MSc Data Science from Leeds Beckett University (2023)
 - BSc Information Technology from Middlesex University (2017)
 - 7+ years professional experience in full-stack development and AI integration
-- Track record of 50+ successful client projects
+- Track record of 15+ successful client projects
 - Direct experience with UK immigration process
 
 **Market Validation:**
@@ -275,10 +275,10 @@ This intensive programme provided foundational training in:
 Duration: 2018 to Present (7+ years)
 Location: United Kingdom and Nigeria
 
-BhenMedia is a digital solutions agency founded and operated by Ebuka Benedict Umeh. Through this venture, the founder has demonstrated entrepreneurial capability and technical excellence across more than 50 client projects.
+BhenMedia is a digital solutions agency founded and operated by Ebuka Benedict Umeh. Through this venture, the founder has demonstrated entrepreneurial capability and technical excellence across more than 15 client projects.
 
 Key Achievements:
-- Successfully delivered 50+ projects spanning custom web platforms, AI chatbots, automation systems, and high-performance websites
+- Successfully delivered 15+ projects spanning custom web platforms, AI chatbots, automation systems, and high-performance websites
 - Built and maintained client relationships across hospitality, healthcare, and corporate sectors
 - Developed reputation for delivering projects on time and within budget
 - Generated consistent revenue through client work while pursuing further education
@@ -430,7 +430,7 @@ The combination of MSc Data Science and 7+ years of development experience provi
 Direct experience integrating AI systems (as demonstrated at Ibis Styles Leeds) means the founder understands both the capabilities and limitations of AI technology. This ensures the platform provides genuine value rather than superficial AI features.
 
 **Entrepreneurial Experience:**
-Running BhenMedia for 7+ years and delivering 50+ client projects demonstrates the ability to manage all aspects of a business: sales, delivery, finance, and client relationships. This experience is directly transferable to scaling a SaaS platform.
+Running BhenMedia for 7+ years and delivering 15+ client projects demonstrates the ability to manage all aspects of a business: sales, delivery, finance, and client relationships. This experience is directly transferable to scaling a SaaS platform.
 
 **Immigration Understanding:**
 As someone who has personally navigated UK immigration processes (student visa, graduate route), the founder understands the challenges applicants face. This first-hand experience informs the platform's design and features.
