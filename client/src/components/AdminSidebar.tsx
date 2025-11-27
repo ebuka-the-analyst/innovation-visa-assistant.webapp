@@ -1,40 +1,62 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
 
-// Animated number component for sidebar stats
+// Animated number component for sidebar stats - uses useRef to properly track previous value
 function AnimatedStat({ value }: { value: number }) {
   const [displayValue, setDisplayValue] = useState(value);
-  const [prevValue, setPrevValue] = useState(value);
+  const prevValueRef = useRef(value);
+  const animationRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (prevValue !== value) {
-      const startValue = displayValue;
-      const duration = 600;
-      const steps = 30;
-      const increment = (value - startValue) / steps;
-      let currentStep = 0;
-
-      const timer = setInterval(() => {
-        currentStep++;
-        if (currentStep >= steps) {
-          clearInterval(timer);
-          setDisplayValue(value);
-        } else {
-          setDisplayValue(Math.round(startValue + (increment * currentStep)));
-        }
-      }, duration / steps);
-
-      setPrevValue(value);
-
-      return () => clearInterval(timer);
+    // Cancel any ongoing animation
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
     }
-  }, [value, prevValue, displayValue]);
+
+    const startValue = displayValue;
+    const endValue = value;
+    
+    // If no change, just ensure display matches
+    if (startValue === endValue) {
+      setDisplayValue(endValue);
+      return;
+    }
+
+    const duration = 600;
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+      const currentValue = Math.round(startValue + (endValue - startValue) * easeOutQuad);
+      
+      setDisplayValue(currentValue);
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        setDisplayValue(endValue);
+        prevValueRef.current = endValue;
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [value]);
 
   return (
     <motion.span
-      key={displayValue}
-      initial={{ scale: prevValue !== value ? 1.1 : 1 }}
+      key={`stat-${value}`}
+      initial={{ scale: 1.05 }}
       animate={{ scale: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 15 }}
     >
