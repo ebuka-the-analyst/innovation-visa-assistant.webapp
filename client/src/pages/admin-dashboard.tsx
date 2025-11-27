@@ -1741,6 +1741,16 @@ export default function AdminDashboard() {
                     transition={{ duration: 0.5 }}
                     className="space-y-6"
                   >
+                    {/* Debug: Demo user filtering status */}
+                    {hideDemoUsers && (
+                      <div className="p-3 mb-4 rounded-lg bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700">
+                        <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                          Demo Filter Active: Hiding {demoUserCount} demo users (showing {realUserCount} real users)
+                          {!allUsersData?.users && <span className="ml-2 text-red-600">(Loading user data...)</span>}
+                        </p>
+                      </div>
+                    )}
+                    
                     {/* KPI Cards with Animations */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       {filteredOverviewData?.kpiMetrics?.map((metric, index) => (
