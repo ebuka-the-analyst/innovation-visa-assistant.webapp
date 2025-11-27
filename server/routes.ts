@@ -2558,8 +2558,11 @@ Keep the tone supportive and professional. Do not be overly enthusiastic.`;
       const total = allUsers.length;
       const users = allUsers.slice(offset, offset + limitNum);
       
-      // Remove passwords from response
-      const safeUsers = users.map(({ password, ...user }) => user);
+      // Remove passwords and map isEmailVerified to isVerified for frontend compatibility
+      const safeUsers = users.map(({ password, ...user }) => ({
+        ...user,
+        isVerified: user.isEmailVerified ?? false,
+      }));
       
       res.json({
         users: safeUsers,
@@ -2592,11 +2595,14 @@ Keep the tone supportive and professional. Do not be overly enthusiastic.`;
       // Get user's business plans
       const plans = await storage.getUserBusinessPlans(userId);
       
-      // Remove password from response
+      // Remove password and map isEmailVerified to isVerified for frontend compatibility
       const { password, ...safeUser } = user;
       
       res.json({
-        user: safeUser,
+        user: {
+          ...safeUser,
+          isVerified: safeUser.isEmailVerified ?? false,
+        },
         plans,
       });
     } catch (error) {
@@ -7079,7 +7085,12 @@ Return a JSON object with:
         }
       }
 
-      res.json({ success: true, message: `User ${verified ? 'verified' : 'unverified'} successfully` });
+      res.json({ 
+        success: true, 
+        message: `User ${verified ? 'verified' : 'unverified'} successfully`,
+        isVerified: verified,
+        isEmailVerified: verified 
+      });
     } catch (error) {
       console.error("Verify user error:", error);
       res.status(500).json({ error: "Failed to verify user" });
