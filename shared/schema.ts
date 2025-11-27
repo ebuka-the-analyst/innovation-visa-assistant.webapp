@@ -14,13 +14,12 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Users table - supports Google OAuth, email/password, and Replit Auth
+// Users table - supports both Google OAuth and email/password authentication
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
   password: text("password"), // For email/password auth (hashed with bcrypt)
   googleId: varchar("google_id").unique(), // Google OAuth ID (optional)
-  replitId: varchar("replit_id").unique(), // Replit Auth ID (optional)
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -71,35 +70,6 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
-
-// User Documents table - stores document history for each user
-export const userDocuments = pgTable("user_documents", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
-  toolId: varchar("tool_id", { length: 100 }).notNull(), // e.g., 'founder-bio', 'business-plan'
-  toolName: varchar("tool_name", { length: 200 }).notNull(), // e.g., 'Founder Biography Builder'
-  documentName: varchar("document_name", { length: 500 }).notNull(),
-  documentType: varchar("document_type", { length: 50 }).notNull().default('text'), // text, pdf, docx
-  content: text("content").notNull(), // Actual document content
-  metadata: jsonb("metadata"), // Additional tool-specific metadata (scores, completeness, etc.)
-  version: integer("version").notNull().default(1),
-  isArchived: boolean("is_archived").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => [
-  index("idx_user_documents_user_id").on(table.userId),
-  index("idx_user_documents_tool_id").on(table.toolId),
-]);
-
-export const insertUserDocumentSchema = createInsertSchema(userDocuments).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  version: true,
-});
-
-export type InsertUserDocument = z.infer<typeof insertUserDocumentSchema>;
-export type UserDocument = typeof userDocuments.$inferSelect;
 
 export const businessPlans = pgTable("business_plans", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -171,11 +141,10 @@ export const businessPlans = pgTable("business_plans", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-// User upsert schema for OAuth (Google/Replit) - Railway deployment
+// Google OAuth user upsert schema for Railway deployment
 export const upsertUserSchema = createInsertSchema(users).pick({
   email: true,
   googleId: true,
-  replitId: true,
   firstName: true,
   lastName: true,
   profileImageUrl: true,
