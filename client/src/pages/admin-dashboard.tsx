@@ -769,38 +769,60 @@ export default function AdminDashboard() {
     if (!overviewData) return overviewData;
     if (!hideDemoUsers) return overviewData;
     
-    // Calculate demo user ratio for proportional filtering
-    const totalUsersFromAPI = overviewData.kpiMetrics?.[0]?.value || 0;
-    const demoRatio = totalUsersFromAPI > 0 ? demoUserCount / totalUsersFromAPI : 0;
-    const realRatio = Math.max(0, 1 - demoRatio);
+    // Calculate demo user count reduction
+    const totalUsersFromAPI = overviewData.kpiMetrics?.[0]?.value || 1;
+    const effectiveDemoCount = Math.min(demoUserCount, totalUsersFromAPI);
+    
+    // For time series data: only filter data points AFTER the cutoff date
+    // Historical data before cutoff can't be retroactively filtered accurately
+    const filterTimeSeriesPoint = (dataPoint: { date: string; users: number; plans: number; activeUsers?: number }) => {
+      const pointDate = new Date(dataPoint.date);
+      if (pointDate >= DEMO_CUTOFF_DATE) {
+        // For dates after cutoff, subtract demo users
+        return {
+          ...dataPoint,
+          users: Math.max(0, (dataPoint.users || 0) - effectiveDemoCount),
+          activeUsers: Math.max(0, (dataPoint.activeUsers || 0) - effectiveDemoCount),
+        };
+      }
+      // For historical data, show original values (demo users existed then)
+      return {
+        ...dataPoint,
+        activeUsers: dataPoint.activeUsers || 0,
+      };
+    };
+    
+    const filterActivityPoint = (dataPoint: { date: string; count: number }) => {
+      const pointDate = new Date(dataPoint.date);
+      if (pointDate >= DEMO_CUTOFF_DATE) {
+        return {
+          ...dataPoint,
+          count: Math.max(0, (dataPoint.count || 0) - effectiveDemoCount),
+        };
+      }
+      return dataPoint;
+    };
     
     return {
       ...overviewData,
       kpiMetrics: overviewData.kpiMetrics?.map((metric, index) => {
         // First metric is typically total users, second is active users
         if (index === 0 || index === 1) {
-          return { ...metric, value: Math.max(0, (metric.value || 0) - demoUserCount) };
+          return { ...metric, value: Math.max(0, (metric.value || 0) - effectiveDemoCount) };
         }
         return metric;
       }),
       subscriptionDistribution: overviewData.subscriptionDistribution?.map(tier => ({
         ...tier,
         // Reduce counts proportionally (demo users are mostly free tier)
-        count: tier.tier === 'Free' ? Math.max(0, tier.count - demoUserCount) : tier.count
+        count: tier.tier === 'Free' ? Math.max(0, tier.count - effectiveDemoCount) : tier.count
       })),
-      // Filter time series data - reduce users/plans counts by demo ratio
-      timeSeriesData: overviewData.timeSeriesData?.map(dataPoint => ({
-        ...dataPoint,
-        users: Math.max(0, Math.round(dataPoint.users * realRatio)),
-        activeUsers: Math.max(0, Math.round(dataPoint.activeUsers * realRatio)),
-      })),
-      // Filter activity data - reduce daily active counts by demo ratio
-      activityData: overviewData.activityData?.map(dataPoint => ({
-        ...dataPoint,
-        count: Math.max(0, Math.round(dataPoint.count * realRatio)),
-      })),
+      // Filter time series data - only for dates after cutoff
+      timeSeriesData: overviewData.timeSeriesData?.map(filterTimeSeriesPoint),
+      // Filter activity data - only for dates after cutoff  
+      activityData: overviewData.activityData?.map(filterActivityPoint),
     };
-  }, [overviewData, hideDemoUsers, demoUserCount]);
+  }, [overviewData, hideDemoUsers, demoUserCount, DEMO_CUTOFF_DATE]);
 
   // Filtered users analytics excluding demo users
   const filteredUsersAnalytics = useMemo(() => {
