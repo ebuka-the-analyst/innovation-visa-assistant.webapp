@@ -149,6 +149,7 @@ export default function VoiceBuilder() {
   const [editedTranscript, setEditedTranscript] = useState("");
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [micPermission, setMicPermission] = useState<'granted' | 'denied' | 'prompt' | 'checking'>('checking');
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -238,9 +239,54 @@ export default function VoiceBuilder() {
       });
 
     } catch (error) {
+      setMicPermission('denied');
       toast({
         title: "Microphone Access Denied",
-        description: "Please allow microphone access to use voice input.",
+        description: "Please click 'Enable Microphone' and allow access in your browser.",
+        variant: "destructive"
+      });
+    }
+  }, [toast]);
+
+  // Check microphone permission on mount
+  useEffect(() => {
+    const checkMicPermission = async () => {
+      try {
+        if (navigator.permissions && navigator.permissions.query) {
+          const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+          setMicPermission(result.state as 'granted' | 'denied' | 'prompt');
+          
+          result.addEventListener('change', () => {
+            setMicPermission(result.state as 'granted' | 'denied' | 'prompt');
+          });
+        } else {
+          // Browser doesn't support permissions API, set to prompt
+          setMicPermission('prompt');
+        }
+      } catch {
+        // Permission query not supported, set to prompt
+        setMicPermission('prompt');
+      }
+    };
+    
+    checkMicPermission();
+  }, []);
+
+  const requestMicPermission = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Permission granted, stop the test stream
+      stream.getTracks().forEach(track => track.stop());
+      setMicPermission('granted');
+      toast({
+        title: "Microphone Enabled",
+        description: "You can now start recording. Click the microphone button to begin."
+      });
+    } catch {
+      setMicPermission('denied');
+      toast({
+        title: "Permission Denied",
+        description: "Microphone access was denied. Please enable it in your browser settings.",
         variant: "destructive"
       });
     }
@@ -444,81 +490,142 @@ export default function VoiceBuilder() {
 
                   <div className="relative bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-2xl p-8 border border-violet-500/20">
                     <div className="flex flex-col items-center space-y-6">
-                      <div className="relative">
-                        <div 
-                          className={`w-32 h-32 rounded-full flex items-center justify-center transition-all duration-300 ${
-                            isRecording 
-                              ? 'bg-gradient-to-br from-red-500 to-pink-500 animate-pulse' 
-                              : 'bg-gradient-to-br from-violet-500 to-purple-500'
-                          }`}
-                          style={{
-                            boxShadow: isRecording 
-                              ? `0 0 ${20 + audioLevel/2}px ${10 + audioLevel/4}px rgba(239,68,68,0.3)` 
-                              : '0 0 20px 10px rgba(139,92,246,0.2)'
-                          }}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="w-24 h-24 rounded-full bg-white/20 hover:bg-white/30"
-                            onClick={isRecording ? stopRecording : startRecording}
-                            data-testid="button-record"
-                          >
-                            {isRecording ? (
-                              <MicOff className="w-12 h-12 text-white" />
-                            ) : (
-                              <Mic className="w-12 h-12 text-white" />
-                            )}
-                          </Button>
-                        </div>
-                        
-                        {isRecording && (
-                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-                            <Badge variant="destructive" className="animate-pulse">
-                              {formatTime(recordingTime)}
-                            </Badge>
+                      {/* Microphone Permission Denied State */}
+                      {micPermission === 'denied' && (
+                        <div className="text-center space-y-4 py-4">
+                          <div className="w-20 h-20 mx-auto rounded-full bg-red-500/20 flex items-center justify-center">
+                            <MicOff className="w-10 h-10 text-red-500" />
                           </div>
-                        )}
-                      </div>
-
-                      {isRecording && (
-                        <div className="w-full max-w-xs">
-                          <Progress value={audioLevel} className="h-2" />
-                          <p className="text-xs text-center text-muted-foreground mt-1">Audio Level</p>
+                          <div>
+                            <h3 className="font-semibold text-lg text-red-600 dark:text-red-400">Microphone Access Required</h3>
+                            <p className="text-sm text-muted-foreground mt-2 max-w-md">
+                              To use voice recording, you need to allow microphone access in your browser.
+                            </p>
+                          </div>
+                          
+                          <div className="bg-muted/50 rounded-lg p-4 text-left max-w-md mx-auto">
+                            <h4 className="font-medium text-sm mb-2">How to enable microphone:</h4>
+                            <ol className="text-sm text-muted-foreground space-y-2">
+                              <li className="flex items-start gap-2">
+                                <span className="bg-primary/20 text-primary rounded-full w-5 h-5 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">1</span>
+                                <span>Click the <strong>lock icon</strong> in your browser's address bar</span>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="bg-primary/20 text-primary rounded-full w-5 h-5 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">2</span>
+                                <span>Find <strong>"Microphone"</strong> in the permissions list</span>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="bg-primary/20 text-primary rounded-full w-5 h-5 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">3</span>
+                                <span>Change it from <strong>"Block"</strong> to <strong>"Allow"</strong></span>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="bg-primary/20 text-primary rounded-full w-5 h-5 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">4</span>
+                                <span><strong>Refresh the page</strong> and try again</span>
+                              </li>
+                            </ol>
+                          </div>
+                          
+                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <Button 
+                              onClick={requestMicPermission}
+                              className="bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
+                              data-testid="button-enable-mic"
+                            >
+                              <Mic className="w-4 h-4 mr-2" />
+                              Try Again
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              onClick={() => window.location.reload()}
+                              data-testid="button-refresh-page"
+                            >
+                              <RefreshCw className="w-4 h-4 mr-2" />
+                              Refresh Page
+                            </Button>
+                          </div>
                         </div>
                       )}
 
-                      <div className="flex items-center gap-3">
-                        {isRecording && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={togglePause}
-                            data-testid="button-pause"
-                          >
-                            {isPaused ? <Play className="w-4 h-4 mr-1" /> : <Pause className="w-4 h-4 mr-1" />}
-                            {isPaused ? 'Resume' : 'Pause'}
-                          </Button>
-                        )}
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={resetRecording}
-                          data-testid="button-reset"
-                        >
-                          <RotateCcw className="w-4 h-4 mr-1" />
-                          Reset
-                        </Button>
-                      </div>
+                      {/* Normal Recording State */}
+                      {micPermission !== 'denied' && (
+                        <>
+                          <div className="relative">
+                            <div 
+                              className={`w-32 h-32 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                isRecording 
+                                  ? 'bg-gradient-to-br from-red-500 to-pink-500 animate-pulse' 
+                                  : 'bg-gradient-to-br from-violet-500 to-purple-500'
+                              }`}
+                              style={{
+                                boxShadow: isRecording 
+                                  ? `0 0 ${20 + audioLevel/2}px ${10 + audioLevel/4}px rgba(239,68,68,0.3)` 
+                                  : '0 0 20px 10px rgba(139,92,246,0.2)'
+                              }}
+                            >
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-24 h-24 rounded-full bg-white/20 hover:bg-white/30"
+                                onClick={isRecording ? stopRecording : startRecording}
+                                data-testid="button-record"
+                              >
+                                {isRecording ? (
+                                  <MicOff className="w-12 h-12 text-white" />
+                                ) : (
+                                  <Mic className="w-12 h-12 text-white" />
+                                )}
+                              </Button>
+                            </div>
+                            
+                            {isRecording && (
+                              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+                                <Badge variant="destructive" className="animate-pulse">
+                                  {formatTime(recordingTime)}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
 
-                      <p className="text-sm text-muted-foreground text-center">
-                        {isRecording 
-                          ? isPaused 
-                            ? "Recording paused. Click Resume to continue." 
-                            : "Recording... Speak clearly about your business."
-                          : "Click the microphone to start recording your response."
-                        }
-                      </p>
+                          {isRecording && (
+                            <div className="w-full max-w-xs">
+                              <Progress value={audioLevel} className="h-2" />
+                              <p className="text-xs text-center text-muted-foreground mt-1">Audio Level</p>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-3">
+                            {isRecording && (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={togglePause}
+                                data-testid="button-pause"
+                              >
+                                {isPaused ? <Play className="w-4 h-4 mr-1" /> : <Pause className="w-4 h-4 mr-1" />}
+                                {isPaused ? 'Resume' : 'Pause'}
+                              </Button>
+                            )}
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={resetRecording}
+                              data-testid="button-reset"
+                            >
+                              <RotateCcw className="w-4 h-4 mr-1" />
+                              Reset
+                            </Button>
+                          </div>
+
+                          <p className="text-sm text-muted-foreground text-center">
+                            {isRecording 
+                              ? isPaused 
+                                ? "Recording paused. Click Resume to continue." 
+                                : "Recording... Speak clearly about your business."
+                              : "Click the microphone to start recording your response."
+                            }
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
 
