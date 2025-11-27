@@ -1765,15 +1765,14 @@ export default function AdminDashboard() {
                     transition={{ duration: 0.5 }}
                     className="space-y-6"
                   >
-                    {/* Debug: Always show current filter state */}
-                    <div className={`p-3 mb-4 rounded-lg ${hideDemoUsers ? 'bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-700' : 'bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700'} border`}>
-                      <p className="text-sm font-medium">
-                        <strong>Filter State:</strong> hideDemoUsers = {String(hideDemoUsers)} | 
-                        Raw API Total: {overviewData?.kpiMetrics?.[0]?.value ?? 'null'} | 
-                        Filtered Total: {filteredOverviewData?.kpiMetrics?.[0]?.value ?? 'null'} | 
-                        Demo Count: {demoUserCount}
-                      </p>
-                    </div>
+                    {/* Demo filter indicator - only show when active */}
+                    {hideDemoUsers && demoUserCount > 0 && (
+                      <div className="p-3 mb-4 rounded-lg bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700">
+                        <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                          Demo Filter Active: Hiding {demoUserCount} demo users (showing {realUserCount} real users from Nov 27, 2025 onwards)
+                        </p>
+                      </div>
+                    )}
                     
                     {/* KPI Cards with Animations - key forces re-render when filter changes */}
                     <div key={`kpi-cards-${hideDemoUsers}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -2072,11 +2071,11 @@ export default function AdminDashboard() {
                         <Card data-testid="card-top-tools">
                           <CardHeader>
                             <CardTitle>Top 10 Most Used Tools</CardTitle>
-                            <CardDescription>Platform feature utilization</CardDescription>
+                            <CardDescription>Platform feature utilization {hideDemoUsers && <span className="text-orange-500">(all users - tool usage not filtered)</span>}</CardDescription>
                           </CardHeader>
                           <CardContent>
                             <ResponsiveContainer width="100%" height={400}>
-                              <RechartsBarChart data={overviewData.topTools?.slice(0, 10)} layout="vertical">
+                              <RechartsBarChart data={filteredOverviewData?.topTools?.slice(0, 10)} layout="vertical">
                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                                 <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} />
                                 <YAxis
