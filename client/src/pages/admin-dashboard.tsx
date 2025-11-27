@@ -735,6 +735,52 @@ export default function AdminDashboard() {
     );
   }, [usersData?.users, hideDemoUsers, DEMO_CUTOFF_DATE]);
 
+  // Count of real users (non-demo) for accurate statistics
+  const realUserCount = useMemo(() => {
+    if (!hideDemoUsers) return usersData?.total || 0;
+    return filteredUsers.length;
+  }, [hideDemoUsers, filteredUsers.length, usersData?.total]);
+
+  // Filtered overview data excluding demo users when toggle is on
+  const filteredOverviewData = useMemo(() => {
+    if (!overviewData || !hideDemoUsers) return overviewData;
+    
+    // Calculate real user stats by subtracting demo users
+    const demoUserCount = (usersData?.total || 0) - filteredUsers.length;
+    
+    return {
+      ...overviewData,
+      kpiMetrics: overviewData.kpiMetrics?.map((metric, index) => {
+        // First metric is typically total users
+        if (index === 0 && metric.label?.toLowerCase().includes('user')) {
+          return { ...metric, value: Math.max(0, (metric.value || 0) - demoUserCount) };
+        }
+        return metric;
+      }),
+      subscriptionDistribution: overviewData.subscriptionDistribution?.map(tier => ({
+        ...tier,
+        // Reduce counts proportionally (demo users are mostly free tier)
+        count: tier.tier === 'Free' ? Math.max(0, tier.count - demoUserCount) : tier.count
+      })),
+    };
+  }, [overviewData, hideDemoUsers, usersData?.total, filteredUsers.length]);
+
+  // Filtered users analytics excluding demo users
+  const filteredUsersAnalytics = useMemo(() => {
+    if (!usersAnalytics || !hideDemoUsers) return usersAnalytics;
+    
+    const demoUserCount = (usersData?.total || 0) - filteredUsers.length;
+    
+    return {
+      ...usersAnalytics,
+      // Reduce users count in time series data by demo user count
+      usersByTier: usersAnalytics.usersByTier?.map(data => ({
+        ...data,
+        users: Math.max(0, data.users - demoUserCount)
+      })),
+    };
+  }, [usersAnalytics, hideDemoUsers, usersData?.total, filteredUsers.length]);
+
   // Plans analytics
   const { data: plansAnalytics, isLoading: plansAnalyticsLoading } = useQuery<PlansAnalytics>({
     queryKey: ['/api/admin/analytics/plans'],
@@ -1638,7 +1684,7 @@ export default function AdminDashboard() {
                   >
                     {/* KPI Cards with Animations */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      {overviewData.kpiMetrics?.map((metric, index) => (
+                      {filteredOverviewData?.kpiMetrics?.map((metric, index) => (
                         <motion.div
                           key={metric.label}
                           initial={{ opacity: 0, y: 20 }}
@@ -1784,7 +1830,7 @@ export default function AdminDashboard() {
                             <ResponsiveContainer width="100%" height={300}>
                               <RechartsPieChart>
                                 <Pie
-                                  data={overviewData.subscriptionDistribution}
+                                  data={filteredOverviewData?.subscriptionDistribution}
                                   cx="50%"
                                   cy="50%"
                                   innerRadius={60}
@@ -1794,7 +1840,7 @@ export default function AdminDashboard() {
                                   dataKey="count"
                                   label={(entry) => `${entry.tier} (${entry.percentage}%)`}
                                 >
-                                  {overviewData.subscriptionDistribution?.map((entry, index) => (
+                                  {filteredOverviewData?.subscriptionDistribution?.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                                   ))}
                                 </Pie>
@@ -2585,7 +2631,7 @@ export default function AdminDashboard() {
                                 <CardContent className="space-y-4">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-3xl font-bold">{overviewData.kpiMetrics?.[0]?.value || 0}</p>
+                                      <p className="text-3xl font-bold">{filteredOverviewData?.kpiMetrics?.[0]?.value || 0}</p>
                                       <p className="text-xs text-muted-foreground">Current Users</p>
                                     </div>
                                     <div className="text-right">
@@ -2593,10 +2639,10 @@ export default function AdminDashboard() {
                                       <p className="text-xs text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={Math.min(((overviewData.kpiMetrics?.[0]?.value || 0) / 50) * 100, 100)} className="h-3" />
+                                  <Progress value={Math.min(((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 50) * 100, 100)} className="h-3" />
                                   <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Progress</span>
-                                    <span className="font-medium text-green-500">{Math.round(((overviewData.kpiMetrics?.[0]?.value || 0) / 50) * 100)}%</span>
+                                    <span className="font-medium text-green-500">{Math.round(((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 50) * 100)}%</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -2695,7 +2741,7 @@ export default function AdminDashboard() {
                                   <Progress value={Math.min(((overviewData.kpiMetrics?.[1]?.value || 0) / 25) * 100, 100)} className="h-3" />
                                   <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Engagement</span>
-                                    <span className="font-medium text-green-500">{Math.round(((overviewData.kpiMetrics?.[1]?.value || 0) / (overviewData.kpiMetrics?.[0]?.value || 1)) * 100)}% of users</span>
+                                    <span className="font-medium text-green-500">{Math.round(((filteredOverviewData?.kpiMetrics?.[1]?.value || 0) / (filteredOverviewData?.kpiMetrics?.[0]?.value || 1)) * 100)}% of users</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -2791,12 +2837,12 @@ export default function AdminDashboard() {
                                       <h4 className="font-semibold">Reach 100 Active Users</h4>
                                       <p className="text-sm text-muted-foreground">Grow user base through organic marketing and referrals</p>
                                     </div>
-                                    <Badge variant="secondary">{overviewData.kpiMetrics?.[0]?.value || 0}/100</Badge>
+                                    <Badge variant="secondary">{filteredOverviewData?.kpiMetrics?.[0]?.value || 0}/100</Badge>
                                   </div>
-                                  <Progress value={((overviewData.kpiMetrics?.[0]?.value || 0) / 100) * 100} className="h-2" />
+                                  <Progress value={((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 100) * 100} className="h-2" />
                                   <div className="flex items-center justify-between mt-2 text-sm">
                                     <span className="text-muted-foreground">Due: Dec 31, 2024</span>
-                                    <span className="text-primary font-medium">{((overviewData.kpiMetrics?.[0]?.value || 0))}% complete</span>
+                                    <span className="text-primary font-medium">{((filteredOverviewData?.kpiMetrics?.[0]?.value || 0))}% complete</span>
                                   </div>
                                 </div>
 
@@ -2881,35 +2927,35 @@ export default function AdminDashboard() {
                                     <div className="flex-1">
                                       <Progress value={100} className="h-6" />
                                     </div>
-                                    <div className="w-16 text-right text-sm">{overviewData.subscriptionDistribution?.find(s => s.tier === 'Free')?.count || 0}</div>
+                                    <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Free')?.count || 0}</div>
                                   </div>
                                   <div className="flex items-center gap-4">
                                     <div className="w-24 text-sm font-medium">Basic</div>
                                     <div className="flex-1">
                                       <Progress value={60} className="h-6" />
                                     </div>
-                                    <div className="w-16 text-right text-sm">{overviewData.subscriptionDistribution?.find(s => s.tier === 'Basic')?.count || 0}</div>
+                                    <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Basic')?.count || 0}</div>
                                   </div>
                                   <div className="flex items-center gap-4">
                                     <div className="w-24 text-sm font-medium">Premium</div>
                                     <div className="flex-1">
                                       <Progress value={40} className="h-6" />
                                     </div>
-                                    <div className="w-16 text-right text-sm">{overviewData.subscriptionDistribution?.find(s => s.tier === 'Premium')?.count || 0}</div>
+                                    <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Premium')?.count || 0}</div>
                                   </div>
                                   <div className="flex items-center gap-4">
                                     <div className="w-24 text-sm font-medium">Enterprise</div>
                                     <div className="flex-1">
                                       <Progress value={20} className="h-6" />
                                     </div>
-                                    <div className="w-16 text-right text-sm">{overviewData.subscriptionDistribution?.find(s => s.tier === 'Enterprise')?.count || 0}</div>
+                                    <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Enterprise')?.count || 0}</div>
                                   </div>
                                   <div className="flex items-center gap-4">
                                     <div className="w-24 text-sm font-medium">Ultimate</div>
                                     <div className="flex-1">
                                       <Progress value={10} className="h-6" />
                                     </div>
-                                    <div className="w-16 text-right text-sm">{overviewData.subscriptionDistribution?.find(s => s.tier === 'Ultimate')?.count || 0}</div>
+                                    <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Ultimate')?.count || 0}</div>
                                   </div>
                                 </div>
                               </CardContent>
@@ -3189,7 +3235,7 @@ export default function AdminDashboard() {
                       </CardHeader>
                       <CardContent>
                         <ResponsiveContainer width="100%" height={300}>
-                          <RechartsBarChart data={usersAnalytics.usersByTier}>
+                          <RechartsBarChart data={filteredUsersAnalytics?.usersByTier}>
                             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                             <XAxis
                               dataKey="date"
@@ -3814,8 +3860,8 @@ export default function AdminDashboard() {
                           </div>
 
                           <p className="text-sm text-muted-foreground">
-                            Showing {filteredUsers.length} of {usersData.total} users
-                            {hideDemoUsers && <span className="ml-1 text-orange-500">(demo users hidden)</span>}
+                            Showing {filteredUsers.length} users
+                            {hideDemoUsers && <span className="ml-1 text-orange-500">(demo users excluded)</span>}
                           </p>
 
                           <div className="flex gap-2">
