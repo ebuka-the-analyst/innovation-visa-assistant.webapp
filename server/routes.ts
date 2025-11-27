@@ -11,7 +11,7 @@ import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
 import crypto from "crypto";
 import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
-import { sendPaymentReceiptEmail, sendPasswordResetEmail, generateVerificationToken, getResetTokenExpiry, sendPlanCompletionEmail, sendReferralRewardEmail, sendPromoCodeRewardEmail } from "./email";
+import { sendPaymentReceiptEmail, sendPasswordResetEmail, generateVerificationToken, getResetTokenExpiry, sendPlanCompletionEmail, sendReferralRewardEmail, sendPromoCodeRewardEmail, sendAdminVerificationSuccessEmail } from "./email";
 import bcrypt from "bcrypt";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import PDFDocument from "pdfkit";
@@ -7061,6 +7061,20 @@ Return a JSON object with:
         isEmailVerified: verified,
         updatedAt: new Date()
       }).where(eq(users.id, userId));
+
+      // Send verification success email when admin verifies a user
+      if (verified && targetUser.email) {
+        try {
+          await sendAdminVerificationSuccessEmail(
+            targetUser.email,
+            targetUser.firstName || 'User'
+          );
+          console.log(`Verification success email sent to ${targetUser.email}`);
+        } catch (emailError) {
+          console.error("Failed to send verification email:", emailError);
+          // Don't fail the request if email fails
+        }
+      }
 
       res.json({ success: true, message: `User ${verified ? 'verified' : 'unverified'} successfully` });
     } catch (error) {

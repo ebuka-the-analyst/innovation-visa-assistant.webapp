@@ -544,6 +544,98 @@ export async function sendWelcomeEmail(
   });
 }
 
+// Admin verification success email - sent when admin manually verifies a user
+export async function sendAdminVerificationSuccessEmail(
+  email: string,
+  firstName: string
+): Promise<{ success: boolean; error?: string }> {
+  const dashboardUrl = `${BASE_URL}/dashboard`;
+  const toolsUrl = `${BASE_URL}/tools-hub`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <div style="font-size: 48px; margin-bottom: 10px;">✓</div>
+        <h1 style="color: white; margin: 0; font-size: 28px;">Account Verified!</h1>
+      </div>
+      
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          Great news! Your account has been verified by our team. You now have full access to all the features of the UK Innovator Founder Visa Assistant.
+        </p>
+        
+        <div style="background: #e8f5e9; border: 2px solid #4caf50; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+          <div style="font-size: 24px; color: #2e7d32; margin-bottom: 10px;">Your Account Status</div>
+          <div style="display: inline-block; background: #4caf50; color: white; padding: 8px 24px; border-radius: 20px; font-weight: bold; font-size: 16px;">
+            VERIFIED
+          </div>
+        </div>
+        
+        <div style="background: #fff; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <h3 style="margin: 0 0 10px 0; color: #2e7d32;">What you can do now:</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #333;">
+            <li>Access all 109 visa preparation tools</li>
+            <li>Generate your AI-powered business plan</li>
+            <li>Practice endorser interviews with AI coaching</li>
+            <li>Download professional visa documents</li>
+            <li>Track your visa readiness score</li>
+          </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${dashboardUrl}" 
+             style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); 
+                    color: white; 
+                    padding: 15px 40px; 
+                    text-decoration: none; 
+                    border-radius: 5px; 
+                    font-size: 18px; 
+                    font-weight: bold;
+                    display: inline-block;
+                    margin: 5px;">
+            Go to Your Dashboard
+          </a>
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${toolsUrl}" style="color: #11b6e9; text-decoration: none; font-size: 16px;">
+            Explore All Tools →
+          </a>
+        </div>
+        
+        <div style="background: #fff3cd; border-left: 4px solid #ffa536; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p style="margin: 0; font-size: 14px; color: #856404;">
+            <strong>Next Step:</strong> Visit the Business Plan Generator to create your visa-compliant business plan and boost your endorsement chances!
+          </p>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="font-size: 12px; color: #999; text-align: center;">
+          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          Your trusted partner in visa success<br>
+          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: 'Your Account Has Been Verified - UK Innovator Founder Visa Assistant',
+    html
+  });
+}
+
 // Plan completion notification
 export async function sendPlanCompletionEmail(
   email: string,
