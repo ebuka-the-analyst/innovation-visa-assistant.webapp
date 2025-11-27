@@ -41,8 +41,8 @@ interface Reference {
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'founder-portfolio',
   toolName: 'Founder Capability Portfolio',
-  agent: 'sage',
-  greeting: "Hello! I'm Sage, your Compliance Expert. Your founder portfolio demonstrates your capability to execute your business plan. Let me help you compile your professional background, projects, credentials, and references in a compelling way.",
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. Your founder portfolio demonstrates your capability to execute your business plan and drive innovation. Let me help you compile your professional background, projects, credentials, and references in a compelling way.",
   questions: [
     {
       id: 'full-name',
@@ -100,6 +100,14 @@ export default function FounderPortfolio() {
   const [activeTab, setActiveTab] = useState('profile');
   const [savedDate, setSavedDate] = useState('');
 
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('founder-portfolio-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('founder-portfolio-mode', mode);
+  }, [mode]);
+
   const [profile, setProfile] = useState({
     fullName: '',
     title: '',
@@ -130,6 +138,55 @@ export default function FounderPortfolio() {
     mvpDescription: ''
   });
 
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.full_name) {
+      setProfile(prev => ({ ...prev, fullName: answers.full_name }));
+    }
+    if (answers.professional_title) {
+      setProfile(prev => ({ ...prev, title: answers.professional_title }));
+    }
+    if (answers.years_experience) {
+      setProfile(prev => ({ ...prev, yearsExperience: answers.years_experience }));
+    }
+    if (answers.linkedin_url) {
+      setProfile(prev => ({ ...prev, linkedIn: answers.linkedin_url }));
+    }
+    if (answers.key_projects) {
+      setProjects([{
+        id: '1',
+        name: 'Key Projects',
+        description: answers.key_projects,
+        technologies: '',
+        url: '',
+        year: ''
+      }]);
+    }
+    if (answers.credentials) {
+      setCredentials([{
+        id: '1',
+        title: answers.credentials,
+        issuer: '',
+        year: '',
+        url: ''
+      }]);
+    }
+    if (answers.references) {
+      setReferences([{
+        id: '1',
+        name: answers.references,
+        role: '',
+        company: '',
+        relationship: '',
+        email: ''
+      }]);
+    }
+    setMode('traditional');
+    toast({
+      title: "AI Assessment Complete",
+      description: "Your founder portfolio has been populated based on your answers.",
+    });
+  };
+
   const getSerializedState = () => ({
     profile, projects, credentials, references, demos, activeTab,
     savedDate: new Date().toLocaleString('en-GB')
@@ -146,8 +203,21 @@ export default function FounderPortfolio() {
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem('founder-portfolio-state');
-    if (saved) restoreSerializedState(JSON.parse(saved));
+    const handoffKey = 'founder-portfolio_handoff';
+    const handoffData = localStorage.getItem(handoffKey);
+    
+    if (handoffData) {
+      try {
+        const payload = JSON.parse(handoffData);
+        restoreSerializedState(payload);
+        localStorage.removeItem(handoffKey);
+      } catch (err) {
+        console.error('Failed to restore handoff data:', err);
+      }
+    } else {
+      const saved = localStorage.getItem('founder-portfolio-state');
+      if (saved) restoreSerializedState(JSON.parse(saved));
+    }
   }, []);
 
   const handleSave = () => {
@@ -235,422 +305,431 @@ export default function FounderPortfolio() {
         />
 
         <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-6 w-6 text-primary" />
-              Founder Capability Portfolio
-            </CardTitle>
-            <CardDescription>
-              Showcase GitHub, demos, past projects, references & credentials
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-6 w-6 text-primary" />
+                Founder Capability Portfolio
+              </CardTitle>
+              <CardDescription>
+                Showcase GitHub, demos, past projects, references & credentials
+              </CardDescription>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </CardHeader>
           <CardContent>
-            <div className="mb-6">
-              <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">Portfolio Completeness</span>
-                <span className="text-sm font-bold text-primary">{calculatePortfolioScore()}/100</span>
-              </div>
-              <Progress value={calculatePortfolioScore()} className="h-3" />
-            </div>
-
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="profile" data-testid="tab-profile">
-                  <User className="h-4 w-4 mr-2" />Profile
-                </TabsTrigger>
-                <TabsTrigger value="projects" data-testid="tab-projects">
-                  <Briefcase className="h-4 w-4 mr-2" />Projects
-                </TabsTrigger>
-                <TabsTrigger value="credentials" data-testid="tab-credentials">
-                  <Award className="h-4 w-4 mr-2" />Credentials
-                </TabsTrigger>
-                <TabsTrigger value="references" data-testid="tab-references">
-                  <User className="h-4 w-4 mr-2" />References
-                </TabsTrigger>
-                <TabsTrigger value="demos" data-testid="tab-demos">
-                  <Video className="h-4 w-4 mr-2" />Demos
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="profile" className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Full Name</Label>
-                    <Input
-                      value={profile.fullName}
-                      onChange={(e) => setProfile({...profile, fullName: e.target.value})}
-                      placeholder="Enter your full name"
-                      data-testid="input-profile-name"
-                    />
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+              <>
+                <div className="mb-6">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium">Portfolio Completeness</span>
+                    <span className="text-sm font-bold text-primary">{calculatePortfolioScore()}/100</span>
                   </div>
-                  <div>
-                    <Label>Professional Title</Label>
-                    <Input
-                      value={profile.title}
-                      onChange={(e) => setProfile({...profile, title: e.target.value})}
-                      placeholder="e.g., CEO & Founder, CTO"
-                      data-testid="input-profile-title"
-                    />
-                  </div>
-                  <div>
-                    <Label>LinkedIn URL</Label>
-                    <Input
-                      value={profile.linkedIn}
-                      onChange={(e) => setProfile({...profile, linkedIn: e.target.value})}
-                      placeholder="https://linkedin.com/in/..."
-                      data-testid="input-profile-linkedin"
-                    />
-                  </div>
-                  <div>
-                    <Label>GitHub URL</Label>
-                    <Input
-                      value={profile.github}
-                      onChange={(e) => setProfile({...profile, github: e.target.value})}
-                      placeholder="https://github.com/..."
-                      data-testid="input-profile-github"
-                    />
-                  </div>
-                  <div>
-                    <Label>Years of Experience</Label>
-                    <Input
-                      value={profile.yearsExperience}
-                      onChange={(e) => setProfile({...profile, yearsExperience: e.target.value})}
-                      placeholder="e.g., 7+"
-                      data-testid="input-profile-experience"
-                    />
-                  </div>
-                  <div>
-                    <Label>Key Specializations</Label>
-                    <Input
-                      value={profile.specializations}
-                      onChange={(e) => setProfile({...profile, specializations: e.target.value})}
-                      placeholder="e.g., Full-Stack Development, AI/ML"
-                      data-testid="input-profile-specializations"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label>Professional Summary</Label>
-                    <Textarea
-                      value={profile.summary}
-                      onChange={(e) => setProfile({...profile, summary: e.target.value})}
-                      placeholder="Write a compelling summary of your background, expertise, and why you're qualified to execute this business..."
-                      className="min-h-[120px]"
-                      data-testid="input-profile-summary"
-                    />
-                  </div>
+                  <Progress value={calculatePortfolioScore()} className="h-3" />
                 </div>
-              </TabsContent>
 
-              <TabsContent value="projects" className="space-y-4 mt-4">
-                <h3 className="text-lg font-semibold">Past Projects & Achievements</h3>
-                {projects.map((project, index) => (
-                  <Card key={project.id} className="p-4">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="profile" data-testid="tab-profile">
+                      <User className="h-4 w-4 mr-2" />Profile
+                    </TabsTrigger>
+                    <TabsTrigger value="projects" data-testid="tab-projects">
+                      <Briefcase className="h-4 w-4 mr-2" />Projects
+                    </TabsTrigger>
+                    <TabsTrigger value="credentials" data-testid="tab-credentials">
+                      <Award className="h-4 w-4 mr-2" />Credentials
+                    </TabsTrigger>
+                    <TabsTrigger value="references" data-testid="tab-references">
+                      <User className="h-4 w-4 mr-2" />References
+                    </TabsTrigger>
+                    <TabsTrigger value="demos" data-testid="tab-demos">
+                      <Video className="h-4 w-4 mr-2" />Demos
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="profile" className="space-y-4 mt-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label>Project Name</Label>
+                        <Label>Full Name</Label>
                         <Input
-                          value={project.name}
-                          onChange={(e) => {
-                            const updated = [...projects];
-                            updated[index].name = e.target.value;
-                            setProjects(updated);
-                          }}
-                          placeholder="Project name"
-                          data-testid={`input-project-name-${index}`}
+                          value={profile.fullName}
+                          onChange={(e) => setProfile({...profile, fullName: e.target.value})}
+                          placeholder="Enter your full name"
+                          data-testid="input-profile-name"
                         />
                       </div>
                       <div>
-                        <Label>Year</Label>
+                        <Label>Professional Title</Label>
                         <Input
-                          value={project.year}
-                          onChange={(e) => {
-                            const updated = [...projects];
-                            updated[index].year = e.target.value;
-                            setProjects(updated);
-                          }}
-                          placeholder="e.g., 2023"
-                          data-testid={`input-project-year-${index}`}
+                          value={profile.title}
+                          onChange={(e) => setProfile({...profile, title: e.target.value})}
+                          placeholder="e.g., CEO & Founder, CTO"
+                          data-testid="input-profile-title"
+                        />
+                      </div>
+                      <div>
+                        <Label>LinkedIn URL</Label>
+                        <Input
+                          value={profile.linkedIn}
+                          onChange={(e) => setProfile({...profile, linkedIn: e.target.value})}
+                          placeholder="https://linkedin.com/in/..."
+                          data-testid="input-profile-linkedin"
+                        />
+                      </div>
+                      <div>
+                        <Label>GitHub URL</Label>
+                        <Input
+                          value={profile.github}
+                          onChange={(e) => setProfile({...profile, github: e.target.value})}
+                          placeholder="https://github.com/..."
+                          data-testid="input-profile-github"
+                        />
+                      </div>
+                      <div>
+                        <Label>Years of Experience</Label>
+                        <Input
+                          value={profile.yearsExperience}
+                          onChange={(e) => setProfile({...profile, yearsExperience: e.target.value})}
+                          placeholder="e.g., 7+"
+                          data-testid="input-profile-experience"
+                        />
+                      </div>
+                      <div>
+                        <Label>Key Specializations</Label>
+                        <Input
+                          value={profile.specializations}
+                          onChange={(e) => setProfile({...profile, specializations: e.target.value})}
+                          placeholder="e.g., Full-Stack Development, AI/ML"
+                          data-testid="input-profile-specializations"
                         />
                       </div>
                       <div className="md:col-span-2">
-                        <Label>Description & Outcomes</Label>
+                        <Label>Professional Summary</Label>
                         <Textarea
-                          value={project.description}
-                          onChange={(e) => {
-                            const updated = [...projects];
-                            updated[index].description = e.target.value;
-                            setProjects(updated);
-                          }}
-                          placeholder="Describe the project, your role, and measurable outcomes"
-                          data-testid={`input-project-description-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Technologies Used</Label>
-                        <Input
-                          value={project.technologies}
-                          onChange={(e) => {
-                            const updated = [...projects];
-                            updated[index].technologies = e.target.value;
-                            setProjects(updated);
-                          }}
-                          placeholder="e.g., React, Node.js, PostgreSQL"
-                          data-testid={`input-project-tech-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>URL (if available)</Label>
-                        <Input
-                          value={project.url}
-                          onChange={(e) => {
-                            const updated = [...projects];
-                            updated[index].url = e.target.value;
-                            setProjects(updated);
-                          }}
-                          placeholder="https://..."
-                          data-testid={`input-project-url-${index}`}
+                          value={profile.summary}
+                          onChange={(e) => setProfile({...profile, summary: e.target.value})}
+                          placeholder="Write a compelling summary of your background, expertise, and why you're qualified to execute this business..."
+                          className="min-h-[120px]"
+                          data-testid="input-profile-summary"
                         />
                       </div>
                     </div>
-                    {projects.length > 1 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4"
-                        onClick={() => setProjects(projects.filter((_, i) => i !== index))}
-                        data-testid={`button-remove-project-${index}`}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />Remove
-                      </Button>
-                    )}
-                  </Card>
-                ))}
-                <Button
-                  variant="outline"
-                  onClick={() => setProjects([...projects, { id: Date.now().toString(), name: '', description: '', technologies: '', url: '', year: '' }])}
-                  data-testid="button-add-project"
-                >
-                  <Plus className="h-4 w-4 mr-2" />Add Project
-                </Button>
-              </TabsContent>
+                  </TabsContent>
 
-              <TabsContent value="credentials" className="space-y-4 mt-4">
-                <h3 className="text-lg font-semibold">Credentials & Certifications</h3>
-                {credentials.map((cred, index) => (
-                  <Card key={cred.id} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Certification/Degree Title</Label>
-                        <Input
-                          value={cred.title}
-                          onChange={(e) => {
-                            const updated = [...credentials];
-                            updated[index].title = e.target.value;
-                            setCredentials(updated);
-                          }}
-                          placeholder="e.g., MSc Data Science, AWS Certified"
-                          data-testid={`input-cred-title-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Issuing Organization</Label>
-                        <Input
-                          value={cred.issuer}
-                          onChange={(e) => {
-                            const updated = [...credentials];
-                            updated[index].issuer = e.target.value;
-                            setCredentials(updated);
-                          }}
-                          placeholder="e.g., University, AWS"
-                          data-testid={`input-cred-issuer-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Year Obtained</Label>
-                        <Input
-                          value={cred.year}
-                          onChange={(e) => {
-                            const updated = [...credentials];
-                            updated[index].year = e.target.value;
-                            setCredentials(updated);
-                          }}
-                          placeholder="e.g., 2023"
-                          data-testid={`input-cred-year-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Verification URL</Label>
-                        <Input
-                          value={cred.url}
-                          onChange={(e) => {
-                            const updated = [...credentials];
-                            updated[index].url = e.target.value;
-                            setCredentials(updated);
-                          }}
-                          placeholder="https://..."
-                          data-testid={`input-cred-url-${index}`}
-                        />
-                      </div>
-                    </div>
-                    {credentials.length > 1 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4"
-                        onClick={() => setCredentials(credentials.filter((_, i) => i !== index))}
-                        data-testid={`button-remove-cred-${index}`}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />Remove
-                      </Button>
-                    )}
-                  </Card>
-                ))}
-                <Button
-                  variant="outline"
-                  onClick={() => setCredentials([...credentials, { id: Date.now().toString(), title: '', issuer: '', year: '', url: '' }])}
-                  data-testid="button-add-credential"
-                >
-                  <Plus className="h-4 w-4 mr-2" />Add Credential
-                </Button>
-              </TabsContent>
+                  <TabsContent value="projects" className="space-y-4 mt-4">
+                    <h3 className="text-lg font-semibold">Past Projects & Achievements</h3>
+                    {projects.map((project, index) => (
+                      <Card key={project.id} className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Project Name</Label>
+                            <Input
+                              value={project.name}
+                              onChange={(e) => {
+                                const updated = [...projects];
+                                updated[index].name = e.target.value;
+                                setProjects(updated);
+                              }}
+                              placeholder="Project name"
+                              data-testid={`input-project-name-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Year</Label>
+                            <Input
+                              value={project.year}
+                              onChange={(e) => {
+                                const updated = [...projects];
+                                updated[index].year = e.target.value;
+                                setProjects(updated);
+                              }}
+                              placeholder="e.g., 2023"
+                              data-testid={`input-project-year-${index}`}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <Label>Description & Outcomes</Label>
+                            <Textarea
+                              value={project.description}
+                              onChange={(e) => {
+                                const updated = [...projects];
+                                updated[index].description = e.target.value;
+                                setProjects(updated);
+                              }}
+                              placeholder="Describe the project, your role, and measurable outcomes"
+                              data-testid={`input-project-description-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Technologies Used</Label>
+                            <Input
+                              value={project.technologies}
+                              onChange={(e) => {
+                                const updated = [...projects];
+                                updated[index].technologies = e.target.value;
+                                setProjects(updated);
+                              }}
+                              placeholder="e.g., React, Node.js, PostgreSQL"
+                              data-testid={`input-project-tech-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>URL (if available)</Label>
+                            <Input
+                              value={project.url}
+                              onChange={(e) => {
+                                const updated = [...projects];
+                                updated[index].url = e.target.value;
+                                setProjects(updated);
+                              }}
+                              placeholder="https://..."
+                              data-testid={`input-project-url-${index}`}
+                            />
+                          </div>
+                        </div>
+                        {projects.length > 1 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-4"
+                            onClick={() => setProjects(projects.filter((_, i) => i !== index))}
+                            data-testid={`button-remove-project-${index}`}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />Remove
+                          </Button>
+                        )}
+                      </Card>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => setProjects([...projects, { id: Date.now().toString(), name: '', description: '', technologies: '', url: '', year: '' }])}
+                      data-testid="button-add-project"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />Add Project
+                    </Button>
+                  </TabsContent>
 
-              <TabsContent value="references" className="space-y-4 mt-4">
-                <h3 className="text-lg font-semibold">Professional References</h3>
-                {references.map((ref, index) => (
-                  <Card key={ref.id} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Reference Name</Label>
-                        <Input
-                          value={ref.name}
-                          onChange={(e) => {
-                            const updated = [...references];
-                            updated[index].name = e.target.value;
-                            setReferences(updated);
-                          }}
-                          placeholder="Full name"
-                          data-testid={`input-ref-name-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Role/Title</Label>
-                        <Input
-                          value={ref.role}
-                          onChange={(e) => {
-                            const updated = [...references];
-                            updated[index].role = e.target.value;
-                            setReferences(updated);
-                          }}
-                          placeholder="e.g., CTO, Director"
-                          data-testid={`input-ref-role-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Company</Label>
-                        <Input
-                          value={ref.company}
-                          onChange={(e) => {
-                            const updated = [...references];
-                            updated[index].company = e.target.value;
-                            setReferences(updated);
-                          }}
-                          placeholder="Company name"
-                          data-testid={`input-ref-company-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Email</Label>
-                        <Input
-                          value={ref.email}
-                          onChange={(e) => {
-                            const updated = [...references];
-                            updated[index].email = e.target.value;
-                            setReferences(updated);
-                          }}
-                          placeholder="email@example.com"
-                          data-testid={`input-ref-email-${index}`}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label>Relationship</Label>
-                        <Input
-                          value={ref.relationship}
-                          onChange={(e) => {
-                            const updated = [...references];
-                            updated[index].relationship = e.target.value;
-                            setReferences(updated);
-                          }}
-                          placeholder="e.g., Former Manager, Mentor, Co-founder"
-                          data-testid={`input-ref-relationship-${index}`}
-                        />
-                      </div>
-                    </div>
-                    {references.length > 1 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4"
-                        onClick={() => setReferences(references.filter((_, i) => i !== index))}
-                        data-testid={`button-remove-ref-${index}`}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />Remove
-                      </Button>
-                    )}
-                  </Card>
-                ))}
-                <Button
-                  variant="outline"
-                  onClick={() => setReferences([...references, { id: Date.now().toString(), name: '', role: '', company: '', relationship: '', email: '' }])}
-                  data-testid="button-add-reference"
-                >
-                  <Plus className="h-4 w-4 mr-2" />Add Reference
-                </Button>
-              </TabsContent>
+                  <TabsContent value="credentials" className="space-y-4 mt-4">
+                    <h3 className="text-lg font-semibold">Credentials & Certifications</h3>
+                    {credentials.map((cred, index) => (
+                      <Card key={cred.id} className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Certification/Degree Title</Label>
+                            <Input
+                              value={cred.title}
+                              onChange={(e) => {
+                                const updated = [...credentials];
+                                updated[index].title = e.target.value;
+                                setCredentials(updated);
+                              }}
+                              placeholder="e.g., MSc Data Science, AWS Certified"
+                              data-testid={`input-cred-title-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Issuing Organization</Label>
+                            <Input
+                              value={cred.issuer}
+                              onChange={(e) => {
+                                const updated = [...credentials];
+                                updated[index].issuer = e.target.value;
+                                setCredentials(updated);
+                              }}
+                              placeholder="e.g., University, AWS"
+                              data-testid={`input-cred-issuer-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Year Obtained</Label>
+                            <Input
+                              value={cred.year}
+                              onChange={(e) => {
+                                const updated = [...credentials];
+                                updated[index].year = e.target.value;
+                                setCredentials(updated);
+                              }}
+                              placeholder="e.g., 2023"
+                              data-testid={`input-cred-year-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Verification URL</Label>
+                            <Input
+                              value={cred.url}
+                              onChange={(e) => {
+                                const updated = [...credentials];
+                                updated[index].url = e.target.value;
+                                setCredentials(updated);
+                              }}
+                              placeholder="https://..."
+                              data-testid={`input-cred-url-${index}`}
+                            />
+                          </div>
+                        </div>
+                        {credentials.length > 1 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-4"
+                            onClick={() => setCredentials(credentials.filter((_, i) => i !== index))}
+                            data-testid={`button-remove-cred-${index}`}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />Remove
+                          </Button>
+                        )}
+                      </Card>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => setCredentials([...credentials, { id: Date.now().toString(), title: '', issuer: '', year: '', url: '' }])}
+                      data-testid="button-add-credential"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />Add Credential
+                    </Button>
+                  </TabsContent>
 
-              <TabsContent value="demos" className="space-y-4 mt-4">
-                <h3 className="text-lg font-semibold">Demos & Prototypes</h3>
-                <Card className="p-4">
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Demo Video URL</Label>
-                      <Input
-                        value={demos.demoUrl}
-                        onChange={(e) => setDemos({...demos, demoUrl: e.target.value})}
-                        placeholder="https://youtube.com/... or https://loom.com/..."
-                        data-testid="input-demo-url"
-                      />
-                    </div>
-                    <div>
-                      <Label>Demo Description</Label>
-                      <Textarea
-                        value={demos.demoDescription}
-                        onChange={(e) => setDemos({...demos, demoDescription: e.target.value})}
-                        placeholder="Describe what the demo shows and key features"
-                        data-testid="input-demo-description"
-                      />
-                    </div>
-                    <div>
-                      <Label>MVP/Prototype URL</Label>
-                      <Input
-                        value={demos.mvpUrl}
-                        onChange={(e) => setDemos({...demos, mvpUrl: e.target.value})}
-                        placeholder="https://..."
-                        data-testid="input-mvp-url"
-                      />
-                    </div>
-                    <div>
-                      <Label>MVP Description</Label>
-                      <Textarea
-                        value={demos.mvpDescription}
-                        onChange={(e) => setDemos({...demos, mvpDescription: e.target.value})}
-                        placeholder="Describe the MVP functionality and current status"
-                        data-testid="input-mvp-description"
-                      />
-                    </div>
-                  </div>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  <TabsContent value="references" className="space-y-4 mt-4">
+                    <h3 className="text-lg font-semibold">Professional References</h3>
+                    {references.map((ref, index) => (
+                      <Card key={ref.id} className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Reference Name</Label>
+                            <Input
+                              value={ref.name}
+                              onChange={(e) => {
+                                const updated = [...references];
+                                updated[index].name = e.target.value;
+                                setReferences(updated);
+                              }}
+                              placeholder="Full name"
+                              data-testid={`input-ref-name-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Role</Label>
+                            <Input
+                              value={ref.role}
+                              onChange={(e) => {
+                                const updated = [...references];
+                                updated[index].role = e.target.value;
+                                setReferences(updated);
+                              }}
+                              placeholder="Job title"
+                              data-testid={`input-ref-role-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Company</Label>
+                            <Input
+                              value={ref.company}
+                              onChange={(e) => {
+                                const updated = [...references];
+                                updated[index].company = e.target.value;
+                                setReferences(updated);
+                              }}
+                              placeholder="Company name"
+                              data-testid={`input-ref-company-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Relationship</Label>
+                            <Input
+                              value={ref.relationship}
+                              onChange={(e) => {
+                                const updated = [...references];
+                                updated[index].relationship = e.target.value;
+                                setReferences(updated);
+                              }}
+                              placeholder="e.g., Former Manager, Business Partner"
+                              data-testid={`input-ref-relationship-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Email</Label>
+                            <Input
+                              value={ref.email}
+                              onChange={(e) => {
+                                const updated = [...references];
+                                updated[index].email = e.target.value;
+                                setReferences(updated);
+                              }}
+                              placeholder="email@example.com"
+                              data-testid={`input-ref-email-${index}`}
+                            />
+                          </div>
+                        </div>
+                        {references.length > 1 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-4"
+                            onClick={() => setReferences(references.filter((_, i) => i !== index))}
+                            data-testid={`button-remove-ref-${index}`}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />Remove
+                          </Button>
+                        )}
+                      </Card>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => setReferences([...references, { id: Date.now().toString(), name: '', role: '', company: '', relationship: '', email: '' }])}
+                      data-testid="button-add-reference"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />Add Reference
+                    </Button>
+                  </TabsContent>
+
+                  <TabsContent value="demos" className="space-y-4 mt-4">
+                    <h3 className="text-lg font-semibold">Product Demos & MVP</h3>
+                    <Card className="p-4">
+                      <div className="grid grid-cols-1 gap-4">
+                        <div>
+                          <Label>Demo Video URL</Label>
+                          <Input
+                            value={demos.demoUrl}
+                            onChange={(e) => setDemos({...demos, demoUrl: e.target.value})}
+                            placeholder="https://youtube.com/... or https://loom.com/..."
+                            data-testid="input-demo-url"
+                          />
+                        </div>
+                        <div>
+                          <Label>Demo Description</Label>
+                          <Textarea
+                            value={demos.demoDescription}
+                            onChange={(e) => setDemos({...demos, demoDescription: e.target.value})}
+                            placeholder="What does the demo show?"
+                            data-testid="input-demo-description"
+                          />
+                        </div>
+                        <div>
+                          <Label>MVP / Live Product URL</Label>
+                          <Input
+                            value={demos.mvpUrl}
+                            onChange={(e) => setDemos({...demos, mvpUrl: e.target.value})}
+                            placeholder="https://yourproduct.com"
+                            data-testid="input-mvp-url"
+                          />
+                        </div>
+                        <div>
+                          <Label>MVP Description</Label>
+                          <Textarea
+                            value={demos.mvpDescription}
+                            onChange={(e) => setDemos({...demos, mvpDescription: e.target.value})}
+                            placeholder="What functionality is available?"
+                            data-testid="input-mvp-description"
+                          />
+                        </div>
+                      </div>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

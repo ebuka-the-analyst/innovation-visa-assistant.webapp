@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
@@ -13,6 +13,60 @@ import { Badge } from "@/components/ui/badge";
 import { Wallet, Building, TrendingUp, FileText, Plus, Trash2 } from "lucide-react";
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'financial-resilience',
+  toolName: 'Financial Resilience Evidence',
+  agent: 'sterling',
+  greeting: "Hello! I'm Sterling, your Financial Analyst. Building robust financial evidence is essential for demonstrating viability to endorsers. Let me guide you through documenting your runway, bank statements, and funding sources systematically.",
+  questions: [
+    {
+      id: 'monthly-burn',
+      question: "What is your current monthly burn rate? Include all operational costs, salaries, and overhead expenses.",
+      hint: "Be comprehensive - endorsers want to see you understand your cost structure",
+      fieldKey: 'monthly_burn',
+      fieldType: 'number',
+      minLength: 1
+    },
+    {
+      id: 'current-cash',
+      question: "How much cash do you currently have in your business accounts? Provide the total across all business accounts.",
+      hint: "This should match what's shown in your recent bank statements",
+      fieldKey: 'current_cash',
+      fieldType: 'number',
+      minLength: 1
+    },
+    {
+      id: 'personal-savings',
+      question: "What personal savings do you have available? Remember the UK visa requires £1,270 minimum held for 28 consecutive days.",
+      hint: "Endorsers want to see you have personal financial stability",
+      fieldKey: 'personal_savings',
+      fieldType: 'number',
+      minLength: 1
+    },
+    {
+      id: 'bank-accounts',
+      question: "Which banks hold your business and personal accounts? List them with approximate balances and account types.",
+      hint: "Include all accounts you'll use as evidence - business current, savings, etc.",
+      fieldKey: 'bank_accounts',
+      minLength: 30
+    },
+    {
+      id: 'funding-sources',
+      question: "What are your funding sources? Include personal investment, angel investors, grants, or any committed capital.",
+      hint: "Document each source with amounts and status (received, committed, pending)",
+      fieldKey: 'funding_sources',
+      minLength: 30
+    },
+    {
+      id: 'funding-documentation',
+      question: "What documentation do you have for each funding source? List the types of proof available.",
+      hint: "Investment agreements, bank transfers, grant letters, commitment letters",
+      fieldKey: 'funding_docs',
+      minLength: 20
+    }
+  ]
+};
 
 interface BankStatement {
   id: string;
@@ -36,6 +90,31 @@ export default function FinancialResilience() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('runway');
   const [savedDate, setSavedDate] = useState('');
+  
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('financial-resilience-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('financial-resilience-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((answers: Record<string, any>) => {
+    if (answers.monthly_burn) {
+      const burnValue = parseInt(answers.monthly_burn) || 0;
+      setRunway(prev => ({ ...prev, monthlyBurn: burnValue }));
+    }
+    if (answers.current_cash) {
+      const cashValue = parseInt(answers.current_cash) || 0;
+      setRunway(prev => ({ ...prev, currentCash: cashValue }));
+    }
+    if (answers.personal_savings) {
+      const savingsValue = parseInt(answers.personal_savings) || 0;
+      setRunway(prev => ({ ...prev, personalSavings: savingsValue }));
+    }
+    setMode('traditional');
+    toast({ title: "AI Guide Complete", description: "Your answers have been applied to the form" });
+  }, [toast]);
 
   const [runway, setRunway] = useState({
     monthlyBurn: 0,
@@ -208,15 +287,24 @@ export default function FinancialResilience() {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Wallet className="h-6 w-6 text-primary" />
-              Financial Resilience Evidence
-            </CardTitle>
-            <CardDescription>
-              Document runway, bank statements & investment readiness
-            </CardDescription>
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="h-6 w-6 text-primary" />
+                  Financial Resilience Evidence
+                </CardTitle>
+                <CardDescription>
+                  Document runway, bank statements & investment readiness
+                </CardDescription>
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </CardHeader>
           <CardContent>
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+              <>
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium">Financial Resilience Score</span>
@@ -498,6 +586,8 @@ export default function FinancialResilience() {
                 </div>
               </TabsContent>
             </Tabs>
+            </>
+            )}
           </CardContent>
         </Card>
       </div>

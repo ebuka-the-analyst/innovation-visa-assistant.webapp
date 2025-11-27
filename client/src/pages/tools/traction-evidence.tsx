@@ -49,8 +49,8 @@ interface Survey {
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'traction-evidence',
   toolName: 'Traction Evidence Builder',
-  agent: 'sage',
-  greeting: "Hello! I'm Sage, your Compliance Expert. Building traction evidence is crucial for demonstrating market validation to endorsers. Let me guide you through documenting your waitlists, letters of intent, partnerships, and customer surveys systematically.",
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. Building traction evidence is crucial for demonstrating market validation to endorsers. Let me guide you through documenting your waitlists, letters of intent, partnerships, and customer surveys systematically.",
   questions: [
     {
       id: 'waitlist-source',
@@ -102,6 +102,56 @@ export default function TractionEvidence() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('waitlists');
   const [savedDate, setSavedDate] = useState('');
+  
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('traction-evidence-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('traction-evidence-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((answers: Record<string, any>) => {
+    if (answers.waitlist_source || answers.waitlist_count) {
+      setWaitlists([{
+        id: Date.now().toString(),
+        source: answers.waitlist_source || '',
+        count: parseInt(answers.waitlist_count) || 0,
+        dateAdded: new Date().toISOString().split('T')[0],
+        verified: false
+      }]);
+    }
+    if (answers.loi_companies) {
+      setLois([{
+        id: Date.now().toString(),
+        companyName: answers.loi_companies.split(',')[0]?.trim() || '',
+        contactPerson: '',
+        value: '',
+        status: 'draft',
+        dateIssued: ''
+      }]);
+    }
+    if (answers.partnerships) {
+      setPartnerships([{
+        id: Date.now().toString(),
+        partnerName: answers.partnerships.split(',')[0]?.trim() || '',
+        type: '',
+        description: answers.partnerships,
+        formalized: false
+      }]);
+    }
+    if (answers.survey_insights) {
+      setSurveys([{
+        id: Date.now().toString(),
+        title: 'Customer Validation Survey',
+        respondents: 0,
+        keyFindings: answers.survey_insights,
+        source: ''
+      }]);
+    }
+    setMode('traditional');
+    toast({ title: "AI Guide Complete", description: "Your traction evidence has been applied to the form" });
+  }, [toast]);
 
   const [waitlists, setWaitlists] = useState<WaitlistEntry[]>([
     { id: '1', source: '', count: 0, dateAdded: '', verified: false }
@@ -220,15 +270,24 @@ export default function TractionEvidence() {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-primary" />
-              Traction Evidence Builder
-            </CardTitle>
-            <CardDescription>
-              Build proof of market demand with waitlists, LOIs, partnerships & surveys
-            </CardDescription>
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-6 w-6 text-primary" />
+                  Traction Evidence Builder
+                </CardTitle>
+                <CardDescription>
+                  Build proof of market demand with waitlists, LOIs, partnerships & surveys
+                </CardDescription>
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </CardHeader>
           <CardContent>
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+              <>
             <div className="mb-6">
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium">Traction Score</span>
@@ -578,6 +637,8 @@ export default function TractionEvidence() {
                 </Button>
               </TabsContent>
             </Tabs>
+            </>
+            )}
           </CardContent>
         </Card>
       </div>

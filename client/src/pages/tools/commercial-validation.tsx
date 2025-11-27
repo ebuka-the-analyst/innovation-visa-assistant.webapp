@@ -44,8 +44,8 @@ interface CaseStudy {
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'commercial-validation',
   toolName: 'Commercial Validation Suite',
-  agent: 'sage',
-  greeting: "Hello! I'm Sage, your Compliance Expert. Commercial validation is essential for proving your business viability to endorsers. Let me guide you through competitor analysis, user interviews, and building case studies that demonstrate market demand.",
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. Commercial validation is essential for proving your business viability to endorsers. Let me guide you through competitor analysis, user interviews, and building case studies that demonstrate market demand and innovation potential.",
   questions: [
     {
       id: 'target-market',
@@ -98,6 +98,14 @@ export default function CommercialValidation() {
   const [activeTab, setActiveTab] = useState('competitors');
   const [savedDate, setSavedDate] = useState('');
 
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('commercial-validation-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('commercial-validation-mode', mode);
+  }, [mode]);
+
   const [competitors, setCompetitors] = useState<Competitor[]>([
     { id: '1', name: '', strengths: '', weaknesses: '', pricing: '', marketShare: '' }
   ]);
@@ -114,6 +122,43 @@ export default function CommercialValidation() {
     keyTrends: ''
   });
 
+  const handleAiComplete = (answers: Record<string, any>) => {
+    if (answers.target_market) {
+      setMarketSummary(prev => ({ ...prev, targetMarket: answers.target_market }));
+    }
+    if (answers.market_size) {
+      setMarketSummary(prev => ({ ...prev, marketSize: answers.market_size }));
+    }
+    if (answers.main_competitors) {
+      const competitorNames = answers.main_competitors.split(',').map((c: string) => c.trim()).slice(0, 3);
+      setCompetitors(competitorNames.map((name: string, index: number) => ({
+        id: (index + 1).toString(),
+        name,
+        strengths: '',
+        weaknesses: '',
+        pricing: '',
+        marketShare: ''
+      })));
+    }
+    if (answers.user_interviews) {
+      setInterviews([{
+        id: '1',
+        intervieweeName: '',
+        role: '',
+        company: '',
+        date: '',
+        keyInsights: answers.user_interviews,
+        painPoints: '',
+        willingnessToPay: answers.willingness_to_pay || ''
+      }]);
+    }
+    setMode('traditional');
+    toast({
+      title: "AI Assessment Complete",
+      description: "Your commercial validation has been populated based on your answers.",
+    });
+  };
+
   const getSerializedState = () => ({
     competitors, interviews, caseStudies, marketSummary, activeTab,
     savedDate: new Date().toLocaleString('en-GB')
@@ -129,8 +174,21 @@ export default function CommercialValidation() {
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem('commercial-validation-state');
-    if (saved) restoreSerializedState(JSON.parse(saved));
+    const handoffKey = 'commercial-validation_handoff';
+    const handoffData = localStorage.getItem(handoffKey);
+    
+    if (handoffData) {
+      try {
+        const payload = JSON.parse(handoffData);
+        restoreSerializedState(payload);
+        localStorage.removeItem(handoffKey);
+      } catch (err) {
+        console.error('Failed to restore handoff data:', err);
+      }
+    } else {
+      const saved = localStorage.getItem('commercial-validation-state');
+      if (saved) restoreSerializedState(JSON.parse(saved));
+    }
   }, []);
 
   const handleSave = () => {
@@ -221,390 +279,398 @@ export default function CommercialValidation() {
         />
 
         <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-6 w-6 text-primary" />
-              Commercial Validation Suite
-            </CardTitle>
-            <CardDescription>
-              Competitor analysis, user interviews, and case study builder
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-6 w-6 text-primary" />
+                Commercial Validation Suite
+              </CardTitle>
+              <CardDescription>
+                Competitor analysis, user interviews, and case study builder
+              </CardDescription>
+            </div>
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
           </CardHeader>
           <CardContent>
-            <div className="mb-6">
-              <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">Validation Score</span>
-                <span className="text-sm font-bold text-primary">{calculateValidationScore()}/100</span>
-              </div>
-              <Progress value={calculateValidationScore()} className="h-3" />
-            </div>
-
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="competitors" data-testid="tab-competitors">
-                  <BarChart3 className="h-4 w-4 mr-2" />Competitors
-                </TabsTrigger>
-                <TabsTrigger value="interviews" data-testid="tab-interviews">
-                  <Users className="h-4 w-4 mr-2" />Interviews
-                </TabsTrigger>
-                <TabsTrigger value="casestudies" data-testid="tab-casestudies">
-                  <FileText className="h-4 w-4 mr-2" />Case Studies
-                </TabsTrigger>
-                <TabsTrigger value="market" data-testid="tab-market">
-                  <Target className="h-4 w-4 mr-2" />Market
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="competitors" className="space-y-4 mt-4">
-                <h3 className="text-lg font-semibold">Competitor Analysis</h3>
-                {competitors.map((comp, index) => (
-                  <Card key={comp.id} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Competitor Name</Label>
-                        <Input
-                          value={comp.name}
-                          onChange={(e) => {
-                            const updated = [...competitors];
-                            updated[index].name = e.target.value;
-                            setCompetitors(updated);
-                          }}
-                          placeholder="Company name"
-                          data-testid={`input-competitor-name-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Market Share</Label>
-                        <Input
-                          value={comp.marketShare}
-                          onChange={(e) => {
-                            const updated = [...competitors];
-                            updated[index].marketShare = e.target.value;
-                            setCompetitors(updated);
-                          }}
-                          placeholder="e.g., 15%"
-                          data-testid={`input-competitor-share-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Strengths</Label>
-                        <Textarea
-                          value={comp.strengths}
-                          onChange={(e) => {
-                            const updated = [...competitors];
-                            updated[index].strengths = e.target.value;
-                            setCompetitors(updated);
-                          }}
-                          placeholder="Key strengths"
-                          data-testid={`input-competitor-strengths-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Weaknesses</Label>
-                        <Textarea
-                          value={comp.weaknesses}
-                          onChange={(e) => {
-                            const updated = [...competitors];
-                            updated[index].weaknesses = e.target.value;
-                            setCompetitors(updated);
-                          }}
-                          placeholder="Key weaknesses"
-                          data-testid={`input-competitor-weaknesses-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Pricing</Label>
-                        <Input
-                          value={comp.pricing}
-                          onChange={(e) => {
-                            const updated = [...competitors];
-                            updated[index].pricing = e.target.value;
-                            setCompetitors(updated);
-                          }}
-                          placeholder="Pricing model/range"
-                          data-testid={`input-competitor-pricing-${index}`}
-                        />
-                      </div>
-                    </div>
-                    {competitors.length > 1 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4"
-                        onClick={() => setCompetitors(competitors.filter((_, i) => i !== index))}
-                        data-testid={`button-remove-competitor-${index}`}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />Remove
-                      </Button>
-                    )}
-                  </Card>
-                ))}
-                <Button
-                  variant="outline"
-                  onClick={() => setCompetitors([...competitors, { id: Date.now().toString(), name: '', strengths: '', weaknesses: '', pricing: '', marketShare: '' }])}
-                  data-testid="button-add-competitor"
-                >
-                  <Plus className="h-4 w-4 mr-2" />Add Competitor
-                </Button>
-              </TabsContent>
-
-              <TabsContent value="interviews" className="space-y-4 mt-4">
-                <h3 className="text-lg font-semibold">User Interviews</h3>
-                {interviews.map((interview, index) => (
-                  <Card key={interview.id} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Interviewee Name</Label>
-                        <Input
-                          value={interview.intervieweeName}
-                          onChange={(e) => {
-                            const updated = [...interviews];
-                            updated[index].intervieweeName = e.target.value;
-                            setInterviews(updated);
-                          }}
-                          placeholder="Name"
-                          data-testid={`input-interview-name-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Role</Label>
-                        <Input
-                          value={interview.role}
-                          onChange={(e) => {
-                            const updated = [...interviews];
-                            updated[index].role = e.target.value;
-                            setInterviews(updated);
-                          }}
-                          placeholder="Job title"
-                          data-testid={`input-interview-role-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Company</Label>
-                        <Input
-                          value={interview.company}
-                          onChange={(e) => {
-                            const updated = [...interviews];
-                            updated[index].company = e.target.value;
-                            setInterviews(updated);
-                          }}
-                          placeholder="Company name"
-                          data-testid={`input-interview-company-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Date</Label>
-                        <Input
-                          type="date"
-                          value={interview.date}
-                          onChange={(e) => {
-                            const updated = [...interviews];
-                            updated[index].date = e.target.value;
-                            setInterviews(updated);
-                          }}
-                          data-testid={`input-interview-date-${index}`}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label>Key Insights</Label>
-                        <Textarea
-                          value={interview.keyInsights}
-                          onChange={(e) => {
-                            const updated = [...interviews];
-                            updated[index].keyInsights = e.target.value;
-                            setInterviews(updated);
-                          }}
-                          placeholder="Main takeaways from the interview"
-                          data-testid={`input-interview-insights-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Pain Points Identified</Label>
-                        <Textarea
-                          value={interview.painPoints}
-                          onChange={(e) => {
-                            const updated = [...interviews];
-                            updated[index].painPoints = e.target.value;
-                            setInterviews(updated);
-                          }}
-                          placeholder="What problems did they describe?"
-                          data-testid={`input-interview-pain-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Willingness to Pay</Label>
-                        <Input
-                          value={interview.willingnessToPay}
-                          onChange={(e) => {
-                            const updated = [...interviews];
-                            updated[index].willingnessToPay = e.target.value;
-                            setInterviews(updated);
-                          }}
-                          placeholder="e.g., £50-100/month"
-                          data-testid={`input-interview-wtp-${index}`}
-                        />
-                      </div>
-                    </div>
-                    {interviews.length > 1 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4"
-                        onClick={() => setInterviews(interviews.filter((_, i) => i !== index))}
-                        data-testid={`button-remove-interview-${index}`}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />Remove
-                      </Button>
-                    )}
-                  </Card>
-                ))}
-                <Button
-                  variant="outline"
-                  onClick={() => setInterviews([...interviews, { id: Date.now().toString(), intervieweeName: '', role: '', company: '', date: '', keyInsights: '', painPoints: '', willingnessToPay: '' }])}
-                  data-testid="button-add-interview"
-                >
-                  <Plus className="h-4 w-4 mr-2" />Add Interview
-                </Button>
-              </TabsContent>
-
-              <TabsContent value="casestudies" className="space-y-4 mt-4">
-                <h3 className="text-lg font-semibold">Case Studies</h3>
-                {caseStudies.map((cs, index) => (
-                  <Card key={cs.id} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Case Study Title</Label>
-                        <Input
-                          value={cs.title}
-                          onChange={(e) => {
-                            const updated = [...caseStudies];
-                            updated[index].title = e.target.value;
-                            setCaseStudies(updated);
-                          }}
-                          placeholder="Descriptive title"
-                          data-testid={`input-cs-title-${index}`}
-                        />
-                      </div>
-                      <div>
-                        <Label>Customer</Label>
-                        <Input
-                          value={cs.customer}
-                          onChange={(e) => {
-                            const updated = [...caseStudies];
-                            updated[index].customer = e.target.value;
-                            setCaseStudies(updated);
-                          }}
-                          placeholder="Customer name/type"
-                          data-testid={`input-cs-customer-${index}`}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label>Problem</Label>
-                        <Textarea
-                          value={cs.problem}
-                          onChange={(e) => {
-                            const updated = [...caseStudies];
-                            updated[index].problem = e.target.value;
-                            setCaseStudies(updated);
-                          }}
-                          placeholder="What problem did the customer face?"
-                          data-testid={`input-cs-problem-${index}`}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label>Solution</Label>
-                        <Textarea
-                          value={cs.solution}
-                          onChange={(e) => {
-                            const updated = [...caseStudies];
-                            updated[index].solution = e.target.value;
-                            setCaseStudies(updated);
-                          }}
-                          placeholder="How did your product/service solve it?"
-                          data-testid={`input-cs-solution-${index}`}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label>Results</Label>
-                        <Textarea
-                          value={cs.results}
-                          onChange={(e) => {
-                            const updated = [...caseStudies];
-                            updated[index].results = e.target.value;
-                            setCaseStudies(updated);
-                          }}
-                          placeholder="Quantifiable results achieved"
-                          data-testid={`input-cs-results-${index}`}
-                        />
-                      </div>
-                    </div>
-                    {caseStudies.length > 1 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4"
-                        onClick={() => setCaseStudies(caseStudies.filter((_, i) => i !== index))}
-                        data-testid={`button-remove-cs-${index}`}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />Remove
-                      </Button>
-                    )}
-                  </Card>
-                ))}
-                <Button
-                  variant="outline"
-                  onClick={() => setCaseStudies([...caseStudies, { id: Date.now().toString(), title: '', customer: '', problem: '', solution: '', results: '' }])}
-                  data-testid="button-add-casestudy"
-                >
-                  <Plus className="h-4 w-4 mr-2" />Add Case Study
-                </Button>
-              </TabsContent>
-
-              <TabsContent value="market" className="space-y-4 mt-4">
-                <h3 className="text-lg font-semibold">Market Overview</h3>
-                <Card className="p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Target Market</Label>
-                      <Input
-                        value={marketSummary.targetMarket}
-                        onChange={(e) => setMarketSummary({...marketSummary, targetMarket: e.target.value})}
-                        placeholder="e.g., UK SMBs in retail sector"
-                        data-testid="input-market-target"
-                      />
-                    </div>
-                    <div>
-                      <Label>Market Size (TAM)</Label>
-                      <Input
-                        value={marketSummary.marketSize}
-                        onChange={(e) => setMarketSummary({...marketSummary, marketSize: e.target.value})}
-                        placeholder="e.g., £2.5 billion"
-                        data-testid="input-market-size"
-                      />
-                    </div>
-                    <div>
-                      <Label>Growth Rate</Label>
-                      <Input
-                        value={marketSummary.growthRate}
-                        onChange={(e) => setMarketSummary({...marketSummary, growthRate: e.target.value})}
-                        placeholder="e.g., 12% CAGR"
-                        data-testid="input-market-growth"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Label>Key Market Trends</Label>
-                      <Textarea
-                        value={marketSummary.keyTrends}
-                        onChange={(e) => setMarketSummary({...marketSummary, keyTrends: e.target.value})}
-                        placeholder="Describe major trends shaping this market..."
-                        className="min-h-[100px]"
-                        data-testid="input-market-trends"
-                      />
-                    </div>
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+              <>
+                <div className="mb-6">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium">Validation Score</span>
+                    <span className="text-sm font-bold text-primary">{calculateValidationScore()}/100</span>
                   </div>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  <Progress value={calculateValidationScore()} className="h-3" />
+                </div>
+
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="competitors" data-testid="tab-competitors">
+                      <BarChart3 className="h-4 w-4 mr-2" />Competitors
+                    </TabsTrigger>
+                    <TabsTrigger value="interviews" data-testid="tab-interviews">
+                      <Users className="h-4 w-4 mr-2" />Interviews
+                    </TabsTrigger>
+                    <TabsTrigger value="casestudies" data-testid="tab-casestudies">
+                      <FileText className="h-4 w-4 mr-2" />Case Studies
+                    </TabsTrigger>
+                    <TabsTrigger value="market" data-testid="tab-market">
+                      <Target className="h-4 w-4 mr-2" />Market
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="competitors" className="space-y-4 mt-4">
+                    <h3 className="text-lg font-semibold">Competitor Analysis</h3>
+                    {competitors.map((comp, index) => (
+                      <Card key={comp.id} className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Competitor Name</Label>
+                            <Input
+                              value={comp.name}
+                              onChange={(e) => {
+                                const updated = [...competitors];
+                                updated[index].name = e.target.value;
+                                setCompetitors(updated);
+                              }}
+                              placeholder="Company name"
+                              data-testid={`input-competitor-name-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Market Share</Label>
+                            <Input
+                              value={comp.marketShare}
+                              onChange={(e) => {
+                                const updated = [...competitors];
+                                updated[index].marketShare = e.target.value;
+                                setCompetitors(updated);
+                              }}
+                              placeholder="e.g., 15%"
+                              data-testid={`input-competitor-share-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Strengths</Label>
+                            <Textarea
+                              value={comp.strengths}
+                              onChange={(e) => {
+                                const updated = [...competitors];
+                                updated[index].strengths = e.target.value;
+                                setCompetitors(updated);
+                              }}
+                              placeholder="Key strengths"
+                              data-testid={`input-competitor-strengths-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Weaknesses</Label>
+                            <Textarea
+                              value={comp.weaknesses}
+                              onChange={(e) => {
+                                const updated = [...competitors];
+                                updated[index].weaknesses = e.target.value;
+                                setCompetitors(updated);
+                              }}
+                              placeholder="Key weaknesses"
+                              data-testid={`input-competitor-weaknesses-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Pricing</Label>
+                            <Input
+                              value={comp.pricing}
+                              onChange={(e) => {
+                                const updated = [...competitors];
+                                updated[index].pricing = e.target.value;
+                                setCompetitors(updated);
+                              }}
+                              placeholder="Pricing model/range"
+                              data-testid={`input-competitor-pricing-${index}`}
+                            />
+                          </div>
+                        </div>
+                        {competitors.length > 1 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-4"
+                            onClick={() => setCompetitors(competitors.filter((_, i) => i !== index))}
+                            data-testid={`button-remove-competitor-${index}`}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />Remove
+                          </Button>
+                        )}
+                      </Card>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => setCompetitors([...competitors, { id: Date.now().toString(), name: '', strengths: '', weaknesses: '', pricing: '', marketShare: '' }])}
+                      data-testid="button-add-competitor"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />Add Competitor
+                    </Button>
+                  </TabsContent>
+
+                  <TabsContent value="interviews" className="space-y-4 mt-4">
+                    <h3 className="text-lg font-semibold">User Interviews</h3>
+                    {interviews.map((interview, index) => (
+                      <Card key={interview.id} className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Interviewee Name</Label>
+                            <Input
+                              value={interview.intervieweeName}
+                              onChange={(e) => {
+                                const updated = [...interviews];
+                                updated[index].intervieweeName = e.target.value;
+                                setInterviews(updated);
+                              }}
+                              placeholder="Name"
+                              data-testid={`input-interview-name-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Role</Label>
+                            <Input
+                              value={interview.role}
+                              onChange={(e) => {
+                                const updated = [...interviews];
+                                updated[index].role = e.target.value;
+                                setInterviews(updated);
+                              }}
+                              placeholder="Job title"
+                              data-testid={`input-interview-role-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Company</Label>
+                            <Input
+                              value={interview.company}
+                              onChange={(e) => {
+                                const updated = [...interviews];
+                                updated[index].company = e.target.value;
+                                setInterviews(updated);
+                              }}
+                              placeholder="Company name"
+                              data-testid={`input-interview-company-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Date</Label>
+                            <Input
+                              type="date"
+                              value={interview.date}
+                              onChange={(e) => {
+                                const updated = [...interviews];
+                                updated[index].date = e.target.value;
+                                setInterviews(updated);
+                              }}
+                              data-testid={`input-interview-date-${index}`}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <Label>Key Insights</Label>
+                            <Textarea
+                              value={interview.keyInsights}
+                              onChange={(e) => {
+                                const updated = [...interviews];
+                                updated[index].keyInsights = e.target.value;
+                                setInterviews(updated);
+                              }}
+                              placeholder="Main takeaways from the interview"
+                              data-testid={`input-interview-insights-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Pain Points Identified</Label>
+                            <Textarea
+                              value={interview.painPoints}
+                              onChange={(e) => {
+                                const updated = [...interviews];
+                                updated[index].painPoints = e.target.value;
+                                setInterviews(updated);
+                              }}
+                              placeholder="What problems did they describe?"
+                              data-testid={`input-interview-pain-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Willingness to Pay</Label>
+                            <Input
+                              value={interview.willingnessToPay}
+                              onChange={(e) => {
+                                const updated = [...interviews];
+                                updated[index].willingnessToPay = e.target.value;
+                                setInterviews(updated);
+                              }}
+                              placeholder="e.g., £50-100/month"
+                              data-testid={`input-interview-wtp-${index}`}
+                            />
+                          </div>
+                        </div>
+                        {interviews.length > 1 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-4"
+                            onClick={() => setInterviews(interviews.filter((_, i) => i !== index))}
+                            data-testid={`button-remove-interview-${index}`}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />Remove
+                          </Button>
+                        )}
+                      </Card>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => setInterviews([...interviews, { id: Date.now().toString(), intervieweeName: '', role: '', company: '', date: '', keyInsights: '', painPoints: '', willingnessToPay: '' }])}
+                      data-testid="button-add-interview"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />Add Interview
+                    </Button>
+                  </TabsContent>
+
+                  <TabsContent value="casestudies" className="space-y-4 mt-4">
+                    <h3 className="text-lg font-semibold">Case Studies</h3>
+                    {caseStudies.map((cs, index) => (
+                      <Card key={cs.id} className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Case Study Title</Label>
+                            <Input
+                              value={cs.title}
+                              onChange={(e) => {
+                                const updated = [...caseStudies];
+                                updated[index].title = e.target.value;
+                                setCaseStudies(updated);
+                              }}
+                              placeholder="Descriptive title"
+                              data-testid={`input-cs-title-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label>Customer</Label>
+                            <Input
+                              value={cs.customer}
+                              onChange={(e) => {
+                                const updated = [...caseStudies];
+                                updated[index].customer = e.target.value;
+                                setCaseStudies(updated);
+                              }}
+                              placeholder="Customer name/type"
+                              data-testid={`input-cs-customer-${index}`}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <Label>Problem</Label>
+                            <Textarea
+                              value={cs.problem}
+                              onChange={(e) => {
+                                const updated = [...caseStudies];
+                                updated[index].problem = e.target.value;
+                                setCaseStudies(updated);
+                              }}
+                              placeholder="What problem did the customer face?"
+                              data-testid={`input-cs-problem-${index}`}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <Label>Solution</Label>
+                            <Textarea
+                              value={cs.solution}
+                              onChange={(e) => {
+                                const updated = [...caseStudies];
+                                updated[index].solution = e.target.value;
+                                setCaseStudies(updated);
+                              }}
+                              placeholder="How did your solution help?"
+                              data-testid={`input-cs-solution-${index}`}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <Label>Results</Label>
+                            <Textarea
+                              value={cs.results}
+                              onChange={(e) => {
+                                const updated = [...caseStudies];
+                                updated[index].results = e.target.value;
+                                setCaseStudies(updated);
+                              }}
+                              placeholder="Quantifiable outcomes and benefits"
+                              data-testid={`input-cs-results-${index}`}
+                            />
+                          </div>
+                        </div>
+                        {caseStudies.length > 1 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-4"
+                            onClick={() => setCaseStudies(caseStudies.filter((_, i) => i !== index))}
+                            data-testid={`button-remove-cs-${index}`}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />Remove
+                          </Button>
+                        )}
+                      </Card>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => setCaseStudies([...caseStudies, { id: Date.now().toString(), title: '', customer: '', problem: '', solution: '', results: '' }])}
+                      data-testid="button-add-casestudy"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />Add Case Study
+                    </Button>
+                  </TabsContent>
+
+                  <TabsContent value="market" className="space-y-4 mt-4">
+                    <h3 className="text-lg font-semibold">Market Summary</h3>
+                    <Card className="p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <Label>Target Market</Label>
+                          <Textarea
+                            value={marketSummary.targetMarket}
+                            onChange={(e) => setMarketSummary({...marketSummary, targetMarket: e.target.value})}
+                            placeholder="Define your ideal customer segments"
+                            data-testid="input-market-target"
+                          />
+                        </div>
+                        <div>
+                          <Label>Market Size</Label>
+                          <Input
+                            value={marketSummary.marketSize}
+                            onChange={(e) => setMarketSummary({...marketSummary, marketSize: e.target.value})}
+                            placeholder="e.g., £500M TAM"
+                            data-testid="input-market-size"
+                          />
+                        </div>
+                        <div>
+                          <Label>Growth Rate</Label>
+                          <Input
+                            value={marketSummary.growthRate}
+                            onChange={(e) => setMarketSummary({...marketSummary, growthRate: e.target.value})}
+                            placeholder="e.g., 15% CAGR"
+                            data-testid="input-market-growth"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <Label>Key Market Trends</Label>
+                          <Textarea
+                            value={marketSummary.keyTrends}
+                            onChange={(e) => setMarketSummary({...marketSummary, keyTrends: e.target.value})}
+                            placeholder="Describe key industry trends supporting your business"
+                            data-testid="input-market-trends"
+                          />
+                        </div>
+                      </div>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

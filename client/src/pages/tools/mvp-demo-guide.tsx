@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
@@ -13,11 +13,90 @@ import { Video, Code, FileText, CheckCircle } from "lucide-react";
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
 
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'mvp-demo-guide',
+  toolName: 'MVP & Demo Builder Guide',
+  agent: 'nova',
+  greeting: "Hello! I'm Nova, your Innovation Specialist. A compelling MVP demo is crucial for showing endorsers your innovation in action. Let me guide you through creating an impressive demonstration of your product.",
+  questions: [
+    {
+      id: 'product-name',
+      question: "What is the name of your product/MVP? Give a brief one-line description of what it does.",
+      hint: "Keep it simple and memorable",
+      fieldKey: 'product_name',
+      minLength: 10
+    },
+    {
+      id: 'problem-solution',
+      question: "What problem does your MVP solve and how? Explain the core value proposition clearly.",
+      hint: "Endorsers want to see a clear problem-solution fit",
+      fieldKey: 'problem_solution',
+      minLength: 50
+    },
+    {
+      id: 'core-features',
+      question: "What are the 3-5 core features that make your MVP innovative? What makes these features unique?",
+      hint: "Focus on what differentiates you from existing solutions",
+      fieldKey: 'core_features',
+      minLength: 50
+    },
+    {
+      id: 'tech-stack',
+      question: "What technology stack powers your MVP? Include frontend, backend, and any AI/ML components.",
+      hint: "Highlight any innovative or cutting-edge technologies",
+      fieldKey: 'tech_stack',
+      minLength: 20
+    },
+    {
+      id: 'demo-status',
+      question: "What is the current status of your MVP? Is it live, in beta, or prototype stage? Provide demo URL if available.",
+      hint: "A working demo significantly strengthens your application",
+      fieldKey: 'demo_status',
+      minLength: 20
+    },
+    {
+      id: 'demo-video',
+      question: "Do you have a demo video? If yes, describe what it shows. If not, what key moments should it capture?",
+      hint: "Keep demos under 3 minutes, focus on the 'wow' moments",
+      fieldKey: 'demo_video',
+      minLength: 30
+    }
+  ]
+};
+
 export default function MvpDemoGuide() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('mvp');
   const [savedDate, setSavedDate] = useState('');
+  
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('mvp-demo-guide-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('mvp-demo-guide-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((answers: Record<string, any>) => {
+    setMvpDetails(prev => ({
+      ...prev,
+      productName: answers.product_name || prev.productName,
+      problemStatement: answers.problem_solution || prev.problemStatement,
+      coreFeatures: answers.core_features || prev.coreFeatures,
+      techStack: answers.tech_stack || prev.techStack,
+      currentStatus: answers.demo_status?.includes('live') ? 'Live' : answers.demo_status?.includes('beta') ? 'Beta' : answers.demo_status?.includes('prototype') ? 'Prototype' : prev.currentStatus,
+      demoUrl: answers.demo_status?.match(/https?:\/\/[^\s]+/)?.[0] || prev.demoUrl
+    }));
+    if (answers.demo_video) {
+      setDemoVideo(prev => ({
+        ...prev,
+        keyMoments: answers.demo_video
+      }));
+    }
+    setMode('traditional');
+    toast({ title: "AI Guide Complete", description: "Your MVP details have been applied to the form" });
+  }, [toast]);
 
   const [mvpDetails, setMvpDetails] = useState({
     productName: '',
@@ -159,15 +238,24 @@ export default function MvpDemoGuide() {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Video className="h-6 w-6 text-primary" />
-              MVP & Demo Builder Guide
-            </CardTitle>
-            <CardDescription>
-              Create compelling prototypes and demo videos for endorsers
-            </CardDescription>
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="h-6 w-6 text-primary" />
+                  MVP & Demo Builder Guide
+                </CardTitle>
+                <CardDescription>
+                  Create compelling prototypes and demo videos for endorsers
+                </CardDescription>
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </CardHeader>
           <CardContent>
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+              <>
             <div className="mb-6">
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium">Demo Readiness</span>
@@ -337,6 +425,8 @@ export default function MvpDemoGuide() {
                 </div>
               </TabsContent>
             </Tabs>
+            </>
+            )}
           </CardContent>
         </Card>
       </div>

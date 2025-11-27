@@ -11,7 +11,7 @@ import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, AlertTriangle, TrendingUp, Calendar, Save } from "lucide-react";
+import { CheckCircle2, AlertTriangle, TrendingUp, Calendar, Save, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePdfExport } from "@/hooks/usePdfExport";
 import { useWordExport } from "@/hooks/useWordExport";
@@ -112,6 +112,14 @@ export default function BusinessPlan() {
   const { generateWord } = useWordExport();
   const [showAutoSaveNotification, setShowAutoSaveNotification] = useState(false);
   const lastSaveRef = useRef<string>('');
+
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('business-plan-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('business-plan-mode', mode);
+  }, [mode]);
   
   const [sections, setSections] = useState<BusinessPlanSection[]>([
     {
@@ -200,6 +208,26 @@ export default function BusinessPlan() {
 
   const autoSaveDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
+  const handleAiComplete = (answers: Record<string, any>) => {
+    setSections(prevSections => {
+      return prevSections.map(section => ({
+        ...section,
+        fields: section.fields.map(field => {
+          const answer = answers[field.id];
+          if (answer) {
+            return { ...field, value: answer };
+          }
+          return field;
+        })
+      }));
+    });
+    setMode('traditional');
+    toast({
+      title: "AI Assessment Complete",
+      description: "Your business plan has been populated based on your answers.",
+    });
+  };
+
   const updateField = (sectionId: string, fieldId: string, value: string) => {
     setSections(prevSections => {
       const newSections = prevSections.map(section => 
@@ -274,11 +302,24 @@ export default function BusinessPlan() {
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem('business-plan-state');
-    if (saved) {
-      const state = JSON.parse(saved);
-      restoreSerializedState(state);
-      lastSaveRef.current = saved;
+    const handoffKey = 'business-plan_handoff';
+    const handoffData = localStorage.getItem(handoffKey);
+    
+    if (handoffData) {
+      try {
+        const payload = JSON.parse(handoffData);
+        restoreSerializedState(payload);
+        localStorage.removeItem(handoffKey);
+      } catch (err) {
+        console.error('Failed to restore handoff data:', err);
+      }
+    } else {
+      const saved = localStorage.getItem('business-plan-state');
+      if (saved) {
+        const state = JSON.parse(saved);
+        restoreSerializedState(state);
+        lastSaveRef.current = saved;
+      }
     }
   }, []);
 
@@ -496,359 +537,183 @@ export default function BusinessPlan() {
     <ToolAccessGuard requiredTier="basic" toolName="Business Plan Generator">
       <SEOHead
         title="Business Plan Generator | UK Innovator Founder Visa Assistant"
-        description="Create a professional, GOV.UK-compliant business plan for your UK Innovator Founder Visa. Covers all Innovation, Viability, and Scalability criteria. Used by 1,000+ successful applicants."
-        canonical="https://innovatorfoundervisaassistant.co.uk/tools/business-plan"
-        keywords="business plan for UK visa, Innovator Founder Visa business plan, UK visa business plan template, endorsement business plan, visa application business plan"
-        schema={combinedSchema}
+        description="Create a comprehensive, GOV.UK-compliant business plan for your UK Innovator Founder Visa application. Covers Innovation, Viability, and Scalability criteria."
+        structuredData={combinedSchema}
       />
-      
-      
-      {showAutoSaveNotification && (
-        <div 
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg animate-in slide-in-from-bottom-5 duration-300"
-          data-testid="notification-autosave"
-        >
-          <Save className="h-4 w-4" />
-          <span className="text-sm font-medium">Your work has been saved</span>
-        </div>
-      )}
-      
-      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
-        <div className="max-w-7xl mx-auto">
-          
-          
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-business-plan">Business Plan Generator</h1>
-            <p className="text-lg text-muted-foreground">GOV.UK-aligned comprehensive business plan for UK Innovator Founder Visa</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
-          </div>
-
+      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
+        <div className="container mx-auto px-4 max-w-6xl">
           <ToolUtilityBar
             toolId="business-plan"
+            toolName="Business Plan Generator"
             onSave={handleSave}
             onRestore={handleRestore}
             onExportPdf={handleExportPdf}
             onExportWord={handleExportWord}
-            onSmartTips={() => setActiveTab('tips')}
-            onActionPlan={() => setActiveTab('action')}
             getSerializedState={getSerializedState}
-            toolName="Business Plan Generator"
           />
 
           <Card className="mb-6">
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold">Overall Completion</h3>
-                    <p className="text-sm text-muted-foreground">Complete all sections for a comprehensive visa application</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold" data-testid="text-overall-completion">{overallCompletion}%</p>
-                  </div>
-                </div>
-                <Progress value={overallCompletion} className="h-3" data-testid="progress-overall" />
-                
-                {overallCompletion < 100 && (
-                  <Alert>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      {overallCompletion < 50 
-                        ? "Your business plan is in early stages. Focus on completing the Executive Summary and Problem/Solution sections first."
-                        : overallCompletion < 80
-                        ? "Good progress! Continue completing remaining sections to strengthen your visa application."
-                        : "Almost there! Review and refine all sections before finalizing your business plan."
-                      }
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                {overallCompletion === 100 && (
-                  <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-600 dark:text-green-400">
-                      Excellent! Your business plan is complete. Review the Smart Tips and Action Plan tabs for final refinements before submission.
-                    </AlertDescription>
-                  </Alert>
-                )}
+            <CardHeader className="flex flex-row items-center justify-between gap-4">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-6 w-6 text-primary" />
+                  Business Plan Generator
+                </CardTitle>
+                <CardDescription>
+                  Create a compelling business plan for your UK Innovator Founder Visa
+                </CardDescription>
               </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </CardHeader>
+            <CardContent>
+              {mode === 'ai' ? (
+                <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+              ) : (
+                <>
+                  {showAutoSaveNotification && (
+                    <Alert className="mb-4 bg-green-50 dark:bg-green-950/30 border-green-200">
+                      <Save className="h-4 w-4" />
+                      <AlertDescription>Auto-saved at {savedDate}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="mb-6">
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm font-medium">Overall Completion</span>
+                      <span className="text-sm font-bold text-primary">{overallCompletion}%</span>
+                    </div>
+                    <Progress value={overallCompletion} className="h-3" />
+                  </div>
+
+                  <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="plan" data-testid="tab-plan">Business Plan</TabsTrigger>
+                      <TabsTrigger value="milestones" data-testid="tab-milestones">Milestones</TabsTrigger>
+                      <TabsTrigger value="analytics" data-testid="tab-analytics">Analytics</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="plan" className="space-y-6 mt-4">
+                      {sections.map((section) => (
+                        <Card key={section.id} className="p-4">
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold">{section.title}</h3>
+                            <span className="text-sm text-muted-foreground">
+                              {calculateSectionCompletion(section)}% complete
+                            </span>
+                          </div>
+                          <div className="space-y-4">
+                            {section.fields.map((field) => (
+                              <div key={field.id}>
+                                <Label>{field.label}</Label>
+                                {field.type === 'textarea' ? (
+                                  <Textarea
+                                    value={field.value}
+                                    onChange={(e) => updateField(section.id, field.id, e.target.value)}
+                                    placeholder={field.placeholder}
+                                    className="min-h-[100px]"
+                                    data-testid={`input-${section.id}-${field.id}`}
+                                  />
+                                ) : (
+                                  <Input
+                                    value={field.value}
+                                    onChange={(e) => updateField(section.id, field.id, e.target.value)}
+                                    placeholder={field.placeholder}
+                                    data-testid={`input-${section.id}-${field.id}`}
+                                  />
+                                )}
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {field.value.length}/{field.minChars} characters minimum
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </Card>
+                      ))}
+                    </TabsContent>
+
+                    <TabsContent value="milestones" className="space-y-4 mt-4">
+                      <h3 className="text-lg font-semibold">Business Milestones</h3>
+                      {milestones.map((milestone, index) => (
+                        <Card key={index} className="p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <Label>Timeline</Label>
+                              <Input
+                                value={milestone.month}
+                                onChange={(e) => {
+                                  const updated = [...milestones];
+                                  updated[index].month = e.target.value;
+                                  setMilestones(updated);
+                                }}
+                                data-testid={`input-milestone-month-${index}`}
+                              />
+                            </div>
+                            <div>
+                              <Label>Milestone</Label>
+                              <Input
+                                value={milestone.milestone}
+                                onChange={(e) => {
+                                  const updated = [...milestones];
+                                  updated[index].milestone = e.target.value;
+                                  setMilestones(updated);
+                                }}
+                                data-testid={`input-milestone-desc-${index}`}
+                              />
+                            </div>
+                            <div>
+                              <Label>Status</Label>
+                              <select
+                                value={milestone.status}
+                                onChange={(e) => {
+                                  const updated = [...milestones];
+                                  updated[index].status = e.target.value as 'planned' | 'in-progress' | 'completed';
+                                  setMilestones(updated);
+                                }}
+                                className="w-full px-3 py-2 border rounded-md"
+                                data-testid={`select-milestone-status-${index}`}
+                              >
+                                <option value="planned">Planned</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                              </select>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </TabsContent>
+
+                    <TabsContent value="analytics" className="space-y-6 mt-4">
+                      <Card className="p-4">
+                        <h3 className="text-lg font-semibold mb-4">Section Completion</h3>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart data={completionBySection}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                            <YAxis domain={[0, 100]} />
+                            <Tooltip />
+                            <Bar dataKey="completion" fill="hsl(var(--primary))" />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </Card>
+
+                      <Card className="p-4">
+                        <h3 className="text-lg font-semibold mb-4">Milestone Progress</h3>
+                        <ResponsiveContainer width="100%" height={200}>
+                          <LineChart data={timelineData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                            <YAxis domain={[0, 100]} />
+                            <Tooltip />
+                            <Line type="monotone" dataKey="progress" stroke="hsl(var(--primary))" strokeWidth={2} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </Card>
+                    </TabsContent>
+                  </Tabs>
+                </>
+              )}
             </CardContent>
           </Card>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4" data-testid="tabs-business-plan">
-              <TabsTrigger value="plan" data-testid="tab-plan">Business Plan</TabsTrigger>
-              <TabsTrigger value="analytics" data-testid="tab-analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="tips" data-testid="tab-tips">Smart Tips</TabsTrigger>
-              <TabsTrigger value="action" data-testid="tab-action">Action Plan</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="plan" className="space-y-6">
-              {sections.map((section) => (
-                <Card key={section.id} data-testid={`section-${section.id}`}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle>{section.title}</CardTitle>
-                        <CardDescription>
-                          {calculateSectionCompletion(section) === 100 ? (
-                            <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
-                              <CheckCircle2 className="h-4 w-4" />
-                              Complete
-                            </span>
-                          ) : (
-                            `${calculateSectionCompletion(section)}% complete`
-                          )}
-                        </CardDescription>
-                      </div>
-                      <Progress 
-                        value={calculateSectionCompletion(section)} 
-                        className="w-24 h-2" 
-                        data-testid={`progress-${section.id}`}
-                      />
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {section.fields.map((field) => (
-                      <div key={field.id} className="space-y-2">
-                        <Label htmlFor={field.id} className="flex items-center gap-2">
-                          {field.label}
-                          {field.value.length >= field.minChars && (
-                            <CheckCircle2 className="h-4 w-4 text-green-500" />
-                          )}
-                          <span className="text-xs text-muted-foreground ml-auto">
-                            {field.value.length} / {field.minChars} characters minimum
-                          </span>
-                        </Label>
-                        {field.type === 'text' ? (
-                          <Input
-                            id={field.id}
-                            value={field.value}
-                            onChange={(e) => updateField(section.id, field.id, e.target.value)}
-                            placeholder={field.placeholder}
-                            data-testid={`input-${section.id}-${field.id}`}
-                          />
-                        ) : (
-                          <Textarea
-                            id={field.id}
-                            value={field.value}
-                            onChange={(e) => updateField(section.id, field.id, e.target.value)}
-                            placeholder={field.placeholder}
-                            rows={6}
-                            data-testid={`textarea-${section.id}-${field.id}`}
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
-            </TabsContent>
-
-            <TabsContent value="analytics" className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Section Completion Progress</CardTitle>
-                    <CardDescription>Track completion across all business plan sections</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={completionBySection}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
-                          dataKey="name" 
-                          angle={-45} 
-                          textAnchor="end" 
-                          height={100}
-                          fontSize={12}
-                        />
-                        <YAxis domain={[0, 100]} />
-                        <Tooltip formatter={(value: number) => `${value}%`} />
-                        <Bar dataKey="completion" fill="#3b82f6" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Milestone Timeline</CardTitle>
-                    <CardDescription>Projected business milestones over 24 months</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={timelineData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" fontSize={12} />
-                        <YAxis domain={[0, 100]} />
-                        <Tooltip formatter={(value: number) => `${value}%`} />
-                        <Line 
-                          type="monotone" 
-                          dataKey="progress" 
-                          stroke="#10b981" 
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>GOV.UK Visa Requirements Summary</CardTitle>
-                  <CardDescription>Key criteria your business plan must address</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Genuine Innovation</p>
-                        <p className="text-sm text-muted-foreground">Business must be innovative, viable, and scalable with potential to create jobs</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Appropriate Investment</p>
-                        <p className="text-sm text-muted-foreground">Funding appropriate for your business plan - no fixed minimum requirement</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Endorsement</p>
-                        <p className="text-sm text-muted-foreground">Must obtain endorsement from an approved endorsing body</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">UK Operations</p>
-                        <p className="text-sm text-muted-foreground">Clear plan to establish and scale business operations in the UK</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Scalability</p>
-                        <p className="text-sm text-muted-foreground">Demonstrable potential for growth and job creation</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="tips" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    Smart Recommendations
-                  </CardTitle>
-                  <CardDescription>Context-aware guidance based on your business plan progress</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {getSmartTips().map((tip, index) => (
-                      <div key={index} className="flex items-start gap-3 p-3 bg-accent/10 rounded-lg" data-testid={`tip-${index}`}>
-                        <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm font-medium">
-                          {index + 1}
-                        </div>
-                        <p className="text-sm flex-1">{tip}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Writing Best Practices</CardTitle>
-                  <CardDescription>Tips for creating a compelling business plan</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <p className="text-sm"><strong>Be Specific:</strong> Use concrete data, metrics, and examples rather than vague statements</p>
-                    <p className="text-sm"><strong>Show Evidence:</strong> Support all claims with research, data, or credible sources</p>
-                    <p className="text-sm"><strong>Focus on Innovation:</strong> Clearly articulate what makes your business genuinely innovative</p>
-                    <p className="text-sm"><strong>UK Market Focus:</strong> Demonstrate deep understanding of UK market opportunity and competitive landscape</p>
-                    <p className="text-sm"><strong>Be Realistic:</strong> Projections should be ambitious but achievable and well-justified</p>
-                    <p className="text-sm"><strong>Professional Tone:</strong> Maintain formal, professional language throughout</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="action" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-primary" />
-                    4-Week Action Plan
-                  </CardTitle>
-                  <CardDescription>Prioritized timeline to complete your business plan</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {generateActionPlan().map((item, index) => (
-                      <div key={index} className="flex items-start gap-4 pb-4 border-b last:border-0" data-testid={`action-${index}`}>
-                        <div className="flex-shrink-0 w-24">
-                          <span className="text-sm font-medium text-muted-foreground">{item.week}</span>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm mb-1">{item.action}</p>
-                          <span 
-                            className={`text-xs px-2 py-1 rounded ${
-                              item.priority === 'Critical' 
-                                ? 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400' 
-                                : 'bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400'
-                            }`}
-                          >
-                            {item.priority}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pre-Submission Checklist</CardTitle>
-                  <CardDescription>Final steps before submitting to endorsing body</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {[
-                      "All sections completed to 100%",
-                      "Financial projections reviewed by accountant",
-                      "Market research supported by credible sources",
-                      "UK expansion plans detailed and realistic",
-                      "Investment funding documented and appropriate for plan",
-                      "Team credentials and CVs prepared",
-                      "Supporting documents organized and ready",
-                      "Plan reviewed by immigration legal expert",
-                      "Spelling and grammar thoroughly checked",
-                      "Plan formatted professionally (if submitting PDF)"
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-center gap-2 text-sm" data-testid={`checklist-${index}`}>
-                        <div className="h-4 w-4 rounded border border-muted-foreground" />
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
         </div>
       </div>
     </ToolAccessGuard>

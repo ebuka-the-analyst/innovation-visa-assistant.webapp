@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
@@ -11,6 +11,57 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Plus, Trash2, ExternalLink, AlertTriangle } from "lucide-react";
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
+
+const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'market-data-verifier',
+  toolName: 'Market Data Verifier',
+  agent: 'atlas',
+  greeting: "Hello! I'm Atlas, your Growth Strategist. Verifying market data with credible sources is crucial for building a compelling case for endorsers. Let me guide you through documenting and validating your market claims systematically.",
+  questions: [
+    {
+      id: 'market-size',
+      question: "What is the total addressable market (TAM) for your product? Provide the market size claim and where you found this data.",
+      hint: "Use credible sources like Statista, IBISWorld, or government statistics",
+      fieldKey: 'market_size',
+      minLength: 30
+    },
+    {
+      id: 'market-growth',
+      question: "What is the projected market growth rate? Include the source and publication date of this data.",
+      hint: "Recent data (within 2-3 years) carries more weight with endorsers",
+      fieldKey: 'market_growth',
+      minLength: 30
+    },
+    {
+      id: 'competitor-data',
+      question: "What claims do you make about competitors or market leaders? List these with their sources.",
+      hint: "Company reports, press releases, and industry publications are good sources",
+      fieldKey: 'competitor_data',
+      minLength: 30
+    },
+    {
+      id: 'uk-specific',
+      question: "What UK-specific market data do you cite? The UK Innovator visa requires UK market relevance.",
+      hint: "ONS, Gov.uk, Tech Nation, and British Business Bank are excellent UK sources",
+      fieldKey: 'uk_specific',
+      minLength: 30
+    },
+    {
+      id: 'customer-data',
+      question: "What customer behavior or demand statistics do you reference? How are these verified?",
+      hint: "Include survey data, industry reports, or your own validated research",
+      fieldKey: 'customer_data',
+      minLength: 20
+    },
+    {
+      id: 'verification-status',
+      question: "Which of your market claims still need verification? What sources will you use?",
+      hint: "Be honest about gaps - we'll help you find credible sources",
+      fieldKey: 'verification_status',
+      minLength: 20
+    }
+  ]
+};
 
 interface MarketClaim {
   id: string;
@@ -27,6 +78,35 @@ export default function MarketDataVerifier() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
   const [savedDate, setSavedDate] = useState('');
+  
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    return (localStorage.getItem('market-data-verifier-mode') as 'ai' | 'traditional') || 'ai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('market-data-verifier-mode', mode);
+  }, [mode]);
+
+  const handleAiComplete = useCallback((answers: Record<string, any>) => {
+    const newClaims: MarketClaim[] = [];
+    if (answers.market_size) {
+      newClaims.push({ id: Date.now().toString(), claim: answers.market_size, sourceType: 'industry', sourceName: '', sourceUrl: '', publicationDate: '', verified: false, notes: '' });
+    }
+    if (answers.market_growth) {
+      newClaims.push({ id: (Date.now() + 1).toString(), claim: answers.market_growth, sourceType: 'industry', sourceName: '', sourceUrl: '', publicationDate: '', verified: false, notes: '' });
+    }
+    if (answers.competitor_data) {
+      newClaims.push({ id: (Date.now() + 2).toString(), claim: answers.competitor_data, sourceType: 'company', sourceName: '', sourceUrl: '', publicationDate: '', verified: false, notes: '' });
+    }
+    if (answers.uk_specific) {
+      newClaims.push({ id: (Date.now() + 3).toString(), claim: answers.uk_specific, sourceType: 'government', sourceName: '', sourceUrl: '', publicationDate: '', verified: false, notes: '' });
+    }
+    if (newClaims.length > 0) {
+      setClaims(newClaims);
+    }
+    setMode('traditional');
+    toast({ title: "AI Guide Complete", description: "Your market claims have been added to the form" });
+  }, [toast]);
 
   const [claims, setClaims] = useState<MarketClaim[]>([
     { id: '1', claim: '', sourceType: '', sourceName: '', sourceUrl: '', publicationDate: '', verified: false, notes: '' }
@@ -143,15 +223,24 @@ export default function MarketDataVerifier() {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-6 w-6 text-primary" />
-              Market Data Verifier
-            </CardTitle>
-            <CardDescription>
-              Verify and cite market statistics with credible sources
-            </CardDescription>
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-6 w-6 text-primary" />
+                  Market Data Verifier
+                </CardTitle>
+                <CardDescription>
+                  Verify and cite market statistics with credible sources
+                </CardDescription>
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </CardHeader>
           <CardContent>
+            {mode === 'ai' ? (
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            ) : (
+              <>
             <div className="mb-6">
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium">Verification Score</span>
@@ -335,6 +424,8 @@ export default function MarketDataVerifier() {
                 </Card>
               </div>
             </div>
+            </>
+            )}
           </CardContent>
         </Card>
       </div>

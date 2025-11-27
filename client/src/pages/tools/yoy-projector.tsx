@@ -14,52 +14,51 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "yoy-projector",
-  agentId: "atlas",
-  agentName: "Atlas",
-  agentTitle: "Growth & Strategy Expert",
-  greeting: "Hello! I'm Atlas, your growth strategy specialist. Let me help you create realistic year-over-year growth projections for your UK business.",
+  toolName: "Year-over-Year Growth Projector",
+  agent: "sterling",
+  greeting: "Hello! I'm Sterling, your Financial Analyst. Let me help you create realistic year-over-year growth projections for your UK business that will impress endorsers.",
   questions: [
     {
       id: "currentMetrics",
-      text: "What are your current business metrics? Include revenue, ARR (if applicable), and customer count.",
+      question: "What are your current business metrics? Include revenue, ARR (if applicable), and customer count.",
+      hint: "Share your current revenue, annual recurring revenue, and total customer count",
       fieldKey: "currentMetrics",
-      minLength: 60,
-      placeholder: "Share your current revenue, annual recurring revenue, and total customer count..."
+      minLength: 30
     },
     {
       id: "revenueGrowth",
-      text: "What annual revenue growth rate do you project? What assumptions support this rate?",
+      question: "What annual revenue growth rate do you project? What assumptions support this rate?",
+      hint: "Describe your projected revenue growth rate and the market/operational factors driving it",
       fieldKey: "revenueGrowth",
-      minLength: 70,
-      placeholder: "Describe your projected revenue growth rate and the market/operational factors driving it..."
+      minLength: 30
     },
     {
       id: "customerGrowth",
-      text: "What customer growth rate do you expect? How will you acquire and retain customers?",
+      question: "What customer growth rate do you expect? How will you acquire and retain customers?",
+      hint: "Share your customer acquisition strategy, expected growth rate, and retention approach",
       fieldKey: "customerGrowth",
-      minLength: 70,
-      placeholder: "Share your customer acquisition strategy, expected growth rate, and retention approach..."
+      minLength: 30
     },
     {
       id: "keyDrivers",
-      text: "What are the key drivers of your growth? How will they compound over time?",
+      question: "What are the key drivers of your growth? How will they compound over time?",
+      hint: "Describe your growth drivers: product development, market expansion, partnerships, pricing",
       fieldKey: "keyDrivers",
-      minLength: 60,
-      placeholder: "Describe your growth drivers: product development, market expansion, partnerships, pricing..."
+      minLength: 30
     },
     {
       id: "projectionHorizon",
-      text: "How many years are you projecting? What major milestones do you expect to hit?",
+      question: "How many years are you projecting? What major milestones do you expect to hit?",
+      hint: "Describe your projection timeline (3-5 years) and key milestones at each stage",
       fieldKey: "projectionHorizon",
-      minLength: 60,
-      placeholder: "Describe your projection timeline (3-5 years) and key milestones at each stage..."
+      minLength: 30
     },
     {
       id: "assumptions",
-      text: "What key assumptions underpin your projections? What could impact your growth trajectory?",
+      question: "What key assumptions underpin your projections? What could impact your growth trajectory?",
+      hint: "List key assumptions about market conditions, funding, team growth, and potential risks",
       fieldKey: "assumptions",
-      minLength: 70,
-      placeholder: "List key assumptions about market conditions, funding, team growth, and potential risks..."
+      minLength: 30
     }
   ]
 };
@@ -115,9 +114,32 @@ export default function YoYProjector() {
   const [activeTab, setActiveTab] = useState('projector');
   const [savedDate, setSavedDate] = useState('');
 
-  const handleAiComplete = useCallback((_answers: Record<string, string>) => {
+  const handleAiComplete = useCallback((answers: Record<string, string>) => {
+    const metricsMatch = answers.currentMetrics?.match(/£?([\d,]+)/g);
+    if (metricsMatch && metricsMatch.length >= 1) {
+      const revenue = parseInt(metricsMatch[0].replace(/[£,]/g, '')) || inputs.currentRevenue;
+      const arr = metricsMatch.length >= 2 ? parseInt(metricsMatch[1].replace(/[£,]/g, '')) || inputs.currentARR : inputs.currentARR;
+      const customersMatch = answers.currentMetrics?.match(/(\d+)\s*customer/i);
+      const customers = customersMatch ? parseInt(customersMatch[1]) : inputs.currentCustomers;
+      setInputs(prev => ({ ...prev, currentRevenue: revenue, currentARR: arr, currentCustomers: customers }));
+    }
+    const growthMatch = answers.revenueGrowth?.match(/(\d+)%/);
+    if (growthMatch) {
+      setInputs(prev => ({ ...prev, revenueGrowthRate: parseInt(growthMatch[1]) }));
+    }
+    const customerGrowthMatch = answers.customerGrowth?.match(/(\d+)%/);
+    if (customerGrowthMatch) {
+      setInputs(prev => ({ ...prev, customerGrowthRate: parseInt(customerGrowthMatch[1]) }));
+    }
+    const yearsMatch = answers.projectionHorizon?.match(/(\d+)\s*year/i);
+    if (yearsMatch) {
+      const years = parseInt(yearsMatch[1]);
+      if (years >= 3 && years <= 5) {
+        setInputs(prev => ({ ...prev, projectionYears: years as 3 | 4 | 5 }));
+      }
+    }
     setMode('traditional');
-  }, []);
+  }, [inputs]);
 
   const getSerializedState = () => {
     return {
@@ -515,11 +537,16 @@ ensure all assumptions are defensible with market evidence.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-yoy-projector">Year-over-Year Growth Projector</h1>
-            <p className="text-lg text-muted-foreground">Multi-year compound growth modeling with milestone predictions</p>
-            {savedDate && (
-              <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
-            )}
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <h1 className="text-4xl font-bold mb-2" data-testid="heading-yoy-projector">Year-over-Year Growth Projector</h1>
+                <p className="text-lg text-muted-foreground">Multi-year compound growth modeling with milestone predictions</p>
+                {savedDate && (
+                  <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
+                )}
+              </div>
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            </div>
           </div>
 
           <ToolUtilityBar
@@ -531,6 +558,10 @@ ensure all assumptions are defensible with market evidence.
             toolName="Year-over-Year Growth Projector"
           />
 
+          {mode === 'ai' ? (
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+          ) : (
+            <>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4" data-testid="tabs-yoy-projector">
               <TabsTrigger value="projector" data-testid="tab-projector">Projector</TabsTrigger>
