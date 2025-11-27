@@ -1,6 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
+
+// Animated number component for sidebar stats
+function AnimatedStat({ value }: { value: number }) {
+  const [displayValue, setDisplayValue] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
+
+  useEffect(() => {
+    if (prevValue !== value) {
+      const startValue = displayValue;
+      const duration = 600;
+      const steps = 30;
+      const increment = (value - startValue) / steps;
+      let currentStep = 0;
+
+      const timer = setInterval(() => {
+        currentStep++;
+        if (currentStep >= steps) {
+          clearInterval(timer);
+          setDisplayValue(value);
+        } else {
+          setDisplayValue(Math.round(startValue + (increment * currentStep)));
+        }
+      }, duration / steps);
+
+      setPrevValue(value);
+
+      return () => clearInterval(timer);
+    }
+  }, [value, prevValue, displayValue]);
+
+  return (
+    <motion.span
+      key={displayValue}
+      initial={{ scale: prevValue !== value ? 1.1 : 1 }}
+      animate={{ scale: 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 15 }}
+    >
+      {displayValue}
+    </motion.span>
+  );
+}
 import {
   Sidebar,
   SidebarContent,
@@ -233,11 +274,15 @@ export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUs
         
         <div className="mt-4 grid grid-cols-2 gap-2">
           <div className="rounded-lg bg-card/50 border border-border/50 p-2 text-center">
-            <div className="text-lg font-bold text-primary">{stats?.totalUsers || 0}</div>
+            <div className="text-lg font-bold text-primary">
+              <AnimatedStat value={stats?.totalUsers || 0} />
+            </div>
             <div className="text-[10px] text-muted-foreground">Total Users</div>
           </div>
           <div className="rounded-lg bg-card/50 border border-border/50 p-2 text-center">
-            <div className="text-lg font-bold text-green-500">{stats?.activeUsers || 0}</div>
+            <div className="text-lg font-bold text-green-500">
+              <AnimatedStat value={stats?.activeUsers || 0} />
+            </div>
             <div className="text-[10px] text-muted-foreground">Active Now</div>
           </div>
         </div>

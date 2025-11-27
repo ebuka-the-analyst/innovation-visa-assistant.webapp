@@ -470,28 +470,34 @@ const exportToCSV = (data: unknown[], filename: string): void => {
 // ===== ANIMATED COMPONENTS =====
 
 const AnimatedNumber = memo(({ value, decimals = 0 }: { value: number; decimals?: number }) => {
-  const [displayValue, setDisplayValue] = useState(0);
+  const [displayValue, setDisplayValue] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
 
   useEffect(() => {
-    const duration = 1000;
-    const steps = 60;
-    const increment = (value - displayValue) / steps;
-    let currentStep = 0;
+    // Detect value change and animate
+    if (prevValue !== value) {
+      const startValue = displayValue;
+      const duration = 800;
+      const steps = 40;
+      const increment = (value - startValue) / steps;
+      let currentStep = 0;
 
-    const timer = setInterval(() => {
-      currentStep++;
-      setDisplayValue(prev => {
-        const newValue = prev + increment;
-        if (currentStep >= steps) {
-          clearInterval(timer);
-          return value;
-        }
-        return newValue;
-      });
-    }, duration / steps);
+      const timer = setInterval(() => {
+        currentStep++;
+        setDisplayValue(prev => {
+          if (currentStep >= steps) {
+            clearInterval(timer);
+            return value;
+          }
+          return startValue + (increment * currentStep);
+        });
+      }, duration / steps);
 
-    return () => clearInterval(timer);
-  }, [value]);
+      setPrevValue(value);
+
+      return () => clearInterval(timer);
+    }
+  }, [value, prevValue, displayValue]);
 
   return <span>{displayValue.toFixed(decimals)}</span>;
 });
@@ -717,10 +723,10 @@ export default function AdminDashboard() {
     refetchInterval: REFRESH_INTERVAL,
   });
 
-  // Users data
+  // Users data - fetch on overview too for demo user filtering
   const { data: usersData, isLoading: usersLoading } = useQuery<{ users: User[]; total: number; page: number; pageSize: number }>({
     queryKey: ['/api/admin/users', { page: usersPage, pageSize: usersPageSize, search: usersSearch, ...userFilters }],
-    enabled: !!user?.isAdmin && activeSection.startsWith('users'),
+    enabled: !!user?.isAdmin && (activeSection.startsWith('users') || activeSection === 'overview'),
   });
 
   // Filter users to exclude demo users when toggle is on
