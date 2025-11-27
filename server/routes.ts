@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users } from "@shared/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans } from "@shared/schema";
+import { eq, and, sql, desc } from "drizzle-orm";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
@@ -6496,7 +6496,7 @@ Return a JSON object with:
       }
 
       // Prevent seeding if users already exist
-      const existingTestUsers = await db.select().from(usersTable)
+      const existingTestUsers = await db.select().from(users)
         .where(sql`email LIKE '%@ukvisatest.com'`).limit(1);
       
       if (existingTestUsers.length > 0) {
@@ -6515,7 +6515,7 @@ Return a JSON object with:
       const stages = ['pre-seed', 'seed', 'early-growth', 'scaling'];
 
       let createdCount = 0;
-      const users = [];
+      const usersToCreate: any[] = [];
 
       let tierIndex = 0;
       for (const [tier, count] of Object.entries(tierDistribution)) {
@@ -6529,15 +6529,14 @@ Return a JSON object with:
           
           const tierCredits: Record<string, number> = { free: 0, basic: 50, premium: 200, enterprise: 500, ultimate: 1000 };
 
-          users.push({
+          usersToCreate.push({
             email: `test.${firstName.toLowerCase()}.${lastName.toLowerCase()}${userNum}@ukvisatest.com`,
             password: hashedPassword,
             firstName,
             lastName,
             isEmailVerified: true,
             planCredits: tierCredits[tier] || 0,
-            country,
-            businessDescription: `${industry} startup at ${stage} stage from ${country}`,
+            subscriptionTier: tier,
           });
           createdCount++;
         }
@@ -6545,9 +6544,9 @@ Return a JSON object with:
       }
 
       // Insert users in batches
-      for (const user of users) {
+      for (const userData of usersToCreate) {
         try {
-          await db.insert(usersTable).values(user).onConflictDoNothing();
+          await db.insert(users).values(userData).onConflictDoNothing();
         } catch (e) {
           // Skip duplicates
         }
@@ -6888,6 +6887,474 @@ Return a JSON object with:
     } catch (error) {
       console.error("Document scan error:", error);
       res.status(500).json({ error: "Failed to scan documents" });
+    }
+  });
+
+  // ==================== COMPREHENSIVE ADMIN CONTROL CENTER ====================
+
+  // Admin: Verify/Unverify user email
+  app.post("/api/admin/users/:userId/verify", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { verified } = req.body;
+      const admin = req.user as any;
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      await db.update(users).set({ 
+        isEmailVerified: verified,
+        updatedAt: new Date()
+      }).where(eq(users.id, userId));
+
+      res.json({ success: true, message: `User ${verified ? 'verified' : 'unverified'} successfully` });
+    } catch (error) {
+      console.error("Verify user error:", error);
+      res.status(500).json({ error: "Failed to verify user" });
+    }
+  });
+
+  // Admin: Ban/Unban user
+  app.post("/api/admin/users/:userId/ban", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { banned, reason } = req.body;
+      const admin = req.user as any;
+
+      if (userId === admin.id) {
+        return res.status(400).json({ error: "Cannot ban yourself" });
+      }
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (targetUser.isAdmin) {
+        return res.status(400).json({ error: "Cannot ban another admin" });
+      }
+
+      await db.update(users).set({ 
+        isBanned: banned,
+        suspendedReason: banned ? reason : null,
+        updatedAt: new Date()
+      }).where(eq(users.id, userId));
+
+      res.json({ success: true, message: `User ${banned ? 'banned' : 'unbanned'} successfully` });
+    } catch (error) {
+      console.error("Ban user error:", error);
+      res.status(500).json({ error: "Failed to ban user" });
+    }
+  });
+
+  // Admin: Suspend/Unsuspend user temporarily
+  app.post("/api/admin/users/:userId/suspend", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { suspended, reason, durationDays } = req.body;
+      const admin = req.user as any;
+
+      if (userId === admin.id) {
+        return res.status(400).json({ error: "Cannot suspend yourself" });
+      }
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const suspendedUntil = suspended && durationDays 
+        ? new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000)
+        : null;
+
+      await db.update(users).set({ 
+        suspendedUntil,
+        suspendedReason: suspended ? reason : null,
+        updatedAt: new Date()
+      }).where(eq(users.id, userId));
+
+      res.json({ 
+        success: true, 
+        message: suspended 
+          ? `User suspended until ${suspendedUntil?.toISOString()}` 
+          : 'User suspension lifted'
+      });
+    } catch (error) {
+      console.error("Suspend user error:", error);
+      res.status(500).json({ error: "Failed to suspend user" });
+    }
+  });
+
+  // Admin: Override user tier
+  app.post("/api/admin/users/:userId/tier-override", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { tier, reason, expiresAt, addCredits } = req.body;
+      const admin = req.user as any;
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const tierCredits: Record<string, number> = { 
+        free: 0, basic: 50, premium: 200, enterprise: 500, ultimate: 1000 
+      };
+
+      const updateData: any = {
+        subscriptionTier: tier,
+        previousTier: targetUser.subscriptionTier,
+        tierUpgradedAt: new Date(),
+        tierOverrideBy: admin.id,
+        tierOverrideReason: reason,
+        tierExpiresAt: expiresAt ? new Date(expiresAt) : null,
+        updatedAt: new Date()
+      };
+
+      if (addCredits) {
+        updateData.bonusCredits = (targetUser.bonusCredits || 0) + (tierCredits[tier] || 0);
+      }
+
+      await db.update(users).set(updateData).where(eq(users.id, userId));
+
+      res.json({ 
+        success: true, 
+        message: `User tier changed to ${tier}`,
+        previousTier: targetUser.subscriptionTier,
+        newTier: tier
+      });
+    } catch (error) {
+      console.error("Tier override error:", error);
+      res.status(500).json({ error: "Failed to override tier" });
+    }
+  });
+
+  // Admin: Add/Remove credits
+  app.post("/api/admin/users/:userId/credits", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { amount, type, reason } = req.body;
+      const admin = req.user as any;
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      let newCredits: number;
+      if (type === 'bonus') {
+        newCredits = Math.max(0, (targetUser.bonusCredits || 0) + amount);
+        await db.update(users).set({ 
+          bonusCredits: newCredits,
+          updatedAt: new Date()
+        }).where(eq(users.id, userId));
+      } else {
+        newCredits = Math.max(0, (targetUser.planCredits || 0) + amount);
+        await db.update(users).set({ 
+          planCredits: newCredits,
+          updatedAt: new Date()
+        }).where(eq(users.id, userId));
+      }
+
+      res.json({ 
+        success: true, 
+        message: `${amount >= 0 ? 'Added' : 'Removed'} ${Math.abs(amount)} ${type || 'plan'} credits`,
+        newBalance: newCredits,
+        reason
+      });
+    } catch (error) {
+      console.error("Credits management error:", error);
+      res.status(500).json({ error: "Failed to manage credits" });
+    }
+  });
+
+  // Admin: Update user notes
+  app.post("/api/admin/users/:userId/notes", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { notes } = req.body;
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      await db.update(users).set({ 
+        adminNotes: notes,
+        updatedAt: new Date()
+      }).where(eq(users.id, userId));
+
+      res.json({ success: true, message: "Notes updated" });
+    } catch (error) {
+      console.error("Update notes error:", error);
+      res.status(500).json({ error: "Failed to update notes" });
+    }
+  });
+
+  // Admin: Get user's full data including activity
+  app.get("/api/admin/users/:userId/full-data", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const businessPlanCount = await db.select({ count: sql`count(*)` })
+        .from(businessPlans)
+        .where(eq(businessPlans.userId, userId));
+
+      const { password, verificationToken, resetToken, ...safeUser } = user;
+
+      res.json({
+        user: safeUser,
+        stats: {
+          businessPlans: Number(businessPlanCount[0]?.count || 0),
+          totalCredits: (user.planCredits || 0) + (user.bonusCredits || 0),
+          creditsUsed: user.creditsUsed || 0,
+          creditsRemaining: (user.planCredits || 0) + (user.bonusCredits || 0) - (user.creditsUsed || 0),
+        }
+      });
+    } catch (error) {
+      console.error("Get user full data error:", error);
+      res.status(500).json({ error: "Failed to get user data" });
+    }
+  });
+
+  // Admin: Impersonate user (read-only view)
+  app.get("/api/admin/users/:userId/impersonate-data", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const userBusinessPlans = await db.select()
+        .from(businessPlans)
+        .where(eq(businessPlans.userId, userId))
+        .orderBy(desc(businessPlans.createdAt))
+        .limit(10);
+
+      const { password, verificationToken, resetToken, ...safeUser } = user;
+
+      res.json({
+        user: safeUser,
+        businessPlans: userBusinessPlans,
+        impersonationNote: "This is a read-only view of user data for support purposes"
+      });
+    } catch (error) {
+      console.error("Impersonate user error:", error);
+      res.status(500).json({ error: "Failed to get impersonation data" });
+    }
+  });
+
+  // Admin: Bulk user actions
+  app.post("/api/admin/users/bulk-action", requireAdmin, async (req, res) => {
+    try {
+      const { userIds, action, data } = req.body;
+      const admin = req.user as any;
+
+      if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+        return res.status(400).json({ error: "No users selected" });
+      }
+
+      const safeUserIds = userIds.filter((id: string) => id !== admin.id);
+
+      let affectedCount = 0;
+
+      switch (action) {
+        case 'verify':
+          await db.update(users)
+            .set({ isEmailVerified: true, updatedAt: new Date() })
+            .where(sql`id = ANY(${safeUserIds})`);
+          affectedCount = safeUserIds.length;
+          break;
+
+        case 'unverify':
+          await db.update(users)
+            .set({ isEmailVerified: false, updatedAt: new Date() })
+            .where(sql`id = ANY(${safeUserIds})`);
+          affectedCount = safeUserIds.length;
+          break;
+
+        case 'add_credits':
+          const creditAmount = data?.amount || 0;
+          await db.execute(sql`
+            UPDATE users 
+            SET bonus_credits = COALESCE(bonus_credits, 0) + ${creditAmount},
+                updated_at = NOW()
+            WHERE id = ANY(${safeUserIds})
+          `);
+          affectedCount = safeUserIds.length;
+          break;
+
+        case 'change_tier':
+          const newTier = data?.tier || 'free';
+          await db.update(users)
+            .set({ 
+              subscriptionTier: newTier, 
+              tierOverrideBy: admin.id,
+              tierUpgradedAt: new Date(),
+              updatedAt: new Date() 
+            })
+            .where(sql`id = ANY(${safeUserIds})`);
+          affectedCount = safeUserIds.length;
+          break;
+
+        default:
+          return res.status(400).json({ error: "Unknown action" });
+      }
+
+      res.json({ 
+        success: true, 
+        message: `${action} applied to ${affectedCount} users`,
+        affectedCount
+      });
+    } catch (error) {
+      console.error("Bulk action error:", error);
+      res.status(500).json({ error: "Failed to perform bulk action" });
+    }
+  });
+
+  // Admin: Export all users data
+  app.get("/api/admin/users/export", requireAdmin, async (req, res) => {
+    try {
+      const allUsers = await db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        subscriptionTier: users.subscriptionTier,
+        isEmailVerified: users.isEmailVerified,
+        isAdmin: users.isAdmin,
+        isBanned: users.isBanned,
+        planCredits: users.planCredits,
+        bonusCredits: users.bonusCredits,
+        creditsUsed: users.creditsUsed,
+        createdAt: users.createdAt,
+        lastActivityAt: users.lastActivityAt,
+      }).from(users).orderBy(desc(users.createdAt));
+
+      res.json({ 
+        users: allUsers,
+        exportedAt: new Date().toISOString(),
+        totalCount: allUsers.length
+      });
+    } catch (error) {
+      console.error("Export users error:", error);
+      res.status(500).json({ error: "Failed to export users" });
+    }
+  });
+
+  // Admin: Dashboard stats summary
+  app.get("/api/admin/dashboard-summary", requireAdmin, async (req, res) => {
+    try {
+      const totalUsers = await db.select({ count: sql`count(*)` }).from(users);
+      const verifiedUsers = await db.select({ count: sql`count(*)` }).from(users).where(eq(users.isEmailVerified, true));
+      const bannedUsers = await db.select({ count: sql`count(*)` }).from(users).where(eq(users.isBanned, true));
+      const adminUsers = await db.select({ count: sql`count(*)` }).from(users).where(eq(users.isAdmin, true));
+
+      const tierCounts = await db.select({
+        tier: users.subscriptionTier,
+        count: sql`count(*)`
+      }).from(users).groupBy(users.subscriptionTier);
+
+      const totalPlans = await db.select({ count: sql`count(*)` }).from(businessPlans);
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const newUsersToday = await db.select({ count: sql`count(*)` })
+        .from(users)
+        .where(sql`created_at >= ${today}`);
+
+      res.json({
+        users: {
+          total: Number(totalUsers[0]?.count || 0),
+          verified: Number(verifiedUsers[0]?.count || 0),
+          banned: Number(bannedUsers[0]?.count || 0),
+          admins: Number(adminUsers[0]?.count || 0),
+          newToday: Number(newUsersToday[0]?.count || 0),
+        },
+        tiers: tierCounts.reduce((acc, t) => {
+          acc[t.tier || 'free'] = Number(t.count);
+          return acc;
+        }, {} as Record<string, number>),
+        businessPlans: Number(totalPlans[0]?.count || 0),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Dashboard summary error:", error);
+      res.status(500).json({ error: "Failed to get dashboard summary" });
+    }
+  });
+
+  // Admin: Make user admin / remove admin
+  app.post("/api/admin/users/:userId/admin-toggle", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { isAdmin: makeAdmin } = req.body;
+      const admin = req.user as any;
+
+      if (userId === admin.id) {
+        return res.status(400).json({ error: "Cannot modify your own admin status" });
+      }
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      await db.update(users).set({ 
+        isAdmin: makeAdmin,
+        updatedAt: new Date()
+      }).where(eq(users.id, userId));
+
+      res.json({ 
+        success: true, 
+        message: `User ${makeAdmin ? 'promoted to admin' : 'removed from admin'}`
+      });
+    } catch (error) {
+      console.error("Admin toggle error:", error);
+      res.status(500).json({ error: "Failed to update admin status" });
+    }
+  });
+
+  // Admin: Reset user password (generate reset link)
+  app.post("/api/admin/users/:userId/reset-password", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const crypto = await import('crypto');
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenExpiry = new Date(Date.now() + 3600000);
+
+      await db.update(users).set({ 
+        resetToken,
+        resetTokenExpiry,
+        updatedAt: new Date()
+      }).where(eq(users.id, userId));
+
+      const resetUrl = `${process.env.APP_URL || 'https://innovatorfoundervisaassistant.co.uk'}/reset-password?token=${resetToken}`;
+
+      res.json({ 
+        success: true, 
+        message: "Password reset initiated",
+        resetUrl,
+        expiresAt: resetTokenExpiry.toISOString()
+      });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ error: "Failed to reset password" });
     }
   });
 

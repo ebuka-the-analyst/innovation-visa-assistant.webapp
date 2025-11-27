@@ -56,6 +56,17 @@ export const users = pgTable("users", {
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   subscriptionStatus: varchar("subscription_status", { length: 20 }).default('inactive'), // active, inactive, cancelled, past_due
+  
+  // Admin Control Fields
+  isBanned: boolean("is_banned").notNull().default(false),
+  suspendedUntil: timestamp("suspended_until"),
+  suspendedReason: text("suspended_reason"),
+  adminNotes: text("admin_notes"),
+  lastActivityAt: timestamp("last_activity_at"),
+  tierExpiresAt: timestamp("tier_expires_at"),
+  tierOverrideBy: varchar("tier_override_by"),
+  tierOverrideReason: text("tier_override_reason"),
+  
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -1973,3 +1984,153 @@ export type AgentPersona = {
   personality: string;
   greeting: string;
 };
+
+// ==================== ADMIN CONTROL SYSTEM ====================
+
+// Admin Audit Logs - Track all admin actions for accountability
+export const adminAuditLogs = pgTable("admin_audit_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  adminId: varchar("admin_id").notNull().references(() => users.id),
+  adminEmail: varchar("admin_email").notNull(),
+  
+  // Action Details
+  action: varchar("action", { length: 100 }).notNull(), // e.g., "user_verified", "tier_override", "user_banned"
+  actionCategory: varchar("action_category", { length: 50 }).notNull(), // user_management, tier_management, credits, system
+  
+  // Target
+  targetType: varchar("target_type", { length: 30 }).notNull(), // user, plan, system, promo
+  targetId: varchar("target_id"),
+  targetEmail: varchar("target_email"),
+  
+  // Changes
+  previousValue: jsonb("previous_value"),
+  newValue: jsonb("new_value"),
+  reason: text("reason"),
+  
+  // Context
+  ipAddress: varchar("ip_address", { length: 50 }),
+  userAgent: text("user_agent"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_audit_admin").on(table.adminId),
+  index("idx_audit_action").on(table.action),
+  index("idx_audit_target").on(table.targetType, table.targetId),
+  index("idx_audit_date").on(table.createdAt),
+]);
+
+// System Announcements - For broadcasting messages to users
+export const systemAnnouncements = pgTable("system_announcements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Announcement Details
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  type: varchar("type", { length: 30 }).notNull().default('info'), // info, warning, success, urgent, maintenance
+  
+  // Targeting
+  targetTiers: jsonb("target_tiers").$type<string[]>().default(['all']), // ['all'] or ['free', 'basic', etc.]
+  targetUserIds: jsonb("target_user_ids").$type<string[]>(), // For individual targeting
+  
+  // Visibility
+  isActive: boolean("is_active").notNull().default(true),
+  isPinned: boolean("is_pinned").notNull().default(false),
+  showOnDashboard: boolean("show_on_dashboard").notNull().default(true),
+  showAsPopup: boolean("show_as_popup").notNull().default(false),
+  
+  // Scheduling
+  startsAt: timestamp("starts_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  
+  // Tracking
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  viewCount: integer("view_count").notNull().default(0),
+  dismissedBy: jsonb("dismissed_by").$type<string[]>().default([]),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// System Settings - Platform-wide configuration
+export const systemSettings = pgTable("system_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Setting Details
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: jsonb("value").notNull(),
+  category: varchar("category", { length: 50 }).notNull(), // general, security, features, maintenance
+  
+  // Metadata
+  description: text("description"),
+  dataType: varchar("data_type", { length: 30 }).notNull().default('string'), // string, boolean, number, json, array
+  isPublic: boolean("is_public").notNull().default(false), // Whether clients can read this setting
+  
+  // Audit
+  lastModifiedBy: varchar("last_modified_by").references(() => users.id),
+  lastModifiedAt: timestamp("last_modified_at").notNull().defaultNow(),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// User Activity Tracking - For admin insights
+export const userActivityLogs = pgTable("user_activity_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Activity Details
+  activityType: varchar("activity_type", { length: 50 }).notNull(), // login, tool_use, export, plan_create, etc.
+  activityData: jsonb("activity_data"), // Additional context
+  
+  // Tool tracking
+  toolId: varchar("tool_id", { length: 100 }),
+  toolCategory: varchar("tool_category", { length: 50 }),
+  
+  // Session info
+  sessionId: varchar("session_id", { length: 100 }),
+  ipAddress: varchar("ip_address", { length: 50 }),
+  userAgent: text("user_agent"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_activity_user").on(table.userId),
+  index("idx_activity_type").on(table.activityType),
+  index("idx_activity_tool").on(table.toolId),
+  index("idx_activity_date").on(table.createdAt),
+]);
+
+// Admin Control Insert Schemas
+export const insertAdminAuditLogSchema = createInsertSchema(adminAuditLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSystemAnnouncementSchema = createInsertSchema(systemAnnouncements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  viewCount: true,
+  dismissedBy: true,
+});
+
+export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserActivityLogSchema = createInsertSchema(userActivityLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Admin Control Types
+export type AdminAuditLog = typeof adminAuditLogs.$inferSelect;
+export type InsertAdminAuditLog = z.infer<typeof insertAdminAuditLogSchema>;
+
+export type SystemAnnouncement = typeof systemAnnouncements.$inferSelect;
+export type InsertSystemAnnouncement = z.infer<typeof insertSystemAnnouncementSchema>;
+
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
+
+export type UserActivityLog = typeof userActivityLogs.$inferSelect;
+export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;
