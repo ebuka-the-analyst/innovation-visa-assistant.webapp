@@ -751,8 +751,8 @@ export default function AdminDashboard() {
     return {
       ...overviewData,
       kpiMetrics: overviewData.kpiMetrics?.map((metric, index) => {
-        // First metric is typically total users
-        if (index === 0 && metric.label?.toLowerCase().includes('user')) {
+        // First metric is typically total users, second is active users
+        if (index === 0 || index === 1) {
           return { ...metric, value: Math.max(0, (metric.value || 0) - demoUserCount) };
         }
         return metric;
@@ -1502,8 +1502,8 @@ export default function AdminDashboard() {
             activeSection={activeSection}
             onSectionChange={setActiveSection}
             stats={{
-              totalUsers: overviewData?.kpiMetrics?.[0]?.value || 0,
-              activeUsers: overviewData?.kpiMetrics?.[1]?.value || 0,
+              totalUsers: filteredOverviewData?.kpiMetrics?.[0]?.value || overviewData?.kpiMetrics?.[0]?.value || 0,
+              activeUsers: filteredOverviewData?.kpiMetrics?.[1]?.value || overviewData?.kpiMetrics?.[1]?.value || 0,
               pendingPlans: plansData?.plans?.filter(p => p.status === 'pending').length || 0,
               errorCount: activityLog?.filter(a => a.severity === 'error').length || 0,
               pendingRewards: pendingRewardsData?.total || referralAnalytics?.pendingRewards || 0,
@@ -2178,7 +2178,7 @@ export default function AdminDashboard() {
                                     <p className="text-xs text-muted-foreground">Events</p>
                                   </div>
                                   <div className="text-center px-4 py-2 bg-background rounded-lg border">
-                                    <p className="text-2xl font-bold text-blue-500">{overviewData?.kpiMetrics?.[1]?.value || 0}</p>
+                                    <p className="text-2xl font-bold text-blue-500">{filteredOverviewData?.kpiMetrics?.[1]?.value || 0}</p>
                                     <p className="text-xs text-muted-foreground">Active Now</p>
                                   </div>
                                   <div className="text-center px-4 py-2 bg-background rounded-lg border">
@@ -3029,8 +3029,8 @@ export default function AdminDashboard() {
                     </CardHeader>
                     <CardContent>
                       {(() => {
-                        const totalUsers = overviewData?.kpiMetrics?.[0]?.value || 38;
-                        const activeUsers = overviewData?.kpiMetrics?.[1]?.value || 32;
+                        const totalUsers = filteredOverviewData?.kpiMetrics?.[0]?.value || 38;
+                        const activeUsers = filteredOverviewData?.kpiMetrics?.[1]?.value || 32;
                         
                         const funnelData = [
                           { stage: 'Registered', count: totalUsers, color: '#f59e0b' },
