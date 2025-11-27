@@ -1765,15 +1765,15 @@ export default function AdminDashboard() {
                     transition={{ duration: 0.5 }}
                     className="space-y-6"
                   >
-                    {/* Debug: Demo user filtering status */}
-                    {hideDemoUsers && (
-                      <div className="p-3 mb-4 rounded-lg bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700">
-                        <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
-                          Demo Filter Active: Hiding {demoUserCount} demo users (showing {realUserCount} real users)
-                          {!allUsersData?.users && <span className="ml-2 text-red-600">(Loading user data...)</span>}
-                        </p>
-                      </div>
-                    )}
+                    {/* Debug: Always show current filter state */}
+                    <div className={`p-3 mb-4 rounded-lg ${hideDemoUsers ? 'bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-700' : 'bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700'} border`}>
+                      <p className="text-sm font-medium">
+                        <strong>Filter State:</strong> hideDemoUsers = {String(hideDemoUsers)} | 
+                        Raw API Total: {overviewData?.kpiMetrics?.[0]?.value ?? 'null'} | 
+                        Filtered Total: {filteredOverviewData?.kpiMetrics?.[0]?.value ?? 'null'} | 
+                        Demo Count: {demoUserCount}
+                      </p>
+                    </div>
                     
                     {/* KPI Cards with Animations */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
