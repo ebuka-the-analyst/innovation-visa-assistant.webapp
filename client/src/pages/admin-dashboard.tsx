@@ -614,6 +614,20 @@ export default function AdminDashboard() {
   // Live refresh countdown
   const [refreshCountdown, setRefreshCountdown] = useState(30);
 
+  // Hide demo users toggle - demo users are all users before uerobor@gmail.com (Sophia Ugbede)
+  const [hideDemoUsers, setHideDemoUsers] = useState(() => {
+    const saved = localStorage.getItem('admin-hide-demo-users');
+    return saved === 'true';
+  });
+
+  // Save hide demo users preference
+  useEffect(() => {
+    localStorage.setItem('admin-hide-demo-users', String(hideDemoUsers));
+  }, [hideDemoUsers]);
+
+  // The first real user email - all users before this are demo users
+  const FIRST_REAL_USER_EMAIL = 'uerobor@gmail.com';
+
   // Load dashboard layout from localStorage
   useEffect(() => {
     const savedLayout = localStorage.getItem('admin-dashboard-layout');
@@ -704,6 +718,25 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/users', { page: usersPage, pageSize: usersPageSize, search: usersSearch, ...userFilters }],
     enabled: !!user?.isAdmin && activeSection.startsWith('users'),
   });
+
+  // Filter users to exclude demo users when toggle is on
+  const filteredUsers = useMemo(() => {
+    if (!usersData?.users) return [];
+    if (!hideDemoUsers) return usersData.users;
+    
+    // Find the first real user
+    const firstRealUser = usersData.users.find(u => u.email === FIRST_REAL_USER_EMAIL);
+    if (!firstRealUser) return usersData.users;
+    
+    const cutoffDate = new Date(firstRealUser.createdAt);
+    
+    // Keep admin users and users created on or after the first real user
+    return usersData.users.filter(u => 
+      u.isAdmin || 
+      u.email === FIRST_REAL_USER_EMAIL ||
+      new Date(u.createdAt) >= cutoffDate
+    );
+  }, [usersData?.users, hideDemoUsers, FIRST_REAL_USER_EMAIL]);
 
   // Plans analytics
   const { data: plansAnalytics, isLoading: plansAnalyticsLoading } = useQuery<PlansAnalytics>({
@@ -3392,6 +3425,22 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-3">
+                        {/* Hide Demo Users Toggle */}
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border bg-muted/30">
+                          <Label htmlFor="hide-demo-users" className="text-sm font-medium cursor-pointer">
+                            {hideDemoUsers ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                          </Label>
+                          <Switch
+                            id="hide-demo-users"
+                            checked={hideDemoUsers}
+                            onCheckedChange={setHideDemoUsers}
+                            data-testid="switch-hide-demo-users"
+                          />
+                          <Label htmlFor="hide-demo-users" className="text-sm text-muted-foreground cursor-pointer">
+                            {hideDemoUsers ? 'Demo users hidden' : 'Show all users'}
+                          </Label>
+                        </div>
+
                         {/* Data Density Control */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -3487,7 +3536,7 @@ export default function AdminDashboard() {
                           <ShimmerSkeleton key={i} />
                         ))}
                       </div>
-                    ) : usersData && usersData.users.length > 0 ? (
+                    ) : usersData && filteredUsers.length > 0 ? (
                       <>
                         <div className="overflow-x-auto">
                           <Table>
@@ -3495,10 +3544,10 @@ export default function AdminDashboard() {
                               <TableRow>
                                 <TableHead className="w-12">
                                   <Checkbox
-                                    checked={selectedUsers.length === usersData.users.length}
+                                    checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
                                     onCheckedChange={(checked) => {
                                       if (checked) {
-                                        setSelectedUsers(usersData.users.map(u => u.id));
+                                        setSelectedUsers(filteredUsers.map(u => u.id));
                                       } else {
                                         setSelectedUsers([]);
                                       }
@@ -3515,7 +3564,7 @@ export default function AdminDashboard() {
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {usersData.users.map((user) => (
+                              {filteredUsers.map((user) => (
                                 <motion.tr
                                   key={user.id}
                                   initial={{ opacity: 0 }}
@@ -3696,7 +3745,8 @@ export default function AdminDashboard() {
                           </div>
 
                           <p className="text-sm text-muted-foreground">
-                            Showing {((usersPage - 1) * usersPageSize) + 1} to {Math.min(usersPage * usersPageSize, usersData.total)} of {usersData.total} users
+                            Showing {filteredUsers.length} of {usersData.total} users
+                            {hideDemoUsers && <span className="ml-1 text-orange-500">(demo users hidden)</span>}
                           </p>
 
                           <div className="flex gap-2">
