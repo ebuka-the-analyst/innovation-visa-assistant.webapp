@@ -803,6 +803,34 @@ export default function AdminDashboard() {
       return dataPoint;
     };
     
+    // Calculate ACTUAL tier distribution from filtered real users (not demo users)
+    let filteredSubscriptionDistribution = overviewData.subscriptionDistribution;
+    
+    if (allUsersData?.users && allUsersData.users.length > 0) {
+      // Get real users (admins + users created on/after Nov 27)
+      const realUsers = allUsersData.users.filter(u => 
+        u.isAdmin || new Date(u.createdAt) >= DEMO_CUTOFF_DATE
+      );
+      
+      // Count users by tier from actual filtered data
+      const tierCounts: Record<string, number> = {};
+      realUsers.forEach(u => {
+        const tier = u.subscriptionTier || 'free';
+        tierCounts[tier] = (tierCounts[tier] || 0) + 1;
+      });
+      
+      const totalRealUsers = realUsers.length;
+      
+      // Build new subscription distribution with accurate counts and percentages
+      filteredSubscriptionDistribution = [
+        { tier: 'Free', count: tierCounts['free'] || 0, percentage: totalRealUsers > 0 ? Math.round(((tierCounts['free'] || 0) / totalRealUsers) * 100) : 0 },
+        { tier: 'Basic', count: tierCounts['basic'] || 0, percentage: totalRealUsers > 0 ? Math.round(((tierCounts['basic'] || 0) / totalRealUsers) * 100) : 0 },
+        { tier: 'Premium', count: tierCounts['premium'] || 0, percentage: totalRealUsers > 0 ? Math.round(((tierCounts['premium'] || 0) / totalRealUsers) * 100) : 0 },
+        { tier: 'Enterprise', count: tierCounts['enterprise'] || 0, percentage: totalRealUsers > 0 ? Math.round(((tierCounts['enterprise'] || 0) / totalRealUsers) * 100) : 0 },
+        { tier: 'Ultimate', count: tierCounts['ultimate'] || 0, percentage: totalRealUsers > 0 ? Math.round(((tierCounts['ultimate'] || 0) / totalRealUsers) * 100) : 0 },
+      ].filter(t => t.count > 0); // Only show tiers with users
+    }
+    
     return {
       ...overviewData,
       kpiMetrics: overviewData.kpiMetrics?.map((metric, index) => {
@@ -812,17 +840,13 @@ export default function AdminDashboard() {
         }
         return metric;
       }),
-      subscriptionDistribution: overviewData.subscriptionDistribution?.map(tier => ({
-        ...tier,
-        // Reduce counts proportionally (demo users are mostly free tier)
-        count: tier.tier === 'Free' ? Math.max(0, tier.count - effectiveDemoCount) : tier.count
-      })),
+      subscriptionDistribution: filteredSubscriptionDistribution,
       // Filter time series data - only for dates after cutoff
       timeSeriesData: overviewData.timeSeriesData?.map(filterTimeSeriesPoint),
       // Filter activity data - only for dates after cutoff  
       activityData: overviewData.activityData?.map(filterActivityPoint),
     };
-  }, [overviewData, hideDemoUsers, demoUserCount, DEMO_CUTOFF_DATE]);
+  }, [overviewData, hideDemoUsers, demoUserCount, allUsersData?.users, DEMO_CUTOFF_DATE]);
 
   // Filtered users analytics excluding demo users
   const filteredUsersAnalytics = useMemo(() => {
