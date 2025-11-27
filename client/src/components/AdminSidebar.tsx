@@ -55,6 +55,7 @@ import {
   Wrench,
   Lock,
   Eye,
+  EyeOff,
   Search,
   Filter,
   Gift,
@@ -69,6 +70,7 @@ import {
   MessageSquare,
   CheckSquare,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface AdminSidebarProps {
   activeSection: string;
@@ -80,6 +82,8 @@ interface AdminSidebarProps {
     errorCount?: number;
     pendingRewards?: number;
   };
+  hideDemoUsers?: boolean;
+  onHideDemoUsersChange?: (value: boolean) => void;
 }
 
 const menuGroups = [
@@ -194,7 +198,7 @@ const menuGroups = [
   }
 ];
 
-export function AdminSidebar({ activeSection, onSectionChange, stats }: AdminSidebarProps) {
+export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUsers, onHideDemoUsersChange }: AdminSidebarProps) {
   const [expandedGroups, setExpandedGroups] = useState<string[]>(["Dashboard", "User Intelligence", "Plan Lifecycle"]);
 
   const toggleGroup = (label: string) => {
@@ -237,6 +241,23 @@ export function AdminSidebar({ activeSection, onSectionChange, stats }: AdminSid
             <div className="text-[10px] text-muted-foreground">Active Now</div>
           </div>
         </div>
+        
+        {onHideDemoUsersChange && (
+          <div className="mt-3 flex items-center justify-between rounded-lg bg-card/50 border border-border/50 p-2">
+            <div className="flex items-center gap-2">
+              {hideDemoUsers ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+              <span className="text-xs text-muted-foreground">
+                {hideDemoUsers ? 'Demo users hidden' : 'Show all users'}
+              </span>
+            </div>
+            <Switch
+              checked={hideDemoUsers}
+              onCheckedChange={onHideDemoUsersChange}
+              data-testid="switch-hide-demo-users"
+              className="scale-90"
+            />
+          </div>
+        )}
       </SidebarHeader>
 
       <SidebarContent className="px-2">

@@ -1502,12 +1502,14 @@ export default function AdminDashboard() {
             activeSection={activeSection}
             onSectionChange={setActiveSection}
             stats={{
-              totalUsers: overviewData?.kpiMetrics?.[0]?.value || 0,
-              activeUsers: overviewData?.kpiMetrics?.[1]?.value || 0,
+              totalUsers: adjustedOverview?.kpiMetrics?.[0]?.value || overviewData?.kpiMetrics?.[0]?.value || 0,
+              activeUsers: adjustedOverview?.kpiMetrics?.[1]?.value || overviewData?.kpiMetrics?.[1]?.value || 0,
               pendingPlans: plansData?.plans?.filter(p => p.status === 'pending').length || 0,
               errorCount: activityLog?.filter(a => a.severity === 'error').length || 0,
               pendingRewards: pendingRewardsData?.total || referralAnalytics?.pendingRewards || 0,
             }}
+            hideDemoUsers={hideDemoUsers}
+            onHideDemoUsersChange={setHideDemoUsers}
           />
           
           <SidebarInset className="flex-1 overflow-auto">
