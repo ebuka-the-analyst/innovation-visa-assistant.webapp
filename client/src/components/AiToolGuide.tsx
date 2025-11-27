@@ -127,14 +127,135 @@ interface Message {
   isTyping?: boolean;
 }
 
+interface SidePanelProps {
+  answers: Record<string, any>;
+  progress: number;
+  currentQuestionIndex: number;
+  totalQuestions: number;
+  xp: number;
+  streak: number;
+  agent: AgentPersona;
+  config: ToolConfig;
+}
+
 interface AiToolGuideProps {
   config: ToolConfig;
   onComplete: (answers: Record<string, any>) => void;
   onSwitchToTraditional?: () => void;
+  sidePanel?: (props: SidePanelProps) => React.ReactNode;
+  sidePanelWidth?: 'narrow' | 'default' | 'wide';
   className?: string;
 }
 
-export function AiToolGuide({ config, onComplete, onSwitchToTraditional, className }: AiToolGuideProps) {
+function DefaultSidePanel({ answers, progress, currentQuestionIndex, totalQuestions, xp, streak, agent, config }: SidePanelProps) {
+  const answeredCount = Object.keys(answers).length;
+  const avgQualityScore = answeredCount > 0 
+    ? Math.round(Object.values(answers).reduce((sum: number, ans: any) => {
+        const len = String(ans || '').length;
+        return sum + Math.min(100, 40 + (len >= 50 ? 10 : 0) + (len >= 100 ? 10 : 0) + (len >= 200 ? 10 : 0));
+      }, 0) / answeredCount)
+    : 0;
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-primary" />
+          Your Progress
+        </h3>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Questions Completed</span>
+            <span className="font-medium">{currentQuestionIndex}/{totalQuestions}</span>
+          </div>
+          <Progress value={progress} className="h-2" />
+          
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <div className="bg-muted/50 rounded-lg p-3 text-center">
+              <div className="text-2xl font-bold" style={{ color: agent.primaryColor }}>{xp}</div>
+              <div className="text-xs text-muted-foreground">XP Earned</div>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3 text-center">
+              <div className="text-2xl font-bold" style={{ color: agent.primaryColor }}>{streak}x</div>
+              <div className="text-xs text-muted-foreground">Streak</div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {answeredCount > 0 && (
+        <Card className="p-4">
+          <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+            <Award className="h-4 w-4 text-primary" />
+            Response Quality
+          </h3>
+          <div className="flex items-center justify-center">
+            <div className="relative w-24 h-24">
+              <svg className="w-full h-full -rotate-90">
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  fill="none"
+                  className="text-muted"
+                />
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  stroke={agent.primaryColor}
+                  strokeWidth="8"
+                  fill="none"
+                  strokeDasharray={251}
+                  strokeDashoffset={251 - (251 * avgQualityScore) / 100}
+                  className="transition-all duration-500"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xl font-bold">{avgQualityScore}%</span>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            {avgQualityScore >= 80 ? 'Excellent detail!' : avgQualityScore >= 60 ? 'Good progress' : 'Add more detail'}
+          </p>
+        </Card>
+      )}
+
+      <Card className="p-4">
+        <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+          <Lightbulb className="h-4 w-4 text-amber-500" />
+          Tips for Better Answers
+        </h3>
+        <ul className="space-y-2 text-xs text-muted-foreground">
+          <li className="flex items-start gap-2">
+            <CheckCircle2 className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+            <span>Use specific numbers and data where possible</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle2 className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+            <span>Include real examples from your business</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle2 className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+            <span>Reference evidence you can provide to endorsers</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle2 className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+            <span>Explain "why" not just "what"</span>
+          </li>
+        </ul>
+      </Card>
+    </div>
+  );
+}
+
+export { DefaultSidePanel };
+export type { SidePanelProps };
+
+export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePanel, sidePanelWidth = 'default', className }: AiToolGuideProps) {
   const agent = AGENTS[config.agent];
   const storageKey = `ai-tool-guide-${config.toolId}`;
   
@@ -391,9 +512,23 @@ export function AiToolGuide({ config, onComplete, onSwitchToTraditional, classNa
   };
 
   const progress = Math.round((currentQuestionIndex / config.questions.length) * 100);
+  
+  const sidePanelProps: SidePanelProps = {
+    answers,
+    progress,
+    currentQuestionIndex,
+    totalQuestions: config.questions.length,
+    xp,
+    streak,
+    agent,
+    config
+  };
 
-  return (
-    <Card className={`overflow-hidden ${className}`}>
+  const panelWidthClass = sidePanelWidth === 'narrow' ? 'lg:w-[35%]' : sidePanelWidth === 'wide' ? 'lg:w-[50%]' : 'lg:w-[40%]';
+  const chatWidthClass = sidePanelWidth === 'narrow' ? 'lg:w-[65%]' : sidePanelWidth === 'wide' ? 'lg:w-[50%]' : 'lg:w-[60%]';
+
+  const chatContent = (
+    <Card className="overflow-hidden flex-1">
       <div 
         className="p-4 text-white"
         style={{ background: `linear-gradient(135deg, ${agent.gradientFrom}, ${agent.gradientTo})` }}
@@ -589,6 +724,17 @@ export function AiToolGuide({ config, onComplete, onSwitchToTraditional, classNa
         )}
       </div>
     </Card>
+  );
+
+  return (
+    <div className={`flex flex-col lg:flex-row gap-4 ${className}`}>
+      <div className={`w-full ${chatWidthClass}`}>
+        {chatContent}
+      </div>
+      <div className={`w-full ${panelWidthClass}`}>
+        {sidePanel ? sidePanel(sidePanelProps) : <DefaultSidePanel {...sidePanelProps} />}
+      </div>
+    </div>
   );
 }
 

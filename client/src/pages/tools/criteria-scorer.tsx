@@ -422,58 +422,58 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
           </div>
 
           {mode === 'ai' ? (
-            <div className="grid lg:grid-cols-2 gap-6">
-              <AiToolGuide
-                config={AI_TOOL_CONFIG}
-                onComplete={handleAiComplete}
-                onSwitchToTraditional={() => setMode('traditional')}
-              />
-              <div className="space-y-4">
-                <Card className="p-6">
-                  <h3 className="font-bold mb-4">The Three Criteria</h3>
-                  <div className="space-y-4 text-sm">
-                    <div className="flex items-start gap-3">
-                      <Sparkles className="w-5 h-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="font-semibold">Innovation</p>
-                        <p className="text-muted-foreground">Genuinely innovative, new, or different solution</p>
+            <AiToolGuide
+              config={AI_TOOL_CONFIG}
+              onComplete={handleAiComplete}
+              onSwitchToTraditional={() => setMode('traditional')}
+              sidePanel={() => (
+                <div className="space-y-4">
+                  <Card className="p-6">
+                    <h3 className="font-bold mb-4">The Three Criteria</h3>
+                    <div className="space-y-4 text-sm">
+                      <div className="flex items-start gap-3">
+                        <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+                        <div>
+                          <p className="font-semibold">Innovation</p>
+                          <p className="text-muted-foreground">Genuinely innovative, new, or different solution</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Shield className="w-5 h-5 text-primary mt-0.5" />
+                        <div>
+                          <p className="font-semibold">Viability</p>
+                          <p className="text-muted-foreground">Capability, skills, and resources to deliver</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <TrendingUp className="w-5 h-5 text-primary mt-0.5" />
+                        <div>
+                          <p className="font-semibold">Scalability</p>
+                          <p className="text-muted-foreground">Potential for growth and job creation</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <Shield className="w-5 h-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="font-semibold">Viability</p>
-                        <p className="text-muted-foreground">Capability, skills, and resources to deliver</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <TrendingUp className="w-5 h-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="font-semibold">Scalability</p>
-                        <p className="text-muted-foreground">Potential for growth and job creation</p>
-                      </div>
-                    </div>
+                  </Card>
+                  <div className="grid grid-cols-3 gap-4">
+                    <Card className="p-4 text-center">
+                      <Sparkles className="w-5 h-5 text-primary mx-auto mb-2" />
+                      <p className="text-2xl font-bold">{scores.innovation}%</p>
+                      <p className="text-xs text-muted-foreground">Innovation</p>
+                    </Card>
+                    <Card className="p-4 text-center">
+                      <Shield className="w-5 h-5 text-primary mx-auto mb-2" />
+                      <p className="text-2xl font-bold">{scores.viability}%</p>
+                      <p className="text-xs text-muted-foreground">Viability</p>
+                    </Card>
+                    <Card className="p-4 text-center">
+                      <TrendingUp className="w-5 h-5 text-primary mx-auto mb-2" />
+                      <p className="text-2xl font-bold">{scores.scalability}%</p>
+                      <p className="text-xs text-muted-foreground">Scalability</p>
+                    </Card>
                   </div>
-                </Card>
-                <div className="grid grid-cols-3 gap-4">
-                  <Card className="p-4 text-center">
-                    <Sparkles className="w-5 h-5 text-primary mx-auto mb-2" />
-                    <p className="text-2xl font-bold">{scores.innovation}%</p>
-                    <p className="text-xs text-muted-foreground">Innovation</p>
-                  </Card>
-                  <Card className="p-4 text-center">
-                    <Shield className="w-5 h-5 text-primary mx-auto mb-2" />
-                    <p className="text-2xl font-bold">{scores.viability}%</p>
-                    <p className="text-xs text-muted-foreground">Viability</p>
-                  </Card>
-                  <Card className="p-4 text-center">
-                    <TrendingUp className="w-5 h-5 text-primary mx-auto mb-2" />
-                    <p className="text-2xl font-bold">{scores.scalability}%</p>
-                    <p className="text-xs text-muted-foreground">Scalability</p>
-                  </Card>
                 </div>
-              </div>
-            </div>
+              )}
+            />
           ) : (
             <>
               <ToolUtilityBar
