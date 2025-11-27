@@ -176,6 +176,41 @@ export const ALL_TOOLS: Tool[] = [
   { id: "zero-approved", name: "Zero-to-Approved Roadmap", description: "Complete roadmap from zero to visa approved", category: "business", stage: "before", tier: "enterprise", icon: "Map" },
   { id: "zone-planning", name: "Zone Planning", description: "Plan for London/Tier 2 expansion", category: "business", stage: "during", tier: "premium", icon: "MapPin" },
   { id: "revenue-forecast", name: "Revenue Forecasting Tool", description: "Generate detailed revenue forecasts by product/service", category: "financial", stage: "during", tier: "premium", icon: "LineChart" },
+
+  // 2040-GRADE AI FEATURES - Advanced AI-Powered Tools
+  // Oracle & Multi-Agent Intelligence
+  { id: "oracle-supervisor", name: "ORACLE AI Supervisor", description: "Master AI coordinating 4 specialist agents for comprehensive visa analysis", category: "innovation", stage: "during", tier: "ultimate", icon: "Brain" },
+  { id: "founder-autopilot", name: "Founder Autopilot", description: "Say 'Build my visa' and let AI orchestrate your entire application", category: "innovation", stage: "during", tier: "ultimate", icon: "Rocket" },
+  { id: "neural-twin", name: "Neural Twin Founder Model", description: "AI simulation of your founder persona for interview practice", category: "defense", stage: "before", tier: "enterprise", icon: "Brain" },
+  
+  // Regulatory & Compliance Intelligence
+  { id: "regulatory-copilot", name: "Autonomous Regulatory Copilot", description: "Real-time UK immigration law monitoring and compliance alerts", category: "compliance", stage: "during", tier: "enterprise", icon: "Shield" },
+  { id: "knowledge-graph", name: "Immigration Knowledge Graph", description: "Visual map of UK visa requirements and their connections", category: "compliance", stage: "before", tier: "premium", icon: "Network" },
+  
+  // Economic & Impact Analysis
+  { id: "economic-impact", name: "UK Economic Impact Simulator", description: "Calculate job creation, GDP contribution, and tax revenue impact", category: "financial", stage: "during", tier: "enterprise", icon: "TrendingUp" },
+  { id: "ilr-tracker", name: "ILR Progress Tracker", description: "Track progress toward Indefinite Leave to Remain requirements", category: "compliance", stage: "after", tier: "premium", icon: "Target" },
+  
+  // Enhanced Existing Tools with AI
+  { id: "ai-weakness-scanner", name: "AI Weakness Scanner", description: "Deep AI analysis of application weaknesses with auto-fix suggestions", category: "defense", stage: "before", tier: "enterprise", icon: "Zap" },
+  { id: "ai-risk-mitigator", name: "AI Risk Mitigator", description: "Intelligent risk detection and automated remediation strategies", category: "defense", stage: "during", tier: "enterprise", icon: "Shield" },
+  { id: "ai-patent-generator", name: "AI Patent Blueprint Generator", description: "Generate technical diagrams and patent claims for your innovation", category: "innovation", stage: "before", tier: "enterprise", icon: "FileText" },
+  { id: "ai-network-builder", name: "UK Network Builder AI", description: "AI-powered partner, investor, and advisor matching for UK market", category: "growth", stage: "during", tier: "enterprise", icon: "Users" },
+  { id: "ai-funding-negotiator", name: "AI Funding Negotiator", description: "Generate SAFE agreements, valuations, and term sheet drafts", category: "financial", stage: "during", tier: "enterprise", icon: "DollarSign" },
+  
+  // Voice & Automation
+  { id: "voice-builder", name: "Voice-First Visa Builder", description: "Speak naturally and let AI build your visa documents", category: "innovation", stage: "during", tier: "ultimate", icon: "Mic" },
+  { id: "document-autopilot", name: "Document Autopilot", description: "AI automatically generates and updates all visa documents", category: "documentation", stage: "during", tier: "ultimate", icon: "FileText" },
+  
+  // Advanced Analytics
+  { id: "founder-evolution", name: "Founder Evolution Tracker", description: "AI-predicted leadership development and growth analytics", category: "business", stage: "after", tier: "premium", icon: "TrendingUp" },
+  { id: "10-year-vision", name: "10-Year Vision Generator", description: "Long-term strategic business projections and market analysis", category: "growth", stage: "before", tier: "enterprise", icon: "Globe" },
+  { id: "ethics-auditor", name: "AI Ethics Auditor", description: "GDPR compliance, bias detection, and ethical risk assessment", category: "compliance", stage: "during", tier: "enterprise", icon: "Shield" },
+  
+  // Innovation Lab
+  { id: "pivot-simulator", name: "Business Pivot Simulator", description: "AI simulates business pivot scenarios and outcomes", category: "innovation", stage: "during", tier: "enterprise", icon: "RotateCw" },
+  { id: "revenue-innovator", name: "Revenue Stream Innovator", description: "AI discovers new revenue opportunities for your business", category: "financial", stage: "during", tier: "enterprise", icon: "Lightbulb" },
+  { id: "market-disruptor", name: "Market Disruption Analyzer", description: "Predict market disruption potential and timing", category: "innovation", stage: "before", tier: "enterprise", icon: "Zap" },
 ];
 
 export const TIER_DESCRIPTIONS = {

@@ -7,48 +7,50 @@ import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 
 const AI_TOOL_CONFIG: ToolConfig = {
+  toolId: 'weakness-analysis',
+  toolName: 'Weakness Analysis',
   agent: 'nova',
   greeting: "I'm Nova, your innovation assessment specialist. Let's conduct a thorough weakness analysis to identify gaps in your Innovator Founder visa application and create an improvement plan.",
   questions: [
     {
       id: 'innovation-strength',
-      text: "How would you rate your innovation strength? Describe your novel technology, unique approach, or IP protection (patents, trade secrets) that differentiates your solution.",
+      question: "How would you rate your innovation strength? Describe your novel technology, unique approach, or IP protection (patents, trade secrets) that differentiates your solution.",
       fieldKey: 'innovationStrength',
       minLength: 100
     },
     {
       id: 'market-viability',
-      text: "What evidence demonstrates market viability? Include customer validation, revenue model proof, market size data, and any paying customers or letters of intent.",
+      question: "What evidence demonstrates market viability? Include customer validation, revenue model proof, market size data, and any paying customers or letters of intent.",
       fieldKey: 'marketViability',
       minLength: 100
     },
     {
       id: 'financial-sustainability',
-      text: "Describe your financial sustainability. Include current funding, cash runway, revenue projections, and path to profitability with supporting evidence.",
+      question: "Describe your financial sustainability. Include current funding, cash runway, revenue projections, and path to profitability with supporting evidence.",
       fieldKey: 'financialSustainability',
       minLength: 100
     },
     {
       id: 'scalability-plan',
-      text: "What is your scalability plan? Describe your growth strategy, job creation targets (minimum 2 FTE by Year 3), and geographic expansion plans.",
+      question: "What is your scalability plan? Describe your growth strategy, job creation targets (minimum 2 FTE by Year 3), and geographic expansion plans.",
       fieldKey: 'scalabilityPlan',
       minLength: 75
     },
     {
       id: 'team-capability',
-      text: "Assess your team's capability. Describe founder expertise, relevant track record, advisory board composition, and any key capability gaps.",
+      question: "Assess your team's capability. Describe founder expertise, relevant track record, advisory board composition, and any key capability gaps.",
       fieldKey: 'teamCapability',
       minLength: 75
     },
     {
       id: 'competitive-advantage',
-      text: "What is your sustainable competitive advantage? Explain your moat, barriers to entry, and why competitors cannot easily replicate your solution.",
+      question: "What is your sustainable competitive advantage? Explain your moat, barriers to entry, and why competitors cannot easily replicate your solution.",
       fieldKey: 'competitiveAdvantage',
       minLength: 75
     },
     {
       id: 'known-weaknesses',
-      text: "What weaknesses or gaps are you already aware of in your application? Be honest about areas needing improvement.",
+      question: "What weaknesses or gaps are you already aware of in your application? Be honest about areas needing improvement.",
       fieldKey: 'knownWeaknesses',
       minLength: 50
     }
@@ -57,7 +59,9 @@ const AI_TOOL_CONFIG: ToolConfig = {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, XCircle, AlertTriangle, TrendingDown, Shield } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, TrendingDown, Shield, Upload, FileText, Scan, Loader2, Sparkles, Eye, RotateCcw } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import {
   ScatterChart, Scatter, BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell

@@ -138,6 +138,15 @@ const toolMap: Record<string, any> = {
   'market-data-verifier': lazy(() => import('@/pages/tools/market-data-verifier')),
   'mvp-demo-guide': lazy(() => import('@/pages/tools/mvp-demo-guide')),
   'financial-resilience': lazy(() => import('@/pages/tools/financial-resilience')),
+  
+  // 2040-GRADE AI FEATURES
+  'oracle-supervisor': lazy(() => import('@/pages/oracle-supervisor')),
+  'founder-autopilot': lazy(() => import('@/pages/founder-autopilot')),
+  'neural-twin': lazy(() => import('@/pages/neural-twin')),
+  'regulatory-copilot': lazy(() => import('@/pages/regulatory-copilot')),
+  'economic-impact': lazy(() => import('@/pages/economic-impact')),
+  'knowledge-graph': lazy(() => import('@/pages/knowledge-graph')),
+  'voice-builder': lazy(() => import('@/pages/voice-builder')),
 };
 
 export function getToolComponent(toolId: string) {
