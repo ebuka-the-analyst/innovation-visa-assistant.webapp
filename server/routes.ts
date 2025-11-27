@@ -440,7 +440,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         ],
         mode: "payment",
-        allow_promotion_codes: true,
         success_url: `${baseUrl}/generation?session_id={CHECKOUT_SESSION_ID}&plan_id=${planId}`,
         cancel_url: `${baseUrl}/questionnaire`,
         metadata: {
@@ -580,7 +579,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         ],
         mode: "payment",
-        allow_promotion_codes: true,
         success_url: `${baseUrl}/tools-hub?session_id={CHECKOUT_SESSION_ID}&plan_id=${businessPlan.id}&upgraded=true`,
         cancel_url: `${baseUrl}/pricing`,
         metadata: {
@@ -944,7 +942,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         ],
         mode: "payment",
-        allow_promotion_codes: true,
         success_url: `${baseUrl}/tools-hub?addon_purchased=true&type=${addonType}&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/pricing`,
         metadata: {
