@@ -87,13 +87,10 @@ export async function setupAuth(app: Express) {
             return done(null, false, { message: "Invalid email or password" });
           }
 
-          // Check if email is verified
-          if (!user.isEmailVerified) {
-            return done(null, false, { 
-              message: "Please verify your email address to log in. Check your inbox for the verification link."
-            });
-          }
-
+          // Allow login even without email verification - show reminder in dashboard instead
+          // This provides a better user experience when email delivery fails
+          // User will see a verification reminder banner in the app
+          
           // Return user ID for session serialization (passport will call serializeUser)
           return done(null, user);
         } catch (error) {
@@ -614,7 +611,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
   
-  // Get full user data to check email verification status
+  // Get full user data
   const userId = (req.user as any).id;
   const fullUser = await storage.getUser(userId);
   
@@ -622,14 +619,22 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
   
-  // Check if email is verified (Google accounts are auto-verified)
-  if (!fullUser.isEmailVerified) {
-    return res.status(401).json({ 
-      message: "Please verify your email address to access this feature.",
-      verificationRequired: true
+  // Check if user is banned
+  if (fullUser.isBanned) {
+    return res.status(403).json({ 
+      message: "Your account has been suspended. Please contact support for assistance."
     });
   }
   
+  // Check if user is suspended (temporary)
+  if (fullUser.suspendedUntil && new Date() < new Date(fullUser.suspendedUntil)) {
+    const suspendedUntilDate = new Date(fullUser.suspendedUntil).toLocaleDateString('en-GB');
+    return res.status(403).json({ 
+      message: `Your account is temporarily suspended until ${suspendedUntilDate}. Reason: ${fullUser.suspendedReason || 'Not specified'}`
+    });
+  }
+  
+  // Allow access - email verification is optional (users see reminder banner instead)
   return next();
 };
 

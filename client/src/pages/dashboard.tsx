@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 
 import ChatBot from "@/components/ChatBot";
 import { MyWorkSection } from "@/components/MyWorkSection";
+import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 import type { BusinessPlan } from "@shared/schema";
 import { format } from "date-fns";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip } from "recharts";
@@ -164,6 +165,7 @@ export default function Dashboard() {
     displayName?: string; 
     subscriptionTier?: string;
     subscriptionStatus?: string;
+    isEmailVerified?: boolean;
   }>({
     queryKey: ['/api/auth/user'],
     retry: false,
@@ -268,6 +270,14 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        {/* Email Verification Banner - show if user hasn't verified email */}
+        {user && !user.isEmailVerified && user.email && (
+          <EmailVerificationBanner 
+            email={user.email} 
+            onDismiss={() => {}} 
+          />
+        )}
+
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold mb-2">
