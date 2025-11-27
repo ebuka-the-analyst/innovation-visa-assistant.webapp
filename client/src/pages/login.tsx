@@ -45,14 +45,20 @@ export default function Login() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
+      const data = await response.json();
 
-      const userData = await response.json();
+      if (!response.ok) {
+        toast({
+          title: "Unable to sign in",
+          description: data.message || "Please check your email and password and try again",
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
         title: "Welcome back!",
@@ -60,21 +66,21 @@ export default function Login() {
       });
 
       // Trigger onboarding tour for new users who haven't completed it
-      if (userData.user && !userData.user.hasCompletedOnboarding) {
+      if (data.user && !data.user.hasCompletedOnboarding) {
         localStorage.setItem('trigger-onboarding-tour', 'true');
       }
 
       // Redirect admin users to admin dashboard
-      if (userData.user?.isAdmin) {
+      if (data.user?.isAdmin) {
         window.location.href = "/admin-dashboard";
       } else {
         window.location.href = "/dashboard";
       }
     } catch (error: any) {
-      // Show user-friendly error message
+      // Network or other error
       toast({
-        title: "Unable to sign in",
-        description: "Please check your email and password and try again",
+        title: "Connection error",
+        description: "Unable to connect. Please try again.",
         variant: "destructive",
       });
     } finally {
