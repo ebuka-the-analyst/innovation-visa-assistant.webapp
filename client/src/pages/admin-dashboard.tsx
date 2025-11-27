@@ -594,6 +594,23 @@ export default function AdminDashboard() {
   const [rejectingReward, setRejectingReward] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
+  // ADMIN CONTROL CENTER STATES
+  const [banningUser, setBanningUser] = useState<User | null>(null);
+  const [banReason, setBanReason] = useState("");
+  const [suspendingUser, setSuspendingUser] = useState<User | null>(null);
+  const [suspendReason, setSuspendReason] = useState("");
+  const [suspendDays, setSuspendDays] = useState(7);
+  const [tierOverrideUser, setTierOverrideUser] = useState<User | null>(null);
+  const [overrideTier, setOverrideTier] = useState<string>("premium");
+  const [overrideReason, setOverrideReason] = useState("");
+  const [creditsUser, setCreditsUser] = useState<User | null>(null);
+  const [creditsAmount, setCreditsAmount] = useState(100);
+  const [creditsType, setCreditsType] = useState<'plan' | 'bonus'>('bonus');
+  const [notesUser, setNotesUser] = useState<User | null>(null);
+  const [adminNotes, setAdminNotes] = useState("");
+  const [impersonatingUser, setImpersonatingUser] = useState<User | null>(null);
+  const [impersonationData, setImpersonationData] = useState<any>(null);
+
   // Live refresh countdown
   const [refreshCountdown, setRefreshCountdown] = useState(30);
 
@@ -1082,6 +1099,142 @@ export default function AdminDashboard() {
       }
     },
   });
+
+  // ==================== ADMIN CONTROL CENTER MUTATIONS ====================
+
+  // Verify/Unverify user
+  const verifyUserMutation = useMutation({
+    mutationFn: async ({ userId, verified }: { userId: string; verified: boolean }) => {
+      await apiRequest('POST', `/api/admin/users/${userId}/verify`, { verified });
+    },
+    onSuccess: (_, { verified }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin'] });
+      toast({ title: `User ${verified ? 'verified' : 'unverified'} successfully` });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update verification", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Ban/Unban user
+  const banUserMutation = useMutation({
+    mutationFn: async ({ userId, banned, reason }: { userId: string; banned: boolean; reason?: string }) => {
+      await apiRequest('POST', `/api/admin/users/${userId}/ban`, { banned, reason });
+    },
+    onSuccess: (_, { banned }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin'] });
+      setBanningUser(null);
+      setBanReason("");
+      toast({ title: `User ${banned ? 'banned' : 'unbanned'} successfully` });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to ban/unban user", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Suspend user
+  const suspendUserMutation = useMutation({
+    mutationFn: async ({ userId, suspended, reason, durationDays }: { userId: string; suspended: boolean; reason?: string; durationDays?: number }) => {
+      await apiRequest('POST', `/api/admin/users/${userId}/suspend`, { suspended, reason, durationDays });
+    },
+    onSuccess: (_, { suspended }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin'] });
+      setSuspendingUser(null);
+      setSuspendReason("");
+      toast({ title: suspended ? 'User suspended' : 'User suspension lifted' });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to suspend user", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Tier override
+  const tierOverrideMutation = useMutation({
+    mutationFn: async ({ userId, tier, reason, addCredits }: { userId: string; tier: string; reason: string; addCredits?: boolean }) => {
+      await apiRequest('POST', `/api/admin/users/${userId}/tier-override`, { tier, reason, addCredits });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin'] });
+      setTierOverrideUser(null);
+      setOverrideReason("");
+      toast({ title: 'User tier updated successfully' });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to override tier", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Manage credits
+  const creditsMutation = useMutation({
+    mutationFn: async ({ userId, amount, type }: { userId: string; amount: number; type: 'plan' | 'bonus' }) => {
+      await apiRequest('POST', `/api/admin/users/${userId}/credits`, { amount, type });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin'] });
+      setCreditsUser(null);
+      toast({ title: 'Credits updated successfully' });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update credits", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Update admin notes
+  const notesMutation = useMutation({
+    mutationFn: async ({ userId, notes }: { userId: string; notes: string }) => {
+      await apiRequest('POST', `/api/admin/users/${userId}/notes`, { notes });
+    },
+    onSuccess: () => {
+      setNotesUser(null);
+      setAdminNotes("");
+      toast({ title: 'Admin notes saved' });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to save notes", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Toggle admin status
+  const adminToggleMutation = useMutation({
+    mutationFn: async ({ userId, isAdmin }: { userId: string; isAdmin: boolean }) => {
+      await apiRequest('POST', `/api/admin/users/${userId}/admin-toggle`, { isAdmin });
+    },
+    onSuccess: (_, { isAdmin }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin'] });
+      toast({ title: isAdmin ? 'User promoted to admin' : 'Admin privileges removed' });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update admin status", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Reset password
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await apiRequest('POST', `/api/admin/users/${userId}/reset-password`, {});
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ 
+        title: 'Password reset initiated', 
+        description: `Reset link generated. Expires at ${new Date(data.expiresAt).toLocaleString()}` 
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to reset password", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Fetch impersonation data
+  const fetchImpersonationData = async (userId: string) => {
+    try {
+      const res = await apiRequest('GET', `/api/admin/users/${userId}/impersonate-data`);
+      const data = await res.json();
+      setImpersonationData(data);
+    } catch (error: any) {
+      toast({ title: "Failed to load user data", description: error.message, variant: "destructive" });
+    }
+  };
 
   // Manual refresh handler
   const handleManualRefresh = useCallback(async () => {
@@ -3416,14 +3569,24 @@ export default function AdminDashboard() {
                                   <TableCell className="text-right">
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
-                                        <Button size="icon" variant="ghost">
+                                        <Button size="icon" variant="ghost" data-testid={`button-user-actions-${user.id}`}>
                                           <MoreVertical className="h-4 w-4" />
                                         </Button>
                                       </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
+                                      <DropdownMenuContent align="end" className="w-56">
+                                        <DropdownMenuLabel>User Actions</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        
                                         <DropdownMenuItem onClick={() => setViewingUserDetails(user)}>
                                           <Eye className="h-4 w-4 mr-2" />
                                           View Details
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => {
+                                          setImpersonatingUser(user);
+                                          fetchImpersonationData(user.id);
+                                        }}>
+                                          <UserCog className="h-4 w-4 mr-2" />
+                                          View as User
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => {
                                           setEditingUser(user);
@@ -3433,10 +3596,69 @@ export default function AdminDashboard() {
                                           <Edit className="h-4 w-4 mr-2" />
                                           Edit User
                                         </DropdownMenuItem>
+                                        
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem className="text-red-500">
-                                          <Trash2 className="h-4 w-4 mr-2" />
-                                          Delete User
+                                        <DropdownMenuLabel className="text-xs text-muted-foreground">Access Control</DropdownMenuLabel>
+                                        
+                                        <DropdownMenuItem onClick={() => verifyUserMutation.mutate({ userId: user.id, verified: !user.isVerified })}>
+                                          {user.isVerified ? (
+                                            <>
+                                              <XCircle className="h-4 w-4 mr-2 text-orange-500" />
+                                              Unverify Email
+                                            </>
+                                          ) : (
+                                            <>
+                                              <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                                              Verify Email
+                                            </>
+                                          )}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setTierOverrideUser(user)}>
+                                          <Crown className="h-4 w-4 mr-2 text-yellow-500" />
+                                          Change Tier
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setCreditsUser(user)}>
+                                          <Wallet className="h-4 w-4 mr-2 text-blue-500" />
+                                          Manage Credits
+                                        </DropdownMenuItem>
+                                        
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuLabel className="text-xs text-muted-foreground">Admin Tools</DropdownMenuLabel>
+                                        
+                                        <DropdownMenuItem onClick={() => {
+                                          setNotesUser(user);
+                                          setAdminNotes((user as any).adminNotes || "");
+                                        }}>
+                                          <FileText className="h-4 w-4 mr-2" />
+                                          Admin Notes
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => resetPasswordMutation.mutate(user.id)}>
+                                          <LockKeyhole className="h-4 w-4 mr-2" />
+                                          Reset Password
+                                        </DropdownMenuItem>
+                                        {!user.isAdmin && (
+                                          <DropdownMenuItem onClick={() => adminToggleMutation.mutate({ userId: user.id, isAdmin: true })}>
+                                            <Shield className="h-4 w-4 mr-2 text-purple-500" />
+                                            Make Admin
+                                          </DropdownMenuItem>
+                                        )}
+                                        {user.isAdmin && user.id !== (window as any).__currentUserId && (
+                                          <DropdownMenuItem onClick={() => adminToggleMutation.mutate({ userId: user.id, isAdmin: false })} className="text-orange-600">
+                                            <Shield className="h-4 w-4 mr-2" />
+                                            Remove Admin
+                                          </DropdownMenuItem>
+                                        )}
+                                        
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuLabel className="text-xs text-muted-foreground">Restrictions</DropdownMenuLabel>
+                                        
+                                        <DropdownMenuItem onClick={() => setSuspendingUser(user)} className="text-orange-600">
+                                          <Clock className="h-4 w-4 mr-2" />
+                                          Suspend User
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setBanningUser(user)} className="text-red-600">
+                                          <Ban className="h-4 w-4 mr-2" />
+                                          Ban User
                                         </DropdownMenuItem>
                                       </DropdownMenuContent>
                                     </DropdownMenu>
@@ -11305,6 +11527,357 @@ export default function AdminDashboard() {
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setViewingUserDetails(null)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ========== ADMIN CONTROL CENTER MODALS ========== */}
+
+        {/* Ban User Modal */}
+        <AlertDialog open={!!banningUser} onOpenChange={(open) => !open && setBanningUser(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                <Ban className="h-5 w-5" />
+                Ban User
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently restrict {banningUser?.email} from accessing the platform.
+                They will not be able to log in or use any features.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="ban-reason">Reason for Ban</Label>
+                <Input
+                  id="ban-reason"
+                  placeholder="e.g., Terms of service violation, spam, etc."
+                  value={banReason}
+                  onChange={(e) => setBanReason(e.target.value)}
+                  data-testid="input-ban-reason"
+                />
+              </div>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => { setBanningUser(null); setBanReason(""); }}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover-elevate"
+                onClick={() => banningUser && banUserMutation.mutate({ 
+                  userId: banningUser.id, 
+                  banned: true, 
+                  reason: banReason 
+                })}
+                disabled={banUserMutation.isPending}
+                data-testid="button-confirm-ban"
+              >
+                {banUserMutation.isPending ? "Banning..." : "Ban User"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Suspend User Modal */}
+        <Dialog open={!!suspendingUser} onOpenChange={(open) => !open && setSuspendingUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-orange-600">
+                <Clock className="h-5 w-5" />
+                Suspend User
+              </DialogTitle>
+              <DialogDescription>
+                Temporarily restrict {suspendingUser?.email}'s access for a specified duration.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="suspend-duration">Suspension Duration (days)</Label>
+                <Select
+                  value={suspendDays.toString()}
+                  onValueChange={(v) => setSuspendDays(Number(v))}
+                >
+                  <SelectTrigger id="suspend-duration" data-testid="select-suspend-duration">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 day</SelectItem>
+                    <SelectItem value="3">3 days</SelectItem>
+                    <SelectItem value="7">7 days</SelectItem>
+                    <SelectItem value="14">14 days</SelectItem>
+                    <SelectItem value="30">30 days</SelectItem>
+                    <SelectItem value="90">90 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="suspend-reason">Reason for Suspension</Label>
+                <Input
+                  id="suspend-reason"
+                  placeholder="e.g., Policy violation, review pending, etc."
+                  value={suspendReason}
+                  onChange={(e) => setSuspendReason(e.target.value)}
+                  data-testid="input-suspend-reason"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setSuspendingUser(null); setSuspendReason(""); }}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-orange-600 hover-elevate"
+                onClick={() => suspendingUser && suspendUserMutation.mutate({ 
+                  userId: suspendingUser.id, 
+                  suspended: true, 
+                  reason: suspendReason,
+                  durationDays: suspendDays
+                })}
+                disabled={suspendUserMutation.isPending}
+                data-testid="button-confirm-suspend"
+              >
+                {suspendUserMutation.isPending ? "Suspending..." : `Suspend for ${suspendDays} days`}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tier Override Modal */}
+        <Dialog open={!!tierOverrideUser} onOpenChange={(open) => !open && setTierOverrideUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Crown className="h-5 w-5 text-yellow-500" />
+                Change User Tier
+              </DialogTitle>
+              <DialogDescription>
+                Override the subscription tier for {tierOverrideUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">Current Tier</p>
+                <Badge variant="outline" className="mt-1 capitalize">
+                  {tierOverrideUser?.subscriptionTier}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-tier">New Tier</Label>
+                <Select value={overrideTier} onValueChange={setOverrideTier}>
+                  <SelectTrigger id="new-tier" data-testid="select-new-tier">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Free (0 credits)</SelectItem>
+                    <SelectItem value="basic">Basic (50 credits)</SelectItem>
+                    <SelectItem value="premium">Premium (200 credits)</SelectItem>
+                    <SelectItem value="enterprise">Enterprise (500 credits)</SelectItem>
+                    <SelectItem value="ultimate">Ultimate (1000 credits)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="override-reason">Reason for Override</Label>
+                <Input
+                  id="override-reason"
+                  placeholder="e.g., Voucher applied, promotional upgrade, etc."
+                  value={overrideReason}
+                  onChange={(e) => setOverrideReason(e.target.value)}
+                  data-testid="input-override-reason"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setTierOverrideUser(null); setOverrideReason(""); }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => tierOverrideUser && tierOverrideMutation.mutate({ 
+                  userId: tierOverrideUser.id, 
+                  tier: overrideTier, 
+                  reason: overrideReason,
+                  addCredits: true
+                })}
+                disabled={tierOverrideMutation.isPending || !overrideReason}
+                data-testid="button-confirm-tier"
+              >
+                {tierOverrideMutation.isPending ? "Updating..." : "Update Tier"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Credits Management Modal */}
+        <Dialog open={!!creditsUser} onOpenChange={(open) => !open && setCreditsUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-blue-500" />
+                Manage Credits
+              </DialogTitle>
+              <DialogDescription>
+                Add or remove credits for {creditsUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="credit-type">Credit Type</Label>
+                <Select value={creditsType} onValueChange={(v) => setCreditsType(v as 'plan' | 'bonus')}>
+                  <SelectTrigger id="credit-type" data-testid="select-credit-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bonus">Bonus Credits (promotional)</SelectItem>
+                    <SelectItem value="plan">Plan Credits (subscription)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="credit-amount">Amount (positive to add, negative to remove)</Label>
+                <Input
+                  id="credit-amount"
+                  type="number"
+                  value={creditsAmount}
+                  onChange={(e) => setCreditsAmount(Number(e.target.value))}
+                  data-testid="input-credit-amount"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => setCreditsAmount(50)}>+50</Button>
+                <Button size="sm" variant="outline" onClick={() => setCreditsAmount(100)}>+100</Button>
+                <Button size="sm" variant="outline" onClick={() => setCreditsAmount(200)}>+200</Button>
+                <Button size="sm" variant="outline" onClick={() => setCreditsAmount(500)}>+500</Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCreditsUser(null)}>Cancel</Button>
+              <Button
+                onClick={() => creditsUser && creditsMutation.mutate({ 
+                  userId: creditsUser.id, 
+                  amount: creditsAmount, 
+                  type: creditsType 
+                })}
+                disabled={creditsMutation.isPending}
+                data-testid="button-confirm-credits"
+              >
+                {creditsMutation.isPending ? "Updating..." : creditsAmount >= 0 ? "Add Credits" : "Remove Credits"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Admin Notes Modal */}
+        <Dialog open={!!notesUser} onOpenChange={(open) => !open && setNotesUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Admin Notes
+              </DialogTitle>
+              <DialogDescription>
+                Internal notes for {notesUser?.email} (not visible to user)
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <textarea
+                className="w-full h-40 p-3 rounded-lg border bg-muted/50 resize-none"
+                placeholder="Add internal notes about this user..."
+                value={adminNotes}
+                onChange={(e) => setAdminNotes(e.target.value)}
+                data-testid="textarea-admin-notes"
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setNotesUser(null)}>Cancel</Button>
+              <Button
+                onClick={() => notesUser && notesMutation.mutate({ userId: notesUser.id, notes: adminNotes })}
+                disabled={notesMutation.isPending}
+                data-testid="button-save-notes"
+              >
+                {notesMutation.isPending ? "Saving..." : "Save Notes"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View as User (Impersonation) Modal */}
+        <Dialog open={!!impersonatingUser} onOpenChange={(open) => { 
+          if (!open) { 
+            setImpersonatingUser(null); 
+            setImpersonationData(null); 
+          } 
+        }}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserCog className="h-5 w-5" />
+                View as User (Read-Only)
+              </DialogTitle>
+              <DialogDescription>
+                Viewing {impersonatingUser?.email}'s account data for support purposes
+              </DialogDescription>
+            </DialogHeader>
+            {impersonationData ? (
+              <div className="space-y-6 py-4">
+                <div className="p-4 bg-muted rounded-lg">
+                  <h4 className="font-semibold mb-3">Account Overview</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Email</p>
+                      <p className="font-medium">{impersonationData.user?.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Tier</p>
+                      <Badge variant="outline" className="capitalize">{impersonationData.user?.subscriptionTier}</Badge>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Plan Credits</p>
+                      <p className="font-medium">{impersonationData.user?.planCredits || 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Bonus Credits</p>
+                      <p className="font-medium">{impersonationData.user?.bonusCredits || 0}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-3">Recent Business Plans ({impersonationData.businessPlans?.length || 0})</h4>
+                  {impersonationData.businessPlans?.length > 0 ? (
+                    <div className="space-y-2">
+                      {impersonationData.businessPlans.map((plan: any) => (
+                        <div key={plan.id} className="p-3 border rounded-lg text-sm">
+                          <div className="flex justify-between">
+                            <span className="font-medium">{plan.businessName || 'Unnamed Plan'}</span>
+                            <Badge variant="outline" className="text-xs">{plan.status}</Badge>
+                          </div>
+                          <p className="text-muted-foreground text-xs mt-1">
+                            Created: {plan.createdAt ? format(new Date(plan.createdAt), 'PPp') : 'N/A'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">No business plans found</p>
+                  )}
+                </div>
+
+                <div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                  <p className="text-sm text-orange-700 dark:text-orange-300">
+                    {impersonationData.impersonationNote}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="py-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+                <p className="text-muted-foreground mt-2">Loading user data...</p>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setImpersonatingUser(null); setImpersonationData(null); }}>
                 Close
               </Button>
             </DialogFooter>
