@@ -147,6 +147,12 @@ const toolMap: Record<string, any> = {
   'economic-impact': lazy(() => import('@/pages/economic-impact')),
   'knowledge-graph': lazy(() => import('@/pages/knowledge-graph')),
   'voice-builder': lazy(() => import('@/pages/voice-builder')),
+  
+  // Enhanced tools
+  'ilr-tracker': lazy(() => import('@/pages/tools/ilr-tracker')),
+  'ai-network-builder': lazy(() => import('@/pages/tools/ai-network-builder')),
+  'ai-patent-generator': lazy(() => import('@/pages/tools/ai-patent-generator')),
+  'ai-funding-negotiator': lazy(() => import('@/pages/tools/ai-funding-negotiator')),
 };
 
 export function getToolComponent(toolId: string) {

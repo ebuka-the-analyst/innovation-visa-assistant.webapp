@@ -218,5 +218,5 @@ export const TIER_DESCRIPTIONS = {
   basic: "For getting started with UK Innovation Visa - business plan + essentials",
   premium: "Full feature suite for comprehensive visa preparation and business planning",
   enterprise: "Advanced tools for complex applications and maximum success probability",
-  ultimate: "Complete access to all 88 tools - everything you could possibly need",
+  ultimate: "Complete access to all 120+ tools including 2040-grade AI features",
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
@@ -132,6 +133,65 @@ export default function WeaknessAnalysis() {
 
   const [activeTab, setActiveTab] = useState('overview');
   const [savedDate, setSavedDate] = useState('');
+  
+  // AI Document Scanner State
+  const [uploadedDocuments, setUploadedDocuments] = useState<{name: string; content: string; type: string}[]>([]);
+  const [scanResults, setScanResults] = useState<{
+    overallScore: number;
+    findings: {category: string; issue: string; severity: 'critical' | 'high' | 'medium' | 'low'; suggestion: string}[];
+    strengths: string[];
+    recommendations: string[];
+  } | null>(null);
+
+  const scanDocumentsMutation = useMutation({
+    mutationFn: async (documents: {name: string; content: string}[]) => {
+      const response = await apiRequest('POST', '/api/ai/scan-documents', { documents });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setScanResults(data);
+      // Update categories based on scan results
+      if (data.categoryScores) {
+        const updated = categories.map(cat => {
+          const scoreUpdate = data.categoryScores[cat.name];
+          if (scoreUpdate !== undefined) {
+            return { ...cat, score: scoreUpdate, severity: getSeverity(scoreUpdate) };
+          }
+          return cat;
+        });
+        setCategories(updated);
+      }
+    }
+  });
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+    
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        setUploadedDocuments(prev => [...prev, {
+          name: file.name,
+          content: content.slice(0, 10000), // Limit content size
+          type: file.type
+        }]);
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  const runAiScan = () => {
+    if (uploadedDocuments.length > 0) {
+      scanDocumentsMutation.mutate(uploadedDocuments);
+    }
+  };
+
+  const clearDocuments = () => {
+    setUploadedDocuments([]);
+    setScanResults(null);
+  };
 
   const updateCategory = (index: number, newScore: number) => {
     const updated = [...categories];
@@ -618,8 +678,12 @@ This tool provides educational guidance only and does not constitute legal advic
           />
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5" data-testid="tabs-weakness-analysis">
+            <TabsList className="grid w-full grid-cols-6" data-testid="tabs-weakness-analysis">
               <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
+              <TabsTrigger value="ai-scanner" data-testid="tab-ai-scanner" className="gap-1">
+                <Scan className="w-3 h-3" />
+                AI Scanner
+              </TabsTrigger>
               <TabsTrigger value="assessment" data-testid="tab-assessment">Assessment</TabsTrigger>
               <TabsTrigger value="analysis" data-testid="tab-analysis">Analysis</TabsTrigger>
               <TabsTrigger value="tips" data-testid="tab-tips">Smart Tips</TabsTrigger>
@@ -748,6 +812,139 @@ This tool provides educational guidance only and does not constitute legal advic
                       <Tooltip />
                     </RadarChart>
                   </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="ai-scanner" className="space-y-6">
+              <Card className="border-violet-500/20 bg-gradient-to-br from-violet-500/5 to-purple-500/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-violet-500" />
+                    AI Document Scanner
+                  </CardTitle>
+                  <CardDescription>
+                    Upload your visa application documents for AI-powered weakness detection and compliance analysis
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="border-2 border-dashed border-violet-500/30 rounded-xl p-8 text-center bg-violet-500/5 hover:bg-violet-500/10 transition-colors">
+                    <input
+                      type="file"
+                      multiple
+                      accept=".txt,.pdf,.doc,.docx"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="document-upload"
+                      data-testid="input-document-upload"
+                    />
+                    <label htmlFor="document-upload" className="cursor-pointer">
+                      <Upload className="w-12 h-12 mx-auto mb-4 text-violet-500" />
+                      <p className="text-lg font-medium mb-2">Drop documents here or click to upload</p>
+                      <p className="text-sm text-muted-foreground">
+                        Supports business plans, financial projections, personal statements, and more
+                      </p>
+                    </label>
+                  </div>
+
+                  {uploadedDocuments.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          Uploaded Documents ({uploadedDocuments.length})
+                        </h4>
+                        <Button variant="ghost" size="sm" onClick={clearDocuments} data-testid="button-clear-docs">
+                          <RotateCcw className="w-4 h-4 mr-1" />
+                          Clear All
+                        </Button>
+                      </div>
+                      <div className="grid gap-2">
+                        {uploadedDocuments.map((doc, i) => (
+                          <div key={i} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                            <FileText className="w-5 h-5 text-violet-500" />
+                            <span className="flex-1 truncate">{doc.name}</span>
+                            <Badge variant="outline">{Math.round(doc.content.length / 1000)}KB</Badge>
+                          </div>
+                        ))}
+                      </div>
+                      <Button 
+                        onClick={runAiScan} 
+                        disabled={scanDocumentsMutation.isPending}
+                        className="w-full bg-gradient-to-r from-violet-500 to-purple-500 text-white"
+                        data-testid="button-run-scan"
+                      >
+                        {scanDocumentsMutation.isPending ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Analyzing Documents...
+                          </>
+                        ) : (
+                          <>
+                            <Scan className="w-4 h-4 mr-2" />
+                            Run AI Weakness Scan
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                  {scanResults && (
+                    <div className="space-y-4 pt-4 border-t">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Eye className="w-4 h-4" />
+                          Scan Results
+                        </h4>
+                        <Badge className={scanResults.overallScore >= 70 ? 'bg-green-500' : scanResults.overallScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'}>
+                          {scanResults.overallScore}% Compliance
+                        </Badge>
+                      </div>
+
+                      {scanResults.findings.length > 0 && (
+                        <div className="space-y-2">
+                          <h5 className="text-sm font-medium text-destructive">Weaknesses Found:</h5>
+                          {scanResults.findings.map((finding, i) => (
+                            <Alert key={i} variant={finding.severity === 'critical' ? 'destructive' : 'default'} className="py-2">
+                              <AlertTriangle className="w-4 h-4" />
+                              <AlertDescription className="ml-2">
+                                <strong>{finding.category}:</strong> {finding.issue}
+                                <p className="text-xs mt-1 text-muted-foreground">💡 {finding.suggestion}</p>
+                              </AlertDescription>
+                            </Alert>
+                          ))}
+                        </div>
+                      )}
+
+                      {scanResults.strengths.length > 0 && (
+                        <div className="space-y-2">
+                          <h5 className="text-sm font-medium text-green-600">Strengths Identified:</h5>
+                          <ul className="space-y-1">
+                            {scanResults.strengths.map((s, i) => (
+                              <li key={i} className="flex items-start gap-2 text-sm">
+                                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                {s}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {scanResults.recommendations.length > 0 && (
+                        <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                          <h5 className="text-sm font-medium text-blue-600 mb-2">AI Recommendations:</h5>
+                          <ul className="space-y-1">
+                            {scanResults.recommendations.map((r, i) => (
+                              <li key={i} className="flex items-start gap-2 text-sm">
+                                <Sparkles className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                {r}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
