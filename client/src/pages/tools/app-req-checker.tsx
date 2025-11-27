@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { Download, AlertTriangle, CheckCircle2, Info, TrendingUp, Save, Share2, Lightbulb, Calendar, RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { OISCDisclaimer } from "@/components/OISCDisclaimer";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'app-req-checker',
@@ -446,6 +447,8 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
             <Download className="w-4 h-4" />
             Export Complete Assessment
           </Button>
+
+          <OISCDisclaimer variant="compact" className="mt-6" />
           </>
           )}
         </div>

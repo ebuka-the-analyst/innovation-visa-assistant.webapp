@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
+import { OISCDisclaimer } from "@/components/OISCDisclaimer";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, AlertTriangle, Calculator } from "lucide-react";
@@ -290,6 +291,8 @@ export default function PointsCalculator() {
                   </AlertDescription>
                 </Alert>
               )}
+
+              <OISCDisclaimer variant="compact" className="mt-6" />
             </>
           )}
         </div>
