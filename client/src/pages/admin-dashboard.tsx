@@ -629,8 +629,8 @@ export default function AdminDashboard() {
     localStorage.setItem('admin-hide-demo-users', String(hideDemoUsers));
   }, [hideDemoUsers]);
 
-  // The first real user email - all users before this are demo users
-  const FIRST_REAL_USER_EMAIL = 'uerobor@gmail.com';
+  // Demo user cutoff date - all users created before November 27, 2025 are demo users
+  const DEMO_CUTOFF_DATE = new Date('2025-11-27T00:00:00Z');
 
   // Load dashboard layout from localStorage
   useEffect(() => {
@@ -728,19 +728,12 @@ export default function AdminDashboard() {
     if (!usersData?.users) return [];
     if (!hideDemoUsers) return usersData.users;
     
-    // Find the first real user
-    const firstRealUser = usersData.users.find(u => u.email === FIRST_REAL_USER_EMAIL);
-    if (!firstRealUser) return usersData.users;
-    
-    const cutoffDate = new Date(firstRealUser.createdAt);
-    
-    // Keep admin users and users created on or after the first real user
+    // Keep admin users and users created on or after November 27, 2025
     return usersData.users.filter(u => 
       u.isAdmin || 
-      u.email === FIRST_REAL_USER_EMAIL ||
-      new Date(u.createdAt) >= cutoffDate
+      new Date(u.createdAt) >= DEMO_CUTOFF_DATE
     );
-  }, [usersData?.users, hideDemoUsers, FIRST_REAL_USER_EMAIL]);
+  }, [usersData?.users, hideDemoUsers, DEMO_CUTOFF_DATE]);
 
   // Plans analytics
   const { data: plansAnalytics, isLoading: plansAnalyticsLoading } = useQuery<PlansAnalytics>({
