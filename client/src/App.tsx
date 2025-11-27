@@ -96,6 +96,15 @@ const News = lazy(() => import("@/pages/news"));
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
 const PartnerDashboard = lazy(() => import("@/pages/partner-dashboard"));
 
+// 2040 AI Brain - Advanced AI Features
+const OracleSupervisor = lazy(() => import("@/pages/oracle-supervisor"));
+const FounderAutopilot = lazy(() => import("@/pages/founder-autopilot"));
+const NeuralTwin = lazy(() => import("@/pages/neural-twin"));
+const VoiceBuilder = lazy(() => import("@/pages/voice-builder"));
+const RegulatoryCopilot = lazy(() => import("@/pages/regulatory-copilot"));
+const EconomicImpact = lazy(() => import("@/pages/economic-impact"));
+const KnowledgeGraph = lazy(() => import("@/pages/knowledge-graph"));
+
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
 
@@ -211,6 +220,15 @@ function Router() {
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/partner-dashboard" component={PartnerDashboard} />
+      
+      {/* 2040 AI Brain Routes */}
+      <Route path="/oracle-supervisor" component={OracleSupervisor} />
+      <Route path="/founder-autopilot" component={FounderAutopilot} />
+      <Route path="/neural-twin" component={NeuralTwin} />
+      <Route path="/voice-builder" component={VoiceBuilder} />
+      <Route path="/regulatory-copilot" component={RegulatoryCopilot} />
+      <Route path="/economic-impact" component={EconomicImpact} />
+      <Route path="/knowledge-graph" component={KnowledgeGraph} />
       <Route path="/referral-dashboard" component={ReferralDashboard} />
       <Route path="/premium-features" component={PremiumFeatures} />
       <Route path="/achievements" component={Achievements} />

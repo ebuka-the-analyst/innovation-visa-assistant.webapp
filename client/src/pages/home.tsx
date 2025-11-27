@@ -4,6 +4,7 @@ import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import PlatformPillars from "@/components/PlatformPillars";
 import AIAgents from "@/components/AIAgents";
+import AI2040Showcase from "@/components/AI2040Showcase";
 import CompetitorFeatures from "@/components/CompetitorFeatures";
 import StatsSection from "@/components/StatsSection";
 import PricingSection from "@/components/PricingSection";
@@ -43,6 +44,7 @@ export default function Home() {
         </div>
         <PlatformPillars />
         <AIAgents />
+        <AI2040Showcase />
         <CompetitorFeatures />
         <StatsSection />
         <div id="pricing">
