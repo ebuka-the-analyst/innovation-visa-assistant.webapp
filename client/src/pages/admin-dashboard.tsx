@@ -610,6 +610,10 @@ export default function AdminDashboard() {
   const [adminNotes, setAdminNotes] = useState("");
   const [impersonatingUser, setImpersonatingUser] = useState<User | null>(null);
   const [impersonationData, setImpersonationData] = useState<any>(null);
+  
+  // Error logging states
+  const [selectedError, setSelectedError] = useState<any>(null);
+  const [resolutionText, setResolutionText] = useState("");
 
   // Live refresh countdown
   const [refreshCountdown, setRefreshCountdown] = useState(30);
@@ -914,6 +918,78 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/lawyer-reviews/analytics'],
     enabled: !!user?.isAdmin && activeSection.startsWith('lawyer'),
     refetchInterval: REFRESH_INTERVAL,
+  });
+
+  // Error logs query
+  const { data: errorLogsData, isLoading: errorLogsLoading, refetch: refetchErrorLogs } = useQuery<{
+    errors: Array<{
+      id: string;
+      errorType: string;
+      errorCode: string | null;
+      message: string;
+      stack: string | null;
+      userId: string | null;
+      userEmail: string | null;
+      endpoint: string | null;
+      toolId: string | null;
+      pageUrl: string | null;
+      severity: string;
+      isResolved: boolean;
+      resolution: string | null;
+      createdAt: string;
+    }>;
+    stats: {
+      total: number;
+      unresolved: number;
+      bySeverity: Record<string, number>;
+    };
+  }>({
+    queryKey: ['/api/admin/errors'],
+    enabled: !!user?.isAdmin && activeSection === 'logs-errors',
+    refetchInterval: 30000,
+  });
+
+  // Resolve error mutation
+  const resolveErrorMutation = useMutation({
+    mutationFn: async ({ errorId, resolution }: { errorId: string; resolution: string }) => {
+      await apiRequest('PATCH', `/api/admin/errors/${errorId}/resolve`, { resolution });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/errors'] });
+      toast({ title: "Error marked as resolved" });
+      setSelectedError(null);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to resolve error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Delete error mutation
+  const deleteErrorMutation = useMutation({
+    mutationFn: async (errorId: string) => {
+      await apiRequest('DELETE', `/api/admin/errors/${errorId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/errors'] });
+      toast({ title: "Error log deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to delete error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Clear resolved errors mutation  
+  const clearResolvedErrorsMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest('DELETE', '/api/admin/errors/resolved/all', {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/errors'] });
+      toast({ title: "All resolved errors cleared" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to clear errors", description: error.message, variant: "destructive" });
+    },
   });
 
   // Refresh countdown timer
@@ -6746,175 +6822,345 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* 2. ERROR LOG - Error Tracking & Analysis */}
+                      {/* 2. ERROR LOG - Real-Time Error Tracking & Analysis */}
                       {activeSection === 'logs-errors' && (
                         <>
                           {/* Error Status Banner */}
                           <Card className="bg-gradient-to-r from-red-500/10 via-rose-500/5 to-red-500/10 border-red-500/20">
                             <CardContent className="py-6">
-                              <div className="flex items-center justify-between">
+                              <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                   <motion.div
-                                    className="p-3 rounded-xl bg-red-500 text-white"
-                                    animate={{ scale: [1, 1.1, 1] }}
+                                    className={`p-3 rounded-xl text-white ${
+                                      (errorLogsData?.stats?.unresolved || 0) > 0 ? 'bg-red-500' : 'bg-green-500'
+                                    }`}
+                                    animate={{ scale: (errorLogsData?.stats?.unresolved || 0) > 0 ? [1, 1.1, 1] : 1 }}
                                     transition={{ duration: 2, repeat: Infinity }}
                                   >
-                                    <AlertTriangle className="h-6 w-6" />
+                                    {(errorLogsData?.stats?.unresolved || 0) > 0 ? (
+                                      <AlertTriangle className="h-6 w-6" />
+                                    ) : (
+                                      <CheckCircle className="h-6 w-6" />
+                                    )}
                                   </motion.div>
                                   <div>
-                                    <p className="text-sm text-muted-foreground">Error Monitor</p>
-                                    <p className="text-2xl font-bold text-red-500">23 Active Issues</p>
+                                    <p className="text-sm text-muted-foreground">Live Error Monitor</p>
+                                    <p className={`text-2xl font-bold ${
+                                      (errorLogsData?.stats?.unresolved || 0) > 0 ? 'text-red-500' : 'text-green-500'
+                                    }`}>
+                                      {errorLogsData?.stats?.unresolved || 0} Unresolved Issues
+                                    </p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-6">
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Critical</p>
-                                    <p className="text-xl font-bold text-red-500">3</p>
+                                    <p className="text-xl font-bold text-red-500">{errorLogsData?.stats?.bySeverity?.critical || 0}</p>
                                   </div>
                                   <div className="text-center">
-                                    <p className="text-sm text-muted-foreground">High</p>
-                                    <p className="text-xl font-bold text-orange-500">8</p>
+                                    <p className="text-sm text-muted-foreground">Error</p>
+                                    <p className="text-xl font-bold text-orange-500">{errorLogsData?.stats?.bySeverity?.error || 0}</p>
                                   </div>
                                   <div className="text-center">
-                                    <p className="text-sm text-muted-foreground">Medium</p>
-                                    <p className="text-xl font-bold text-amber-500">12</p>
+                                    <p className="text-sm text-muted-foreground">Warning</p>
+                                    <p className="text-xl font-bold text-amber-500">{errorLogsData?.stats?.bySeverity?.warning || 0}</p>
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="text-sm text-muted-foreground">Total</p>
+                                    <p className="text-xl font-bold">{errorLogsData?.stats?.total || 0}</p>
                                   </div>
                                 </div>
                               </div>
                             </CardContent>
                           </Card>
 
-                          {/* Error Distribution */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card>
-                              <CardHeader>
-                                <CardTitle>Error Types</CardTitle>
-                                <CardDescription>Categorized by error type</CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <div className="space-y-4">
-                                  {[
-                                    { type: 'ValidationError', count: 8, percent: 35, color: '#f59e0b' },
-                                    { type: 'NetworkError', count: 5, percent: 22, color: '#ef4444' },
-                                    { type: 'AuthenticationError', count: 4, percent: 17, color: '#8b5cf6' },
-                                    { type: 'DatabaseError', count: 3, percent: 13, color: '#3b82f6' },
-                                    { type: 'PaymentError', count: 3, percent: 13, color: '#22c55e' },
-                                  ].map((error, index) => (
-                                    <motion.div
-                                      key={error.type}
-                                      initial={{ opacity: 0, x: -20 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="space-y-2"
-                                    >
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: error.color }} />
-                                          <span className="font-mono text-sm">{error.type}</span>
-                                        </div>
-                                        <Badge variant="outline">{error.count}</Badge>
+                          {/* Error Stats Cards */}
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            {[
+                              { label: 'Client Errors', type: 'client', icon: Globe, color: 'blue' },
+                              { label: 'API Errors', type: 'api', icon: Server, color: 'purple' },
+                              { label: 'AI Errors', type: 'ai', icon: Sparkles, color: 'amber' },
+                              { label: 'Auth Errors', type: 'auth', icon: Shield, color: 'red' },
+                            ].map((stat) => {
+                              const count = errorLogsData?.errors?.filter(e => e.errorType === stat.type).length || 0;
+                              return (
+                                <Card key={stat.type} className="hover-elevate">
+                                  <CardContent className="pt-6">
+                                    <div className="flex items-center gap-3">
+                                      <div className={`p-2 rounded-lg bg-${stat.color}-500/10`}>
+                                        <stat.icon className={`h-5 w-5 text-${stat.color}-500`} />
                                       </div>
-                                      <div className="relative h-2 rounded-full bg-muted overflow-hidden">
-                                        <motion.div
-                                          className="absolute inset-y-0 left-0 rounded-full"
-                                          style={{ backgroundColor: error.color }}
-                                          initial={{ width: 0 }}
-                                          animate={{ width: `${error.percent}%` }}
-                                          transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
-                                        />
+                                      <div>
+                                        <p className="text-2xl font-bold">{count}</p>
+                                        <p className="text-sm text-muted-foreground">{stat.label}</p>
                                       </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </CardContent>
-                            </Card>
-
-                            <Card>
-                              <CardHeader>
-                                <CardTitle>Error Frequency (24h)</CardTitle>
-                                <CardDescription>Hourly error distribution</CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <ResponsiveContainer width="100%" height={220}>
-                                  <RechartsAreaChart data={[
-                                    { hour: '00:00', errors: 2 },
-                                    { hour: '04:00', errors: 1 },
-                                    { hour: '08:00', errors: 5 },
-                                    { hour: '12:00', errors: 8 },
-                                    { hour: '16:00', errors: 4 },
-                                    { hour: '20:00', errors: 3 },
-                                  ]}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                                    <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={11} />
-                                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
-                                    <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
-                                    <Area type="monotone" dataKey="errors" stroke="#ef4444" fill="#ef444430" strokeWidth={2} />
-                                  </RechartsAreaChart>
-                                </ResponsiveContainer>
-                              </CardContent>
-                            </Card>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              );
+                            })}
                           </div>
 
                           {/* Error List */}
                           <Card>
                             <CardHeader>
-                              <div className="flex items-center justify-between">
+                              <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
-                                  <CardTitle>Recent Errors</CardTitle>
-                                  <CardDescription>Click to view stack trace</CardDescription>
+                                  <CardTitle className="flex items-center gap-2">
+                                    Recent Errors
+                                    {errorLogsLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
+                                  </CardTitle>
+                                  <CardDescription>Click to view details and resolve errors</CardDescription>
                                 </div>
-                                <Button variant="outline" size="sm">
-                                  <RefreshCw className="h-4 w-4 mr-2" />
-                                  Refresh
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => clearResolvedErrorsMutation.mutate()}
+                                    disabled={clearResolvedErrorsMutation.isPending}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Clear Resolved
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => refetchErrorLogs()}
+                                  >
+                                    <RefreshCw className={`h-4 w-4 mr-2 ${errorLogsLoading ? 'animate-spin' : ''}`} />
+                                    Refresh
+                                  </Button>
+                                </div>
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <ScrollArea className="h-[400px]">
+                              {errorLogsLoading ? (
                                 <div className="space-y-3">
-                                  {[
-                                    { id: 'ERR-001', type: 'ValidationError', message: 'Invalid email format in registration form', time: '5 min ago', severity: 'high', user: 'anonymous' },
-                                    { id: 'ERR-002', type: 'NetworkError', message: 'Failed to connect to payment gateway', time: '12 min ago', severity: 'critical', user: 'john@example.com' },
-                                    { id: 'ERR-003', type: 'AuthenticationError', message: 'Invalid token signature', time: '25 min ago', severity: 'medium', user: 'sarah@startup.io' },
-                                    { id: 'ERR-004', type: 'DatabaseError', message: 'Connection pool exhausted', time: '1 hour ago', severity: 'critical', user: 'system' },
-                                    { id: 'ERR-005', type: 'PaymentError', message: 'Stripe webhook signature mismatch', time: '2 hours ago', severity: 'high', user: 'system' },
-                                  ].map((error, index) => (
-                                    <motion.div
-                                      key={error.id}
-                                      initial={{ opacity: 0 }}
-                                      animate={{ opacity: 1 }}
-                                      transition={{ delay: index * 0.05 }}
-                                      className={`p-4 rounded-lg border hover-elevate cursor-pointer ${
-                                        error.severity === 'critical' ? 'border-red-500/50 bg-red-500/5' :
-                                        error.severity === 'high' ? 'border-orange-500/50 bg-orange-500/5' :
-                                        'border-border/50'
-                                      }`}
-                                    >
-                                      <div className="flex items-start justify-between">
-                                        <div className="flex items-start gap-3">
-                                          <Badge className={
-                                            error.severity === 'critical' ? 'bg-red-500 text-white' :
-                                            error.severity === 'high' ? 'bg-orange-500 text-white' :
-                                            'bg-amber-500 text-white'
-                                          }>{error.severity}</Badge>
-                                          <div>
-                                            <p className="font-mono text-sm">{error.type}</p>
-                                            <p className="text-sm text-muted-foreground mt-1">{error.message}</p>
-                                            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                                              <span>{error.id}</span>
-                                              <span>|</span>
-                                              <span>{error.user}</span>
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-20 w-full" />
+                                  ))}
+                                </div>
+                              ) : errorLogsData?.errors?.length === 0 ? (
+                                <div className="py-12 text-center">
+                                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                                  <p className="text-lg font-medium text-green-600">No errors logged!</p>
+                                  <p className="text-muted-foreground">Your system is running smoothly.</p>
+                                </div>
+                              ) : (
+                                <ScrollArea className="h-[500px]">
+                                  <div className="space-y-3">
+                                    {errorLogsData?.errors?.map((error, index) => (
+                                      <motion.div
+                                        key={error.id}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: index * 0.03 }}
+                                        className={`p-4 rounded-lg border hover-elevate cursor-pointer ${
+                                          error.isResolved ? 'border-green-500/30 bg-green-500/5' :
+                                          error.severity === 'critical' ? 'border-red-500/50 bg-red-500/5' :
+                                          error.severity === 'error' ? 'border-orange-500/50 bg-orange-500/5' :
+                                          error.severity === 'warning' ? 'border-amber-500/50 bg-amber-500/5' :
+                                          'border-border/50'
+                                        }`}
+                                        onClick={() => setSelectedError(error)}
+                                      >
+                                        <div className="flex items-start justify-between gap-4">
+                                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                                            <Badge className={
+                                              error.isResolved ? 'bg-green-500 text-white' :
+                                              error.severity === 'critical' ? 'bg-red-500 text-white' :
+                                              error.severity === 'error' ? 'bg-orange-500 text-white' :
+                                              error.severity === 'warning' ? 'bg-amber-500 text-white' :
+                                              'bg-blue-500 text-white'
+                                            }>
+                                              {error.isResolved ? 'resolved' : error.severity}
+                                            </Badge>
+                                            <div className="flex-1 min-w-0">
+                                              <div className="flex items-center gap-2 flex-wrap">
+                                                <Badge variant="outline" className="font-mono text-xs">
+                                                  {error.errorType}
+                                                </Badge>
+                                                {error.toolId && (
+                                                  <Badge variant="secondary" className="text-xs">
+                                                    {error.toolId}
+                                                  </Badge>
+                                                )}
+                                              </div>
+                                              <p className="text-sm mt-2 break-words">{error.message}</p>
+                                              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
+                                                <span className="font-mono">{error.id.slice(0, 8)}...</span>
+                                                {error.userEmail && (
+                                                  <>
+                                                    <span>|</span>
+                                                    <span>{error.userEmail}</span>
+                                                  </>
+                                                )}
+                                                {error.pageUrl && (
+                                                  <>
+                                                    <span>|</span>
+                                                    <span className="truncate max-w-[200px]">{error.pageUrl}</span>
+                                                  </>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div className="flex flex-col items-end gap-2">
+                                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                              {formatDistance(new Date(error.createdAt), new Date(), { addSuffix: true })}
+                                            </span>
+                                            <div className="flex items-center gap-1">
+                                              {!error.isResolved && (
+                                                <Button
+                                                  size="icon"
+                                                  variant="ghost"
+                                                  className="h-7 w-7"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedError(error);
+                                                  }}
+                                                >
+                                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                                </Button>
+                                              )}
+                                              <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="h-7 w-7"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  deleteErrorMutation.mutate(error.id);
+                                                }}
+                                              >
+                                                <Trash2 className="h-4 w-4 text-red-500" />
+                                              </Button>
                                             </div>
                                           </div>
                                         </div>
-                                        <span className="text-xs text-muted-foreground">{error.time}</span>
-                                      </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </ScrollArea>
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                </ScrollArea>
+                              )}
                             </CardContent>
                           </Card>
+
+                          {/* Error Detail Dialog */}
+                          <Dialog open={!!selectedError} onOpenChange={() => setSelectedError(null)}>
+                            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                                  Error Details
+                                </DialogTitle>
+                                <DialogDescription>
+                                  Full error information and stack trace
+                                </DialogDescription>
+                              </DialogHeader>
+                              {selectedError && (
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label className="text-muted-foreground">Error Type</Label>
+                                      <p className="font-mono">{selectedError.errorType}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-muted-foreground">Severity</Label>
+                                      <Badge className={
+                                        selectedError.severity === 'critical' ? 'bg-red-500' :
+                                        selectedError.severity === 'error' ? 'bg-orange-500' :
+                                        'bg-amber-500'
+                                      }>{selectedError.severity}</Badge>
+                                    </div>
+                                    <div>
+                                      <Label className="text-muted-foreground">User</Label>
+                                      <p>{selectedError.userEmail || 'Anonymous'}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-muted-foreground">Time</Label>
+                                      <p>{format(new Date(selectedError.createdAt), 'PPpp')}</p>
+                                    </div>
+                                    {selectedError.toolId && (
+                                      <div>
+                                        <Label className="text-muted-foreground">Tool</Label>
+                                        <p>{selectedError.toolId}</p>
+                                      </div>
+                                    )}
+                                    {selectedError.pageUrl && (
+                                      <div className="col-span-2">
+                                        <Label className="text-muted-foreground">Page URL</Label>
+                                        <p className="break-all text-sm">{selectedError.pageUrl}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div>
+                                    <Label className="text-muted-foreground">Message</Label>
+                                    <p className="p-3 bg-muted rounded-lg mt-1">{selectedError.message}</p>
+                                  </div>
+                                  
+                                  {selectedError.stack && (
+                                    <div>
+                                      <Label className="text-muted-foreground">Stack Trace</Label>
+                                      <pre className="p-3 bg-muted rounded-lg mt-1 text-xs overflow-x-auto whitespace-pre-wrap">
+                                        {selectedError.stack}
+                                      </pre>
+                                    </div>
+                                  )}
+
+                                  {!selectedError.isResolved && (
+                                    <div className="space-y-2">
+                                      <Label>Resolution Notes</Label>
+                                      <Input
+                                        placeholder="How was this error resolved?"
+                                        value={resolutionText}
+                                        onChange={(e) => setResolutionText(e.target.value)}
+                                      />
+                                    </div>
+                                  )}
+
+                                  {selectedError.isResolved && selectedError.resolution && (
+                                    <div>
+                                      <Label className="text-muted-foreground">Resolution</Label>
+                                      <p className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg mt-1">
+                                        {selectedError.resolution}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              <DialogFooter className="gap-2">
+                                <Button variant="outline" onClick={() => setSelectedError(null)}>
+                                  Close
+                                </Button>
+                                {selectedError && !selectedError.isResolved && (
+                                  <Button 
+                                    onClick={() => {
+                                      resolveErrorMutation.mutate({
+                                        errorId: selectedError.id,
+                                        resolution: resolutionText || 'Marked as resolved'
+                                      });
+                                      setResolutionText("");
+                                    }}
+                                    disabled={resolveErrorMutation.isPending}
+                                  >
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    Mark Resolved
+                                  </Button>
+                                )}
+                                <Button 
+                                  variant="destructive"
+                                  onClick={() => {
+                                    deleteErrorMutation.mutate(selectedError.id);
+                                    setSelectedError(null);
+                                  }}
+                                  disabled={deleteErrorMutation.isPending}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
                         </>
                       )}
 

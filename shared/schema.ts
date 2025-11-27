@@ -2134,3 +2134,57 @@ export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
 
 export type UserActivityLog = typeof userActivityLogs.$inferSelect;
 export type InsertUserActivityLog = z.infer<typeof insertUserActivityLogSchema>;
+
+// Error Logs Table - For admin error monitoring
+export const errorLogs = pgTable("error_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Error Details
+  errorType: varchar("error_type", { length: 50 }).notNull(), // client, server, api, database, ai, export, auth
+  errorCode: varchar("error_code", { length: 50 }),
+  message: text("message").notNull(),
+  stack: text("stack"),
+  
+  // Context
+  userId: varchar("user_id").references(() => users.id),
+  userEmail: varchar("user_email"),
+  endpoint: varchar("endpoint", { length: 255 }),
+  method: varchar("method", { length: 10 }),
+  statusCode: integer("status_code"),
+  
+  // Tool/Page context
+  toolId: varchar("tool_id", { length: 100 }),
+  pageUrl: text("page_url"),
+  
+  // Request info
+  requestBody: jsonb("request_body"),
+  requestHeaders: jsonb("request_headers"),
+  
+  // Browser/Device info (for client errors)
+  userAgent: text("user_agent"),
+  browserInfo: jsonb("browser_info"),
+  
+  // Severity and status
+  severity: varchar("severity", { length: 20 }).notNull().default('error'), // info, warning, error, critical
+  isResolved: boolean("is_resolved").notNull().default(false),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  resolution: text("resolution"),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_error_type").on(table.errorType),
+  index("idx_error_severity").on(table.severity),
+  index("idx_error_user").on(table.userId),
+  index("idx_error_date").on(table.createdAt),
+  index("idx_error_resolved").on(table.isResolved),
+]);
+
+export const insertErrorLogSchema = createInsertSchema(errorLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type ErrorLog = typeof errorLogs.$inferSelect;
+export type InsertErrorLog = z.infer<typeof insertErrorLogSchema>;

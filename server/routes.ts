@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs } from "@shared/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -3101,6 +3101,159 @@ Keep the tone supportive and professional. Do not be overly enthusiastic.`;
     } catch (error) {
       console.error("Admin activity log error:", error);
       res.status(500).json({ error: "Failed to fetch activity log" });
+    }
+  });
+
+  // =====================
+  // ERROR LOGGING SYSTEM
+  // =====================
+
+  // Log client-side errors (no auth required for error capture)
+  app.post("/api/errors/log", async (req, res) => {
+    try {
+      const { 
+        errorType = 'client', 
+        errorCode,
+        message, 
+        stack, 
+        toolId, 
+        pageUrl, 
+        browserInfo,
+        severity = 'error'
+      } = req.body;
+
+      if (!message) {
+        return res.status(400).json({ error: "Error message is required" });
+      }
+
+      const user = req.user as any;
+      const userId = user?.id || null;
+      const userEmail = user?.email || null;
+
+      await db.insert(errorLogs).values({
+        errorType,
+        errorCode,
+        message,
+        stack,
+        userId,
+        userEmail,
+        toolId,
+        pageUrl,
+        browserInfo,
+        severity,
+        userAgent: req.headers['user-agent'] || null,
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error logging failed:", error);
+      res.status(500).json({ error: "Failed to log error" });
+    }
+  });
+
+  // Get all error logs (admin only)
+  app.get("/api/admin/errors", requireAdmin, async (req, res) => {
+    try {
+      const { 
+        severity, 
+        errorType, 
+        resolved, 
+        limit = '100',
+        offset = '0' 
+      } = req.query;
+
+      let query = db.select().from(errorLogs).orderBy(desc(errorLogs.createdAt));
+
+      const errors = await db.select()
+        .from(errorLogs)
+        .orderBy(desc(errorLogs.createdAt))
+        .limit(parseInt(limit as string))
+        .offset(parseInt(offset as string));
+
+      // Get counts by severity for the dashboard
+      const severityCounts = await db.select({
+        severity: errorLogs.severity,
+        count: sql<number>`count(*)::int`
+      })
+        .from(errorLogs)
+        .groupBy(errorLogs.severity);
+
+      const unresolvedCount = await db.select({
+        count: sql<number>`count(*)::int`
+      })
+        .from(errorLogs)
+        .where(eq(errorLogs.isResolved, false));
+
+      const totalCount = await db.select({
+        count: sql<number>`count(*)::int`
+      })
+        .from(errorLogs);
+
+      res.json({
+        errors,
+        stats: {
+          total: totalCount[0]?.count || 0,
+          unresolved: unresolvedCount[0]?.count || 0,
+          bySeverity: severityCounts.reduce((acc, item) => {
+            acc[item.severity] = item.count;
+            return acc;
+          }, {} as Record<string, number>)
+        }
+      });
+    } catch (error) {
+      console.error("Admin error log fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch error logs" });
+    }
+  });
+
+  // Mark error as resolved (admin only)
+  app.patch("/api/admin/errors/:errorId/resolve", requireAdmin, async (req, res) => {
+    try {
+      const { errorId } = req.params;
+      const { resolution } = req.body;
+      const user = req.user as any;
+
+      await db.update(errorLogs)
+        .set({
+          isResolved: true,
+          resolvedAt: new Date(),
+          resolvedBy: user.id,
+          resolution,
+        })
+        .where(eq(errorLogs.id, errorId));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error resolution failed:", error);
+      res.status(500).json({ error: "Failed to resolve error" });
+    }
+  });
+
+  // Delete error log (admin only)
+  app.delete("/api/admin/errors/:errorId", requireAdmin, async (req, res) => {
+    try {
+      const { errorId } = req.params;
+
+      await db.delete(errorLogs)
+        .where(eq(errorLogs.id, errorId));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deletion failed:", error);
+      res.status(500).json({ error: "Failed to delete error" });
+    }
+  });
+
+  // Clear all resolved errors (admin only)
+  app.delete("/api/admin/errors/resolved/all", requireAdmin, async (req, res) => {
+    try {
+      await db.delete(errorLogs)
+        .where(eq(errorLogs.isResolved, true));
+
+      res.json({ success: true, message: "All resolved errors cleared" });
+    } catch (error) {
+      console.error("Resolved errors clear failed:", error);
+      res.status(500).json({ error: "Failed to clear resolved errors" });
     }
   });
 
