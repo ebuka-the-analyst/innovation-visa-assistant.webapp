@@ -769,6 +769,11 @@ export default function AdminDashboard() {
     if (!overviewData) return overviewData;
     if (!hideDemoUsers) return overviewData;
     
+    // Calculate demo user ratio for proportional filtering
+    const totalUsersFromAPI = overviewData.kpiMetrics?.[0]?.value || 0;
+    const demoRatio = totalUsersFromAPI > 0 ? demoUserCount / totalUsersFromAPI : 0;
+    const realRatio = Math.max(0, 1 - demoRatio);
+    
     return {
       ...overviewData,
       kpiMetrics: overviewData.kpiMetrics?.map((metric, index) => {
@@ -782,6 +787,17 @@ export default function AdminDashboard() {
         ...tier,
         // Reduce counts proportionally (demo users are mostly free tier)
         count: tier.tier === 'Free' ? Math.max(0, tier.count - demoUserCount) : tier.count
+      })),
+      // Filter time series data - reduce users/plans counts by demo ratio
+      timeSeriesData: overviewData.timeSeriesData?.map(dataPoint => ({
+        ...dataPoint,
+        users: Math.max(0, Math.round(dataPoint.users * realRatio)),
+        activeUsers: Math.max(0, Math.round(dataPoint.activeUsers * realRatio)),
+      })),
+      // Filter activity data - reduce daily active counts by demo ratio
+      activityData: overviewData.activityData?.map(dataPoint => ({
+        ...dataPoint,
+        count: Math.max(0, Math.round(dataPoint.count * realRatio)),
       })),
     };
   }, [overviewData, hideDemoUsers, demoUserCount]);
@@ -1772,7 +1788,7 @@ export default function AdminDashboard() {
                         </CardHeader>
                         <CardContent>
                           <ResponsiveContainer width="100%" height={350}>
-                            <RechartsLineChart data={overviewData.timeSeriesData}>
+                            <RechartsLineChart data={filteredOverviewData?.timeSeriesData}>
                               <defs>
                                 <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
                                   <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8}/>
@@ -1892,7 +1908,7 @@ export default function AdminDashboard() {
                           </CardHeader>
                           <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
-                              <RechartsAreaChart data={overviewData.activityData}>
+                              <RechartsAreaChart data={filteredOverviewData?.activityData}>
                                 <defs>
                                   <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="hsl(var(--chart-3))" stopOpacity={0.8}/>
@@ -2912,7 +2928,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <ResponsiveContainer width="100%" height={300}>
-                                  <RechartsLineChart data={overviewData.timeSeriesData?.slice(-7) || []}>
+                                  <RechartsLineChart data={filteredOverviewData?.timeSeriesData?.slice(-7) || []}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                                     <XAxis
                                       dataKey="date"
