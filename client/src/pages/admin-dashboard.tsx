@@ -3611,7 +3611,9 @@ export default function AdminDashboard() {
                             data-testid="switch-hide-demo-users"
                           />
                           <Label htmlFor="hide-demo-users" className="text-sm text-muted-foreground cursor-pointer">
-                            {hideDemoUsers ? 'Demo users hidden' : 'Show all users'}
+                            {hideDemoUsers 
+                              ? `Hiding ${demoUserCount} demo users` 
+                              : `Show all (${demoUserCount} demo)`}
                           </Label>
                         </div>
 
