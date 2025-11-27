@@ -1,64 +1,48 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { motion, useSpring, useMotionValue, animate } from "framer-motion";
 
-// Animated number component for sidebar stats - uses useRef to properly track previous value
+// Animated number component for sidebar stats - always synced with current value
 function AnimatedStat({ value }: { value: number }) {
   const [displayValue, setDisplayValue] = useState(value);
-  const prevValueRef = useRef(value);
-  const animationRef = useRef<number | null>(null);
-
+  const controlsRef = useRef<ReturnType<typeof animate> | null>(null);
+  
   useEffect(() => {
-    // Cancel any ongoing animation
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
+    // Stop any ongoing animation
+    if (controlsRef.current) {
+      controlsRef.current.stop();
     }
-
-    const startValue = displayValue;
-    const endValue = value;
     
-    // If no change, just ensure display matches
-    if (startValue === endValue) {
-      setDisplayValue(endValue);
-      return;
-    }
-
-    const duration = 600;
-    const startTime = performance.now();
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Easing function for smooth animation
-      const easeOutQuad = 1 - (1 - progress) * (1 - progress);
-      const currentValue = Math.round(startValue + (endValue - startValue) * easeOutQuad);
-      
-      setDisplayValue(currentValue);
-
-      if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate);
-      } else {
-        setDisplayValue(endValue);
-        prevValueRef.current = endValue;
-      }
-    };
-
-    animationRef.current = requestAnimationFrame(animate);
-
+    // Animate from current display value to new value
+    controlsRef.current = animate(displayValue, value, {
+      duration: 0.5,
+      ease: "easeOut",
+      onUpdate: (latest) => setDisplayValue(Math.round(latest)),
+      onComplete: () => setDisplayValue(value),
+    });
+    
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      if (controlsRef.current) {
+        controlsRef.current.stop();
       }
     };
   }, [value]);
+  
+  // Ensure display is always in sync if animation fails
+  useLayoutEffect(() => {
+    const timer = setTimeout(() => {
+      if (displayValue !== value) {
+        setDisplayValue(value);
+      }
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [value, displayValue]);
 
   return (
     <motion.span
-      key={`stat-${value}`}
-      initial={{ scale: 1.05 }}
-      animate={{ scale: 1 }}
-      transition={{ type: "spring", stiffness: 300, damping: 15 }}
+      key={`stat-${displayValue}`}
+      initial={{ opacity: 0.8 }}
+      animate={{ opacity: 1 }}
     >
       {displayValue}
     </motion.span>
