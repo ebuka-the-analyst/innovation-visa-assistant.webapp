@@ -1775,11 +1775,11 @@ export default function AdminDashboard() {
                       </p>
                     </div>
                     
-                    {/* KPI Cards with Animations */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {/* KPI Cards with Animations - key forces re-render when filter changes */}
+                    <div key={`kpi-cards-${hideDemoUsers}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       {filteredOverviewData?.kpiMetrics?.map((metric, index) => (
                         <motion.div
-                          key={metric.label}
+                          key={`${metric.label}-${hideDemoUsers}-${metric.value}`}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.1, duration: 0.5 }}
@@ -1807,7 +1807,7 @@ export default function AdminDashboard() {
                               <div className="flex items-end justify-between">
                                 <div>
                                   <div className="text-3xl font-bold tabular-nums">
-                                    <AnimatedNumber value={metric.value} />
+                                    <AnimatedNumber key={`num-${metric.label}-${metric.value}`} value={metric.value} />
                                   </div>
                                   <div className="flex items-center gap-2 mt-2">
                                     <TrendIndicator trend={metric.trend} />
