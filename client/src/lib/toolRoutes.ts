@@ -139,7 +139,7 @@ const toolMap: Record<string, any> = {
   'mvp-demo-guide': lazy(() => import('@/pages/tools/mvp-demo-guide')),
   'financial-resilience': lazy(() => import('@/pages/tools/financial-resilience')),
   
-  // 2040-GRADE AI FEATURES
+  // OMNI AI FEATURES
   'oracle-supervisor': lazy(() => import('@/pages/oracle-supervisor')),
   'founder-autopilot': lazy(() => import('@/pages/founder-autopilot')),
   'neural-twin': lazy(() => import('@/pages/neural-twin')),

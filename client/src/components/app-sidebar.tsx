@@ -179,7 +179,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
       ],
     },
     {
-      label: "2040 AI Brain",
+      label: "OMNI",
       items: [
         {
           title: "ORACLE Supervisor",

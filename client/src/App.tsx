@@ -96,7 +96,7 @@ const News = lazy(() => import("@/pages/news"));
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
 const PartnerDashboard = lazy(() => import("@/pages/partner-dashboard"));
 
-// 2040 AI Brain - Advanced AI Features
+// OMNI - Advanced AI Features
 const OracleSupervisor = lazy(() => import("@/pages/oracle-supervisor"));
 const FounderAutopilot = lazy(() => import("@/pages/founder-autopilot"));
 const NeuralTwin = lazy(() => import("@/pages/neural-twin"));
@@ -221,7 +221,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/partner-dashboard" component={PartnerDashboard} />
       
-      {/* 2040 AI Brain Routes */}
+      {/* OMNI Routes */}
       <Route path="/oracle-supervisor" component={OracleSupervisor} />
       <Route path="/founder-autopilot" component={FounderAutopilot} />
       <Route path="/neural-twin" component={NeuralTwin} />
