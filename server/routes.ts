@@ -6420,36 +6420,20 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
         ? query 
         : `Analyze this from your ${criterion} specialist perspective:\n\n${query}`;
 
-      // Use OpenAI if available
-      if (process.env.OPENAI_API_KEY) {
-        const OpenAI = (await import("openai")).default;
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ],
-          max_tokens: 1200
-        });
-
-        const responseText = completion.choices[0]?.message?.content || "";
-        
+      // Helper function to process AI response
+      const processAIResponse = (responseText: string) => {
         if (isQuestion) {
-          // For questions, provide the answer directly without forcing a score
-          res.json({
+          return {
             analysis: responseText,
-            score: null, // No score for direct questions
+            score: null,
             suggestions: [],
             isDirectAnswer: true
-          });
+          };
         } else {
-          // Extract score from response or generate one for assessments
           const scoreMatch = responseText.match(/(\d{1,3})\/100|score[:\s]+(\d{1,3})/i);
           const score = scoreMatch ? parseInt(scoreMatch[1] || scoreMatch[2]) : Math.floor(Math.random() * 25) + 65;
           
-          res.json({
+          return {
             analysis: responseText,
             score: Math.min(100, Math.max(0, score)),
             suggestions: [
@@ -6457,46 +6441,93 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
               `Include quantifiable metrics to demonstrate ${criterion}`,
               `Address potential endorser concerns about ${criterion}`
             ]
-          });
-        }
-      } else {
-        // Fallback response
-        if (isQuestion) {
-          // Provide helpful fallback answers for common questions
-          const fallbackAnswers: Record<string, string> = {
-            endorsement: "Endorsement typically takes 2-6 weeks depending on the endorsing body. Tech Nation and Barclays Eagle Labs are popular choices. A well-prepared application with strong evidence of innovation, viability, and scalability can speed up the process.",
-            time: "The full UK Innovator Founder Visa process typically takes 6-14 weeks total: 2-6 weeks for endorsement, then 3-8 weeks for Home Office processing.",
-            cost: "Endorsement fees range from £500-£3,000 depending on the body. The visa application fee is £1,191, plus the Immigration Health Surcharge (currently £1,035 per year). Total costs are typically £3,000-£6,000."
           };
-          
-          const queryLower = query.toLowerCase();
-          let answer = "Based on UK Innovator Founder Visa requirements, I recommend consulting the official Home Office guidance for the most current information on your specific question.";
-          
-          if (queryLower.includes('time') || queryLower.includes('long') || queryLower.includes('short') || queryLower.includes('fast')) {
-            answer = fallbackAnswers.time;
-          } else if (queryLower.includes('endors')) {
-            answer = fallbackAnswers.endorsement;
-          } else if (queryLower.includes('cost') || queryLower.includes('fee') || queryLower.includes('price')) {
-            answer = fallbackAnswers.cost;
-          }
-          
-          res.json({
-            analysis: answer,
-            score: null,
-            suggestions: [],
-            isDirectAnswer: true
-          });
-        } else {
-          res.json({
-            analysis: `Based on ${criterion} analysis, your application shows potential. Focus on demonstrating clear evidence of ${criterion} to satisfy Home Office requirements. Consider providing specific examples, metrics, and UK market relevance.`,
-            score: Math.floor(Math.random() * 25) + 65,
-            suggestions: [
-              `Strengthen your ${criterion} evidence`,
-              `Include specific UK market data`,
-              `Add quantifiable success metrics`
-            ]
-          });
         }
+      };
+
+      let responseText: string | null = null;
+
+      // Try OpenAI first
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      if (openaiKey) {
+        try {
+          const OpenAI = (await import("openai")).default;
+          const openai = new OpenAI({ apiKey: openaiKey });
+          
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt }
+            ],
+            max_tokens: 1200
+          });
+
+          responseText = completion.choices[0]?.message?.content || null;
+        } catch (openaiError: any) {
+          console.log("OpenAI failed, trying Gemini fallback:", openaiError?.message || openaiError);
+        }
+      }
+
+      // Fallback to Gemini if OpenAI failed or unavailable
+      const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      if (!responseText && geminiKey) {
+        try {
+          const { GoogleGenAI } = await import("@google/genai");
+          const genai = new GoogleGenAI({ apiKey: geminiKey });
+          
+          const result = await genai.models.generateContent({
+            model: "gemini-2.0-flash",
+            contents: `${systemPrompt}\n\nUser query: ${userPrompt}`
+          });
+          
+          responseText = result.text || null;
+        } catch (geminiError: any) {
+          console.log("Gemini also failed:", geminiError?.message || geminiError);
+        }
+      }
+
+      // If we got a response from either AI, return it
+      if (responseText) {
+        res.json(processAIResponse(responseText));
+        return;
+      }
+      
+      // Final fallback - static responses
+      if (isQuestion) {
+        const fallbackAnswers: Record<string, string> = {
+          endorsement: "Endorsement typically takes 2-6 weeks depending on the endorsing body. Tech Nation and Barclays Eagle Labs are popular choices. A well-prepared application with strong evidence of innovation, viability, and scalability can speed up the process.",
+          time: "The full UK Innovator Founder Visa process typically takes 6-14 weeks total: 2-6 weeks for endorsement, then 3-8 weeks for Home Office processing.",
+          cost: "Endorsement fees range from £500-£3,000 depending on the body. The visa application fee is £1,191, plus the Immigration Health Surcharge (currently £1,035 per year). Total costs are typically £3,000-£6,000."
+        };
+        
+        const queryLower = query.toLowerCase();
+        let answer = "Based on UK Innovator Founder Visa requirements, I recommend consulting the official Home Office guidance for the most current information on your specific question.";
+        
+        if (queryLower.includes('time') || queryLower.includes('long') || queryLower.includes('short') || queryLower.includes('fast')) {
+          answer = fallbackAnswers.time;
+        } else if (queryLower.includes('endors')) {
+          answer = fallbackAnswers.endorsement;
+        } else if (queryLower.includes('cost') || queryLower.includes('fee') || queryLower.includes('price')) {
+          answer = fallbackAnswers.cost;
+        }
+        
+        res.json({
+          analysis: answer,
+          score: null,
+          suggestions: [],
+          isDirectAnswer: true
+        });
+      } else {
+        res.json({
+          analysis: `Based on ${criterion} analysis, your application shows potential. Focus on demonstrating clear evidence of ${criterion} to satisfy Home Office requirements. Consider providing specific examples, metrics, and UK market relevance.`,
+          score: Math.floor(Math.random() * 25) + 65,
+          suggestions: [
+            `Strengthen your ${criterion} evidence`,
+            `Include specific UK market data`,
+            `Add quantifiable success metrics`
+          ]
+        });
       }
     } catch (error) {
       console.error("Oracle delegate error:", error);
