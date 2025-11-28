@@ -1,8 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Play, BookOpen, Award } from "lucide-react";
-import { useState } from "react";
+import { Play, Square, Mic, BookOpen, Award, Loader2 } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 import FeatureNavigation from "@/components/FeatureNavigation";
 
@@ -126,6 +127,87 @@ const endorserTips = {
 export default function InterviewPrep() {
   const [selectedScenario, setSelectedScenario] = useState(interviewScenarios[0]);
   const [selectedEndorser, setSelectedEndorser] = useState<string>("Tech Nation");
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedResponse, setRecordedResponse] = useState<string>("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const { toast } = useToast();
+
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        setIsProcessing(true);
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        
+        try {
+          const formData = new FormData();
+          formData.append('audio', audioBlob, 'response.webm');
+          
+          const response = await fetch('/api/voice/transcribe', {
+            method: 'POST',
+            body: formData,
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            setRecordedResponse(data.text || "Response recorded successfully!");
+            toast({
+              title: "Response Recorded",
+              description: "Your interview response has been captured.",
+            });
+          } else {
+            setRecordedResponse("Recording completed - practice your response out loud!");
+            toast({
+              title: "Recording Complete",
+              description: "Great job practicing! Try again to improve.",
+            });
+          }
+        } catch (error) {
+          setRecordedResponse("Recording completed - keep practicing!");
+          toast({
+            title: "Practice Complete",
+            description: "Nice work! Review your key points and try again.",
+          });
+        } finally {
+          setIsProcessing(false);
+          stream.getTracks().forEach(track => track.stop());
+        }
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      toast({
+        title: "Recording Started",
+        description: "Speak your interview response clearly.",
+      });
+    } catch (error: any) {
+      console.error("Microphone access error:", error);
+      toast({
+        title: "Microphone Access Required",
+        description: "Please allow microphone access in your browser to record responses.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  }, [isRecording]);
 
   return (
     <div className="min-h-screen">
@@ -208,9 +290,36 @@ export default function InterviewPrep() {
                         </ul>
                       </div>
 
-                      <Button className="w-full gap-2" data-testid="button-record-response">
-                        <Play className="w-4 h-4" />
-                        Record Your Response
+                      {recordedResponse && (
+                        <div className="p-4 bg-muted rounded-lg mb-4">
+                          <p className="text-sm font-medium mb-2">Your Response:</p>
+                          <p className="text-sm text-muted-foreground">{recordedResponse}</p>
+                        </div>
+                      )}
+                      
+                      <Button 
+                        className="w-full gap-2" 
+                        data-testid="button-record-response"
+                        onClick={isRecording ? stopRecording : startRecording}
+                        disabled={isProcessing}
+                        variant={isRecording ? "destructive" : "default"}
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Processing...
+                          </>
+                        ) : isRecording ? (
+                          <>
+                            <Square className="w-4 h-4" />
+                            Stop Recording
+                          </>
+                        ) : (
+                          <>
+                            <Mic className="w-4 h-4" />
+                            Record Your Response
+                          </>
+                        )}
                       </Button>
                     </div>
                   </Card>
