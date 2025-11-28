@@ -29,10 +29,7 @@ export function SiteFeedbackPopup() {
 
   const submitMutation = useMutation({
     mutationFn: async (data: { rating: number; comment: string; pageUrl: string; timeSpentMinutes: number }) => {
-      return apiRequest("/api/feedback/site", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return apiRequest("POST", "/api/feedback/site", data);
     },
     onSuccess: () => {
       const state = getFeedbackState();

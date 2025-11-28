@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback } from "@shared/schema";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -7990,6 +7990,43 @@ Return a JSON object with:
     } catch (error) {
       console.error("Regulations fetch error:", error);
       res.status(500).json({ error: "Failed to fetch regulatory updates" });
+    }
+  });
+
+  // Site Feedback - Timed popup after 10 minutes
+  app.post("/api/feedback/site", async (req, res) => {
+    try {
+      const { rating, comment, pageUrl, timeSpentMinutes } = req.body;
+      
+      if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: "Rating must be between 1 and 5" });
+      }
+      
+      const userId = (req.user as any)?.id || null;
+      
+      await db.insert(siteFeedback).values({
+        userId,
+        rating,
+        comment: comment || null,
+        pageUrl: pageUrl || null,
+        timeSpentMinutes: timeSpentMinutes || null,
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Site feedback error:", error);
+      res.status(500).json({ error: "Failed to save feedback" });
+    }
+  });
+
+  // Admin: Get site feedback
+  app.get("/api/admin/feedback", requireAdmin, async (req, res) => {
+    try {
+      const feedback = await db.select().from(siteFeedback).orderBy(sql`created_at DESC`).limit(100);
+      res.json({ feedback });
+    } catch (error) {
+      console.error("Admin feedback fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch feedback" });
     }
   });
 
