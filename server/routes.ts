@@ -2706,35 +2706,6 @@ Keep the tone supportive and professional. Do not be overly enthusiastic.`;
     }
   });
 
-  app.delete("/api/admin/users/:userId", requireAdmin, async (req, res) => {
-    try {
-      const { userId } = req.params;
-      const adminUser = req.user as any;
-      
-      // Prevent self-deletion
-      if (userId === adminUser.id) {
-        return res.status(400).json({ error: "Cannot delete your own account" });
-      }
-      
-      // Validate user exists
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      
-      // Soft delete by deactivating
-      await storage.updateUser(userId, {
-        subscriptionStatus: 'cancelled',
-        updatedAt: new Date(),
-      });
-      
-      res.json({ success: true, message: "User deactivated successfully" });
-    } catch (error) {
-      console.error("Admin user delete error:", error);
-      res.status(500).json({ error: "Failed to delete user" });
-    }
-  });
-
   // Business Plan Management Endpoints
   app.get("/api/admin/plans", requireAdmin, async (req, res) => {
     try {
