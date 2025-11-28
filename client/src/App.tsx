@@ -23,6 +23,7 @@ const CookieConsent = lazy(() => import("@/components/CookieConsent"));
 const ToolsChronographWheel = lazy(() => import("@/components/ToolsChronographWheel"));
 const BlackNovemberBanner = lazy(() => import("@/components/BlackNovemberBanner"));
 const SpotlightTour = lazy(() => import("@/components/SpotlightTour"));
+const SiteFeedbackPopup = lazy(() => import("@/components/SiteFeedbackPopup").then(m => ({ default: m.SiteFeedbackPopup })));
 
 // ============ LAZY LOADED PAGES ============
 // Public pages (marketing/auth)
@@ -413,6 +414,7 @@ function App() {
               <BlackNovemberBanner />
               <ChatBot />
               <ToolsChronographWheel />
+              <SiteFeedbackPopup />
             </Suspense>
             <GlobalSpotlightTour />
             <Toaster />

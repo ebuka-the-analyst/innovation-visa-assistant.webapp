@@ -49,7 +49,12 @@ export function SiteFeedbackPopup() {
         return JSON.parse(saved);
       }
     } catch (e) {}
-    return { startTime: Date.now(), dismissed: false, submitted: false };
+    // Initialize with current time and persist immediately
+    const initialState = { startTime: Date.now(), dismissed: false, submitted: false };
+    try {
+      localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(initialState));
+    } catch (e) {}
+    return initialState;
   }, []);
 
   const saveFeedbackState = useCallback((state: FeedbackState) => {
@@ -60,10 +65,6 @@ export function SiteFeedbackPopup() {
 
   useEffect(() => {
     const state = getFeedbackState();
-    
-    if (!state.startTime) {
-      saveFeedbackState({ startTime: Date.now(), dismissed: false, submitted: false });
-    }
     
     if (state.dismissed || state.submitted) {
       return;
@@ -85,7 +86,7 @@ export function SiteFeedbackPopup() {
     checkTime();
 
     return () => clearInterval(interval);
-  }, [getFeedbackState, saveFeedbackState]);
+  }, [getFeedbackState]);
 
   const handleDismiss = () => {
     const state = getFeedbackState();
