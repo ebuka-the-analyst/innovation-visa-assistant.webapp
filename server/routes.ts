@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes } from "@shared/schema";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -8236,6 +8236,514 @@ Return a JSON object with:
     } catch (error) {
       console.error("Admin feedback fetch error:", error);
       res.status(500).json({ error: "Failed to fetch feedback" });
+    }
+  });
+
+  // ============================================
+  // ADMIN NOTIFICATIONS API
+  // ============================================
+
+  // Get all notifications
+  app.get("/api/admin/notifications", requireAdmin, async (req, res) => {
+    try {
+      const notifications = await db.execute(
+        sql`SELECT * FROM admin_notifications ORDER BY created_at DESC LIMIT 100`
+      );
+      res.json({ notifications: notifications.rows });
+    } catch (error) {
+      console.error("Get notifications error:", error);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  // Create notification
+  app.post("/api/admin/notifications", requireAdmin, async (req, res) => {
+    try {
+      const { title, message, type, targetType, targetValue, actionUrl, actionText, scheduledAt, expiresAt } = req.body;
+      const adminUser = req.user as any;
+
+      if (!title || !message) {
+        return res.status(400).json({ error: "Title and message are required" });
+      }
+
+      const result = await db.execute(
+        sql`INSERT INTO admin_notifications (title, message, type, target_type, target_value, action_url, action_text, scheduled_at, expires_at, created_by, status)
+            VALUES (${title}, ${message}, ${type || 'info'}, ${targetType || 'all'}, ${targetValue || null}, ${actionUrl || null}, ${actionText || null}, ${scheduledAt ? new Date(scheduledAt) : null}, ${expiresAt ? new Date(expiresAt) : null}, ${adminUser.id}, 'draft')
+            RETURNING *`
+      );
+
+      res.json({ success: true, notification: result.rows[0] });
+    } catch (error) {
+      console.error("Create notification error:", error);
+      res.status(500).json({ error: "Failed to create notification" });
+    }
+  });
+
+  // Send broadcast notification (mark as sent and count recipients)
+  app.post("/api/admin/notifications/:id/send", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Get the notification
+      const notifResult = await db.execute(
+        sql`SELECT * FROM admin_notifications WHERE id = ${id}`
+      );
+      
+      if (notifResult.rows.length === 0) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
+
+      const notification = notifResult.rows[0] as any;
+
+      // Count recipients based on target type
+      let recipientCount = 0;
+      if (notification.target_type === 'all') {
+        const countResult = await db.execute(sql`SELECT COUNT(*) as count FROM users WHERE is_banned = false`);
+        recipientCount = parseInt((countResult.rows[0] as any).count);
+      } else if (notification.target_type === 'tier') {
+        const countResult = await db.execute(
+          sql`SELECT COUNT(*) as count FROM users WHERE subscription_tier = ${notification.target_value} AND is_banned = false`
+        );
+        recipientCount = parseInt((countResult.rows[0] as any).count);
+      }
+
+      // Update notification as sent
+      await db.execute(
+        sql`UPDATE admin_notifications 
+            SET status = 'sent', sent_at = NOW(), recipient_count = ${recipientCount}, updated_at = NOW()
+            WHERE id = ${id}`
+      );
+
+      res.json({ success: true, recipientCount });
+    } catch (error) {
+      console.error("Send notification error:", error);
+      res.status(500).json({ error: "Failed to send notification" });
+    }
+  });
+
+  // Delete notification
+  app.delete("/api/admin/notifications/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.execute(sql`DELETE FROM admin_notifications WHERE id = ${id}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete notification error:", error);
+      res.status(500).json({ error: "Failed to delete notification" });
+    }
+  });
+
+  // Get notification stats
+  app.get("/api/admin/notifications/stats", requireAdmin, async (req, res) => {
+    try {
+      const stats = await db.execute(sql`
+        SELECT 
+          COUNT(*) as total_sent,
+          SUM(recipient_count) as total_recipients,
+          SUM(read_count) as total_reads,
+          CASE WHEN SUM(recipient_count) > 0 
+            THEN ROUND((SUM(read_count)::decimal / SUM(recipient_count)) * 100, 1) 
+            ELSE 0 
+          END as read_rate
+        FROM admin_notifications 
+        WHERE status = 'sent'
+      `);
+      res.json({ stats: stats.rows[0] });
+    } catch (error) {
+      console.error("Get notification stats error:", error);
+      res.status(500).json({ error: "Failed to fetch notification stats" });
+    }
+  });
+
+  // User: Get notifications for current user
+  app.get("/api/notifications", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const tier = (req.user as any).subscriptionTier;
+
+      // Get notifications targeted to all or user's tier, excluding already read
+      const notifications = await db.execute(sql`
+        SELECT n.* FROM admin_notifications n
+        LEFT JOIN user_notification_reads r ON n.id = r.notification_id AND r.user_id = ${userId}
+        WHERE n.status = 'sent'
+          AND (n.target_type = 'all' OR (n.target_type = 'tier' AND n.target_value = ${tier}))
+          AND (n.expires_at IS NULL OR n.expires_at > NOW())
+          AND r.id IS NULL
+        ORDER BY n.sent_at DESC
+        LIMIT 20
+      `);
+
+      res.json({ notifications: notifications.rows });
+    } catch (error) {
+      console.error("Get user notifications error:", error);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  // User: Mark notification as read
+  app.post("/api/notifications/:id/read", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { id } = req.params;
+
+      await db.execute(sql`
+        INSERT INTO user_notification_reads (user_id, notification_id)
+        VALUES (${userId}, ${id})
+        ON CONFLICT DO NOTHING
+      `);
+
+      // Update read count
+      await db.execute(sql`
+        UPDATE admin_notifications SET read_count = read_count + 1, updated_at = NOW() WHERE id = ${id}
+      `);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Mark notification read error:", error);
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
+  // ============================================
+  // ADMIN CAMPAIGNS API
+  // ============================================
+
+  // Get all campaigns
+  app.get("/api/admin/campaigns", requireAdmin, async (req, res) => {
+    try {
+      const campaigns = await db.execute(
+        sql`SELECT * FROM marketing_campaigns ORDER BY created_at DESC`
+      );
+      res.json({ campaigns: campaigns.rows });
+    } catch (error) {
+      console.error("Get campaigns error:", error);
+      res.status(500).json({ error: "Failed to fetch campaigns" });
+    }
+  });
+
+  // Create campaign
+  app.post("/api/admin/campaigns", requireAdmin, async (req, res) => {
+    try {
+      const { name, description, type, targetAudience, targetCriteria, startDate, endDate, promoCodeIds, isAbTest, abVariants } = req.body;
+      const adminUser = req.user as any;
+
+      if (!name) {
+        return res.status(400).json({ error: "Campaign name is required" });
+      }
+
+      const result = await db.execute(
+        sql`INSERT INTO marketing_campaigns (name, description, type, target_audience, target_criteria, start_date, end_date, promo_code_ids, is_ab_test, ab_variants, created_by)
+            VALUES (${name}, ${description || null}, ${type || 'promotional'}, ${targetAudience || 'all'}, ${JSON.stringify(targetCriteria) || null}, ${startDate ? new Date(startDate) : null}, ${endDate ? new Date(endDate) : null}, ${promoCodeIds || null}, ${isAbTest || false}, ${JSON.stringify(abVariants) || null}, ${adminUser.id})
+            RETURNING *`
+      );
+
+      res.json({ success: true, campaign: result.rows[0] });
+    } catch (error) {
+      console.error("Create campaign error:", error);
+      res.status(500).json({ error: "Failed to create campaign" });
+    }
+  });
+
+  // Update campaign status
+  app.patch("/api/admin/campaigns/:id/status", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!['draft', 'active', 'paused', 'completed', 'cancelled'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+
+      await db.execute(
+        sql`UPDATE marketing_campaigns SET status = ${status}, updated_at = NOW() WHERE id = ${id}`
+      );
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Update campaign status error:", error);
+      res.status(500).json({ error: "Failed to update campaign status" });
+    }
+  });
+
+  // Delete campaign
+  app.delete("/api/admin/campaigns/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.execute(sql`DELETE FROM marketing_campaigns WHERE id = ${id}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete campaign error:", error);
+      res.status(500).json({ error: "Failed to delete campaign" });
+    }
+  });
+
+  // ============================================
+  // ADMIN EXPORT API
+  // ============================================
+
+  // Get export history
+  app.get("/api/admin/exports", requireAdmin, async (req, res) => {
+    try {
+      const exports = await db.execute(
+        sql`SELECT * FROM admin_exports ORDER BY created_at DESC LIMIT 50`
+      );
+      res.json({ exports: exports.rows });
+    } catch (error) {
+      console.error("Get exports error:", error);
+      res.status(500).json({ error: "Failed to fetch exports" });
+    }
+  });
+
+  // Create export job
+  app.post("/api/admin/exports", requireAdmin, async (req, res) => {
+    try {
+      const { exportType, format, filters } = req.body;
+      const adminUser = req.user as any;
+
+      if (!exportType) {
+        return res.status(400).json({ error: "Export type is required" });
+      }
+
+      // Create export record
+      const result = await db.execute(
+        sql`INSERT INTO admin_exports (export_type, format, filters, requested_by, status)
+            VALUES (${exportType}, ${format || 'csv'}, ${JSON.stringify(filters) || null}, ${adminUser.id}, 'processing')
+            RETURNING *`
+      );
+
+      const exportRecord = result.rows[0] as any;
+
+      // Generate export data based on type
+      let data: any[] = [];
+      let fileName = '';
+
+      switch (exportType) {
+        case 'users':
+          const usersResult = await db.select({
+            id: users.id,
+            email: users.email,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            subscriptionTier: users.subscriptionTier,
+            planCredits: users.planCredits,
+            bonusCredits: users.bonusCredits,
+            isEmailVerified: users.isEmailVerified,
+            createdAt: users.createdAt
+          }).from(users).orderBy(sql`created_at DESC`);
+          data = usersResult;
+          fileName = `users_export_${Date.now()}.csv`;
+          break;
+
+        case 'transactions':
+          const txResult = await db.execute(sql`
+            SELECT pt.*, u.email, u.first_name, u.last_name 
+            FROM payment_transactions pt
+            LEFT JOIN users u ON pt.user_id = u.id
+            ORDER BY pt.created_at DESC
+            LIMIT 1000
+          `);
+          data = txResult.rows;
+          fileName = `transactions_export_${Date.now()}.csv`;
+          break;
+
+        case 'referrals':
+          const refResult = await db.select().from(referralCodes).orderBy(sql`created_at DESC`);
+          data = refResult;
+          fileName = `referrals_export_${Date.now()}.csv`;
+          break;
+
+        case 'promos':
+          const promoResult = await db.select().from(promoCodes).orderBy(sql`created_at DESC`);
+          data = promoResult;
+          fileName = `promo_codes_export_${Date.now()}.csv`;
+          break;
+
+        case 'plans':
+          const plansResult = await db.select({
+            id: businessPlans.id,
+            businessName: businessPlans.businessName,
+            tier: businessPlans.tier,
+            status: businessPlans.status,
+            industry: businessPlans.industry,
+            createdAt: businessPlans.createdAt
+          }).from(businessPlans).orderBy(sql`created_at DESC`);
+          data = plansResult;
+          fileName = `business_plans_export_${Date.now()}.csv`;
+          break;
+
+        default:
+          return res.status(400).json({ error: "Invalid export type" });
+      }
+
+      // Convert to CSV
+      if (data.length > 0) {
+        const headers = Object.keys(data[0]);
+        const csvRows = [headers.join(',')];
+        for (const row of data) {
+          const values = headers.map(h => {
+            const val = (row as any)[h];
+            if (val === null || val === undefined) return '';
+            if (typeof val === 'object') return JSON.stringify(val).replace(/,/g, ';');
+            return String(val).replace(/,/g, ';').replace(/\n/g, ' ');
+          });
+          csvRows.push(values.join(','));
+        }
+        const csvContent = csvRows.join('\n');
+
+        // Update export record
+        await db.execute(
+          sql`UPDATE admin_exports 
+              SET status = 'completed', file_name = ${fileName}, record_count = ${data.length}, completed_at = NOW()
+              WHERE id = ${exportRecord.id}`
+        );
+
+        // Return CSV directly
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        return res.send(csvContent);
+      }
+
+      res.json({ success: true, export: exportRecord, recordCount: 0 });
+    } catch (error) {
+      console.error("Create export error:", error);
+      res.status(500).json({ error: "Failed to create export" });
+    }
+  });
+
+  // ============================================
+  // PAYMENT TRANSACTIONS API (Real data)
+  // ============================================
+
+  // Get payment transactions for admin
+  app.get("/api/admin/transactions", requireAdmin, async (req, res) => {
+    try {
+      const transactions = await db.execute(sql`
+        SELECT pt.*, u.email, u.first_name, u.last_name 
+        FROM payment_transactions pt
+        LEFT JOIN users u ON pt.user_id = u.id
+        ORDER BY pt.created_at DESC
+        LIMIT 100
+      `);
+      res.json({ transactions: transactions.rows });
+    } catch (error) {
+      console.error("Get transactions error:", error);
+      res.status(500).json({ error: "Failed to fetch transactions" });
+    }
+  });
+
+  // Get transaction stats
+  app.get("/api/admin/transactions/stats", requireAdmin, async (req, res) => {
+    try {
+      const stats = await db.execute(sql`
+        SELECT 
+          COUNT(*) as total_transactions,
+          SUM(CASE WHEN status = 'succeeded' THEN amount ELSE 0 END) as total_revenue,
+          SUM(CASE WHEN type = 'subscription' AND status = 'succeeded' THEN amount ELSE 0 END) as subscription_revenue,
+          SUM(CASE WHEN type = 'one_time' AND status = 'succeeded' THEN amount ELSE 0 END) as onetime_revenue,
+          SUM(CASE WHEN type = 'upgrade' AND status = 'succeeded' THEN amount ELSE 0 END) as upgrade_revenue,
+          SUM(discount_amount) as total_discounts
+        FROM payment_transactions
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+      `);
+      res.json({ stats: stats.rows[0] });
+    } catch (error) {
+      console.error("Get transaction stats error:", error);
+      res.status(500).json({ error: "Failed to fetch transaction stats" });
+    }
+  });
+
+  // ============================================
+  // TOOL PROGRESS API
+  // ============================================
+
+  // Get tool progress for current user
+  app.get("/api/tools/:toolId/progress", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { toolId } = req.params;
+
+      const result = await db.execute(
+        sql`SELECT * FROM tool_progress WHERE user_id = ${userId} AND tool_id = ${toolId}`
+      );
+
+      if (result.rows.length === 0) {
+        return res.json({ progress: null });
+      }
+
+      res.json({ progress: result.rows[0] });
+    } catch (error) {
+      console.error("Get tool progress error:", error);
+      res.status(500).json({ error: "Failed to fetch tool progress" });
+    }
+  });
+
+  // Save tool progress
+  app.post("/api/tools/:toolId/progress", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { toolId } = req.params;
+      const { progressData, completionPercent, status } = req.body;
+
+      // Upsert progress
+      const existing = await db.execute(
+        sql`SELECT id FROM tool_progress WHERE user_id = ${userId} AND tool_id = ${toolId}`
+      );
+
+      if (existing.rows.length > 0) {
+        await db.execute(
+          sql`UPDATE tool_progress 
+              SET progress_data = ${JSON.stringify(progressData)}, 
+                  completion_percent = ${completionPercent || 0},
+                  status = ${status || 'in_progress'},
+                  updated_at = NOW()
+              WHERE user_id = ${userId} AND tool_id = ${toolId}`
+        );
+      } else {
+        await db.execute(
+          sql`INSERT INTO tool_progress (user_id, tool_id, progress_data, completion_percent, status)
+              VALUES (${userId}, ${toolId}, ${JSON.stringify(progressData)}, ${completionPercent || 0}, ${status || 'in_progress'})`
+        );
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Save tool progress error:", error);
+      res.status(500).json({ error: "Failed to save tool progress" });
+    }
+  });
+
+  // Mark tool as exported
+  app.post("/api/tools/:toolId/export", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { toolId } = req.params;
+
+      await db.execute(
+        sql`UPDATE tool_progress 
+            SET last_exported_at = NOW(), export_count = export_count + 1, status = 'exported', updated_at = NOW()
+            WHERE user_id = ${userId} AND tool_id = ${toolId}`
+      );
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Mark tool exported error:", error);
+      res.status(500).json({ error: "Failed to mark tool as exported" });
+    }
+  });
+
+  // Get all user tool progress (for dashboard)
+  app.get("/api/tools/progress/all", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+
+      const result = await db.execute(
+        sql`SELECT * FROM tool_progress WHERE user_id = ${userId} ORDER BY updated_at DESC`
+      );
+
+      res.json({ progress: result.rows });
+    } catch (error) {
+      console.error("Get all tool progress error:", error);
+      res.status(500).json({ error: "Failed to fetch tool progress" });
     }
   });
 
