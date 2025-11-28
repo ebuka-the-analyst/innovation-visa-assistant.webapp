@@ -2248,3 +2248,266 @@ export const insertSecurityEventSchema = createInsertSchema(securityEvents).omit
 
 export type SecurityEvent = typeof securityEvents.$inferSelect;
 export type InsertSecurityEvent = z.infer<typeof insertSecurityEventSchema>;
+
+// ============================================
+// ADMIN NOTIFICATION & BROADCAST SYSTEM
+// ============================================
+
+// Admin Notifications - For in-app broadcast messages
+export const adminNotifications = pgTable("admin_notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Notification Content
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  type: varchar("type", { length: 50 }).notNull().default('info'), // info, success, warning, error, announcement
+  
+  // Targeting
+  targetType: varchar("target_type", { length: 50 }).notNull().default('all'), // all, tier, user, segment
+  targetValue: text("target_value"), // tier name, user ids, or segment criteria as JSON
+  
+  // Status
+  status: varchar("status", { length: 20 }).notNull().default('draft'), // draft, scheduled, sent, cancelled
+  scheduledAt: timestamp("scheduled_at"),
+  sentAt: timestamp("sent_at"),
+  
+  // Stats
+  recipientCount: integer("recipient_count").default(0),
+  readCount: integer("read_count").default(0),
+  clickCount: integer("click_count").default(0),
+  
+  // Metadata
+  actionUrl: text("action_url"), // Optional link when clicked
+  actionText: varchar("action_text", { length: 100 }), // Button text
+  expiresAt: timestamp("expires_at"),
+  
+  // Admin tracking
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_notification_status").on(table.status),
+  index("idx_notification_type").on(table.type),
+  index("idx_notification_target").on(table.targetType),
+  index("idx_notification_date").on(table.createdAt),
+]);
+
+// User Notification Read Status
+export const userNotificationReads = pgTable("user_notification_reads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  notificationId: varchar("notification_id").notNull().references(() => adminNotifications.id),
+  readAt: timestamp("read_at").notNull().defaultNow(),
+  clickedAt: timestamp("clicked_at"),
+}, (table) => [
+  index("idx_user_notif_read").on(table.userId, table.notificationId),
+]);
+
+export const insertAdminNotificationSchema = createInsertSchema(adminNotifications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  recipientCount: true,
+  readCount: true,
+  clickCount: true,
+});
+
+export type AdminNotification = typeof adminNotifications.$inferSelect;
+export type InsertAdminNotification = z.infer<typeof insertAdminNotificationSchema>;
+
+// ============================================
+// MARKETING CAMPAIGNS SYSTEM
+// ============================================
+
+export const marketingCampaigns = pgTable("marketing_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Campaign Details
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  type: varchar("type", { length: 50 }).notNull().default('promotional'), // promotional, seasonal, tier_upgrade, retention, referral
+  
+  // Targeting
+  targetAudience: varchar("target_audience", { length: 50 }).notNull().default('all'), // all, free, basic, premium, enterprise, churned, inactive
+  targetCriteria: jsonb("target_criteria"), // Advanced targeting rules
+  
+  // Campaign Status
+  status: varchar("status", { length: 20 }).notNull().default('draft'), // draft, active, paused, completed, cancelled
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  
+  // Associated Promo Codes
+  promoCodeIds: text("promo_code_ids").array(), // Array of promo code IDs
+  
+  // Performance Metrics
+  impressions: integer("impressions").default(0),
+  clicks: integer("clicks").default(0),
+  conversions: integer("conversions").default(0),
+  revenueGenerated: integer("revenue_generated").default(0), // In pence
+  
+  // A/B Testing
+  isAbTest: boolean("is_ab_test").default(false),
+  abVariants: jsonb("ab_variants"), // {variantA: {...}, variantB: {...}}
+  winningVariant: varchar("winning_variant", { length: 10 }),
+  
+  // Admin tracking
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_campaign_status").on(table.status),
+  index("idx_campaign_type").on(table.type),
+  index("idx_campaign_dates").on(table.startDate, table.endDate),
+]);
+
+export const insertMarketingCampaignSchema = createInsertSchema(marketingCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  impressions: true,
+  clicks: true,
+  conversions: true,
+  revenueGenerated: true,
+});
+
+export type MarketingCampaign = typeof marketingCampaigns.$inferSelect;
+export type InsertMarketingCampaign = z.infer<typeof insertMarketingCampaignSchema>;
+
+// ============================================
+// ADMIN EXPORT SYSTEM
+// ============================================
+
+export const adminExports = pgTable("admin_exports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Export Details
+  exportType: varchar("export_type", { length: 50 }).notNull(), // users, transactions, referrals, promos, analytics, campaigns
+  format: varchar("format", { length: 10 }).notNull().default('csv'), // csv, pdf, xlsx
+  
+  // Status
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // pending, processing, completed, failed
+  
+  // File info
+  fileName: varchar("file_name", { length: 255 }),
+  fileSize: integer("file_size"), // In bytes
+  fileUrl: text("file_url"),
+  
+  // Filters applied
+  filters: jsonb("filters"), // {dateRange: {...}, tier: 'premium', ...}
+  recordCount: integer("record_count"),
+  
+  // Error handling
+  errorMessage: text("error_message"),
+  
+  // Admin tracking
+  requestedBy: varchar("requested_by").notNull().references(() => users.id),
+  completedAt: timestamp("completed_at"),
+  expiresAt: timestamp("expires_at"), // Auto-delete after X days
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_export_status").on(table.status),
+  index("idx_export_type").on(table.exportType),
+  index("idx_export_user").on(table.requestedBy),
+  index("idx_export_date").on(table.createdAt),
+]);
+
+export const insertAdminExportSchema = createInsertSchema(adminExports).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+  fileName: true,
+  fileSize: true,
+  fileUrl: true,
+  recordCount: true,
+  completedAt: true,
+});
+
+export type AdminExport = typeof adminExports.$inferSelect;
+export type InsertAdminExport = z.infer<typeof insertAdminExportSchema>;
+
+// ============================================
+// TOOL PROGRESS PERSISTENCE
+// ============================================
+
+export const toolProgress = pgTable("tool_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  toolId: varchar("tool_id", { length: 100 }).notNull(), // e.g., 'traction-evidence', 'commercial-validation'
+  
+  // Progress Data
+  progressData: jsonb("progress_data").notNull(), // Tool-specific structured data
+  completionPercent: integer("completion_percent").default(0),
+  status: varchar("status", { length: 20 }).notNull().default('in_progress'), // in_progress, completed, exported
+  
+  // Export tracking
+  lastExportedAt: timestamp("last_exported_at"),
+  exportCount: integer("export_count").default(0),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_tool_progress_user").on(table.userId),
+  index("idx_tool_progress_tool").on(table.toolId),
+  index("idx_tool_progress_status").on(table.status),
+]);
+
+export const insertToolProgressSchema = createInsertSchema(toolProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  exportCount: true,
+});
+
+export type ToolProgress = typeof toolProgress.$inferSelect;
+export type InsertToolProgress = z.infer<typeof insertToolProgressSchema>;
+
+// ============================================
+// PAYMENT TRANSACTIONS (Real data for admin)
+// ============================================
+
+export const paymentTransactions = pgTable("payment_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Transaction Details
+  stripePaymentId: varchar("stripe_payment_id", { length: 255 }),
+  stripeInvoiceId: varchar("stripe_invoice_id", { length: 255 }),
+  
+  type: varchar("type", { length: 50 }).notNull(), // subscription, one_time, upgrade, addon, refund
+  tier: varchar("tier", { length: 20 }), // For tier purchases
+  
+  // Amounts in pence
+  amount: integer("amount").notNull(),
+  currency: varchar("currency", { length: 3 }).notNull().default('GBP'),
+  
+  // Status
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // pending, succeeded, failed, refunded
+  
+  // Promo/Referral tracking
+  promoCodeId: varchar("promo_code_id").references(() => promoCodes.id),
+  referralCodeId: varchar("referral_code_id").references(() => referralCodes.id),
+  discountAmount: integer("discount_amount").default(0),
+  
+  // Metadata
+  metadata: jsonb("metadata"),
+  failureReason: text("failure_reason"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_payment_user").on(table.userId),
+  index("idx_payment_status").on(table.status),
+  index("idx_payment_type").on(table.type),
+  index("idx_payment_date").on(table.createdAt),
+  index("idx_payment_stripe").on(table.stripePaymentId),
+]);
+
+export const insertPaymentTransactionSchema = createInsertSchema(paymentTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+export type InsertPaymentTransaction = z.infer<typeof insertPaymentTransactionSchema>;
+
+export type UserNotificationRead = typeof userNotificationReads.$inferSelect;
