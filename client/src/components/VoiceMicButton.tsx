@@ -127,9 +127,33 @@ export function VoiceMicButton({ className, showLabel = false, size = 'icon' }: 
               <div className="flex items-center gap-2 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
                 <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                 <p className="text-sm text-green-600 dark:text-green-400">
-                  Voice input is ready! You can use speech-to-text anywhere in the app.
+                  Microphone access enabled! Voice features are ready.
                 </p>
               </div>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={async () => {
+                  try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    toast({
+                      title: "Microphone Test Successful",
+                      description: "Your microphone is working correctly!",
+                    });
+                    stream.getTracks().forEach(track => track.stop());
+                  } catch (err) {
+                    toast({
+                      title: "Microphone Test Failed",
+                      description: String(err),
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                data-testid="button-test-mic"
+              >
+                <Mic className="h-4 w-4 mr-2" />
+                Test Microphone
+              </Button>
               <div className="text-xs text-muted-foreground space-y-1">
                 <p className="flex items-center gap-2">
                   <Volume2 className="h-3 w-3" />
@@ -138,10 +162,6 @@ export function VoiceMicButton({ className, showLabel = false, size = 'icon' }: 
                 <p className="flex items-center gap-2">
                   <Volume2 className="h-3 w-3" />
                   AI Interview - Voice-guided sessions
-                </p>
-                <p className="flex items-center gap-2">
-                  <Volume2 className="h-3 w-3" />
-                  Pitch Coach - Practice with voice
                 </p>
               </div>
             </div>
@@ -179,8 +199,13 @@ export function VoiceMicButton({ className, showLabel = false, size = 'icon' }: 
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Enable microphone access to use voice features like speech-to-text for your visa application.
+                Enable <strong>microphone</strong> access (not "Sound") to use voice recording features.
               </p>
+              <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                <p className="text-xs text-amber-600 dark:text-amber-400">
+                  <strong>Note:</strong> "Sound" permission is for audio playback. You need to allow <strong>"Microphone"</strong> permission when the browser asks.
+                </p>
+              </div>
               <Button 
                 onClick={handleEnableVoice} 
                 className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
@@ -188,7 +213,7 @@ export function VoiceMicButton({ className, showLabel = false, size = 'icon' }: 
                 data-testid="button-enable-voice"
               >
                 <Mic className="h-4 w-4 mr-2" />
-                {isRequesting ? 'Requesting Access...' : 'Enable Voice Features'}
+                {isRequesting ? 'Requesting Access...' : 'Request Microphone Access'}
               </Button>
             </div>
           )}
