@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs } from "@shared/schema";
-import { eq, and, sql, desc } from "drizzle-orm";
+import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
@@ -2666,7 +2666,7 @@ Keep the tone supportive and professional. Do not be overly enthusiastic.`;
 
       await db.update(users)
         .set(updateData)
-        .where(sql`id = ANY(${safeUserIds})`);
+        .where(inArray(users.id, safeUserIds));
 
       res.json({ 
         success: true, 
