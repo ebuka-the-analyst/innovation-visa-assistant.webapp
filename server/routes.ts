@@ -6556,29 +6556,60 @@ Task: ${stepPrompts[stepId] || "Analyze this business idea."}
 Provide a concise but thorough analysis (2-3 paragraphs) relevant to this step.
 Include specific recommendations for the UK market.`;
 
-      if (process.env.OPENAI_API_KEY) {
-        const OpenAI = (await import("openai")).default;
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        
-        const previousContext = previousSteps?.map((s: any) => `${s.id}: ${s.output}`).join('\n') || '';
-        
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: `Business Idea: ${businessIdea}\n\nPrevious Analysis:\n${previousContext}` }
-          ],
-          max_tokens: 800
-        });
+      const previousContext = previousSteps?.map((s: any) => `${s.id}: ${s.output}`).join('\n') || '';
+      const userMessage = `Business Idea: ${businessIdea}\n\nPrevious Analysis:\n${previousContext}`;
+      
+      let output: string | null = null;
 
-        const output = completion.choices[0]?.message?.content || `${stepName} completed successfully.`;
-        
+      // Try OpenAI first
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      if (openaiKey) {
+        try {
+          const OpenAI = (await import("openai")).default;
+          const openai = new OpenAI({ apiKey: openaiKey });
+          
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userMessage }
+            ],
+            max_tokens: 800
+          });
+
+          output = completion.choices[0]?.message?.content || null;
+        } catch (openaiError: any) {
+          console.log("OpenAI failed for autopilot, trying Gemini:", openaiError?.message);
+        }
+      }
+
+      // Fallback to Gemini
+      const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      if (!output && geminiKey) {
+        try {
+          const { GoogleGenAI } = await import("@google/genai");
+          const genai = new GoogleGenAI({ apiKey: geminiKey });
+          
+          const result = await genai.models.generateContent({
+            model: "gemini-2.0-flash",
+            contents: `${systemPrompt}\n\n${userMessage}`
+          });
+          
+          output = result.text || null;
+        } catch (geminiError: any) {
+          console.log("Gemini also failed for autopilot:", geminiError?.message);
+        }
+      }
+
+      // Return result
+      if (output) {
         res.json({
           output,
           score: Math.floor(Math.random() * 20) + 75,
           documents: stepId === 'synthesis' ? ['Business Plan', 'Financial Projections', 'Innovation Statement'] : []
         });
       } else {
+        // Static fallback
         res.json({
           output: `${stepName} analysis completed. Your business shows promise for the UK Innovator Founder Visa. Key areas identified for further development.`,
           score: Math.floor(Math.random() * 20) + 70,

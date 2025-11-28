@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Rocket,
   Play,
@@ -23,10 +25,12 @@ import {
   Download,
   RefreshCw,
   Mic,
-  MicOff
+  MicOff,
+  Eye
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface AutopilotStep {
   id: string;
@@ -73,6 +77,56 @@ export function FounderAutopilot({ onComplete, businessIdea }: FounderAutopilotP
   const [steps, setSteps] = useState<AutopilotStep[]>(AUTOPILOT_STEPS);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
   const [isRunning, setIsRunning] = useState(false);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const { toast } = useToast();
+
+  const handleDownloadPackage = () => {
+    const completedSteps = steps.filter(s => s.status === 'completed' && s.output);
+    if (completedSteps.length === 0) {
+      toast({
+        title: "No Content Available",
+        description: "Please complete the autopilot process first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    let content = "UK INNOVATOR FOUNDER VISA APPLICATION PACKAGE\n";
+    content += "=" .repeat(50) + "\n\n";
+    content += `Generated: ${new Date().toLocaleString()}\n\n`;
+
+    completedSteps.forEach((step, index) => {
+      content += `\n${"=".repeat(50)}\n`;
+      content += `SECTION ${index + 1}: ${step.name.toUpperCase()}\n`;
+      content += `${"=".repeat(50)}\n\n`;
+      content += step.output || "Analysis pending";
+      if (step.score) {
+        content += `\n\nScore: ${step.score}/100`;
+      }
+      content += "\n\n";
+    });
+
+    content += "\n" + "=".repeat(50) + "\n";
+    content += "DISCLAIMER\n";
+    content += "=".repeat(50) + "\n";
+    content += "This document is for guidance only and does not constitute legal advice.\n";
+    content += "Please consult a qualified immigration advisor for your specific situation.\n";
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'visa-application-package.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Package Downloaded",
+      description: "Your visa application package has been saved.",
+    });
+  };
   const [isPaused, setIsPaused] = useState(false);
   const [userInput, setUserInput] = useState(businessIdea || "");
   const [hasStarted, setHasStarted] = useState(false);
@@ -406,6 +460,7 @@ export function FounderAutopilot({ onComplete, businessIdea }: FounderAutopilotP
               <Button 
                 className="bg-green-500 hover:bg-green-600"
                 data-testid="button-download-package"
+                onClick={handleDownloadPackage}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Download Full Package
@@ -413,14 +468,68 @@ export function FounderAutopilot({ onComplete, businessIdea }: FounderAutopilotP
               <Button 
                 variant="outline"
                 data-testid="button-review-details"
+                onClick={() => setShowReviewDialog(true)}
               >
-                <FileText className="h-4 w-4 mr-2" />
+                <Eye className="h-4 w-4 mr-2" />
                 Review Details
               </Button>
             </div>
           </div>
         </Card>
       )}
+
+      <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
+        <DialogContent className="max-w-4xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle>Visa Application Package Details</DialogTitle>
+            <DialogDescription>
+              Review all analyses from your Founder Autopilot session
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] pr-4">
+            <div className="space-y-6">
+              {steps.filter(s => s.status === 'completed' && s.output).map((step, index) => (
+                <Card key={step.id} className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Badge 
+                      className={`bg-gradient-to-r ${AGENT_COLORS[step.agent].gradient}`}
+                    >
+                      {step.name}
+                    </Badge>
+                    {step.score && (
+                      <Badge variant="outline" className="ml-auto">
+                        Score: {step.score}/100
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {step.output}
+                  </p>
+                  {step.documents && step.documents.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {step.documents.map((doc, i) => (
+                        <Badge key={i} variant="secondary">
+                          <FileText className="h-3 w-3 mr-1" />
+                          {doc}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setShowReviewDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={handleDownloadPackage}>
+              <Download className="h-4 w-4 mr-2" />
+              Download Package
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
