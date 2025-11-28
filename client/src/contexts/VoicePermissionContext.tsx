@@ -15,48 +15,28 @@ export function VoicePermissionProvider({ children }: { children: ReactNode }) {
   const [permission, setPermission] = useState<VoicePermissionState>('checking');
 
   const checkPermission = useCallback(async () => {
-    console.log('[VoicePermission] Checking microphone permission...');
+    console.log('[VoicePermission] Checking microphone permission via direct test...');
     
-    // First try the Permissions API
+    // Skip Permissions API - it's unreliable in some environments (like Replit webview)
+    // Instead, directly try to get the microphone stream
     try {
-      if (navigator.permissions && navigator.permissions.query) {
-        const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-        console.log('[VoicePermission] Permissions API returned:', result.state);
-        
-        // If Permissions API says granted, verify by actually getting the stream
-        if (result.state === 'granted') {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            stream.getTracks().forEach(track => track.stop());
-            console.log('[VoicePermission] Verified: microphone access works');
-            setPermission('granted');
-          } catch (err) {
-            console.log('[VoicePermission] Permissions API said granted but getUserMedia failed:', err);
-            setPermission('denied');
-          }
-        } else {
-          setPermission(result.state as VoicePermissionState);
-        }
-        
-        // Listen for changes
-        result.addEventListener('change', () => {
-          console.log('[VoicePermission] Permission changed to:', result.state);
-          setPermission(result.state as VoicePermissionState);
-        });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      console.log('[VoicePermission] Direct microphone test SUCCEEDED');
+      setPermission('granted');
+    } catch (err: any) {
+      console.log('[VoicePermission] Direct microphone test failed:', err?.name, err?.message);
+      
+      // Check error type to determine if it's denied or just needs prompting
+      if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
+        // User explicitly denied or browser blocked it
+        setPermission('denied');
+      } else if (err?.name === 'NotFoundError') {
+        // No microphone device found
+        console.log('[VoicePermission] No microphone device found');
+        setPermission('denied');
       } else {
-        console.log('[VoicePermission] Permissions API not available');
-        setPermission('prompt');
-      }
-    } catch (err) {
-      console.log('[VoicePermission] Permissions query failed, trying direct getUserMedia:', err);
-      // Fallback: try to get the stream directly
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(track => track.stop());
-        console.log('[VoicePermission] Direct test succeeded');
-        setPermission('granted');
-      } catch {
-        console.log('[VoicePermission] Direct test failed, setting to prompt');
+        // Other error - treat as needing prompt
         setPermission('prompt');
       }
     }

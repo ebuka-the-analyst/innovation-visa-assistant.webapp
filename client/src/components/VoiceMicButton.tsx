@@ -180,36 +180,36 @@ export function VoiceMicButton({ className, showLabel = false, size = 'icon' }: 
                 </div>
               </div>
               
-              <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-2">
-                  If microphone shows ON but still not working:
+              <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-2">
+                  Replit Webview Limitation Detected
                 </p>
-                <ol className="text-xs text-amber-600/80 dark:text-amber-400/80 space-y-1 list-decimal list-inside">
-                  <li>Click the lock icon in address bar</li>
-                  <li>Click <strong>"Reset permissions"</strong></li>
-                  <li><strong>Refresh this page</strong> (Ctrl+R or Cmd+R)</li>
-                  <li>Click Enable Voice again</li>
-                </ol>
+                <p className="text-xs text-blue-600/80 dark:text-blue-400/80">
+                  The embedded preview can block microphone access. Try opening in a new browser tab for full voice features.
+                </p>
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
+                <Button 
+                  onClick={() => {
+                    const url = window.location.href;
+                    window.open(url, '_blank');
+                  }}
+                  className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
+                  data-testid="button-open-new-tab"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Open in New Tab (Recommended)
+                </Button>
                 <Button 
                   onClick={handleEnableVoice} 
-                  className="flex-1"
+                  variant="outline"
+                  className="w-full"
                   disabled={isRequesting}
                   data-testid="button-try-enable-voice"
                 >
                   <Mic className="h-4 w-4 mr-2" />
-                  {isRequesting ? 'Requesting...' : 'Try Again'}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => window.location.reload()}
-                  title="Refresh Page"
-                  data-testid="button-refresh-page"
-                >
-                  <Settings className="h-4 w-4" />
+                  {isRequesting ? 'Requesting...' : 'Try Again Here'}
                 </Button>
               </div>
             </div>
