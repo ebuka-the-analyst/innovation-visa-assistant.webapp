@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useVoicePermission } from "@/contexts/VoicePermissionContext";
 import {
   Mic,
   MicOff,
@@ -139,6 +140,7 @@ const VOICE_PROMPTS = {
 
 export default function VoiceBuilder() {
   const { toast } = useToast();
+  const { permission: micPermission, requestPermission } = useVoicePermission();
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [activeTab, setActiveTab] = useState("record");
@@ -149,7 +151,6 @@ export default function VoiceBuilder() {
   const [editedTranscript, setEditedTranscript] = useState("");
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
-  const [micPermission, setMicPermission] = useState<'granted' | 'denied' | 'prompt' | 'checking'>('checking');
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -239,54 +240,9 @@ export default function VoiceBuilder() {
       });
 
     } catch (error) {
-      setMicPermission('denied');
       toast({
         title: "Microphone Access Denied",
-        description: "Please click 'Enable Microphone' and allow access in your browser.",
-        variant: "destructive"
-      });
-    }
-  }, [toast]);
-
-  // Check microphone permission on mount
-  useEffect(() => {
-    const checkMicPermission = async () => {
-      try {
-        if (navigator.permissions && navigator.permissions.query) {
-          const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-          setMicPermission(result.state as 'granted' | 'denied' | 'prompt');
-          
-          result.addEventListener('change', () => {
-            setMicPermission(result.state as 'granted' | 'denied' | 'prompt');
-          });
-        } else {
-          // Browser doesn't support permissions API, set to prompt
-          setMicPermission('prompt');
-        }
-      } catch {
-        // Permission query not supported, set to prompt
-        setMicPermission('prompt');
-      }
-    };
-    
-    checkMicPermission();
-  }, []);
-
-  const requestMicPermission = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Permission granted, stop the test stream
-      stream.getTracks().forEach(track => track.stop());
-      setMicPermission('granted');
-      toast({
-        title: "Microphone Enabled",
-        description: "You can now start recording. Click the microphone button to begin."
-      });
-    } catch {
-      setMicPermission('denied');
-      toast({
-        title: "Permission Denied",
-        description: "Microphone access was denied. Please enable it in your browser settings.",
+        description: "Please click the microphone icon in the header to enable voice features.",
         variant: "destructive"
       });
     }
@@ -527,7 +483,7 @@ export default function VoiceBuilder() {
                           
                           <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <Button 
-                              onClick={requestMicPermission}
+                              onClick={() => requestPermission()}
                               className="bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
                               data-testid="button-enable-mic"
                             >

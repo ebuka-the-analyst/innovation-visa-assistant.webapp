@@ -8,6 +8,8 @@ import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ThemeToggle from "@/components/ThemeToggle";
+import { VoiceMicButton } from "@/components/VoiceMicButton";
+import { VoicePermissionProvider } from "@/contexts/VoicePermissionContext";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LogOut, Loader2, LayoutDashboard, Wrench, FileText, HelpCircle } from "lucide-react";
 import logoLightImg from "@assets/official_logo.png";
@@ -311,6 +313,8 @@ function UnifiedHeader() {
         </span>
       )}
       
+      <VoiceMicButton />
+      
       <ThemeToggle />
       
       {user && (
@@ -403,19 +407,21 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Suspense fallback={null}>
-            <BlackNovemberBanner />
-            <ChatBot />
-            <ToolsChronographWheel />
-          </Suspense>
-          <GlobalSpotlightTour />
-          <Toaster />
-          <AppLayout />
-          <Suspense fallback={null}>
-            <CookieConsent />
-          </Suspense>
-        </TooltipProvider>
+        <VoicePermissionProvider>
+          <TooltipProvider>
+            <Suspense fallback={null}>
+              <BlackNovemberBanner />
+              <ChatBot />
+              <ToolsChronographWheel />
+            </Suspense>
+            <GlobalSpotlightTour />
+            <Toaster />
+            <AppLayout />
+            <Suspense fallback={null}>
+              <CookieConsent />
+            </Suspense>
+          </TooltipProvider>
+        </VoicePermissionProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
