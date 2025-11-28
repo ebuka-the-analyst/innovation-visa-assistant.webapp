@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, LogIn, Gift, CheckCircle } from "lucide-react";
+import { UserPlus, LogIn, Gift, CheckCircle, Mail, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import logoLightImg from "@assets/official_logo.png";
@@ -17,6 +17,8 @@ export default function Signup() {
   const search = useSearch();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState<{ email: string } | null>(null);
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralDiscount, setReferralDiscount] = useState<number | null>(null);
   const [formData, setFormData] = useState({
@@ -114,13 +116,8 @@ export default function Signup() {
       // Clear stored referral code after successful signup
       sessionStorage.removeItem('referralCode');
 
-      toast({
-        title: "Account created!",
-        description: result.message || "Please check your email to verify your account",
-      });
-
-      // Don't auto-redirect - user needs to verify email first
-      // They can still access dashboard but features may be limited
+      // Show success screen with verification instructions
+      setRegistrationSuccess({ email: formData.email });
     } catch (error: any) {
       toast({
         title: "Connection error",
@@ -131,6 +128,102 @@ export default function Signup() {
       setIsLoading(false);
     }
   };
+
+  const handleResendVerification = async () => {
+    if (!registrationSuccess) return;
+    
+    setIsResendingVerification(true);
+    try {
+      const response = await fetch("/api/auth/resend-verification-public", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: registrationSuccess.email }),
+      });
+
+      const data = await response.json();
+
+      toast({
+        title: data.success ? "Verification email sent" : "Unable to send",
+        description: data.message,
+        variant: data.success ? "default" : "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resend verification email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResendingVerification(false);
+    }
+  };
+
+  // Show success screen after registration
+  if (registrationSuccess) {
+    return (
+      <>
+        <SEOHead
+          title="Verify Your Email | UK Innovator Founder Visa Assistant"
+          description="Please verify your email to complete your registration."
+          path="/signup"
+        />
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
+          <Card className="w-full max-w-md">
+            <div className="flex justify-center pt-8 pb-4">
+              <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <Mail className="h-8 w-8 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            <CardHeader className="space-y-1 pt-2">
+              <CardTitle className="text-2xl font-bold text-center">Check your email</CardTitle>
+              <CardDescription className="text-center">
+                We've sent a verification link to
+              </CardDescription>
+              <p className="text-center font-medium text-primary">{registrationSuccess.email}</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Click the link in the email to verify your account and start using all features.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Don't see the email? Check your spam folder.
+                </p>
+              </div>
+              
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleResendVerification}
+                disabled={isResendingVerification}
+                data-testid="button-resend-verification"
+              >
+                {isResendingVerification ? "Sending..." : "Resend verification email"}
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Already verified?</span>
+                </div>
+              </div>
+              
+              <Button
+                className="w-full"
+                onClick={() => setLocation("/login")}
+                data-testid="button-go-to-login"
+              >
+                <ArrowRight className="mr-2 h-4 w-4" />
+                Go to Sign In
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

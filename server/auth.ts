@@ -87,9 +87,12 @@ export async function setupAuth(app: Express) {
             return done(null, false, { message: "Invalid email or password" });
           }
 
-          // Allow login even without email verification - show reminder in dashboard instead
-          // This provides a better user experience when email delivery fails
-          // User will see a verification reminder banner in the app
+          // BLOCK login if email is not verified
+          if (!user.isEmailVerified) {
+            return done(null, false, { 
+              message: "VERIFICATION_REQUIRED:" + user.email
+            });
+          }
           
           // Return user ID for session serialization (passport will call serializeUser)
           return done(null, user);
@@ -336,7 +339,17 @@ export async function setupAuth(app: Express) {
           return res.status(500).json({ message: "Authentication error: " + (err.message || "Unknown error") });
         }
         if (!user) {
-          return res.status(401).json({ message: info?.message || "Invalid credentials" });
+          // Check if this is a verification required case
+          const message = info?.message || "Invalid credentials";
+          if (message.startsWith("VERIFICATION_REQUIRED:")) {
+            const email = message.split(":")[1];
+            return res.status(403).json({ 
+              message: "Please verify your email before logging in. Check your inbox for the verification link.",
+              requiresVerification: true,
+              email 
+            });
+          }
+          return res.status(401).json({ message });
         }
         req.login({ id: user.id }, (loginErr) => {
           if (loginErr) {
@@ -484,6 +497,57 @@ export async function setupAuth(app: Express) {
       });
     } catch (error: any) {
       console.error("Resend verification error:", error);
+      res.status(500).json({ message: "Failed to resend verification email" });
+    }
+  });
+
+  // Resend Verification Email (public - for login page)
+  app.post("/api/auth/resend-verification-public", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      const normalizedEmail = email.toLowerCase().trim();
+      const user = await storage.getUserByEmail(normalizedEmail);
+
+      // Always return success to prevent email enumeration
+      if (!user) {
+        return res.json({ 
+          success: true, 
+          message: "If that email exists and is unverified, a verification email has been sent."
+        });
+      }
+
+      if (user.isEmailVerified) {
+        return res.json({ 
+          success: true, 
+          message: "Email is already verified. You can log in now."
+        });
+      }
+
+      // Generate new verification token
+      const verificationToken = generateVerificationToken();
+      const tokenExpiry = getTokenExpiry();
+
+      // Update user with new token
+      await storage.updateVerificationToken(user.id, verificationToken, tokenExpiry);
+
+      // Send verification email
+      await sendVerificationEmail(
+        user.email!,
+        user.firstName || "there",
+        verificationToken
+      );
+
+      res.json({ 
+        success: true, 
+        message: "Verification email sent! Please check your inbox."
+      });
+    } catch (error: any) {
+      console.error("Resend verification (public) error:", error);
       res.status(500).json({ message: "Failed to resend verification email" });
     }
   });
@@ -637,7 +701,14 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     });
   }
   
-  // Allow access - email verification is optional (users see reminder banner instead)
+  // Enforce email verification for authenticated routes
+  if (!fullUser.isEmailVerified) {
+    return res.status(403).json({ 
+      message: "Please verify your email to access this feature.",
+      requiresVerification: true 
+    });
+  }
+  
   return next();
 };
 

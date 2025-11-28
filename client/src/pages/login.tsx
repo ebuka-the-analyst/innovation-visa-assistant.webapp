@@ -4,19 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn } from "lucide-react";
+import { LogIn, Mail, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
 import { SEOHead } from "@/components/SEOHead";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Login() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
+  const [verificationRequired, setVerificationRequired] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -40,6 +43,7 @@ export default function Login() {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setVerificationRequired(null);
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -52,6 +56,12 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Check if email verification is required
+        if (data.requiresVerification) {
+          setVerificationRequired(data.email || formData.email);
+          return;
+        }
+        
         toast({
           title: "Unable to sign in",
           description: data.message || "Please check your email and password and try again",
@@ -88,6 +98,35 @@ export default function Login() {
     }
   };
 
+  const handleResendVerification = async () => {
+    if (!verificationRequired) return;
+    
+    setIsResendingVerification(true);
+    try {
+      const response = await fetch("/api/auth/resend-verification-public", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: verificationRequired }),
+      });
+
+      const data = await response.json();
+
+      toast({
+        title: data.success ? "Verification email sent" : "Unable to send",
+        description: data.message,
+        variant: data.success ? "default" : "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resend verification email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResendingVerification(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -121,6 +160,28 @@ export default function Login() {
           <CardDescription className="text-center">Sign in to your account to continue</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {verificationRequired && (
+            <Alert className="border-amber-500/50 bg-amber-500/10">
+              <Mail className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-700 dark:text-amber-400">Email verification required</AlertTitle>
+              <AlertDescription className="text-amber-600 dark:text-amber-300">
+                <p className="mb-3">
+                  Please verify your email address before signing in. Check your inbox for the verification link.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResendVerification}
+                  disabled={isResendingVerification}
+                  className="border-amber-500 text-amber-700 hover:bg-amber-500/20"
+                  data-testid="button-resend-verification"
+                >
+                  {isResendingVerification ? "Sending..." : "Resend verification email"}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <form onSubmit={handleEmailLogin} className="space-y-3">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
