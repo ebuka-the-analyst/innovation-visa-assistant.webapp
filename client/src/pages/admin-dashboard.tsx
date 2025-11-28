@@ -1637,7 +1637,10 @@ export default function AdminDashboard() {
       await apiRequest('DELETE', `/api/admin/users/${userId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin'] });
+      // Invalidate all user-related queries for immediate UI update
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/plans'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/dashboard'] });
       setDeletingUser(null);
       setDeleteConfirmText("");
       toast({ title: 'User deleted permanently', description: 'All user data has been removed.' });
