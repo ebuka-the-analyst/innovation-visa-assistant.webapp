@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs } from "@shared/schema";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -3486,23 +3486,51 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
     }
   });
 
-  // Audit Log Endpoint
+  // Audit Log Endpoint - Uses real admin audit logs
   app.get("/api/admin/audit-log", requireAdmin, async (req, res) => {
     try {
-      // In a production system, this would query a dedicated audit log table
-      // For now, we generate from existing data
-      const auditEntries: any[] = [
+      const { limit = '50' } = req.query;
+      
+      // Fetch real audit logs from database
+      const realAuditLogs = await db.select()
+        .from(adminAuditLogs)
+        .orderBy(desc(adminAuditLogs.createdAt))
+        .limit(parseInt(limit as string));
+      
+      // Format audit logs for frontend
+      const formattedLogs = realAuditLogs.map(log => ({
+        id: log.id,
+        action: log.action,
+        actionCategory: log.actionCategory,
+        description: `${log.action.replace(/_/g, ' ')} - ${log.targetType}: ${log.targetEmail || log.targetId || 'N/A'}`,
+        timestamp: log.createdAt.toISOString(),
+        actor: log.adminEmail,
+        actorId: log.adminId,
+        targetType: log.targetType,
+        targetId: log.targetId,
+        targetEmail: log.targetEmail,
+        previousValue: log.previousValue,
+        newValue: log.newValue,
+        reason: log.reason,
+        ipAddress: log.ipAddress,
+        severity: log.actionCategory === 'user_management' ? 'warning' : 'info',
+      }));
+      
+      // Add system events for context
+      const systemEvents = [
         {
-          id: 'audit-1',
+          id: 'system-startup',
           action: 'system_startup',
+          actionCategory: 'system',
           description: 'Application server started',
           timestamp: new Date(Date.now() - process.uptime() * 1000).toISOString(),
           actor: 'system',
           severity: 'info',
         },
         {
-          id: 'audit-2',
+          id: 'database-connected',
           action: 'database_connected',
+          actionCategory: 'system',
           description: 'PostgreSQL database connection established',
           timestamp: new Date(Date.now() - process.uptime() * 1000 + 1000).toISOString(),
           actor: 'system',
@@ -3510,10 +3538,148 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
         },
       ];
       
-      res.json(auditEntries);
+      // Combine and sort by timestamp
+      const allLogs = [...formattedLogs, ...systemEvents]
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      
+      res.json(allLogs);
     } catch (error) {
       console.error("Admin audit log error:", error);
       res.status(500).json({ error: "Failed to fetch audit log" });
+    }
+  });
+
+  // =====================
+  // SECURITY EVENTS SYSTEM
+  // =====================
+
+  // Get all security events (admin only)
+  app.get("/api/admin/security-events", requireAdmin, async (req, res) => {
+    try {
+      const { limit = '100', eventType, severity, resolved } = req.query;
+      
+      const events = await db.select()
+        .from(securityEvents)
+        .orderBy(desc(securityEvents.createdAt))
+        .limit(parseInt(limit as string));
+      
+      // Get stats
+      const stats = await db.select({
+        eventType: securityEvents.eventType,
+        count: sql<number>`count(*)::int`,
+      })
+        .from(securityEvents)
+        .groupBy(securityEvents.eventType);
+      
+      const severityStats = await db.select({
+        severity: securityEvents.severity,
+        count: sql<number>`count(*)::int`,
+      })
+        .from(securityEvents)
+        .groupBy(securityEvents.severity);
+      
+      const unresolvedCount = await db.select({
+        count: sql<number>`count(*)::int`,
+      })
+        .from(securityEvents)
+        .where(eq(securityEvents.isResolved, false));
+      
+      res.json({
+        events,
+        stats: {
+          total: events.length,
+          unresolved: unresolvedCount[0]?.count || 0,
+          byType: stats.reduce((acc, item) => {
+            acc[item.eventType] = item.count;
+            return acc;
+          }, {} as Record<string, number>),
+          bySeverity: severityStats.reduce((acc, item) => {
+            acc[item.severity] = item.count;
+            return acc;
+          }, {} as Record<string, number>),
+        },
+      });
+    } catch (error) {
+      console.error("Security events fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch security events" });
+    }
+  });
+
+  // Log a security event (internal use)
+  app.post("/api/security/log", async (req, res) => {
+    try {
+      const { eventType, severity, userId, userEmail, ipAddress, userAgent, description, metadata } = req.body;
+      
+      if (!eventType || !description) {
+        return res.status(400).json({ error: "eventType and description are required" });
+      }
+      
+      await db.insert(securityEvents).values({
+        eventType,
+        severity: severity || 'low',
+        userId,
+        userEmail,
+        ipAddress,
+        userAgent,
+        description,
+        metadata,
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Security event logging failed:", error);
+      res.status(500).json({ error: "Failed to log security event" });
+    }
+  });
+
+  // Resolve security event (admin only)
+  app.patch("/api/admin/security-events/:eventId/resolve", requireAdmin, async (req, res) => {
+    try {
+      const { eventId } = req.params;
+      const { resolution } = req.body;
+      const user = req.user as any;
+      
+      await db.update(securityEvents)
+        .set({
+          isResolved: true,
+          resolvedAt: new Date(),
+          resolvedBy: user.id,
+          resolution,
+        })
+        .where(eq(securityEvents.id, eventId));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Security event resolution failed:", error);
+      res.status(500).json({ error: "Failed to resolve security event" });
+    }
+  });
+
+  // Delete security event (admin only)
+  app.delete("/api/admin/security-events/:eventId", requireAdmin, async (req, res) => {
+    try {
+      const { eventId } = req.params;
+      
+      await db.delete(securityEvents)
+        .where(eq(securityEvents.id, eventId));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Security event deletion failed:", error);
+      res.status(500).json({ error: "Failed to delete security event" });
+    }
+  });
+
+  // Clear all resolved security events (admin only)
+  app.delete("/api/admin/security-events/resolved/all", requireAdmin, async (req, res) => {
+    try {
+      await db.delete(securityEvents)
+        .where(eq(securityEvents.isResolved, true));
+      
+      res.json({ success: true, message: "All resolved security events cleared" });
+    } catch (error) {
+      console.error("Resolved security events clear failed:", error);
+      res.status(500).json({ error: "Failed to clear resolved security events" });
     }
   });
 

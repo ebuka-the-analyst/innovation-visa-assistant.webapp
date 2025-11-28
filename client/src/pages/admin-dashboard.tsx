@@ -1118,6 +1118,76 @@ export default function AdminDashboard() {
     },
   });
 
+  // Security events query
+  const { data: securityEventsData, isLoading: securityEventsLoading, refetch: refetchSecurityEvents } = useQuery<{
+    events: Array<{
+      id: string;
+      eventType: string;
+      severity: string;
+      userId: string | null;
+      userEmail: string | null;
+      ipAddress: string | null;
+      userAgent: string | null;
+      description: string;
+      metadata: any;
+      isResolved: boolean;
+      resolution: string | null;
+      createdAt: string;
+    }>;
+    stats: {
+      total: number;
+      unresolved: number;
+      byType: Record<string, number>;
+      bySeverity: Record<string, number>;
+    };
+  }>({
+    queryKey: ['/api/admin/security-events'],
+    enabled: !!user?.isAdmin && activeSection === 'logs-security',
+    refetchInterval: 30000,
+  });
+
+  // Resolve security event mutation
+  const resolveSecurityEventMutation = useMutation({
+    mutationFn: async ({ eventId, resolution }: { eventId: string; resolution: string }) => {
+      await apiRequest('PATCH', `/api/admin/security-events/${eventId}/resolve`, { resolution });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/security-events'] });
+      toast({ title: "Security event marked as resolved" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to resolve security event", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Delete security event mutation
+  const deleteSecurityEventMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      await apiRequest('DELETE', `/api/admin/security-events/${eventId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/security-events'] });
+      toast({ title: "Security event deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to delete security event", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Clear resolved security events mutation  
+  const clearResolvedSecurityEventsMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest('DELETE', '/api/admin/security-events/resolved/all', {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/security-events'] });
+      toast({ title: "All resolved security events cleared" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to clear security events", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Refresh countdown timer
   useEffect(() => {
     if (overviewData?.lastUpdated) {
@@ -7775,12 +7845,18 @@ export default function AdminDashboard() {
                       {activeSection === 'logs-security' && (
                         <>
                           {/* Security Status */}
-                          <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-green-500/10 border-green-500/20">
+                          <Card className={`bg-gradient-to-r ${
+                            (securityEventsData?.stats?.unresolved || 0) > 0 
+                              ? 'from-amber-500/10 via-orange-500/5 to-amber-500/10 border-amber-500/20'
+                              : 'from-green-500/10 via-emerald-500/5 to-green-500/10 border-green-500/20'
+                          }`}>
                             <CardContent className="py-6">
-                              <div className="flex items-center justify-between">
+                              <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                   <motion.div
-                                    className="p-3 rounded-xl bg-green-500 text-white"
+                                    className={`p-3 rounded-xl text-white ${
+                                      (securityEventsData?.stats?.unresolved || 0) > 0 ? 'bg-amber-500' : 'bg-green-500'
+                                    }`}
                                     animate={{ rotate: [0, 5, -5, 0] }}
                                     transition={{ duration: 2, repeat: Infinity }}
                                   >
@@ -7788,13 +7864,37 @@ export default function AdminDashboard() {
                                   </motion.div>
                                   <div>
                                     <p className="text-sm text-muted-foreground">Security Status</p>
-                                    <p className="text-2xl font-bold text-green-500">All Systems Secure</p>
+                                    <p className={`text-2xl font-bold ${
+                                      (securityEventsData?.stats?.unresolved || 0) > 0 ? 'text-amber-500' : 'text-green-500'
+                                    }`}>
+                                      {(securityEventsData?.stats?.unresolved || 0) > 0 
+                                        ? `${securityEventsData?.stats?.unresolved} Unresolved Events` 
+                                        : 'All Systems Secure'}
+                                    </p>
                                   </div>
                                 </div>
-                                <Badge className="bg-green-500 text-white px-4 py-2">
-                                  <CheckCircle className="h-4 w-4 mr-1" />
-                                  No Threats Detected
-                                </Badge>
+                                <div className="flex items-center gap-4">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => refetchSecurityEvents()}
+                                    disabled={securityEventsLoading}
+                                  >
+                                    <RefreshCw className={`h-4 w-4 mr-2 ${securityEventsLoading ? 'animate-spin' : ''}`} />
+                                    Refresh
+                                  </Button>
+                                  {(securityEventsData?.events?.filter(e => e.isResolved).length || 0) > 0 && (
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => clearResolvedSecurityEventsMutation.mutate()}
+                                      disabled={clearResolvedSecurityEventsMutation.isPending}
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Clear Resolved
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
                             </CardContent>
                           </Card>
@@ -7802,10 +7902,34 @@ export default function AdminDashboard() {
                           {/* Security Metrics */}
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             {[
-                              { label: 'Failed Logins', value: '12', icon: XCircle, color: 'red', status: 'Blocked' },
-                              { label: 'Suspicious IPs', value: '3', icon: Eye, color: 'amber', status: 'Monitoring' },
-                              { label: 'Rate Limits Hit', value: '45', icon: Zap, color: 'blue', status: 'Normal' },
-                              { label: 'Threats Blocked', value: '0', icon: Shield, color: 'green', status: 'All Clear' },
+                              { 
+                                label: 'Failed Logins', 
+                                value: securityEventsData?.stats?.byType?.failed_login || 0, 
+                                icon: XCircle, 
+                                color: 'red', 
+                                status: (securityEventsData?.stats?.byType?.failed_login || 0) > 0 ? 'Monitoring' : 'Clear' 
+                              },
+                              { 
+                                label: 'Suspicious IPs', 
+                                value: securityEventsData?.stats?.byType?.suspicious_ip || 0, 
+                                icon: Eye, 
+                                color: 'amber', 
+                                status: (securityEventsData?.stats?.byType?.suspicious_ip || 0) > 0 ? 'Tracking' : 'Clear' 
+                              },
+                              { 
+                                label: 'Rate Limits', 
+                                value: securityEventsData?.stats?.byType?.rate_limit || 0, 
+                                icon: Zap, 
+                                color: 'blue', 
+                                status: 'Normal' 
+                              },
+                              { 
+                                label: 'Total Events', 
+                                value: securityEventsData?.stats?.total || 0, 
+                                icon: Shield, 
+                                color: 'green', 
+                                status: securityEventsData?.stats?.unresolved === 0 ? 'All Clear' : 'Review' 
+                              },
                             ].map((metric, index) => (
                               <motion.div
                                 key={metric.label}
@@ -7817,7 +7941,7 @@ export default function AdminDashboard() {
                                   <CardContent className="pt-6">
                                     <div className="flex items-center justify-between mb-3">
                                       <metric.icon className={`h-6 w-6 text-${metric.color}-500`} />
-                                      <Badge className={`bg-${metric.color}-500/10 text-${metric.color}-500`}>{metric.status}</Badge>
+                                      <Badge variant="outline">{metric.status}</Badge>
                                     </div>
                                     <p className="text-3xl font-bold">{metric.value}</p>
                                     <p className="text-sm text-muted-foreground">{metric.label}</p>
@@ -7828,96 +7952,125 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Security Events List */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <Card>
-                              <CardHeader>
-                                <CardTitle>Failed Login Attempts</CardTitle>
-                                <CardDescription>Recent authentication failures</CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <ScrollArea className="h-[300px]">
+                          <Card>
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle>Security Events</CardTitle>
+                                  <CardDescription>Real-time security monitoring and event tracking</CardDescription>
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              {securityEventsLoading ? (
+                                <div className="space-y-3">
+                                  {[1, 2, 3, 4, 5].map((i) => (
+                                    <ShimmerSkeleton key={i} />
+                                  ))}
+                                </div>
+                              ) : securityEventsData?.events && securityEventsData.events.length > 0 ? (
+                                <ScrollArea className="h-[400px]">
                                   <div className="space-y-3">
-                                    {[
-                                      { ip: '192.168.1.45', attempts: 5, email: 'test@example.com', time: '10 min ago', blocked: true },
-                                      { ip: '45.67.89.123', attempts: 3, email: 'admin@fake.com', time: '25 min ago', blocked: true },
-                                      { ip: '78.90.12.34', attempts: 2, email: 'user@domain.com', time: '1 hour ago', blocked: false },
-                                      { ip: '156.78.90.12', attempts: 1, email: 'john@company.uk', time: '2 hours ago', blocked: false },
-                                    ].map((attempt, index) => (
+                                    {securityEventsData.events.map((event, index) => (
                                       <motion.div
-                                        key={index}
+                                        key={event.id}
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className={`p-3 rounded-lg border ${attempt.blocked ? 'border-red-500/30 bg-red-500/5' : 'border-border/50'}`}
+                                        transition={{ delay: index * 0.05 }}
+                                        className={`p-4 rounded-lg border ${
+                                          event.isResolved 
+                                            ? 'border-green-500/30 bg-green-500/5' 
+                                            : event.severity === 'critical' || event.severity === 'high'
+                                              ? 'border-red-500/30 bg-red-500/5'
+                                              : event.severity === 'medium'
+                                                ? 'border-amber-500/30 bg-amber-500/5'
+                                                : 'border-border/50'
+                                        }`}
                                       >
-                                        <div className="flex items-center justify-between">
-                                          <div className="flex items-center gap-3">
-                                            {attempt.blocked ? (
-                                              <XCircle className="h-5 w-5 text-red-500" />
+                                        <div className="flex items-start justify-between gap-4">
+                                          <div className="flex items-start gap-3">
+                                            {event.isResolved ? (
+                                              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                                            ) : event.severity === 'critical' || event.severity === 'high' ? (
+                                              <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
+                                            ) : event.severity === 'medium' ? (
+                                              <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
                                             ) : (
-                                              <AlertCircle className="h-5 w-5 text-amber-500" />
+                                              <Eye className="h-5 w-5 text-blue-500 mt-0.5" />
                                             )}
-                                            <div>
-                                              <p className="font-mono text-sm">{attempt.ip}</p>
-                                              <p className="text-xs text-muted-foreground">{attempt.email}</p>
+                                            <div className="flex-1">
+                                              <div className="flex items-center gap-2 mb-1">
+                                                <p className="font-medium">{event.description}</p>
+                                                <Badge variant="outline" className={
+                                                  event.severity === 'critical' ? 'text-red-600 border-red-500' :
+                                                  event.severity === 'high' ? 'text-red-500' :
+                                                  event.severity === 'medium' ? 'text-amber-500' :
+                                                  'text-blue-500'
+                                                }>{event.severity}</Badge>
+                                                {event.isResolved && (
+                                                  <Badge className="bg-green-500/10 text-green-500">Resolved</Badge>
+                                                )}
+                                              </div>
+                                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                                <span className="flex items-center gap-1">
+                                                  <Clock className="h-3 w-3" />
+                                                  {formatDistance(new Date(event.createdAt), new Date(), { addSuffix: true })}
+                                                </span>
+                                                {event.ipAddress && (
+                                                  <span className="font-mono">{event.ipAddress}</span>
+                                                )}
+                                                {event.userEmail && (
+                                                  <span>{event.userEmail}</span>
+                                                )}
+                                                <Badge variant="secondary" className="text-xs">
+                                                  {event.eventType.replace(/_/g, ' ')}
+                                                </Badge>
+                                              </div>
+                                              {event.resolution && (
+                                                <p className="text-xs text-green-600 mt-2">
+                                                  Resolution: {event.resolution}
+                                                </p>
+                                              )}
                                             </div>
                                           </div>
-                                          <div className="text-right">
-                                            <Badge variant={attempt.blocked ? 'destructive' : 'outline'}>
-                                              {attempt.attempts} attempts
-                                            </Badge>
-                                            <p className="text-xs text-muted-foreground mt-1">{attempt.time}</p>
+                                          <div className="flex items-center gap-2">
+                                            {!event.isResolved && (
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => resolveSecurityEventMutation.mutate({ 
+                                                  eventId: event.id, 
+                                                  resolution: 'Reviewed and cleared by admin' 
+                                                })}
+                                                disabled={resolveSecurityEventMutation.isPending}
+                                              >
+                                                <CheckCircle className="h-4 w-4 mr-1" />
+                                                Resolve
+                                              </Button>
+                                            )}
+                                            <Button
+                                              size="icon"
+                                              variant="ghost"
+                                              onClick={() => deleteSecurityEventMutation.mutate(event.id)}
+                                              disabled={deleteSecurityEventMutation.isPending}
+                                            >
+                                              <Trash2 className="h-4 w-4 text-red-500" />
+                                            </Button>
                                           </div>
                                         </div>
                                       </motion.div>
                                     ))}
                                   </div>
                                 </ScrollArea>
-                              </CardContent>
-                            </Card>
-
-                            <Card>
-                              <CardHeader>
-                                <CardTitle>Suspicious Activity</CardTitle>
-                                <CardDescription>Monitored security events</CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <ScrollArea className="h-[300px]">
-                                  <div className="space-y-3">
-                                    {[
-                                      { event: 'Unusual API pattern detected', severity: 'medium', source: 'API Gateway', time: '15 min ago' },
-                                      { event: 'Multiple countries login attempt', severity: 'low', source: 'Auth Service', time: '45 min ago' },
-                                      { event: 'High volume data export request', severity: 'low', source: 'Export Service', time: '2 hours ago' },
-                                    ].map((event, index) => (
-                                      <motion.div
-                                        key={index}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="p-3 rounded-lg border border-border/50 hover-elevate"
-                                      >
-                                        <div className="flex items-start gap-3">
-                                          <Eye className="h-5 w-5 text-amber-500 mt-0.5" />
-                                          <div className="flex-1">
-                                            <p className="font-medium text-sm">{event.event}</p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                              <Badge variant="outline" className={
-                                                event.severity === 'high' ? 'text-red-500' :
-                                                event.severity === 'medium' ? 'text-amber-500' :
-                                                'text-blue-500'
-                                              }>{event.severity}</Badge>
-                                              <span className="text-xs text-muted-foreground">{event.source}</span>
-                                            </div>
-                                          </div>
-                                          <span className="text-xs text-muted-foreground">{event.time}</span>
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </ScrollArea>
-                              </CardContent>
-                            </Card>
-                          </div>
+                              ) : (
+                                <div className="py-12 text-center">
+                                  <Shield className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                                  <p className="text-lg font-medium text-green-500">All Systems Secure</p>
+                                  <p className="text-muted-foreground mt-1">No security events recorded</p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
                         </>
                       )}
                     </motion.div>

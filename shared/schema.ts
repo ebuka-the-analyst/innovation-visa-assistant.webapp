@@ -2207,3 +2207,44 @@ export const insertSiteFeedbackSchema = createInsertSchema(siteFeedback).omit({
 
 export type SiteFeedback = typeof siteFeedback.$inferSelect;
 export type InsertSiteFeedback = z.infer<typeof insertSiteFeedbackSchema>;
+
+// Security Events - Track security-related events for admin monitoring
+export const securityEvents = pgTable("security_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Event Details
+  eventType: varchar("event_type", { length: 50 }).notNull(), // failed_login, suspicious_ip, rate_limit, blocked_request, unusual_activity
+  severity: varchar("severity", { length: 20 }).notNull().default('low'), // low, medium, high, critical
+  
+  // Context
+  userId: varchar("user_id").references(() => users.id),
+  userEmail: varchar("user_email"),
+  ipAddress: varchar("ip_address", { length: 50 }),
+  userAgent: text("user_agent"),
+  
+  // Event-specific data
+  description: text("description").notNull(),
+  metadata: jsonb("metadata"), // Additional context like attempts count, blocked status, etc.
+  
+  // Resolution
+  isResolved: boolean("is_resolved").notNull().default(false),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  resolution: text("resolution"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_security_type").on(table.eventType),
+  index("idx_security_severity").on(table.severity),
+  index("idx_security_ip").on(table.ipAddress),
+  index("idx_security_date").on(table.createdAt),
+  index("idx_security_resolved").on(table.isResolved),
+]);
+
+export const insertSecurityEventSchema = createInsertSchema(securityEvents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type SecurityEvent = typeof securityEvents.$inferSelect;
+export type InsertSecurityEvent = z.infer<typeof insertSecurityEventSchema>;

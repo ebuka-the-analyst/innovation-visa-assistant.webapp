@@ -8,6 +8,33 @@ import bcrypt from "bcrypt";
 import { storage } from "./storage";
 import { verifyTurnstileToken } from "./turnstile";
 import { generateVerificationToken, getTokenExpiry, sendVerificationEmail, sendPasswordResetEmail, getResetTokenExpiry, sendWelcomeEmail } from "./email";
+import { db } from "./db";
+import { securityEvents } from "@shared/schema";
+
+// Helper function to log security events
+async function logSecurityEvent(
+  eventType: string,
+  description: string,
+  severity: string = 'low',
+  userEmail?: string | null,
+  ipAddress?: string | null,
+  userAgent?: string | null,
+  metadata?: any
+) {
+  try {
+    await db.insert(securityEvents).values({
+      eventType,
+      severity,
+      userEmail,
+      ipAddress,
+      userAgent,
+      description,
+      metadata,
+    });
+  } catch (error) {
+    console.error("Failed to log security event:", error);
+  }
+}
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -331,22 +358,37 @@ export async function setupAuth(app: Express) {
   // Email/Password Login
   app.post("/api/auth/login", async (req, res, next) => {
     try {
+      const { email } = req.body;
+      const ipAddress = req.headers['x-forwarded-for']?.toString().split(',')[0] || req.socket.remoteAddress || null;
+      const userAgent = req.headers['user-agent'] || null;
+      
       // Turnstile is optional for login (bot protection is more critical for signup)
       // Authenticate user directly
-      passport.authenticate("local", (err: any, user: any, info: any) => {
+      passport.authenticate("local", async (err: any, user: any, info: any) => {
         if (err) {
           console.error("Passport authentication error:", err);
           return res.status(500).json({ message: "Authentication error: " + (err.message || "Unknown error") });
         }
         if (!user) {
+          // Log failed login attempt as security event
+          await logSecurityEvent(
+            'failed_login',
+            `Failed login attempt for email: ${email || 'unknown'}`,
+            'medium',
+            email || null,
+            ipAddress,
+            userAgent,
+            { reason: info?.message || 'Invalid credentials' }
+          );
+          
           // Check if this is a verification required case
           const message = info?.message || "Invalid credentials";
           if (message.startsWith("VERIFICATION_REQUIRED:")) {
-            const email = message.split(":")[1];
+            const verifyEmail = message.split(":")[1];
             return res.status(403).json({ 
               message: "Please verify your email before logging in. Check your inbox for the verification link.",
               requiresVerification: true,
-              email 
+              email: verifyEmail 
             });
           }
           return res.status(401).json({ message });
