@@ -7655,6 +7655,120 @@ Return a JSON object with:
     }
   });
 
+  // Admin: Delete user permanently
+  app.delete("/api/admin/users/:userId", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const adminUser = req.user as any;
+
+      // Prevent self-deletion
+      if (userId === adminUser.id) {
+        return res.status(400).json({ error: "Cannot delete yourself" });
+      }
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Prevent deleting other admins
+      if (targetUser.isAdmin) {
+        return res.status(400).json({ error: "Cannot delete admin users" });
+      }
+
+      // Delete user's business plans first (foreign key constraint)
+      await db.delete(businessPlans).where(eq(businessPlans.userId, userId));
+
+      // Delete user
+      await db.delete(users).where(eq(users.id, userId));
+
+      res.json({ 
+        success: true, 
+        message: "User deleted permanently"
+      });
+    } catch (error) {
+      console.error("Delete user error:", error);
+      res.status(500).json({ error: "Failed to delete user" });
+    }
+  });
+
+  // Admin: Force logout user (invalidate sessions)
+  app.post("/api/admin/users/:userId/force-logout", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Delete all sessions for this user from the session store
+      // The session table stores sessions with user info in the 'sess' JSONB column
+      const result = await db.execute(
+        sql`DELETE FROM session WHERE sess::jsonb->'passport'->>'user' = ${userId}`
+      );
+
+      res.json({ 
+        success: true, 
+        message: "User sessions terminated",
+        sessionsTerminated: (result as any).rowCount || 0
+      });
+    } catch (error) {
+      console.error("Force logout error:", error);
+      res.status(500).json({ error: "Failed to force logout" });
+    }
+  });
+
+  // Admin: Export user data (GDPR compliance)
+  app.get("/api/admin/users/:userId/export", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get user's business plans
+      const userPlans = await db.select().from(businessPlans).where(eq(businessPlans.userId, userId));
+
+      // Prepare export data (exclude sensitive fields like password)
+      const userData = targetUser as any;
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        userData: {
+          id: userData.id,
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          isVerified: userData.isEmailVerified,
+          isAdmin: userData.isAdmin,
+          subscriptionTier: userData.subscriptionTier,
+          credits: userData.planCredits + userData.bonusCredits,
+          planCredits: userData.planCredits,
+          bonusCredits: userData.bonusCredits,
+          createdAt: userData.createdAt,
+          updatedAt: userData.updatedAt,
+          isBanned: userData.isBanned,
+          suspendedUntil: userData.suspendedUntil,
+          suspendedReason: userData.suspendedReason,
+        },
+        businessPlans: userPlans.map((plan: any) => ({
+          id: plan.id,
+          businessName: plan.businessName,
+          status: plan.status,
+          createdAt: plan.createdAt,
+        })),
+        planCount: userPlans.length,
+      };
+
+      res.json(exportData);
+    } catch (error) {
+      console.error("Export user data error:", error);
+      res.status(500).json({ error: "Failed to export user data" });
+    }
+  });
+
   // Regulatory updates endpoint
   app.get("/api/regulations/updates", isAuthenticated, async (req, res) => {
     try {

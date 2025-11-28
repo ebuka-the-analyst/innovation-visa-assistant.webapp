@@ -616,6 +616,10 @@ export default function AdminDashboard() {
   const [adminNotes, setAdminNotes] = useState("");
   const [impersonatingUser, setImpersonatingUser] = useState<User | null>(null);
   const [impersonationData, setImpersonationData] = useState<any>(null);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [viewingUserActivity, setViewingUserActivity] = useState<User | null>(null);
+  const [exportingUser, setExportingUser] = useState<User | null>(null);
   
   // Error logging states
   const [selectedError, setSelectedError] = useState<any>(null);
@@ -1453,6 +1457,62 @@ export default function AdminDashboard() {
       toast({ title: "Failed to reset password", description: error.message, variant: "destructive" });
     },
   });
+
+  // Delete user permanently
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      await apiRequest('DELETE', `/api/admin/users/${userId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin'] });
+      setDeletingUser(null);
+      setDeleteConfirmText("");
+      toast({ title: 'User deleted permanently', description: 'All user data has been removed.' });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to delete user", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Force logout user (end all sessions)
+  const forceLogoutMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await apiRequest('POST', `/api/admin/users/${userId}/force-logout`);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ 
+        title: 'User logged out', 
+        description: `${data.sessionsTerminated || 0} active session(s) terminated.` 
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to force logout", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Export user data (GDPR compliance)
+  const exportUserData = async (userId: string) => {
+    try {
+      const res = await apiRequest('GET', `/api/admin/users/${userId}/export`);
+      const data = await res.json();
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `user-data-${userId}-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      setExportingUser(null);
+      toast({ title: 'User data exported', description: 'Download started.' });
+    } catch (error: any) {
+      toast({ title: "Failed to export user data", description: error.message, variant: "destructive" });
+    }
+  };
 
   // Fetch impersonation data
   const fetchImpersonationData = async (userId: string) => {
@@ -3910,6 +3970,22 @@ export default function AdminDashboard() {
                                         )}
                                         
                                         <DropdownMenuSeparator />
+                                        <DropdownMenuLabel className="text-xs text-muted-foreground">Data & Sessions</DropdownMenuLabel>
+                                        
+                                        <DropdownMenuItem onClick={() => exportUserData(user.id)}>
+                                          <Download className="h-4 w-4 mr-2 text-blue-500" />
+                                          Export User Data
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setViewingUserActivity(user)}>
+                                          <Activity className="h-4 w-4 mr-2 text-green-500" />
+                                          View Activity
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => forceLogoutMutation.mutate(user.id)}>
+                                          <LogOut className="h-4 w-4 mr-2 text-orange-500" />
+                                          Force Logout
+                                        </DropdownMenuItem>
+                                        
+                                        <DropdownMenuSeparator />
                                         <DropdownMenuLabel className="text-xs text-muted-foreground">Restrictions</DropdownMenuLabel>
                                         
                                         <DropdownMenuItem onClick={() => setSuspendingUser(user)} className="text-orange-600">
@@ -3919,6 +3995,17 @@ export default function AdminDashboard() {
                                         <DropdownMenuItem onClick={() => setBanningUser(user)} className="text-red-600">
                                           <Ban className="h-4 w-4 mr-2" />
                                           Ban User
+                                        </DropdownMenuItem>
+                                        
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuLabel className="text-xs text-muted-foreground">Danger Zone</DropdownMenuLabel>
+                                        
+                                        <DropdownMenuItem 
+                                          onClick={() => setDeletingUser(user)} 
+                                          className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
+                                        >
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Delete User
                                         </DropdownMenuItem>
                                       </DropdownMenuContent>
                                     </DropdownMenu>
@@ -12010,6 +12097,123 @@ export default function AdminDashboard() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Delete User Modal */}
+        <AlertDialog open={!!deletingUser} onOpenChange={(open) => !open && setDeletingUser(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Delete User Permanently
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <p>This action <span className="font-bold text-red-600">CANNOT be undone</span>. This will permanently delete:</p>
+                <ul className="list-disc list-inside text-sm space-y-1 mt-2">
+                  <li>User account and profile</li>
+                  <li>All business plans</li>
+                  <li>Payment history</li>
+                  <li>Activity logs</li>
+                </ul>
+                <p className="mt-4">
+                  To confirm, type <span className="font-mono bg-muted px-1 rounded">{deletingUser?.email}</span> below:
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-4 py-4">
+              <Input
+                placeholder="Type user email to confirm"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                data-testid="input-delete-confirm"
+              />
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => { setDeletingUser(null); setDeleteConfirmText(""); }}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover-elevate"
+                onClick={() => deletingUser && deleteUserMutation.mutate(deletingUser.id)}
+                disabled={deleteUserMutation.isPending || deleteConfirmText !== deletingUser?.email}
+                data-testid="button-confirm-delete"
+              >
+                {deleteUserMutation.isPending ? "Deleting..." : "Delete User Forever"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* View User Activity Modal */}
+        <Dialog open={!!viewingUserActivity} onOpenChange={(open) => !open && setViewingUserActivity(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-green-500" />
+                User Activity
+              </DialogTitle>
+              <DialogDescription>
+                Recent activity for {viewingUserActivity?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs text-muted-foreground">Account Created</p>
+                  <p className="font-medium">
+                    {viewingUserActivity?.createdAt 
+                      ? format(new Date(viewingUserActivity.createdAt), 'PPp')
+                      : 'Unknown'}
+                  </p>
+                </div>
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs text-muted-foreground">Last Login</p>
+                  <p className="font-medium">
+                    {viewingUserActivity?.lastLogin 
+                      ? formatDistance(new Date(viewingUserActivity.lastLogin), new Date(), { addSuffix: true })
+                      : 'Never'}
+                  </p>
+                </div>
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs text-muted-foreground">Current Tier</p>
+                  <Badge variant="outline" className="capitalize mt-1">
+                    {viewingUserActivity?.subscriptionTier || 'free'}
+                  </Badge>
+                </div>
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs text-muted-foreground">Credits Remaining</p>
+                  <p className="font-medium">{(viewingUserActivity as any)?.credits || 0}</p>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h4 className="font-medium mb-2">Account Status</h4>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant={viewingUserActivity?.isVerified ? "default" : "secondary"}>
+                    {viewingUserActivity?.isVerified ? "Email Verified" : "Email Not Verified"}
+                  </Badge>
+                  {viewingUserActivity?.isAdmin && (
+                    <Badge variant="default" className="bg-purple-600">Admin</Badge>
+                  )}
+                  {(viewingUserActivity as any)?.isBanned && (
+                    <Badge variant="destructive">Banned</Badge>
+                  )}
+                  {(viewingUserActivity as any)?.suspendedUntil && new Date((viewingUserActivity as any).suspendedUntil) > new Date() && (
+                    <Badge variant="secondary" className="bg-orange-500 text-white">
+                      Suspended until {format(new Date((viewingUserActivity as any).suspendedUntil), 'PP')}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setViewingUserActivity(null)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Suspend User Modal */}
         <Dialog open={!!suspendingUser} onOpenChange={(open) => !open && setSuspendingUser(null)}>
