@@ -2992,6 +2992,49 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
     }
   });
 
+  // Bulk delete plans - MUST be before :planId route to avoid route conflicts
+  app.delete("/api/admin/plans/bulk", requireAdmin, async (req, res) => {
+    try {
+      const { planIds } = req.body;
+      
+      if (!planIds || !Array.isArray(planIds) || planIds.length === 0) {
+        return res.status(400).json({ error: "Plan IDs are required" });
+      }
+      
+      let succeeded = 0;
+      let failed = 0;
+      const errors: string[] = [];
+      
+      for (const planId of planIds) {
+        try {
+          const plan = await storage.getBusinessPlan(planId);
+          if (plan) {
+            await storage.deleteBusinessPlan(planId);
+            succeeded++;
+          } else {
+            failed++;
+            errors.push(`Plan ${planId} not found`);
+          }
+        } catch (error) {
+          failed++;
+          errors.push(`Failed to delete plan ${planId}`);
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `Deleted ${succeeded} of ${planIds.length} plans`,
+        succeeded,
+        failed,
+        total: planIds.length,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    } catch (error) {
+      console.error("Admin bulk plan delete error:", error);
+      res.status(500).json({ error: "Failed to delete plans" });
+    }
+  });
+
   app.delete("/api/admin/plans/:planId", requireAdmin, async (req, res) => {
     try {
       const { planId } = req.params;
