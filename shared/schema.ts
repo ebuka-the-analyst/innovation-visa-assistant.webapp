@@ -2188,3 +2188,22 @@ export const insertErrorLogSchema = createInsertSchema(errorLogs).omit({
 
 export type ErrorLog = typeof errorLogs.$inferSelect;
 export type InsertErrorLog = z.infer<typeof insertErrorLogSchema>;
+
+// Site Feedback - Timed popup after 10 minutes on site
+export const siteFeedback = pgTable("site_feedback", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  rating: integer("rating").notNull(), // 1-5 star rating
+  comment: text("comment"), // Optional improvement suggestion
+  pageUrl: text("page_url"), // Page where feedback was submitted
+  timeSpentMinutes: integer("time_spent_minutes"), // How long user was on site
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertSiteFeedbackSchema = createInsertSchema(siteFeedback).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type SiteFeedback = typeof siteFeedback.$inferSelect;
+export type InsertSiteFeedback = z.infer<typeof insertSiteFeedbackSchema>;
