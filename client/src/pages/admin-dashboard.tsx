@@ -1194,7 +1194,7 @@ export default function AdminDashboard() {
     },
   });
 
-  // Bulk delete users mutation
+  // Bulk delete users mutation with optimistic updates
   const bulkDeleteUsersMutation = useMutation({
     mutationFn: async (userIds: string[]) => {
       const results = await Promise.allSettled(
@@ -1203,20 +1203,35 @@ export default function AdminDashboard() {
       const succeeded = results.filter(r => r.status === 'fulfilled').length;
       return { succeeded, total: userIds.length, deletedIds: userIds };
     },
-    onSuccess: (data) => {
-      // Force immediate refetch of all user-related queries
-      queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const key = query.queryKey[0];
-          return typeof key === 'string' && key.includes('/api/admin');
+    onMutate: async (userIds) => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['/api/admin/users'] });
+      
+      // Optimistically remove users from ALL cached user queries
+      queryClient.setQueriesData(
+        { predicate: (query) => query.queryKey[0] === '/api/admin/users' },
+        (oldData: any) => {
+          if (!oldData?.users) return oldData;
+          return {
+            ...oldData,
+            users: oldData.users.filter((u: User) => !userIds.includes(u.id)),
+            total: Math.max(0, (oldData.total || 0) - userIds.length)
+          };
         }
-      });
-      queryClient.refetchQueries({ queryKey: ['/api/admin/users'] });
-      queryClient.refetchQueries({ queryKey: ['/api/admin/analytics/overview'] });
+      );
+      
+      return { userIds };
+    },
+    onSuccess: (data) => {
+      // Refetch to ensure server state is accurate
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/analytics/overview'] });
       toast({ title: `Bulk delete completed`, description: `${data.succeeded}/${data.total} users deleted` });
       setSelectedUsers([]);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _userIds, context) => {
+      // Revert on error - refetch the real data
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       toast({ title: "Bulk delete failed", description: error.message, variant: "destructive" });
     },
   });
