@@ -32,9 +32,9 @@ export default function VerifyEmail() {
           setStatus("success");
           setMessage(result.message || "Email verified successfully!");
           
-          // Redirect to dashboard after 3 seconds
+          // Redirect to login after 3 seconds (user needs to sign in)
           setTimeout(() => {
-            setLocation("/dashboard");
+            setLocation("/login");
           }, 3000);
         } else {
           setStatus("error");
@@ -122,14 +122,14 @@ export default function VerifyEmail() {
           {status === "success" && (
             <div className="space-y-3">
               <p className="text-sm text-center text-muted-foreground">
-                Redirecting you to your dashboard in 3 seconds...
+                Redirecting you to sign in in 3 seconds...
               </p>
               <Button
                 className="w-full"
-                onClick={() => setLocation("/dashboard")}
-                data-testid="button-dashboard"
+                onClick={() => setLocation("/login")}
+                data-testid="button-login-now"
               >
-                Go to Dashboard Now
+                Sign In Now
               </Button>
             </div>
           )}
