@@ -223,8 +223,8 @@ export async function completeInterviewSession(sessionId: string) {
   const avgContent = Math.round(totalContent / answeredCount);
   const overallScore = Math.round((avgConfidence + avgClarity + avgContent) / 3);
 
-  const uniqueStrengths = [...new Set(allStrengths)].slice(0, 5);
-  const uniqueImprovements = [...new Set(allImprovements)].slice(0, 5);
+  const uniqueStrengths = Array.from(new Set(allStrengths)).slice(0, 5);
+  const uniqueImprovements = Array.from(new Set(allImprovements)).slice(0, 5);
 
   const [updated] = await db.update(interviewSessions)
     .set({
