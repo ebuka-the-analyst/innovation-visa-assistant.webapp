@@ -19,45 +19,58 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (char) => htmlEscapeMap[char] || char);
 }
 
-// Hostinger SMTP transporter
+// Amazon SES SMTP transporter (primary) with Hostinger fallback
 const createTransporter = () => {
+  const AWS_SES_SMTP_USERNAME = process.env.AWS_SES_SMTP_USERNAME;
+  const AWS_SES_SMTP_PASSWORD = process.env.AWS_SES_SMTP_PASSWORD;
   const HOSTINGER_EMAIL_USER = process.env.HOSTINGER_EMAIL_USER;
   const HOSTINGER_EMAIL_PASSWORD = process.env.HOSTINGER_EMAIL_PASSWORD;
   
-  if (!HOSTINGER_EMAIL_USER || !HOSTINGER_EMAIL_PASSWORD) {
-    return null;
+  // Primary: Amazon SES (eu-north-1 Stockholm region)
+  if (AWS_SES_SMTP_USERNAME && AWS_SES_SMTP_PASSWORD) {
+    console.log('[Email] Using Amazon SES SMTP');
+    return nodemailer.createTransport({
+      host: 'email-smtp.eu-north-1.amazonaws.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: AWS_SES_SMTP_USERNAME,
+        pass: AWS_SES_SMTP_PASSWORD,
+      },
+    });
   }
   
-  return nodemailer.createTransport({
-    host: 'smtp.hostinger.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: HOSTINGER_EMAIL_USER,
-      pass: HOSTINGER_EMAIL_PASSWORD,
-    },
-  });
+  // Fallback: Hostinger SMTP
+  if (HOSTINGER_EMAIL_USER && HOSTINGER_EMAIL_PASSWORD) {
+    console.log('[Email] Using Hostinger SMTP fallback');
+    return nodemailer.createTransport({
+      host: 'smtp.hostinger.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: HOSTINGER_EMAIL_USER,
+        pass: HOSTINGER_EMAIL_PASSWORD,
+      },
+    });
+  }
+  
+  return null;
 };
 
 export async function sendEmail({ to, subject, html, from }: SendEmailParams) {
-  const HOSTINGER_EMAIL_USER = process.env.HOSTINGER_EMAIL_USER;
+  const DEFAULT_FROM_EMAIL = 'noreply@innovatorfoundervisaassistant.co.uk';
   
-  if (!HOSTINGER_EMAIL_USER) {
-    console.error("Hostinger email not configured. Email not sent.");
+  const transporter = createTransporter();
+  
+  if (!transporter) {
+    console.error("Email service not configured. Email not sent.");
     console.log("Would have sent email to:", to);
     console.log("Subject:", subject);
     return { success: false, error: "Email service not configured" };
   }
 
-  const transporter = createTransporter();
-  
-  if (!transporter) {
-    console.error("Failed to create email transporter");
-    return { success: false, error: "Email service not configured" };
-  }
-
   try {
-    const fromAddress = from || `UK Innovator Visa Assistant <${HOSTINGER_EMAIL_USER}>`;
+    const fromAddress = from || `UK Innovator Visa Assistant <${DEFAULT_FROM_EMAIL}>`;
     
     const info = await transporter.sendMail({
       from: fromAddress,
@@ -440,12 +453,11 @@ export async function sendPaymentReceiptEmail(
     </html>
   `;
 
-  // Send payment receipt using Hostinger SMTP
   return sendEmail({
     to: email,
     subject: 'Payment Receipt - UK Innovator Founder Visa Assistant',
     html,
-    from: `UK Innovator Visa Assistant <${process.env.HOSTINGER_EMAIL_USER || 'noreply@innovatorfoundervisaassistant.co.uk'}>`,
+    from: 'UK Innovator Visa Assistant <noreply@innovatorfoundervisaassistant.co.uk>',
   });
 }
 
