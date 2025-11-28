@@ -626,6 +626,27 @@ export default function AdminDashboard() {
   // Error logging states
   const [selectedError, setSelectedError] = useState<any>(null);
   const [resolutionText, setResolutionText] = useState("");
+  
+  // Broadcast notification modal state
+  const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [broadcastData, setBroadcastData] = useState({
+    title: '',
+    message: '',
+    type: 'info' as 'info' | 'success' | 'warning' | 'error',
+    targetTiers: [] as string[],
+  });
+  
+  // Campaign creation modal state
+  const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [campaignData, setCampaignData] = useState({
+    name: '',
+    description: '',
+    discountType: 'percentage' as 'percentage' | 'fixed',
+    discountValue: 10,
+    startDate: new Date(),
+    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+    targetTiers: [] as string[],
+  });
 
   // Live refresh countdown
   const [refreshCountdown, setRefreshCountdown] = useState(30);
@@ -1573,6 +1594,65 @@ export default function AdminDashboard() {
       } else {
         setLocation("/login");
       }
+    },
+  });
+
+  // Send broadcast notification mutation
+  const sendBroadcastMutation = useMutation({
+    mutationFn: async (data: { title: string; message: string; type: string; targetTiers: string[] }) => {
+      const response = await apiRequest('POST', '/api/admin/notifications', {
+        title: data.title,
+        message: data.message,
+        type: data.type,
+        targetTiers: data.targetTiers.length > 0 ? data.targetTiers : null,
+      });
+      const notification = await response.json();
+      // Auto-send after creation
+      await apiRequest('POST', `/api/admin/notifications/${notification.id}/send`, {});
+      return notification;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/notifications'] });
+      setShowBroadcastModal(false);
+      setBroadcastData({ title: '', message: '', type: 'info', targetTiers: [] });
+      toast({ title: "Broadcast notification sent successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to send broadcast", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Create campaign mutation
+  const createCampaignMutation = useMutation({
+    mutationFn: async (data: { name: string; description: string; discountType: string; discountValue: number; startDate: Date; endDate: Date; targetTiers: string[] }) => {
+      const response = await apiRequest('POST', '/api/admin/campaigns', {
+        name: data.name,
+        description: data.description,
+        discountType: data.discountType,
+        discountValue: data.discountValue,
+        startDate: data.startDate.toISOString(),
+        endDate: data.endDate.toISOString(),
+        targetTiers: data.targetTiers.length > 0 ? data.targetTiers : null,
+        status: 'active',
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/campaigns'] });
+      setShowCampaignModal(false);
+      setCampaignData({
+        name: '',
+        description: '',
+        discountType: 'percentage',
+        discountValue: 10,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        targetTiers: [],
+      });
+      toast({ title: "Campaign created successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to create campaign", description: error.message, variant: "destructive" });
     },
   });
 
@@ -8317,7 +8397,11 @@ export default function AdminDashboard() {
                                     <p className="text-2xl font-bold text-amber-500">In-App & Push Notifications</p>
                                   </div>
                                 </div>
-                                <Button variant="outline">
+                                <Button 
+                                  variant="outline"
+                                  onClick={() => setShowBroadcastModal(true)}
+                                  data-testid="button-send-broadcast"
+                                >
                                   <Send className="h-4 w-4 mr-2" />
                                   Send Broadcast
                                 </Button>
@@ -9994,7 +10078,10 @@ export default function AdminDashboard() {
                                   </CardTitle>
                                   <CardDescription>Create and manage promotional campaigns with A/B testing</CardDescription>
                                 </div>
-                                <Button>
+                                <Button 
+                                  onClick={() => setShowCampaignModal(true)}
+                                  data-testid="button-new-campaign"
+                                >
                                   <Plus className="h-4 w-4 mr-2" />
                                   New Campaign
                                 </Button>
@@ -10032,7 +10119,11 @@ export default function AdminDashboard() {
                                     </CardContent>
                                   </Card>
                                 </div>
-                                <Button size="lg">
+                                <Button 
+                                  size="lg"
+                                  onClick={() => setShowCampaignModal(true)}
+                                  data-testid="button-create-first-campaign"
+                                >
                                   <Plus className="h-5 w-5 mr-2" />
                                   Create Your First Campaign
                                 </Button>
@@ -13186,6 +13277,261 @@ export default function AdminDashboard() {
                 disabled={!rejectReason || rejectRewardMutation.isPending}
               >
                 {rejectRewardMutation.isPending ? 'Rejecting...' : 'Reject Reward'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Send Broadcast Notification Dialog */}
+        <Dialog open={showBroadcastModal} onOpenChange={setShowBroadcastModal}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Send Broadcast Notification
+              </DialogTitle>
+              <DialogDescription>
+                Send a notification to all users or specific subscription tiers
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="broadcast-title">Notification Title</Label>
+                <Input
+                  id="broadcast-title"
+                  placeholder="e.g., New Feature Announcement"
+                  value={broadcastData.title}
+                  onChange={(e) => setBroadcastData({ ...broadcastData, title: e.target.value })}
+                  data-testid="input-broadcast-title"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="broadcast-message">Message</Label>
+                <textarea
+                  id="broadcast-message"
+                  className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="Write your notification message here..."
+                  value={broadcastData.message}
+                  onChange={(e) => setBroadcastData({ ...broadcastData, message: e.target.value })}
+                  data-testid="input-broadcast-message"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="broadcast-type">Notification Type</Label>
+                <Select
+                  value={broadcastData.type}
+                  onValueChange={(value: 'info' | 'success' | 'warning' | 'error') => 
+                    setBroadcastData({ ...broadcastData, type: value })
+                  }
+                >
+                  <SelectTrigger id="broadcast-type" data-testid="select-broadcast-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="success">Success</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Target Tiers (leave empty for all users)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['free', 'basic', 'premium', 'enterprise', 'ultimate'].map(tier => (
+                    <Badge
+                      key={tier}
+                      variant={broadcastData.targetTiers.includes(tier) ? 'default' : 'outline'}
+                      className="cursor-pointer capitalize"
+                      onClick={() => {
+                        if (broadcastData.targetTiers.includes(tier)) {
+                          setBroadcastData({
+                            ...broadcastData,
+                            targetTiers: broadcastData.targetTiers.filter(t => t !== tier)
+                          });
+                        } else {
+                          setBroadcastData({
+                            ...broadcastData,
+                            targetTiers: [...broadcastData.targetTiers, tier]
+                          });
+                        }
+                      }}
+                    >
+                      {tier}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBroadcastModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => sendBroadcastMutation.mutate(broadcastData)}
+                disabled={!broadcastData.title || !broadcastData.message || sendBroadcastMutation.isPending}
+                data-testid="button-confirm-send-broadcast"
+              >
+                {sendBroadcastMutation.isPending ? 'Sending...' : 'Send Broadcast'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Campaign Dialog */}
+        <Dialog open={showCampaignModal} onOpenChange={setShowCampaignModal}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Create Marketing Campaign
+              </DialogTitle>
+              <DialogDescription>
+                Create a new promotional campaign with targeted discounts
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="campaign-name">Campaign Name</Label>
+                <Input
+                  id="campaign-name"
+                  placeholder="e.g., Black Friday Sale"
+                  value={campaignData.name}
+                  onChange={(e) => setCampaignData({ ...campaignData, name: e.target.value })}
+                  data-testid="input-campaign-name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="campaign-description">Description</Label>
+                <textarea
+                  id="campaign-description"
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="Describe the campaign..."
+                  value={campaignData.description}
+                  onChange={(e) => setCampaignData({ ...campaignData, description: e.target.value })}
+                  data-testid="input-campaign-description"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-discount-type">Discount Type</Label>
+                  <Select
+                    value={campaignData.discountType}
+                    onValueChange={(value: 'percentage' | 'fixed') => 
+                      setCampaignData({ ...campaignData, discountType: value })
+                    }
+                  >
+                    <SelectTrigger id="campaign-discount-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="percentage">Percentage (%)</SelectItem>
+                      <SelectItem value="fixed">Fixed Amount (GBP)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-discount-value">Discount Value</Label>
+                  <Input
+                    id="campaign-discount-value"
+                    type="number"
+                    min="0"
+                    max={campaignData.discountType === 'percentage' ? 100 : undefined}
+                    value={campaignData.discountValue}
+                    onChange={(e) => setCampaignData({ ...campaignData, discountValue: Number(e.target.value) })}
+                    data-testid="input-campaign-discount-value"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(campaignData.startDate, 'PPP')}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={campaignData.startDate}
+                        onSelect={(date) => date && setCampaignData({ ...campaignData, startDate: date })}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(campaignData.endDate, 'PPP')}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={campaignData.endDate}
+                        onSelect={(date) => date && setCampaignData({ ...campaignData, endDate: date })}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Target Tiers (leave empty for all users)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['free', 'basic', 'premium', 'enterprise', 'ultimate'].map(tier => (
+                    <Badge
+                      key={tier}
+                      variant={campaignData.targetTiers.includes(tier) ? 'default' : 'outline'}
+                      className="cursor-pointer capitalize"
+                      onClick={() => {
+                        if (campaignData.targetTiers.includes(tier)) {
+                          setCampaignData({
+                            ...campaignData,
+                            targetTiers: campaignData.targetTiers.filter(t => t !== tier)
+                          });
+                        } else {
+                          setCampaignData({
+                            ...campaignData,
+                            targetTiers: [...campaignData.targetTiers, tier]
+                          });
+                        }
+                      }}
+                    >
+                      {tier}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCampaignModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => createCampaignMutation.mutate(campaignData)}
+                disabled={!campaignData.name || createCampaignMutation.isPending}
+                data-testid="button-confirm-create-campaign"
+              >
+                {createCampaignMutation.isPending ? 'Creating...' : 'Create Campaign'}
               </Button>
             </DialogFooter>
           </DialogContent>
