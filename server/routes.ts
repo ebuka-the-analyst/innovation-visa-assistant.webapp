@@ -3790,8 +3790,8 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
     try {
       const { type } = req.body;
       
-      if (!type || !['users', 'plans'].includes(type)) {
-        return res.status(400).json({ error: "Invalid export type. Must be 'users' or 'plans'" });
+      if (!type || !['users', 'plans', 'analytics', 'referrals', 'promos', 'transactions'].includes(type)) {
+        return res.status(400).json({ error: "Invalid export type" });
       }
       
       let csvData = '';
@@ -3815,6 +3815,50 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
         // CSV rows
         plans.forEach(plan => {
           csvData += `"${plan.id}","${plan.businessName}","${plan.industry}","${plan.tier}","${plan.status || 'pending'}","${plan.userId || ''}","${plan.isDemoData}","${new Date(plan.createdAt).toISOString()}"\n`;
+        });
+      } else if (type === 'analytics') {
+        // Export aggregated analytics
+        const usersResult = await db.execute(sql`
+          SELECT 
+            DATE(created_at) as date,
+            COUNT(*) as new_users,
+            SUM(CASE WHEN subscription_tier != 'free' THEN 1 ELSE 0 END) as paying_users
+          FROM users 
+          WHERE created_at >= NOW() - INTERVAL '90 days'
+          GROUP BY DATE(created_at) 
+          ORDER BY date DESC
+        `);
+        
+        csvData = 'Date,New Users,Paying Users\n';
+        usersResult.rows.forEach((row: any) => {
+          csvData += `"${row.date}","${row.new_users}","${row.paying_users}"\n`;
+        });
+      } else if (type === 'referrals') {
+        const refResult = await db.select().from(referralCodes).orderBy(sql`created_at DESC`);
+        
+        csvData = 'ID,Code,User ID,Reward Type,Reward Value,Total Clicks,Total Signups,Total Earnings,Status,Created At\n';
+        refResult.forEach((ref: any) => {
+          csvData += `"${ref.id}","${ref.code}","${ref.userId}","${ref.rewardType}","${ref.rewardValue}","${ref.totalClicks || 0}","${ref.totalSignups || 0}","${ref.totalEarnings || 0}","${ref.status}","${new Date(ref.createdAt).toISOString()}"\n`;
+        });
+      } else if (type === 'promos') {
+        const promoResult = await db.select().from(promoCodes).orderBy(sql`created_at DESC`);
+        
+        csvData = 'ID,Code,Discount Type,Discount Value,Max Uses,Current Uses,Expires At,Status,Created At\n';
+        promoResult.forEach((promo: any) => {
+          csvData += `"${promo.id}","${promo.code}","${promo.discountType}","${promo.discountValue}","${promo.maxUses || 'unlimited'}","${promo.currentUses || 0}","${promo.expiresAt || 'never'}","${promo.status}","${new Date(promo.createdAt).toISOString()}"\n`;
+        });
+      } else if (type === 'transactions') {
+        const txResult = await db.execute(sql`
+          SELECT pt.*, u.email 
+          FROM payment_transactions pt
+          LEFT JOIN users u ON pt.user_id = u.id
+          ORDER BY pt.created_at DESC
+          LIMIT 1000
+        `);
+        
+        csvData = 'ID,User Email,Amount,Currency,Type,Status,Payment Method,Stripe ID,Created At\n';
+        txResult.rows.forEach((tx: any) => {
+          csvData += `"${tx.id}","${tx.email || ''}","${tx.amount / 100}","${tx.currency}","${tx.type}","${tx.status}","${tx.payment_method || ''}","${tx.stripe_payment_id || ''}","${new Date(tx.created_at).toISOString()}"\n`;
         });
       }
       

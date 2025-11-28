@@ -6514,9 +6514,15 @@ export default function AdminDashboard() {
                                   <CardTitle>Recent Transactions</CardTitle>
                                   <CardDescription>Latest payment activities</CardDescription>
                                 </div>
-                                <Button variant="outline" size="sm">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => exportMutation.mutate('transactions')}
+                                  disabled={exportMutation.isPending}
+                                  data-testid="button-export-transactions"
+                                >
                                   <Download className="h-4 w-4 mr-2" />
-                                  Export
+                                  {exportMutation.isPending ? 'Exporting...' : 'Export'}
                                 </Button>
                               </div>
                             </CardHeader>
@@ -6801,9 +6807,15 @@ export default function AdminDashboard() {
                                     <Filter className="h-4 w-4 mr-2" />
                                     Filter
                                   </Button>
-                                  <Button variant="outline" size="sm">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => exportMutation.mutate('users')}
+                                    disabled={exportMutation.isPending}
+                                    data-testid="button-export-subscriptions"
+                                  >
                                     <Download className="h-4 w-4 mr-2" />
-                                    Export
+                                    {exportMutation.isPending ? 'Exporting...' : 'Export'}
                                   </Button>
                                 </div>
                               </div>
@@ -7249,9 +7261,15 @@ export default function AdminDashboard() {
                                     <p className="text-sm text-muted-foreground">This Week</p>
                                     <p className="text-xl font-bold">18,234</p>
                                   </div>
-                                  <Button variant="outline" size="sm">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => exportMutation.mutate('analytics')}
+                                    disabled={exportMutation.isPending}
+                                    data-testid="button-export-activity-log"
+                                  >
                                     <Download className="h-4 w-4 mr-2" />
-                                    Export
+                                    {exportMutation.isPending ? 'Exporting...' : 'Export'}
                                   </Button>
                                 </div>
                               </div>
@@ -7723,9 +7741,15 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                  <Button variant="outline" size="sm">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => exportMutation.mutate('analytics')}
+                                    disabled={exportMutation.isPending}
+                                    data-testid="button-export-audit-report"
+                                  >
                                     <Download className="h-4 w-4 mr-2" />
-                                    Export Report
+                                    {exportMutation.isPending ? 'Exporting...' : 'Export Report'}
                                   </Button>
                                 </div>
                               </div>
@@ -8935,9 +8959,15 @@ export default function AdminDashboard() {
                                     <RefreshCw className="h-4 w-4 mr-2" />
                                     Refresh
                                   </Button>
-                                  <Button variant="outline" size="sm">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => exportMutation.mutate('referrals')}
+                                    disabled={exportMutation.isPending}
+                                    data-testid="button-export-referrals"
+                                  >
                                     <Download className="h-4 w-4 mr-2" />
-                                    Export
+                                    {exportMutation.isPending ? 'Exporting...' : 'Export'}
                                   </Button>
                                 </div>
                               </div>
@@ -10026,11 +10056,25 @@ export default function AdminDashboard() {
                                   <CardDescription>Generate comprehensive reports on promotional performance</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Button variant="outline">
+                                  <Button 
+                                    variant="outline"
+                                    onClick={() => exportMutation.mutate('promos')}
+                                    disabled={exportMutation.isPending}
+                                    data-testid="button-export-promos-csv"
+                                  >
                                     <Download className="h-4 w-4 mr-2" />
-                                    Export CSV
+                                    {exportMutation.isPending ? 'Exporting...' : 'Export CSV'}
                                   </Button>
-                                  <Button variant="outline">
+                                  <Button 
+                                    variant="outline"
+                                    onClick={() => {
+                                      toast({
+                                        title: "PDF export coming soon",
+                                        description: "PDF export functionality will be available in the next update."
+                                      });
+                                    }}
+                                    data-testid="button-export-promos-pdf"
+                                  >
                                     <Download className="h-4 w-4 mr-2" />
                                     Export PDF
                                   </Button>
@@ -10731,9 +10775,15 @@ export default function AdminDashboard() {
                                   <CardDescription>Complete review history with detailed tracking</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Button variant="outline" size="sm">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => exportMutation.mutate('plans')}
+                                    disabled={exportMutation.isPending}
+                                    data-testid="button-export-document-reviews"
+                                  >
                                     <Download className="h-4 w-4 mr-2" />
-                                    Export
+                                    {exportMutation.isPending ? 'Exporting...' : 'Export'}
                                   </Button>
                                   <Button variant="outline" onClick={() => refetchLawyerReviews()}>
                                     <RefreshCw className="h-4 w-4 mr-2" />
@@ -11203,11 +11253,27 @@ export default function AdminDashboard() {
                                   <CardDescription>Successfully reviewed documents with detailed outcomes</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Button variant="outline" size="sm">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => exportMutation.mutate('plans')}
+                                    disabled={exportMutation.isPending}
+                                    data-testid="button-export-completed-reviews-csv"
+                                  >
                                     <Download className="h-4 w-4 mr-2" />
-                                    Export CSV
+                                    {exportMutation.isPending ? 'Exporting...' : 'Export CSV'}
                                   </Button>
-                                  <Button variant="outline" size="sm">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      toast({
+                                        title: "PDF export coming soon",
+                                        description: "PDF export functionality will be available in the next update."
+                                      });
+                                    }}
+                                    data-testid="button-export-completed-reviews-pdf"
+                                  >
                                     <Download className="h-4 w-4 mr-2" />
                                     Export PDF
                                   </Button>
