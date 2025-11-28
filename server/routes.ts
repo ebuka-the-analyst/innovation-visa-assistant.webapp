@@ -2631,6 +2631,54 @@ Keep the tone supportive and professional. Do not be overly enthusiastic.`;
     }
   });
 
+  // Admin: Bulk update users (PATCH) - MUST be before :userId route
+  app.patch("/api/admin/users/bulk", requireAdmin, async (req, res) => {
+    try {
+      const { userIds, updates } = req.body;
+      const admin = req.user as any;
+
+      if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+        return res.status(400).json({ error: "No users selected" });
+      }
+
+      // Don't allow updating yourself
+      const safeUserIds = userIds.filter((id: string) => id !== admin.id);
+      
+      if (safeUserIds.length === 0) {
+        return res.status(400).json({ error: "No valid users to update" });
+      }
+
+      // Build the update object with allowed fields
+      const allowedFields = ['subscriptionTier', 'isAdmin', 'isEmailVerified', 'subscriptionStatus'];
+      const updateData: any = { updatedAt: new Date() };
+      
+      for (const field of allowedFields) {
+        if (updates[field] !== undefined) {
+          updateData[field] = updates[field];
+        }
+      }
+
+      // If updating tier, also set override info
+      if (updates.subscriptionTier) {
+        updateData.tierOverrideBy = admin.id;
+        updateData.tierUpgradedAt = new Date();
+      }
+
+      await db.update(users)
+        .set(updateData)
+        .where(sql`id = ANY(${safeUserIds})`);
+
+      res.json({ 
+        success: true, 
+        message: `Updated ${safeUserIds.length} users`,
+        affectedCount: safeUserIds.length
+      });
+    } catch (error) {
+      console.error("Bulk update error:", error);
+      res.status(500).json({ error: "Failed to update users" });
+    }
+  });
+
   app.get("/api/admin/users/:userId", requireAdmin, async (req, res) => {
     try {
       const { userId } = req.params;
@@ -7480,54 +7528,6 @@ Return a JSON object with:
     } catch (error) {
       console.error("Impersonate user error:", error);
       res.status(500).json({ error: "Failed to get impersonation data" });
-    }
-  });
-
-  // Admin: Bulk update users (PATCH)
-  app.patch("/api/admin/users/bulk", requireAdmin, async (req, res) => {
-    try {
-      const { userIds, updates } = req.body;
-      const admin = req.user as any;
-
-      if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
-        return res.status(400).json({ error: "No users selected" });
-      }
-
-      // Don't allow updating yourself
-      const safeUserIds = userIds.filter((id: string) => id !== admin.id);
-      
-      if (safeUserIds.length === 0) {
-        return res.status(400).json({ error: "No valid users to update" });
-      }
-
-      // Build the update object with allowed fields
-      const allowedFields = ['subscriptionTier', 'isAdmin', 'isEmailVerified', 'subscriptionStatus'];
-      const updateData: any = { updatedAt: new Date() };
-      
-      for (const field of allowedFields) {
-        if (updates[field] !== undefined) {
-          updateData[field] = updates[field];
-        }
-      }
-
-      // If updating tier, also set override info
-      if (updates.subscriptionTier) {
-        updateData.tierOverrideBy = admin.id;
-        updateData.tierUpgradedAt = new Date();
-      }
-
-      await db.update(users)
-        .set(updateData)
-        .where(sql`id = ANY(${safeUserIds})`);
-
-      res.json({ 
-        success: true, 
-        message: `Updated ${safeUserIds.length} users`,
-        affectedCount: safeUserIds.length
-      });
-    } catch (error) {
-      console.error("Bulk update error:", error);
-      res.status(500).json({ error: "Failed to update users" });
     }
   });
 
