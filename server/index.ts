@@ -277,8 +277,8 @@ app.use((req, res, next) => {
   // Referrer policy for privacy
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   
-  // Permissions policy (formerly Feature-Policy)
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  // Permissions policy (formerly Feature-Policy) - allow microphone for voice features
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(self), geolocation=()');
   
   // Content Security Policy (CSP) - allows Google Analytics, fonts, and APIs
   const csp = [
