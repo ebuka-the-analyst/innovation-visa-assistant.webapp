@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -69,9 +70,23 @@ const AI_TOOL_CONFIG: ToolConfig = {
 export default function LegalCompliance() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('legal-compliance-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('legal-compliance-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('legal-compliance-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
@@ -237,7 +252,7 @@ export default function LegalCompliance() {
               <h1 className="text-4xl font-bold mb-2">Legal Compliance Checker</h1>
               <p className="text-muted-foreground">UK company law requirements validation</p>
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (
@@ -245,6 +260,7 @@ export default function LegalCompliance() {
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

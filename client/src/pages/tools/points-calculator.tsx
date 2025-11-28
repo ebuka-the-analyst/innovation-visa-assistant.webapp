@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { OISCDisclaimer } from "@/components/OISCDisclaimer";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -73,8 +74,14 @@ type PointsCategory = {
 };
 
 export default function PointsCalculator() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('points-calculator-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('points-calculator-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [savedDate, setSavedDate] = useState('');
   const [englishLevel, setEnglishLevel] = useState('');
@@ -92,6 +99,14 @@ export default function PointsCalculator() {
     { id: 'viability', name: 'Viability Criterion', points: 0, maxPoints: 20, status: 'not-met', details: '' },
     { id: 'scalability', name: 'Scalability Criterion', points: 0, maxPoints: 20, status: 'not-met', details: '' }
   ]);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('points-calculator-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('points-calculator-mode', mode);
@@ -183,7 +198,7 @@ export default function PointsCalculator() {
               <p className="text-lg text-muted-foreground">Calculate your UK Innovator Founder visa eligibility score</p>
               {savedDate && <p className="text-sm text-muted-foreground mt-1">Last saved: {savedDate}</p>}
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           <ToolUtilityBar
@@ -195,7 +210,7 @@ export default function PointsCalculator() {
           />
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
             <>
               <div className="grid md:grid-cols-3 gap-6 mb-6">

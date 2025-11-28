@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -387,9 +388,23 @@ const LEGAL_TEMPLATES: LegalTemplate[] = [
 ];
 
 export default function LegalTemplates() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('legal-templates-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('legal-templates-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('legal-templates-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
   const [templates, setTemplates] = useState<LegalTemplate[]>(LEGAL_TEMPLATES);
   const [activeTab, setActiveTab] = useState('overview');
   const [savedDate, setSavedDate] = useState('');
@@ -780,7 +795,7 @@ All statutory references and penalty amounts are current as of 2025 but may chan
                   <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
                 )}
               </div>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
           </div>
 
@@ -789,6 +804,7 @@ All statutory references and penalty amounts are current as of 2025 but may chan
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

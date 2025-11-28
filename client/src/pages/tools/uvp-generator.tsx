@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -85,8 +86,14 @@ const AI_TOOL_CONFIG: ToolConfig = {
 };
 
 export default function UVPGenerator() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('uvp-generator-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('uvp-generator-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [valueComponent, setValueComponent] = useState<ValueComponent>({
     customerSegment: '',
@@ -110,6 +117,14 @@ export default function UVPGenerator() {
   });
   const [activeTab, setActiveTab] = useState('builder');
   const [savedDate, setSavedDate] = useState('');
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('uvp-generator-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('uvp-generator-mode', mode);
@@ -563,12 +578,13 @@ Scalability Criterion: Significant growth potential in UK market
                 onModeChange={setMode}
                 aiLabel="AI-Guided"
                 traditionalLabel="Traditional Form"
+                userTier={userTier}
               />
             </div>
           </div>
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
             <>
           <ToolUtilityBar

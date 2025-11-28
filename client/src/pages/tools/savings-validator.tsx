@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -42,14 +43,28 @@ const AI_TOOL_CONFIG: ToolConfig = {
 };
 
 export default function SavingsValidator() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('savings-validator-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('savings-validator-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [accounts, setAccounts] = useState<SavingsAccount[]>([
     { accountName: '', bankName: '', balance: 0, verified: false, monthsOfStatements: 0, sourceDocumented: false, accountType: 'savings' }
   ]);
   const [activeTab, setActiveTab] = useState('validator');
   const [savedDate, setSavedDate] = useState('');
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('savings-validator-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('savings-validator-mode', mode);
@@ -331,7 +346,7 @@ Consult with a qualified immigration lawyer before submitting your application.
           />
 
           <div className="flex justify-end mt-4 mb-4">
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -57,13 +58,27 @@ const DEFAULT_FACTORS: PredictionFactor[] = [
 export default function SuccessPredictor() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('success-predictor-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('success-predictor-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('success-predictor-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('success-predictor-mode', mode);
@@ -219,7 +234,7 @@ export default function SuccessPredictor() {
           />
 
           <div className="flex justify-end mt-4 mb-4">
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {showAutoSave && (
@@ -230,7 +245,7 @@ export default function SuccessPredictor() {
           )}
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
           <div className="mt-6">
             <Card className="mb-6">

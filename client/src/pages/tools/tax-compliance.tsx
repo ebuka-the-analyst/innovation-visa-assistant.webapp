@@ -3,6 +3,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -63,9 +64,23 @@ const AI_TOOL_CONFIG: ToolConfig = {
 };
 
 export default function TaxCompliance() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('tax-compliance-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('tax-compliance-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('tax-compliance-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('tax-compliance-mode', mode);
@@ -167,7 +182,7 @@ export default function TaxCompliance() {
               <h1 className="text-4xl font-bold mb-2">Tax Compliance Checker</h1>
               <p className="text-muted-foreground">Corporation tax, VAT, PAYE and personal tax verification</p>
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (

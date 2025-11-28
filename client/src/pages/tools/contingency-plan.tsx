@@ -17,6 +17,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
 } from 'recharts';
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig, type ToolQuestion } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'contingency-plan',
@@ -128,10 +129,24 @@ const CATEGORY_COLORS: Record<RiskCategory, string> = {
 };
 
 export default function ContingencyPlan() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('contingency-plan-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('contingency-plan-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
+
   const [risks, setRisks] = useState<Risk[]>([
     {
       id: '1',
@@ -592,6 +607,7 @@ industry-specific requirements.
                 onModeChange={setMode}
                 aiLabel="AI-Guided"
                 traditionalLabel="Traditional Form"
+                userTier={userTier}
               />
             </div>
           </div>
@@ -602,6 +618,7 @@ industry-specific requirements.
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
                 onSwitchToTraditional={() => setMode('traditional')}
+                userTier={userTier}
               />
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-4">

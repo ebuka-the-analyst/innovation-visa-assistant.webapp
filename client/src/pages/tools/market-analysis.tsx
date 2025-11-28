@@ -19,6 +19,7 @@ import {
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'market-analysis',
@@ -75,10 +76,23 @@ const AI_TOOL_CONFIG: ToolConfig = {
 export default function MarketAnalysis() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('market-analysis-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+  
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('market-analysis-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
   const [tam, setTam] = useState(5000000000); // Total Addressable Market
   const [sam, setSam] = useState(500000000); // Serviceable Addressable Market
   const [som, setSom] = useState(50000000); // Serviceable Obtainable Market
@@ -712,6 +726,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                 onModeChange={setMode}
                 aiLabel="AI-Guided"
                 traditionalLabel="Traditional Form"
+                userTier={userTier}
               />
             </div>
           </div>
@@ -722,6 +737,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
                 onSwitchToTraditional={() => setMode('traditional')}
+                userTier={userTier}
               />
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-4">

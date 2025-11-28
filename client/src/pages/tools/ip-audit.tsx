@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -137,9 +138,23 @@ export default function IPAudit() {
   const [savedDate, setSavedDate] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [industrySector, setIndustrySector] = useState('');
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('ip-audit-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('ip-audit-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('ip-audit-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('ip-audit-mode', mode);
@@ -587,7 +602,7 @@ IP attorney or patent agent for professional advice on IP protection strategy.
           />
 
           <div className="mb-6">
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (
@@ -595,6 +610,7 @@ IP attorney or patent agent for professional advice on IP protection strategy.
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

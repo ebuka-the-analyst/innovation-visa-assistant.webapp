@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -87,8 +88,14 @@ interface RoleDefinition {
 }
 
 export default function RoleDesigner() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('role-designer-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('role-designer-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
 
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
@@ -109,6 +116,14 @@ export default function RoleDesigner() {
       impactOnScaling: "Critical - enables product development and technical foundation for growth"
     }
   ]);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('role-designer-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('role-designer-mode', mode);
@@ -602,12 +617,12 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-4xl font-bold">Organizational Design & Role Framework</h1>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
           <p className="text-muted-foreground mb-6">Build scalable team structure with clear roles (Innovator Founder Visa)</p>
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
           <>
           <ToolUtilityBar

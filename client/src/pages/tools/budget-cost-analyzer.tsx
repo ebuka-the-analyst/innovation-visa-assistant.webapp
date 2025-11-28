@@ -15,6 +15,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'budget-cost-analyzer',
@@ -76,10 +77,24 @@ type BudgetCategory = {
 };
 
 export default function BudgetCostAnalyzer() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('budget-cost-analyzer-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('budget-cost-analyzer-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
+
   const [categories, setCategories] = useState<BudgetCategory[]>([
     { name: 'Salaries & Wages', budgeted: 20000, actual: 18500, category: 'personnel' },
     { name: 'Software & Tools', budgeted: 5000, actual: 5200, category: 'technology' },
@@ -473,7 +488,7 @@ and actual results may vary significantly based on market conditions and executi
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
               )}
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (
@@ -481,6 +496,7 @@ and actual results may vary significantly based on market conditions and executi
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

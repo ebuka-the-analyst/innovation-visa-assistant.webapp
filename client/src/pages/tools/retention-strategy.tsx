@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -83,8 +84,14 @@ interface RetentionRisk {
 }
 
 export default function RetentionStrategy() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('retention-strategy-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('retention-strategy-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
 
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
@@ -95,6 +102,14 @@ export default function RetentionStrategy() {
   const [risks, setRisks] = useState<RetentionRisk[]>([
     { id: "1", employee: "Senior Engineer A", role: "Software Engineer", riskLevel: "high", turnoverLikelihood: 75, keyReasons: "Limited growth opportunities", interventions: "Career development plan, mentorship", estimatedSalary: 75000 }
   ]);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('retention-strategy-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('retention-strategy-mode', mode);
@@ -319,7 +334,7 @@ GOV.UK: Innovator Founder Visa viability criterion
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-4xl font-bold">Retention Strategy</h1>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
           <p className="text-muted-foreground mb-6">Reduce turnover for viability and scalability (Innovator Founder Visa)</p>
 

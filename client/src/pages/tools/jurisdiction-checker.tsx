@@ -13,6 +13,7 @@ import { CheckCircle2, XCircle, AlertTriangle, MapPin, Globe, FileCheck, Save, I
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'jurisdiction-checker',
@@ -74,10 +75,23 @@ const COUNTRIES = [
 export default function JurisdictionChecker() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('jurisdiction-checker-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('jurisdiction-checker-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
@@ -277,6 +291,7 @@ export default function JurisdictionChecker() {
                 onModeChange={setMode}
                 aiLabel="AI-Guided"
                 traditionalLabel="Traditional Form"
+                userTier={userTier}
               />
             </div>
           </div>
@@ -287,6 +302,7 @@ export default function JurisdictionChecker() {
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
                 onSwitchToTraditional={() => setMode('traditional')}
+                userTier={userTier}
               />
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-4">

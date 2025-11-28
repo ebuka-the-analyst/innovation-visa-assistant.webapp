@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -45,8 +46,14 @@ const AI_TOOL_CONFIG: ToolConfig = {
 };
 
 export default function SkillsMatrix() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('skills-matrix-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('skills-matrix-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
@@ -68,6 +75,14 @@ export default function SkillsMatrix() {
     const defaultSkills = SKILL_CATEGORIES.reduce((acc, skill) => ({ ...acc, [skill]: "none" }), {});
     setSkillEntries([...skillEntries, { id: Date.now().toString(), employee: "New Employee", role: "", skills: defaultSkills as any, salary: 60000 }]);
   };
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('skills-matrix-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('skills-matrix-mode', mode);
@@ -309,13 +324,13 @@ GOV.UK: Innovator Founder Visa scalability criterion
           <ToolUtilityBar toolId="skills-matrix" toolName="Skills Matrix" onSave={saveProgress} onExport={exportMatrix} getSerializedState={getSerializedState} />
 
           <div className="flex justify-end mt-4 mb-4">
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {savedDate && <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950"><AlertCircle className="h-4 w-4 text-green-600" /><AlertDescription className="text-green-700 dark:text-green-300">Last saved: {savedDate}</AlertDescription></Alert>}
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
           <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

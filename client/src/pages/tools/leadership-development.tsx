@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -76,14 +77,28 @@ const AI_TOOL_CONFIG: ToolConfig = {
 };
 
 export default function LeadershipDevelopment() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('leadership-development-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('leadership-development-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [leaders, setLeaders] = useState<LeaderProfile[]>([
     { id: "1", name: "Tech Lead", currentRole: "Engineering Manager", skillScores: { strategic: 70, communication: 85, technical: 90, peopleManagement: 75, innovation: 80 }, developmentGoals: "Improve strategic planning and business acumen", mentor: "Founder", developmentCost: 15000 }
   ]);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('leadership-development-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('leadership-development-mode', mode);
@@ -325,7 +340,7 @@ Productivity = (Avg Leadership Score / 100) × 25%
               <h1 className="text-4xl font-bold mb-2">Leadership Development</h1>
               <p className="text-muted-foreground">Build leadership bench for scaling (Innovator Founder Visa)</p>
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (
@@ -333,6 +348,7 @@ Productivity = (Avg Leadership Score / 100) × 25%
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

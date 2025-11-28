@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -100,12 +101,26 @@ const AI_TOOL_CONFIG: ToolConfig = {
 export default function TractionEvidence() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [activeTab, setActiveTab] = useState('waitlists');
   const [savedDate, setSavedDate] = useState('');
   
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('traction-evidence-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('traction-evidence-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('traction-evidence-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('traction-evidence-mode', mode);
@@ -280,7 +295,7 @@ export default function TractionEvidence() {
                   Build proof of market demand with waitlists, LOIs, partnerships & surveys
                 </CardDescription>
               </div>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
           </CardHeader>
           <CardContent>

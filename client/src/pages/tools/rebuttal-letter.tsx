@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -89,9 +90,24 @@ type LetterData = {
 };
 
 export default function RebuttalLetter() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('rebuttal-letter-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('rebuttal-letter-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('rebuttal-letter-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
+
   const [letterData, setLetterData] = useState<LetterData>({
     applicantName: '',
     visaType: 'UK Innovator Founder Visa',
@@ -665,7 +681,7 @@ each case individually based on specific circumstances and evidence provided.
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
               )}
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           <ToolUtilityBar
@@ -678,7 +694,7 @@ each case individually based on specific circumstances and evidence provided.
           />
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
             <>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

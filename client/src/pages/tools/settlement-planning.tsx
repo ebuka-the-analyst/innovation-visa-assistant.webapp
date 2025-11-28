@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -71,13 +72,26 @@ const CATEGORY_INFO: Record<string, { label: string; icon: any; color: string }>
 export default function SettlementPlanning() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const { userTier } = useTierAccess();
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('settlement-planning-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('settlement-planning-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('settlement-planning-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('settlement-planning-mode', mode);
@@ -209,7 +223,7 @@ export default function SettlementPlanning() {
             />
 
             <div className="flex justify-end mt-4 mb-4">
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
 
             {mode === 'ai' ? (

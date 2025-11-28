@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { Download, Save, Lightbulb, Calendar, RefreshCw, Zap, Target, TrendingUp } from "lucide-react";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'deep-xray',
@@ -72,15 +73,28 @@ const BUSINESS_ANALYSIS_CATEGORIES = [
 ];
 
 export default function DeepXRay() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('deep-xray-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('deep-xray-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('deep-xray-mode', mode);
@@ -229,6 +243,7 @@ export default function DeepXRay() {
               onModeChange={setMode}
               aiLabel="AI-Guided"
               traditionalLabel="Traditional Form"
+              userTier={userTier}
             />
           </div>
 
@@ -238,6 +253,7 @@ export default function DeepXRay() {
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
                 onSwitchToTraditional={() => setMode('traditional')}
+                userTier={userTier}
               />
               <div className="space-y-4">
                 <Card className="p-6">

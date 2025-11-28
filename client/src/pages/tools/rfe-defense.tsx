@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, CheckCircle2, AlertTriangle, Plus, Trash2, FileText, Target, Lightbulb, Scale } from "lucide-react";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'rfe-defense',
@@ -136,12 +137,17 @@ const DEFENSE_TEMPLATES = {
 export default function RFEDefense() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const { userTier } = useTierAccess();
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('rfe-defense-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('rfe-defense-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
 
   const [issues, setIssues] = useState<RFEIssue[]>(() => {
@@ -165,6 +171,14 @@ export default function RFEDefense() {
 
   const [activeTab, setActiveTab] = useState("issues");
   const [selectedIssue, setSelectedIssue] = useState<string | null>(null);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('rfe-defense-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('rfe-defense-mode', mode);
@@ -285,7 +299,7 @@ export default function RFEDefense() {
                 <p className="text-muted-foreground mt-1">Build comprehensive defenses against RFE challenges</p>
               </div>
               <div className="flex items-center gap-3">
-                <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+                <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
                 {showAutoSave && (
                   <Badge variant="secondary" className="animate-pulse">
                     <CheckCircle2 className="w-3 h-3 mr-1" /> Auto-saved
@@ -295,7 +309,7 @@ export default function RFEDefense() {
             </div>
 
             {mode === 'ai' ? (
-              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
             ) : (
             <>
             <ToolUtilityBar

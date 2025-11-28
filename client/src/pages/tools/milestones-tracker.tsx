@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -87,9 +88,24 @@ const AI_TOOL_CONFIG: ToolConfig = {
 export default function MilestonesTracker() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('milestones-tracker-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('milestones-tracker-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('milestones-tracker-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
+
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
@@ -271,7 +287,7 @@ export default function MilestonesTracker() {
                 <h1 className="text-3xl font-bold mb-2">Key Milestones Tracker</h1>
                 <p className="text-muted-foreground">Track and document your business achievements and progress</p>
               </div>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
           </div>
 
@@ -280,6 +296,7 @@ export default function MilestonesTracker() {
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

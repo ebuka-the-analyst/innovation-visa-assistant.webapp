@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -106,9 +107,23 @@ export default function FounderBio() {
     isPrefillEnabled ? `• ${getAchievementsText()}` : (localStorage.getItem('founderBioData') ? JSON.parse(localStorage.getItem('founderBioData')!).achievements || '' : '')
   );
   const [bio, setBio] = useState("");
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('founder-bio-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('founder-bio-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('founder-bio-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('founder-bio-mode', mode);
@@ -214,7 +229,7 @@ export default function FounderBio() {
           />
 
           <div className="mb-6">
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (
@@ -222,6 +237,7 @@ export default function FounderBio() {
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

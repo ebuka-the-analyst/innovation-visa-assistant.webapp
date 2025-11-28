@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
@@ -98,9 +99,24 @@ type PitchSlide = {
 export default function PitchDeck() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('pitch-deck-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('pitch-deck-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('pitch-deck-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
+
   const [slides, setSlides] = useState<PitchSlide[]>([
     {
       id: 'problem',
@@ -590,7 +606,7 @@ Ensure all claims are accurate and can be verified.
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
               )}
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           <ToolUtilityBar
@@ -606,7 +622,7 @@ Ensure all claims are accurate and can be verified.
           />
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
             <>
           <div className="grid md:grid-cols-3 gap-6 mb-6">

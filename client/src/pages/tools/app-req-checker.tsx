@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { Download, AlertTriangle, CheckCircle2, Info, TrendingUp, Save, Share2, Lightbulb, Calendar, RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { OISCDisclaimer } from "@/components/OISCDisclaimer";
 
 const AI_TOOL_CONFIG: ToolConfig = {
@@ -91,10 +92,23 @@ const FINANCIAL_REQS = [
 ];
 
 export default function AppReqChecker() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('app-req-checker-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('app-req-checker-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
   const [checks, setChecks] = useState<any>({});
   const [expanded, setExpanded] = useState<any>({});
   const [tab, setTab] = useState("overview");
@@ -244,7 +258,7 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
               <h1 className="text-4xl font-bold mb-2">Application Requirements Checker</h1>
               <p className="text-muted-foreground">Comprehensive assessment of your 70-point application readiness</p>
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (
@@ -252,6 +266,7 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

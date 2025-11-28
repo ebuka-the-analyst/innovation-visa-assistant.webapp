@@ -16,6 +16,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'business-model-validator',
@@ -101,10 +102,24 @@ type BusinessModelInputs = {
 };
 
 export default function BusinessModelValidator() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('business-model-validator-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('business-model-validator-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
+
   const [scores, setScores] = useState<BusinessModelScores>({
     customerSegments: 70,
     valuePropositions: 75,
@@ -481,7 +496,7 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
               )}
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (
@@ -489,6 +504,7 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

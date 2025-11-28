@@ -17,6 +17,7 @@ import {
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
 import { AiToolGuide, AiTraditionalToggle, ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'endorser-cover-letter',
@@ -127,12 +128,26 @@ const LETTER_TEMPLATES = [
 export default function EndorserCoverLetter() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [savedDate, setSavedDate] = useState('');
   const [activeTab, setActiveTab] = useState('compose');
   const [selectedTemplate, setSelectedTemplate] = useState('standard');
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('endorser-cover-letter-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('endorser-cover-letter-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('endorser-cover-letter-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   const [formData, setFormData] = useState({
     founderName: '',
@@ -517,7 +532,7 @@ Founder, ${formData.businessName}`;
                   Create professional, criterion-focused cover letters for endorsement applications
                 </CardDescription>
               </div>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
           </CardHeader>
           <CardContent>
@@ -525,6 +540,7 @@ Founder, ${formData.businessName}`;
               <AiToolGuide
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
+                userTier={userTier}
               />
             ) : (
               <>

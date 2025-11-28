@@ -14,6 +14,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'due-diligence',
@@ -123,9 +124,14 @@ const CHECKLIST_ITEMS: Omit<ChecklistItem, 'completed'>[] = [
 ];
 
 export default function DueDiligence() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('due-diligence-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [checklist, setChecklist] = useState<ChecklistItem[]>(
     CHECKLIST_ITEMS.map(item => ({ ...item, completed: false }))
@@ -134,6 +140,14 @@ export default function DueDiligence() {
   const [savedDate, setSavedDate] = useState('');
   const [showSmartTips, setShowSmartTips] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('due-diligence-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('due-diligence-mode', mode);
@@ -391,7 +405,7 @@ endorsing body and individual circumstances.
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2 gap-4 flex-wrap">
               <h1 className="text-4xl font-bold" data-testid="heading-due-diligence">Due Diligence Checklist</h1>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
             <p className="text-lg text-muted-foreground">Comprehensive visa application compliance audit</p>
             {savedDate && (
@@ -400,7 +414,7 @@ endorsing body and individual circumstances.
           </div>
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
           <>
           <ToolUtilityBar

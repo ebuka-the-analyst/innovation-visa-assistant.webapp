@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 
 const AI_TOOL_CONFIG: ToolConfig = {
@@ -96,9 +97,23 @@ type TractionMetric = {
 };
 
 export default function ValidationReport() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('validation-report-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('validation-report-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('validation-report-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('validation-report-mode', mode);
@@ -570,12 +585,13 @@ can be substantiated with documentary evidence before submission to endorsers.
                 onModeChange={setMode}
                 aiLabel="AI-Guided"
                 traditionalLabel="Traditional Form"
+                userTier={userTier}
               />
             </div>
           </div>
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
             <>
           <ToolUtilityBar

@@ -14,6 +14,7 @@ import { Download, Save, Lightbulb, Calendar, RefreshCw, FileCheck, X } from "lu
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { UploadedFile } from "@/components/FileUploadButton";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'doc-verification',
@@ -101,9 +102,14 @@ const DOC_CATEGORIES = [
 ];
 
 export default function DocVerification() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('doc-verification-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
@@ -111,6 +117,14 @@ export default function DocVerification() {
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('doc-verification-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('doc-verification-mode', mode);
@@ -260,12 +274,12 @@ export default function DocVerification() {
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-2 gap-4 flex-wrap">
             <h1 className="text-4xl font-bold">Document Verification</h1>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
           <p className="text-muted-foreground mb-6">Critical and supporting documents checklist</p>
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
           <>
           <ToolUtilityBar

@@ -15,6 +15,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'fee-estimator',
@@ -71,9 +72,14 @@ const AI_TOOL_CONFIG: ToolConfig = {
 type EndorsingBody = 'techNation' | 'globalEntrepreneurs' | 'other';
 
 export default function FeeEstimator() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('fee-estimator-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [visaYears, setVisaYears] = useState(3);
   const [endorsingBody, setEndorsingBody] = useState<EndorsingBody>('techNation');
@@ -87,6 +93,14 @@ export default function FeeEstimator() {
   const [accommodationCostPerMonth, setAccommodationCostPerMonth] = useState(1500);
   const [activeTab, setActiveTab] = useState('estimator');
   const [savedDate, setSavedDate] = useState('');
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('fee-estimator-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('fee-estimator-mode', mode);
@@ -429,11 +443,11 @@ current fees on official government websites before making financial commitments
           />
 
           <div className="mb-6">
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4" data-testid="tabs-fee-estimator">

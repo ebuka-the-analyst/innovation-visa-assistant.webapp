@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { FileUploadButton } from "@/components/FileUploadButton";
@@ -66,8 +67,14 @@ const AI_TOOL_CONFIG: ToolConfig = {
 };
 
 export default function MarketEntryPlan() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('market-entry-plan-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('market-entry-plan-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
@@ -77,6 +84,14 @@ export default function MarketEntryPlan() {
   const [localizationPlan, setLocalizationPlan] = useState("English only, USD pricing, US support hours");
   const [investmentRequired, setInvestmentRequired] = useState(250000);
   const [scores, setScores] = useState({ marketFit: 75, regulatory: 70, competition: 65, resources: 70, timing: 75 });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('market-entry-plan-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('market-entry-plan-mode', mode);
@@ -293,7 +308,7 @@ Market Entry Methodology: International expansion framework
               <h1 className="text-4xl font-bold mb-2">Market Entry Plan</h1>
               <p className="text-muted-foreground">Plan international expansion (Innovator Founder Visa)</p>
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (
@@ -301,6 +316,7 @@ Market Entry Methodology: International expansion framework
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

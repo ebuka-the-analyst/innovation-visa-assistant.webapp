@@ -13,6 +13,7 @@ import { Zap, TrendingUp, TrendingDown, AlertTriangle, Target, Plus, Trash2, Sav
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'scenario-planner',
@@ -151,12 +152,17 @@ const DEFAULT_SCENARIOS: Scenario[] = [
 export default function ScenarioPlanner() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const { userTier } = useTierAccess();
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('scenario-planner-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('scenario-planner-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
 
   const [scenarios, setScenarios] = useState<Scenario[]>(() => {
@@ -170,6 +176,14 @@ export default function ScenarioPlanner() {
   });
 
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('scenario-planner-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('scenario-planner-mode', mode);
@@ -345,13 +359,13 @@ export default function ScenarioPlanner() {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <h1 className="text-3xl font-bold">Scenario Planner</h1>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
             <p className="text-muted-foreground">Plan for best, expected, and worst case scenarios</p>
           </div>
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
           <>
           <ToolUtilityBar

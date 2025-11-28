@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "performance-bench",
@@ -125,13 +126,26 @@ const INDUSTRY_BENCHMARKS: Record<Industry, BenchmarkMetric[]> = {
 export default function PerformanceBench() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const { userTier } = useTierAccess();
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('performance-bench-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('performance-bench-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('performance-bench-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('performance-bench-mode', mode);
@@ -337,7 +351,7 @@ export default function PerformanceBench() {
           />
 
           <div className="flex justify-end mt-4">
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {showAutoSave && (
@@ -349,7 +363,7 @@ export default function PerformanceBench() {
 
           {mode === 'ai' ? (
             <div className="mt-6">
-              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
             </div>
           ) : (
           <>

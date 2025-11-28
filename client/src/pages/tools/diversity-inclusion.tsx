@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'diversity-inclusion',
@@ -59,15 +60,28 @@ const AI_TOOL_CONFIG: ToolConfig = {
 };
 
 export default function DiversityInclusion() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('diversity-inclusion-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [demographics, setDemographics] = useState({ male: 60, female: 35, nonBinary: 5, white: 50, asian: 30, black: 12, hispanic: 8 });
   const [paygapData, setPaygapData] = useState({ maleAvg: 75000, femaleAvg: 72000, minorityAvg: 70000 });
   const [teamSize, setTeamSize] = useState(15);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('diversity-inclusion-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('diversity-inclusion-mode', mode);
@@ -252,6 +266,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
               onModeChange={setMode}
               aiLabel="AI-Guided"
               traditionalLabel="Traditional Form"
+              userTier={userTier}
             />
           </div>
 
@@ -261,6 +276,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
                 onSwitchToTraditional={() => setMode('traditional')}
+                userTier={userTier}
               />
               <div className="space-y-4">
                 <Card className="p-6">

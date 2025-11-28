@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'compensation-planning',
@@ -81,9 +82,14 @@ interface TeamRole {
 }
 
 export default function CompensationPlanning() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('compensation-planning-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
@@ -92,6 +98,14 @@ export default function CompensationPlanning() {
     { id: "1", role: "Lead Engineer", level: "Senior", minSalary: 70000, maxSalary: 90000, equity: 0.5, bonusTarget: 10, hiringMonth: 1, isFullTime: true, costPerHire: 8000 },
     { id: "2", role: "Product Designer", level: "Mid", minSalary: 55000, maxSalary: 70000, equity: 0.3, bonusTarget: 8, hiringMonth: 3, isFullTime: true, costPerHire: 6000 }
   ]);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('compensation-planning-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('compensation-planning-mode', mode);
@@ -439,6 +453,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
               onModeChange={setMode}
               aiLabel="AI-Guided"
               traditionalLabel="Traditional Form"
+              userTier={userTier}
             />
           </div>
 
@@ -448,6 +463,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
                 onSwitchToTraditional={() => setMode('traditional')}
+                userTier={userTier}
               />
               <div className="space-y-4">
                 <Card className="p-6">

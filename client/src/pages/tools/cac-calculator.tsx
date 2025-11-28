@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'cac-calculator',
@@ -70,9 +71,14 @@ const AI_TOOL_CONFIG: ToolConfig = {
 // Scalability Criterion: Efficient customer acquisition enables growth
 
 export default function CACCalculator() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('cac-calculator-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
@@ -82,6 +88,14 @@ export default function CACCalculator() {
   const [avgRevenue, setAvgRevenue] = useState(5000);
   const [churnRate, setChurnRate] = useState(5);
   const [grossMargin, setGrossMargin] = useState(75);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('cac-calculator-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   const saveProgress = () => {
     localStorage.setItem('cacCalculatorFiles', JSON.stringify(uploadedFiles));
@@ -451,7 +465,7 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
               <h1 className="text-4xl font-bold mb-2">Customer Acquisition Cost (CAC)</h1>
               <p className="text-muted-foreground">Analyze unit economics for viability (Innovator Founder Visa)</p>
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (
@@ -459,6 +473,7 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

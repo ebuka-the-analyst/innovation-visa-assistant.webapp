@@ -14,6 +14,7 @@ import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from 
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'financial-projections',
@@ -77,13 +78,26 @@ const AI_TOOL_CONFIG: ToolConfig = {
 export default function FinancialProjections() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('financial-projections-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('financial-projections-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('financial-projections-mode', mode);
@@ -408,6 +422,7 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
               onModeChange={setMode}
               aiLabel="AI-Guided"
               traditionalLabel="Calculator"
+              userTier={userTier}
             />
           </div>
 
@@ -417,6 +432,7 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
                 onSwitchToTraditional={() => setMode('traditional')}
+                userTier={userTier}
               />
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-4">

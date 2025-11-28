@@ -2008,36 +2008,145 @@ Keep your response concise (2-3 paragraphs max) but actionable.`;
   });
 
   // AI Tool Guide Feedback - provides personalized feedback for any tool's AI interview
+  // PAID TIER ONLY - Free users should not have access to AI-guided mode
   app.post("/api/ai/tool-feedback", isAuthenticated, async (req, res) => {
     try {
-      const { toolId, question, answer, agentPersonality } = req.body;
+      // Validate user subscription tier - block free tier users
+      const userId = (req.user as any)?.id;
+      if (userId) {
+        const user = await storage.getUser(userId);
+        if (!user || !user.subscriptionTier || user.subscriptionTier === 'free') {
+          return res.status(403).json({ 
+            error: "AI-Guided mode requires a paid subscription",
+            upgradeRequired: true 
+          });
+        }
+      }
       
-      const prompt = `You are an AI assistant for a UK Innovator Founder Visa application tool.
-Your personality: ${agentPersonality || 'Professional, helpful, detail-oriented'}
+      const { toolId, question, answer, agentPersonality, previousAnswers } = req.body;
+      
+      // Tool-specific context for more intelligent responses
+      const toolContext: Record<string, { focus: string; keyMetrics: string[]; visaCriteria: string }> = {
+        'market-analysis': {
+          focus: 'Market sizing and scalability potential',
+          keyMetrics: ['TAM/SAM/SOM', 'Market growth rate (CAGR)', 'Competitor landscape'],
+          visaCriteria: 'Scalability - demonstrates large addressable market for growth'
+        },
+        'financial-projections': {
+          focus: 'Revenue forecasts and financial viability',
+          keyMetrics: ['Revenue projections', 'Break-even timeline', 'Profit margins', 'Funding requirements'],
+          visaCriteria: 'Viability - shows realistic financial planning and sustainability'
+        },
+        'innovation-score': {
+          focus: 'Innovation and differentiation',
+          keyMetrics: ['Unique value proposition', 'Technical innovation', 'Market disruption potential'],
+          visaCriteria: 'Innovation - genuine new or significantly improved offering'
+        },
+        'growth-strategy': {
+          focus: 'Scaling and expansion plans',
+          keyMetrics: ['Growth milestones', 'Market expansion', 'Team scaling', 'Revenue targets'],
+          visaCriteria: 'Scalability - credible plan for national/international growth'
+        },
+        'hiring-plan': {
+          focus: 'Team building and job creation',
+          keyMetrics: ['Key hires', 'Hiring timeline', 'Salary benchmarks', 'Skills requirements'],
+          visaCriteria: 'All criteria - job creation is a key endorsement factor'
+        },
+        'competitor-bench': {
+          focus: 'Competitive positioning and differentiation',
+          keyMetrics: ['Direct competitors', 'Market gaps', 'Competitive advantages'],
+          visaCriteria: 'Innovation - shows understanding of competitive landscape'
+        },
+        'cover-letter-builder': {
+          focus: 'Personal narrative and founder credibility',
+          keyMetrics: ['Relevant experience', 'Passion demonstration', 'Vision clarity'],
+          visaCriteria: 'All criteria - establishes founder credentials'
+        }
+      };
 
-The user is completing the "${toolId}" tool and answered this question:
+      const context = toolContext[toolId] || {
+        focus: 'UK Innovator Founder Visa requirements',
+        keyMetrics: ['Evidence', 'Specificity', 'Relevance'],
+        visaCriteria: 'Meeting endorsing body standards'
+      };
+      
+      const prompt = `You are ${agentPersonality === 'Creative, enthusiastic, forward-thinking' ? 'Nova, the Innovation Specialist' : 
+        agentPersonality === 'Analytical, precise, business-focused' ? 'Sterling, the Financial Analyst' :
+        agentPersonality === 'Strategic, ambitious, growth-oriented' ? 'Atlas, the Growth Strategist' :
+        'Sage, the Compliance Expert'} - an AI agent for UK Innovator Founder Visa applications.
 
-Question: ${question}
+TOOL CONTEXT:
+- Tool: ${toolId}
+- Focus Area: ${context.focus}
+- Key Metrics Endorsers Look For: ${context.keyMetrics.join(', ')}
+- Visa Criteria Relevance: ${context.visaCriteria}
 
-User's Answer: ${answer}
+QUESTION ASKED:
+${question}
 
-Provide brief, encouraging feedback (2-3 sentences max) that:
-1. Acknowledges what they did well
-2. If the answer could be stronger, suggest ONE specific improvement
-3. Relate it to UK visa requirements where relevant
+USER'S ANSWER:
+${answer}
 
-Keep the tone supportive and professional. Do not be overly enthusiastic.`;
+${previousAnswers ? `PREVIOUS ANSWERS IN SESSION:\n${JSON.stringify(previousAnswers, null, 2)}` : ''}
+
+ANALYSIS REQUIRED:
+1. Does this answer contain specific data, numbers, or measurable details?
+2. Does it reference evidence that can be provided to endorsers?
+3. Is it relevant to the ${context.visaCriteria}?
+4. What ONE specific improvement would most strengthen the visa application?
+
+RESPOND WITH:
+- A direct, personalised comment on their SPECIFIC answer (reference their actual content)
+- If strong: Acknowledge the specific strength you noticed
+- If needs improvement: Suggest ONE concrete enhancement with an example
+- Keep it to 2-3 sentences, conversational but professional
+- DO NOT give generic praise - be specific about what they wrote
+
+EXAMPLES OF BAD RESPONSES (do not do this):
+- "Great answer!" (too generic)
+- "Good response, you've covered the key points." (not specific)
+- "This is a solid foundation." (vague)
+
+EXAMPLES OF GOOD RESPONSES:
+- "Your £2.3M TAM figure with the 12% CAGR projection shows solid market research. Consider adding the source of this data - endorsers often verify these claims."
+- "I notice you mentioned 3 direct competitors - excellent. Adding HOW you differentiate from each would strengthen your innovation case."
+- "The 18-month breakeven timeline is realistic. However, endorsers will want to see the assumptions behind your £45K/month revenue target."`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
-        max_tokens: 150
+        max_tokens: 200
       });
 
       res.json({ feedback: response.choices[0].message.content });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Tool feedback error:", error);
+      
+      // Try Gemini fallback - use dedicated GEMINI_API_KEY
+      try {
+        const geminiKey = process.env.GEMINI_API_KEY;
+        if (geminiKey) {
+          const { GoogleGenAI } = await import("@google/genai");
+          const ai = new GoogleGenAI({ apiKey: geminiKey });
+          const { toolId, question, answer } = req.body;
+          
+          const result = await ai.models.generateContent({
+            model: "gemini-1.5-flash",
+            contents: `As a UK Innovator Founder Visa expert, provide brief feedback (2-3 sentences) on this answer.
+Question: ${question}
+Answer: ${answer}
+Tool: ${toolId}
+Focus on specificity and what endorsers look for. Be direct and reference their actual answer.`
+          });
+          
+          res.json({ feedback: result.text });
+          return;
+        }
+      } catch (geminiError) {
+        console.error("Gemini fallback also failed:", geminiError);
+      }
+      
       res.status(500).json({ error: "Failed to generate feedback" });
     }
   });

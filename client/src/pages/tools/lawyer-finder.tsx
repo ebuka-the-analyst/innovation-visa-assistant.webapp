@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -164,13 +165,28 @@ const AI_TOOL_CONFIG: ToolConfig = {
 export default function LawyerFinder() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('lawyer-finder-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('lawyer-finder-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('lawyer-finder-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [sortBy, setSortBy] = useState("rating");
@@ -363,7 +379,7 @@ export default function LawyerFinder() {
                 <h1 className="text-3xl font-bold mb-2">Lawyer Finder & Booking</h1>
                 <p className="text-muted-foreground">Find and connect with experienced immigration lawyers</p>
               </div>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
           </div>
 
@@ -372,6 +388,7 @@ export default function LawyerFinder() {
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

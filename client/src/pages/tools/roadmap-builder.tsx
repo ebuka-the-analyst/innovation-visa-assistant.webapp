@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -88,8 +89,14 @@ type QuarterlyMetrics = {
 };
 
 export default function RoadmapBuilder() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('roadmap-builder-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('roadmap-builder-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
 
   const [milestones, setMilestones] = useState<Milestone[]>([
@@ -122,6 +129,14 @@ export default function RoadmapBuilder() {
 
   const [activeTab, setActiveTab] = useState('builder');
   const [savedDate, setSavedDate] = useState('');
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('roadmap-builder-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('roadmap-builder-mode', mode);
@@ -497,7 +512,7 @@ for personalized guidance on your UK Innovator Founder visa application.
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
               <h1 className="text-4xl font-bold" data-testid="heading-roadmap-builder">Business Roadmap Builder</h1>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
             <p className="text-lg text-muted-foreground">Strategic quarterly planning demonstrating innovation and scalability for UK visa endorsement</p>
             {savedDate && (
@@ -506,7 +521,7 @@ for personalized guidance on your UK Innovator Founder visa application.
           </div>
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
           <>
           <ToolUtilityBar

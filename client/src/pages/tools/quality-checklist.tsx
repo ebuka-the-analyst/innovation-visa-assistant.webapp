@@ -11,6 +11,7 @@ import { Download, CheckCircle2, Circle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "quality-checklist",
@@ -65,9 +66,24 @@ const QUALITY_ITEMS = [
 ];
 
 export default function QualityChecklist() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('quality-checklist-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('quality-checklist-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('quality-checklist-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
+
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [savedDate, setSavedDate] = useState("");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -186,7 +202,7 @@ export default function QualityChecklist() {
               <h1 className="text-4xl font-bold" data-testid="heading-quality-checklist">Quality Checklist</h1>
               <p className="text-muted-foreground">Verify quality assurance requirements before release</p>
             </div>
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           <ToolUtilityBar
@@ -198,7 +214,7 @@ export default function QualityChecklist() {
           />
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : traditionalContent}
         </div>
       </div>

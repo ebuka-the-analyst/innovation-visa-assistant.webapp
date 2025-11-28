@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "min-investment-calc",
@@ -94,13 +95,26 @@ const CHART_COLORS = ["#ffa536", "#11b6e9", "#10B981", "#8B5CF6", "#F59E0B", "#E
 export default function MinInvestmentCalc() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const { userTier } = useTierAccess();
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('min-investment-calc-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('min-investment-calc-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('min-investment-calc-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('min-investment-calc-mode', mode);
@@ -276,12 +290,12 @@ export default function MinInvestmentCalc() {
             />
 
             <div className="flex justify-end mt-4">
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
 
             {mode === 'ai' ? (
               <div className="mt-6">
-                <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+                <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
               </div>
             ) : (
             <>

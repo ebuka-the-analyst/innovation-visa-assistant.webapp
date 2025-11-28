@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -132,8 +133,14 @@ type CapacityPlan = {
 export default function ScalabilityRoadmap() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('scalability-roadmap-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('scalability-roadmap-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
 
   const [activeTab, setActiveTab] = useState('roadmap');
@@ -171,6 +178,14 @@ export default function ScalabilityRoadmap() {
     trainingPlan: '',
     retentionStrategy: ''
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('scalability-roadmap-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('scalability-roadmap-mode', mode);
@@ -791,7 +806,7 @@ submitting visa applications.
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
               <h1 className="text-4xl font-bold" data-testid="heading-scalability-roadmap">Scalability Roadmap</h1>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
             <p className="text-lg text-muted-foreground">Infrastructure, team, and technology scaling plan for UK visa compliance</p>
             {savedDate && (
@@ -800,7 +815,7 @@ submitting visa applications.
           </div>
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
           <>
           <ToolUtilityBar

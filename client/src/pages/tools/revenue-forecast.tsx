@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -84,8 +85,14 @@ type GrowthScenario = 'conservative' | 'base' | 'optimistic';
 export default function RevenueForecast() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('revenue-forecast-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('revenue-forecast-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
 
   const [streams, setStreams] = useState<RevenueStream[]>([
@@ -103,6 +110,14 @@ export default function RevenueForecast() {
   const [ltv, setLTV] = useState(3000);
   const [activeTab, setActiveTab] = useState('forecast');
   const [savedDate, setSavedDate] = useState('');
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('revenue-forecast-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('revenue-forecast-mode', mode);
@@ -750,7 +765,7 @@ www.innovatorfoundervisaassistant.co.uk
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
               <h1 className="text-4xl font-bold" data-testid="heading-revenue-forecast">Revenue Forecast</h1>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
             <p className="text-lg text-muted-foreground">Multi-stream revenue projections with growth scenarios and unit economics</p>
             {savedDate && (
@@ -759,7 +774,7 @@ www.innovatorfoundervisaassistant.co.uk
           </div>
 
           {mode === 'ai' ? (
-            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+            <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
           ) : (
           <>
           <ToolUtilityBar

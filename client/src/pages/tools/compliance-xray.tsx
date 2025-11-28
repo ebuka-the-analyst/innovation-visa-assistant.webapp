@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { Download, Save, Lightbulb, Calendar, RefreshCw, LineChart as LineChartIcon, TrendingUp } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter } from "recharts";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'compliance-xray',
@@ -107,15 +108,28 @@ const BUSINESS_CATEGORIES = [
 ];
 
 export default function ComplianceXRay() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('compliance-xray-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('compliance-xray-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('compliance-xray-mode', mode);
@@ -253,6 +267,7 @@ export default function ComplianceXRay() {
               onModeChange={setMode}
               aiLabel="AI-Guided"
               traditionalLabel="Traditional Form"
+              userTier={userTier}
             />
           </div>
 
@@ -262,6 +277,7 @@ export default function ComplianceXRay() {
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
                 onSwitchToTraditional={() => setMode('traditional')}
+                userTier={userTier}
               />
               <div className="space-y-4">
                 <Card className="p-6">

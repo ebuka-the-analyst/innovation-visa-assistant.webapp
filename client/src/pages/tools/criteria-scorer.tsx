@@ -15,6 +15,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
 } from 'recharts';
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'criteria-scorer',
@@ -109,10 +110,23 @@ const ENDORSERS: EndorserProfile[] = [
 ];
 
 export default function CriteriaScorer() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('criteria-scorer-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('criteria-scorer-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   const [scores, setScores] = useState<CriteriaScores>({
     innovation: 50,
@@ -418,6 +432,7 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
               onModeChange={setMode}
               aiLabel="AI-Guided"
               traditionalLabel="Traditional Form"
+              userTier={userTier}
             />
           </div>
 
@@ -426,6 +441,7 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
               config={AI_TOOL_CONFIG}
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
               sidePanel={() => (
                 <div className="space-y-4">
                   <Card className="p-6">

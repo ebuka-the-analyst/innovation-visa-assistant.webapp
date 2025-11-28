@@ -145,6 +145,7 @@ interface AiToolGuideProps {
   sidePanel?: (props: SidePanelProps) => React.ReactNode;
   sidePanelWidth?: 'narrow' | 'default' | 'wide';
   className?: string;
+  userTier?: string;
 }
 
 function DefaultSidePanel({ answers, progress, currentQuestionIndex, totalQuestions, xp, streak, agent, config }: SidePanelProps) {
@@ -255,10 +256,12 @@ function DefaultSidePanel({ answers, progress, currentQuestionIndex, totalQuesti
 export { DefaultSidePanel };
 export type { SidePanelProps };
 
-export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePanel, sidePanelWidth = 'default', className }: AiToolGuideProps) {
+export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePanel, sidePanelWidth = 'default', className, userTier = 'free' }: AiToolGuideProps) {
   const agent = AGENTS[config.agent];
   const storageKey = `ai-tool-guide-${config.toolId}`;
+  const isPaidUser = userTier !== 'free';
   
+  // All hooks must be called unconditionally to satisfy React's rules of hooks
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
@@ -281,7 +284,30 @@ export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePan
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
+  // Clear stored AI session and reset state for free users
   useEffect(() => {
+    if (!isPaidUser) {
+      // Clear localStorage
+      try {
+        localStorage.removeItem(storageKey);
+      } catch (e) {}
+      // Reset all AI state to prevent data leaks from prior sessions
+      setMessages([]);
+      setCurrentQuestionIndex(0);
+      setAnswers({});
+      setUserInput("");
+      setIsTyping(false);
+      setXp(0);
+      setStreak(0);
+      setIsComplete(false);
+      setIsListening(false);
+    }
+  }, [isPaidUser, storageKey]);
+
+  useEffect(() => {
+    // Skip initialization for free users
+    if (!isPaidUser) return;
+    
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
@@ -307,9 +333,12 @@ export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePan
     setTimeout(() => {
       askQuestion(0);
     }, 1500);
-  }, [config.toolId]);
+  }, [config.toolId, isPaidUser]);
 
   useEffect(() => {
+    // Skip localStorage persistence for free users
+    if (!isPaidUser) return;
+    
     try {
       localStorage.setItem(storageKey, JSON.stringify({
         messages: messages.map(m => ({ ...m, timestamp: m.timestamp.toISOString() })),
@@ -320,7 +349,41 @@ export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePan
         isComplete
       }));
     } catch (e) {}
-  }, [messages, currentQuestionIndex, answers, xp, streak, isComplete, storageKey]);
+  }, [messages, currentQuestionIndex, answers, xp, streak, isComplete, storageKey, isPaidUser]);
+  
+  // RENDER GATE: Show upgrade prompt for free users after hooks have run
+  if (!isPaidUser) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 rounded-xl bg-gradient-to-br from-[#ffa536] to-[#11b6e9] text-white">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">AI-Guided Mode</h3>
+            <p className="text-sm text-muted-foreground">Premium feature - upgrade to access</p>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Get personalised guidance from our AI agents who specialise in UK Innovator Founder Visa requirements. 
+          Upgrade to Basic or higher to unlock this feature.
+        </p>
+        <div className="flex gap-3">
+          <a href="/pricing">
+            <Button className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9]">
+              <Sparkles className="h-4 w-4 mr-2" />
+              View Plans
+            </Button>
+          </a>
+          {onSwitchToTraditional && (
+            <Button variant="outline" onClick={onSwitchToTraditional}>
+              Use Traditional Form
+            </Button>
+          )}
+        </div>
+      </Card>
+    );
+  }
 
   const askQuestion = (index: number) => {
     if (index >= config.questions.length) {
@@ -738,46 +801,150 @@ export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePan
   );
 }
 
-export function AiTraditionalToggle({
-  mode,
-  onModeChange,
-  aiLabel = "AI-Guided",
-  traditionalLabel = "Traditional Form",
-  className
-}: {
+interface AiTraditionalToggleProps {
   mode: 'ai' | 'traditional';
   onModeChange: (mode: 'ai' | 'traditional') => void;
   aiLabel?: string;
   traditionalLabel?: string;
   className?: string;
-}) {
+  userTier?: string;
+}
+
+export function AiTraditionalToggle({
+  mode,
+  onModeChange,
+  aiLabel = "AI-Guided",
+  traditionalLabel = "Traditional Form",
+  className,
+  userTier = "free"
+}: AiTraditionalToggleProps) {
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  
+  const isPaidUser = userTier !== "free";
+  
+  const handleAiClick = () => {
+    if (isPaidUser) {
+      onModeChange('ai');
+    } else {
+      setShowUpgradePrompt(true);
+    }
+  };
+  
   return (
-    <div className={`flex items-center gap-2 p-1 bg-muted rounded-lg ${className}`}>
-      <button
-        onClick={() => onModeChange('ai')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-          mode === 'ai' 
-            ? 'bg-gradient-to-r from-[#ffa536] to-[#11b6e9] text-white shadow-md' 
-            : 'text-muted-foreground hover:text-foreground'
-        }`}
-        data-testid="button-mode-ai"
-      >
-        <MessageSquare className="h-4 w-4" />
-        {aiLabel}
-        <Badge variant="secondary" className="ml-1 text-xs bg-white/20">Recommended</Badge>
-      </button>
-      <button
-        onClick={() => onModeChange('traditional')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-          mode === 'traditional' 
-            ? 'bg-background text-foreground shadow-md' 
-            : 'text-muted-foreground hover:text-foreground'
-        }`}
-        data-testid="button-mode-traditional"
-      >
-        <FileText className="h-4 w-4" />
-        {traditionalLabel}
-      </button>
-    </div>
+    <>
+      <div className={`flex items-center gap-2 p-1 bg-muted rounded-lg ${className}`}>
+        <button
+          onClick={handleAiClick}
+          className={`relative flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            mode === 'ai' && isPaidUser
+              ? 'bg-gradient-to-r from-[#ffa536] to-[#11b6e9] text-white shadow-md' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+          data-testid="button-mode-ai"
+        >
+          <MessageSquare className="h-4 w-4" />
+          {aiLabel}
+          {isPaidUser ? (
+            <Badge variant="secondary" className="ml-1 text-xs bg-white/20">Recommended</Badge>
+          ) : (
+            <Badge variant="secondary" className="ml-1 text-xs bg-amber-500/20 text-amber-600 dark:text-amber-400">Premium</Badge>
+          )}
+        </button>
+        <button
+          onClick={() => onModeChange('traditional')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            mode === 'traditional' || !isPaidUser
+              ? 'bg-background text-foreground shadow-md' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+          data-testid="button-mode-traditional"
+        >
+          <FileText className="h-4 w-4" />
+          {traditionalLabel}
+        </button>
+      </div>
+      
+      <AnimatePresence>
+        {showUpgradePrompt && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowUpgradePrompt(false)}
+              className="fixed inset-0 bg-black/30 backdrop-blur-[2px] z-50"
+            />
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="w-full max-w-md pointer-events-auto"
+              >
+                <Card className="p-6 shadow-xl border overflow-hidden">
+                  <div className="flex items-start gap-4 mb-5">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-[#ffa536] to-[#11b6e9] text-white shadow-lg">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg">Unlock AI-Guided Experience</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Get personalised guidance from our specialised AI agents who understand UK visa requirements.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 mb-5">
+                    <div className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      <span>4 expert AI agents: Nova, Sterling, Atlas & Sage</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      <span>Real-time feedback on your answers</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      <span>Context-aware tips for each question</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      <span>XP rewards & gamified progress tracking</span>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-muted/50 rounded-lg p-3 mb-5 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Available from <span className="font-semibold text-primary">Basic Plan (£29/mo)</span>
+                    </p>
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => {
+                        setShowUpgradePrompt(false);
+                        window.location.href = '/pricing';
+                      }}
+                      className="flex-1 bg-gradient-to-r from-[#ffa536] to-[#11b6e9] hover:opacity-90"
+                      data-testid="button-upgrade-ai"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      View Plans
+                    </Button>
+                    <Button
+                      onClick={() => setShowUpgradePrompt(false)}
+                      variant="outline"
+                      data-testid="button-continue-free"
+                    >
+                      Use Traditional Form
+                    </Button>
+                  </div>
+                </Card>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

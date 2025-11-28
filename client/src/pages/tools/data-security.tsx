@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { Download, AlertTriangle, Lock, Save, Lightbulb, Calendar, RefreshCw, Shield, CheckCircle } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, ResponsiveContainer } from "recharts";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'data-security',
@@ -117,15 +118,28 @@ const DATA_SECURITY_REQUIREMENTS = [
 ];
 
 export default function DataSecurity() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('data-security-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [checks, setChecks] = useState<any>({});
   const [tab, setTab] = useState("overview");
   const [savedDate, setSavedDate] = useState("");
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [showActionPlan, setShowActionPlan] = useState(false);
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('data-security-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('data-security-mode', mode);
@@ -272,6 +286,7 @@ STATUS: ${complianceScore >= 80 ? 'GDPR Ready' : complianceScore >= 60 ? 'At Ris
               onModeChange={setMode}
               aiLabel="AI-Guided"
               traditionalLabel="Traditional Form"
+              userTier={userTier}
             />
           </div>
 
@@ -281,6 +296,7 @@ STATUS: ${complianceScore >= 80 ? 'GDPR Ready' : complianceScore >= 60 ? 'At Ris
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
                 onSwitchToTraditional={() => setMode('traditional')}
+                userTier={userTier}
               />
               <div className="space-y-4">
                 <Card className="p-6">

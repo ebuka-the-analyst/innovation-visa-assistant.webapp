@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -92,8 +93,14 @@ const calculateNationalInsurance = (annualIncome: number): number => {
 };
 
 export default function SalaryThreshold() {
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('salary-threshold-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('salary-threshold-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [annualSalary, setAnnualSalary] = useState(45000);
   const [region, setRegion] = useState<UKRegion>('london');
@@ -101,6 +108,14 @@ export default function SalaryThreshold() {
   const [additionalIncome, setAdditionalIncome] = useState(0);
   const [activeTab, setActiveTab] = useState('calculator');
   const [savedDate, setSavedDate] = useState('');
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('salary-threshold-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('salary-threshold-mode', mode);
@@ -435,7 +450,7 @@ Consult a qualified UK accountant or tax advisor for personalized advice.
           />
 
           <div className="flex justify-end mt-4 mb-4">
-            <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+            <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
 
           {mode === 'ai' ? (

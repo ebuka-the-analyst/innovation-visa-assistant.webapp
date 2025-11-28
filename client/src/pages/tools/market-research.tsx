@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { useWordExport } from "@/hooks/useWordExport";
@@ -106,8 +107,14 @@ type CustomerSegment = {
 export default function MarketResearch() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('market-research-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('market-research-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
   const [activities, setActivities] = useState<ResearchActivity[]>([
     {
@@ -160,6 +167,14 @@ export default function MarketResearch() {
 
   const [activeTab, setActiveTab] = useState('research');
   const [savedDate, setSavedDate] = useState('');
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('market-research-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('market-research-mode', mode);
@@ -763,7 +778,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
                 )}
               </div>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
           </div>
 
@@ -772,6 +787,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
               config={AI_TOOL_CONFIG} 
               onComplete={handleAiComplete}
               onSwitchToTraditional={() => setMode('traditional')}
+              userTier={userTier}
             />
           ) : (
           <>

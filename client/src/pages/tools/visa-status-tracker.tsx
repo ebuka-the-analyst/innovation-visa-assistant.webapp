@@ -15,6 +15,7 @@ import { Clock, CheckCircle2, Circle, AlertTriangle, Calendar, FileText, Send, E
 import { useToast } from "@/hooks/use-toast";
 import { useWordExport } from "@/hooks/useWordExport";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: "visa-status-tracker",
@@ -117,13 +118,27 @@ const INITIAL_DATA: ApplicationData = {
 export default function VisaStatusTracker() {
   const { toast } = useToast();
   const { generateWord } = useWordExport();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
 
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    return (localStorage.getItem('visa-status-tracker-mode') as 'ai' | 'traditional') || 'ai';
+    const saved = localStorage.getItem('visa-status-tracker-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('visa-status-tracker-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('visa-status-tracker-mode', mode);
@@ -270,12 +285,13 @@ export default function VisaStatusTracker() {
                   onModeChange={setMode}
                   aiLabel="AI-Guided"
                   traditionalLabel="Traditional Form"
+                  userTier={userTier}
                 />
               </div>
             </div>
 
             {mode === 'ai' ? (
-              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} />
+              <AiToolGuide config={AI_TOOL_CONFIG} onComplete={handleAiComplete} userTier={userTier} />
             ) : (
               <>
             <ToolUtilityBar

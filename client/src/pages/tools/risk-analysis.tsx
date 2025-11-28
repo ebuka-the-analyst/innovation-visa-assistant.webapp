@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -61,13 +62,27 @@ const INITIAL_RISKS: Risk[] = [
 
 export default function RiskAnalysis() {
   const { toast } = useToast();
-  const [mode, setMode] = useState<'ai' | 'traditional'>(() => 
-    (localStorage.getItem('risk-analysis-mode') as 'ai' | 'traditional') || 'ai'
-  );
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
+  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
+    const saved = localStorage.getItem('risk-analysis-mode');
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
+  });
   const [activeTab, setActiveTab] = useState('dashboard');
   const [risks, setRisks] = useState<Risk[]>(INITIAL_RISKS);
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
   const [autoRemediationResults, setAutoRemediationResults] = useState<Record<string, string[]>>({});
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('risk-analysis-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('risk-analysis-mode', mode);
@@ -161,7 +176,7 @@ export default function RiskAnalysis() {
             <h1 className="text-4xl font-bold" data-testid="heading-risk-analysis">Risk Analysis & Auto-Remediation</h1>
             <p className="text-lg text-muted-foreground">Real-time risk scoring with AI-powered mitigation strategies</p>
           </div>
-          <AiTraditionalToggle mode={mode} onModeChange={setMode} />
+          <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
         </div>
 
         {mode === 'ai' ? (

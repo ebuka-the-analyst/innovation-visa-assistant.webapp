@@ -20,6 +20,7 @@ import { organizationSchema, createBreadcrumbSchema, createArticleSchema } from 
 import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
+import { useTierAccess } from "@/hooks/useTierAccess";
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'innovation-score',
@@ -105,13 +106,26 @@ const INDUSTRY_BENCHMARKS: IndustryBenchmark[] = [
 export default function InnovationScore() {
   const { generateWord } = useWordExport();
   const { toast } = useToast();
+  const { userTier } = useTierAccess();
+  
+  // Free users default to traditional mode, paid users can use AI mode
+  const isPaidUser = userTier !== 'free';
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
   
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('innovation-score-mode');
-    return (saved === 'traditional') ? 'traditional' : 'ai';
+    // Free users always start in traditional mode
+    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
   });
+
+  // Force traditional mode for free users and clear localStorage
+  useEffect(() => {
+    if (!isPaidUser && mode === 'ai') {
+      setMode('traditional');
+      localStorage.setItem('innovation-score-mode', 'traditional');
+    }
+  }, [isPaidUser, mode]);
 
   useEffect(() => {
     localStorage.setItem('innovation-score-mode', mode);
@@ -788,6 +802,7 @@ for official assessment and application preparation.
                 onModeChange={setMode}
                 aiLabel="AI-Guided"
                 traditionalLabel="Calculator"
+                userTier={userTier}
               />
             </div>
           </div>
@@ -798,6 +813,7 @@ for official assessment and application preparation.
                 config={AI_TOOL_CONFIG}
                 onComplete={handleAiComplete}
                 onSwitchToTraditional={() => setMode('traditional')}
+                userTier={userTier}
               />
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-4">
