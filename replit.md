@@ -32,5 +32,5 @@ An auto-save and session persistence system ensures data integrity, with full se
 - **Authentication:** Google OAuth 2.0 (via `passport-google-oauth20`).
 - **Session Management:** `express-session` with `connect-pg-simple`.
 - **Bot Protection:** Cloudflare Turnstile.
-- **Email Service:** Resend.
+- **Email Service:** Hostinger SMTP (via Nodemailer).
 - **Deployment:** Railway.

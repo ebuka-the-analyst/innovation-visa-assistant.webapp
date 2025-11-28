@@ -1,9 +1,11 @@
 import crypto from "crypto";
+import nodemailer from "nodemailer";
 
 interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
+  from?: string;
 }
 
 function escapeHtml(text: string): string {
@@ -17,40 +19,55 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (char) => htmlEscapeMap[char] || char);
 }
 
-export async function sendEmail({ to, subject, html }: SendEmailParams) {
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+// Hostinger SMTP transporter
+const createTransporter = () => {
+  const HOSTINGER_EMAIL_USER = process.env.HOSTINGER_EMAIL_USER;
+  const HOSTINGER_EMAIL_PASSWORD = process.env.HOSTINGER_EMAIL_PASSWORD;
   
-  if (!RESEND_API_KEY) {
-    console.error("RESEND_API_KEY not configured. Email not sent.");
+  if (!HOSTINGER_EMAIL_USER || !HOSTINGER_EMAIL_PASSWORD) {
+    return null;
+  }
+  
+  return nodemailer.createTransport({
+    host: 'smtp.hostinger.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: HOSTINGER_EMAIL_USER,
+      pass: HOSTINGER_EMAIL_PASSWORD,
+    },
+  });
+};
+
+export async function sendEmail({ to, subject, html, from }: SendEmailParams) {
+  const HOSTINGER_EMAIL_USER = process.env.HOSTINGER_EMAIL_USER;
+  
+  if (!HOSTINGER_EMAIL_USER) {
+    console.error("Hostinger email not configured. Email not sent.");
     console.log("Would have sent email to:", to);
     console.log("Subject:", subject);
     return { success: false, error: "Email service not configured" };
   }
 
+  const transporter = createTransporter();
+  
+  if (!transporter) {
+    console.error("Failed to create email transporter");
+    return { success: false, error: "Email service not configured" };
+  }
+
   try {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "UK Innovator Visa Assistant <noreply@innovatorfoundervisaassistant.co.uk>",
-        to: [to],
-        subject,
-        html,
-      }),
+    const fromAddress = from || `UK Innovator Visa Assistant <${HOSTINGER_EMAIL_USER}>`;
+    
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to: to,
+      subject: subject,
+      html: html,
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Resend API error:", data);
-      return { success: false, error: data.message || "Failed to send email" };
-    }
-
-    console.log("Email sent successfully to:", to);
-    return { success: true, messageId: data.id };
+    console.log("Email sent successfully to:", to, "MessageId:", info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error("Email send error:", error);
     return { success: false, error: "Failed to send email" };
@@ -423,42 +440,13 @@ export async function sendPaymentReceiptEmail(
     </html>
   `;
 
-  // Send from billing@ for payment-related emails
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  
-  if (!RESEND_API_KEY) {
-    console.error("RESEND_API_KEY not configured. Email not sent.");
-    return { success: false, error: "Email service not configured" };
-  }
-
-  try {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "UK Innovator Visa Assistant <billing@innovatorfoundervisaassistant.co.uk>",
-        to: [email],
-        subject: 'Payment Receipt - UK Innovator Founder Visa Assistant',
-        html,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Resend API error:", data);
-      return { success: false, error: data.message || "Failed to send email" };
-    }
-
-    console.log("Payment receipt email sent successfully to:", email);
-    return { success: true };
-  } catch (error) {
-    console.error("Email send error:", error);
-    return { success: false, error: "Failed to send email" };
-  }
+  // Send payment receipt using Hostinger SMTP
+  return sendEmail({
+    to: email,
+    subject: 'Payment Receipt - UK Innovator Founder Visa Assistant',
+    html,
+    from: `UK Innovator Visa Assistant <${process.env.HOSTINGER_EMAIL_USER || 'noreply@innovatorfoundervisaassistant.co.uk'}>`,
+  });
 }
 
 // Welcome email sent after email verification
