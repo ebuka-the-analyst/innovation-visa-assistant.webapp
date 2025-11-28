@@ -117,7 +117,9 @@ import {
   Wallet,
   ClipboardCheck,
   FileSearch,
-  UserCog
+  UserCog,
+  BadgeCheck,
+  ShieldOff
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Link } from "wouter";
@@ -1164,6 +1166,128 @@ export default function AdminDashboard() {
       toast({ title: "Bulk update failed", description: error.message, variant: "destructive" });
     },
   });
+
+  // Bulk force logout mutation
+  const bulkForceLogoutMutation = useMutation({
+    mutationFn: async (userIds: string[]) => {
+      const results = await Promise.allSettled(
+        userIds.map(id => apiRequest('POST', `/api/admin/users/${id}/force-logout`))
+      );
+      const succeeded = results.filter(r => r.status === 'fulfilled').length;
+      return { succeeded, total: userIds.length };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({ title: `Force logout completed`, description: `${data.succeeded}/${data.total} users logged out` });
+      setSelectedUsers([]);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Bulk force logout failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Bulk delete users mutation
+  const bulkDeleteUsersMutation = useMutation({
+    mutationFn: async (userIds: string[]) => {
+      const results = await Promise.allSettled(
+        userIds.map(id => apiRequest('DELETE', `/api/admin/users/${id}`))
+      );
+      const succeeded = results.filter(r => r.status === 'fulfilled').length;
+      return { succeeded, total: userIds.length };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({ title: `Bulk delete completed`, description: `${data.succeeded}/${data.total} users deleted` });
+      setSelectedUsers([]);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Bulk delete failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Bulk verify/unverify mutation
+  const bulkVerifyMutation = useMutation({
+    mutationFn: async ({ userIds, verified }: { userIds: string[]; verified: boolean }) => {
+      const results = await Promise.allSettled(
+        userIds.map(id => apiRequest('POST', `/api/admin/users/${id}/verify`, { verified }))
+      );
+      const succeeded = results.filter(r => r.status === 'fulfilled').length;
+      return { succeeded, total: userIds.length };
+    },
+    onSuccess: (data, { verified }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({ title: `${verified ? 'Verification' : 'Unverification'} completed`, description: `${data.succeeded}/${data.total} users updated` });
+      setSelectedUsers([]);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Bulk verify failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Bulk suspend mutation
+  const bulkSuspendMutation = useMutation({
+    mutationFn: async ({ userIds, suspended, durationDays }: { userIds: string[]; suspended: boolean; durationDays?: number }) => {
+      const results = await Promise.allSettled(
+        userIds.map(id => apiRequest('POST', `/api/admin/users/${id}/suspend`, { suspended, durationDays }))
+      );
+      const succeeded = results.filter(r => r.status === 'fulfilled').length;
+      return { succeeded, total: userIds.length };
+    },
+    onSuccess: (data, { suspended }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({ title: `${suspended ? 'Suspension' : 'Unsuspension'} completed`, description: `${data.succeeded}/${data.total} users updated` });
+      setSelectedUsers([]);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Bulk suspend failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Bulk ban mutation
+  const bulkBanMutation = useMutation({
+    mutationFn: async ({ userIds, banned }: { userIds: string[]; banned: boolean }) => {
+      const results = await Promise.allSettled(
+        userIds.map(id => apiRequest('POST', `/api/admin/users/${id}/ban`, { banned }))
+      );
+      const succeeded = results.filter(r => r.status === 'fulfilled').length;
+      return { succeeded, total: userIds.length };
+    },
+    onSuccess: (data, { banned }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({ title: `${banned ? 'Ban' : 'Unban'} completed`, description: `${data.succeeded}/${data.total} users updated` });
+      setSelectedUsers([]);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Bulk ban failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Bulk export user data
+  const bulkExportUserData = async (userIds: string[]) => {
+    try {
+      const allData: any[] = [];
+      for (const userId of userIds) {
+        const res = await apiRequest('GET', `/api/admin/users/${userId}/export`);
+        const data = await res.json();
+        allData.push(data);
+      }
+      
+      const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bulk-user-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({ title: 'Bulk export completed', description: `${userIds.length} users exported` });
+      setSelectedUsers([]);
+    } catch (error: any) {
+      toast({ title: "Failed to export user data", description: error.message, variant: "destructive" });
+    }
+  };
 
   // Toggle demo mutation
   const toggleDemoMutation = useMutation({
@@ -3764,33 +3888,107 @@ export default function AdminDashboard() {
                                   Bulk Actions ({selectedUsers.length})
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent>
-                                <DropdownMenuLabel>Bulk Operations</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => {
-                                  bulkUpdateUsersMutation.mutate({
-                                    userIds: selectedUsers,
-                                    updates: { subscriptionTier: 'premium' }
-                                  });
-                                }}>
-                                  <TrendingUp className="h-4 w-4 mr-2" />
-                                  Upgrade to Premium
+                              <DropdownMenuContent className="w-56" align="end">
+                                <DropdownMenuLabel>Email Verification</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => bulkVerifyMutation.mutate({ userIds: selectedUsers, verified: true })}>
+                                  <BadgeCheck className="h-4 w-4 mr-2 text-green-500" />
+                                  Verify All Emails
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => {
-                                  if (confirm(`Delete ${selectedUsers.length} users?`)) {
-                                    bulkUpdateUsersMutation.mutate({
-                                      userIds: selectedUsers,
-                                      updates: { isAdmin: false }
-                                    });
-                                  }
-                                }}>
-                                  <Shield className="h-4 w-4 mr-2" />
+                                <DropdownMenuItem onClick={() => bulkVerifyMutation.mutate({ userIds: selectedUsers, verified: false })}>
+                                  <XCircle className="h-4 w-4 mr-2 text-orange-500" />
+                                  Unverify All Emails
+                                </DropdownMenuItem>
+                                
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Change Tier</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { subscriptionTier: 'free' } })}>
+                                  <Crown className="h-4 w-4 mr-2 text-gray-500" />
+                                  Set to Free
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { subscriptionTier: 'basic' } })}>
+                                  <Crown className="h-4 w-4 mr-2 text-blue-500" />
+                                  Set to Basic
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { subscriptionTier: 'premium' } })}>
+                                  <Crown className="h-4 w-4 mr-2 text-purple-500" />
+                                  Set to Premium
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { subscriptionTier: 'enterprise' } })}>
+                                  <Crown className="h-4 w-4 mr-2 text-amber-500" />
+                                  Set to Enterprise
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { subscriptionTier: 'ultimate' } })}>
+                                  <Crown className="h-4 w-4 mr-2 text-gradient" />
+                                  Set to Ultimate
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Admin Tools</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { isAdmin: true } })}>
+                                  <Shield className="h-4 w-4 mr-2 text-blue-500" />
+                                  Make Admin
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { isAdmin: false } })}>
+                                  <ShieldOff className="h-4 w-4 mr-2" />
                                   Remove Admin Access
                                 </DropdownMenuItem>
+
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => exportToCSV(selectedUsers as unknown as Record<string, unknown>[], 'selected-users')}>
+                                <DropdownMenuLabel>Data & Sessions</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => bulkExportUserData(selectedUsers)}>
                                   <Download className="h-4 w-4 mr-2" />
-                                  Export Selected
+                                  Export User Data
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                  if (confirm(`Force logout ${selectedUsers.length} users?`)) {
+                                    bulkForceLogoutMutation.mutate(selectedUsers);
+                                  }
+                                }}>
+                                  <LogOut className="h-4 w-4 mr-2" />
+                                  Force Logout All
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel className="text-orange-500">Restrictions</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => {
+                                  if (confirm(`Suspend ${selectedUsers.length} users for 7 days?`)) {
+                                    bulkSuspendMutation.mutate({ userIds: selectedUsers, suspended: true, durationDays: 7 });
+                                  }
+                                }}>
+                                  <Clock className="h-4 w-4 mr-2 text-orange-500" />
+                                  Suspend All (7 days)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => bulkSuspendMutation.mutate({ userIds: selectedUsers, suspended: false })}>
+                                  <Clock className="h-4 w-4 mr-2 text-green-500" />
+                                  Lift All Suspensions
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                  if (confirm(`Ban ${selectedUsers.length} users permanently?`)) {
+                                    bulkBanMutation.mutate({ userIds: selectedUsers, banned: true });
+                                  }
+                                }}>
+                                  <Ban className="h-4 w-4 mr-2 text-red-500" />
+                                  Ban All Users
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => bulkBanMutation.mutate({ userIds: selectedUsers, banned: false })}>
+                                  <UserCheck className="h-4 w-4 mr-2 text-green-500" />
+                                  Unban All Users
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel className="text-red-500">Danger Zone</DropdownMenuLabel>
+                                <DropdownMenuItem 
+                                  className="text-red-500 focus:text-red-500"
+                                  onClick={() => {
+                                    if (confirm(`DELETE ${selectedUsers.length} users PERMANENTLY? This cannot be undone!`)) {
+                                      if (confirm(`Are you absolutely sure? Type count to confirm: ${selectedUsers.length} users will be deleted forever.`)) {
+                                        bulkDeleteUsersMutation.mutate(selectedUsers);
+                                      }
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete All Users
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
