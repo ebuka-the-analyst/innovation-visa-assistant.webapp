@@ -1156,10 +1156,18 @@ export default function AdminDashboard() {
   const bulkUpdateUsersMutation = useMutation({
     mutationFn: async ({ userIds, updates }: { userIds: string[]; updates: Partial<User> }) => {
       await apiRequest('PATCH', '/api/admin/users/bulk', { userIds, updates });
+      return { count: userIds.length };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      toast({ title: `Successfully updated ${selectedUsers.length} users` });
+    onSuccess: (data) => {
+      // Force immediate refetch
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return typeof key === 'string' && key.includes('/api/admin');
+        }
+      });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/users'] });
+      toast({ title: `Successfully updated ${data.count} users` });
       setSelectedUsers([]);
     },
     onError: (error: Error) => {
@@ -1193,10 +1201,18 @@ export default function AdminDashboard() {
         userIds.map(id => apiRequest('DELETE', `/api/admin/users/${id}`))
       );
       const succeeded = results.filter(r => r.status === 'fulfilled').length;
-      return { succeeded, total: userIds.length };
+      return { succeeded, total: userIds.length, deletedIds: userIds };
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      // Force immediate refetch of all user-related queries
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return typeof key === 'string' && key.includes('/api/admin');
+        }
+      });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/analytics/overview'] });
       toast({ title: `Bulk delete completed`, description: `${data.succeeded}/${data.total} users deleted` });
       setSelectedUsers([]);
     },
@@ -1215,7 +1231,13 @@ export default function AdminDashboard() {
       return { succeeded, total: userIds.length };
     },
     onSuccess: (data, { verified }) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return typeof key === 'string' && key.includes('/api/admin');
+        }
+      });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/users'] });
       toast({ title: `${verified ? 'Verification' : 'Unverification'} completed`, description: `${data.succeeded}/${data.total} users updated` });
       setSelectedUsers([]);
     },
@@ -1234,7 +1256,13 @@ export default function AdminDashboard() {
       return { succeeded, total: userIds.length };
     },
     onSuccess: (data, { suspended }) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return typeof key === 'string' && key.includes('/api/admin');
+        }
+      });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/users'] });
       toast({ title: `${suspended ? 'Suspension' : 'Unsuspension'} completed`, description: `${data.succeeded}/${data.total} users updated` });
       setSelectedUsers([]);
     },
@@ -1253,7 +1281,13 @@ export default function AdminDashboard() {
       return { succeeded, total: userIds.length };
     },
     onSuccess: (data, { banned }) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return typeof key === 'string' && key.includes('/api/admin');
+        }
+      });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/users'] });
       toast({ title: `${banned ? 'Ban' : 'Unban'} completed`, description: `${data.succeeded}/${data.total} users updated` });
       setSelectedUsers([]);
     },
