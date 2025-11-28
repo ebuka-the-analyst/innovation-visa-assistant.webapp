@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 
-export type VoicePermissionState = 'checking' | 'prompt' | 'granted' | 'denied';
+export type VoicePermissionState = 'unknown' | 'prompt' | 'granted' | 'denied';
 
 interface VoicePermissionContextType {
   permission: VoicePermissionState;
@@ -12,13 +12,13 @@ interface VoicePermissionContextType {
 const VoicePermissionContext = createContext<VoicePermissionContextType | null>(null);
 
 export function VoicePermissionProvider({ children }: { children: ReactNode }) {
-  const [permission, setPermission] = useState<VoicePermissionState>('checking');
+  // Start with 'unknown' - don't check permission until user actually clicks the mic button
+  const [permission, setPermission] = useState<VoicePermissionState>('unknown');
 
   const checkPermission = useCallback(async () => {
     console.log('[VoicePermission] Checking microphone permission via direct test...');
     
-    // Skip Permissions API - it's unreliable in some environments (like Replit webview)
-    // Instead, directly try to get the microphone stream
+    // Only check when explicitly called (user clicked mic button)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach(track => track.stop());
@@ -27,24 +27,18 @@ export function VoicePermissionProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       console.log('[VoicePermission] Direct microphone test failed:', err?.name, err?.message);
       
-      // Check error type to determine if it's denied or just needs prompting
       if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
-        // User explicitly denied or browser blocked it
         setPermission('denied');
       } else if (err?.name === 'NotFoundError') {
-        // No microphone device found
         console.log('[VoicePermission] No microphone device found');
         setPermission('denied');
       } else {
-        // Other error - treat as needing prompt
         setPermission('prompt');
       }
     }
   }, []);
 
-  useEffect(() => {
-    checkPermission();
-  }, [checkPermission]);
+  // NO automatic permission check on mount - only when user clicks mic button
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
     console.log('[VoicePermission] Requesting microphone access...');
