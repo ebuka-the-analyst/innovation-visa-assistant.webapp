@@ -119,6 +119,9 @@ export function VoiceMicButton({ className, showLabel = false, size = 'icon' }: 
                 {permission === 'prompt' && 'Microphone access required'}
                 {permission === 'checking' && 'Checking permission...'}
               </p>
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                Status: {permission}
+              </p>
             </div>
           </div>
 
@@ -176,6 +179,19 @@ export function VoiceMicButton({ className, showLabel = false, size = 'icon' }: 
                   </p>
                 </div>
               </div>
+              
+              <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-2">
+                  If microphone shows ON but still not working:
+                </p>
+                <ol className="text-xs text-amber-600/80 dark:text-amber-400/80 space-y-1 list-decimal list-inside">
+                  <li>Click the lock icon in address bar</li>
+                  <li>Click <strong>"Reset permissions"</strong></li>
+                  <li><strong>Refresh this page</strong> (Ctrl+R or Cmd+R)</li>
+                  <li>Click Enable Voice again</li>
+                </ol>
+              </div>
+              
               <div className="flex gap-2">
                 <Button 
                   onClick={handleEnableVoice} 
@@ -189,8 +205,9 @@ export function VoiceMicButton({ className, showLabel = false, size = 'icon' }: 
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={handleRefreshPermission}
-                  data-testid="button-refresh-permission"
+                  onClick={() => window.location.reload()}
+                  title="Refresh Page"
+                  data-testid="button-refresh-page"
                 >
                   <Settings className="h-4 w-4" />
                 </Button>
