@@ -206,13 +206,7 @@ async function regularChat(
   userMessage: string,
   conversationHistory: Message[]
 ): Promise<OrchestratorResult> {
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are an expert UK Innovator Founder Visa consultant.
+  const systemPrompt = `You are an expert UK Innovator Founder Visa consultant.
 
 RULES:
 - Be concise: 2-4 sentences typical
@@ -221,8 +215,60 @@ RULES:
 - If uncertain, say "verify with gov.uk"
 - Focus only on Innovator Founder Visa
 
-Give direct, helpful answers.`
+Give direct, helpful answers.`;
+
+  // Try Gemini first (PRIMARY - saves costs)
+  try {
+    const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+    const geminiBaseURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "https://generativelanguage.googleapis.com";
+    
+    console.log("[AI Orchestrator] Attempting Gemini for regular chat (PRIMARY)");
+    
+    const response = await fetch(`${geminiBaseURL}/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: {
+          parts: [{ text: systemPrompt }],
         },
+        contents: [
+          ...conversationHistory.map((msg) => ({
+            role: msg.role === "user" ? "user" : "model",
+            parts: [{ text: msg.content }],
+          })),
+          {
+            role: "user",
+            parts: [{ text: userMessage }],
+          },
+        ],
+        generationConfig: {
+          maxOutputTokens: 500,
+          temperature: 0.7,
+        },
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json() as any;
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (content) {
+        return {
+          response: content,
+          provider: "Gemini"
+        };
+      }
+    }
+  } catch (error: any) {
+    console.error("[AI Orchestrator] Gemini failed for regular chat:", error.message);
+  }
+
+  // Fallback to OpenAI
+  try {
+    console.log("[AI Orchestrator] Falling back to OpenAI for regular chat");
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: systemPrompt },
         ...conversationHistory.map(msg => ({
           role: msg.role as "user" | "assistant",
           content: msg.content

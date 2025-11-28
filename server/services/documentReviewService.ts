@@ -34,6 +34,71 @@ RESPONSE FORMAT (JSON):
 
 Be constructive but honest. Focus on visa-specific requirements.`;
 
+// Call Gemini API for JSON response
+async function callGeminiForJSON(systemPrompt: string, userPrompt: string): Promise<any> {
+  const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+  const geminiBaseURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "https://generativelanguage.googleapis.com";
+  
+  const response = await fetch(`${geminiBaseURL}/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      system_instruction: {
+        parts: [{ text: systemPrompt }],
+      },
+      contents: [{
+        role: "user",
+        parts: [{ text: userPrompt }],
+      }],
+      generationConfig: {
+        maxOutputTokens: 2000,
+        temperature: 0.7,
+        responseMimeType: "application/json",
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Gemini API error: ${response.status}`);
+  }
+
+  const data = await response.json() as any;
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!content) throw new Error("No response from Gemini");
+  
+  return JSON.parse(content);
+}
+
+// Fallback to OpenAI
+async function callOpenAIForJSON(systemPrompt: string, userPrompt: string): Promise<any> {
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ],
+    response_format: { type: 'json_object' },
+    max_tokens: 2000,
+    temperature: 0.7
+  });
+
+  const content = response.choices[0]?.message?.content;
+  if (!content) throw new Error("No response from OpenAI");
+  
+  return JSON.parse(content);
+}
+
+// Try Gemini first, fallback to OpenAI
+async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<any> {
+  try {
+    console.log("[DocumentReviewService] Attempting Gemini (PRIMARY)");
+    return await callGeminiForJSON(systemPrompt, userPrompt);
+  } catch (error: any) {
+    console.error("[DocumentReviewService] Gemini failed, falling back to OpenAI:", error.message);
+    return await callOpenAIForJSON(systemPrompt, userPrompt);
+  }
+}
+
 export interface DocumentReviewInput {
   userId: string;
   documentName: string;
@@ -68,24 +133,8 @@ export async function processDocumentReview(reviewId: string) {
     const [review] = await db.select().from(documentReviews).where(eq(documentReviews.id, reviewId));
     if (!review) throw new Error('Review not found');
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        { role: 'system', content: DOCUMENT_REVIEW_PROMPT },
-        { 
-          role: 'user', 
-          content: `Document Type: ${review.documentType}\nDocument Name: ${review.documentName}\n\nContent:\n${review.documentContent?.substring(0, 15000) || 'No content provided'}` 
-        }
-      ],
-      response_format: { type: 'json_object' },
-      max_tokens: 2000,
-      temperature: 0.7
-    });
-
-    const content = response.choices[0]?.message?.content;
-    if (!content) throw new Error('No response from AI');
-
-    const analysis = JSON.parse(content);
+    const userPrompt = `Document Type: ${review.documentType}\nDocument Name: ${review.documentName}\n\nContent:\n${review.documentContent?.substring(0, 15000) || 'No content provided'}`;
+    const analysis = await getAIResponse(DOCUMENT_REVIEW_PROMPT, userPrompt);
 
     await db.update(documentReviews)
       .set({
@@ -99,7 +148,7 @@ export async function processDocumentReview(reviewId: string) {
         strengthsFound: analysis.strengths,
         weaknessesFound: analysis.weaknesses,
         suggestions: analysis.suggestions,
-        aiProvider: 'openai'
+        aiProvider: 'gemini'
       })
       .where(eq(documentReviews.id, reviewId));
 

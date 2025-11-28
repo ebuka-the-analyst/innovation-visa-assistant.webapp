@@ -52,50 +52,16 @@ export async function chatWithMultipleLLMs(
   newsContext?: NewsArticle[]
 ): Promise<{ response: string; provider: string }> {
   const systemPrompt = buildSystemPrompt(newsContext);
-  // Try each LLM in order of preference
+  // Try each LLM in order of preference (Gemini FIRST to save costs)
   
-  // 1. Try OpenAI (GPT-4o via Replit AI Integrations)
-  try {
-    console.log("[ChatService] Attempting OpenAI call with base URL:", process.env.AI_INTEGRATIONS_OPENAI_BASE_URL);
-    console.log("[ChatService] API key present:", !!process.env.AI_INTEGRATIONS_OPENAI_API_KEY || !!process.env.OPENAI_API_KEY);
-    
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt,
-        },
-        ...conversationHistory.map((msg) => ({
-          role: msg.role,
-          content: msg.content,
-        })),
-        {
-          role: "user",
-          content: userMessage,
-        },
-      ],
-      max_tokens: 500,
-      temperature: 0.7,
-    });
-
-    const content = response.choices[0]?.message?.content || "";
-    console.log("[ChatService] OpenAI response received successfully");
-    return {
-      response: addDisclaimerIfNeeded(content),
-      provider: "GPT-4o",
-    };
-  } catch (error: any) {
-    console.error("[ChatService] OpenAI API failed:", error?.message || error);
-    console.error("[ChatService] Full error:", JSON.stringify(error, null, 2));
-  }
-
-  // 2. Try Gemini via REST API
+  // 1. Try Gemini FIRST (PRIMARY - uses your existing subscription)
   try {
     const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
     const geminiBaseURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "https://generativelanguage.googleapis.com";
     
-    const response = await fetch(`${geminiBaseURL}/v1beta/models/gemini-2.5-pro:generateContent?key=${geminiKey}`, {
+    console.log("[ChatService] Attempting Gemini call (PRIMARY)");
+    
+    const response = await fetch(`${geminiBaseURL}/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -123,56 +89,52 @@ export async function chatWithMultipleLLMs(
       const data = (await response.json()) as any;
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
       if (content) {
+        console.log("[ChatService] Gemini response received successfully");
         return {
           response: addDisclaimerIfNeeded(content),
           provider: "Gemini",
         };
       }
+    } else {
+      const errorText = await response.text();
+      console.error("[ChatService] Gemini API error:", response.status, errorText);
     }
-  } catch (error) {
-    console.warn("Gemini API failed, trying Claude...", error);
+  } catch (error: any) {
+    console.error("[ChatService] Gemini API failed:", error?.message || error);
   }
 
-  // 3. Fallback: Anthropic Claude (if needed)
+  // 2. Fallback to OpenAI (BACKUP - only if Gemini fails)
   try {
-    // Using fetch for Claude API
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": process.env.ANTHROPIC_API_KEY || "",
-        "content-type": "application/json",
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 500,
-        system: systemPrompt,
-        messages: [
-          ...conversationHistory.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-          {
-            role: "user",
-            content: userMessage,
-          },
-        ],
-      }),
+    console.log("[ChatService] Falling back to OpenAI (BACKUP)");
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        ...conversationHistory.map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+        {
+          role: "user",
+          content: userMessage,
+        },
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
     });
 
-    if (!response.ok) {
-      throw new Error(`Claude API error: ${response.statusText}`);
-    }
-
-    const data = (await response.json()) as any;
-    const content = data.content?.[0]?.text || "";
-
+    const content = response.choices[0]?.message?.content || "";
+    console.log("[ChatService] OpenAI response received successfully (backup)");
     return {
       response: addDisclaimerIfNeeded(content),
-      provider: "Claude",
+      provider: "GPT-4o",
     };
-  } catch (error) {
-    console.error("All LLM APIs failed:", error);
+  } catch (error: any) {
+    console.error("[ChatService] OpenAI API failed:", error?.message || error);
   }
 
   // Fallback response
@@ -187,14 +149,12 @@ Please try again shortly, or visit the official UK Home Office website for UK In
 }
 
 function addDisclaimerIfNeeded(response: string): string {
-  // Check if response already contains a disclaimer or verification note
   if (response.toLowerCase().includes("disclaimer") || 
       response.toLowerCase().includes("gov.uk") ||
       response.toLowerCase().includes("verify")) {
     return response;
   }
 
-  // Add brief disclaimer only for sensitive topics
   const topicsRequiringDisclaimer = [
     "application",
     "approval",
