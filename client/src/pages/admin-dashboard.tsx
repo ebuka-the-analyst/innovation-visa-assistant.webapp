@@ -7325,18 +7325,19 @@ export default function AdminDashboard() {
                                         <p className="text-3xl font-bold text-green-500">£{(revenueAnalytics?.revenueToday || 0).toFixed(2)}</p>
                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-6 flex-wrap">
-                                      <div className="text-right">
+                                    <div className="flex items-center justify-center gap-6 flex-wrap flex-1">
+                                      <div className="text-center">
                                         <p className="text-sm text-muted-foreground">This Week</p>
                                         <p className="text-xl font-bold">£{(revenueAnalytics?.revenueThisWeek || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                       </div>
-                                      <div className="text-right">
+                                      <div className="text-center">
                                         <p className="text-sm text-muted-foreground">This Month</p>
                                         <p className="text-xl font-bold">£{(revenueAnalytics?.revenueThisMonth || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                       </div>
-                                      <Badge className={`${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'bg-green-500' : 'bg-red-500'} text-white px-4 py-2`}>
-                                        {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
-                                        {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? '+' : ''}{revenueAnalytics?.monthlyGrowth || 0}% MTD
+                                      <Badge className={`${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'bg-green-500' : 'bg-red-500'} text-white px-3 py-1.5 flex items-center`}>
+                                        {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                                        <span className="text-xs font-medium">{(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? '+' : ''}{revenueAnalytics?.monthlyGrowth || 0}% MTD</span>
+                                        <span className="ml-2 text-[10px] opacity-90">{format(new Date(), 'dd MMM')}</span>
                                       </Badge>
                                     </div>
                                   </div>
