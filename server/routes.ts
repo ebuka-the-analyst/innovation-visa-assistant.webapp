@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents } from "@shared/schema";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -9391,6 +9391,9 @@ Return a JSON object with:
         return res.status(400).json({ error: "Session ID and page path required" });
       }
 
+      // Round pageLoadTimeMs to integer for database
+      const roundedLoadTime = pageLoadTimeMs ? Math.round(pageLoadTimeMs) : null;
+
       // Create page view
       const result = await db.execute(
         sql`INSERT INTO page_views (
@@ -9398,7 +9401,7 @@ Return a JSON object with:
           referrer_path, navigation_type, page_load_time_ms
         ) VALUES (
           ${sessionId}, ${userId}, ${pagePath}, ${pageTitle || null}, ${pageUrl || null},
-          ${referrerPath || null}, ${navigationType || null}, ${pageLoadTimeMs || null}
+          ${referrerPath || null}, ${navigationType || null}, ${roundedLoadTime}
         ) RETURNING id`
       );
 
@@ -9843,6 +9846,228 @@ Return a JSON object with:
     } catch (error) {
       console.error("Users activity error:", error);
       res.status(500).json({ error: "Failed to fetch users activity" });
+    }
+  });
+
+  // ============================================
+  // ACTIVITY TRACKING ENDPOINTS
+  // ============================================
+  
+  // Start or update a session
+  app.post("/api/activity/session", async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user?.id) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { sessionToken, deviceInfo, location, referrer, utm, currentPage } = req.body;
+      
+      if (!sessionToken) {
+        return res.status(400).json({ error: "Session token required" });
+      }
+      
+      // Check if session already exists (heartbeat)
+      const existing = await db.select().from(userSessions)
+        .where(and(
+          eq(userSessions.userId, user.id),
+          eq(userSessions.sessionToken, sessionToken),
+          eq(userSessions.isActive, true)
+        ))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        // Update last seen and current page
+        await db.update(userSessions)
+          .set({ 
+            lastSeenAt: new Date(),
+            currentPage: currentPage || existing[0].currentPage
+          })
+          .where(eq(userSessions.id, existing[0].id));
+        
+        return res.json({ sessionId: existing[0].id, updated: true });
+      }
+      
+      // Create new session
+      const [session] = await db.insert(userSessions).values({
+        userId: user.id,
+        sessionToken,
+        deviceType: deviceInfo?.deviceType || 'desktop',
+        browserName: deviceInfo?.browserName,
+        browserVersion: deviceInfo?.browserVersion,
+        osName: deviceInfo?.osName,
+        osVersion: deviceInfo?.osVersion,
+        screenResolution: deviceInfo?.screenResolution,
+        connectionType: deviceInfo?.connectionType,
+        timezone: location?.timezone,
+        referrerUrl: referrer?.url,
+        referrerSource: referrer?.source,
+        utmSource: utm?.source,
+        utmMedium: utm?.medium,
+        utmCampaign: utm?.campaign,
+        currentPage: currentPage,
+        isActive: true,
+      }).returning();
+      
+      // Update user last activity
+      await db.update(users)
+        .set({ lastActivityAt: new Date() })
+        .where(eq(users.id, user.id));
+      
+      res.json({ sessionId: session.id, created: true });
+    } catch (error) {
+      console.error("Session tracking error:", error);
+      res.status(500).json({ error: "Failed to track session" });
+    }
+  });
+  
+  // Track page view
+  app.post("/api/activity/page-view", async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user?.id) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { sessionId, pagePath, pageTitle, pageUrl, referrerPath, navigationType, pageLoadTimeMs } = req.body;
+      
+      if (!sessionId || !pagePath) {
+        return res.status(400).json({ error: "Session ID and page path required" });
+      }
+      
+      // Verify session belongs to user
+      const [session] = await db.select().from(userSessions)
+        .where(and(
+          eq(userSessions.id, sessionId),
+          eq(userSessions.userId, user.id)
+        ))
+        .limit(1);
+      
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+      
+      // Create page view
+      const [pageView] = await db.insert(pageViews).values({
+        sessionId,
+        userId: user.id,
+        pagePath,
+        pageTitle,
+        pageUrl,
+        referrerPath,
+        navigationType,
+        pageLoadTimeMs: pageLoadTimeMs ? Math.round(pageLoadTimeMs) : null,
+      }).returning();
+      
+      // Update session current page
+      await db.update(userSessions)
+        .set({ 
+          currentPage: pagePath,
+          lastSeenAt: new Date()
+        })
+        .where(eq(userSessions.id, sessionId));
+      
+      // Update user last activity
+      await db.update(users)
+        .set({ lastActivityAt: new Date() })
+        .where(eq(users.id, user.id));
+      
+      res.json({ pageViewId: pageView.id });
+    } catch (error) {
+      console.error("Page view tracking error:", error);
+      res.status(500).json({ error: "Failed to track page view" });
+    }
+  });
+  
+  // Track activity event
+  app.post("/api/activity/event", async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user?.id) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { sessionId, eventType, eventCategory, eventAction, eventLabel, eventValue, pagePath, toolId, toolCategory, payload } = req.body;
+      
+      if (!sessionId || !eventType || !eventCategory || !eventAction) {
+        return res.status(400).json({ error: "Required fields missing" });
+      }
+      
+      // Verify session belongs to user
+      const [session] = await db.select().from(userSessions)
+        .where(and(
+          eq(userSessions.id, sessionId),
+          eq(userSessions.userId, user.id)
+        ))
+        .limit(1);
+      
+      if (!session) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+      
+      // Create event
+      const [event] = await db.insert(activityEvents).values({
+        sessionId,
+        userId: user.id,
+        eventType,
+        eventCategory,
+        eventAction,
+        eventLabel,
+        eventValue,
+        pagePath,
+        toolId,
+        toolCategory,
+        payload: payload ? JSON.stringify(payload) : null,
+      }).returning();
+      
+      // Update session last seen
+      await db.update(userSessions)
+        .set({ lastSeenAt: new Date() })
+        .where(eq(userSessions.id, sessionId));
+      
+      // Update user last activity
+      await db.update(users)
+        .set({ lastActivityAt: new Date() })
+        .where(eq(users.id, user.id));
+      
+      res.json({ eventId: event.id });
+    } catch (error) {
+      console.error("Event tracking error:", error);
+      res.status(500).json({ error: "Failed to track event" });
+    }
+  });
+  
+  // End session
+  app.post("/api/activity/session/end", async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user?.id) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { sessionId, exitPage } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ error: "Session ID required" });
+      }
+      
+      // End the session
+      await db.update(userSessions)
+        .set({ 
+          isActive: false,
+          sessionEndedAt: new Date(),
+          exitPage: exitPage || null,
+          lastSeenAt: new Date()
+        })
+        .where(and(
+          eq(userSessions.id, sessionId),
+          eq(userSessions.userId, user.id)
+        ));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Session end error:", error);
+      res.status(500).json({ error: "Failed to end session" });
     }
   });
 

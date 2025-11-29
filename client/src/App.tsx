@@ -336,7 +336,7 @@ function useActivityTracker() {
   const [location] = useLocation();
   const prevLocationRef = useRef<string | null>(null);
   const { data: user } = useQuery<{ id: string }>({
-    queryKey: ["/api/user"],
+    queryKey: ["/api/auth/user"],
     retry: false,
   });
 
