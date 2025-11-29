@@ -7658,99 +7658,54 @@ FORMAT YOUR RESPONSE AS:
 
 BE HARSH BUT FAIR. This is visa preparation - false confidence could lead to rejection.`;
 
-      // Helper function to use Gemini
-      const tryGemini = async (): Promise<{ score: number; feedback: string } | null> => {
-        if (!process.env.GEMINI_API_KEY) return null;
+      // Use Gemini exclusively for evaluation
+      if (!process.env.GEMINI_API_KEY) {
+        return res.json({
+          score: 0,
+          feedback: "**Evaluation Unavailable.** AI evaluation service is not configured. Please contact support@ukvisaassistant.com for assistance.",
+          error: true
+        });
+      }
+
+      try {
+        const { GoogleGenerativeAI } = await import("@google/genai");
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         
-        try {
-          const { GoogleGenerativeAI } = await import("@google/genai");
-          const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-          
-          const result = await model.generateContent(`${systemPrompt}\n\nQUESTION ASKED: "${question}"\n\nFOUNDER'S RESPONSE (${wordCount} words):\n"${response}"`);
-          const feedbackText = result.response.text();
-          
-          if (!feedbackText) return null;
-          
-          const scoreMatch = feedbackText.match(/\*?\*?Score:\s*(\d{1,3})\/100\*?\*?/i) || 
-                            feedbackText.match(/(\d{1,3})\/100/);
-          
-          if (!scoreMatch) return null;
-          
-          let score = parseInt(scoreMatch[1]);
-          
-          // Enforce word count caps
-          if (wordCount < 10 && score > 25) score = 25;
-          else if (wordCount < 20 && score > 45) score = 45;
-          else if (wordCount < 30 && score > 60) score = 60;
-          else if (wordCount < 50 && score > 75) score = 75;
-
-          return {
-            score: Math.min(100, Math.max(0, score)),
-            feedback: feedbackText
-          };
-        } catch (geminiError) {
-          console.error("Gemini evaluation error:", geminiError);
-          return null;
+        const result = await model.generateContent(`${systemPrompt}\n\nQUESTION ASKED: "${question}"\n\nFOUNDER'S RESPONSE (${wordCount} words):\n"${response}"`);
+        const feedbackText = result.response.text();
+        
+        if (!feedbackText) {
+          throw new Error("Empty AI response");
         }
-      };
-
-      // Try OpenAI first
-      if (process.env.OPENAI_API_KEY) {
-        try {
-          const OpenAI = (await import("openai")).default;
-          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-          
-          const completion = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: `QUESTION ASKED: "${question}"\n\nFOUNDER'S RESPONSE (${wordCount} words):\n"${response}"` }
-            ],
-            max_tokens: 600,
-            temperature: 0.3
-          });
-
-          const feedbackText = completion.choices[0]?.message?.content;
-          
-          if (feedbackText) {
-            const scoreMatch = feedbackText.match(/\*?\*?Score:\s*(\d{1,3})\/100\*?\*?/i) || 
-                              feedbackText.match(/(\d{1,3})\/100/);
-            
-            if (scoreMatch) {
-              let score = parseInt(scoreMatch[1]);
-              
-              // Enforce word count caps as safety net
-              if (wordCount < 10 && score > 25) score = 25;
-              else if (wordCount < 20 && score > 45) score = 45;
-              else if (wordCount < 30 && score > 60) score = 60;
-              else if (wordCount < 50 && score > 75) score = 75;
-
-              return res.json({
-                score: Math.min(100, Math.max(0, score)),
-                feedback: feedbackText
-              });
-            }
-          }
-          // If OpenAI response was invalid, try Gemini
-          console.log("OpenAI response invalid, trying Gemini...");
-        } catch (openaiError) {
-          console.error("OpenAI evaluation error, trying Gemini fallback:", openaiError);
+        
+        const scoreMatch = feedbackText.match(/\*?\*?Score:\s*(\d{1,3})\/100\*?\*?/i) || 
+                          feedbackText.match(/(\d{1,3})\/100/);
+        
+        if (!scoreMatch) {
+          throw new Error("Could not parse score from AI response");
         }
+        
+        let score = parseInt(scoreMatch[1]);
+        
+        // Enforce word count caps
+        if (wordCount < 10 && score > 25) score = 25;
+        else if (wordCount < 20 && score > 45) score = 45;
+        else if (wordCount < 30 && score > 60) score = 60;
+        else if (wordCount < 50 && score > 75) score = 75;
+
+        return res.json({
+          score: Math.min(100, Math.max(0, score)),
+          feedback: feedbackText
+        });
+      } catch (geminiError) {
+        console.error("Gemini evaluation error:", geminiError);
+        return res.json({
+          score: 0,
+          feedback: "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this problem persists, please contact support@ukvisaassistant.com for assistance.",
+          error: true
+        });
       }
-      
-      // Try Gemini (either as fallback or primary if OpenAI unavailable)
-      const geminiResult = await tryGemini();
-      if (geminiResult) {
-        return res.json(geminiResult);
-      }
-      
-      // Both AI services failed - return error message
-      return res.json({
-        score: 0,
-        feedback: "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this problem persists, please contact support@ukvisaassistant.com for assistance.",
-        error: true
-      });
     } catch (error) {
       console.error("Evaluate response error:", error);
       res.json({
