@@ -3577,11 +3577,14 @@ export default function AdminDashboard() {
                                 </div>
                                 <div className="flex items-center gap-4">
                                   <div className="text-center px-4 py-2 bg-background rounded-lg border">
-                                    <p className="text-3xl font-bold text-green-500">87%</p>
+                                    <p className={`text-3xl font-bold ${
+                                      (overviewData.extendedKPIs?.overallScore || 0) >= 80 ? 'text-green-500' :
+                                      (overviewData.extendedKPIs?.overallScore || 0) >= 60 ? 'text-amber-500' : 'text-red-500'
+                                    }`}>{overviewData.extendedKPIs?.overallScore || 0}%</p>
                                     <p className="text-xs text-muted-foreground">Overall Score</p>
                                   </div>
                                   <div className="text-center px-4 py-2 bg-background rounded-lg border">
-                                    <p className="text-3xl font-bold text-primary">{overviewData.kpiMetrics?.length || 0}</p>
+                                    <p className="text-3xl font-bold text-primary">5</p>
                                     <p className="text-xs text-muted-foreground">Active KPIs</p>
                                   </div>
                                 </div>
@@ -3634,24 +3637,32 @@ export default function AdminDashboard() {
                                 <CardHeader className="pb-2">
                                   <div className="flex items-center justify-between">
                                     <CardTitle className="text-sm font-medium">Plan Completion Rate</CardTitle>
-                                    <Badge variant="outline" className="text-amber-500 border-amber-500/30">Needs Focus</Badge>
+                                    <Badge variant="outline" className={
+                                      (overviewData.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'text-green-500 border-green-500/30' :
+                                      (overviewData.extendedKPIs?.planCompletionRate || 0) >= 50 ? 'text-amber-500 border-amber-500/30' : 'text-red-500 border-red-500/30'
+                                    }>
+                                      {(overviewData.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'On Track' :
+                                       (overviewData.extendedKPIs?.planCompletionRate || 0) >= 50 ? 'Needs Focus' : 'Critical'}
+                                    </Badge>
                                   </div>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-3xl font-bold">42%</p>
-                                      <p className="text-xs text-muted-foreground">Completion Rate</p>
+                                      <p className="text-3xl font-bold">{overviewData.extendedKPIs?.planCompletionRate || 0}%</p>
+                                      <p className="text-xs text-muted-foreground">{overviewData.extendedKPIs?.completedPlans || 0} of {overviewData.extendedKPIs?.totalPlans || 0} completed</p>
                                     </div>
                                     <div className="text-right">
                                       <p className="text-lg font-semibold text-muted-foreground">/ 80%</p>
                                       <p className="text-xs text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={42} className="h-3" />
+                                  <Progress value={overviewData.extendedKPIs?.planCompletionRate || 0} className="h-3" />
                                   <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">vs Target</span>
-                                    <span className="font-medium text-amber-500">52% of goal</span>
+                                    <span className={`font-medium ${
+                                      (overviewData.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'text-green-500' : 'text-amber-500'
+                                    }`}>{Math.round(((overviewData.extendedKPIs?.planCompletionRate || 0) / 80) * 100)}% of goal</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -3667,24 +3678,32 @@ export default function AdminDashboard() {
                                 <CardHeader className="pb-2">
                                   <div className="flex items-center justify-between">
                                     <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-                                    <Badge variant="outline" className="text-green-500 border-green-500/30">Exceeding</Badge>
+                                    <Badge variant="outline" className={
+                                      (overviewData.extendedKPIs?.monthlyRevenue || 0) >= (overviewData.extendedKPIs?.revenueTarget || 2000) ? 'text-green-500 border-green-500/30' :
+                                      (overviewData.extendedKPIs?.monthlyRevenue || 0) >= ((overviewData.extendedKPIs?.revenueTarget || 2000) * 0.5) ? 'text-amber-500 border-amber-500/30' : 'text-red-500 border-red-500/30'
+                                    }>
+                                      {(overviewData.extendedKPIs?.monthlyRevenue || 0) >= (overviewData.extendedKPIs?.revenueTarget || 2000) ? 'Exceeding' :
+                                       (overviewData.extendedKPIs?.monthlyRevenue || 0) >= ((overviewData.extendedKPIs?.revenueTarget || 2000) * 0.5) ? 'Growing' : 'Needs Focus'}
+                                    </Badge>
                                   </div>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-3xl font-bold">£2,450</p>
+                                      <p className="text-3xl font-bold">£{(overviewData.extendedKPIs?.monthlyRevenue || 0).toLocaleString()}</p>
                                       <p className="text-xs text-muted-foreground">Current MRR</p>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-lg font-semibold text-muted-foreground">/ £2,000</p>
+                                      <p className="text-lg font-semibold text-muted-foreground">/ £{(overviewData.extendedKPIs?.revenueTarget || 2000).toLocaleString()}</p>
                                       <p className="text-xs text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={100} className="h-3" />
+                                  <Progress value={Math.min(((overviewData.extendedKPIs?.monthlyRevenue || 0) / (overviewData.extendedKPIs?.revenueTarget || 2000)) * 100, 100)} className="h-3" />
                                   <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">vs Target</span>
-                                    <span className="font-medium text-green-500">122% of goal</span>
+                                    <span className={`font-medium ${
+                                      (overviewData.extendedKPIs?.monthlyRevenue || 0) >= (overviewData.extendedKPIs?.revenueTarget || 2000) ? 'text-green-500' : 'text-amber-500'
+                                    }`}>{Math.round(((overviewData.extendedKPIs?.monthlyRevenue || 0) / (overviewData.extendedKPIs?.revenueTarget || 2000)) * 100)}% of goal</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -3733,30 +3752,36 @@ export default function AdminDashboard() {
                                 <CardHeader className="pb-2">
                                   <div className="flex items-center justify-between">
                                     <CardTitle className="text-sm font-medium">Tool Adoption Rate</CardTitle>
-                                    <Badge variant="outline" className="text-blue-500 border-blue-500/30">Growing</Badge>
+                                    <Badge variant="outline" className={
+                                      (overviewData.extendedKPIs?.toolAdoptionRate || 0) >= 75 ? 'text-green-500 border-green-500/30' :
+                                      (overviewData.extendedKPIs?.toolAdoptionRate || 0) >= 50 ? 'text-blue-500 border-blue-500/30' : 'text-amber-500 border-amber-500/30'
+                                    }>
+                                      {(overviewData.extendedKPIs?.toolAdoptionRate || 0) >= 75 ? 'Excellent' :
+                                       (overviewData.extendedKPIs?.toolAdoptionRate || 0) >= 50 ? 'Growing' : 'Building'}
+                                    </Badge>
                                   </div>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-3xl font-bold">68%</p>
-                                      <p className="text-xs text-muted-foreground">Tools Used</p>
+                                      <p className="text-3xl font-bold">{overviewData.extendedKPIs?.toolAdoptionRate || 0}%</p>
+                                      <p className="text-xs text-muted-foreground">{overviewData.extendedKPIs?.uniqueToolsUsed || 0} of {overviewData.extendedKPIs?.totalTools || 109} tools</p>
                                     </div>
                                     <div className="text-right">
                                       <p className="text-lg font-semibold text-muted-foreground">/ 75%</p>
                                       <p className="text-xs text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={68} className="h-3" />
+                                  <Progress value={overviewData.extendedKPIs?.toolAdoptionRate || 0} className="h-3" />
                                   <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Avg tools/user</span>
-                                    <span className="font-medium text-blue-500">12.4 tools</span>
+                                    <span className="font-medium text-blue-500">{overviewData.extendedKPIs?.avgToolsPerUser || 0} tools</span>
                                   </div>
                                 </CardContent>
                               </Card>
                             </motion.div>
 
-                            {/* Customer Satisfaction KPI */}
+                            {/* User Engagement KPI */}
                             <motion.div
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
@@ -3765,25 +3790,31 @@ export default function AdminDashboard() {
                               <Card className="h-full">
                                 <CardHeader className="pb-2">
                                   <div className="flex items-center justify-between">
-                                    <CardTitle className="text-sm font-medium">Customer Satisfaction</CardTitle>
-                                    <Badge variant="outline" className="text-green-500 border-green-500/30">Excellent</Badge>
+                                    <CardTitle className="text-sm font-medium">User Engagement</CardTitle>
+                                    <Badge variant="outline" className={
+                                      ((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.5 ? 'text-green-500 border-green-500/30' :
+                                      ((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.25 ? 'text-blue-500 border-blue-500/30' : 'text-amber-500 border-amber-500/30'
+                                    }>
+                                      {((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.5 ? 'Excellent' :
+                                       ((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.25 ? 'Good' : 'Building'}
+                                    </Badge>
                                   </div>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-3xl font-bold">4.8</p>
-                                      <p className="text-xs text-muted-foreground">NPS Score</p>
+                                      <p className="text-3xl font-bold">{Math.round(((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100)}%</p>
+                                      <p className="text-xs text-muted-foreground">Daily active rate</p>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-lg font-semibold text-muted-foreground">/ 5.0</p>
+                                      <p className="text-lg font-semibold text-muted-foreground">/ 50%</p>
                                       <p className="text-xs text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={96} className="h-3" />
+                                  <Progress value={Math.min(((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100, 100)} className="h-3" />
                                   <div className="flex items-center justify-between text-sm">
-                                    <span className="text-muted-foreground">Rating</span>
-                                    <span className="font-medium text-green-500">96% satisfied</span>
+                                    <span className="text-muted-foreground">Active users</span>
+                                    <span className="font-medium text-blue-500">{overviewData.extendedKPIs?.dailyActiveUsers || 0} of {filteredOverviewData?.kpiMetrics?.[0]?.value || 0}</span>
                                   </div>
                                 </CardContent>
                               </Card>

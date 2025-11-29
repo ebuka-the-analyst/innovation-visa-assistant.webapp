@@ -2364,6 +2364,54 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
       // Get tool usage stats
       const toolUsageStats = await storage.getToolUsageStats(10);
       
+      // Calculate real KPI metrics
+      const planCompletionRate = totalPlans > 0 ? Math.round((completedPlans / totalPlans) * 100) : 0;
+      
+      // Get real tool adoption data from tool_usage_analytics
+      const toolUsageQuery = await db.execute(sql`
+        SELECT COUNT(DISTINCT tool_id) as unique_tools, COUNT(*) as total_uses
+        FROM tool_usage_analytics
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+      `);
+      const toolStats = toolUsageQuery.rows[0] as any || { unique_tools: 0, total_uses: 0 };
+      const uniqueToolsUsed = parseInt(toolStats.unique_tools) || 0;
+      const totalTools = 109; // Total available tools
+      const toolAdoptionRate = Math.round((uniqueToolsUsed / totalTools) * 100);
+      
+      // Get average tools per user
+      const avgToolsQuery = await db.execute(sql`
+        SELECT AVG(tool_count) as avg_tools FROM (
+          SELECT user_id, COUNT(DISTINCT tool_id) as tool_count
+          FROM tool_usage_analytics
+          WHERE created_at >= NOW() - INTERVAL '30 days'
+          GROUP BY user_id
+        ) subquery
+      `);
+      const avgToolsPerUser = parseFloat((avgToolsQuery.rows[0] as any)?.avg_tools) || 0;
+      
+      // Get real revenue from Stripe (subscription payments in last 30 days)
+      let monthlyRevenue = 0;
+      try {
+        const thirtyDaysAgoTimestamp = Math.floor(thirtyDaysAgo.getTime() / 1000);
+        const charges = await stripe.charges.list({
+          created: { gte: thirtyDaysAgoTimestamp },
+          limit: 100,
+        });
+        monthlyRevenue = charges.data
+          .filter(c => c.status === 'succeeded')
+          .reduce((sum, c) => sum + (c.amount / 100), 0);
+      } catch (stripeError) {
+        console.error("Stripe revenue fetch error:", stripeError);
+      }
+      
+      // Get daily active users from user_sessions (last 24 hours)
+      const dailyActiveQuery = await db.execute(sql`
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM user_sessions
+        WHERE last_seen_at >= NOW() - INTERVAL '24 hours'
+      `);
+      const dailyActiveUsers = parseInt((dailyActiveQuery.rows[0] as any)?.count) || activeUsers;
+      
       // System health
       const uptime = process.uptime();
       const databaseStatus = await storage.checkDatabaseHealth();
@@ -2401,13 +2449,44 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
         };
       });
       
+      // Calculate overall KPI score based on real metrics
+      const kpiTargets = {
+        userAcquisition: { value: totalUsers, target: 50 },
+        planCompletion: { value: planCompletionRate, target: 80 },
+        revenue: { value: monthlyRevenue, target: 2000 },
+        dailyActive: { value: dailyActiveUsers, target: 25 },
+        toolAdoption: { value: toolAdoptionRate, target: 75 },
+      };
+      
+      const overallScore = Math.round(
+        ((Math.min(kpiTargets.userAcquisition.value / kpiTargets.userAcquisition.target, 1) * 20) +
+        (Math.min(kpiTargets.planCompletion.value / kpiTargets.planCompletion.target, 1) * 20) +
+        (Math.min(kpiTargets.revenue.value / kpiTargets.revenue.target, 1) * 20) +
+        (Math.min(kpiTargets.dailyActive.value / kpiTargets.dailyActive.target, 1) * 20) +
+        (Math.min(kpiTargets.toolAdoption.value / kpiTargets.toolAdoption.target, 1) * 20))
+      );
+      
       res.json({
         kpiMetrics: [
           { label: 'Total Users', value: totalUsers, trend: { value: newUsersLastWeek, direction: 'up' as const, period: '7d' }, icon: 'Users', color: 'blue' },
-          { label: 'Active Now', value: activeUsers, trend: { value: Math.round((activeUsers / Math.max(totalUsers, 1)) * 100), direction: 'up' as const, period: '30d' }, icon: 'Activity', color: 'green' },
+          { label: 'Active Now', value: dailyActiveUsers, trend: { value: Math.round((dailyActiveUsers / Math.max(totalUsers, 1)) * 100), direction: 'up' as const, period: '24h' }, icon: 'Activity', color: 'green' },
           { label: 'Total Plans', value: totalPlans, trend: { value: completedPlans, direction: 'up' as const, period: 'completed' }, icon: 'FileText', color: 'purple' },
           { label: 'Pending Plans', value: pendingPlans, trend: { value: pendingPlans, direction: 'neutral' as const, period: 'now' }, icon: 'Clock', color: 'orange' },
         ],
+        extendedKPIs: {
+          planCompletionRate,
+          completedPlans,
+          totalPlans,
+          monthlyRevenue,
+          revenueTarget: 2000,
+          toolAdoptionRate,
+          avgToolsPerUser: Math.round(avgToolsPerUser * 10) / 10,
+          uniqueToolsUsed,
+          totalTools,
+          dailyActiveUsers,
+          dailyActiveTarget: 25,
+          overallScore,
+        },
         timeSeriesData,
         subscriptionDistribution: Object.entries(tierCounts).map(([tier, count]) => ({
           tier,
