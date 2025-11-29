@@ -21,7 +21,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 const ChatBot = lazy(() => import("@/components/ChatBot"));
 const CookieConsent = lazy(() => import("@/components/CookieConsent"));
 const ToolsChronographWheel = lazy(() => import("@/components/ToolsChronographWheel"));
-const BlackNovemberBanner = lazy(() => import("@/components/BlackNovemberBanner"));
+// Black November banner removed - promotion ended
 const SpotlightTour = lazy(() => import("@/components/SpotlightTour"));
 const SiteFeedbackPopup = lazy(() => import("@/components/SiteFeedbackPopup").then(m => ({ default: m.SiteFeedbackPopup })));
 
@@ -411,7 +411,6 @@ function App() {
         <VoicePermissionProvider>
           <TooltipProvider>
             <Suspense fallback={null}>
-              <BlackNovemberBanner />
               <ChatBot />
               <ToolsChronographWheel />
               <SiteFeedbackPopup />
