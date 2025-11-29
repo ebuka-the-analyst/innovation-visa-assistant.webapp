@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs } from "@shared/schema";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
@@ -106,6 +106,37 @@ const PRICING = {
   enterprise: { amount: 8900, name: "Enterprise Plan" },
   ultimate: { amount: 12900, name: "Ultimate Plan" },
 };
+
+// Helper function to format time ago for email analytics
+function formatTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+// Helper function to format email type for display
+function formatEmailType(type: string): string {
+  const typeLabels: Record<string, string> = {
+    'verification': 'Verification Emails',
+    'welcome': 'Welcome Emails',
+    'password_reset': 'Password Reset',
+    'payment_receipt': 'Payment Receipts',
+    'plan_notification': 'Plan Notifications',
+    'marketing': 'Marketing',
+    'system': 'System Emails',
+    'referral': 'Referral Emails',
+    'promo': 'Promo Emails',
+  };
+  return typeLabels[type] || type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' ');
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth authentication (must be before routes)
@@ -3108,6 +3139,80 @@ EXAMPLES OF GOOD RESPONSES:
         error: "Failed to fetch subscriptions",
         message: error?.message || "Unknown error"
       });
+    }
+  });
+
+  // Email Analytics - Real data from email_logs table
+  app.get("/api/admin/analytics/emails", requireAdmin, async (req, res) => {
+    try {
+      // Get email statistics from database
+      const allEmails = await db.select().from(emailLogs).orderBy(desc(emailLogs.sentAt));
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      
+      // Calculate metrics
+      const totalSent30Days = allEmails.filter(e => new Date(e.sentAt) >= thirtyDaysAgo).length;
+      const sentToday = allEmails.filter(e => new Date(e.sentAt) >= today).length;
+      const successfulEmails = allEmails.filter(e => e.status === 'sent' || e.status === 'delivered');
+      const deliveryRate = totalSent30Days > 0 ? ((successfulEmails.filter(e => new Date(e.sentAt) >= thirtyDaysAgo).length / totalSent30Days) * 100).toFixed(1) : '0';
+      
+      // Group by email type
+      const typeBreakdown = allEmails.reduce((acc, email) => {
+        const type = email.emailType || 'system';
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      // Get weekly data for chart (last 4 weeks)
+      const weeklyData = [];
+      for (let i = 3; i >= 0; i--) {
+        const weekStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
+        const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+        const weekEmails = allEmails.filter(e => {
+          const sentDate = new Date(e.sentAt);
+          return sentDate >= weekStart && sentDate < weekEnd;
+        });
+        weeklyData.push({
+          week: `Week ${4 - i}`,
+          sent: weekEmails.length,
+          delivered: weekEmails.filter(e => e.status === 'sent' || e.status === 'delivered').length,
+        });
+      }
+      
+      // Get recent emails (last 10)
+      const recentEmails = allEmails.slice(0, 10).map(email => ({
+        id: email.id,
+        to: email.recipientEmail,
+        subject: email.subject,
+        type: email.emailType,
+        status: email.status,
+        time: formatTimeAgo(new Date(email.sentAt)),
+        sentAt: email.sentAt
+      }));
+      
+      // Format type distribution for display
+      const typeDistribution = Object.entries(typeBreakdown).map(([type, count]) => ({
+        type: formatEmailType(type),
+        count,
+        percent: totalSent30Days > 0 ? ((count / allEmails.length) * 100).toFixed(1) : '0'
+      }));
+      
+      res.json({
+        summary: {
+          totalSent30Days,
+          sentToday,
+          deliveryRate: `${deliveryRate}%`,
+          totalAllTime: allEmails.length
+        },
+        weeklyData,
+        typeDistribution,
+        recentEmails
+      });
+    } catch (error: any) {
+      console.error("Email analytics error:", error);
+      res.status(500).json({ error: "Failed to fetch email analytics" });
     }
   });
 

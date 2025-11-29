@@ -1,11 +1,16 @@
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import { db } from "./db";
+import { emailLogs } from "@shared/schema";
 
 interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
   from?: string;
+  emailType?: string;
+  recipientName?: string;
+  userId?: string;
 }
 
 function escapeHtml(text: string): string {
@@ -57,15 +62,33 @@ const createTransporter = () => {
   return null;
 };
 
-export async function sendEmail({ to, subject, html, from }: SendEmailParams) {
+export async function sendEmail({ to, subject, html, from, emailType = 'system', recipientName, userId }: SendEmailParams) {
   const DEFAULT_FROM_EMAIL = 'noreply@innovatorfoundervisaassistant.co.uk';
   
   const transporter = createTransporter();
+  const provider = process.env.AWS_SES_SMTP_USERNAME ? 'aws_ses' : 'hostinger';
   
   if (!transporter) {
     console.error("Email service not configured. Email not sent.");
     console.log("Would have sent email to:", to);
     console.log("Subject:", subject);
+    
+    // Log failed email attempt
+    try {
+      await db.insert(emailLogs).values({
+        recipientEmail: to,
+        recipientName: recipientName || null,
+        subject: subject,
+        emailType: emailType,
+        status: 'failed',
+        provider: null,
+        errorMessage: 'Email service not configured',
+        userId: userId || null,
+      });
+    } catch (logError) {
+      console.error("Failed to log email:", logError);
+    }
+    
     return { success: false, error: "Email service not configured" };
   }
 
@@ -80,9 +103,43 @@ export async function sendEmail({ to, subject, html, from }: SendEmailParams) {
     });
 
     console.log("Email sent successfully to:", to, "MessageId:", info.messageId);
+    
+    // Log successful email
+    try {
+      await db.insert(emailLogs).values({
+        recipientEmail: to,
+        recipientName: recipientName || null,
+        subject: subject,
+        emailType: emailType,
+        status: 'sent',
+        provider: provider,
+        messageId: info.messageId,
+        userId: userId || null,
+      });
+    } catch (logError) {
+      console.error("Failed to log email:", logError);
+    }
+    
     return { success: true, messageId: info.messageId };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Email send error:", error);
+    
+    // Log failed email
+    try {
+      await db.insert(emailLogs).values({
+        recipientEmail: to,
+        recipientName: recipientName || null,
+        subject: subject,
+        emailType: emailType,
+        status: 'failed',
+        provider: provider,
+        errorMessage: error?.message || 'Unknown error',
+        userId: userId || null,
+      });
+    } catch (logError) {
+      console.error("Failed to log email:", logError);
+    }
+    
     return { success: false, error: "Failed to send email" };
   }
 }
@@ -180,7 +237,9 @@ export async function sendPasswordResetEmail(
   return sendEmail({
     to: email,
     subject: 'Password Reset Request - UK Innovator Founder Visa Assistant',
-    html
+    html,
+    emailType: 'password_reset',
+    recipientName: firstName
   });
 }
 
@@ -263,7 +322,9 @@ export async function sendVerificationEmail(
   return sendEmail({
     to: email,
     subject: '🎉 Verify your email - UK Innovator Founder Visa Assistant',
-    html
+    html,
+    emailType: 'verification',
+    recipientName: firstName
   });
 }
 
@@ -457,6 +518,8 @@ export async function sendPaymentReceiptEmail(
     subject: 'Payment Receipt - UK Innovator Founder Visa Assistant',
     html,
     from: 'UK Innovator Visa Assistant <noreply@innovatorfoundervisaassistant.co.uk>',
+    emailType: 'payment_receipt',
+    recipientName: firstName
   });
 }
 
@@ -539,7 +602,9 @@ export async function sendWelcomeEmail(
   return sendEmail({
     to: email,
     subject: 'Welcome to UK Innovator Founder Visa Assistant!',
-    html
+    html,
+    emailType: 'welcome',
+    recipientName: firstName
   });
 }
 

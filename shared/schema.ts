@@ -2725,3 +2725,51 @@ export type InsertPageView = z.infer<typeof insertPageViewSchema>;
 
 export type ActivityEvent = typeof activityEvents.$inferSelect;
 export type InsertActivityEvent = z.infer<typeof insertActivityEventSchema>;
+
+// ============================================
+// EMAIL LOGS - REAL EMAIL TRACKING SYSTEM
+// ============================================
+
+export const emailLogs = pgTable("email_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Email Details
+  recipientEmail: varchar("recipient_email", { length: 255 }).notNull(),
+  recipientName: varchar("recipient_name", { length: 255 }),
+  subject: varchar("subject", { length: 500 }).notNull(),
+  
+  // Email Type Classification
+  emailType: varchar("email_type", { length: 50 }).notNull(), // verification, welcome, password_reset, payment_receipt, plan_notification, marketing, system
+  
+  // Status Tracking
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // pending, sent, delivered, failed, bounced
+  
+  // Provider Info
+  provider: varchar("provider", { length: 50 }), // aws_ses, hostinger
+  messageId: varchar("message_id", { length: 255 }),
+  
+  // Error Tracking
+  errorMessage: text("error_message"),
+  
+  // User Association (optional)
+  userId: varchar("user_id").references(() => users.id),
+  
+  // Timestamps
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+  deliveredAt: timestamp("delivered_at"),
+  
+}, (table) => [
+  index("idx_email_recipient").on(table.recipientEmail),
+  index("idx_email_type").on(table.emailType),
+  index("idx_email_status").on(table.status),
+  index("idx_email_sent_at").on(table.sentAt),
+  index("idx_email_user").on(table.userId),
+]);
+
+export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
+  id: true,
+  sentAt: true,
+});
+
+export type EmailLog = typeof emailLogs.$inferSelect;
+export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;

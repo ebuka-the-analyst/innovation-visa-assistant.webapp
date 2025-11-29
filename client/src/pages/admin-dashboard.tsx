@@ -1335,6 +1335,31 @@ export default function AdminDashboard() {
     refetchInterval: 30000,
   });
 
+  // Email Analytics - Real data from email_logs table
+  const { data: emailAnalytics, isLoading: emailAnalyticsLoading } = useQuery<{
+    summary: {
+      totalSent30Days: number;
+      sentToday: number;
+      deliveryRate: string;
+      totalAllTime: number;
+    };
+    weeklyData: Array<{ week: string; sent: number; delivered: number }>;
+    typeDistribution: Array<{ type: string; count: number; percent: string }>;
+    recentEmails: Array<{
+      id: string;
+      to: string;
+      subject: string;
+      type: string;
+      status: string;
+      time: string;
+      sentAt: string;
+    }>;
+  }>({
+    queryKey: ['/api/admin/analytics/emails'],
+    enabled: !!user?.isAdmin && activeSection === 'comms-emails',
+    refetchInterval: 30000,
+  });
+
   // Resolve error mutation
   const resolveErrorMutation = useMutation({
     mutationFn: async ({ errorId, resolution }: { errorId: string; resolution: string }) => {
@@ -9190,190 +9215,194 @@ export default function AdminDashboard() {
                       transition={{ duration: 0.5 }}
                       className="space-y-6"
                     >
-                      {/* 1. EMAIL ANALYTICS - Comprehensive Email Dashboard */}
+                      {/* 1. EMAIL ANALYTICS - Real Data from Database */}
                       {activeSection === 'comms-emails' && (
                         <>
-                          {/* Email Overview Banner */}
-                          <Card className="bg-gradient-to-r from-blue-500/10 via-sky-500/5 to-blue-500/10 border-blue-500/20">
-                            <CardContent className="py-6">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                  <div className="p-3 rounded-xl bg-blue-500 text-white">
-                                    <Mail className="h-6 w-6" />
-                                  </div>
-                                  <div>
-                                    <p className="text-sm text-muted-foreground">Email Analytics</p>
-                                    <p className="text-2xl font-bold text-blue-500">Email Performance Dashboard</p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-6">
-                                  <div className="text-center">
-                                    <p className="text-sm text-muted-foreground">Sent Today</p>
-                                    <p className="text-xl font-bold">89</p>
-                                  </div>
-                                  <div className="text-center">
-                                    <p className="text-sm text-muted-foreground">Delivered</p>
-                                    <p className="text-xl font-bold text-green-500">98.5%</p>
-                                  </div>
-                                </div>
+                          {emailAnalyticsLoading ? (
+                            <div className="space-y-6">
+                              <Skeleton className="h-24 w-full" />
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                {[1,2,3,4].map(i => <Skeleton key={i} className="h-32" />)}
                               </div>
-                            </CardContent>
-                          </Card>
+                            </div>
+                          ) : (
+                            <>
+                              {/* Email Overview Banner */}
+                              <Card className="bg-gradient-to-r from-blue-500/10 via-sky-500/5 to-blue-500/10 border-blue-500/20">
+                                <CardContent className="py-6">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                      <div className="p-3 rounded-xl bg-blue-500 text-white">
+                                        <Mail className="h-6 w-6" />
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">Email Analytics</p>
+                                        <p className="text-2xl font-bold text-blue-500">Email Performance Dashboard</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-6">
+                                      <div className="text-center">
+                                        <p className="text-sm text-muted-foreground">Sent Today</p>
+                                        <p className="text-xl font-bold">{emailAnalytics?.summary?.sentToday || 0}</p>
+                                      </div>
+                                      <div className="text-center">
+                                        <p className="text-sm text-muted-foreground">Delivery Rate</p>
+                                        <p className="text-xl font-bold text-green-500">{emailAnalytics?.summary?.deliveryRate || '0%'}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
 
-                          {/* Email KPIs */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            {[
-                              { label: 'Total Sent', value: '1,247', icon: Send, color: 'blue', sub: 'Last 30 days' },
-                              { label: 'Delivery Rate', value: '98.5%', icon: CheckCircle, color: 'green', sub: 'Excellent' },
-                              { label: 'Open Rate', value: '42.3%', icon: Eye, color: 'purple', sub: 'Above average' },
-                              { label: 'Click Rate', value: '12.8%', icon: MousePointer, color: 'amber', sub: 'Good' },
-                            ].map((kpi, index) => (
-                              <motion.div
-                                key={kpi.label}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                              >
-                                <Card className={`hover-elevate border-t-4 border-t-${kpi.color}-500`}>
-                                  <CardContent className="pt-6">
-                                    <kpi.icon className={`h-8 w-8 text-${kpi.color}-500 mb-3`} />
-                                    <p className="text-3xl font-bold">{kpi.value}</p>
-                                    <p className="text-sm text-muted-foreground">{kpi.label}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">{kpi.sub}</p>
+                              {/* Email KPIs - Real Data */}
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                {[
+                                  { label: 'Total Sent (30 days)', value: emailAnalytics?.summary?.totalSent30Days?.toLocaleString() || '0', icon: Send, color: 'blue', sub: 'Last 30 days' },
+                                  { label: 'Delivery Rate', value: emailAnalytics?.summary?.deliveryRate || '0%', icon: CheckCircle, color: 'green', sub: emailAnalytics?.summary?.deliveryRate === '100%' ? 'Perfect' : 'Good' },
+                                  { label: 'Sent Today', value: emailAnalytics?.summary?.sentToday?.toString() || '0', icon: Eye, color: 'purple', sub: 'Today' },
+                                  { label: 'Total All Time', value: emailAnalytics?.summary?.totalAllTime?.toLocaleString() || '0', icon: MousePointer, color: 'amber', sub: 'Since launch' },
+                                ].map((kpi, index) => (
+                                  <motion.div
+                                    key={kpi.label}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                  >
+                                    <Card className={`hover-elevate border-t-4 border-t-${kpi.color}-500`}>
+                                      <CardContent className="pt-6">
+                                        <kpi.icon className={`h-8 w-8 text-${kpi.color}-500 mb-3`} />
+                                        <p className="text-3xl font-bold">{kpi.value}</p>
+                                        <p className="text-sm text-muted-foreground">{kpi.label}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">{kpi.sub}</p>
+                                      </CardContent>
+                                    </Card>
+                                  </motion.div>
+                                ))}
+                              </div>
+
+                              {/* Email Charts - Real Data */}
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle>Email Volume (30 days)</CardTitle>
+                                    <CardDescription>Weekly email sending trends</CardDescription>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <ResponsiveContainer width="100%" height={250}>
+                                      <RechartsAreaChart data={emailAnalytics?.weeklyData || []}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                        <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                                        <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
+                                        <Area type="monotone" dataKey="sent" stroke="#3b82f6" fill="#3b82f620" strokeWidth={2} name="Sent" />
+                                        <Area type="monotone" dataKey="delivered" stroke="#22c55e" fill="#22c55e20" strokeWidth={2} name="Delivered" />
+                                      </RechartsAreaChart>
+                                    </ResponsiveContainer>
+                                    <div className="flex justify-center gap-6 mt-4">
+                                      {[
+                                        { name: 'Sent', color: '#3b82f6' },
+                                        { name: 'Delivered', color: '#22c55e' },
+                                      ].map(item => (
+                                        <div key={item.name} className="flex items-center gap-2">
+                                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                          <span className="text-sm">{item.name}</span>
+                                        </div>
+                                      ))}
+                                    </div>
                                   </CardContent>
                                 </Card>
-                              </motion.div>
-                            ))}
-                          </div>
 
-                          {/* Email Charts */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <Card>
-                              <CardHeader>
-                                <CardTitle>Email Volume (30 days)</CardTitle>
-                                <CardDescription>Daily email sending trends</CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <ResponsiveContainer width="100%" height={250}>
-                                  <RechartsAreaChart data={[
-                                    { day: 'Week 1', sent: 280, delivered: 275, opened: 115 },
-                                    { day: 'Week 2', sent: 320, delivered: 315, opened: 138 },
-                                    { day: 'Week 3', sent: 295, delivered: 290, opened: 124 },
-                                    { day: 'Week 4', sent: 352, delivered: 347, opened: 151 },
-                                  ]}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                                    <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} />
-                                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
-                                    <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
-                                    <Area type="monotone" dataKey="sent" stroke="#3b82f6" fill="#3b82f620" strokeWidth={2} />
-                                    <Area type="monotone" dataKey="delivered" stroke="#22c55e" fill="#22c55e20" strokeWidth={2} />
-                                    <Area type="monotone" dataKey="opened" stroke="#8b5cf6" fill="#8b5cf620" strokeWidth={2} />
-                                  </RechartsAreaChart>
-                                </ResponsiveContainer>
-                                <div className="flex justify-center gap-6 mt-4">
-                                  {[
-                                    { name: 'Sent', color: '#3b82f6' },
-                                    { name: 'Delivered', color: '#22c55e' },
-                                    { name: 'Opened', color: '#8b5cf6' },
-                                  ].map(item => (
-                                    <div key={item.name} className="flex items-center gap-2">
-                                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                                      <span className="text-sm">{item.name}</span>
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle>Email Type Distribution</CardTitle>
+                                    <CardDescription>Breakdown by category</CardDescription>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="space-y-4">
+                                      {emailAnalytics?.typeDistribution?.length ? (
+                                        emailAnalytics.typeDistribution.map((item, index) => {
+                                          const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899'];
+                                          const color = colors[index % colors.length];
+                                          return (
+                                            <motion.div
+                                              key={item.type}
+                                              initial={{ opacity: 0, x: -20 }}
+                                              animate={{ opacity: 1, x: 0 }}
+                                              transition={{ delay: index * 0.1 }}
+                                              className="space-y-2"
+                                            >
+                                              <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+                                                  <span className="text-sm">{item.type}</span>
+                                                </div>
+                                                <span className="text-sm font-bold">{item.count}</span>
+                                              </div>
+                                              <div className="relative h-2 rounded-full bg-muted overflow-hidden">
+                                                <motion.div
+                                                  className="absolute inset-y-0 left-0 rounded-full"
+                                                  style={{ backgroundColor: color }}
+                                                  initial={{ width: 0 }}
+                                                  animate={{ width: `${parseFloat(item.percent)}%` }}
+                                                  transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
+                                                />
+                                              </div>
+                                            </motion.div>
+                                          );
+                                        })
+                                      ) : (
+                                        <p className="text-muted-foreground text-center py-8">No emails sent yet</p>
+                                      )}
                                     </div>
-                                  ))}
-                                </div>
-                              </CardContent>
-                            </Card>
+                                  </CardContent>
+                                </Card>
+                              </div>
 
-                            <Card>
-                              <CardHeader>
-                                <CardTitle>Email Type Distribution</CardTitle>
-                                <CardDescription>Breakdown by category</CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <div className="space-y-4">
-                                  {[
-                                    { type: 'Verification Emails', count: 456, percent: 36.6, color: '#3b82f6' },
-                                    { type: 'Welcome Emails', count: 234, percent: 18.8, color: '#22c55e' },
-                                    { type: 'Plan Notifications', count: 312, percent: 25.0, color: '#f59e0b' },
-                                    { type: 'Password Reset', count: 89, percent: 7.1, color: '#8b5cf6' },
-                                    { type: 'Marketing', count: 156, percent: 12.5, color: '#ef4444' },
-                                  ].map((item, index) => (
-                                    <motion.div
-                                      key={item.type}
-                                      initial={{ opacity: 0, x: -20 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="space-y-2"
-                                    >
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                                          <span className="text-sm">{item.type}</span>
-                                        </div>
-                                        <span className="text-sm font-bold">{item.count}</span>
-                                      </div>
-                                      <div className="relative h-2 rounded-full bg-muted overflow-hidden">
-                                        <motion.div
-                                          className="absolute inset-y-0 left-0 rounded-full"
-                                          style={{ backgroundColor: item.color }}
-                                          initial={{ width: 0 }}
-                                          animate={{ width: `${item.percent}%` }}
-                                          transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
-                                        />
-                                      </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </div>
-
-                          {/* Recent Emails Table */}
-                          <Card>
-                            <CardHeader>
-                              <CardTitle>Recent Emails</CardTitle>
-                              <CardDescription>Last 10 emails sent</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              <ScrollArea className="h-[300px]">
-                                <div className="space-y-3">
-                                  {[
-                                    { to: 'john@example.com', subject: 'Welcome to UK Visa Assistant', type: 'Welcome', status: 'delivered', time: '5 min ago' },
-                                    { to: 'sarah@startup.io', subject: 'Verify your email address', type: 'Verification', status: 'opened', time: '12 min ago' },
-                                    { to: 'mike@company.uk', subject: 'Your Premium plan is active', type: 'Notification', status: 'delivered', time: '25 min ago' },
-                                    { to: 'lisa@tech.co', subject: 'Password reset request', type: 'Password', status: 'clicked', time: '1 hour ago' },
-                                    { to: 'demo@test.com', subject: 'Your free trial is ending', type: 'Marketing', status: 'bounced', time: '2 hours ago' },
-                                  ].map((email, index) => (
-                                    <motion.div
-                                      key={index}
-                                      initial={{ opacity: 0 }}
-                                      animate={{ opacity: 1 }}
-                                      transition={{ delay: index * 0.05 }}
-                                      className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
-                                    >
-                                      <div className="flex items-center gap-3">
-                                        <Mail className="h-5 w-5 text-blue-500" />
-                                        <div>
-                                          <p className="font-medium text-sm">{email.subject}</p>
-                                          <p className="text-xs text-muted-foreground">{email.to}</p>
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center gap-3">
-                                        <Badge variant="outline">{email.type}</Badge>
-                                        <Badge className={
-                                          email.status === 'opened' || email.status === 'clicked' ? 'bg-green-500 text-white' :
-                                          email.status === 'delivered' ? 'bg-blue-500 text-white' :
-                                          'bg-red-500 text-white'
-                                        }>{email.status}</Badge>
-                                        <span className="text-xs text-muted-foreground">{email.time}</span>
-                                      </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </ScrollArea>
-                            </CardContent>
-                          </Card>
+                              {/* Recent Emails Table - Real Data */}
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle>Recent Emails</CardTitle>
+                                  <CardDescription>Last 10 emails sent</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                  <ScrollArea className="h-[300px]">
+                                    <div className="space-y-3">
+                                      {emailAnalytics?.recentEmails?.length ? (
+                                        emailAnalytics.recentEmails.map((email, index) => (
+                                          <motion.div
+                                            key={email.id}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: index * 0.05 }}
+                                            className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
+                                          >
+                                            <div className="flex items-center gap-3">
+                                              <Mail className="h-5 w-5 text-blue-500" />
+                                              <div>
+                                                <p className="font-medium text-sm">{email.subject}</p>
+                                                <p className="text-xs text-muted-foreground">{email.to}</p>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                              <Badge variant="outline">{email.type}</Badge>
+                                              <Badge className={
+                                                email.status === 'sent' || email.status === 'delivered' ? 'bg-green-500 text-white' :
+                                                email.status === 'pending' ? 'bg-blue-500 text-white' :
+                                                'bg-red-500 text-white'
+                                              }>{email.status}</Badge>
+                                              <span className="text-xs text-muted-foreground">{email.time}</span>
+                                            </div>
+                                          </motion.div>
+                                        ))
+                                      ) : (
+                                        <p className="text-muted-foreground text-center py-8">No emails sent yet</p>
+                                      )}
+                                    </div>
+                                  </ScrollArea>
+                                </CardContent>
+                              </Card>
+                            </>
+                          )}
                         </>
                       )}
 
