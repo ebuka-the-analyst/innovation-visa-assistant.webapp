@@ -1607,10 +1607,11 @@ ${generatedSections.join('\n\n---\n\n')}`;
 
       const { getAllEndorsers, scoreBusinessPlanForEndorser } = await import("./calculators/endorserSimulator");
       
-      const endorsers = getAllEndorsers();
-      const scores = endorsers.map((e: any) => scoreBusinessPlanForEndorser(plan, e.id));
+      const allEndorsers = getAllEndorsers();
+      // Return scored endorsers directly as 'endorsers' array for UI compatibility
+      const endorsers = allEndorsers.map((e: any) => scoreBusinessPlanForEndorser(plan, e.id));
       
-      res.json({ endorsers, scores });
+      res.json({ endorsers, scores: endorsers });
     } catch (error) {
       console.error("Endorser simulator error:", error);
       res.status(500).json({ error: "Failed to analyze endorsers" });
