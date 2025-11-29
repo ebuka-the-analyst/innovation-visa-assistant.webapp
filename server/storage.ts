@@ -26,11 +26,12 @@ import {
   type IndustryProfile, type InsertIndustryProfile,
   type EligibilityAssessment, type InsertEligibilityAssessment,
   type InnovationCoachingSession, type InsertInnovationCoachingSession,
+  type PerformanceMetric, type InsertPerformanceMetric,
   users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics,
   referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits, payoutRequests,
   supportTickets, userDocuments, immigrationLawyers, lawyerDocumentReviews, lawyerReviewComments, lawyerReviewStatusHistory,
   newsArticles, newsFetchLog, aiActionLogs, aiPendingConfirmations, aiRateLimits,
-  industryProfiles, eligibilityAssessments, innovationCoachingSessions
+  industryProfiles, eligibilityAssessments, innovationCoachingSessions, performanceMetrics
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gt, lt, desc, sql, count } from "drizzle-orm";
@@ -1718,6 +1719,122 @@ export class DatabaseStorage implements IStorage {
       .where(eq(innovationCoachingSessions.id, id))
       .returning();
     return result;
+  }
+
+  // ============================================
+  // PERFORMANCE METRICS
+  // ============================================
+
+  async createPerformanceMetric(metric: InsertPerformanceMetric): Promise<PerformanceMetric> {
+    const [result] = await db.insert(performanceMetrics).values(metric).returning();
+    return result;
+  }
+
+  async getPerformanceMetrics(options: {
+    startDate?: Date;
+    endDate?: Date;
+    pagePath?: string;
+    deviceType?: string;
+    limit?: number;
+  } = {}): Promise<PerformanceMetric[]> {
+    const { startDate, endDate, pagePath, deviceType, limit = 1000 } = options;
+    
+    let query = db.select().from(performanceMetrics);
+    
+    const conditions = [];
+    if (startDate) {
+      conditions.push(gt(performanceMetrics.createdAt, startDate));
+    }
+    if (endDate) {
+      conditions.push(lt(performanceMetrics.createdAt, endDate));
+    }
+    if (pagePath) {
+      conditions.push(eq(performanceMetrics.pagePath, pagePath));
+    }
+    if (deviceType) {
+      conditions.push(eq(performanceMetrics.deviceType, deviceType));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    return query.orderBy(desc(performanceMetrics.createdAt)).limit(limit);
+  }
+
+  async getPerformanceStats(startDate?: Date, endDate?: Date): Promise<{
+    totalSamples: number;
+    avgLcp: number;
+    avgFid: number;
+    avgCls: number;
+    avgFcp: number;
+    avgTtfb: number;
+    avgInp: number;
+    p75Lcp: number;
+    p75Fid: number;
+    p75Cls: number;
+    deviceBreakdown: Array<{ deviceType: string; count: number }>;
+    pageBreakdown: Array<{ pagePath: string; avgLcp: number; count: number }>;
+  }> {
+    const metrics = await this.getPerformanceMetrics({ startDate, endDate, limit: 5000 });
+    
+    const validLcp = metrics.filter(m => m.lcp != null).map(m => m.lcp!);
+    const validFid = metrics.filter(m => m.fid != null).map(m => m.fid!);
+    const validCls = metrics.filter(m => m.cls != null).map(m => m.cls!);
+    const validFcp = metrics.filter(m => m.fcp != null).map(m => m.fcp!);
+    const validTtfb = metrics.filter(m => m.ttfb != null).map(m => m.ttfb!);
+    const validInp = metrics.filter(m => m.inp != null).map(m => m.inp!);
+
+    const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+    const p75 = (arr: number[]) => {
+      if (!arr.length) return 0;
+      const sorted = [...arr].sort((a, b) => a - b);
+      const idx = Math.floor(sorted.length * 0.75);
+      return sorted[idx];
+    };
+
+    const deviceMap = new Map<string, number>();
+    metrics.forEach(m => {
+      const device = m.deviceType || 'unknown';
+      deviceMap.set(device, (deviceMap.get(device) || 0) + 1);
+    });
+
+    const pageMap = new Map<string, { lcpSum: number; count: number }>();
+    metrics.forEach(m => {
+      const path = m.pagePath;
+      const existing = pageMap.get(path) || { lcpSum: 0, count: 0 };
+      existing.lcpSum += m.lcp || 0;
+      existing.count += 1;
+      pageMap.set(path, existing);
+    });
+
+    return {
+      totalSamples: metrics.length,
+      avgLcp: Math.round(avg(validLcp)),
+      avgFid: Math.round(avg(validFid)),
+      avgCls: Math.round(avg(validCls)),
+      avgFcp: Math.round(avg(validFcp)),
+      avgTtfb: Math.round(avg(validTtfb)),
+      avgInp: Math.round(avg(validInp)),
+      p75Lcp: Math.round(p75(validLcp)),
+      p75Fid: Math.round(p75(validFid)),
+      p75Cls: Math.round(p75(validCls)),
+      deviceBreakdown: Array.from(deviceMap.entries()).map(([deviceType, count]) => ({ deviceType, count })),
+      pageBreakdown: Array.from(pageMap.entries())
+        .map(([pagePath, data]) => ({ 
+          pagePath, 
+          avgLcp: Math.round(data.lcpSum / data.count), 
+          count: data.count 
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10),
+    };
+  }
+
+  async cleanupOldPerformanceMetrics(olderThan: Date): Promise<number> {
+    const result = await db.delete(performanceMetrics)
+      .where(lt(performanceMetrics.createdAt, olderThan));
+    return (result as any).rowCount || 0;
   }
 }
 

@@ -2518,3 +2518,50 @@ export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
 export type InsertPaymentTransaction = z.infer<typeof insertPaymentTransactionSchema>;
 
 export type UserNotificationRead = typeof userNotificationReads.$inferSelect;
+
+// ============================================
+// PERFORMANCE METRICS (Core Web Vitals Monitoring)
+// ============================================
+
+export const performanceMetrics = pgTable("performance_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Core Web Vitals
+  lcp: integer("lcp"), // Largest Contentful Paint (ms)
+  fid: integer("fid"), // First Input Delay (ms)
+  cls: integer("cls"), // Cumulative Layout Shift (x1000 for precision)
+  fcp: integer("fcp"), // First Contentful Paint (ms)
+  ttfb: integer("ttfb"), // Time to First Byte (ms)
+  inp: integer("inp"), // Interaction to Next Paint (ms)
+  
+  // Page Info
+  pageUrl: text("page_url").notNull(),
+  pagePath: varchar("page_path", { length: 255 }).notNull(),
+  
+  // Device/Browser Info
+  deviceType: varchar("device_type", { length: 20 }), // mobile, tablet, desktop
+  browserName: varchar("browser_name", { length: 50 }),
+  browserVersion: varchar("browser_version", { length: 20 }),
+  connectionType: varchar("connection_type", { length: 20 }), // 4g, 3g, wifi, etc
+  
+  // User Context (optional)
+  userId: varchar("user_id"),
+  sessionId: varchar("session_id", { length: 100 }),
+  
+  // Navigation Type
+  navigationType: varchar("navigation_type", { length: 20 }), // navigate, reload, back_forward
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_perf_page_path").on(table.pagePath),
+  index("idx_perf_created_at").on(table.createdAt),
+  index("idx_perf_device").on(table.deviceType),
+]);
+
+export const insertPerformanceMetricSchema = createInsertSchema(performanceMetrics).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
+export type InsertPerformanceMetric = z.infer<typeof insertPerformanceMetricSchema>;
