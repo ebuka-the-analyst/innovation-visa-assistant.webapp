@@ -338,6 +338,20 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
     
+    // Verify Stripe mode on startup
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const stripePublicKey = process.env.VITE_STRIPE_PUBLIC_KEY;
+    if (stripeKey) {
+      const mode = stripeKey.startsWith('sk_live_') ? 'LIVE' : 'TEST';
+      const publicMode = stripePublicKey?.startsWith('pk_live_') ? 'LIVE' : 'TEST';
+      log(`[STRIPE] Secret Key Mode: ${mode} | Public Key Mode: ${publicMode}`);
+      if (mode === 'TEST') {
+        log(`[STRIPE WARNING] Using TEST keys - payments will not be real!`);
+      }
+    } else {
+      log(`[STRIPE WARNING] STRIPE_SECRET_KEY not configured!`);
+    }
+    
     // Start notification processing interval (every 5 minutes)
     const NOTIFICATION_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
     setInterval(async () => {
