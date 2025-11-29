@@ -1114,6 +1114,35 @@ export default function AdminDashboard() {
     refetchInterval: REFRESH_INTERVAL,
   });
 
+  // Real Stripe Revenue Analytics
+  const { data: revenueAnalytics, isLoading: revenueAnalyticsLoading, refetch: refetchRevenueAnalytics } = useQuery<{
+    revenueToday: number;
+    revenueThisWeek: number;
+    revenueThisMonth: number;
+    revenueLastMonth: number;
+    revenueAllTime: number;
+    monthlyGrowth: number;
+    mrr: number;
+    arr: number;
+    activeSubscriptions: number;
+    cancelledSubscriptions: number;
+    churnRate: number;
+    totalCustomers: number;
+    avgLTV: number;
+    avgOrderValue: number;
+    totalTransactions: number;
+    tierDistribution: { free: number; basic: number; premium: number; enterprise: number; ultimate: number };
+    revenueByTier: { basic: number; premium: number; enterprise: number; ultimate: number };
+    monthlyTrend: Array<{ month: string; revenue: number; transactions: number }>;
+    promoCodeStats: Array<{ code: string; uses: number; maxUses: number | null; discountType: string; discountValue: number; totalSavings: number }>;
+    totalDiscounts: number;
+    lastUpdated: string;
+  }>({
+    queryKey: ['/api/admin/analytics/revenue'],
+    enabled: !!user?.isAdmin && activeSection.startsWith('revenue'),
+    refetchInterval: REFRESH_INTERVAL,
+  });
+
   // Promo codes with comprehensive analytics
   const { data: promoCodesData, isLoading: promoCodesLoading, refetch: refetchPromoCodes } = useQuery<{
     promoCodes: Array<{
@@ -7226,148 +7255,151 @@ export default function AdminDashboard() {
                       {/* 1. REVENUE DASHBOARD - Executive Overview with Real-Time Metrics */}
                       {activeSection === 'revenue-overview' && (
                         <>
-                          {/* Real-Time Revenue Ticker */}
-                          <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-teal-500/10 border-green-500/20">
-                            <CardContent className="py-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                  <motion.div
-                                    className="p-3 rounded-xl bg-green-500 text-white"
-                                    animate={{ scale: [1, 1.05, 1] }}
-                                    transition={{ duration: 2, repeat: Infinity }}
-                                  >
-                                    <DollarSign className="h-6 w-6" />
-                                  </motion.div>
-                                  <div>
-                                    <p className="text-sm text-muted-foreground">Live Revenue Today</p>
-                                    <p className="text-3xl font-bold text-green-500">£347.00</p>
-                                  </div>
+                          {revenueAnalyticsLoading ? (
+                            <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-teal-500/10 border-green-500/20">
+                              <CardContent className="py-8">
+                                <div className="flex items-center justify-center gap-3">
+                                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500" />
+                                  <span className="text-muted-foreground">Loading real-time Stripe revenue data...</span>
                                 </div>
-                                <div className="flex items-center gap-6">
-                                  <div className="text-right">
-                                    <p className="text-sm text-muted-foreground">This Week</p>
-                                    <p className="text-xl font-bold">£1,892</p>
+                              </CardContent>
+                            </Card>
+                          ) : (
+                            <>
+                              {/* Real-Time Revenue Ticker */}
+                              <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-teal-500/10 border-green-500/20">
+                                <CardContent className="py-4">
+                                  <div className="flex items-center justify-between flex-wrap gap-4">
+                                    <div className="flex items-center gap-4">
+                                      <motion.div
+                                        className="p-3 rounded-xl bg-green-500 text-white"
+                                        animate={{ scale: [1, 1.05, 1] }}
+                                        transition={{ duration: 2, repeat: Infinity }}
+                                      >
+                                        <DollarSign className="h-6 w-6" />
+                                      </motion.div>
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">Live Revenue Today</p>
+                                        <p className="text-3xl font-bold text-green-500">£{(revenueAnalytics?.revenueToday || 0).toFixed(2)}</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-6 flex-wrap">
+                                      <div className="text-right">
+                                        <p className="text-sm text-muted-foreground">This Week</p>
+                                        <p className="text-xl font-bold">£{(revenueAnalytics?.revenueThisWeek || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="text-sm text-muted-foreground">This Month</p>
+                                        <p className="text-xl font-bold">£{(revenueAnalytics?.revenueThisMonth || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                      </div>
+                                      <Badge className={`${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'bg-green-500' : 'bg-red-500'} text-white px-4 py-2`}>
+                                        {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
+                                        {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? '+' : ''}{revenueAnalytics?.monthlyGrowth || 0}% MTD
+                                      </Badge>
+                                    </div>
                                   </div>
-                                  <div className="text-right">
-                                    <p className="text-sm text-muted-foreground">This Month</p>
-                                    <p className="text-xl font-bold">£4,890</p>
-                                  </div>
-                                  <Badge className="bg-green-500 text-white px-4 py-2">
-                                    <TrendingUp className="h-4 w-4 mr-1" />
-                                    +23% MTD
-                                  </Badge>
-                                </div>
+                                </CardContent>
+                              </Card>
+
+                              {/* Revenue KPIs Grid */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                                  <Card className="hover-elevate border-l-4 border-l-green-500">
+                                    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                      <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
+                                      <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
+                                        <DollarSign className="h-4 w-4" />
+                                      </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                      <div className="text-3xl font-bold">£{(revenueAnalytics?.revenueAllTime || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                      <div className="flex items-center gap-2 mt-2">
+                                        <Badge className="bg-green-500/10 text-green-500">{revenueAnalytics?.totalTransactions || 0} transactions</Badge>
+                                        <span className="text-xs text-muted-foreground">all-time</span>
+                                      </div>
+                                      <Progress value={Math.min((revenueAnalytics?.revenueAllTime || 0) / 500, 100)} className="h-1 mt-3" />
+                                    </CardContent>
+                                  </Card>
+                                </motion.div>
+
+                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                                  <Card className="hover-elevate border-l-4 border-l-blue-500">
+                                    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                      <CardTitle className="text-sm font-medium text-muted-foreground">MRR</CardTitle>
+                                      <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                                        <TrendingUp className="h-4 w-4" />
+                                      </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                      <div className="text-3xl font-bold">£{(revenueAnalytics?.mrr || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                      <div className="flex items-center gap-2 mt-2">
+                                        <Badge className={`${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                                          {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? '+' : ''}{revenueAnalytics?.monthlyGrowth || 0}%
+                                        </Badge>
+                                        <span className="text-xs text-muted-foreground">vs. last month</span>
+                                      </div>
+                                      <Progress value={Math.min((revenueAnalytics?.mrr || 0) / 100, 100)} className="h-1 mt-3" />
+                                    </CardContent>
+                                  </Card>
+                                </motion.div>
+
+                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                                  <Card className="hover-elevate border-l-4 border-l-purple-500">
+                                    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                      <CardTitle className="text-sm font-medium text-muted-foreground">ARR</CardTitle>
+                                      <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
+                                        <Calendar className="h-4 w-4" />
+                                      </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                      <div className="text-3xl font-bold">£{(revenueAnalytics?.arr || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                      <div className="flex items-center gap-2 mt-2">
+                                        <Badge className="bg-purple-500/10 text-purple-500">{revenueAnalytics?.activeSubscriptions || 0} active subs</Badge>
+                                        <span className="text-xs text-muted-foreground">projected</span>
+                                      </div>
+                                      <Progress value={Math.min((revenueAnalytics?.arr || 0) / 1000, 100)} className="h-1 mt-3" />
+                                    </CardContent>
+                                  </Card>
+                                </motion.div>
+
+                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+                                  <Card className="hover-elevate border-l-4 border-l-amber-500">
+                                    <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+                                      <CardTitle className="text-sm font-medium text-muted-foreground">Avg. Order Value</CardTitle>
+                                      <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
+                                        <Target className="h-4 w-4" />
+                                      </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                      <div className="text-3xl font-bold">£{(revenueAnalytics?.avgOrderValue || 0).toFixed(2)}</div>
+                                      <div className="flex items-center gap-2 mt-2">
+                                        <Badge className="bg-amber-500/10 text-amber-500">{revenueAnalytics?.totalCustomers || 0} customers</Badge>
+                                        <span className="text-xs text-muted-foreground">per transaction</span>
+                                      </div>
+                                      <Progress value={Math.min((revenueAnalytics?.avgOrderValue || 0) / 2, 100)} className="h-1 mt-3" />
+                                    </CardContent>
+                                  </Card>
+                                </motion.div>
                               </div>
-                            </CardContent>
-                          </Card>
 
-                          {/* Revenue KPIs Grid */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                              <Card className="hover-elevate border-l-4 border-l-green-500">
-                                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
-                                  <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
-                                    <DollarSign className="h-4 w-4" />
-                                  </div>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="text-3xl font-bold">£24,560</div>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    <Badge className="bg-green-500/10 text-green-500">+34%</Badge>
-                                    <span className="text-xs text-muted-foreground">all-time</span>
-                                  </div>
-                                  <Progress value={78} className="h-1 mt-3" />
-                                </CardContent>
-                              </Card>
-                            </motion.div>
-
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                              <Card className="hover-elevate border-l-4 border-l-blue-500">
-                                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                  <CardTitle className="text-sm font-medium text-muted-foreground">MRR</CardTitle>
-                                  <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-                                    <TrendingUp className="h-4 w-4" />
-                                  </div>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="text-3xl font-bold">£3,250</div>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    <Badge className="bg-green-500/10 text-green-500">+15%</Badge>
-                                    <span className="text-xs text-muted-foreground">vs. last month</span>
-                                  </div>
-                                  <Progress value={65} className="h-1 mt-3" />
-                                </CardContent>
-                              </Card>
-                            </motion.div>
-
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                              <Card className="hover-elevate border-l-4 border-l-purple-500">
-                                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                  <CardTitle className="text-sm font-medium text-muted-foreground">ARR</CardTitle>
-                                  <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
-                                    <Calendar className="h-4 w-4" />
-                                  </div>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="text-3xl font-bold">£39,000</div>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    <Badge className="bg-green-500/10 text-green-500">+28%</Badge>
-                                    <span className="text-xs text-muted-foreground">projected</span>
-                                  </div>
-                                  <Progress value={82} className="h-1 mt-3" />
-                                </CardContent>
-                              </Card>
-                            </motion.div>
-
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-                              <Card className="hover-elevate border-l-4 border-l-amber-500">
-                                <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                  <CardTitle className="text-sm font-medium text-muted-foreground">Avg. Order Value</CardTitle>
-                                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-                                    <Target className="h-4 w-4" />
-                                  </div>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="text-3xl font-bold">£52.40</div>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    <Badge className="bg-green-500/10 text-green-500">+8%</Badge>
-                                    <span className="text-xs text-muted-foreground">per transaction</span>
-                                  </div>
-                                  <Progress value={54} className="h-1 mt-3" />
-                                </CardContent>
-                              </Card>
-                            </motion.div>
-                          </div>
-
-                          {/* Revenue Charts */}
-                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <Card className="lg:col-span-2">
-                              <CardHeader>
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <CardTitle>Revenue Trend (12 Months)</CardTitle>
-                                    <CardDescription>Monthly recurring revenue growth trajectory</CardDescription>
-                                  </div>
-                                  <Badge variant="outline" className="text-green-500 border-green-500">
-                                    <TrendingUp className="h-3 w-3 mr-1" />
-                                    Healthy Growth
-                                  </Badge>
-                                </div>
-                              </CardHeader>
-                              <CardContent>
-                                <ResponsiveContainer width="100%" height={300}>
-                                  <RechartsAreaChart data={[
-                                    { month: 'Jan', revenue: 1200, target: 1000 },
-                                    { month: 'Feb', revenue: 1450, target: 1200 },
-                                    { month: 'Mar', revenue: 1800, target: 1500 },
-                                    { month: 'Apr', revenue: 2100, target: 1800 },
-                                    { month: 'May', revenue: 2400, target: 2100 },
-                                    { month: 'Jun', revenue: 2850, target: 2400 },
-                                    { month: 'Jul', revenue: 3100, target: 2700 },
-                                    { month: 'Aug', revenue: 3400, target: 3000 },
-                                    { month: 'Sep', revenue: 3750, target: 3300 },
-                                    { month: 'Oct', revenue: 4200, target: 3600 },
+                              {/* Revenue Charts */}
+                              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <Card className="lg:col-span-2">
+                                  <CardHeader>
+                                    <div className="flex items-center justify-between">
+                                      <div>
+                                        <CardTitle>Revenue Trend (12 Months)</CardTitle>
+                                        <CardDescription>Monthly revenue from Stripe payments</CardDescription>
+                                      </div>
+                                      <Badge variant="outline" className={`${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'text-green-500 border-green-500' : 'text-red-500 border-red-500'}`}>
+                                        {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                                        {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'Growing' : 'Declining'}
+                                      </Badge>
+                                    </div>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <ResponsiveContainer width="100%" height={300}>
+                                      <RechartsAreaChart data={revenueAnalytics?.monthlyTrend || [
                                     { month: 'Nov', revenue: 4890, target: 4000 },
                                     { month: 'Dec', revenue: 5500, target: 4500 },
                                   ]}>
@@ -7491,20 +7523,33 @@ export default function AdminDashboard() {
                               </div>
                             </CardContent>
                           </Card>
+                            </>
+                          )}
                         </>
                       )}
 
                       {/* 2. MRR ANALYTICS - Deep Dive Monthly Recurring Revenue */}
                       {activeSection === 'revenue-mrr' && (
                         <>
+                          {revenueAnalyticsLoading ? (
+                            <Card className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-blue-500/10 border-blue-500/20">
+                              <CardContent className="py-8">
+                                <div className="flex items-center justify-center gap-3">
+                                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
+                                  <span className="text-muted-foreground">Loading MRR analytics from Stripe...</span>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ) : (
+                            <>
                           {/* MRR Summary Header */}
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                             {[
-                              { label: 'Current MRR', value: '£3,250', change: '+15%', icon: DollarSign, color: 'green' },
-                              { label: 'New MRR', value: '£420', change: '+8 subs', icon: Plus, color: 'blue' },
-                              { label: 'Expansion MRR', value: '£180', change: '5 upgrades', icon: TrendingUp, color: 'purple' },
-                              { label: 'Churned MRR', value: '£87', change: '-2 subs', icon: TrendingDown, color: 'red' },
-                              { label: 'Net New MRR', value: '£513', change: '+18%', icon: Zap, color: 'amber' },
+                              { label: 'Current MRR', value: `£${(revenueAnalytics?.mrr || 0).toFixed(2)}`, change: `${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? '+' : ''}${revenueAnalytics?.monthlyGrowth || 0}%`, icon: DollarSign, color: 'green' },
+                              { label: 'Active Subs', value: `${revenueAnalytics?.activeSubscriptions || 0}`, change: 'subscribers', icon: Plus, color: 'blue' },
+                              { label: 'ARR', value: `£${(revenueAnalytics?.arr || 0).toFixed(2)}`, change: 'projected', icon: TrendingUp, color: 'purple' },
+                              { label: 'Churned', value: `${revenueAnalytics?.cancelledSubscriptions || 0}`, change: `${(revenueAnalytics?.churnRate || 0).toFixed(1)}% churn`, icon: TrendingDown, color: 'red' },
+                              { label: 'This Month', value: `£${(revenueAnalytics?.revenueThisMonth || 0).toFixed(2)}`, change: `${revenueAnalytics?.totalTransactions || 0} txns`, icon: Zap, color: 'amber' },
                             ].map((metric, index) => (
                               <motion.div
                                 key={metric.label}
@@ -7661,6 +7706,8 @@ export default function AdminDashboard() {
                               </CardContent>
                             </Card>
                           </div>
+                            </>
+                          )}
                         </>
                       )}
 
@@ -7814,14 +7861,25 @@ export default function AdminDashboard() {
                       {/* 4. TIER DISTRIBUTION - Visual Tier Analysis */}
                       {activeSection === 'revenue-tiers' && (
                         <>
+                          {revenueAnalyticsLoading ? (
+                            <Card className="bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-purple-500/10 border-purple-500/20">
+                              <CardContent className="py-8">
+                                <div className="flex items-center justify-center gap-3">
+                                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500" />
+                                  <span className="text-muted-foreground">Loading tier distribution from Stripe...</span>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ) : (
+                            <>
                           {/* Tier Overview Cards */}
                           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                             {[
-                              { tier: 'Free', price: 0, users: 245, color: '#94a3b8', icon: Users },
-                              { tier: 'Basic', price: 29, users: 42, color: '#22c55e', icon: Zap },
-                              { tier: 'Premium', price: 49, users: 28, color: '#3b82f6', icon: Star },
-                              { tier: 'Enterprise', price: 89, users: 12, color: '#f59e0b', icon: Building },
-                              { tier: 'Ultimate', price: 129, users: 5, color: '#8b5cf6', icon: Crown },
+                              { tier: 'Free', price: 0, users: revenueAnalytics?.tierDistribution?.free || 0, color: '#94a3b8', icon: Users },
+                              { tier: 'Basic', price: 29, users: revenueAnalytics?.tierDistribution?.basic || 0, color: '#22c55e', icon: Zap },
+                              { tier: 'Premium', price: 49, users: revenueAnalytics?.tierDistribution?.premium || 0, color: '#3b82f6', icon: Star },
+                              { tier: 'Enterprise', price: 89, users: revenueAnalytics?.tierDistribution?.enterprise || 0, color: '#f59e0b', icon: Building },
+                              { tier: 'Ultimate', price: 129, users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6', icon: Crown },
                             ].map((tier, index) => (
                               <motion.div
                                 key={tier.tier}
@@ -7859,11 +7917,11 @@ export default function AdminDashboard() {
                                   <RechartsPieChart>
                                     <Pie
                                       data={[
-                                        { name: 'Free', value: 245, fill: '#94a3b8' },
-                                        { name: 'Basic', value: 42, fill: '#22c55e' },
-                                        { name: 'Premium', value: 28, fill: '#3b82f6' },
-                                        { name: 'Enterprise', value: 12, fill: '#f59e0b' },
-                                        { name: 'Ultimate', value: 5, fill: '#8b5cf6' },
+                                        { name: 'Free', value: revenueAnalytics?.tierDistribution?.free || 0, fill: '#94a3b8' },
+                                        { name: 'Basic', value: revenueAnalytics?.tierDistribution?.basic || 0, fill: '#22c55e' },
+                                        { name: 'Premium', value: revenueAnalytics?.tierDistribution?.premium || 0, fill: '#3b82f6' },
+                                        { name: 'Enterprise', value: revenueAnalytics?.tierDistribution?.enterprise || 0, fill: '#f59e0b' },
+                                        { name: 'Ultimate', value: revenueAnalytics?.tierDistribution?.ultimate || 0, fill: '#8b5cf6' },
                                       ]}
                                       cx="50%"
                                       cy="50%"
@@ -7901,11 +7959,11 @@ export default function AdminDashboard() {
                               <CardContent>
                                 <ResponsiveContainer width="100%" height={300}>
                                   <RechartsBarChart data={[
-                                    { tier: 'Free', revenue: 0, users: 245 },
-                                    { tier: 'Basic', revenue: 1218, users: 42 },
-                                    { tier: 'Premium', revenue: 1372, users: 28 },
-                                    { tier: 'Enterprise', revenue: 1068, users: 12 },
-                                    { tier: 'Ultimate', revenue: 645, users: 5 },
+                                    { tier: 'Free', revenue: 0, users: revenueAnalytics?.tierDistribution?.free || 0 },
+                                    { tier: 'Basic', revenue: revenueAnalytics?.revenueByTier?.basic || 0, users: revenueAnalytics?.tierDistribution?.basic || 0 },
+                                    { tier: 'Premium', revenue: revenueAnalytics?.revenueByTier?.premium || 0, users: revenueAnalytics?.tierDistribution?.premium || 0 },
+                                    { tier: 'Enterprise', revenue: revenueAnalytics?.revenueByTier?.enterprise || 0, users: revenueAnalytics?.tierDistribution?.enterprise || 0 },
+                                    { tier: 'Ultimate', revenue: revenueAnalytics?.revenueByTier?.ultimate || 0, users: revenueAnalytics?.tierDistribution?.ultimate || 0 },
                                   ]} layout="vertical">
                                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                                     <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} tickFormatter={(v) => `£${v}`} />
@@ -7969,6 +8027,8 @@ export default function AdminDashboard() {
                               </div>
                             </CardContent>
                           </Card>
+                            </>
+                          )}
                         </>
                       )}
 
