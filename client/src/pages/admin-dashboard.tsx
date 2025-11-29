@@ -3830,9 +3830,9 @@ export default function AdminDashboard() {
                                     <Target className="h-5 w-5 text-primary" />
                                     Quarterly Strategic Goals
                                   </CardTitle>
-                                  <CardDescription>Q4 2024 objectives and progress tracking</CardDescription>
+                                  <CardDescription>Q4 2025 objectives and progress tracking</CardDescription>
                                 </div>
-                                <Badge>Q4 2024</Badge>
+                                <Badge>Q4 2025</Badge>
                               </div>
                             </CardHeader>
                             <CardContent>
@@ -3848,7 +3848,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <Progress value={((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 100) * 100} className="h-2" />
                                   <div className="flex items-center justify-between mt-2 text-sm">
-                                    <span className="text-muted-foreground">Due: Dec 31, 2024</span>
+                                    <span className="text-muted-foreground">Due: Dec 31, 2025</span>
                                     <span className="text-primary font-medium">{((filteredOverviewData?.kpiMetrics?.[0]?.value || 0))}% complete</span>
                                   </div>
                                 </div>
@@ -3864,7 +3864,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <Progress value={49} className="h-2" />
                                   <div className="flex items-center justify-between mt-2 text-sm">
-                                    <span className="text-muted-foreground">Due: Dec 31, 2024</span>
+                                    <span className="text-muted-foreground">Due: Dec 31, 2025</span>
                                     <span className="text-amber-500 font-medium">49% complete</span>
                                   </div>
                                 </div>
@@ -3880,7 +3880,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <Progress value={56} className="h-2" />
                                   <div className="flex items-center justify-between mt-2 text-sm">
-                                    <span className="text-muted-foreground">Due: Dec 31, 2024</span>
+                                    <span className="text-muted-foreground">Due: Dec 31, 2025</span>
                                     <span className="text-amber-500 font-medium">56% complete</span>
                                   </div>
                                 </div>
@@ -4219,7 +4219,7 @@ export default function AdminDashboard() {
                                     <span className="font-medium text-blue-500">Next Goal</span>
                                   </div>
                                   <p className="text-sm text-muted-foreground">
-                                    Target 90%+ first login conversion by Q1 2025
+                                    Target 90%+ first login conversion by Q1 2026
                                   </p>
                                 </CardContent>
                               </Card>
@@ -7629,11 +7629,11 @@ export default function AdminDashboard() {
                               <CardContent>
                                 <div className="space-y-3">
                                   {[
-                                    { cohort: 'Nov 2024', initial: 420, current: 420, retention: 100, status: 'new' },
-                                    { cohort: 'Oct 2024', initial: 380, current: 365, retention: 96, status: 'healthy' },
-                                    { cohort: 'Sep 2024', initial: 290, current: 275, retention: 95, status: 'healthy' },
-                                    { cohort: 'Aug 2024', initial: 350, current: 310, retention: 89, status: 'watch' },
-                                    { cohort: 'Jul 2024', initial: 420, current: 350, retention: 83, status: 'concern' },
+                                    { cohort: 'Nov 2025', initial: 420, current: 420, retention: 100, status: 'new' },
+                                    { cohort: 'Oct 2025', initial: 380, current: 365, retention: 96, status: 'healthy' },
+                                    { cohort: 'Sep 2025', initial: 290, current: 275, retention: 95, status: 'healthy' },
+                                    { cohort: 'Aug 2025', initial: 350, current: 310, retention: 89, status: 'watch' },
+                                    { cohort: 'Jul 2025', initial: 420, current: 350, retention: 83, status: 'concern' },
                                   ].map((cohort, index) => (
                                     <motion.div
                                       key={cohort.cohort}
@@ -7752,12 +7752,12 @@ export default function AdminDashboard() {
                               <ScrollArea className="h-[400px]">
                                 <div className="space-y-3">
                                   {[
-                                    { user: 'Nnaemeka Umeh', email: 'emexy8088@yahoo.com', tier: 'Premium', amount: 49, status: 'active', nextBilling: 'Dec 15, 2024', since: 'Oct 2024' },
-                                    { user: 'Sarah Johnson', email: 'sarah.j@email.com', tier: 'Enterprise', amount: 89, status: 'active', nextBilling: 'Dec 20, 2024', since: 'Sep 2024' },
-                                    { user: 'Michael Chen', email: 'm.chen@startup.io', tier: 'Basic', amount: 29, status: 'active', nextBilling: 'Dec 1, 2024', since: 'Nov 2024' },
-                                    { user: 'Emma Williams', email: 'emma.w@company.uk', tier: 'Ultimate', amount: 129, status: 'active', nextBilling: 'Jan 5, 2025', since: 'Aug 2024' },
-                                    { user: 'James Brown', email: 'jbrown@tech.co', tier: 'Premium', amount: 49, status: 'renewing', nextBilling: 'Nov 28, 2024', since: 'Jul 2024' },
-                                    { user: 'Lisa Anderson', email: 'lisa.a@biz.uk', tier: 'Enterprise', amount: 89, status: 'at_risk', nextBilling: 'Nov 30, 2024', since: 'Jun 2024' },
+                                    { user: 'Nnaemeka Umeh', email: 'emexy8088@yahoo.com', tier: 'Premium', amount: 49, status: 'active', nextBilling: 'Dec 15, 2025', since: 'Nov 2025' },
+                                    { user: 'Sarah Johnson', email: 'sarah.j@email.com', tier: 'Enterprise', amount: 89, status: 'active', nextBilling: 'Dec 20, 2025', since: 'Nov 2025' },
+                                    { user: 'Michael Chen', email: 'm.chen@startup.io', tier: 'Basic', amount: 29, status: 'active', nextBilling: 'Dec 1, 2025', since: 'Nov 2025' },
+                                    { user: 'Emma Williams', email: 'emma.w@company.uk', tier: 'Ultimate', amount: 129, status: 'active', nextBilling: 'Jan 5, 2026', since: 'Nov 2025' },
+                                    { user: 'James Brown', email: 'jbrown@tech.co', tier: 'Premium', amount: 49, status: 'renewing', nextBilling: 'Nov 28, 2025', since: 'Nov 2025' },
+                                    { user: 'Lisa Anderson', email: 'lisa.a@biz.uk', tier: 'Enterprise', amount: 89, status: 'at_risk', nextBilling: 'Nov 30, 2025', since: 'Nov 2025' },
                                   ].map((sub, index) => (
                                     <motion.div
                                       key={index}
@@ -12701,10 +12701,10 @@ export default function AdminDashboard() {
                               <div className="space-y-4">
                                 {/* Sample Comment Threads */}
                                 {[
-                                  { id: 1, author: 'Sarah Johnson', role: 'Immigration Lawyer', content: 'The business plan needs more detail on the innovation aspect. Please request clarification on the technology differentiation.', time: '2 hours ago', status: 'pending', review: 'BP-2024-001' },
-                                  { id: 2, author: 'Michael Chen', role: 'Lead Reviewer', content: 'Financial projections look solid. Ready for final approval pending innovation section revision.', time: '5 hours ago', status: 'resolved', review: 'BP-2024-002' },
-                                  { id: 3, author: 'Emma Williams', role: 'Immigration Lawyer', content: '@Michael Chen - I have reviewed the updated innovation section. The applicant has provided sufficient evidence of scalability and market potential.', time: '1 day ago', status: 'resolved', review: 'BP-2024-003' },
-                                  { id: 4, author: 'James Taylor', role: 'Senior Partner', content: 'Urgent: This Enterprise tier application needs priority review. Client has endorsement meeting scheduled next week.', time: '2 days ago', status: 'pending', review: 'BP-2024-004' },
+                                  { id: 1, author: 'Sarah Johnson', role: 'Immigration Lawyer', content: 'The business plan needs more detail on the innovation aspect. Please request clarification on the technology differentiation.', time: '2 hours ago', status: 'pending', review: 'BP-2025-001' },
+                                  { id: 2, author: 'Michael Chen', role: 'Lead Reviewer', content: 'Financial projections look solid. Ready for final approval pending innovation section revision.', time: '5 hours ago', status: 'resolved', review: 'BP-2025-002' },
+                                  { id: 3, author: 'Emma Williams', role: 'Immigration Lawyer', content: '@Michael Chen - I have reviewed the updated innovation section. The applicant has provided sufficient evidence of scalability and market potential.', time: '1 day ago', status: 'resolved', review: 'BP-2025-003' },
+                                  { id: 4, author: 'James Taylor', role: 'Senior Partner', content: 'Urgent: This Enterprise tier application needs priority review. Client has endorsement meeting scheduled next week.', time: '2 days ago', status: 'pending', review: 'BP-2025-004' },
                                 ].map((comment) => (
                                   <Card key={comment.id} className={`hover-elevate ${comment.status === 'pending' ? 'border-amber-500/30' : ''}`}>
                                     <CardContent className="p-4">
@@ -13478,10 +13478,10 @@ export default function AdminDashboard() {
                                 </TableHeader>
                                 <TableBody>
                                   {[
-                                    { name: 'auto_backup_2024_11_26', type: 'Automatic', size: '1.2 GB', created: '2 hours ago', status: 'Completed' },
-                                    { name: 'auto_backup_2024_11_25', type: 'Automatic', size: '1.1 GB', created: '1 day ago', status: 'Completed' },
+                                    { name: 'auto_backup_2025_11_29', type: 'Automatic', size: '1.2 GB', created: '2 hours ago', status: 'Completed' },
+                                    { name: 'auto_backup_2025_11_28', type: 'Automatic', size: '1.1 GB', created: '1 day ago', status: 'Completed' },
                                     { name: 'manual_pre_update', type: 'Manual', size: '1.1 GB', created: '3 days ago', status: 'Completed' },
-                                    { name: 'auto_backup_2024_11_22', type: 'Automatic', size: '1.0 GB', created: '4 days ago', status: 'Completed' },
+                                    { name: 'auto_backup_2025_11_26', type: 'Automatic', size: '1.0 GB', created: '4 days ago', status: 'Completed' },
                                   ].map((backup, i) => (
                                     <TableRow key={i}>
                                       <TableCell className="font-medium">
