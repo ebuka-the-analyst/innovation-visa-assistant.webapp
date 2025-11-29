@@ -8119,74 +8119,76 @@ Return a JSON object with:
         return res.status(400).json({ error: "Cannot delete admin users" });
       }
 
-      // Delete all related records in order (respecting foreign key constraints)
-      // Using raw SQL for tables that may not be imported
+      // Delete all related records - using safe delete that ignores missing tables
+      const safeDelete = async (query: any) => {
+        try {
+          await db.execute(query);
+        } catch (e: any) {
+          // Ignore "relation does not exist" errors
+          if (!e.message?.includes('does not exist')) {
+            throw e;
+          }
+        }
+      };
       
       // Tables with user_id foreign key
-      await db.execute(sql`DELETE FROM tool_progress WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM ai_action_logs WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM ai_pending_confirmations WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM ai_rate_limits WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM eligibility_assessments WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM innovation_coaching_sessions WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM score_history WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM interview_milestones WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM ai_interview_responses WHERE session_id IN (SELECT id FROM ai_interview_sessions WHERE user_id = ${userId})`);
-      await db.execute(sql`DELETE FROM ai_interview_sessions WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM interview_sessions WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM document_reviews WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM user_documents WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM user_achievements WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM certificates WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM user_template_downloads WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM calendar_events WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM calendar_connections WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM notification_preferences WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM scheduled_notifications WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM support_tickets WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM uploaded_files WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM credit_transactions WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM addon_purchases WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM referral_events WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM referral_rewards WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM promo_redemptions WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM referral_codes WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM payout_requests WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM user_activity_logs WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM error_logs WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM site_feedback WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM security_events WHERE user_id = ${userId}`);
-      await db.execute(sql`UPDATE security_events SET resolved_by = NULL WHERE resolved_by = ${userId}`);
-      await db.execute(sql`DELETE FROM session_handoffs WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM referrals WHERE referrer_id = ${userId} OR referred_id = ${userId}`);
-      await db.execute(sql`DELETE FROM tool_analytics WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM tool_progress WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM ai_action_logs WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM ai_pending_confirmations WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM ai_rate_limits WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM eligibility_assessments WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM innovation_coaching_sessions WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM interview_sessions WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM document_reviews WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM user_documents WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM user_achievements WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM certificates WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM user_template_downloads WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM calendar_events WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM calendar_connections WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM notification_preferences WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM scheduled_notifications WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM support_tickets WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM uploaded_files WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM credit_transactions WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM addon_purchases WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM referral_events WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM referral_rewards WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM promo_redemptions WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM referral_codes WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM site_feedback WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM security_events WHERE user_id = ${userId}`);
+      await safeDelete(sql`UPDATE security_events SET resolved_by = NULL WHERE resolved_by = ${userId}`);
+      await safeDelete(sql`DELETE FROM session_handoffs WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM referrals WHERE referrer_id = ${userId} OR referred_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM tool_analytics WHERE user_id = ${userId}`);
       
       // Additional tables with user foreign keys
-      await db.execute(sql`DELETE FROM user_notification_reads WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM payment_transactions WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM admin_exports WHERE requested_by = ${userId}`);
-      await db.execute(sql`DELETE FROM admin_notifications WHERE created_by = ${userId}`);
-      await db.execute(sql`DELETE FROM marketing_campaigns WHERE created_by = ${userId}`);
+      await safeDelete(sql`DELETE FROM user_notification_reads WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM payment_transactions WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM admin_exports WHERE requested_by = ${userId}`);
+      await safeDelete(sql`DELETE FROM admin_notifications WHERE created_by = ${userId}`);
+      await safeDelete(sql`DELETE FROM marketing_campaigns WHERE created_by = ${userId}`);
       
       // Lawyer review tables
-      await db.execute(sql`DELETE FROM lawyer_review_comments WHERE resolved_by = ${userId}`);
-      await db.execute(sql`DELETE FROM lawyer_document_reviews WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM lawyer_review_comments WHERE resolved_by = ${userId}`);
+      await safeDelete(sql`DELETE FROM lawyer_document_reviews WHERE user_id = ${userId}`);
       
       // Promo codes (owner and creator)
-      await db.execute(sql`UPDATE promo_codes SET owner_id = NULL WHERE owner_id = ${userId}`);
-      await db.execute(sql`UPDATE promo_codes SET created_by = NULL WHERE created_by = ${userId}`);
+      await safeDelete(sql`UPDATE promo_codes SET owner_id = NULL WHERE owner_id = ${userId}`);
+      await safeDelete(sql`UPDATE promo_codes SET created_by = NULL WHERE created_by = ${userId}`);
       
       // Referral events by referrer
-      await db.execute(sql`DELETE FROM referral_events WHERE referrer_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM referral_events WHERE referrer_id = ${userId}`);
       
       // Referrals table (may have user_id column)
-      await db.execute(sql`DELETE FROM referrals WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM referrals WHERE user_id = ${userId}`);
       
       // Delete business plans
       await db.delete(businessPlans).where(eq(businessPlans.userId, userId));
       
       // Delete user sessions
-      await db.execute(sql`DELETE FROM session WHERE sess::jsonb->'passport'->>'user' = ${userId}`);
+      await safeDelete(sql`DELETE FROM sessions WHERE sess::jsonb->'passport'->>'user' = ${userId}`);
 
       // Finally delete user
       await db.delete(users).where(eq(users.id, userId));
