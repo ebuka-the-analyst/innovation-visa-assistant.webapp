@@ -102,9 +102,8 @@ export function getTokenExpiry(): Date {
   return expiry;
 }
 
-const BASE_URL = process.env.NODE_ENV === 'production' 
-  ? process.env.BASE_URL || 'https://innovatorfoundervisaassistant.co.uk'
-  : 'http://localhost:5000';
+// Always use production URL for email links since emails go to real users
+const BASE_URL = process.env.BASE_URL || 'https://innovatorfoundervisaassistant.co.uk';
 
 export async function sendPasswordResetEmail(
   email: string,
