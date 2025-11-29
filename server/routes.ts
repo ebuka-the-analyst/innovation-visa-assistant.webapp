@@ -2748,6 +2748,242 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
     }
   });
 
+  // Comprehensive Stripe Revenue Analytics Endpoint
+  app.get("/api/admin/analytics/revenue", requireAdmin, async (req, res) => {
+    try {
+      const stripe = await getUncachableStripeClient();
+      const now = new Date();
+      
+      // Calculate timestamps for different periods
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay()); // Start of current week (Sunday)
+      startOfWeek.setHours(0, 0, 0, 0);
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      
+      // Fetch all successful charges (payments) from Stripe
+      let allCharges: any[] = [];
+      let hasMore = true;
+      let startingAfter: string | undefined;
+      
+      while (hasMore) {
+        const chargesResponse = await stripe.charges.list({
+          limit: 100,
+          status: 'succeeded',
+          ...(startingAfter && { starting_after: startingAfter }),
+        });
+        
+        allCharges = [...allCharges, ...chargesResponse.data];
+        hasMore = chargesResponse.has_more;
+        if (chargesResponse.data.length > 0) {
+          startingAfter = chargesResponse.data[chargesResponse.data.length - 1].id;
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      // Calculate revenue for different periods
+      const todayCharges = allCharges.filter(c => new Date(c.created * 1000) >= startOfToday);
+      const weekCharges = allCharges.filter(c => new Date(c.created * 1000) >= startOfWeek);
+      const monthCharges = allCharges.filter(c => new Date(c.created * 1000) >= startOfMonth);
+      const lastMonthCharges = allCharges.filter(c => {
+        const chargeDate = new Date(c.created * 1000);
+        return chargeDate >= startOfLastMonth && chargeDate <= endOfLastMonth;
+      });
+      
+      const revenueToday = todayCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
+      const revenueThisWeek = weekCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
+      const revenueThisMonth = monthCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
+      const revenueLastMonth = lastMonthCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
+      const revenueAllTime = allCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
+      
+      // Calculate discounts/refunds from charges
+      const totalDiscounts = allCharges.reduce((sum, c) => {
+        // Check if there was a discount applied (metadata or amount_off)
+        const discount = c.metadata?.discount_amount ? parseFloat(c.metadata.discount_amount) : 0;
+        return sum + discount;
+      }, 0);
+      
+      // Fetch active subscriptions for MRR calculation
+      let activeSubscriptions: any[] = [];
+      hasMore = true;
+      startingAfter = undefined;
+      
+      while (hasMore) {
+        const subsResponse = await stripe.subscriptions.list({
+          limit: 100,
+          status: 'active',
+          ...(startingAfter && { starting_after: startingAfter }),
+        });
+        
+        activeSubscriptions = [...activeSubscriptions, ...subsResponse.data];
+        hasMore = subsResponse.has_more;
+        if (subsResponse.data.length > 0) {
+          startingAfter = subsResponse.data[subsResponse.data.length - 1].id;
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      // Calculate MRR from active subscriptions
+      const mrr = activeSubscriptions.reduce((sum, sub) => {
+        const items = sub.items?.data || [];
+        return sum + items.reduce((itemSum: number, item: any) => {
+          const amount = item.price?.unit_amount || 0;
+          const interval = item.price?.recurring?.interval || 'month';
+          // Convert to monthly
+          if (interval === 'year') {
+            return itemSum + (amount / 12 / 100);
+          }
+          return itemSum + (amount / 100);
+        }, 0);
+      }, 0);
+      
+      // ARR projection
+      const arr = mrr * 12;
+      
+      // Fetch cancelled/past due subscriptions
+      let cancelledSubscriptions: any[] = [];
+      hasMore = true;
+      startingAfter = undefined;
+      
+      while (hasMore) {
+        const cancelledResponse = await stripe.subscriptions.list({
+          limit: 100,
+          status: 'canceled',
+          ...(startingAfter && { starting_after: startingAfter }),
+        });
+        
+        cancelledSubscriptions = [...cancelledSubscriptions, ...cancelledResponse.data];
+        hasMore = cancelledResponse.has_more;
+        if (cancelledResponse.data.length > 0) {
+          startingAfter = cancelledResponse.data[cancelledResponse.data.length - 1].id;
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      // Get user data for tier distribution and LTV
+      const allUsers = await storage.getAllUsers();
+      const paidUsers = allUsers.filter(u => u.subscriptionTier && u.subscriptionTier !== 'free');
+      
+      // Tier distribution from database
+      const tierDistribution = {
+        free: allUsers.filter(u => !u.subscriptionTier || u.subscriptionTier === 'free').length,
+        basic: allUsers.filter(u => u.subscriptionTier === 'basic').length,
+        premium: allUsers.filter(u => u.subscriptionTier === 'premium').length,
+        enterprise: allUsers.filter(u => u.subscriptionTier === 'enterprise').length,
+        ultimate: allUsers.filter(u => u.subscriptionTier === 'ultimate').length,
+      };
+      
+      // Revenue by tier (from metadata or calculations)
+      const revenueByTier = {
+        basic: monthCharges.filter(c => c.metadata?.tier === 'basic').reduce((s, c) => s + c.amount / 100, 0),
+        premium: monthCharges.filter(c => c.metadata?.tier === 'premium').reduce((s, c) => s + c.amount / 100, 0),
+        enterprise: monthCharges.filter(c => c.metadata?.tier === 'enterprise').reduce((s, c) => s + c.amount / 100, 0),
+        ultimate: monthCharges.filter(c => c.metadata?.tier === 'ultimate').reduce((s, c) => s + c.amount / 100, 0),
+      };
+      
+      // Calculate LTV (Lifetime Value) = Total Revenue / Total Customers
+      const totalCustomers = allCharges.length > 0 
+        ? new Set(allCharges.map(c => c.customer).filter(Boolean)).size 
+        : 1;
+      const avgLTV = totalCustomers > 0 ? revenueAllTime / totalCustomers : 0;
+      
+      // Average order value
+      const avgOrderValue = allCharges.length > 0 ? revenueAllTime / allCharges.length : 0;
+      
+      // Monthly comparison
+      const monthlyGrowth = revenueLastMonth > 0 
+        ? Math.round(((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100)
+        : 0;
+      
+      // Get promo code usage from database
+      const allPromoCodes = await storage.getAllPromoCodes();
+      const promoCodeStats = allPromoCodes.map(code => ({
+        code: code.code,
+        uses: code.currentUses,
+        maxUses: code.maxTotalUses,
+        discountType: code.discountType,
+        discountValue: code.discountValue,
+        totalSavings: code.currentUses * (code.discountType === 'percentage' 
+          ? 0 // Would need actual order values to calculate
+          : code.discountValue / 100),
+      }));
+      
+      // Monthly revenue trend (last 12 months)
+      const monthlyTrend: { month: string; revenue: number; transactions: number }[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+        const monthChargesData = allCharges.filter(c => {
+          const chargeDate = new Date(c.created * 1000);
+          return chargeDate >= monthStart && chargeDate <= monthEnd;
+        });
+        const monthName = monthStart.toLocaleDateString('en-GB', { month: 'short' });
+        monthlyTrend.push({
+          month: monthName,
+          revenue: monthChargesData.reduce((s, c) => s + c.amount / 100, 0),
+          transactions: monthChargesData.length,
+        });
+      }
+      
+      // Churn rate (cancelled this month / total active at start)
+      const cancelledThisMonth = cancelledSubscriptions.filter(s => {
+        const cancelDate = s.canceled_at ? new Date(s.canceled_at * 1000) : null;
+        return cancelDate && cancelDate >= startOfMonth;
+      }).length;
+      const churnRate = activeSubscriptions.length > 0 
+        ? Math.round((cancelledThisMonth / (activeSubscriptions.length + cancelledThisMonth)) * 100 * 10) / 10
+        : 0;
+      
+      res.json({
+        // Live metrics
+        revenueToday,
+        revenueThisWeek,
+        revenueThisMonth,
+        revenueLastMonth,
+        revenueAllTime,
+        monthlyGrowth,
+        
+        // Subscription metrics
+        mrr,
+        arr,
+        activeSubscriptions: activeSubscriptions.length,
+        cancelledSubscriptions: cancelledSubscriptions.length,
+        churnRate,
+        
+        // Customer metrics
+        totalCustomers,
+        avgLTV,
+        avgOrderValue,
+        totalTransactions: allCharges.length,
+        
+        // Tier data
+        tierDistribution,
+        revenueByTier,
+        
+        // Trends
+        monthlyTrend,
+        
+        // Promo codes
+        promoCodeStats,
+        totalDiscounts,
+        
+        // Metadata
+        lastUpdated: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      console.error("Revenue analytics error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch revenue analytics",
+        message: error?.message || "Unknown error"
+      });
+    }
+  });
+
   // User Management Endpoints
   app.get("/api/admin/users", requireAdmin, async (req, res) => {
     try {
