@@ -4040,7 +4040,7 @@ export default function AdminDashboard() {
                         const funnelData = [
                           { stage: 'Registered', count: totalUsers, color: '#f59e0b' },
                           { stage: 'Email Verified', count: activeUsers, color: '#3b82f6' },
-                          { stage: 'First Login', count: totalUsers, color: '#f59e0b' },
+                          { stage: 'First Login', count: activeUsers, color: '#f59e0b' },
                           { stage: 'Used Tool', count: Math.round(activeUsers * 0.9), color: '#22c55e' },
                           { stage: 'Created Plan', count: Math.round(activeUsers * 0.75), color: '#8b5cf6' },
                           { stage: 'Active User', count: activeUsers, color: '#06b6d4' },
