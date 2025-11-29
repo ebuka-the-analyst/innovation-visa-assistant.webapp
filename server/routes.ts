@@ -9130,6 +9130,92 @@ Return a JSON object with:
     }
   });
 
+  // ============================================
+  // PERFORMANCE METRICS API (Core Web Vitals)
+  // ============================================
+
+  // Collect performance metrics (public endpoint for beacon API)
+  app.post("/api/performance/metrics", async (req, res) => {
+    try {
+      const {
+        lcp, fid, cls, fcp, ttfb, inp,
+        pageUrl, pagePath, deviceType, browserName, browserVersion,
+        connectionType, navigationType, sessionId
+      } = req.body;
+
+      if (!pageUrl || !pagePath) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      await storage.createPerformanceMetric({
+        lcp: lcp ? Math.round(lcp) : null,
+        fid: fid ? Math.round(fid) : null,
+        cls: cls ? Math.round(cls) : null,
+        fcp: fcp ? Math.round(fcp) : null,
+        ttfb: ttfb ? Math.round(ttfb) : null,
+        inp: inp ? Math.round(inp) : null,
+        pageUrl,
+        pagePath,
+        deviceType: deviceType || null,
+        browserName: browserName || null,
+        browserVersion: browserVersion || null,
+        connectionType: connectionType || null,
+        navigationType: navigationType || null,
+        sessionId: sessionId || null,
+        userId: req.user ? (req.user as any).id : null,
+      });
+
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to record metrics" });
+    }
+  });
+
+  // Get performance stats (admin only)
+  app.get("/api/admin/performance/stats", requireAdmin, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const end = endDate ? new Date(endDate as string) : new Date();
+
+      const stats = await storage.getPerformanceStats(start, end);
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch performance stats" });
+    }
+  });
+
+  // Get raw performance metrics (admin only)
+  app.get("/api/admin/performance/metrics", requireAdmin, async (req, res) => {
+    try {
+      const { startDate, endDate, pagePath, deviceType, limit } = req.query;
+      
+      const metrics = await storage.getPerformanceMetrics({
+        startDate: startDate ? new Date(startDate as string) : undefined,
+        endDate: endDate ? new Date(endDate as string) : undefined,
+        pagePath: pagePath as string | undefined,
+        deviceType: deviceType as string | undefined,
+        limit: limit ? parseInt(limit as string) : 100,
+      });
+
+      res.json({ metrics });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch performance metrics" });
+    }
+  });
+
+  // Cleanup old metrics (admin only)
+  app.delete("/api/admin/performance/cleanup", requireAdmin, async (req, res) => {
+    try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const deleted = await storage.cleanupOldPerformanceMetrics(thirtyDaysAgo);
+      res.json({ deleted, message: `Cleaned up ${deleted} old performance records` });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to cleanup metrics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
