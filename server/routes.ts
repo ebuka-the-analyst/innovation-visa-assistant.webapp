@@ -2984,6 +2984,148 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
     }
   });
 
+  // Real Stripe Recent Transactions Endpoint
+  app.get("/api/admin/analytics/transactions", requireAdmin, async (req, res) => {
+    try {
+      const stripe = await getUncachableStripeClient();
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      // Fetch recent successful charges from Stripe
+      const charges = await stripe.charges.list({
+        limit: Math.min(limit, 50),
+      });
+      
+      // Get all users for mapping customer IDs to user data
+      const allUsers = await storage.getAllUsers();
+      const usersByStripeId = new Map<string, typeof allUsers[0]>();
+      allUsers.forEach(user => {
+        if (user.stripeCustomerId) {
+          usersByStripeId.set(user.stripeCustomerId, user);
+        }
+      });
+      
+      // Format transactions with real user data
+      const transactions = charges.data
+        .filter(charge => charge.status === 'succeeded' && charge.paid)
+        .map(charge => {
+          const user = charge.customer ? usersByStripeId.get(charge.customer as string) : null;
+          const chargeDate = new Date(charge.created * 1000);
+          const now = new Date();
+          const diffMs = now.getTime() - chargeDate.getTime();
+          const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+          
+          let timeAgo = 'just now';
+          if (diffDays > 0) {
+            timeAgo = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+          } else if (diffHours > 0) {
+            timeAgo = `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+          } else {
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            if (diffMins > 0) {
+              timeAgo = `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+            }
+          }
+          
+          return {
+            id: charge.id,
+            user: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email?.split('@')[0] || 'Customer' : charge.billing_details?.name || 'Customer',
+            email: user?.email || charge.billing_details?.email || charge.receipt_email || 'N/A',
+            amount: charge.amount / 100,
+            tier: user?.subscriptionTier || charge.metadata?.tier || 'subscription',
+            time: timeAgo,
+            status: charge.status,
+            date: chargeDate.toISOString(),
+          };
+        });
+      
+      res.json({ transactions });
+    } catch (error: any) {
+      console.error("Recent transactions error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch recent transactions",
+        message: error?.message || "Unknown error"
+      });
+    }
+  });
+
+  // Real Stripe Active Subscriptions Endpoint
+  app.get("/api/admin/analytics/subscriptions", requireAdmin, async (req, res) => {
+    try {
+      const stripe = await getUncachableStripeClient();
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      // Fetch active subscriptions from Stripe
+      const subscriptions = await stripe.subscriptions.list({
+        limit: Math.min(limit, 100),
+        status: 'active',
+        expand: ['data.customer'],
+      });
+      
+      // Get all users for mapping
+      const allUsers = await storage.getAllUsers();
+      const usersByStripeId = new Map<string, typeof allUsers[0]>();
+      allUsers.forEach(user => {
+        if (user.stripeCustomerId) {
+          usersByStripeId.set(user.stripeCustomerId, user);
+        }
+      });
+      
+      // Format subscriptions with real user data
+      const formattedSubscriptions = subscriptions.data.map(sub => {
+        const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id;
+        const customer = typeof sub.customer === 'object' ? sub.customer : null;
+        const user = customerId ? usersByStripeId.get(customerId) : null;
+        
+        // Get subscription amount
+        const amount = sub.items?.data?.[0]?.price?.unit_amount 
+          ? sub.items.data[0].price.unit_amount / 100 
+          : 0;
+        
+        // Determine tier from amount or user data
+        let tier = user?.subscriptionTier || 'subscription';
+        if (amount === 29) tier = 'basic';
+        else if (amount === 49) tier = 'premium';
+        else if (amount === 89) tier = 'enterprise';
+        else if (amount === 129) tier = 'ultimate';
+        
+        // Format dates
+        const nextBilling = sub.current_period_end 
+          ? new Date(sub.current_period_end * 1000).toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' })
+          : 'N/A';
+        const since = sub.start_date 
+          ? new Date(sub.start_date * 1000).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+          : 'N/A';
+        
+        // Determine status
+        let status = 'active';
+        if (sub.cancel_at_period_end) status = 'at_risk';
+        else if (sub.current_period_end && (sub.current_period_end * 1000 - Date.now()) < 7 * 24 * 60 * 60 * 1000) {
+          status = 'renewing';
+        }
+        
+        return {
+          id: sub.id,
+          user: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email?.split('@')[0] || 'Customer' : (customer as any)?.name || 'Customer',
+          email: user?.email || (customer as any)?.email || 'N/A',
+          tier,
+          amount,
+          status,
+          nextBilling,
+          since,
+        };
+      });
+      
+      res.json({ subscriptions: formattedSubscriptions });
+    } catch (error: any) {
+      console.error("Subscriptions list error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch subscriptions",
+        message: error?.message || "Unknown error"
+      });
+    }
+  });
+
   // User Management Endpoints
   app.get("/api/admin/users", requireAdmin, async (req, res) => {
     try {

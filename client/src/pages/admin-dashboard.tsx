@@ -1143,6 +1143,42 @@ export default function AdminDashboard() {
     refetchInterval: REFRESH_INTERVAL,
   });
 
+  // Real Stripe Recent Transactions
+  const { data: recentTransactionsData, isLoading: recentTransactionsLoading } = useQuery<{
+    transactions: Array<{
+      id: string;
+      user: string;
+      email: string;
+      amount: number;
+      tier: string;
+      time: string;
+      status: string;
+      date: string;
+    }>;
+  }>({
+    queryKey: ['/api/admin/analytics/transactions'],
+    enabled: !!user?.isAdmin && activeSection === 'revenue-dashboard',
+    refetchInterval: REFRESH_INTERVAL,
+  });
+
+  // Real Stripe Active Subscriptions
+  const { data: activeSubscriptionsData, isLoading: activeSubscriptionsLoading } = useQuery<{
+    subscriptions: Array<{
+      id: string;
+      user: string;
+      email: string;
+      tier: string;
+      amount: number;
+      status: string;
+      nextBilling: string;
+      since: string;
+    }>;
+  }>({
+    queryKey: ['/api/admin/analytics/subscriptions'],
+    enabled: !!user?.isAdmin && activeSection === 'revenue-subscriptions',
+    refetchInterval: REFRESH_INTERVAL,
+  });
+
   // Promo codes with comprehensive analytics
   const { data: promoCodesData, isLoading: promoCodesLoading, refetch: refetchPromoCodes } = useQuery<{
     promoCodes: Array<{
@@ -7473,13 +7509,13 @@ export default function AdminDashboard() {
                             </Card>
                           </div>
 
-                          {/* Recent Transactions */}
+                          {/* Recent Transactions - Real Stripe Data */}
                           <Card>
                             <CardHeader>
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle>Recent Transactions</CardTitle>
-                                  <CardDescription>Latest payment activities</CardDescription>
+                                  <CardDescription>Latest payment activities from Stripe</CardDescription>
                                 </div>
                                 <Button 
                                   variant="outline" 
@@ -7494,40 +7530,48 @@ export default function AdminDashboard() {
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-3">
-                                {[
-                                  { user: 'Nnaemeka Umeh', email: 'emexy8088@yahoo.com', amount: 49, tier: 'Premium', time: '2 hours ago', status: 'success' },
-                                  { user: 'Sarah Johnson', email: 'sarah.j@email.com', amount: 89, tier: 'Enterprise', time: '5 hours ago', status: 'success' },
-                                  { user: 'Michael Chen', email: 'm.chen@startup.io', amount: 29, tier: 'Basic', time: '1 day ago', status: 'success' },
-                                  { user: 'Emma Williams', email: 'emma.w@company.uk', amount: 129, tier: 'Ultimate', time: '2 days ago', status: 'success' },
-                                ].map((tx, index) => (
-                                  <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <Avatar className="h-10 w-10">
-                                        <AvatarFallback className="bg-primary/10 text-primary">
-                                          {tx.user.split(' ').map(n => n[0]).join('')}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                      <div>
-                                        <p className="font-medium">{tx.user}</p>
-                                        <p className="text-xs text-muted-foreground">{tx.email}</p>
+                              {recentTransactionsLoading ? (
+                                <div className="flex items-center justify-center py-8">
+                                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+                                  <span className="ml-2 text-muted-foreground">Loading transactions...</span>
+                                </div>
+                              ) : recentTransactionsData?.transactions && recentTransactionsData.transactions.length > 0 ? (
+                                <div className="space-y-3">
+                                  {recentTransactionsData.transactions.map((tx, index) => (
+                                    <motion.div
+                                      key={tx.id || index}
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: index * 0.05 }}
+                                      className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <Avatar className="h-10 w-10">
+                                          <AvatarFallback className="bg-primary/10 text-primary">
+                                            {tx.user.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'CU'}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                          <p className="font-medium">{tx.user}</p>
+                                          <p className="text-xs text-muted-foreground">{tx.email}</p>
+                                        </div>
                                       </div>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                      <Badge variant="outline">{tx.tier}</Badge>
-                                      <span className="font-bold text-green-500">+£{tx.amount}</span>
-                                      <span className="text-xs text-muted-foreground">{tx.time}</span>
-                                      <CheckCircle className="h-4 w-4 text-green-500" />
-                                    </div>
-                                  </motion.div>
-                                ))}
-                              </div>
+                                      <div className="flex items-center gap-4">
+                                        <Badge variant="outline" className="capitalize">{tx.tier}</Badge>
+                                        <span className="font-bold text-green-500">+£{tx.amount.toFixed(2)}</span>
+                                        <span className="text-xs text-muted-foreground">{tx.time}</span>
+                                        <CheckCircle className="h-4 w-4 text-green-500" />
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-8 text-muted-foreground">
+                                  <CreditCard className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                                  <p>No transactions yet</p>
+                                  <p className="text-sm">Transactions will appear here when customers make payments</p>
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
                             </>
@@ -7795,13 +7839,13 @@ export default function AdminDashboard() {
                             </Card>
                           </div>
 
-                          {/* Active Subscriptions List */}
+                          {/* Active Subscriptions List - Real Stripe Data */}
                           <Card>
                             <CardHeader>
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle>Active Subscriptions</CardTitle>
-                                  <CardDescription>All current paying subscribers</CardDescription>
+                                  <CardDescription>All current paying subscribers from Stripe</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button variant="outline" size="sm">
@@ -7822,63 +7866,69 @@ export default function AdminDashboard() {
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <ScrollArea className="h-[400px]">
-                                <div className="space-y-3">
-                                  {[
-                                    { user: 'Nnaemeka Umeh', email: 'emexy8088@yahoo.com', tier: 'Premium', amount: 49, status: 'active', nextBilling: 'Dec 15, 2025', since: 'Nov 2025' },
-                                    { user: 'Sarah Johnson', email: 'sarah.j@email.com', tier: 'Enterprise', amount: 89, status: 'active', nextBilling: 'Dec 20, 2025', since: 'Nov 2025' },
-                                    { user: 'Michael Chen', email: 'm.chen@startup.io', tier: 'Basic', amount: 29, status: 'active', nextBilling: 'Dec 1, 2025', since: 'Nov 2025' },
-                                    { user: 'Emma Williams', email: 'emma.w@company.uk', tier: 'Ultimate', amount: 129, status: 'active', nextBilling: 'Jan 5, 2026', since: 'Nov 2025' },
-                                    { user: 'James Brown', email: 'jbrown@tech.co', tier: 'Premium', amount: 49, status: 'renewing', nextBilling: 'Nov 28, 2025', since: 'Nov 2025' },
-                                    { user: 'Lisa Anderson', email: 'lisa.a@biz.uk', tier: 'Enterprise', amount: 89, status: 'at_risk', nextBilling: 'Nov 30, 2025', since: 'Nov 2025' },
-                                  ].map((sub, index) => (
-                                    <motion.div
-                                      key={index}
-                                      initial={{ opacity: 0, y: 10 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      transition={{ delay: index * 0.05 }}
-                                      className={`flex items-center justify-between p-4 rounded-lg border ${
-                                        sub.status === 'at_risk' ? 'border-red-500/50 bg-red-500/5' :
-                                        sub.status === 'renewing' ? 'border-amber-500/50 bg-amber-500/5' :
-                                        'border-border/50'
-                                      } hover-elevate`}
-                                    >
-                                      <div className="flex items-center gap-4">
-                                        <Avatar>
-                                          <AvatarFallback className="bg-primary/10">
-                                            {sub.user.split(' ').map(n => n[0]).join('')}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                          <p className="font-medium">{sub.user}</p>
-                                          <p className="text-xs text-muted-foreground">{sub.email}</p>
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center gap-6">
-                                        <div className="text-center">
-                                          <Badge className={
-                                            sub.tier === 'Ultimate' ? 'bg-purple-500' :
-                                            sub.tier === 'Enterprise' ? 'bg-amber-500' :
-                                            sub.tier === 'Premium' ? 'bg-blue-500' : 'bg-green-500'
-                                          }>{sub.tier}</Badge>
-                                          <p className="text-xs text-muted-foreground mt-1">Since {sub.since}</p>
-                                        </div>
-                                        <div className="text-center">
-                                          <p className="font-bold">£{sub.amount}/mo</p>
-                                          <p className="text-xs text-muted-foreground">Next: {sub.nextBilling}</p>
-                                        </div>
-                                        <Badge variant="outline" className={
-                                          sub.status === 'at_risk' ? 'text-red-500 border-red-500' :
-                                          sub.status === 'renewing' ? 'text-amber-500 border-amber-500' :
-                                          'text-green-500 border-green-500'
-                                        }>
-                                          {sub.status === 'at_risk' ? 'At Risk' : sub.status === 'renewing' ? 'Renewing Soon' : 'Active'}
-                                        </Badge>
-                                      </div>
-                                    </motion.div>
-                                  ))}
+                              {activeSubscriptionsLoading ? (
+                                <div className="flex items-center justify-center py-8">
+                                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+                                  <span className="ml-2 text-muted-foreground">Loading subscriptions...</span>
                                 </div>
-                              </ScrollArea>
+                              ) : activeSubscriptionsData?.subscriptions && activeSubscriptionsData.subscriptions.length > 0 ? (
+                                <ScrollArea className="h-[400px]">
+                                  <div className="space-y-3">
+                                    {activeSubscriptionsData.subscriptions.map((sub, index) => (
+                                      <motion.div
+                                        key={sub.id || index}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.05 }}
+                                        className={`flex items-center justify-between p-4 rounded-lg border ${
+                                          sub.status === 'at_risk' ? 'border-red-500/50 bg-red-500/5' :
+                                          sub.status === 'renewing' ? 'border-amber-500/50 bg-amber-500/5' :
+                                          'border-border/50'
+                                        } hover-elevate`}
+                                      >
+                                        <div className="flex items-center gap-4">
+                                          <Avatar>
+                                            <AvatarFallback className="bg-primary/10">
+                                              {sub.user.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'CU'}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <div>
+                                            <p className="font-medium">{sub.user}</p>
+                                            <p className="text-xs text-muted-foreground">{sub.email}</p>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-6">
+                                          <div className="text-center">
+                                            <Badge className={
+                                              sub.tier === 'ultimate' ? 'bg-purple-500' :
+                                              sub.tier === 'enterprise' ? 'bg-amber-500' :
+                                              sub.tier === 'premium' ? 'bg-blue-500' : 'bg-green-500'
+                                            }><span className="capitalize">{sub.tier}</span></Badge>
+                                            <p className="text-xs text-muted-foreground mt-1">Since {sub.since}</p>
+                                          </div>
+                                          <div className="text-center">
+                                            <p className="font-bold">£{sub.amount.toFixed(2)}/mo</p>
+                                            <p className="text-xs text-muted-foreground">Next: {sub.nextBilling}</p>
+                                          </div>
+                                          <Badge variant="outline" className={
+                                            sub.status === 'at_risk' ? 'text-red-500 border-red-500' :
+                                            sub.status === 'renewing' ? 'text-amber-500 border-amber-500' :
+                                            'text-green-500 border-green-500'
+                                          }>
+                                            {sub.status === 'at_risk' ? 'At Risk' : sub.status === 'renewing' ? 'Renewing Soon' : 'Active'}
+                                          </Badge>
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                </ScrollArea>
+                              ) : (
+                                <div className="text-center py-8 text-muted-foreground">
+                                  <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                                  <p>No active subscriptions yet</p>
+                                  <p className="text-sm">Subscriptions will appear here when customers subscribe</p>
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
                         </>
