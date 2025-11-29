@@ -14764,7 +14764,7 @@ export default function AdminDashboard() {
                           : 'No start date'}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+                    <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
                       <Calendar
                         mode="single"
                         selected={newPromoCode.validFrom || undefined}
@@ -14785,7 +14785,7 @@ export default function AdminDashboard() {
                           : 'No expiry'}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+                    <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
                       <Calendar
                         mode="single"
                         selected={newPromoCode.validUntil || undefined}
@@ -15064,7 +15064,7 @@ export default function AdminDashboard() {
                         {format(campaignData.startDate, 'PPP')}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+                    <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
                       <Calendar
                         mode="single"
                         selected={campaignData.startDate}
@@ -15083,7 +15083,7 @@ export default function AdminDashboard() {
                         {format(campaignData.endDate, 'PPP')}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+                    <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
                       <Calendar
                         mode="single"
                         selected={campaignData.endDate}

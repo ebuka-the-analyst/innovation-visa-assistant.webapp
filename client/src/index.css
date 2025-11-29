@@ -57,6 +57,18 @@
   animation: blink-2s 2s ease-in-out infinite;
 }
 
+/* Fix Radix UI Popover positioning in scrollable containers */
+[data-radix-popper-content-wrapper] {
+  z-index: 99999 !important;
+  position: fixed !important;
+}
+
+/* Ensure calendar popover has proper max-height */
+.calendar-popover-content {
+  max-height: var(--radix-popover-content-available-height, 400px);
+  overflow-y: auto;
+}
+
 /* LIGHT MODE - Innovator Founder Visa Assistant Brand Colors */
 :root {
   --button-outline: rgba(0,0,0, .10);
