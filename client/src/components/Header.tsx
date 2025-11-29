@@ -80,7 +80,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl">
       {/* Disclaimer Bar */}
       {!disclaimerDismissed && (
-        <div className="w-full bg-black/90 dark:bg-white text-white dark:text-black text-xs py-2 px-3 md:py-2.5 flex items-center justify-between md:justify-center gap-2 md:gap-4 border-b border-border/40">
+        <div className="w-full bg-black/90 dark:bg-white text-white dark:text-black text-xs py-4 px-3 md:py-5 flex items-center justify-between md:justify-center gap-2 md:gap-4 border-b border-border/40">
           <span className="line-clamp-2 md:line-clamp-1">
             <strong>UK Innovator Founder Visa Assistant Disclaimer:</strong> Trained on GOV.UK guidance. This doesnt substitute a legal advice. Always verify with official sources.
           </span>
