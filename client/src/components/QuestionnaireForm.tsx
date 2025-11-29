@@ -21,6 +21,34 @@ import { useAutoSave } from "@/hooks/useAutoSave";
 
 const steps = [
   {
+    id: 0,
+    title: "Personal Profile & Credentials",
+    description: "Essential founder information for your visa application",
+    fields: [
+      { name: "fullLegalName", label: "Full Legal Name (as on passport)", type: "text", required: true, help: "Enter your complete legal name exactly as it appears on your passport" },
+      { name: "currentVisaStatus", label: "Current UK Visa Status", type: "select", required: true, options: [
+        { value: "student-visa", label: "Student Visa (Tier 4 / Student Route)" },
+        { value: "graduate-visa", label: "Graduate Visa" },
+        { value: "skilled-worker", label: "Skilled Worker Visa" },
+        { value: "family-visa", label: "Family Visa" },
+        { value: "visitor", label: "Visitor Visa" },
+        { value: "outside-uk", label: "Currently Outside UK" },
+        { value: "eea-national", label: "EEA National / EU Settled Status" },
+        { value: "other", label: "Other (specify in notes)" },
+      ]},
+      { name: "visaExpiryDate", label: "Visa Expiry Date", type: "text", required: true, help: "Format: DD/MM/YYYY - This determines application timeline urgency" },
+      { name: "workAuthorizationDetails", label: "Current Work Authorization Details", type: "textarea", required: true, minLength: 30, help: "Can you work in the UK? Any restrictions? Hours limits? Self-employment allowed?" },
+      { name: "educationBackground", label: "Educational Background (All Degrees)", type: "textarea", required: true, minLength: 100, help: "List ALL degrees: Degree Name, Institution, Location, Year, Grade. Example: MSc Data Science, Leeds Beckett University, UK, 2023, Distinction" },
+      { name: "professionalCertifications", label: "Professional Certifications & Accreditations", type: "textarea", required: false, help: "AWS, Google Cloud, Microsoft, industry certifications, professional body memberships (BCS, IET, etc.)" },
+      { name: "totalProfessionalExperience", label: "Total Years of Professional Experience", type: "number", required: true, help: "Include all relevant work experience since graduation" },
+      { name: "industryExperience", label: "Industry-Specific Experience (years and details)", type: "textarea", required: true, minLength: 50, help: "How many years in your target industry? What specific projects/roles?" },
+      { name: "technicalSkillsProficiency", label: "Technical Skills & Proficiency Levels", type: "textarea", required: true, minLength: 100, help: "Rate 1-10 for each skill. Example: Python (9/10), SQL (8/10), JavaScript (7/10), AI/ML (8/10), Cloud Platforms (7/10), Data Analysis (9/10)" },
+      { name: "languagesSpoken", label: "Languages & Proficiency", type: "textarea", required: false, help: "List languages: English (Native/Fluent), other languages with proficiency level" },
+      { name: "linkedInProfile", label: "LinkedIn Profile URL", type: "text", required: false, help: "Your LinkedIn profile URL for verification" },
+      { name: "portfolioUrl", label: "Portfolio/GitHub/Website URL", type: "text", required: false, help: "Links to your work samples, GitHub, personal website" },
+    ],
+  },
+  {
     id: 1,
     title: "Business Overview & Innovation Stage",
     description: "Critical: Assessors check your actual development stage",
@@ -149,6 +177,18 @@ interface PromoCodeValidation {
 
 const defaultFormData: Record<string, string> = {
   tier: 'premium',
+  fullLegalName: '',
+  currentVisaStatus: '',
+  visaExpiryDate: '',
+  workAuthorizationDetails: '',
+  educationBackground: '',
+  professionalCertifications: '',
+  totalProfessionalExperience: '',
+  industryExperience: '',
+  technicalSkillsProficiency: '',
+  languagesSpoken: '',
+  linkedInProfile: '',
+  portfolioUrl: '',
   businessName: '',
   industry: '',
   problem: '',
