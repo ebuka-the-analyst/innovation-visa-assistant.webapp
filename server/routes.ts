@@ -2132,7 +2132,7 @@ EXAMPLES OF GOOD RESPONSES:
           const { toolId, question, answer } = req.body;
           
           const result = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             contents: `As a UK Innovator Founder Visa expert, provide brief feedback (2-3 sentences) on this answer.
 Question: ${question}
 Answer: ${answer}
@@ -7487,7 +7487,7 @@ Reference actual visa requirements where relevant.`;
           const genai = new GoogleGenAI({ apiKey: geminiKey });
           
           const result = await genai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             contents: `${systemPrompt}\n\n${userMessage}`
           });
           
