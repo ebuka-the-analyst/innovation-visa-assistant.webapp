@@ -7391,7 +7391,7 @@ export default function AdminDashboard() {
                                     <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
                                       <CardTitle className="text-sm font-medium text-muted-foreground">ARR</CardTitle>
                                       <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
-                                        <Calendar className="h-4 w-4" />
+                                        <CalendarIcon className="h-4 w-4" />
                                       </div>
                                     </CardHeader>
                                     <CardContent>
@@ -12452,7 +12452,7 @@ export default function AdminDashboard() {
                                                   View Performance
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem>
-                                                  <Calendar className="h-4 w-4 mr-2" />
+                                                  <CalendarIcon className="h-4 w-4 mr-2" />
                                                   Set Availability
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
