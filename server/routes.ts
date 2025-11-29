@@ -8278,6 +8278,272 @@ Return a JSON object with:
     }
   });
 
+  // Admin: Comprehensive User Analysis (PhD-level deep analysis)
+  app.get("/api/admin/users/:userId/analysis", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      // Get user details
+      const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+      if (!targetUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const userData = targetUser as any;
+
+      // Get business plans
+      const userPlans = await db.select().from(businessPlans).where(eq(businessPlans.userId, userId));
+      
+      // Get tool usage analytics
+      const toolUsageResult = await db.execute(sql`
+        SELECT tool_id, COUNT(*) as uses, MAX(updated_at) as last_used
+        FROM tool_progress 
+        WHERE user_id = ${userId}
+        GROUP BY tool_id
+        ORDER BY uses DESC
+      `);
+      const toolUsage = (toolUsageResult as any).rows || [];
+
+      // Get AI interaction logs
+      const aiLogsResult = await db.execute(sql`
+        SELECT action_type, COUNT(*) as count, MAX(created_at) as last_action
+        FROM ai_action_logs 
+        WHERE user_id = ${userId}
+        GROUP BY action_type
+      `);
+      const aiLogs = (aiLogsResult as any).rows || [];
+
+      // Get total AI interactions
+      const totalAiResult = await db.execute(sql`
+        SELECT COUNT(*) as total FROM ai_action_logs WHERE user_id = ${userId}
+      `);
+      const totalAiInteractions = (totalAiResult as any).rows?.[0]?.total || 0;
+
+      // Get interview sessions
+      const interviewResult = await db.execute(sql`
+        SELECT COUNT(*) as total, 
+               SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+        FROM ai_interview_sessions 
+        WHERE user_id = ${userId}
+      `);
+      const interviewStats = (interviewResult as any).rows?.[0] || { total: 0, completed: 0 };
+
+      // Get payment history
+      const paymentsResult = await db.execute(sql`
+        SELECT SUM(amount) as total_spent, COUNT(*) as transaction_count,
+               MIN(created_at) as first_payment, MAX(created_at) as last_payment
+        FROM payment_transactions 
+        WHERE user_id = ${userId} AND status = 'completed'
+      `);
+      const payments = (paymentsResult as any).rows?.[0] || { total_spent: 0, transaction_count: 0 };
+
+      // Get credit history
+      const creditResult = await db.execute(sql`
+        SELECT 
+          SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END) as credits_earned,
+          SUM(CASE WHEN type = 'debit' THEN amount ELSE 0 END) as credits_used,
+          COUNT(*) as total_transactions
+        FROM credit_transactions 
+        WHERE user_id = ${userId}
+      `);
+      const creditStats = (creditResult as any).rows?.[0] || { credits_earned: 0, credits_used: 0 };
+
+      // Get support tickets
+      const ticketsResult = await db.execute(sql`
+        SELECT COUNT(*) as total, 
+               SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as open_count,
+               SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved_count
+        FROM support_tickets 
+        WHERE user_id = ${userId}
+      `);
+      const tickets = (ticketsResult as any).rows?.[0] || { total: 0, open_count: 0, resolved_count: 0 };
+
+      // Get security events
+      const securityResult = await db.execute(sql`
+        SELECT event_type, severity, COUNT(*) as count
+        FROM security_events 
+        WHERE user_id = ${userId}
+        GROUP BY event_type, severity
+        ORDER BY count DESC
+      `);
+      const securityEvents = (securityResult as any).rows || [];
+
+      // Get activity timeline (last 30 days)
+      const activityResult = await db.execute(sql`
+        SELECT DATE(created_at) as date, COUNT(*) as actions
+        FROM user_activity_logs 
+        WHERE user_id = ${userId} AND created_at > NOW() - INTERVAL '30 days'
+        GROUP BY DATE(created_at)
+        ORDER BY date DESC
+      `);
+      const activityTimeline = (activityResult as any).rows || [];
+
+      // Get site feedback
+      const feedbackResult = await db.execute(sql`
+        SELECT rating, comment, page_url, created_at
+        FROM site_feedback 
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+        LIMIT 10
+      `);
+      const feedback = (feedbackResult as any).rows || [];
+
+      // Get referral stats
+      const referralResult = await db.execute(sql`
+        SELECT 
+          (SELECT COUNT(*) FROM referral_codes WHERE user_id = ${userId}) as codes_created,
+          (SELECT COUNT(*) FROM referrals WHERE referrer_id = ${userId}) as successful_referrals,
+          (SELECT SUM(amount) FROM referral_rewards WHERE user_id = ${userId}) as total_rewards
+      `);
+      const referralStats = (referralResult as any).rows?.[0] || { codes_created: 0, successful_referrals: 0, total_rewards: 0 };
+
+      // Get uploaded files count
+      const filesResult = await db.execute(sql`
+        SELECT COUNT(*) as total, SUM(file_size) as total_size
+        FROM uploaded_files 
+        WHERE user_id = ${userId}
+      `);
+      const fileStats = (filesResult as any).rows?.[0] || { total: 0, total_size: 0 };
+
+      // Get eligibility assessments
+      const eligibilityResult = await db.execute(sql`
+        SELECT score, assessment_type, created_at
+        FROM eligibility_assessments 
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+        LIMIT 5
+      `);
+      const eligibilityAssessments = (eligibilityResult as any).rows || [];
+
+      // Calculate engagement score (0-100)
+      const daysSinceJoin = Math.max(1, Math.floor((Date.now() - new Date(userData.createdAt).getTime()) / (1000 * 60 * 60 * 24)));
+      const toolUsageScore = Math.min(30, toolUsage.length * 3);
+      const planScore = Math.min(20, userPlans.length * 10);
+      const aiScore = Math.min(20, Math.floor(parseInt(totalAiInteractions) / 5));
+      const activityScore = Math.min(15, activityTimeline.length / 2);
+      const paymentScore = parseInt(payments.total_spent) > 0 ? 15 : 0;
+      const engagementScore = Math.min(100, toolUsageScore + planScore + aiScore + activityScore + paymentScore);
+
+      // Determine user status/risk
+      const lastActive = activityTimeline.length > 0 ? activityTimeline[0].date : userData.updatedAt;
+      const daysSinceActive = Math.floor((Date.now() - new Date(lastActive).getTime()) / (1000 * 60 * 60 * 24));
+      const riskLevel = daysSinceActive > 30 ? 'high' : daysSinceActive > 14 ? 'medium' : 'low';
+
+      // Build comprehensive analysis response
+      const analysis = {
+        user: {
+          id: userData.id,
+          email: userData.email,
+          name: `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'Unknown',
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          avatar: userData.avatarUrl,
+          tier: userData.subscriptionTier || 'free',
+          isVerified: userData.isEmailVerified,
+          isAdmin: userData.isAdmin,
+          isBanned: userData.isBanned,
+          suspendedUntil: userData.suspendedUntil,
+          createdAt: userData.createdAt,
+          updatedAt: userData.updatedAt,
+          lastLoginAt: userData.lastLoginAt,
+          loginCount: userData.loginCount || 0,
+        },
+        credits: {
+          current: (userData.planCredits || 0) + (userData.bonusCredits || 0),
+          planCredits: userData.planCredits || 0,
+          bonusCredits: userData.bonusCredits || 0,
+          earned: parseInt(creditStats.credits_earned) || 0,
+          used: parseInt(creditStats.credits_used) || 0,
+          transactions: parseInt(creditStats.total_transactions) || 0,
+        },
+        financials: {
+          totalSpent: parseFloat(payments.total_spent) || 0,
+          transactionCount: parseInt(payments.transaction_count) || 0,
+          firstPayment: payments.first_payment,
+          lastPayment: payments.last_payment,
+          lifetimeValue: parseFloat(payments.total_spent) || 0,
+        },
+        businessPlans: {
+          total: userPlans.length,
+          plans: userPlans.map((p: any) => ({
+            id: p.id,
+            name: p.businessName,
+            status: p.status,
+            progress: p.progress || 0,
+            createdAt: p.createdAt,
+            updatedAt: p.updatedAt,
+          })),
+        },
+        toolEngagement: {
+          uniqueToolsUsed: toolUsage.length,
+          topTools: toolUsage.slice(0, 10),
+          totalToolInteractions: toolUsage.reduce((sum: number, t: any) => sum + parseInt(t.uses), 0),
+        },
+        aiInteractions: {
+          total: parseInt(totalAiInteractions) || 0,
+          byType: aiLogs,
+          interviewSessions: parseInt(interviewStats.total) || 0,
+          completedInterviews: parseInt(interviewStats.completed) || 0,
+        },
+        support: {
+          totalTickets: parseInt(tickets.total) || 0,
+          openTickets: parseInt(tickets.open_count) || 0,
+          resolvedTickets: parseInt(tickets.resolved_count) || 0,
+        },
+        security: {
+          events: securityEvents,
+          totalEvents: securityEvents.reduce((sum: number, e: any) => sum + parseInt(e.count), 0),
+        },
+        activity: {
+          timeline: activityTimeline,
+          daysSinceJoin,
+          daysSinceActive,
+          lastActive,
+        },
+        feedback: {
+          submissions: feedback,
+          averageRating: feedback.length > 0 
+            ? feedback.reduce((sum: number, f: any) => sum + (f.rating || 0), 0) / feedback.length 
+            : null,
+        },
+        referrals: {
+          codesCreated: parseInt(referralStats.codes_created) || 0,
+          successfulReferrals: parseInt(referralStats.successful_referrals) || 0,
+          totalRewards: parseFloat(referralStats.total_rewards) || 0,
+        },
+        files: {
+          totalUploaded: parseInt(fileStats.total) || 0,
+          totalSize: parseInt(fileStats.total_size) || 0,
+        },
+        eligibility: {
+          assessments: eligibilityAssessments,
+          latestScore: eligibilityAssessments.length > 0 ? eligibilityAssessments[0].score : null,
+        },
+        insights: {
+          engagementScore,
+          riskLevel,
+          churnRisk: riskLevel === 'high' ? 'High risk - inactive for 30+ days' : 
+                     riskLevel === 'medium' ? 'Medium risk - inactive for 14+ days' : 'Low risk',
+          upgradeReadiness: userData.subscriptionTier === 'free' && engagementScore > 50 
+            ? 'High - active user on free tier' 
+            : userData.subscriptionTier === 'free' ? 'Medium - could benefit from premium features' : 'N/A - already upgraded',
+          recommendedActions: [
+            ...(riskLevel === 'high' ? ['Send re-engagement email'] : []),
+            ...(userData.subscriptionTier === 'free' && engagementScore > 60 ? ['Offer upgrade discount'] : []),
+            ...(parseInt(tickets.open_count) > 0 ? ['Resolve open support tickets'] : []),
+            ...(userPlans.length === 0 ? ['Encourage to create first business plan'] : []),
+          ],
+        },
+        generatedAt: new Date().toISOString(),
+      };
+
+      res.json(analysis);
+    } catch (error: any) {
+      console.error("User analysis error:", error);
+      res.status(500).json({ error: "Failed to generate user analysis", details: error.message });
+    }
+  });
+
   // Regulatory updates endpoint
   app.get("/api/regulations/updates", isAuthenticated, async (req, res) => {
     try {
