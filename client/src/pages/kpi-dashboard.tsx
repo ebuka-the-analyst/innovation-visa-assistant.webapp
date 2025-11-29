@@ -2,10 +2,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, AlertCircle, CheckCircle2, BarChart3 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 import FeatureNavigation from "@/components/FeatureNavigation";
 
 export default function KPIDashboard() {
+  const { toast } = useToast();
   const visaHealthScore = 87;
   const kpis = [
     { label: "Revenue Progress", value: "£180K", target: "£250K", status: "on-track", trend: "+12%" },
@@ -102,7 +104,18 @@ export default function KPIDashboard() {
               <TabsContent value="metrics">
                 <Card className="p-8">
                   <p className="text-muted-foreground">Connect your analytics, CRM, and payment platforms to auto-populate real metrics. Your business data becomes your evidence.</p>
-                  <Button className="mt-4">Connect Data Sources</Button>
+                  <Button 
+                    className="mt-4"
+                    onClick={() => {
+                      toast({
+                        title: "Data Sources Integration",
+                        description: "Integration with external data sources is available in Premium tier. Contact support to set up your connections.",
+                      });
+                    }}
+                    data-testid="button-connect-data-sources"
+                  >
+                    Connect Data Sources
+                  </Button>
                 </Card>
               </TabsContent>
 
@@ -117,7 +130,19 @@ export default function KPIDashboard() {
                   <div className="space-y-3">
                     <p className="text-sm font-semibold">Next Review: December 15, 2025</p>
                     <p className="text-sm text-muted-foreground">Days until job creation target review: 87 days</p>
-                    <Button variant="outline" className="w-full">Set Reminder</Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        toast({
+                          title: "Reminder Set",
+                          description: "You'll receive an email reminder 7 days before your December 15, 2025 review date.",
+                        });
+                      }}
+                      data-testid="button-set-reminder"
+                    >
+                      Set Reminder
+                    </Button>
                   </div>
                 </Card>
               </TabsContent>

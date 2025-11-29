@@ -180,7 +180,19 @@ export default function RFEDefenceLab() {
                 <p className="text-sm text-amber-900 dark:text-amber-100 mb-4">
                   Ready for adversarial interview prep? We'll simulate a critical endorser panel and test your responses to tough questions.
                 </p>
-                <Button variant="outline">Start Mock Interview</Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    toast({
+                      title: "Mock Interview Starting",
+                      description: "Launching adversarial interview simulation...",
+                    });
+                    window.location.href = "/interview-prep";
+                  }}
+                  data-testid="button-start-mock-interview"
+                >
+                  Start Mock Interview
+                </Button>
               </div>
             </div>
           </Card>

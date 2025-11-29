@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle2, TrendingUp, Home, Globe } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 
 const settlementSteps = [
@@ -103,6 +104,33 @@ const expansionStrategies = [
 ];
 
 export default function SettlementPlanning() {
+  const { toast } = useToast();
+  
+  const downloadExpansionChecklist = () => {
+    const checklist = [
+      "1. Ensure UK entity remains your primary business hub",
+      "2. Maintain UK tax residency obligations",
+      "3. Document international operations for ILR",
+      "4. Create subsidiaries rather than relocating",
+      "5. Keep UK job creation commitments",
+      "6. Plan international expansion after ILR grant",
+    ];
+    
+    const content = "UK Innovator Founder - International Expansion Checklist\n\n" + checklist.join("\n");
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'expansion-checklist.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Checklist Downloaded",
+      description: "Your international expansion checklist has been downloaded.",
+    });
+  };
+  
   return (
     <div className="min-h-screen">
       
@@ -219,7 +247,11 @@ export default function SettlementPlanning() {
                     <p className="text-sm text-muted-foreground mb-4">
                       Your Innovator Founder Visa startup has proven you can innovate and create value. Use this foundation to expand internationally while maintaining your UK presence and fulfilling ILR requirements.
                     </p>
-                    <Button gap-2>
+                    <Button 
+                      className="gap-2"
+                      onClick={downloadExpansionChecklist}
+                      data-testid="button-download-expansion-checklist"
+                    >
                       <TrendingUp className="w-4 h-4" />
                       Download Expansion Checklist
                     </Button>

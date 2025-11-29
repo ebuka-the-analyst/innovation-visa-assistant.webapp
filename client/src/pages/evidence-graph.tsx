@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, AlertCircle, Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 import FeatureNavigation from "@/components/FeatureNavigation";
 
@@ -34,6 +35,25 @@ const claims = [
 ];
 
 export default function EvidenceGraph() {
+  const { toast } = useToast();
+  
+  const createActionPlan = () => {
+    const weakClaims = claims.filter(c => (c.status === "weak" || c.status === "moderate") && c.gap);
+    const actionPlan = weakClaims.map(c => ({
+      claim: c.claim,
+      gap: c.gap,
+      score: c.supportScore,
+      createdAt: new Date().toISOString()
+    }));
+    
+    localStorage.setItem("evidence-action-plan", JSON.stringify(actionPlan));
+    
+    toast({
+      title: "Action Plan Created",
+      description: `Created action plan with ${actionPlan.length} evidence gaps to address.`,
+    });
+  };
+  
   return (
     <div className="min-h-screen">
       
@@ -117,7 +137,13 @@ export default function EvidenceGraph() {
                 <li>Create detailed unit economics breakdown</li>
                 <li>Obtain customer testimonials and LOIs</li>
               </ul>
-              <Button className="mt-4">Create Action Plan</Button>
+              <Button 
+                className="mt-4"
+                onClick={createActionPlan}
+                data-testid="button-create-action-plan"
+              >
+                Create Action Plan
+              </Button>
             </div>
           </Card>
         </div>
