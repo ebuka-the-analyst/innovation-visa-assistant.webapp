@@ -3924,35 +3924,39 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
 
-                                {/* Goal 2 */}
+                                {/* Goal 2 - Real MRR from Stripe */}
                                 <div className="p-4 rounded-lg border bg-muted/30">
                                   <div className="flex items-start justify-between mb-3">
                                     <div>
                                       <h4 className="font-semibold">£5,000 Monthly Recurring Revenue</h4>
                                       <p className="text-sm text-muted-foreground">Scale premium tier conversions</p>
                                     </div>
-                                    <Badge variant="secondary">£2,450/£5,000</Badge>
+                                    <Badge variant="secondary">£{(overviewData.extendedKPIs?.monthlyRevenue || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/£5,000</Badge>
                                   </div>
-                                  <Progress value={49} className="h-2" />
+                                  <Progress value={Math.min(((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100, 100)} className="h-2" />
                                   <div className="flex items-center justify-between mt-2 text-sm">
                                     <span className="text-muted-foreground">Due: Dec 31, 2025</span>
-                                    <span className="text-amber-500 font-medium">49% complete</span>
+                                    <span className={`font-medium ${((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100 >= 75 ? 'text-green-500' : ((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100 >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
+                                      {Math.round(((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100)}% complete
+                                    </span>
                                   </div>
                                 </div>
 
-                                {/* Goal 3 */}
+                                {/* Goal 3 - Real Plan Completion Rate */}
                                 <div className="p-4 rounded-lg border bg-muted/30">
                                   <div className="flex items-start justify-between mb-3">
                                     <div>
                                       <h4 className="font-semibold">75% Plan Completion Rate</h4>
                                       <p className="text-sm text-muted-foreground">Improve user journey and tool guidance</p>
                                     </div>
-                                    <Badge variant="secondary">42%/75%</Badge>
+                                    <Badge variant="secondary">{overviewData.extendedKPIs?.planCompletionRate || 0}%/75%</Badge>
                                   </div>
-                                  <Progress value={56} className="h-2" />
+                                  <Progress value={Math.min(((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100, 100)} className="h-2" />
                                   <div className="flex items-center justify-between mt-2 text-sm">
                                     <span className="text-muted-foreground">Due: Dec 31, 2025</span>
-                                    <span className="text-amber-500 font-medium">56% complete</span>
+                                    <span className={`font-medium ${((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100 >= 75 ? 'text-green-500' : ((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100 >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
+                                      {Math.round(((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100)}% complete
+                                    </span>
                                   </div>
                                 </div>
                               </div>
