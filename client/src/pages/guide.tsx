@@ -159,7 +159,7 @@ export default function Guide() {
                 </CardHeader>
                 <CardContent className="space-y-3 text-muted-foreground">
                   <p>
-                    Your business idea must be endorsed by a Home Office-approved endorsing body. These organizations assess whether your business meets the three core criteria: <strong>Innovation, Viability, and Scalability</strong>. Endorsing bodies include Tech Nation, Innovator International, The Global Entrepreneurs Programme, and select universities.
+                    Your business idea must be endorsed by a Home Office-approved endorsing body. These organizations assess whether your business meets the three core criteria: <strong>Innovation, Viability, and Scalability</strong>. Current endorsing bodies (November 2025) include Envestors, UK Endorsing Services (UKES), Innovator International, and the Global Entrepreneurs Programme (GEP).
                   </p>
                   <p className="font-semibold">What they evaluate:</p>
                   <ul className="list-disc pl-6 space-y-1">
@@ -256,10 +256,10 @@ export default function Guide() {
                     <h3 className="text-xl font-bold mb-3">Step 1: Choose Your Endorsing Body</h3>
                     <p>Not all endorsing bodies are created equal. Each has specific focus areas, success rates, and support offerings:</p>
                     <ul className="list-disc pl-6 space-y-2 mt-2">
-                      <li><strong>Tech Nation:</strong> Best for digital technology and software businesses. Offers extensive mentorship network.</li>
-                      <li><strong>Innovator International:</strong> Broad sector coverage with strong track record (70%+ success rate).</li>
-                      <li><strong>The Global Entrepreneurs Programme:</strong> Focus on high-growth startups with international expansion plans.</li>
-                      <li><strong>University-based bodies:</strong> Often require connection to the institution (alumni, research collaboration).</li>
+                      <li><strong>Envestors:</strong> Best for investment-ready businesses with strong investor network access.</li>
+                      <li><strong>UK Endorsing Services (UKES):</strong> Diverse sector support from consortium of 6 UK businesses.</li>
+                      <li><strong>Innovator International:</strong> Broad sector coverage supporting 700+ global entrepreneurs.</li>
+                      <li><strong>Global Entrepreneurs Programme (GEP):</strong> Government-backed, ideal for exceptional serial founders.</li>
                     </ul>
                     <p className="mt-3 bg-primary/10 p-3 rounded">
                       <strong>Pro tip:</strong> Choose based on sector expertise, not just application fees. A body with experience in your industry provides better feedback and higher approval chances.

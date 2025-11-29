@@ -59,7 +59,7 @@ const taxPlanning = [
       "Limited Company vs Sole Proprietor",
       "Tax-efficient dividend strategy",
       "Director loan account management",
-      "R&D tax credits (especially for Tech Nation)"
+      "R&D tax credits for innovative businesses"
     ]
   },
   {

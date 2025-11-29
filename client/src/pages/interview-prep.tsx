@@ -11,7 +11,7 @@ const interviewScenarios = [
   {
     id: 1,
     question: "Can you walk us through your competitive differentiation?",
-    context: "Tech Nation Interview",
+    context: "Endorser Interview",
     category: "Innovation",
     keyPoints: [
       "Be specific - avoid generic claims",
@@ -101,12 +101,19 @@ const interviewScenarios = [
 ];
 
 const endorserTips = {
-  "Tech Nation": [
-    "Emphasize innovation and technology differentiation",
-    "Show clear IP or proprietary technology",
-    "Demonstrate R&D commitment (10%+ spend)",
-    "Reference relevant technology trends",
-    "Highlight scalability potential"
+  "Envestors": [
+    "Emphasize investment-readiness and scalability",
+    "Show clear revenue model and path to profitability",
+    "Demonstrate market validation and traction",
+    "Reference investor network value",
+    "Highlight growth potential and exit strategy"
+  ],
+  "UKES": [
+    "Show diverse sector innovation potential",
+    "Emphasize job creation and UK economic benefit",
+    "Demonstrate business viability and sustainability",
+    "Show founder experience and capability",
+    "Reference mentorship needs and growth plans"
   ],
   "Innovator International": [
     "Show market validation and customer traction",
@@ -115,18 +122,18 @@ const endorserTips = {
     "Show founder-market fit",
     "Reference sector trends and opportunities"
   ],
-  "University": [
-    "Connect to research and academic excellence",
-    "Show publication or research backing",
-    "Emphasize knowledge commercialization",
-    "Reference academic partnerships",
-    "Highlight knowledge transfer to industry"
+  "GEP": [
+    "Demonstrate exceptional track record",
+    "Show high-growth potential and ambition",
+    "Emphasize international expansion plans",
+    "Reference significant job creation targets",
+    "Highlight government/investor backing"
   ]
 };
 
 export default function InterviewPrep() {
   const [selectedScenario, setSelectedScenario] = useState(interviewScenarios[0]);
-  const [selectedEndorser, setSelectedEndorser] = useState<string>("Tech Nation");
+  const [selectedEndorser, setSelectedEndorser] = useState<string>("Envestors");
   const [isRecording, setIsRecording] = useState(false);
   const [recordedResponse, setRecordedResponse] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);

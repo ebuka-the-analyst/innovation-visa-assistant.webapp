@@ -8,9 +8,9 @@ const experts = [
   {
     id: 1,
     name: "Sarah Chen",
-    title: "Immigration Lawyer & Tech Nation Advisor",
+    title: "Immigration Lawyer & Endorsement Advisor",
     bio: "15+ years immigration law, 200+ visa approvals",
-    specialties: ["Tech Nation", "Innovation Criteria", "IP Strategy"],
+    specialties: ["Envestors", "Innovation Criteria", "IP Strategy"],
     rating: 4.9,
     reviews: 127,
     hourlyRate: 150,
