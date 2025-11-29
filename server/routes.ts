@@ -8291,13 +8291,14 @@ Return a JSON object with:
   // Site Feedback - Timed popup after 10 minutes
   app.post("/api/feedback/site", async (req, res) => {
     try {
-      const { rating, comment, pageUrl, timeSpentMinutes } = req.body;
+      const { rating, comment, pageUrl, timeSpentMinutes, browserInfo, screenSize, referrer } = req.body;
       
       if (!rating || rating < 1 || rating > 5) {
         return res.status(400).json({ error: "Rating must be between 1 and 5" });
       }
       
-      const userId = (req.user as any)?.id || null;
+      const user = req.user as any;
+      const userId = user?.id || null;
       
       await db.insert(siteFeedback).values({
         userId,
@@ -8305,6 +8306,12 @@ Return a JSON object with:
         comment: comment || null,
         pageUrl: pageUrl || null,
         timeSpentMinutes: timeSpentMinutes || null,
+        userEmail: user?.email || null,
+        userName: user?.name || user?.firstName || null,
+        userTier: user?.tier || null,
+        browserInfo: browserInfo || null,
+        screenSize: screenSize || null,
+        referrer: referrer || null,
       });
       
       res.json({ success: true });

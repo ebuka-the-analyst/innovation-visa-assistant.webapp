@@ -2197,6 +2197,13 @@ export const siteFeedback = pgTable("site_feedback", {
   comment: text("comment"), // Optional improvement suggestion
   pageUrl: text("page_url"), // Page where feedback was submitted
   timeSpentMinutes: integer("time_spent_minutes"), // How long user was on site
+  // Enhanced user tracking
+  userEmail: varchar("user_email"),
+  userName: varchar("user_name"),
+  userTier: varchar("user_tier", { length: 20 }),
+  browserInfo: text("browser_info"), // Browser/device details
+  screenSize: varchar("screen_size", { length: 20 }), // e.g., "1920x1080"
+  referrer: text("referrer"), // Where user came from
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

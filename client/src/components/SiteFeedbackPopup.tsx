@@ -28,7 +28,15 @@ export function SiteFeedbackPopup() {
   });
 
   const submitMutation = useMutation({
-    mutationFn: async (data: { rating: number; comment: string; pageUrl: string; timeSpentMinutes: number }) => {
+    mutationFn: async (data: { 
+      rating: number; 
+      comment: string; 
+      pageUrl: string; 
+      timeSpentMinutes: number;
+      browserInfo: string;
+      screenSize: string;
+      referrer: string;
+    }) => {
       return apiRequest("POST", "/api/feedback/site", data);
     },
     onSuccess: () => {
@@ -105,12 +113,20 @@ export function SiteFeedbackPopup() {
 
     const state = getFeedbackState();
     const timeSpent = Math.round((Date.now() - state.startTime) / (1000 * 60));
+    
+    // Capture browser and device info
+    const browserInfo = `${navigator.userAgent}`;
+    const screenSize = `${window.screen.width}x${window.screen.height}`;
+    const referrer = document.referrer || "direct";
 
     submitMutation.mutate({
       rating,
       comment: comment.trim(),
       pageUrl: window.location.pathname,
       timeSpentMinutes: timeSpent,
+      browserInfo,
+      screenSize,
+      referrer,
     });
   };
 
