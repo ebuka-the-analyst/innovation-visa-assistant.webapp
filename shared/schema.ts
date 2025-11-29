@@ -2565,3 +2565,163 @@ export const insertPerformanceMetricSchema = createInsertSchema(performanceMetri
 
 export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
 export type InsertPerformanceMetric = z.infer<typeof insertPerformanceMetricSchema>;
+
+// ============================================
+// REAL-TIME ANALYTICS SYSTEM (PhD-Level Activity Tracking)
+// ============================================
+
+// Active User Sessions - Track currently active users in real-time
+export const userSessions = pgTable("user_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Session Identification
+  sessionToken: varchar("session_token", { length: 100 }).notNull(),
+  
+  // Timing
+  sessionStartedAt: timestamp("session_started_at").notNull().defaultNow(),
+  lastSeenAt: timestamp("last_seen_at").notNull().defaultNow(),
+  sessionEndedAt: timestamp("session_ended_at"),
+  
+  // Session Status
+  isActive: boolean("is_active").notNull().default(true),
+  
+  // Device Information
+  userAgent: text("user_agent"),
+  deviceType: varchar("device_type", { length: 20 }), // mobile, tablet, desktop
+  browserName: varchar("browser_name", { length: 50 }),
+  browserVersion: varchar("browser_version", { length: 30 }),
+  osName: varchar("os_name", { length: 50 }),
+  osVersion: varchar("os_version", { length: 30 }),
+  screenResolution: varchar("screen_resolution", { length: 20 }), // e.g., "1920x1080"
+  
+  // Location Information (from IP)
+  ipAddress: varchar("ip_address", { length: 50 }),
+  country: varchar("country", { length: 100 }),
+  countryCode: varchar("country_code", { length: 5 }),
+  region: varchar("region", { length: 100 }),
+  city: varchar("city", { length: 100 }),
+  timezone: varchar("timezone", { length: 50 }),
+  
+  // Connection Info
+  connectionType: varchar("connection_type", { length: 20 }), // 4g, 3g, wifi, ethernet
+  
+  // Session Metrics
+  pageViewCount: integer("page_view_count").notNull().default(0),
+  eventCount: integer("event_count").notNull().default(0),
+  totalDurationSeconds: integer("total_duration_seconds").notNull().default(0),
+  
+  // Entry/Exit
+  entryPage: varchar("entry_page", { length: 255 }),
+  currentPage: varchar("current_page", { length: 255 }),
+  exitPage: varchar("exit_page", { length: 255 }),
+  
+  // Referrer
+  referrerUrl: text("referrer_url"),
+  referrerSource: varchar("referrer_source", { length: 50 }), // google, facebook, direct, etc.
+  utmSource: varchar("utm_source", { length: 100 }),
+  utmMedium: varchar("utm_medium", { length: 100 }),
+  utmCampaign: varchar("utm_campaign", { length: 100 }),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_session_user").on(table.userId),
+  index("idx_session_active").on(table.isActive),
+  index("idx_session_started").on(table.sessionStartedAt),
+  index("idx_session_last_seen").on(table.lastSeenAt),
+  index("idx_session_country").on(table.countryCode),
+  index("idx_session_device").on(table.deviceType),
+]);
+
+// Page Views - Track every page navigation
+export const pageViews = pgTable("page_views", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull().references(() => userSessions.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Page Information
+  pagePath: varchar("page_path", { length: 255 }).notNull(),
+  pageTitle: varchar("page_title", { length: 255 }),
+  pageUrl: text("page_url"),
+  
+  // Navigation
+  referrerPath: varchar("referrer_path", { length: 255 }),
+  navigationType: varchar("navigation_type", { length: 20 }), // navigate, reload, back_forward, prerender
+  
+  // Timing
+  viewStartedAt: timestamp("view_started_at").notNull().defaultNow(),
+  viewEndedAt: timestamp("view_ended_at"),
+  timeOnPageSeconds: integer("time_on_page_seconds"),
+  
+  // Engagement
+  scrollDepthPercent: integer("scroll_depth_percent").default(0),
+  clickCount: integer("click_count").default(0),
+  
+  // Performance
+  pageLoadTimeMs: integer("page_load_time_ms"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_pageview_session").on(table.sessionId),
+  index("idx_pageview_user").on(table.userId),
+  index("idx_pageview_path").on(table.pagePath),
+  index("idx_pageview_started").on(table.viewStartedAt),
+]);
+
+// Activity Events - Detailed event tracking for user actions
+export const activityEvents = pgTable("activity_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").notNull().references(() => userSessions.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Event Details
+  eventType: varchar("event_type", { length: 50 }).notNull(), // click, form_submit, tool_use, export, plan_create, etc.
+  eventCategory: varchar("event_category", { length: 50 }).notNull(), // navigation, engagement, conversion, tool, system
+  eventAction: varchar("event_action", { length: 100 }).notNull(), // specific action
+  eventLabel: varchar("event_label", { length: 255 }), // optional label
+  eventValue: integer("event_value"), // optional numeric value
+  
+  // Context
+  pagePath: varchar("page_path", { length: 255 }),
+  
+  // Tool-specific tracking
+  toolId: varchar("tool_id", { length: 100 }),
+  toolCategory: varchar("tool_category", { length: 50 }),
+  
+  // Additional Data
+  payload: jsonb("payload").$type<Record<string, any>>(),
+  
+  occurredAt: timestamp("occurred_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_event_session").on(table.sessionId),
+  index("idx_event_user").on(table.userId),
+  index("idx_event_type").on(table.eventType),
+  index("idx_event_category").on(table.eventCategory),
+  index("idx_event_occurred").on(table.occurredAt),
+  index("idx_event_tool").on(table.toolId),
+]);
+
+// Real-Time Analytics Insert Schemas
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPageViewSchema = createInsertSchema(pageViews).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertActivityEventSchema = createInsertSchema(activityEvents).omit({
+  id: true,
+});
+
+// Real-Time Analytics Types
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
+
+export type PageView = typeof pageViews.$inferSelect;
+export type InsertPageView = z.infer<typeof insertPageViewSchema>;
+
+export type ActivityEvent = typeof activityEvents.$inferSelect;
+export type InsertActivityEvent = z.infer<typeof insertActivityEventSchema>;
