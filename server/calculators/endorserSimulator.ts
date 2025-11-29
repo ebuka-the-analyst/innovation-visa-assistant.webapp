@@ -10,13 +10,13 @@ interface EndorserProfile {
 }
 
 const ENDORSERS: Record<string, EndorserProfile> = {
-  "tech-nation": {
-    name: "Tech Nation (2025)",
-    riskTolerance: "high",
-    sectorPreferences: ["AI/ML", "FinTech", "SaaS", "Cyber Security", "Deep Tech", "Climate Tech"],
-    innovationWeight: 0.4,
+  "ukes": {
+    name: "UK Endorsing Services (UKES) (2025)",
+    riskTolerance: "medium",
+    sectorPreferences: ["Technology", "E-commerce", "Business Services", "Healthcare", "Creative Industries"],
+    innovationWeight: 0.35,
     viabilityWeight: 0.35,
-    scalabilityWeight: 0.25,
+    scalabilityWeight: 0.30,
   },
   "innovator-intl": {
     name: "Innovator International (2025)",

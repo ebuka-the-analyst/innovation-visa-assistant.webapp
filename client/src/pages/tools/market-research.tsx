@@ -59,7 +59,7 @@ const AI_TOOL_CONFIG: ToolConfig = {
     {
       id: 'data-sources',
       question: "What are your data sources? (For secondary research, name specific reports or databases)",
-      hint: "Credible sources like ONS, Tech Nation, or industry associations strengthen evidence",
+      hint: "Credible sources like ONS, government data, or industry associations strengthen evidence",
       fieldKey: 'dataSources'
     }
   ],

@@ -109,12 +109,10 @@ const AI_TOOL_CONFIG: ToolConfig = {
 };
 
 const ENDORSING_BODIES = [
-  { id: 'tech-nation', name: 'Tech Nation', focus: 'Digital technology startups' },
-  { id: 'founders-forum', name: 'Founders Forum', focus: 'High-growth tech companies' },
-  { id: 'entrepreneur-first', name: 'Entrepreneur First', focus: 'Pre-idea to early-stage founders' },
-  { id: 'seedcamp', name: 'Seedcamp', focus: 'European seed-stage startups' },
-  { id: 'bethnal-green', name: 'Bethnal Green Ventures', focus: 'Tech for good startups' },
-  { id: 'coadec', name: 'Coadec', focus: 'Digital economy companies' },
+  { id: 'envestors', name: 'Envestors', focus: 'Investment-ready businesses' },
+  { id: 'ukes', name: 'UK Endorsing Services (UKES)', focus: 'Diverse sector support' },
+  { id: 'innovator-international', name: 'Innovator International', focus: 'Global entrepreneurs' },
+  { id: 'gep', name: 'Global Entrepreneurs Programme', focus: 'High-growth startups' },
   { id: 'other', name: 'Other Endorsing Body', focus: 'Custom entry' }
 ];
 

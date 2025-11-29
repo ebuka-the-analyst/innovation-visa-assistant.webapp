@@ -45,46 +45,46 @@ const AI_TOOL_CONFIG: ToolConfig = {
     { id: 'scalability', question: "How does your business plan to scale in the UK market?", hint: "Consider hiring plans, market expansion, growth projections", fieldKey: 'scalability', fieldType: 'text' },
     { id: 'evidence', question: "What supporting evidence can you provide for your claims?", hint: "Market research, financial projections, testimonials, LOIs", fieldKey: 'evidence', fieldType: 'text' },
     { id: 'presentation', question: "How prepared is your pitch and documentation?", hint: "Business plan quality, pitch deck, supporting materials", fieldKey: 'presentation', fieldType: 'text' },
-    { id: 'endorser', question: "Which endorsing body are you targeting for your application?", hint: "Tech Nation, Innovator International, UK University Routes, Envestors", fieldKey: 'targetEndorser', fieldType: 'select', options: ['Tech Nation', 'Innovator International', 'UK University Routes', 'Envestors'] },
+    { id: 'endorser', question: "Which endorsing body are you targeting for your application?", hint: "Envestors, UKES, Innovator International, or Global Entrepreneurs Programme", fieldKey: 'targetEndorser', fieldType: 'select', options: ['Envestors', 'UK Endorsing Services (UKES)', 'Innovator International', 'Global Entrepreneurs Programme'] },
   ],
   completionMessage: "I've assessed your application inputs. Let me calculate your strength scores and endorsement probability."
 };
 
 const ENDORSERS: EndorserProfile[] = [
   {
-    name: "Tech Nation",
-    approvalThreshold: 75,
-    innovationWeight: 0.35,
-    viabilityWeight: 0.25,
+    name: "Envestors",
+    approvalThreshold: 72,
+    innovationWeight: 0.30,
+    viabilityWeight: 0.35,
     scalabilityWeight: 0.20,
-    evidenceWeight: 0.15,
+    evidenceWeight: 0.10,
+    presentationWeight: 0.05
+  },
+  {
+    name: "UK Endorsing Services (UKES)",
+    approvalThreshold: 70,
+    innovationWeight: 0.35,
+    viabilityWeight: 0.30,
+    scalabilityWeight: 0.20,
+    evidenceWeight: 0.10,
     presentationWeight: 0.05
   },
   {
     name: "Innovator International",
     approvalThreshold: 70,
-    innovationWeight: 0.30,
-    viabilityWeight: 0.30,
-    scalabilityWeight: 0.20,
-    evidenceWeight: 0.15,
-    presentationWeight: 0.05
-  },
-  {
-    name: "UK University Routes",
-    approvalThreshold: 78,
-    innovationWeight: 0.40,
-    viabilityWeight: 0.20,
-    scalabilityWeight: 0.15,
-    evidenceWeight: 0.20,
-    presentationWeight: 0.05
-  },
-  {
-    name: "Envestors",
-    approvalThreshold: 72,
-    innovationWeight: 0.25,
+    innovationWeight: 0.35,
     viabilityWeight: 0.35,
+    scalabilityWeight: 0.20,
+    evidenceWeight: 0.05,
+    presentationWeight: 0.05
+  },
+  {
+    name: "Global Entrepreneurs Programme",
+    approvalThreshold: 75,
+    innovationWeight: 0.35,
+    viabilityWeight: 0.30,
     scalabilityWeight: 0.25,
-    evidenceWeight: 0.10,
+    evidenceWeight: 0.05,
     presentationWeight: 0.05
   },
 ];
@@ -345,7 +345,7 @@ export default function StrengthScorer() {
     
     actions.push({
       week: "Ongoing",
-      action: "Monitor endorsing body requirements - criteria emphasis varies (Tech Nation weights innovation 40%, Envestors weights viability 35%), select best-fit endorser for your profile",
+      action: "Monitor endorsing body requirements - criteria emphasis varies (UKES weights innovation 35%, Envestors weights viability 35%), select best-fit endorser for your profile",
       priority: "Medium"
     });
     
@@ -1075,7 +1075,7 @@ application-specific advice. Endorser criteria and requirements may change.
                       <h4 className="font-semibold">Selection Strategy:</h4>
                       <ul className="space-y-2 ml-4 text-muted-foreground">
                         <li>Choose endorser whose weighting aligns with your strongest areas</li>
-                        <li>If innovation is your strength, prioritize UK University Routes (40% weight) or Tech Nation (35% weight)</li>
+                        <li>If innovation is your strength, prioritize UKES (35% weight) or Innovator International (35% weight)</li>
                         <li>If viability is strongest, consider Envestors (35% weight) or Innovator International (30% weight)</li>
                         <li>Ensure your weighted score exceeds endorser's threshold by minimum 5-10 points for safety margin</li>
                         <li>Consider endorser interview style and technical requirements - some conduct more rigorous technical interviews</li>

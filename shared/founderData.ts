@@ -622,8 +622,8 @@ export const FOUNDER_DATA: FounderProfile = {
   },
 
   visa: {
-    endorsingBody: "Tech Nation", // Most appropriate for AI/tech platform
-    endorsingBodyReason: "Tech Nation specializes in digital technology businesses and has specific expertise in AI-powered platforms. The platform's multi-LLM architecture and innovative approach to immigration services aligns with their focus on transformative technology.",
+    endorsingBody: "Envestors", // Most appropriate for investment-ready tech platform
+    endorsingBodyReason: "Envestors specializes in investment-ready businesses and has specific expertise in scalable tech platforms. The platform's multi-LLM architecture and revenue potential aligns with their focus on commercially viable innovation.",
     contactPointStrategy: [
       "Contact 1 (Month 6): Platform launch metrics, first 500 users, initial revenue",
       "Contact 2 (Month 12): Year 1 milestones, 5,000 users, first hires, partnership announcements",

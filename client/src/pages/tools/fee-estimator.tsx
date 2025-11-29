@@ -32,7 +32,7 @@ const AI_TOOL_CONFIG: ToolConfig = {
     },
     {
       id: 'endorsing-body',
-      question: "Which endorsing body are you using? Options include Tech Nation, Global Entrepreneurs Programme, Innovator International, or another approved endorser.",
+      question: "Which endorsing body are you using? Options include Envestors, UKES, Innovator International, or Global Entrepreneurs Programme.",
       hint: "Endorsement fees vary significantly between bodies",
       fieldKey: 'endorser_choice',
       minLength: 10
@@ -292,7 +292,7 @@ export default function FeeEstimator() {
     }
     
     if (endorsingBody === 'techNation') {
-      tips.push("Tech Nation endorsements typically take 8-12 weeks - factor in living costs during this waiting period");
+      tips.push("Endorsement processing typically takes 6-12 weeks - factor in living costs during this waiting period");
     }
     
     if (grandTotal > 15000) {
@@ -333,7 +333,7 @@ GOVERNMENT FEES
 ${'-'.repeat(70)}
 Application Fee (Main Applicant):           £${applicationFee.toLocaleString()}
 IHS Surcharge (${visaYears} years @ £${IHS_SURCHARGE_PER_YEAR}/year):    £${ihsSurcharge.toLocaleString()}
-Endorsement Fee (${endorsingBody === 'techNation' ? 'Tech Nation' : endorsingBody === 'globalEntrepreneurs' ? 'Global Entrepreneurs' : 'Other'}):              £${endorsementFee.toLocaleString()}
+Endorsement Fee (${endorsingBody === 'techNation' ? 'Envestors' : endorsingBody === 'globalEntrepreneurs' ? 'Global Entrepreneurs' : 'Other'}):              £${endorsementFee.toLocaleString()}
 ${includeDependents ? `Dependent Application Fees (${numDependents}):      £${dependentApplicationFees.toLocaleString()}` : ''}
 ${includeDependents ? `Dependent IHS Surcharge (${numDependents} x ${visaYears} years): £${dependentIHSFees.toLocaleString()}` : ''}
                                           _______________
@@ -527,9 +527,9 @@ current fees on official government websites before making financial commitments
                         className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
                         data-testid="select-endorsing-body"
                       >
-                        <option value="techNation">Tech Nation (£1,500)</option>
-                        <option value="globalEntrepreneurs">Global Entrepreneurs (£2,000)</option>
-                        <option value="other">Other Body (£2,500)</option>
+                        <option value="techNation">Envestors (£1,000 + £500/contact)</option>
+                        <option value="globalEntrepreneurs">Global Entrepreneurs (Competitive)</option>
+                        <option value="other">Other Body (Varies)</option>
                       </select>
                       <p className="text-xs text-muted-foreground">Endorsement fee: £{endorsementFee.toLocaleString()}</p>
                     </div>
@@ -752,7 +752,7 @@ current fees on official government websites before making financial commitments
                           <span className="font-medium">£{ihsSurcharge.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Endorsement Fee ({endorsingBody === 'techNation' ? 'Tech Nation' : endorsingBody === 'globalEntrepreneurs' ? 'Global Entrepreneurs' : 'Other'})</span>
+                          <span>Endorsement Fee ({endorsingBody === 'techNation' ? 'Envestors' : endorsingBody === 'globalEntrepreneurs' ? 'Global Entrepreneurs' : 'Other'})</span>
                           <span className="font-medium">£{endorsementFee.toLocaleString()}</span>
                         </div>
                         {includeDependents && numDependents > 0 && (

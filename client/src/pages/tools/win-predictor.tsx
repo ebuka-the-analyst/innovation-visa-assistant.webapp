@@ -100,17 +100,17 @@ type EndorserProfile = {
 
 const ENDORSERS: EndorserProfile[] = [
   {
-    name: "Tech Nation",
-    approvalThreshold: 75,
-    innovationWeight: 0.35,
-    viabilityWeight: 0.20,
+    name: "Envestors",
+    approvalThreshold: 72,
+    innovationWeight: 0.30,
+    viabilityWeight: 0.35,
     scalabilityWeight: 0.20,
-    evidenceWeight: 0.10,
-    teamWeight: 0.10,
+    evidenceWeight: 0.05,
+    teamWeight: 0.05,
     marketWeight: 0.05,
-    focusArea: "Technology Innovation",
-    processingTime: "8-12 weeks",
-    successRate: 68
+    focusArea: "Investment Readiness",
+    processingTime: "6-12 weeks",
+    successRate: 70
   },
   {
     name: "Innovator International",
@@ -496,7 +496,7 @@ export default function WinPredictor() {
     
     actions.push({
       week: "Ongoing",
-      action: "Monitor endorsing body requirement changes - criteria emphasis varies significantly (Tech Nation weights Innovation 35%, Envestors weights Viability 35%), track policy updates, maintain business momentum to demonstrate ongoing progress throughout application period",
+      action: "Monitor endorsing body requirement changes - criteria emphasis varies significantly (UKES weights Innovation 35%, Envestors weights Viability 35%), track policy updates, maintain business momentum to demonstrate ongoing progress throughout application period",
       priority: "Medium"
     });
     

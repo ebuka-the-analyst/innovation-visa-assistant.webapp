@@ -5543,8 +5543,8 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
           hiringPlan: "Year 1 (UK-based, London HQ):\n- Q1: 2 ML Engineers (£80-100k), 1 Clinical Specialist (£70-90k)\n- Q2: 2 Sales Representatives (£50-70k + commission), 1 DevOps Engineer (£75-95k)\n- Q3: 1 Product Manager (£70-90k), 1 Customer Success Manager (£45-60k)\n- Q4: 2 ML Engineers, 1 QA Engineer (£55-70k)\nTotal Year 1: 15 new UK employees, £1.1M annual payroll",
           specificRegions: "HQ: London (Shoreditch Tech City) - existing office, 2,500 sq ft\nSales Office: Manchester - planned Q3 2025, targeting Northern Trusts\nR&D Hub: Cambridge - partnership with University, shared space\nAll UK employees with right to work, no visa sponsorship required initially",
           internationalPlan: "Phase 1 (Year 2): Ireland expansion - leverage EU data adequacy, similar healthcare system, low-risk market entry. Establish Dublin sales office.\nPhase 2 (Year 2-3): Nordic markets (Denmark, Sweden, Norway) - strong digital health infrastructure, English proficiency.\nPhase 3 (Year 3-5): Germany and US - larger markets requiring local certification and sales teams.",
-          targetEndorser: "Primary: Tech Nation (endorsed by NHS Digital and Health Innovation Network)\nSecondary: SETsquared Partnership (university-backed, strong healthcare portfolio)\nRationale: Tech Nation's healthcare track record (15+ successful visa applications in health tech), strong NHS relationships, and dedicated health tech support team align perfectly with our profile.",
-          contactPointsStrategy: "1) Tech Nation: Attended 2 Tech Nation events, connected with 3 portfolio founders, scheduled intro call with healthcare sector lead (Sarah Mitchell)\n2) NHS Digital connection: Our pilot programme lead (Dr. James Roberts) serves on Tech Nation advisory board\n3) Warm introductions: 2 existing Tech Nation endorsed founders offered to provide referrals\n4) Supporting evidence prepared: NHS deployment metrics, revenue documentation, patent applications",
+          targetEndorser: "Primary: Envestors (investment-ready focus with strong investor network)\nSecondary: Innovator International (broad sector support with 700+ entrepreneurs endorsed)\nRationale: Envestors' investment-focused approach aligns with our Series A trajectory, while their investor network provides valuable connections for future funding rounds.",
+          contactPointsStrategy: "1) Envestors: Attended 2 Envestors networking events, connected with 3 portfolio founders, scheduled intro call with healthcare sector advisor\n2) NHS Digital connection: Our pilot programme lead (Dr. James Roberts) has extensive endorsing body experience\n3) Warm introductions: 2 existing endorsed founders offered to provide referrals\n4) Supporting evidence prepared: NHS deployment metrics, revenue documentation, patent applications",
           supportingEvidence: "Comprehensive evidence package prepared:\n- NHS Trust deployment agreements (4 signed contracts)\n- Letters of Intent (5 documents, £1.2M value)\n- Patent applications (3 pending UK patents)\n- Financial statements (audited, 12 months revenue)\n- Customer testimonials (12 NHS clinician endorsements)\n- Press coverage (BBC, BMJ, The Guardian)\n- Award certificates (NHS Innovation Award 2024)\n- Technical certifications (ISO 27001, CE Mark, DTAC)",
           userId: demoUser.id,
           isDemoData: true,
@@ -5656,7 +5656,7 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
         },
         {
           category: "endorsement",
-          name: "Tech Nation Endorsement Application",
+          name: "Envestors Endorsement Application",
           description: "Complete endorsement application with supporting evidence",
           fileType: "application/pdf",
           fileSize: 5600000,
@@ -6876,7 +6876,7 @@ IMPORTANT VISA FACTS:
 - The fastest endorsements can be 2-3 weeks with well-prepared applications
 - Home Office visa processing takes 3-8 weeks after endorsement
 - Total timeline: typically 6-14 weeks from application to visa
-- Premium endorsers like Tech Nation, Barclays Eagle Labs have different timelines
+- Premium endorsers like Envestors, UKES, Innovator International have different timelines
 
 Provide a helpful, direct answer that addresses the user's question. Be specific with numbers, timelines, and requirements. Don't give generic advice - answer what they actually asked.`
 
@@ -6972,7 +6972,7 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
       // Final fallback - static responses
       if (isQuestion) {
         const fallbackAnswers: Record<string, string> = {
-          endorsement: "Endorsement typically takes 2-6 weeks depending on the endorsing body. Tech Nation and Barclays Eagle Labs are popular choices. A well-prepared application with strong evidence of innovation, viability, and scalability can speed up the process.",
+          endorsement: "Endorsement typically takes 6-12 weeks depending on the endorsing body. Envestors, UKES, Innovator International, and Global Entrepreneurs Programme are the current approved endorsers (November 2025). A well-prepared application with strong evidence of innovation, viability, and scalability can speed up the process.",
           time: "The full UK Innovator Founder Visa process typically takes 6-14 weeks total: 2-6 weeks for endorsement, then 3-8 weeks for Home Office processing.",
           cost: "Endorsement fees range from £500-£3,000 depending on the body. The visa application fee is £1,191, plus the Immigration Health Surcharge (currently £1,035 per year). Total costs are typically £3,000-£6,000."
         };

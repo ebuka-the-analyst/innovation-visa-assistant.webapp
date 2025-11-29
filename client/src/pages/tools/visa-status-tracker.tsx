@@ -32,7 +32,7 @@ const AI_TOOL_CONFIG: ToolConfig = {
     },
     {
       id: "endorsingBody",
-      question: "Which endorsing body is processing your application? (e.g., Tech Nation, Innovator International, UK universities)",
+      question: "Which endorsing body is processing your application? (e.g., Envestors, UKES, Innovator International, Global Entrepreneurs Programme)",
       hint: "Name the endorsing body and describe why you chose them",
       fieldKey: "endorsingBody",
       minLength: 50
@@ -551,11 +551,10 @@ export default function VisaStatusTracker() {
                             <SelectValue placeholder="Select endorsing body" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Tech Nation">Tech Nation</SelectItem>
-                            <SelectItem value="Entrepreneur First">Entrepreneur First</SelectItem>
-                            <SelectItem value="Seedcamp">Seedcamp</SelectItem>
-                            <SelectItem value="Founders Factory">Founders Factory</SelectItem>
-                            <SelectItem value="Bethnal Green Ventures">Bethnal Green Ventures</SelectItem>
+                            <SelectItem value="Envestors">Envestors</SelectItem>
+                            <SelectItem value="UK Endorsing Services (UKES)">UK Endorsing Services (UKES)</SelectItem>
+                            <SelectItem value="Innovator International">Innovator International</SelectItem>
+                            <SelectItem value="Global Entrepreneurs Programme">Global Entrepreneurs Programme</SelectItem>
                             <SelectItem value="Other">Other</SelectItem>
                           </SelectContent>
                         </Select>

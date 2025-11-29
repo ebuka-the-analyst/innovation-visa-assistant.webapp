@@ -24,7 +24,7 @@ const AI_TOOL_CONFIG: ToolConfig = {
   questions: [
     {
       id: 'preferred-endorser',
-      question: "Which endorsing body are you targeting? Options include Tech Nation (tech focus), Innovator International (sector flexible), Global Entrepreneurs Programme (VC-backed), or Endorsement Direct.",
+      question: "Which endorsing body are you targeting? Options include Envestors (investment-ready), UKES (sector flexible), Innovator International (global focus), or Global Entrepreneurs Programme (government-backed).",
       hint: "Choose based on your business sector and funding stage",
       fieldKey: 'endorser_choice',
       minLength: 10
@@ -91,7 +91,7 @@ type EndorserRequirements = {
 
 const ENDORSER_DATA: EndorserRequirements = {
   'technation': {
-    name: 'Tech Nation',
+    name: 'Envestors',
     categories: [
       {
         name: 'Documentation Completeness',
@@ -515,7 +515,7 @@ export default function EndorsementReadiness() {
     }
     
     if (selectedEndorser === 'technation') {
-      tips.push("Tech Nation prioritizes technical innovation and scalability - emphasize your tech stack and growth metrics");
+      tips.push("Envestors prioritizes investment-readiness and scalability - emphasize your business model and growth metrics");
     } else if (selectedEndorser === 'innovator-international') {
       tips.push("Innovator International values comprehensive preparation - ensure every document is investor-grade quality");
     }
@@ -573,10 +573,10 @@ ${generateActionPlan().map(item => `[${item.priority}] ${item.week}: ${item.acti
 
 ENDORSER-SPECIFIC NOTES: ${endorserName}
 ${'-'.repeat(70)}
-${selectedEndorser === 'technation' ? `- Tech Nation focuses on technical innovation and scalability
-- Emphasize your technology stack and competitive advantage
+${selectedEndorser === 'technation' ? `- Envestors focuses on investment-readiness and scalability
+- Emphasize your business model and revenue potential
 - Demonstrate clear market validation and growth metrics
-- Show UK job creation potential in tech sector` : ''}
+- Show UK job creation potential and economic benefit` : ''}
 ${selectedEndorser === 'innovator-international' ? `- Innovator International requires comprehensive documentation
 - Prepare investor-grade business plan and pitch deck
 - Strong emphasis on scalability and market opportunity

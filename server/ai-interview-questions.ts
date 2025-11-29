@@ -412,7 +412,7 @@ export const atlasQuestions: Question[] = [
 // SAGE - Compliance Expert Questions (115 questions)
 export const sageQuestions: Question[] = [
   // Endorsing Body Strategy (25 questions)
-  { id: 'sage-1', text: "Which endorsing body are you targeting? (Tech Nation, university, etc.)", category: 'endorsement', subcategory: 'target', difficulty: 'basic', points: 15 },
+  { id: 'sage-1', text: "Which endorsing body are you targeting? (Envestors, UKES, Innovator International, GEP)", category: 'endorsement', subcategory: 'target', difficulty: 'basic', points: 15 },
   { id: 'sage-2', text: "What's your strategy for the 6 required contact points with your endorser?", category: 'endorsement', subcategory: 'strategy', difficulty: 'advanced', points: 35 },
   { id: 'sage-3', text: "Have you already made contact with any endorsing body?", category: 'endorsement', subcategory: 'contact', difficulty: 'intermediate', points: 25 },
   { id: 'sage-4', text: "Why have you chosen this particular endorsing body?", category: 'endorsement', subcategory: 'rationale', difficulty: 'intermediate', points: 20 },

@@ -103,10 +103,10 @@ type EndorserProfile = {
 };
 
 const ENDORSERS: EndorserProfile[] = [
-  { name: "Tech Nation", innovationWeight: 0.4, viabilityWeight: 0.35, scalabilityWeight: 0.25, minScore: 70 },
-  { name: "Innovator International", innovationWeight: 0.35, viabilityWeight: 0.4, scalabilityWeight: 0.25, minScore: 65 },
-  { name: "UK University Routes", innovationWeight: 0.5, viabilityWeight: 0.25, scalabilityWeight: 0.25, minScore: 75 },
-  { name: "Envestors", innovationWeight: 0.3, viabilityWeight: 0.35, scalabilityWeight: 0.35, minScore: 68 },
+  { name: "Envestors", innovationWeight: 0.30, viabilityWeight: 0.35, scalabilityWeight: 0.35, minScore: 68 },
+  { name: "UK Endorsing Services (UKES)", innovationWeight: 0.35, viabilityWeight: 0.35, scalabilityWeight: 0.30, minScore: 65 },
+  { name: "Innovator International", innovationWeight: 0.35, viabilityWeight: 0.40, scalabilityWeight: 0.25, minScore: 65 },
+  { name: "Global Entrepreneurs Programme", innovationWeight: 0.35, viabilityWeight: 0.30, scalabilityWeight: 0.35, minScore: 70 },
 ];
 
 export default function CriteriaScorer() {

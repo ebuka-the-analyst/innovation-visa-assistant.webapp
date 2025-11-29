@@ -454,7 +454,7 @@ export default function InnovationScore() {
     
     actions.push({
       week: "Week 4",
-      action: "Review endorsing body-specific innovation emphasis (e.g., Tech Nation prioritizes technical depth, Universities emphasize research novelty)",
+      action: "Review endorsing body-specific innovation emphasis (e.g., Envestors prioritizes commercial viability, UKES emphasizes innovation breadth)",
       priority: "Medium"
     });
     
@@ -569,7 +569,7 @@ ${benchmarkData.map(b => `  ${b.sector}: Industry Avg ${b.industryAvg}% | Your S
 
 ENDORSING BODY INNOVATION CRITERION ALIGNMENT
 ${'-'.repeat(80)}
-${innovationScore >= 75 ? '[EXCELLENT FIT]' : innovationScore >= 65 ? '[ACCEPTABLE FIT]' : '[BELOW STANDARD]'} Tech Nation (Innovation-focused endorser)
+${innovationScore >= 75 ? '[EXCELLENT FIT]' : innovationScore >= 65 ? '[ACCEPTABLE FIT]' : '[BELOW STANDARD]'} UKES (Innovation-focused endorser)
   - Emphasizes technical depth and genuine UK market innovation
   - Typical successful applicants score 75%+ on innovation criterion
   - Your score: ${innovationScore}% ${innovationScore >= 75 ? '- Strong match' : innovationScore >= 65 ? '- Borderline, strengthen evidence' : '- Needs significant improvement'}
@@ -1300,7 +1300,7 @@ for official assessment and application preparation.
                   <div className="space-y-4">
                     <div className="p-4 border rounded-lg">
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold">Tech Nation</h4>
+                        <h4 className="font-semibold">UKES (UK Endorsing Services)</h4>
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${innovationScore >= 75 ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : innovationScore >= 65 ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300' : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'}`}>
                           {innovationScore >= 75 ? 'Strong Fit' : innovationScore >= 65 ? 'Borderline' : 'Below Standard'}
                         </span>

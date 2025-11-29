@@ -35,7 +35,7 @@ export default function EndorserCoverLetter() {
   const [data, setData] = useState<CoverLetterData>({
     applicantName: "",
     businessName: "",
-    endorsingBody: "Tech Nation",
+    endorsingBody: "Envestors",
     endorserContact: "",
     businessSector: "",
     innovationSummary: "",
@@ -52,12 +52,10 @@ export default function EndorserCoverLetter() {
   const [generatedLetter, setGeneratedLetter] = useState("");
 
   const endorsingBodies = [
-    { id: "tech-nation", name: "Tech Nation", focus: "Digital technology businesses" },
-    { id: "envestors", name: "Envestors", focus: "Investment-ready startups" },
-    { id: "seedcamp", name: "Seedcamp", focus: "Early-stage tech startups" },
-    { id: "bethnal-green", name: "Bethnal Green Ventures", focus: "Tech for good" },
-    { id: "coadec", name: "Coadec", focus: "Digital economy" },
-    { id: "founders-factory", name: "Founders Factory", focus: "Corporate-backed ventures" },
+    { id: "envestors", name: "Envestors", focus: "Investment-ready startups with scalable models" },
+    { id: "ukes", name: "UK Endorsing Services (UKES)", focus: "Multi-sector innovative businesses" },
+    { id: "innovator-international", name: "Innovator International", focus: "Global entrepreneurs and tech businesses" },
+    { id: "gep", name: "Global Entrepreneurs Programme", focus: "High-potential international founders" },
   ];
 
   const generateCoverLetter = () => {

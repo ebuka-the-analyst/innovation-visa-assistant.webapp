@@ -217,7 +217,7 @@ export const getSectionsForTier = (tier: string): Section[] => {
         title: "10. ENDORSING BODY SELECTION",
         pageTarget: "3-4 pages",
         requirements: [
-          "Recommended endorsers (Tech Nation, Innovator International)",
+          "Recommended endorsers (Envestors, UKES, Innovator International, GEP)",
           "Fit assessment",
           "Application strategy",
           "Contact points plan (6 touchpoints over 3 years)"
@@ -563,7 +563,7 @@ export const getSectionsForTier = (tier: string): Section[] => {
       title: "10. ENDORSING BODY STRATEGY",
       pageTarget: "4-5 pages",
       requirements: [
-        "Primary target (Tech Nation/Innovator International)",
+        "Primary target (Envestors/Innovator International)",
         "Fit assessment with criteria mapping",
         "Application strategy and timeline",
         "Contact points plan (6+ touchpoints)",

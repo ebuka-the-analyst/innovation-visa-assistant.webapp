@@ -437,8 +437,8 @@ export default function EndorserComparison() {
       tips.push("Funding Consideration: Ensure your funding is appropriate for your business plan. Endorsers assess whether you have sufficient resources to execute your plans, though there is no fixed minimum requirement.");
     }
 
-    if (!businessProfile.hasTechIP && ENDORSERS.find(e => e.id === 'tech-nation') === bestMatch) {
-      tips.push("IP Strategy Gap for Tech Nation: Without patents, trade secrets, or proprietary technology, demonstrating innovation to Tech Nation becomes challenging. Consider filing provisional patents or documenting technical differentiation thoroughly.");
+    if (!businessProfile.hasTechIP && ENDORSERS.find(e => e.id === 'envestors') === bestMatch) {
+      tips.push("IP Strategy Gap: Without patents, trade secrets, or proprietary technology, demonstrating innovation becomes challenging. Consider filing provisional patents or documenting technical differentiation thoroughly.");
     }
 
     if (businessProfile.isVCBacked && endorsersWithScores.find(e => e.id === 'global-entrepreneurs')!.matchScore < 70) {
@@ -449,7 +449,7 @@ export default function EndorserComparison() {
     tips.push(`Timeline Planning Critical: Average endorsement timeline is ${Math.round(avgTimeline)} days. Factor in 2-4 weeks for application preparation plus visa processing (8-12 weeks) when planning your move to UK.`);
 
     if (businessProfile.jobsPlanned >= 5) {
-      tips.push("Strong Job Creation Profile: Your commitment to creating 5+ jobs aligns with Tech Nation and UK Endorsing Services priorities. Emphasize this in your business plan with detailed hiring roadmap and roles specification.");
+      tips.push("Strong Job Creation Profile: Your commitment to creating 5+ jobs aligns with UKES and Envestors priorities. Emphasize this in your business plan with detailed hiring roadmap and roles specification.");
     }
 
     const cheapestOption = endorsersWithScores.reduce((min, e) => e.fees.total < min.fees.total ? e : min);
@@ -458,11 +458,11 @@ export default function EndorserComparison() {
     }
 
     if (businessProfile.rdPercentage >= 10) {
-      tips.push("Excellent R&D Investment: Your 10%+ R&D spend demonstrates strong innovation commitment. Tech Nation particularly values this - ensure you document all R&D activities with detailed technical specifications.");
+      tips.push("Excellent R&D Investment: Your 10%+ R&D spend demonstrates strong innovation commitment. Envestors and UKES particularly value this - ensure you document all R&D activities with detailed technical specifications.");
     }
 
-    if (!businessProfile.hasRevenue && endorsersWithScores[0].id !== 'tech-nation') {
-      tips.push("Pre-revenue Stage Consideration: Without current revenue, focus on endorsers accepting pre-revenue startups (Tech Nation, Global Entrepreneurs). Prepare strong market validation evidence and clear path to revenue.");
+    if (!businessProfile.hasRevenue && endorsersWithScores[0].id !== 'envestors') {
+      tips.push("Pre-revenue Stage Consideration: Without current revenue, focus on endorsers accepting pre-revenue startups (Innovator International, Global Entrepreneurs). Prepare strong market validation evidence and clear path to revenue.");
     }
 
     return tips.slice(0, 8);

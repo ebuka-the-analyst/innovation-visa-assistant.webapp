@@ -30,21 +30,21 @@ export const getOfficialNews = () => {
     },
     {
       id: "official-4",
-      title: "Tech Nation Application Process Changes: New Home Office Endorsement Form (Aug 2025)",
-      description: "Tech Nation Global Talent endorsement process updated. Previous portal replaced with updated Home Office Stage 1 Endorsement form. Applicants must use new process for all applications. Enhanced evidence submission requirements implemented.",
-      sourceName: "Tech Nation",
+      title: "Envestors Endorsement Process: Investment-Ready Application Guidelines (Nov 2025)",
+      description: "Envestors endorsement process focuses on investment-readiness and scalable business models. Application requires detailed financial projections, market analysis, and evidence of commercial viability. Processing typically takes 6-12 weeks.",
+      sourceName: "Envestors",
       category: "Process Update",
-      publishedAt: "2025-08-04T11:00:00.000Z",
-      url: "https://tech-nation.io"
+      publishedAt: "2025-11-01T11:00:00.000Z",
+      url: "https://envestors.co.uk"
     },
     {
       id: "official-5",
-      title: "Tech Nation Guidelines Updated: New Standards for Evidence & Document Structure (Jan 2025)",
-      description: "Tech Nation releases updated Global Talent guidelines with significant changes to evidence submission, document structure, and talent proof requirements. New guidelines hosted on Notion platform. Rejection rates increased due to stricter standards.",
-      sourceName: "Tech Nation",
+      title: "UKES and Innovator International: Multi-Sector Endorsement Options Available (Oct 2025)",
+      description: "UK Endorsing Services and Innovator International offer endorsements across diverse business sectors. Both bodies emphasize innovation, viability, and scalability criteria. Standard £1,000 endorsement fee applies with 6-12 week processing.",
+      sourceName: "Home Office - gov.uk",
       category: "Guidelines",
-      publishedAt: "2025-01-22T10:00:00.000Z",
-      url: "https://tech-nation.io"
+      publishedAt: "2025-10-20T10:00:00.000Z",
+      url: "https://www.gov.uk/government/publications/endorsing-bodies"
     },
     {
       id: "official-6",

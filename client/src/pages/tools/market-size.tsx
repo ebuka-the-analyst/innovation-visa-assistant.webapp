@@ -63,7 +63,7 @@ const AI_TOOL_CONFIG: ToolConfig = {
     {
       id: 'evidence-sources',
       question: "What sources support your market sizing? (List 3+ credible sources)",
-      hint: "ONS, Tech Nation, Statista, industry associations, analyst reports",
+      hint: "ONS, Statista, government data, industry associations, analyst reports",
       fieldKey: 'evidenceSources'
     }
   ],
@@ -91,7 +91,7 @@ export default function MarketSizing() {
   const [ukMarketShare, setUkMarketShare] = useState(30);
   const [targetCustomers, setTargetCustomers] = useState(50000);
   const [avgRevenue, setAvgRevenue] = useState(10000);
-  const [evidenceSources, setEvidenceSources] = useState("ONS Digital Economy Survey 2024, Tech Nation Report, UK SaaS Market Analysis");
+  const [evidenceSources, setEvidenceSources] = useState("ONS Digital Economy Survey 2024, UK Government Statistics, UK SaaS Market Analysis");
   const [activeTab, setActiveTab] = useState('calculator');
   const [savedDate, setSavedDate] = useState('');
 

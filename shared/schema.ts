@@ -222,7 +222,7 @@ export const questionnaireSchema = z.object({
   specificRegions: z.string().min(20, "Name specific cities/regions you're targeting (e.g., Greater London, Manchester)"),
   internationalPlan: z.string().optional(),
   
-  targetEndorser: z.string().min(10, "Which endorsing body are you targeting? (Tech Nation, university, etc.)"),
+  targetEndorser: z.string().min(10, "Which endorsing body are you targeting? (Envestors, UKES, Innovator International, GEP)"),
   contactPointsStrategy: z.string().min(50, "Strategy for 6 required contact points with endorser over 3 years"),
   
   supportingEvidence: z.string().optional(),

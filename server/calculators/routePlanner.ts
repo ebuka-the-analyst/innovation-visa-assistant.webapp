@@ -20,7 +20,7 @@ const VISA_ROUTES: Record<string, VisaRoute> = {
     minTraction: "none",
     timeline: "8-12 weeks",
     requirements: [
-      "Endorsement from approved body (Tech Nation, etc.)",
+      "Endorsement from approved body (Envestors, UKES, Innovator International, GEP)",
       "Innovative business idea",
       "Full-time commitment",
       "No cash injection requirement",
