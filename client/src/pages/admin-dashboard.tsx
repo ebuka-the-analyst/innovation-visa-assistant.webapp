@@ -1360,6 +1360,34 @@ export default function AdminDashboard() {
     refetchInterval: 30000,
   });
 
+  // Notification Analytics - Real data from database
+  const { data: notificationAnalytics, isLoading: notificationAnalyticsLoading } = useQuery<{
+    summary: {
+      totalSent30Days: number;
+      sentToday: number;
+      inAppCount: number;
+      scheduledCount: number;
+      readRate: string;
+      totalAllTime: number;
+    };
+    typeDistribution: Array<{ type: string; count: number; percent: string }>;
+    recentNotifications: Array<{
+      id: string;
+      title: string;
+      message: string;
+      type: string;
+      recipientCount: number;
+      readCount: number;
+      status: string;
+      time: string;
+      createdAt: string;
+    }>;
+  }>({
+    queryKey: ['/api/admin/analytics/notifications'],
+    enabled: !!user?.isAdmin && activeSection === 'comms-notifications',
+    refetchInterval: 30000,
+  });
+
   // Resolve error mutation
   const resolveErrorMutation = useMutation({
     mutationFn: async ({ errorId, resolution }: { errorId: string; resolution: string }) => {
@@ -9406,207 +9434,218 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* 2. NOTIFICATIONS - In-App & Push Notification Center */}
+                      {/* 2. NOTIFICATIONS - Real Data from Database */}
                       {activeSection === 'comms-notifications' && (
                         <>
-                          {/* Notification Overview */}
-                          <Card className="bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-amber-500/10 border-amber-500/20">
-                            <CardContent className="py-6">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                  <motion.div
-                                    className="p-3 rounded-xl bg-amber-500 text-white"
-                                    animate={{ rotate: [0, 15, -15, 0] }}
-                                    transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
-                                  >
-                                    <Bell className="h-6 w-6" />
-                                  </motion.div>
-                                  <div>
-                                    <p className="text-sm text-muted-foreground">Notification Center</p>
-                                    <p className="text-2xl font-bold text-amber-500">In-App & Push Notifications</p>
-                                  </div>
-                                </div>
-                                <Button 
-                                  variant="outline"
-                                  onClick={() => setShowBroadcastModal(true)}
-                                  data-testid="button-send-broadcast"
-                                >
-                                  <Send className="h-4 w-4 mr-2" />
-                                  Send Broadcast
-                                </Button>
+                          {notificationAnalyticsLoading ? (
+                            <div className="space-y-6">
+                              <Skeleton className="h-24 w-full" />
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                {[1,2,3,4].map(i => <Skeleton key={i} className="h-32" />)}
                               </div>
-                            </CardContent>
-                          </Card>
-
-                          {/* Notification Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            {[
-                              { label: 'Total Sent', value: '3,456', icon: Bell, color: 'amber', sub: 'This month' },
-                              { label: 'In-App', value: '2,890', icon: MessageSquare, color: 'blue', sub: 'System alerts' },
-                              { label: 'Push', value: '566', icon: Smartphone, color: 'purple', sub: 'Mobile devices' },
-                              { label: 'Read Rate', value: '78.5%', icon: Eye, color: 'green', sub: 'Above average' },
-                            ].map((stat, index) => (
-                              <motion.div
-                                key={stat.label}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: index * 0.1 }}
-                              >
-                                <Card className="hover-elevate">
-                                  <CardContent className="pt-6">
-                                    <div className="flex items-center justify-between mb-3">
-                                      <stat.icon className={`h-6 w-6 text-${stat.color}-500`} />
-                                    </div>
-                                    <p className="text-3xl font-bold">{stat.value}</p>
-                                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                                    <p className="text-xs text-muted-foreground">{stat.sub}</p>
-                                  </CardContent>
-                                </Card>
-                              </motion.div>
-                            ))}
-                          </div>
-
-                          {/* Notification Categories & Recent */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <Card>
-                              <CardHeader>
-                                <CardTitle>Notification Categories</CardTitle>
-                                <CardDescription>Distribution by type</CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <div className="space-y-4">
-                                  {[
-                                    { category: 'Tool Completions', count: 1234, percent: 36, icon: CheckCircle, color: '#22c55e' },
-                                    { category: 'Plan Updates', count: 567, percent: 16, icon: CreditCard, color: '#3b82f6' },
-                                    { category: 'System Alerts', count: 890, percent: 26, icon: AlertCircle, color: '#f59e0b' },
-                                    { category: 'Feature Announcements', count: 432, percent: 12, icon: Sparkles, color: '#8b5cf6' },
-                                    { category: 'Reminders', count: 333, percent: 10, icon: Clock, color: '#ef4444' },
-                                  ].map((cat, index) => (
-                                    <motion.div
-                                      key={cat.category}
-                                      initial={{ opacity: 0, x: -20 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="flex items-center gap-4 p-3 rounded-lg border border-border/50 hover-elevate"
-                                    >
-                                      <div className="p-2 rounded-lg" style={{ backgroundColor: `${cat.color}20` }}>
-                                        <cat.icon className="h-5 w-5" style={{ color: cat.color }} />
-                                      </div>
-                                      <div className="flex-1">
-                                        <div className="flex items-center justify-between mb-1">
-                                          <span className="font-medium text-sm">{cat.category}</span>
-                                          <span className="text-sm font-bold">{cat.count}</span>
-                                        </div>
-                                        <div className="relative h-2 rounded-full bg-muted overflow-hidden">
-                                          <motion.div
-                                            className="absolute inset-y-0 left-0 rounded-full"
-                                            style={{ backgroundColor: cat.color }}
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${cat.percent}%` }}
-                                            transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
-                                          />
-                                        </div>
-                                      </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </CardContent>
-                            </Card>
-
-                            <Card>
-                              <CardHeader>
-                                <CardTitle>Recent Notifications</CardTitle>
-                                <CardDescription>Latest sent notifications</CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <ScrollArea className="h-[350px]">
-                                  <div className="space-y-3">
-                                    {[
-                                      { title: 'Business Plan completed', message: 'Your Business Plan has been saved successfully', type: 'success', users: 1, time: '2 min ago' },
-                                      { title: 'New feature available', message: 'Try our new AI Pitch Coach tool', type: 'info', users: 342, time: '1 hour ago' },
-                                      { title: 'Plan expiring soon', message: 'Your Premium plan expires in 3 days', type: 'warning', users: 12, time: '3 hours ago' },
-                                      { title: 'Weekly progress report', message: 'You completed 5 tools this week!', type: 'success', users: 89, time: '5 hours ago' },
-                                      { title: 'System maintenance', message: 'Scheduled maintenance tonight at 2 AM', type: 'info', users: 'All', time: '1 day ago' },
-                                    ].map((notif, index) => (
+                            </div>
+                          ) : (
+                            <>
+                              {/* Notification Overview */}
+                              <Card className="bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-amber-500/10 border-amber-500/20">
+                                <CardContent className="py-6">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
                                       <motion.div
-                                        key={index}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: index * 0.05 }}
-                                        className="p-3 rounded-lg border border-border/50 hover-elevate"
+                                        className="p-3 rounded-xl bg-amber-500 text-white"
+                                        animate={{ rotate: [0, 15, -15, 0] }}
+                                        transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
                                       >
-                                        <div className="flex items-start gap-3">
-                                          <div className={`p-2 rounded-lg ${
-                                            notif.type === 'success' ? 'bg-green-500/10 text-green-500' :
-                                            notif.type === 'warning' ? 'bg-amber-500/10 text-amber-500' :
-                                            'bg-blue-500/10 text-blue-500'
-                                          }`}>
-                                            {notif.type === 'success' ? <CheckCircle className="h-4 w-4" /> :
-                                             notif.type === 'warning' ? <AlertCircle className="h-4 w-4" /> :
-                                             <Info className="h-4 w-4" />}
-                                          </div>
-                                          <div className="flex-1">
-                                            <p className="font-medium text-sm">{notif.title}</p>
-                                            <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
-                                            <div className="flex items-center gap-2 mt-2">
-                                              <Badge variant="outline" className="text-xs">
-                                                {notif.users === 'All' ? 'All users' : `${notif.users} user${typeof notif.users === 'number' && notif.users > 1 ? 's' : ''}`}
-                                              </Badge>
-                                              <span className="text-xs text-muted-foreground">{notif.time}</span>
-                                            </div>
-                                          </div>
-                                        </div>
+                                        <Bell className="h-6 w-6" />
                                       </motion.div>
-                                    ))}
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">Notification Center</p>
+                                        <p className="text-2xl font-bold text-amber-500">In-App & Push Notifications</p>
+                                      </div>
+                                    </div>
+                                    <Button 
+                                      variant="outline"
+                                      onClick={() => setShowBroadcastModal(true)}
+                                      data-testid="button-send-broadcast"
+                                    >
+                                      <Send className="h-4 w-4 mr-2" />
+                                      Send Broadcast
+                                    </Button>
                                   </div>
-                                </ScrollArea>
-                              </CardContent>
-                            </Card>
-                          </div>
+                                </CardContent>
+                              </Card>
 
-                          {/* Notification Settings */}
-                          <Card>
-                            <CardHeader>
-                              <CardTitle>Notification Templates</CardTitle>
-                              <CardDescription>Pre-configured notification types</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {/* Notification Stats - Real Data */}
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 {[
-                                  { name: 'Welcome Message', status: 'active', lastUsed: 'Today', sends: 45 },
-                                  { name: 'Trial Ending', status: 'active', lastUsed: 'Yesterday', sends: 12 },
-                                  { name: 'Feature Update', status: 'active', lastUsed: '3 days ago', sends: 342 },
-                                  { name: 'Weekly Summary', status: 'scheduled', lastUsed: 'Sunday', sends: 89 },
-                                  { name: 'Payment Reminder', status: 'active', lastUsed: '5 days ago', sends: 8 },
-                                  { name: 'Custom Broadcast', status: 'draft', lastUsed: 'Never', sends: 0 },
-                                ].map((template, index) => (
+                                  { label: 'Total Sent', value: notificationAnalytics?.summary?.totalSent30Days?.toLocaleString() || '0', icon: Bell, color: 'amber', sub: 'Last 30 days' },
+                                  { label: 'In-App', value: notificationAnalytics?.summary?.inAppCount?.toLocaleString() || '0', icon: MessageSquare, color: 'blue', sub: 'System alerts' },
+                                  { label: 'Scheduled', value: notificationAnalytics?.summary?.scheduledCount?.toLocaleString() || '0', icon: Smartphone, color: 'purple', sub: 'Scheduled notifications' },
+                                  { label: 'Read Rate', value: notificationAnalytics?.summary?.readRate || '0%', icon: Eye, color: 'green', sub: notificationAnalytics?.summary?.readRate === '0%' ? 'No data yet' : 'Current rate' },
+                                ].map((stat, index) => (
                                   <motion.div
-                                    key={template.name}
-                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    key={stat.label}
+                                    initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: index * 0.05 }}
+                                    transition={{ delay: index * 0.1 }}
                                   >
-                                    <Card className="hover-elevate cursor-pointer">
-                                      <CardContent className="pt-4 pb-4">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <span className="font-medium text-sm">{template.name}</span>
-                                          <Badge className={
-                                            template.status === 'active' ? 'bg-green-500 text-white' :
-                                            template.status === 'scheduled' ? 'bg-blue-500 text-white' :
-                                            'bg-gray-500 text-white'
-                                          }>{template.status}</Badge>
+                                    <Card className="hover-elevate">
+                                      <CardContent className="pt-6">
+                                        <div className="flex items-center justify-between mb-3">
+                                          <stat.icon className={`h-6 w-6 text-${stat.color}-500`} />
                                         </div>
-                                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                          <span>Last: {template.lastUsed}</span>
-                                          <span>{template.sends} sent</span>
-                                        </div>
+                                        <p className="text-3xl font-bold">{stat.value}</p>
+                                        <p className="text-sm text-muted-foreground">{stat.label}</p>
+                                        <p className="text-xs text-muted-foreground">{stat.sub}</p>
                                       </CardContent>
                                     </Card>
                                   </motion.div>
                                 ))}
                               </div>
-                            </CardContent>
-                          </Card>
+
+                              {/* Notification Categories & Recent - Real Data */}
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle>Notification Categories</CardTitle>
+                                    <CardDescription>Distribution by type</CardDescription>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="space-y-4">
+                                      {notificationAnalytics?.typeDistribution?.length ? (
+                                        notificationAnalytics.typeDistribution.map((cat, index) => {
+                                          const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4'];
+                                          const color = colors[index % colors.length];
+                                          const icons = [CheckCircle, CreditCard, AlertCircle, Sparkles, Clock, Info];
+                                          const IconComponent = icons[index % icons.length];
+                                          return (
+                                            <motion.div
+                                              key={cat.type}
+                                              initial={{ opacity: 0, x: -20 }}
+                                              animate={{ opacity: 1, x: 0 }}
+                                              transition={{ delay: index * 0.1 }}
+                                              className="flex items-center gap-4 p-3 rounded-lg border border-border/50 hover-elevate"
+                                            >
+                                              <div className="p-2 rounded-lg" style={{ backgroundColor: `${color}20` }}>
+                                                <IconComponent className="h-5 w-5" style={{ color }} />
+                                              </div>
+                                              <div className="flex-1">
+                                                <div className="flex items-center justify-between mb-1">
+                                                  <span className="font-medium text-sm">{cat.type}</span>
+                                                  <span className="text-sm font-bold">{cat.count}</span>
+                                                </div>
+                                                <div className="relative h-2 rounded-full bg-muted overflow-hidden">
+                                                  <motion.div
+                                                    className="absolute inset-y-0 left-0 rounded-full"
+                                                    style={{ backgroundColor: color }}
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${parseFloat(cat.percent)}%` }}
+                                                    transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
+                                                  />
+                                                </div>
+                                              </div>
+                                            </motion.div>
+                                          );
+                                        })
+                                      ) : (
+                                        <p className="text-muted-foreground text-center py-8">No notifications sent yet</p>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle>Recent Notifications</CardTitle>
+                                    <CardDescription>Latest sent notifications</CardDescription>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <ScrollArea className="h-[350px]">
+                                      <div className="space-y-3">
+                                        {notificationAnalytics?.recentNotifications?.length ? (
+                                          notificationAnalytics.recentNotifications.map((notif, index) => (
+                                            <motion.div
+                                              key={notif.id}
+                                              initial={{ opacity: 0 }}
+                                              animate={{ opacity: 1 }}
+                                              transition={{ delay: index * 0.05 }}
+                                              className="p-3 rounded-lg border border-border/50 hover-elevate"
+                                            >
+                                              <div className="flex items-start gap-3">
+                                                <div className={`p-2 rounded-lg ${
+                                                  notif.type === 'success' ? 'bg-green-500/10 text-green-500' :
+                                                  notif.type === 'warning' ? 'bg-amber-500/10 text-amber-500' :
+                                                  notif.type === 'error' ? 'bg-red-500/10 text-red-500' :
+                                                  'bg-blue-500/10 text-blue-500'
+                                                }`}>
+                                                  {notif.type === 'success' ? <CheckCircle className="h-4 w-4" /> :
+                                                   notif.type === 'warning' ? <AlertCircle className="h-4 w-4" /> :
+                                                   notif.type === 'error' ? <AlertCircle className="h-4 w-4" /> :
+                                                   <Info className="h-4 w-4" />}
+                                                </div>
+                                                <div className="flex-1">
+                                                  <p className="font-medium text-sm">{notif.title}</p>
+                                                  <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
+                                                  <div className="flex items-center gap-2 mt-2">
+                                                    <Badge variant="outline" className="text-xs">
+                                                      {notif.recipientCount === 0 ? 'All users' : `${notif.recipientCount} user${notif.recipientCount > 1 ? 's' : ''}`}
+                                                    </Badge>
+                                                    <Badge variant="secondary" className="text-xs">
+                                                      {notif.readCount} read
+                                                    </Badge>
+                                                    <span className="text-xs text-muted-foreground">{notif.time}</span>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </motion.div>
+                                          ))
+                                        ) : (
+                                          <p className="text-muted-foreground text-center py-8">No notifications sent yet</p>
+                                        )}
+                                      </div>
+                                    </ScrollArea>
+                                  </CardContent>
+                                </Card>
+                              </div>
+
+                              {/* Notification Templates - Static config, not analytics data */}
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle>Notification Templates</CardTitle>
+                                  <CardDescription>Pre-configured notification types (available templates)</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {[
+                                      { name: 'Welcome Message', status: 'active', description: 'Sent to new users' },
+                                      { name: 'Trial Ending', status: 'active', description: 'Sent 3 days before trial ends' },
+                                      { name: 'Feature Update', status: 'active', description: 'Announce new features' },
+                                      { name: 'Weekly Summary', status: 'active', description: 'User progress digest' },
+                                      { name: 'Payment Reminder', status: 'active', description: 'Subscription renewal' },
+                                      { name: 'Custom Broadcast', status: 'active', description: 'Admin broadcast message' },
+                                    ].map((template, index) => (
+                                      <motion.div
+                                        key={template.name}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: index * 0.05 }}
+                                      >
+                                        <Card className="hover-elevate cursor-pointer">
+                                          <CardContent className="pt-4 pb-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                              <span className="font-medium text-sm">{template.name}</span>
+                                              <Badge className="bg-green-500 text-white">{template.status}</Badge>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">{template.description}</p>
+                                          </CardContent>
+                                        </Card>
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </>
+                          )}
                         </>
                       )}
                     </motion.div>

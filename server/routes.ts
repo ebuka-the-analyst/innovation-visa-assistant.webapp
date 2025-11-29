@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications } from "@shared/schema";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
@@ -3213,6 +3213,90 @@ EXAMPLES OF GOOD RESPONSES:
     } catch (error: any) {
       console.error("Email analytics error:", error);
       res.status(500).json({ error: "Failed to fetch email analytics" });
+    }
+  });
+
+  // Notification Analytics - Real data from database
+  app.get("/api/admin/analytics/notifications", requireAdmin, async (req, res) => {
+    try {
+      // Get all notifications from database
+      const allNotifications = await db.select().from(adminNotifications).orderBy(desc(adminNotifications.createdAt));
+      const allScheduled = await db.select().from(scheduledNotifications).orderBy(desc(scheduledNotifications.createdAt));
+      
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      // Filter notifications from last 30 days
+      const recent30Days = allNotifications.filter(n => 
+        n.createdAt && new Date(n.createdAt) >= thirtyDaysAgo
+      );
+      
+      // Calculate stats
+      const totalSent30Days = recent30Days.filter(n => n.status === 'sent').length;
+      const sentToday = allNotifications.filter(n => 
+        n.createdAt && new Date(n.createdAt) >= todayStart && n.status === 'sent'
+      ).length;
+      
+      // Calculate totals by type
+      const inAppCount = allNotifications.filter(n => n.status === 'sent').length;
+      const scheduledCount = allScheduled.filter(n => n.status === 'sent').length;
+      
+      // Calculate read rate
+      const totalRecipients = allNotifications.reduce((sum, n) => sum + (n.recipientCount || 0), 0);
+      const totalReads = allNotifications.reduce((sum, n) => sum + (n.readCount || 0), 0);
+      const readRate = totalRecipients > 0 ? ((totalReads / totalRecipients) * 100).toFixed(1) : '0';
+      
+      // Type breakdown
+      const typeBreakdown: Record<string, number> = {};
+      allNotifications.forEach(n => {
+        const type = n.type || 'info';
+        typeBreakdown[type] = (typeBreakdown[type] || 0) + 1;
+      });
+      
+      // Add scheduled notification types
+      allScheduled.forEach(n => {
+        const type = n.type || 'reminder';
+        typeBreakdown[type] = (typeBreakdown[type] || 0) + 1;
+      });
+      
+      const total = allNotifications.length + allScheduled.length;
+      
+      // Format type distribution
+      const typeDistribution = Object.entries(typeBreakdown).map(([type, count]) => ({
+        type: type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' '),
+        count,
+        percent: total > 0 ? ((count / total) * 100).toFixed(1) : '0'
+      })).sort((a, b) => b.count - a.count);
+      
+      // Get recent notifications (last 10)
+      const recentNotifications = allNotifications.slice(0, 10).map(n => ({
+        id: n.id,
+        title: n.title,
+        message: n.message || '',
+        type: n.type || 'info',
+        recipientCount: n.recipientCount || 0,
+        readCount: n.readCount || 0,
+        status: n.status,
+        time: formatTimeAgo(new Date(n.createdAt)),
+        createdAt: n.createdAt
+      }));
+      
+      res.json({
+        summary: {
+          totalSent30Days,
+          sentToday,
+          inAppCount,
+          scheduledCount,
+          readRate: `${readRate}%`,
+          totalAllTime: total
+        },
+        typeDistribution,
+        recentNotifications
+      });
+    } catch (error: any) {
+      console.error("Notification analytics error:", error);
+      res.status(500).json({ error: "Failed to fetch notification analytics" });
     }
   });
 
