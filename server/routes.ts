@@ -2392,14 +2392,15 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
       // Get real revenue from Stripe (subscription payments in last 30 days)
       let monthlyRevenue = 0;
       try {
+        const stripe = await getUncachableStripeClient();
         const thirtyDaysAgoTimestamp = Math.floor(thirtyDaysAgo.getTime() / 1000);
         const charges = await stripe.charges.list({
           created: { gte: thirtyDaysAgoTimestamp },
           limit: 100,
         });
         monthlyRevenue = charges.data
-          .filter(c => c.status === 'succeeded')
-          .reduce((sum, c) => sum + (c.amount / 100), 0);
+          .filter((c: any) => c.status === 'succeeded')
+          .reduce((sum: number, c: any) => sum + (c.amount / 100), 0);
       } catch (stripeError) {
         console.error("Stripe revenue fetch error:", stripeError);
       }
