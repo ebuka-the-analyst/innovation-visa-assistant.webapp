@@ -24,6 +24,8 @@ The system includes comprehensive, enterprise-grade SEO infrastructure following
 
 An auto-save and session persistence system ensures data integrity, with full session state saved to `localStorage` for AI interview sessions and a `useAutoSaveWithIndicator` hook for tools. An AI-driven tool mode system allows tools to operate in either an AI-guided conversational interface or a traditional form-based input, supported by four specialized AI agents (Nova, Sterling, Atlas, Sage). A founder visa application prefill system helps pre-populate forms with founder data (`shared/founderData.ts`) and includes OISC compliance integration for all exports. A real-time error logging system captures and tracks client, API, AI, auth, export, and database errors, with live monitoring and resolution workflow in the admin dashboard.
 
+A PhD-level real-time activity analytics system tracks user behavior across the platform with three database tables (user_sessions, page_views, activity_events). The frontend automatically tracks session heartbeats (30-second intervals), page navigation, device info (type, browser, OS), and performance metrics. The admin dashboard displays live analytics including active sessions with user details, device/browser/geographic distribution, top pages, tool usage patterns, activity heatmaps by hour, and user journey analysis. The Active Users table includes a "Last Activity" column showing real-time status indicators (green pulse for active in last 5 minutes, yellow for last hour, gray otherwise).
+
 ## External Dependencies
 - **Database:** `PostgreSQL` managed by `Neon`.
 - **ORM:** `Drizzle ORM`.
