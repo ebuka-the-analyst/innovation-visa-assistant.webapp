@@ -153,7 +153,7 @@ const steps = [
     title: "Endorser Strategy",
     description: "You must show you've researched endorsing bodies",
     fields: [
-      { name: "targetEndorser", label: "Target Endorsing Body", type: "textarea", required: true, minLength: 30, help: "Tech Nation, Global Entrepreneurs Programme, Innovator International, or specific university. Show you've researched their requirements." },
+      { name: "targetEndorser", label: "Target Endorsing Body", type: "textarea", required: true, minLength: 30, help: "Envestors, UKES, Innovator International, or Global Entrepreneurs Programme. Show you've researched their requirements." },
       { name: "contactPointsStrategy", label: "6 Contact Points Strategy", type: "textarea", required: true, minLength: 100, help: "Innovator Founder Visa requires 6 contact points over 3 years. How will you achieve this? Quarterly reports, milestone reviews, annual strategy sessions?" },
     ],
   },

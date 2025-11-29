@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     question: "Which endorsing bodies do you support?",
-    answer: "Our plans are formatted for major UK endorsing bodies including Tech Nation, Innovate UK, The Global Entrepreneurs Programme, and others. Premium tier allows you to select your specific endorsing body for tailored formatting.",
+    answer: "Our plans are formatted for major UK endorsing bodies including Envestors, UK Endorsing Services (UKES), Innovator International, and the Global Entrepreneurs Programme. Premium tier allows you to select your specific endorsing body for tailored formatting.",
   },
   {
     question: "Do you guarantee visa approval?",

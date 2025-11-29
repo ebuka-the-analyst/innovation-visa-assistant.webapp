@@ -15,7 +15,7 @@ const features = [
     id: "endorsing-ready",
     icon: Shield,
     title: "Endorsing Body Ready",
-    description: "Formatted specifically for UK endorsing bodies like Tech Nation and Innovate UK",
+    description: "Formatted specifically for UK endorsing bodies like Envestors, UKES, and Innovator International",
     color: "from-chart-4 to-chart-2",
   },
   {

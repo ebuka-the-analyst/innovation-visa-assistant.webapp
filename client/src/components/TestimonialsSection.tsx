@@ -6,7 +6,7 @@ const testimonials = [
     name: "Sarah Chen",
     role: "Fintech Founder",
     company: "PayFlow",
-    content: "Approved in 4 weeks! The business plan was comprehensive and exactly what Tech Nation wanted. Saved me months of work.",
+    content: "Approved in 4 weeks! The business plan was comprehensive and exactly what Envestors wanted. Saved me months of work.",
     rating: 5,
   },
   {
