@@ -706,44 +706,22 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           </Card>
         )}
 
-        {/* Ultimate Plan Pre-Fill Button for Ebuka */}
+        {/* Load My Info - Auto-fill form with founder data */}
         {currentStep === 0 && (
-          <Card className="p-4 mb-6 border-orange-500/50 bg-gradient-to-r from-orange-500/10 to-amber-500/10">
+          <Card className="p-4 mb-6 border-primary/50 bg-gradient-to-r from-primary/10 to-primary/5">
             <div className="flex gap-4 items-center justify-between">
               <div>
-                <h3 className="font-bold text-sm mb-1 text-orange-600">Ultimate Plan - Pre-filled for Review</h3>
+                <h3 className="font-bold text-sm mb-1 text-primary">Quick Start</h3>
                 <p className="text-xs text-muted-foreground">
-                  Load your pre-filled Ultimate Plan based on your CV and business documents. Review and edit each section before submitting.
+                  Auto-fill the entire form with your saved business information. Review and edit each section before submitting.
                 </p>
               </div>
               <Button
                 onClick={handleEbukaUltimatePlanAutoFill}
-                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white"
-                data-testid="button-ultimate-prefill"
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
+                data-testid="button-load-my-info"
               >
-                Load My Ultimate Plan
-              </Button>
-            </div>
-          </Card>
-        )}
-        
-        {/* Test Auto-Fill Button (Testing Only - Remove Before Production) */}
-        {currentStep === 0 && (
-          <Card className="p-4 mb-6 border-purple-500/50 bg-purple-500/5">
-            <div className="flex gap-4 items-center justify-between">
-              <div>
-                <h3 className="font-bold text-sm mb-1 text-purple-600">Testing Mode</h3>
-                <p className="text-xs text-muted-foreground">
-                  Auto-fill all sections with FinFlow AI example data for testing
-                </p>
-              </div>
-              <Button
-                onClick={handleTestAutoFill}
-                variant="outline"
-                className="border-purple-500 text-purple-600 hover:bg-purple-500/10"
-                data-testid="button-autofill"
-              >
-                Auto-Fill Test Data
+                Load my Info
               </Button>
             </div>
           </Card>
