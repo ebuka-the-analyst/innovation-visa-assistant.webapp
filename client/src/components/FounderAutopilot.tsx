@@ -26,8 +26,13 @@ import {
   RefreshCw,
   Mic,
   MicOff,
-  Eye
+  Eye,
+  FileIcon,
+  FileType2
 } from "lucide-react";
+import { jsPDF } from "jspdf";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import { saveAs } from "file-saver";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -78,22 +83,21 @@ export function FounderAutopilot({ onComplete, businessIdea }: FounderAutopilotP
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
   const [isRunning, setIsRunning] = useState(false);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [showFormatDialog, setShowFormatDialog] = useState(false);
   const { toast } = useToast();
 
-  const handleDownloadPackage = () => {
+  const getPackageContent = () => {
     const completedSteps = steps.filter(s => s.status === 'completed' && s.output);
-    if (completedSteps.length === 0) {
-      toast({
-        title: "No Content Available",
-        description: "Please complete the autopilot process first.",
-        variant: "destructive"
-      });
-      return;
-    }
+    return { completedSteps, timestamp: new Date().toLocaleString() };
+  };
+
+  const handleDownloadTXT = () => {
+    const { completedSteps, timestamp } = getPackageContent();
+    if (completedSteps.length === 0) return;
 
     let content = "UK INNOVATOR FOUNDER VISA APPLICATION PACKAGE\n";
     content += "=" .repeat(50) + "\n\n";
-    content += `Generated: ${new Date().toLocaleString()}\n\n`;
+    content += `Generated: ${timestamp}\n\n`;
 
     completedSteps.forEach((step, index) => {
       content += `\n${"=".repeat(50)}\n`;
@@ -122,10 +126,176 @@ export function FounderAutopilot({ onComplete, businessIdea }: FounderAutopilotP
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
+    setShowFormatDialog(false);
     toast({
-      title: "Package Downloaded",
-      description: "Your visa application package has been saved.",
+      title: "TXT Downloaded",
+      description: "Your visa application package has been saved as a text file.",
     });
+  };
+
+  const handleDownloadPDF = () => {
+    const { completedSteps, timestamp } = getPackageContent();
+    if (completedSteps.length === 0) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const maxWidth = pageWidth - margin * 2;
+    let yPos = 20;
+
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("UK INNOVATOR FOUNDER VISA", pageWidth / 2, yPos, { align: "center" });
+    yPos += 8;
+    doc.text("APPLICATION PACKAGE", pageWidth / 2, yPos, { align: "center" });
+    yPos += 10;
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Generated: ${timestamp}`, pageWidth / 2, yPos, { align: "center" });
+    yPos += 15;
+
+    completedSteps.forEach((step, index) => {
+      if (yPos > 260) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Section ${index + 1}: ${step.name}`, margin, yPos);
+      yPos += 8;
+
+      if (step.score) {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "italic");
+        doc.text(`Score: ${step.score}/100`, margin, yPos);
+        yPos += 8;
+      }
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      const lines = doc.splitTextToSize(step.output || "Analysis pending", maxWidth);
+      
+      lines.forEach((line: string) => {
+        if (yPos > 280) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.text(line, margin, yPos);
+        yPos += 5;
+      });
+      yPos += 10;
+    });
+
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    doc.text("DISCLAIMER: This document is for guidance only and does not constitute legal advice.", margin, yPos);
+    yPos += 5;
+    doc.text("Please consult a qualified immigration advisor for your specific situation.", margin, yPos);
+
+    doc.save("visa-application-package.pdf");
+    setShowFormatDialog(false);
+    toast({
+      title: "PDF Downloaded",
+      description: "Your visa application package has been saved as a PDF.",
+    });
+  };
+
+  const handleDownloadDOCX = async () => {
+    const { completedSteps, timestamp } = getPackageContent();
+    if (completedSteps.length === 0) return;
+
+    const children: Paragraph[] = [
+      new Paragraph({
+        text: "UK INNOVATOR FOUNDER VISA APPLICATION PACKAGE",
+        heading: HeadingLevel.TITLE,
+        spacing: { after: 200 },
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: `Generated: ${timestamp}`, italics: true }),
+        ],
+        spacing: { after: 400 },
+      }),
+    ];
+
+    completedSteps.forEach((step, index) => {
+      children.push(
+        new Paragraph({
+          text: `Section ${index + 1}: ${step.name}`,
+          heading: HeadingLevel.HEADING_1,
+          spacing: { before: 400, after: 200 },
+        })
+      );
+
+      if (step.score) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `Score: ${step.score}/100`, italics: true, bold: true }),
+            ],
+            spacing: { after: 200 },
+          })
+        );
+      }
+
+      const paragraphs = (step.output || "Analysis pending").split('\n\n');
+      paragraphs.forEach(para => {
+        children.push(
+          new Paragraph({
+            text: para.trim(),
+            spacing: { after: 200 },
+          })
+        );
+      });
+    });
+
+    children.push(
+      new Paragraph({
+        text: "DISCLAIMER",
+        heading: HeadingLevel.HEADING_2,
+        spacing: { before: 400, after: 200 },
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "This document is for guidance only and does not constitute legal advice. ", italics: true }),
+          new TextRun({ text: "Please consult a qualified immigration advisor for your specific situation.", italics: true }),
+        ],
+      })
+    );
+
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children,
+      }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "visa-application-package.docx");
+    setShowFormatDialog(false);
+    toast({
+      title: "Word Document Downloaded",
+      description: "Your visa application package has been saved as a Word document.",
+    });
+  };
+
+  const handleDownloadPackage = () => {
+    const completedSteps = steps.filter(s => s.status === 'completed' && s.output);
+    if (completedSteps.length === 0) {
+      toast({
+        title: "No Content Available",
+        description: "Please complete the autopilot process first.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setShowFormatDialog(true);
   };
   const [isPaused, setIsPaused] = useState(false);
   const [userInput, setUserInput] = useState(businessIdea || "");
@@ -526,6 +696,61 @@ export function FounderAutopilot({ onComplete, businessIdea }: FounderAutopilotP
             <Button onClick={handleDownloadPackage}>
               <Download className="h-4 w-4 mr-2" />
               Download Package
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showFormatDialog} onOpenChange={setShowFormatDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Choose Export Format</DialogTitle>
+            <DialogDescription>
+              Select the format for your visa application package
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 py-4">
+            <Button 
+              variant="outline" 
+              className="h-16 justify-start gap-4 hover-elevate"
+              onClick={handleDownloadDOCX}
+              data-testid="button-download-docx"
+            >
+              <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <FileType2 className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">Word Document (.docx)</div>
+                <div className="text-sm text-muted-foreground">Best for editing and formatting</div>
+              </div>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-16 justify-start gap-4 hover-elevate"
+              onClick={handleDownloadPDF}
+              data-testid="button-download-pdf"
+            >
+              <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+                <FileIcon className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">PDF Document (.pdf)</div>
+                <div className="text-sm text-muted-foreground">Best for sharing and printing</div>
+              </div>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-16 justify-start gap-4 hover-elevate"
+              onClick={handleDownloadTXT}
+              data-testid="button-download-txt"
+            >
+              <div className="h-10 w-10 rounded-lg bg-gray-500/10 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-gray-500" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">Plain Text (.txt)</div>
+                <div className="text-sm text-muted-foreground">Simple text format</div>
+              </div>
             </Button>
           </div>
         </DialogContent>
