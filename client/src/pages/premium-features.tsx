@@ -524,7 +524,7 @@ export default function PremiumFeatures() {
                     <p className="text-sm text-muted-foreground mb-4">
                       Start using tools to automatically track your visa journey milestones
                     </p>
-                    <Link href="/tools">
+                    <Link href="/tools-hub">
                       <Button>Explore Tools</Button>
                     </Link>
                   </div>

@@ -140,7 +140,7 @@ export function MyWorkSection() {
             Start using tools from the Tools Hub to build your visa application. 
             Your progress will be saved automatically.
           </p>
-          <Button onClick={() => setLocation("/tools")} data-testid="button-go-to-tools">
+          <Button onClick={() => setLocation("/tools-hub")} data-testid="button-go-to-tools">
             <ExternalLink className="h-4 w-4 mr-2" />
             Go to Tools Hub
           </Button>

@@ -64,7 +64,6 @@ export default function AIAgents() {
               }`}
               onClick={() => {
                 setActiveAgent(index);
-                console.log(`Agent ${agent.name} selected`);
               }}
               data-testid={`agent-${agent.id}`}
             >

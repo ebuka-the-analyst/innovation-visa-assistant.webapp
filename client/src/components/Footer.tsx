@@ -1,9 +1,32 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+  const { toast } = useToast();
+
+  const handleNewsletterSubscribe = () => {
+    if (!email || !email.includes("@")) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    window.location.href = `mailto:updates@innovatorfoundervisaassistant.co.uk?subject=Newsletter Subscription&body=Please add ${encodeURIComponent(email)} to your newsletter list.`;
+    
+    toast({
+      title: "Opening email client",
+      description: "Send the email to complete your subscription",
+    });
+  };
+
   return (
     <footer className="border-t border-border bg-gradient-to-b from-background to-accent/5">
       <div className="container mx-auto px-4 md:px-6 py-16">
@@ -81,9 +104,11 @@ export default function Footer() {
                 type="email" 
                 placeholder="Enter your email address" 
                 className="flex-1 min-w-[200px]"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 data-testid="input-newsletter"
               />
-              <Button onClick={() => console.log('Newsletter subscribed')} className="whitespace-nowrap">
+              <Button onClick={handleNewsletterSubscribe} className="whitespace-nowrap" data-testid="button-newsletter-subscribe">
                 Subscribe
               </Button>
             </div>
