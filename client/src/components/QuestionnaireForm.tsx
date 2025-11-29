@@ -559,6 +559,13 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const handleEbukaUltimatePlanAutoFill = () => {
     const ebukaData: Record<string, string> = {
       tier: 'ultimate',
+      // Section 1: Personal Profile & Credentials
+      fullLegalName: "Ebuka Benedict Umeh",
+      currentVisaStatus: "graduate-visa",
+      visaExpiryDate: "15/03/2026",
+      workAuthorizationDetails: "Graduate Visa holder with full work authorization in the UK. Permitted to work unlimited hours in any sector including self-employment. No restrictions on starting or running a business. Visa valid until March 2026, providing 4+ months runway for Innovator Founder Visa application and transition.",
+      educationBackground: "MSc Data Science, Leeds Beckett University, UK, 2023, Distinction (75% overall). BSc Computer Science, University of Nigeria Nsukka, Nigeria, 2018, First Class Honours (4.5/5.0 GPA). Dissertation: 'Machine Learning Approaches for Financial Time Series Prediction' - developed novel LSTM architecture achieving 94% accuracy on cash flow forecasting.",
+      professionalCertifications: "AWS Certified Solutions Architect - Associate (2023). AWS Certified Machine Learning - Specialty (2024). Google Cloud Professional Data Engineer (2023). Certified ScrumMaster (CSM) - Scrum Alliance (2022). FCA Financial Services Training Certificate (2024). Part-qualified Financial Risk Manager (FRM) - GARP (2024). Python for Finance Certificate - DataCamp (2022).",
       businessName: "UK Innovator Founder Visa Assistant",
       industry: "LegalTech / Immigration Technology / AI-powered SaaS",
       problem: "Navigating the UK Innovator Founder Visa process presents significant challenges for talented entrepreneurs worldwide. Traditional immigration lawyers charge £3,000-15,000, creating barriers for qualified entrepreneurs with limited capital. The process involves a complex two-stage application (endorsement + Home Office), with 60-70% rejection rate at endorsement stage due to weak business plans, lack of traction evidence, and insufficient documentation. Free online resources are fragmented, outdated, and generic - not tailored to individual circumstances. Applicants lack tools to assess their readiness, and there is no integrated platform providing comprehensive, affordable guidance across compliance, documentation, business planning, and interview preparation.",
