@@ -8121,6 +8121,8 @@ Return a JSON object with:
 
       // Delete all related records in order (respecting foreign key constraints)
       // Using raw SQL for tables that may not be imported
+      
+      // Tables with user_id foreign key
       await db.execute(sql`DELETE FROM tool_progress WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM ai_action_logs WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM ai_pending_confirmations WHERE user_id = ${userId}`);
@@ -8154,9 +8156,17 @@ Return a JSON object with:
       await db.execute(sql`DELETE FROM error_logs WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM site_feedback WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM security_events WHERE user_id = ${userId}`);
+      await db.execute(sql`UPDATE security_events SET resolved_by = NULL WHERE resolved_by = ${userId}`);
       await db.execute(sql`DELETE FROM session_handoffs WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM referrals WHERE referrer_id = ${userId} OR referred_id = ${userId}`);
       await db.execute(sql`DELETE FROM tool_analytics WHERE user_id = ${userId}`);
+      
+      // Additional tables with user foreign keys
+      await db.execute(sql`DELETE FROM user_notification_reads WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM payment_transactions WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM admin_exports WHERE requested_by = ${userId}`);
+      await db.execute(sql`DELETE FROM admin_notifications WHERE created_by = ${userId}`);
+      await db.execute(sql`DELETE FROM marketing_campaigns WHERE created_by = ${userId}`);
       
       // Delete business plans
       await db.delete(businessPlans).where(eq(businessPlans.userId, userId));
