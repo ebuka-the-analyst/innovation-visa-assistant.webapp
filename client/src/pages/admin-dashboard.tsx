@@ -7425,42 +7425,49 @@ export default function AdminDashboard() {
 
                             <Card>
                               <CardHeader>
-                                <CardTitle>Revenue Sources</CardTitle>
-                                <CardDescription>Breakdown by payment type</CardDescription>
+                                <CardTitle>Revenue by Tier</CardTitle>
+                                <CardDescription>Monthly revenue from each tier</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="space-y-4">
-                                  {[
-                                    { source: 'Subscriptions', amount: 3250, percent: 66, color: 'bg-green-500' },
-                                    { source: 'One-time', amount: 890, percent: 18, color: 'bg-blue-500' },
-                                    { source: 'Upgrades', amount: 540, percent: 11, color: 'bg-purple-500' },
-                                    { source: 'Add-ons', amount: 210, percent: 5, color: 'bg-amber-500' },
-                                  ].map((item, index) => (
-                                    <motion.div
-                                      key={item.source}
-                                      initial={{ opacity: 0, x: -20 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="space-y-2"
-                                    >
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                          <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                                          <span className="font-medium">{item.source}</span>
-                                        </div>
-                                        <span className="font-bold">£{item.amount}</span>
-                                      </div>
-                                      <div className="relative h-2 rounded-full bg-muted overflow-hidden">
+                                  {(() => {
+                                    const tierData = [
+                                      { source: 'Basic (£29)', amount: revenueAnalytics?.revenueByTier?.basic || 0, color: 'bg-green-500' },
+                                      { source: 'Premium (£49)', amount: revenueAnalytics?.revenueByTier?.premium || 0, color: 'bg-blue-500' },
+                                      { source: 'Enterprise (£89)', amount: revenueAnalytics?.revenueByTier?.enterprise || 0, color: 'bg-purple-500' },
+                                      { source: 'Ultimate (£129)', amount: revenueAnalytics?.revenueByTier?.ultimate || 0, color: 'bg-amber-500' },
+                                    ];
+                                    const totalRevenue = tierData.reduce((sum, t) => sum + t.amount, 0) || 1;
+                                    return tierData.map((item, index) => {
+                                      const percent = Math.round((item.amount / totalRevenue) * 100) || 0;
+                                      return (
                                         <motion.div
-                                          className={`absolute inset-y-0 left-0 rounded-full ${item.color}`}
-                                          initial={{ width: 0 }}
-                                          animate={{ width: `${item.percent}%` }}
-                                          transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
-                                        />
-                                      </div>
-                                      <p className="text-xs text-muted-foreground text-right">{item.percent}% of total</p>
-                                    </motion.div>
-                                  ))}
+                                          key={item.source}
+                                          initial={{ opacity: 0, x: -20 }}
+                                          animate={{ opacity: 1, x: 0 }}
+                                          transition={{ delay: index * 0.1 }}
+                                          className="space-y-2"
+                                        >
+                                          <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                              <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                                              <span className="font-medium">{item.source}</span>
+                                            </div>
+                                            <span className="font-bold">£{item.amount.toFixed(2)}</span>
+                                          </div>
+                                          <div className="relative h-2 rounded-full bg-muted overflow-hidden">
+                                            <motion.div
+                                              className={`absolute inset-y-0 left-0 rounded-full ${item.color}`}
+                                              initial={{ width: 0 }}
+                                              animate={{ width: `${percent}%` }}
+                                              transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
+                                            />
+                                          </div>
+                                          <p className="text-xs text-muted-foreground text-right">{percent}% of total</p>
+                                        </motion.div>
+                                      );
+                                    });
+                                  })()}
                                 </div>
                               </CardContent>
                             </Card>
@@ -7626,82 +7633,99 @@ export default function AdminDashboard() {
                             <Card>
                               <CardHeader>
                                 <CardTitle>MRR by Subscription Tier</CardTitle>
-                                <CardDescription>Revenue contribution per tier</CardDescription>
+                                <CardDescription>Revenue contribution per tier (from Stripe)</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="space-y-4">
-                                  {[
-                                    { tier: 'Ultimate (£129)', mrr: 645, users: 5, percent: 20, color: '#8b5cf6' },
-                                    { tier: 'Enterprise (£89)', mrr: 1068, users: 12, percent: 33, color: '#f59e0b' },
-                                    { tier: 'Premium (£49)', mrr: 1372, users: 28, percent: 42, color: '#3b82f6' },
-                                    { tier: 'Basic (£29)', mrr: 165, users: 42, percent: 5, color: '#22c55e' },
-                                  ].map((item, index) => (
-                                    <motion.div
-                                      key={item.tier}
-                                      initial={{ opacity: 0, x: -20 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="space-y-2"
-                                    >
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                                          <span className="font-medium">{item.tier}</span>
-                                          <Badge variant="secondary">{item.users} users</Badge>
-                                        </div>
-                                        <span className="font-bold">£{item.mrr}/mo</span>
-                                      </div>
-                                      <div className="relative h-3 rounded-full bg-muted overflow-hidden">
+                                  {(() => {
+                                    const tierData = [
+                                      { tier: 'Ultimate (£129)', mrr: (revenueAnalytics?.tierDistribution?.ultimate || 0) * 129, users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6' },
+                                      { tier: 'Enterprise (£89)', mrr: (revenueAnalytics?.tierDistribution?.enterprise || 0) * 89, users: revenueAnalytics?.tierDistribution?.enterprise || 0, color: '#f59e0b' },
+                                      { tier: 'Premium (£49)', mrr: (revenueAnalytics?.tierDistribution?.premium || 0) * 49, users: revenueAnalytics?.tierDistribution?.premium || 0, color: '#3b82f6' },
+                                      { tier: 'Basic (£29)', mrr: (revenueAnalytics?.tierDistribution?.basic || 0) * 29, users: revenueAnalytics?.tierDistribution?.basic || 0, color: '#22c55e' },
+                                    ];
+                                    const totalMrr = tierData.reduce((sum, t) => sum + t.mrr, 0) || 1;
+                                    return tierData.map((item, index) => {
+                                      const percent = Math.round((item.mrr / totalMrr) * 100) || 0;
+                                      return (
                                         <motion.div
-                                          className="absolute inset-y-0 left-0 rounded-full"
-                                          style={{ backgroundColor: item.color }}
-                                          initial={{ width: 0 }}
-                                          animate={{ width: `${item.percent}%` }}
-                                          transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
-                                        />
-                                      </div>
-                                    </motion.div>
-                                  ))}
+                                          key={item.tier}
+                                          initial={{ opacity: 0, x: -20 }}
+                                          animate={{ opacity: 1, x: 0 }}
+                                          transition={{ delay: index * 0.1 }}
+                                          className="space-y-2"
+                                        >
+                                          <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                              <span className="font-medium">{item.tier}</span>
+                                              <Badge variant="secondary">{item.users} users</Badge>
+                                            </div>
+                                            <span className="font-bold">£{item.mrr.toFixed(2)}/mo</span>
+                                          </div>
+                                          <div className="relative h-3 rounded-full bg-muted overflow-hidden">
+                                            <motion.div
+                                              className="absolute inset-y-0 left-0 rounded-full"
+                                              style={{ backgroundColor: item.color }}
+                                              initial={{ width: 0 }}
+                                              animate={{ width: `${percent}%` }}
+                                              transition={{ delay: index * 0.1 + 0.3, duration: 0.6 }}
+                                            />
+                                          </div>
+                                        </motion.div>
+                                      );
+                                    });
+                                  })()}
                                 </div>
                               </CardContent>
                             </Card>
 
                             <Card>
                               <CardHeader>
-                                <CardTitle>MRR Cohort Analysis</CardTitle>
-                                <CardDescription>Revenue retention by signup month</CardDescription>
+                                <CardTitle>Subscription Metrics</CardTitle>
+                                <CardDescription>Real-time subscription health</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="space-y-3">
-                                  {[
-                                    { cohort: 'Nov 2025', initial: 420, current: 420, retention: 100, status: 'new' },
-                                    { cohort: 'Oct 2025', initial: 380, current: 365, retention: 96, status: 'healthy' },
-                                    { cohort: 'Sep 2025', initial: 290, current: 275, retention: 95, status: 'healthy' },
-                                    { cohort: 'Aug 2025', initial: 350, current: 310, retention: 89, status: 'watch' },
-                                    { cohort: 'Jul 2025', initial: 420, current: 350, retention: 83, status: 'concern' },
-                                  ].map((cohort, index) => (
-                                    <motion.div
-                                      key={cohort.cohort}
-                                      initial={{ opacity: 0, y: 10 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      transition={{ delay: index * 0.08 }}
-                                      className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
-                                    >
-                                      <div>
-                                        <p className="font-medium">{cohort.cohort}</p>
-                                        <p className="text-xs text-muted-foreground">£{cohort.initial} → £{cohort.current}</p>
-                                      </div>
-                                      <div className="flex items-center gap-3">
-                                        <Badge className={
-                                          cohort.status === 'new' ? 'bg-blue-500' :
-                                          cohort.status === 'healthy' ? 'bg-green-500' :
-                                          cohort.status === 'watch' ? 'bg-amber-500' : 'bg-red-500'
-                                        }>
-                                          {cohort.retention}% retained
-                                        </Badge>
-                                      </div>
-                                    </motion.div>
-                                  ))}
+                                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                                    <div>
+                                      <p className="font-medium">Active Subscriptions</p>
+                                      <p className="text-xs text-muted-foreground">Currently paying customers</p>
+                                    </div>
+                                    <Badge className="bg-green-500">{revenueAnalytics?.activeSubscriptions || 0}</Badge>
+                                  </div>
+                                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                                    <div>
+                                      <p className="font-medium">Cancelled Subscriptions</p>
+                                      <p className="text-xs text-muted-foreground">All-time cancelled</p>
+                                    </div>
+                                    <Badge className="bg-red-500">{revenueAnalytics?.cancelledSubscriptions || 0}</Badge>
+                                  </div>
+                                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                                    <div>
+                                      <p className="font-medium">Churn Rate</p>
+                                      <p className="text-xs text-muted-foreground">Percentage of cancellations</p>
+                                    </div>
+                                    <Badge className={(revenueAnalytics?.churnRate || 0) < 5 ? 'bg-green-500' : (revenueAnalytics?.churnRate || 0) < 10 ? 'bg-amber-500' : 'bg-red-500'}>
+                                      {(revenueAnalytics?.churnRate || 0).toFixed(1)}%
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                                    <div>
+                                      <p className="font-medium">Total Customers</p>
+                                      <p className="text-xs text-muted-foreground">Unique paying customers</p>
+                                    </div>
+                                    <Badge className="bg-blue-500">{revenueAnalytics?.totalCustomers || 0}</Badge>
+                                  </div>
+                                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                                    <div>
+                                      <p className="font-medium">Monthly Growth</p>
+                                      <p className="text-xs text-muted-foreground">vs. last month</p>
+                                    </div>
+                                    <Badge className={(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'bg-green-500' : 'bg-red-500'}>
+                                      {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? '+' : ''}{revenueAnalytics?.monthlyGrowth || 0}%
+                                    </Badge>
+                                  </div>
                                 </div>
                               </CardContent>
                             </Card>
@@ -7721,8 +7745,8 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm text-muted-foreground">Active Subscriptions</p>
-                                    <p className="text-3xl font-bold">87</p>
-                                    <Badge className="mt-2 bg-green-500/10 text-green-500">+8 this month</Badge>
+                                    <p className="text-3xl font-bold">{revenueAnalytics?.activeSubscriptions || 0}</p>
+                                    <Badge className="mt-2 bg-green-500/10 text-green-500">from Stripe</Badge>
                                   </div>
                                   <CreditCard className="h-12 w-12 text-blue-500 opacity-50" />
                                 </div>
@@ -7733,9 +7757,11 @@ export default function AdminDashboard() {
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
                                   <div>
-                                    <p className="text-sm text-muted-foreground">Renewal Rate</p>
-                                    <p className="text-3xl font-bold">94.2%</p>
-                                    <Badge className="mt-2 bg-green-500/10 text-green-500">Excellent</Badge>
+                                    <p className="text-sm text-muted-foreground">Retention Rate</p>
+                                    <p className="text-3xl font-bold">{(100 - (revenueAnalytics?.churnRate || 0)).toFixed(1)}%</p>
+                                    <Badge className="mt-2 bg-green-500/10 text-green-500">
+                                      {(100 - (revenueAnalytics?.churnRate || 0)) >= 90 ? 'Excellent' : (100 - (revenueAnalytics?.churnRate || 0)) >= 80 ? 'Good' : 'Needs work'}
+                                    </Badge>
                                   </div>
                                   <RefreshCw className="h-12 w-12 text-green-500 opacity-50" />
                                 </div>
@@ -7746,11 +7772,11 @@ export default function AdminDashboard() {
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
                                   <div>
-                                    <p className="text-sm text-muted-foreground">Due for Renewal</p>
-                                    <p className="text-3xl font-bold">12</p>
-                                    <Badge className="mt-2 bg-amber-500/10 text-amber-500">Next 7 days</Badge>
+                                    <p className="text-sm text-muted-foreground">Monthly Revenue</p>
+                                    <p className="text-3xl font-bold">£{(revenueAnalytics?.mrr || 0).toFixed(0)}</p>
+                                    <Badge className="mt-2 bg-amber-500/10 text-amber-500">MRR</Badge>
                                   </div>
-                                  <Clock className="h-12 w-12 text-amber-500 opacity-50" />
+                                  <TrendingUp className="h-12 w-12 text-amber-500 opacity-50" />
                                 </div>
                               </CardContent>
                             </Card>
@@ -7759,9 +7785,9 @@ export default function AdminDashboard() {
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
                                   <div>
-                                    <p className="text-sm text-muted-foreground">At Risk</p>
-                                    <p className="text-3xl font-bold">3</p>
-                                    <Badge className="mt-2 bg-red-500/10 text-red-500">Needs attention</Badge>
+                                    <p className="text-sm text-muted-foreground">Cancelled</p>
+                                    <p className="text-3xl font-bold">{revenueAnalytics?.cancelledSubscriptions || 0}</p>
+                                    <Badge className="mt-2 bg-red-500/10 text-red-500">All-time</Badge>
                                   </div>
                                   <AlertTriangle className="h-12 w-12 text-red-500 opacity-50" />
                                 </div>
@@ -7993,37 +8019,40 @@ export default function AdminDashboard() {
                           <Card>
                             <CardHeader>
                               <CardTitle>Tier Upgrade Funnel</CardTitle>
-                              <CardDescription>User progression through subscription tiers</CardDescription>
+                              <CardDescription>User progression through subscription tiers (real data)</CardDescription>
                             </CardHeader>
                             <CardContent>
                               <div className="flex items-center justify-between gap-4">
-                                {[
-                                  { tier: 'Free', users: 245, converts: 42, rate: 17.1 },
-                                  { tier: 'Basic', users: 42, converts: 28, rate: 66.7 },
-                                  { tier: 'Premium', users: 28, converts: 12, rate: 42.9 },
-                                  { tier: 'Enterprise', users: 12, converts: 5, rate: 41.7 },
-                                  { tier: 'Ultimate', users: 5, converts: 0, rate: 0 },
-                                ].map((stage, index, arr) => (
-                                  <div key={stage.tier} className="flex-1 relative">
-                                    <motion.div
-                                      initial={{ opacity: 0, y: 20 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      className="text-center p-4 rounded-lg bg-muted/50"
-                                    >
-                                      <p className="text-xs text-muted-foreground">{stage.tier}</p>
-                                      <p className="text-2xl font-bold mt-1">{stage.users}</p>
+                                {(() => {
+                                  const tiers = [
+                                    { tier: 'Free', users: revenueAnalytics?.tierDistribution?.free || 0 },
+                                    { tier: 'Basic', users: revenueAnalytics?.tierDistribution?.basic || 0 },
+                                    { tier: 'Premium', users: revenueAnalytics?.tierDistribution?.premium || 0 },
+                                    { tier: 'Enterprise', users: revenueAnalytics?.tierDistribution?.enterprise || 0 },
+                                    { tier: 'Ultimate', users: revenueAnalytics?.tierDistribution?.ultimate || 0 },
+                                  ];
+                                  return tiers.map((stage, index, arr) => (
+                                    <div key={stage.tier} className="flex-1 relative">
+                                      <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="text-center p-4 rounded-lg bg-muted/50"
+                                      >
+                                        <p className="text-xs text-muted-foreground">{stage.tier}</p>
+                                        <p className="text-2xl font-bold mt-1">{stage.users}</p>
+                                        {index < arr.length - 1 && stage.users > 0 && arr[index + 1].users > 0 && (
+                                          <Badge className="mt-2 bg-green-500/10 text-green-500">
+                                            {((arr[index + 1].users / stage.users) * 100).toFixed(1)}% upgrade
+                                          </Badge>
+                                        )}
+                                      </motion.div>
                                       {index < arr.length - 1 && (
-                                        <Badge className="mt-2 bg-green-500/10 text-green-500">
-                                          {stage.rate}% upgrade
-                                        </Badge>
+                                        <ArrowRight className="absolute -right-2 top-1/2 -translate-y-1/2 text-muted-foreground z-10" />
                                       )}
-                                    </motion.div>
-                                    {index < arr.length - 1 && (
-                                      <ArrowRight className="absolute -right-2 top-1/2 -translate-y-1/2 text-muted-foreground z-10" />
-                                    )}
-                                  </div>
-                                ))}
+                                    </div>
+                                  ));
+                                })()}
                               </div>
                             </CardContent>
                           </Card>
@@ -8042,8 +8071,8 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm text-muted-foreground">Average LTV</p>
-                                    <p className="text-3xl font-bold">£156</p>
-                                    <Badge className="mt-2 bg-green-500/10 text-green-500">+12% YoY</Badge>
+                                    <p className="text-3xl font-bold">£{(revenueAnalytics?.avgLTV || 0).toFixed(2)}</p>
+                                    <Badge className="mt-2 bg-green-500/10 text-green-500">from Stripe</Badge>
                                   </div>
                                   <LineChart className="h-10 w-10 text-purple-500 opacity-50" />
                                 </div>
@@ -8054,9 +8083,9 @@ export default function AdminDashboard() {
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
                                   <div>
-                                    <p className="text-sm text-muted-foreground">LTV:CAC Ratio</p>
-                                    <p className="text-3xl font-bold">4.2:1</p>
-                                    <Badge className="mt-2 bg-green-500/10 text-green-500">Healthy</Badge>
+                                    <p className="text-sm text-muted-foreground">Total Revenue</p>
+                                    <p className="text-3xl font-bold">£{(revenueAnalytics?.revenueAllTime || 0).toFixed(2)}</p>
+                                    <Badge className="mt-2 bg-green-500/10 text-green-500">All-time</Badge>
                                   </div>
                                   <Target className="h-10 w-10 text-green-500 opacity-50" />
                                 </div>
@@ -8067,11 +8096,11 @@ export default function AdminDashboard() {
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
                                   <div>
-                                    <p className="text-sm text-muted-foreground">Avg. Customer Lifespan</p>
-                                    <p className="text-3xl font-bold">8.2 mo</p>
-                                    <Badge className="mt-2 bg-blue-500/10 text-blue-500">+1.3 mo</Badge>
+                                    <p className="text-sm text-muted-foreground">Total Customers</p>
+                                    <p className="text-3xl font-bold">{revenueAnalytics?.totalCustomers || 0}</p>
+                                    <Badge className="mt-2 bg-blue-500/10 text-blue-500">Unique</Badge>
                                   </div>
-                                  <Clock className="h-10 w-10 text-blue-500 opacity-50" />
+                                  <Users className="h-10 w-10 text-blue-500 opacity-50" />
                                 </div>
                               </CardContent>
                             </Card>
@@ -8080,9 +8109,9 @@ export default function AdminDashboard() {
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
                                   <div>
-                                    <p className="text-sm text-muted-foreground">CAC Payback</p>
-                                    <p className="text-3xl font-bold">2.1 mo</p>
-                                    <Badge className="mt-2 bg-green-500/10 text-green-500">Fast</Badge>
+                                    <p className="text-sm text-muted-foreground">Avg Order Value</p>
+                                    <p className="text-3xl font-bold">£{(revenueAnalytics?.avgOrderValue || 0).toFixed(2)}</p>
+                                    <Badge className="mt-2 bg-amber-500/10 text-amber-500">Per transaction</Badge>
                                   </div>
                                   <Zap className="h-10 w-10 text-amber-500 opacity-50" />
                                 </div>
@@ -8172,36 +8201,36 @@ export default function AdminDashboard() {
 
                             <Card>
                               <CardHeader>
-                                <CardTitle>LTV:CAC Analysis</CardTitle>
-                                <CardDescription>Return on customer acquisition investment</CardDescription>
+                                <CardTitle>Revenue Summary</CardTitle>
+                                <CardDescription>Key revenue metrics from Stripe</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="space-y-6">
                                   <div className="text-center p-6 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
-                                    <p className="text-sm text-muted-foreground">LTV:CAC Ratio</p>
-                                    <p className="text-5xl font-bold text-green-500 mt-2">4.2:1</p>
+                                    <p className="text-sm text-muted-foreground">Monthly Recurring Revenue</p>
+                                    <p className="text-5xl font-bold text-green-500 mt-2">£{(revenueAnalytics?.mrr || 0).toFixed(2)}</p>
                                     <p className="text-sm text-muted-foreground mt-2">
-                                      Industry benchmark: 3:1 (You're outperforming!)
+                                      ARR: £{(revenueAnalytics?.arr || 0).toFixed(2)}
                                     </p>
                                   </div>
                                   <div className="grid grid-cols-2 gap-4">
                                     <div className="text-center p-4 rounded-lg bg-muted/30">
                                       <p className="text-xs text-muted-foreground">Avg. LTV</p>
-                                      <p className="text-2xl font-bold">£156</p>
+                                      <p className="text-2xl font-bold">£{(revenueAnalytics?.avgLTV || 0).toFixed(2)}</p>
                                     </div>
                                     <div className="text-center p-4 rounded-lg bg-muted/30">
-                                      <p className="text-xs text-muted-foreground">Avg. CAC</p>
-                                      <p className="text-2xl font-bold">£37</p>
+                                      <p className="text-xs text-muted-foreground">This Month</p>
+                                      <p className="text-2xl font-bold">£{(revenueAnalytics?.revenueThisMonth || 0).toFixed(2)}</p>
                                     </div>
                                   </div>
                                   <Card className="bg-blue-500/5 border-blue-500/20">
                                     <CardContent className="py-3">
                                       <div className="flex items-center gap-2">
                                         <Lightbulb className="h-4 w-4 text-blue-500" />
-                                        <span className="text-sm text-blue-500 font-medium">Insight</span>
+                                        <span className="text-sm text-blue-500 font-medium">Summary</span>
                                       </div>
                                       <p className="text-sm text-muted-foreground mt-1">
-                                        Your healthy LTV:CAC ratio indicates strong unit economics. Consider increasing marketing spend.
+                                        All figures are real-time data from your Stripe account. {revenueAnalytics?.totalCustomers || 0} unique customers, {revenueAnalytics?.activeSubscriptions || 0} active subscriptions.
                                       </p>
                                     </CardContent>
                                   </Card>
@@ -14685,7 +14714,7 @@ export default function AdminDashboard() {
                           : 'No start date'}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
                       <Calendar
                         mode="single"
                         selected={newPromoCode.validFrom || undefined}
@@ -14706,7 +14735,7 @@ export default function AdminDashboard() {
                           : 'No expiry'}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
                       <Calendar
                         mode="single"
                         selected={newPromoCode.validUntil || undefined}
@@ -14985,7 +15014,7 @@ export default function AdminDashboard() {
                         {format(campaignData.startDate, 'PPP')}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
                       <Calendar
                         mode="single"
                         selected={campaignData.startDate}
@@ -15004,7 +15033,7 @@ export default function AdminDashboard() {
                         {format(campaignData.endDate, 'PPP')}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
                       <Calendar
                         mode="single"
                         selected={campaignData.endDate}
