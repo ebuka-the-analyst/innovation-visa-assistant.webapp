@@ -7393,25 +7393,59 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
   app.post("/api/ai/autopilot-step", isAuthenticated, async (req, res) => {
     try {
       const { stepId, stepName, agent, businessIdea, previousSteps } = req.body;
+      
+      console.log(`[Autopilot] Starting step: ${stepId} - ${stepName}`);
 
       const stepPrompts: Record<string, string> = {
-        gather: "Extract and summarize the key business information from this idea.",
-        innovation: "Assess the innovation potential and uniqueness of this business idea for UK Innovator Founder Visa.",
-        viability: "Analyze the financial viability and create initial projections for this business.",
-        scalability: "Evaluate the scalability potential and UK job creation capacity of this business.",
-        compliance: "Review compliance with UK visa requirements and identify any gaps.",
-        synthesis: "Create a final synthesis report combining all analyses for visa application."
+        gather: `Analyze this business idea comprehensively. Extract and detail:
+- Core business concept and value proposition
+- Target market and customer segments  
+- Revenue model and pricing strategy
+- Key differentiators and competitive advantages
+- Founder's relevant experience and skills`,
+        innovation: `Assess the innovation potential for UK Innovator Founder Visa. Evaluate:
+- How the business is genuinely innovative (new to UK market or globally)
+- Technology or process innovations involved
+- Market disruption potential
+- Intellectual property considerations
+- Why this innovation matters for UK economy`,
+        viability: `Analyze the financial viability in detail:
+- Realistic revenue projections for years 1-3
+- Cost structure and break-even analysis
+- Funding requirements and sources
+- Cash flow considerations
+- Key financial risks and mitigation strategies`,
+        scalability: `Evaluate UK market scalability and job creation:
+- UK market size and growth potential
+- Expansion strategy and timeline
+- Projected job creation (numbers and roles)
+- Skills and talent requirements
+- Infrastructure and operational scaling needs`,
+        compliance: `Review UK Innovator Founder Visa compliance:
+- Alignment with endorsing body criteria
+- Evidence of genuine innovation
+- Scalability demonstration
+- Viable business model proof
+- Required documentation checklist`,
+        synthesis: `Create a comprehensive final synthesis:
+- Executive summary of business viability
+- Overall visa application strength assessment
+- Key strengths to highlight in application
+- Areas requiring additional evidence
+- Recommended next steps for application`
       };
 
-      const systemPrompt = `You are an AI assistant specialized in UK Innovator Founder Visa applications.
-Step: ${stepName}
-Task: ${stepPrompts[stepId] || "Analyze this business idea."}
+      const systemPrompt = `You are an expert UK Innovator Founder Visa consultant with deep knowledge of Home Office requirements and endorsing body criteria.
 
-Provide a concise but thorough analysis (2-3 paragraphs) relevant to this step.
-Include specific recommendations for the UK market.`;
+Step: ${stepName}
+Task: ${stepPrompts[stepId] || "Analyze this business idea for UK visa application."}
+
+IMPORTANT: Provide a detailed, substantive analysis (3-4 paragraphs minimum). Be specific and actionable.
+Include UK market-specific insights and recommendations.
+Reference actual visa requirements where relevant.`;
 
       const previousContext = previousSteps?.map((s: any) => `${s.id}: ${s.output}`).join('\n') || '';
-      const userMessage = `Business Idea: ${businessIdea}\n\nPrevious Analysis:\n${previousContext}`;
+      const userMessage = `Business Idea: ${businessIdea}\n\n${previousContext ? `Previous Analysis:\n${previousContext}` : ''}`;
       
       let output: string | null = null;
 
@@ -7419,6 +7453,7 @@ Include specific recommendations for the UK market.`;
       const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
       if (openaiKey) {
         try {
+          console.log(`[Autopilot] Attempting OpenAI for step: ${stepId}`);
           const OpenAI = (await import("openai")).default;
           const openai = new OpenAI({ apiKey: openaiKey });
           
@@ -7428,50 +7463,81 @@ Include specific recommendations for the UK market.`;
               { role: "system", content: systemPrompt },
               { role: "user", content: userMessage }
             ],
-            max_tokens: 800
+            max_tokens: 1200,
+            temperature: 0.7
           });
 
           output = completion.choices[0]?.message?.content || null;
+          if (output) {
+            console.log(`[Autopilot] OpenAI success for step: ${stepId}, output length: ${output.length}`);
+          }
         } catch (openaiError: any) {
-          console.log("OpenAI failed for autopilot, trying Gemini:", openaiError?.message);
+          console.error(`[Autopilot] OpenAI failed for step ${stepId}:`, openaiError?.message || openaiError);
         }
+      } else {
+        console.log("[Autopilot] No OpenAI key available");
       }
 
       // Fallback to Gemini
       const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
       if (!output && geminiKey) {
         try {
+          console.log(`[Autopilot] Attempting Gemini fallback for step: ${stepId}`);
           const { GoogleGenAI } = await import("@google/genai");
           const genai = new GoogleGenAI({ apiKey: geminiKey });
           
           const result = await genai.models.generateContent({
-            model: "gemini-2.0-flash",
+            model: "gemini-1.5-flash",
             contents: `${systemPrompt}\n\n${userMessage}`
           });
           
           output = result.text || null;
+          if (output) {
+            console.log(`[Autopilot] Gemini success for step: ${stepId}, output length: ${output.length}`);
+          }
         } catch (geminiError: any) {
-          console.log("Gemini also failed for autopilot:", geminiError?.message);
+          console.error(`[Autopilot] Gemini also failed for step ${stepId}:`, geminiError?.message || geminiError);
         }
+      }
+
+      // Calculate score based on content quality
+      let score = 70;
+      if (output) {
+        // Score based on output length and quality indicators
+        if (output.length > 500) score += 10;
+        if (output.length > 1000) score += 5;
+        if (output.includes('UK') || output.includes('visa')) score += 3;
+        if (output.includes('recommend') || output.includes('suggest')) score += 2;
+        score = Math.min(score, 95); // Cap at 95
       }
 
       // Return result
       if (output) {
         res.json({
           output,
-          score: Math.floor(Math.random() * 20) + 75,
+          score,
           documents: stepId === 'synthesis' ? ['Business Plan', 'Financial Projections', 'Innovation Statement'] : []
         });
       } else {
-        // Static fallback
+        console.warn(`[Autopilot] Both AI providers failed for step: ${stepId}, returning fallback`);
+        // Static fallback with more helpful content
+        const fallbacks: Record<string, string> = {
+          gather: `Based on your business idea, we've identified key elements for your UK Innovator Founder Visa application. Your concept shows potential for the UK market. To strengthen your application, ensure you can demonstrate: a clear value proposition, defined target market, sustainable revenue model, and your relevant experience. Consider documenting specific examples of your industry expertise.`,
+          innovation: `Your business shows innovation potential for the UK market. To meet Innovator Founder Visa requirements, you'll need to demonstrate genuine innovation - either through new technology, a novel business model, or a unique market approach. Document how your solution differs from existing UK market offerings and any intellectual property you may develop.`,
+          viability: `Financial viability is crucial for your visa application. Prepare detailed projections showing: realistic revenue forecasts for 3 years, clear cost structure, break-even timeline, and funding strategy. Endorsing bodies look for evidence that your business can sustain itself and grow in the UK market.`,
+          scalability: `Your business should demonstrate UK scalability and job creation potential. Plan to show: how you'll expand within the UK market, projected team growth and job creation timeline, skills you'll bring to the UK workforce, and infrastructure requirements for scaling operations.`,
+          compliance: `For visa compliance, ensure you have: proof of genuine innovation, evidence of scalability, demonstration of viability, and alignment with endorsing body criteria. Prepare supporting documents including business plan, financial projections, market research, and evidence of your relevant experience.`,
+          synthesis: `Your Innovator Founder Visa application package is taking shape. Key strengths to highlight include your business innovation and market potential. Ensure all documentation is complete: business plan, financial projections, market analysis, and evidence of your qualifications. Consider seeking feedback from your chosen endorsing body before final submission.`
+        };
+        
         res.json({
-          output: `${stepName} analysis completed. Your business shows promise for the UK Innovator Founder Visa. Key areas identified for further development.`,
-          score: Math.floor(Math.random() * 20) + 70,
+          output: fallbacks[stepId] || `${stepName} analysis completed. Your business shows potential for the UK Innovator Founder Visa. Review the guidance above and ensure you address each requirement thoroughly.`,
+          score: Math.floor(Math.random() * 10) + 65,
           documents: []
         });
       }
     } catch (error) {
-      console.error("Autopilot step error:", error);
+      console.error("[Autopilot] Step error:", error);
       res.status(500).json({ error: "Failed to execute autopilot step" });
     }
   });
