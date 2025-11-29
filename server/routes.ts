@@ -9218,6 +9218,533 @@ Return a JSON object with:
     }
   });
 
+  // ============================================
+  // REAL-TIME ACTIVITY TRACKING API
+  // ============================================
+
+  // Create or update user session
+  app.post("/api/activity/session", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { sessionToken, deviceInfo, location, referrer, utm } = req.body;
+
+      if (!sessionToken) {
+        return res.status(400).json({ error: "Session token required" });
+      }
+
+      // Check if session exists
+      const existing = await db.execute(
+        sql`SELECT id, page_view_count, event_count FROM user_sessions 
+            WHERE session_token = ${sessionToken} AND user_id = ${userId} AND is_active = true`
+      );
+
+      if (existing.rows.length > 0) {
+        // Update existing session heartbeat
+        await db.execute(
+          sql`UPDATE user_sessions SET 
+              last_seen_at = NOW(),
+              current_page = ${req.body.currentPage || null},
+              total_duration_seconds = EXTRACT(EPOCH FROM (NOW() - session_started_at))::integer
+              WHERE session_token = ${sessionToken} AND user_id = ${userId}`
+        );
+        return res.json({ sessionId: existing.rows[0].id, action: 'updated' });
+      }
+
+      // Create new session
+      const result = await db.execute(
+        sql`INSERT INTO user_sessions (
+          user_id, session_token, user_agent, device_type, browser_name, browser_version,
+          os_name, os_version, screen_resolution, ip_address, country, country_code,
+          region, city, timezone, connection_type, entry_page, current_page,
+          referrer_url, referrer_source, utm_source, utm_medium, utm_campaign
+        ) VALUES (
+          ${userId}, ${sessionToken}, ${deviceInfo?.userAgent || null}, ${deviceInfo?.deviceType || null},
+          ${deviceInfo?.browserName || null}, ${deviceInfo?.browserVersion || null},
+          ${deviceInfo?.osName || null}, ${deviceInfo?.osVersion || null},
+          ${deviceInfo?.screenResolution || null}, ${req.ip || null},
+          ${location?.country || null}, ${location?.countryCode || null},
+          ${location?.region || null}, ${location?.city || null}, ${location?.timezone || null},
+          ${deviceInfo?.connectionType || null}, ${req.body.currentPage || null}, ${req.body.currentPage || null},
+          ${referrer?.url || null}, ${referrer?.source || null},
+          ${utm?.source || null}, ${utm?.medium || null}, ${utm?.campaign || null}
+        ) RETURNING id`
+      );
+
+      // Update user's last activity
+      await db.execute(sql`UPDATE users SET last_activity_at = NOW() WHERE id = ${userId}`);
+
+      res.json({ sessionId: result.rows[0].id, action: 'created' });
+    } catch (error) {
+      console.error("Session tracking error:", error);
+      res.status(500).json({ error: "Failed to track session" });
+    }
+  });
+
+  // Track page view
+  app.post("/api/activity/page-view", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { sessionId, pagePath, pageTitle, pageUrl, referrerPath, navigationType, pageLoadTimeMs } = req.body;
+
+      if (!sessionId || !pagePath) {
+        return res.status(400).json({ error: "Session ID and page path required" });
+      }
+
+      // Create page view
+      const result = await db.execute(
+        sql`INSERT INTO page_views (
+          session_id, user_id, page_path, page_title, page_url,
+          referrer_path, navigation_type, page_load_time_ms
+        ) VALUES (
+          ${sessionId}, ${userId}, ${pagePath}, ${pageTitle || null}, ${pageUrl || null},
+          ${referrerPath || null}, ${navigationType || null}, ${pageLoadTimeMs || null}
+        ) RETURNING id`
+      );
+
+      // Update session page view count and current page
+      await db.execute(
+        sql`UPDATE user_sessions SET 
+            page_view_count = page_view_count + 1,
+            current_page = ${pagePath},
+            last_seen_at = NOW()
+            WHERE id = ${sessionId}`
+      );
+
+      // Update user's last activity
+      await db.execute(sql`UPDATE users SET last_activity_at = NOW() WHERE id = ${userId}`);
+
+      res.json({ pageViewId: result.rows[0].id });
+    } catch (error) {
+      console.error("Page view tracking error:", error);
+      res.status(500).json({ error: "Failed to track page view" });
+    }
+  });
+
+  // Track activity event
+  app.post("/api/activity/event", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { sessionId, eventType, eventCategory, eventAction, eventLabel, eventValue, pagePath, toolId, toolCategory, payload } = req.body;
+
+      if (!sessionId || !eventType || !eventCategory || !eventAction) {
+        return res.status(400).json({ error: "Required fields: sessionId, eventType, eventCategory, eventAction" });
+      }
+
+      // Create event
+      const result = await db.execute(
+        sql`INSERT INTO activity_events (
+          session_id, user_id, event_type, event_category, event_action,
+          event_label, event_value, page_path, tool_id, tool_category, payload
+        ) VALUES (
+          ${sessionId}, ${userId}, ${eventType}, ${eventCategory}, ${eventAction},
+          ${eventLabel || null}, ${eventValue || null}, ${pagePath || null},
+          ${toolId || null}, ${toolCategory || null}, ${payload ? JSON.stringify(payload) : null}
+        ) RETURNING id`
+      );
+
+      // Update session event count
+      await db.execute(
+        sql`UPDATE user_sessions SET 
+            event_count = event_count + 1,
+            last_seen_at = NOW()
+            WHERE id = ${sessionId}`
+      );
+
+      res.json({ eventId: result.rows[0].id });
+    } catch (error) {
+      console.error("Event tracking error:", error);
+      res.status(500).json({ error: "Failed to track event" });
+    }
+  });
+
+  // End session
+  app.post("/api/activity/session/end", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { sessionId, exitPage } = req.body;
+
+      await db.execute(
+        sql`UPDATE user_sessions SET 
+            is_active = false,
+            session_ended_at = NOW(),
+            exit_page = ${exitPage || null},
+            total_duration_seconds = EXTRACT(EPOCH FROM (NOW() - session_started_at))::integer
+            WHERE id = ${sessionId} AND user_id = ${userId}`
+      );
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Session end error:", error);
+      res.status(500).json({ error: "Failed to end session" });
+    }
+  });
+
+  // ============================================
+  // ADMIN REAL-TIME ACTIVITY ANALYTICS API
+  // ============================================
+
+  // Get real-time activity overview
+  app.get("/api/admin/activity/overview", requireAdmin, async (req, res) => {
+    try {
+      const now = new Date();
+      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+      const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      // Active users (sessions in last 5 minutes)
+      const activeNow = await db.execute(
+        sql`SELECT COUNT(DISTINCT user_id) as count FROM user_sessions 
+            WHERE is_active = true AND last_seen_at > ${fiveMinutesAgo}`
+      );
+
+      // Sessions in last hour
+      const lastHourSessions = await db.execute(
+        sql`SELECT COUNT(*) as count FROM user_sessions 
+            WHERE session_started_at > ${oneHourAgo}`
+      );
+
+      // Page views today
+      const todayPageViews = await db.execute(
+        sql`SELECT COUNT(*) as count FROM page_views 
+            WHERE view_started_at > ${oneDayAgo}`
+      );
+
+      // Events today
+      const todayEvents = await db.execute(
+        sql`SELECT COUNT(*) as count FROM activity_events 
+            WHERE occurred_at > ${oneDayAgo}`
+      );
+
+      // Average session duration (last 24 hours)
+      const avgDuration = await db.execute(
+        sql`SELECT AVG(total_duration_seconds) as avg_seconds 
+            FROM user_sessions 
+            WHERE session_ended_at IS NOT NULL AND session_ended_at > ${oneDayAgo}`
+      );
+
+      // Top pages today
+      const topPages = await db.execute(
+        sql`SELECT page_path, COUNT(*) as views 
+            FROM page_views 
+            WHERE view_started_at > ${oneDayAgo}
+            GROUP BY page_path 
+            ORDER BY views DESC 
+            LIMIT 10`
+      );
+
+      // Device breakdown
+      const deviceBreakdown = await db.execute(
+        sql`SELECT device_type, COUNT(*) as count 
+            FROM user_sessions 
+            WHERE session_started_at > ${sevenDaysAgo} AND device_type IS NOT NULL
+            GROUP BY device_type`
+      );
+
+      // Browser breakdown
+      const browserBreakdown = await db.execute(
+        sql`SELECT browser_name, COUNT(*) as count 
+            FROM user_sessions 
+            WHERE session_started_at > ${sevenDaysAgo} AND browser_name IS NOT NULL
+            GROUP BY browser_name 
+            ORDER BY count DESC 
+            LIMIT 5`
+      );
+
+      // Geographic distribution
+      const geoDistribution = await db.execute(
+        sql`SELECT country, country_code, COUNT(*) as sessions 
+            FROM user_sessions 
+            WHERE session_started_at > ${sevenDaysAgo} AND country IS NOT NULL
+            GROUP BY country, country_code 
+            ORDER BY sessions DESC 
+            LIMIT 10`
+      );
+
+      // Hourly activity (last 24 hours)
+      const hourlyActivity = await db.execute(
+        sql`SELECT 
+              DATE_TRUNC('hour', view_started_at) as hour,
+              COUNT(*) as page_views
+            FROM page_views 
+            WHERE view_started_at > ${oneDayAgo}
+            GROUP BY hour 
+            ORDER BY hour`
+      );
+
+      // Event type breakdown
+      const eventBreakdown = await db.execute(
+        sql`SELECT event_type, event_category, COUNT(*) as count 
+            FROM activity_events 
+            WHERE occurred_at > ${oneDayAgo}
+            GROUP BY event_type, event_category 
+            ORDER BY count DESC 
+            LIMIT 10`
+      );
+
+      // Tool usage
+      const toolUsage = await db.execute(
+        sql`SELECT tool_id, tool_category, COUNT(*) as usage_count 
+            FROM activity_events 
+            WHERE occurred_at > ${sevenDaysAgo} AND tool_id IS NOT NULL
+            GROUP BY tool_id, tool_category 
+            ORDER BY usage_count DESC 
+            LIMIT 15`
+      );
+
+      res.json({
+        realtime: {
+          activeUsersNow: parseInt(activeNow.rows[0]?.count || '0'),
+          sessionsLastHour: parseInt(lastHourSessions.rows[0]?.count || '0'),
+          pageViewsToday: parseInt(todayPageViews.rows[0]?.count || '0'),
+          eventsToday: parseInt(todayEvents.rows[0]?.count || '0'),
+          avgSessionDuration: Math.round(parseFloat(avgDuration.rows[0]?.avg_seconds || '0')),
+        },
+        topPages: topPages.rows,
+        deviceBreakdown: deviceBreakdown.rows,
+        browserBreakdown: browserBreakdown.rows,
+        geoDistribution: geoDistribution.rows,
+        hourlyActivity: hourlyActivity.rows,
+        eventBreakdown: eventBreakdown.rows,
+        toolUsage: toolUsage.rows,
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Activity overview error:", error);
+      res.status(500).json({ error: "Failed to fetch activity overview" });
+    }
+  });
+
+  // Get live activity feed
+  app.get("/api/admin/activity/live-feed", requireAdmin, async (req, res) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
+      const since = req.query.since ? new Date(req.query.since as string) : new Date(Date.now() - 60 * 60 * 1000);
+
+      // Get recent page views
+      const pageViews = await db.execute(
+        sql`SELECT 
+              pv.id, pv.page_path, pv.page_title, pv.view_started_at as occurred_at,
+              pv.page_load_time_ms, pv.navigation_type,
+              u.email, u.first_name, u.last_name, u.subscription_tier,
+              us.device_type, us.browser_name, us.country, us.city,
+              'page_view' as activity_type
+            FROM page_views pv
+            JOIN users u ON pv.user_id = u.id
+            JOIN user_sessions us ON pv.session_id = us.id
+            WHERE pv.view_started_at > ${since}
+            ORDER BY pv.view_started_at DESC
+            LIMIT ${limit}`
+      );
+
+      // Get recent events
+      const events = await db.execute(
+        sql`SELECT 
+              ae.id, ae.event_type, ae.event_category, ae.event_action,
+              ae.event_label, ae.page_path, ae.tool_id, ae.occurred_at,
+              u.email, u.first_name, u.last_name, u.subscription_tier,
+              us.device_type, us.browser_name, us.country, us.city,
+              'event' as activity_type
+            FROM activity_events ae
+            JOIN users u ON ae.user_id = u.id
+            JOIN user_sessions us ON ae.session_id = us.id
+            WHERE ae.occurred_at > ${since}
+            ORDER BY ae.occurred_at DESC
+            LIMIT ${limit}`
+      );
+
+      // Merge and sort by time
+      const allActivities = [...pageViews.rows, ...events.rows]
+        .sort((a: any, b: any) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
+        .slice(0, limit);
+
+      res.json({ 
+        activities: allActivities,
+        count: allActivities.length,
+        since: since.toISOString(),
+      });
+    } catch (error) {
+      console.error("Live feed error:", error);
+      res.status(500).json({ error: "Failed to fetch live feed" });
+    }
+  });
+
+  // Get active sessions
+  app.get("/api/admin/activity/sessions", requireAdmin, async (req, res) => {
+    try {
+      const activeOnly = req.query.active !== 'false';
+      const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+      let query;
+      if (activeOnly) {
+        query = sql`SELECT 
+              us.*,
+              u.email, u.first_name, u.last_name, u.subscription_tier, u.is_admin, u.profile_image_url
+            FROM user_sessions us
+            JOIN users u ON us.user_id = u.id
+            WHERE us.is_active = true AND us.last_seen_at > ${fiveMinutesAgo}
+            ORDER BY us.last_seen_at DESC
+            LIMIT ${limit}`;
+      } else {
+        query = sql`SELECT 
+              us.*,
+              u.email, u.first_name, u.last_name, u.subscription_tier, u.is_admin, u.profile_image_url
+            FROM user_sessions us
+            JOIN users u ON us.user_id = u.id
+            ORDER BY us.session_started_at DESC
+            LIMIT ${limit}`;
+      }
+
+      const sessions = await db.execute(query);
+
+      res.json({ 
+        sessions: sessions.rows,
+        count: sessions.rows.length,
+        activeOnly,
+      });
+    } catch (error) {
+      console.error("Active sessions error:", error);
+      res.status(500).json({ error: "Failed to fetch sessions" });
+    }
+  });
+
+  // Get user journey (for specific user)
+  app.get("/api/admin/activity/journey/:userId", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
+
+      // Get user info
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get recent sessions
+      const sessions = await db.execute(
+        sql`SELECT * FROM user_sessions 
+            WHERE user_id = ${userId}
+            ORDER BY session_started_at DESC 
+            LIMIT 10`
+      );
+
+      // Get page views for these sessions
+      const pageViews = await db.execute(
+        sql`SELECT * FROM page_views 
+            WHERE user_id = ${userId}
+            ORDER BY view_started_at DESC 
+            LIMIT ${limit}`
+      );
+
+      // Get events for this user
+      const events = await db.execute(
+        sql`SELECT * FROM activity_events 
+            WHERE user_id = ${userId}
+            ORDER BY occurred_at DESC 
+            LIMIT ${limit}`
+      );
+
+      // Calculate journey stats
+      const totalSessions = await db.execute(
+        sql`SELECT COUNT(*) as count FROM user_sessions WHERE user_id = ${userId}`
+      );
+
+      const totalPageViews = await db.execute(
+        sql`SELECT COUNT(*) as count FROM page_views WHERE user_id = ${userId}`
+      );
+
+      const avgSessionDuration = await db.execute(
+        sql`SELECT AVG(total_duration_seconds) as avg_seconds 
+            FROM user_sessions 
+            WHERE user_id = ${userId} AND session_ended_at IS NOT NULL`
+      );
+
+      const mostVisitedPages = await db.execute(
+        sql`SELECT page_path, COUNT(*) as visits 
+            FROM page_views 
+            WHERE user_id = ${userId}
+            GROUP BY page_path 
+            ORDER BY visits DESC 
+            LIMIT 5`
+      );
+
+      const mostUsedTools = await db.execute(
+        sql`SELECT tool_id, tool_category, COUNT(*) as usage_count 
+            FROM activity_events 
+            WHERE user_id = ${userId} AND tool_id IS NOT NULL
+            GROUP BY tool_id, tool_category 
+            ORDER BY usage_count DESC 
+            LIMIT 5`
+      );
+
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          subscriptionTier: user.subscriptionTier,
+          createdAt: user.createdAt,
+          lastActivityAt: user.lastActivityAt,
+        },
+        stats: {
+          totalSessions: parseInt(totalSessions.rows[0]?.count || '0'),
+          totalPageViews: parseInt(totalPageViews.rows[0]?.count || '0'),
+          avgSessionDuration: Math.round(parseFloat(avgSessionDuration.rows[0]?.avg_seconds || '0')),
+        },
+        mostVisitedPages: mostVisitedPages.rows,
+        mostUsedTools: mostUsedTools.rows,
+        sessions: sessions.rows,
+        recentPageViews: pageViews.rows,
+        recentEvents: events.rows,
+      });
+    } catch (error) {
+      console.error("User journey error:", error);
+      res.status(500).json({ error: "Failed to fetch user journey" });
+    }
+  });
+
+  // Get all users with last activity for Active Users view
+  app.get("/api/admin/users/activity", requireAdmin, async (req, res) => {
+    try {
+      const result = await db.execute(
+        sql`SELECT 
+              u.id, u.email, u.first_name, u.last_name, u.subscription_tier,
+              u.is_email_verified, u.is_admin, u.created_at, u.last_activity_at,
+              u.profile_image_url,
+              (SELECT COUNT(*) FROM business_plans WHERE user_id = u.id) as plan_count,
+              (SELECT session_started_at FROM user_sessions 
+               WHERE user_id = u.id 
+               ORDER BY session_started_at DESC LIMIT 1) as last_session_started,
+              (SELECT last_seen_at FROM user_sessions 
+               WHERE user_id = u.id AND is_active = true
+               ORDER BY last_seen_at DESC LIMIT 1) as last_seen_at,
+              (SELECT device_type FROM user_sessions 
+               WHERE user_id = u.id 
+               ORDER BY session_started_at DESC LIMIT 1) as last_device,
+              (SELECT country FROM user_sessions 
+               WHERE user_id = u.id 
+               ORDER BY session_started_at DESC LIMIT 1) as last_country,
+              (SELECT current_page FROM user_sessions 
+               WHERE user_id = u.id AND is_active = true
+               ORDER BY last_seen_at DESC LIMIT 1) as current_page,
+              CASE WHEN EXISTS (
+                SELECT 1 FROM user_sessions 
+                WHERE user_id = u.id AND is_active = true 
+                AND last_seen_at > NOW() - INTERVAL '5 minutes'
+              ) THEN true ELSE false END as is_online
+            FROM users u
+            ORDER BY u.last_activity_at DESC NULLS LAST`
+      );
+
+      res.json({ users: result.rows });
+    } catch (error) {
+      console.error("Users activity error:", error);
+      res.status(500).json({ error: "Failed to fetch users activity" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
