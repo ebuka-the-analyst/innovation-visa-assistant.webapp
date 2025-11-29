@@ -2367,10 +2367,10 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
       // Calculate real KPI metrics
       const planCompletionRate = totalPlans > 0 ? Math.round((completedPlans / totalPlans) * 100) : 0;
       
-      // Get real tool adoption data from tool_usage_analytics
+      // Get real tool adoption data from tool_analytics
       const toolUsageQuery = await db.execute(sql`
         SELECT COUNT(DISTINCT tool_id) as unique_tools, COUNT(*) as total_uses
-        FROM tool_usage_analytics
+        FROM tool_analytics
         WHERE created_at >= NOW() - INTERVAL '30 days'
       `);
       const toolStats = toolUsageQuery.rows[0] as any || { unique_tools: 0, total_uses: 0 };
@@ -2382,7 +2382,7 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
       const avgToolsQuery = await db.execute(sql`
         SELECT AVG(tool_count) as avg_tools FROM (
           SELECT user_id, COUNT(DISTINCT tool_id) as tool_count
-          FROM tool_usage_analytics
+          FROM tool_analytics
           WHERE created_at >= NOW() - INTERVAL '30 days'
           GROUP BY user_id
         ) subquery
