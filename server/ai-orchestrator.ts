@@ -201,6 +201,56 @@ export async function orchestrateChat(
   }
 }
 
+// Helper functions for retry logic
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number = 30000): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error: any) {
+    clearTimeout(id);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout');
+    }
+    throw error;
+  }
+}
+
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 2,
+  initialDelayMs: number = 1000,
+  operationName: string = "operation"
+): Promise<T> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      const delay = initialDelayMs * Math.pow(2, attempt);
+      console.log(`[AI Orchestrator] ${operationName} attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+      
+      if (attempt < maxRetries - 1) {
+        await sleep(delay);
+      }
+    }
+  }
+  
+  throw lastError || new Error(`${operationName} failed after ${maxRetries} attempts`);
+}
+
 // Regular chat without action capabilities (for unauthenticated users or fallback)
 async function regularChat(
   userMessage: string,
@@ -217,79 +267,149 @@ RULES:
 
 Give direct, helpful answers.`;
 
-  // Try Gemini first (PRIMARY - saves costs)
+  // Try Gemini first (PRIMARY - saves costs) with retry
   try {
-    const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-    const geminiBaseURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "https://generativelanguage.googleapis.com";
-    
-    console.log("[AI Orchestrator] Attempting Gemini for regular chat (PRIMARY)");
-    
-    const response = await fetch(`${geminiBaseURL}/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: systemPrompt }],
+    return await retryWithBackoff(async () => {
+      const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      const geminiBaseURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "https://generativelanguage.googleapis.com";
+      
+      console.log("[AI Orchestrator] Attempting Gemini for regular chat (PRIMARY)");
+      
+      const response = await fetchWithTimeout(
+        `${geminiBaseURL}/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: {
+              parts: [{ text: systemPrompt }],
+            },
+            contents: [
+              ...conversationHistory.map((msg) => ({
+                role: msg.role === "user" ? "user" : "model",
+                parts: [{ text: msg.content }],
+              })),
+              {
+                role: "user",
+                parts: [{ text: userMessage }],
+              },
+            ],
+            generationConfig: {
+              maxOutputTokens: 500,
+              temperature: 0.7,
+            },
+          }),
         },
-        contents: [
-          ...conversationHistory.map((msg) => ({
-            role: msg.role === "user" ? "user" : "model",
-            parts: [{ text: msg.content }],
-          })),
-          {
-            role: "user",
-            parts: [{ text: userMessage }],
-          },
-        ],
-        generationConfig: {
-          maxOutputTokens: 500,
-          temperature: 0.7,
-        },
-      }),
-    });
+        25000
+      );
 
-    if (response.ok) {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Gemini error: ${response.status} - ${errorText}`);
+      }
+
       const data = await response.json() as any;
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (content) {
-        return {
-          response: content,
-          provider: "Gemini"
-        };
+      
+      if (!content) {
+        throw new Error("Empty response from Gemini");
       }
-    }
+      
+      return {
+        response: content,
+        provider: "Gemini"
+      };
+    }, 2, 1000, "Gemini regular chat");
   } catch (error: any) {
-    console.error("[AI Orchestrator] Gemini failed for regular chat:", error.message);
+    console.error("[AI Orchestrator] Gemini failed for regular chat after retries:", error.message);
   }
 
-  // Fallback to OpenAI
+  // Fallback to OpenAI with retry
   try {
-    console.log("[AI Orchestrator] Falling back to OpenAI for regular chat");
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...conversationHistory.map(msg => ({
-          role: msg.role as "user" | "assistant",
-          content: msg.content
-        })),
-        { role: "user", content: userMessage }
-      ],
-      max_tokens: 500,
-      temperature: 0.7
-    });
+    return await retryWithBackoff(async () => {
+      console.log("[AI Orchestrator] Falling back to OpenAI for regular chat");
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...conversationHistory.map(msg => ({
+            role: msg.role as "user" | "assistant",
+            content: msg.content
+          })),
+          { role: "user", content: userMessage }
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      });
 
-    return {
-      response: response.choices[0]?.message?.content || "I apologize, I couldn't process your request.",
-      provider: "GPT-4o"
-    };
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error("Empty response from OpenAI");
+      }
+      
+      return {
+        response: content,
+        provider: "GPT-4o"
+      };
+    }, 2, 1000, "OpenAI regular chat");
   } catch (error) {
-    console.error("[Regular Chat] Error:", error);
+    console.error("[Regular Chat] All providers failed:", error);
+    return getIntelligentFallback(userMessage);
+  }
+}
+
+// Intelligent fallback responses when all AI providers fail
+function getIntelligentFallback(userMessage: string): OrchestratorResult {
+  const lowerMessage = userMessage.toLowerCase();
+  
+  if (lowerMessage.includes("requirement") || lowerMessage.includes("eligible") || lowerMessage.includes("qualify")) {
     return {
-      response: "I apologize for the technical difficulty. Please try again shortly.",
+      response: `For Innovator Founder Visa requirements, you need:
+- An innovative, viable, and scalable business idea
+- Endorsement from an approved endorsing body
+- At least £50,000 investment funds (if required)
+- English proficiency (B2 level)
+- Maintenance funds (£1,270 for 28 days)
+
+Visit gov.uk/innovation-visa for complete details.`,
       provider: "Fallback"
     };
   }
+  
+  if (lowerMessage.includes("endorser") || lowerMessage.includes("endorsement")) {
+    return {
+      response: `You need endorsement from a Home Office approved body. They assess if your business is:
+- Innovative (new or significantly different)
+- Viable (skills and market potential)
+- Scalable (potential for growth)
+
+Find approved bodies at gov.uk.`,
+      provider: "Fallback"
+    };
+  }
+  
+  if (lowerMessage.includes("cost") || lowerMessage.includes("fee") || lowerMessage.includes("how much")) {
+    return {
+      response: `Innovator Founder Visa costs approximately:
+- Application: £1,036 (outside UK) or £1,292 (in UK)
+- Healthcare surcharge: £1,035/year
+- Endorsement fees vary by body
+
+Check gov.uk for current fees.`,
+      provider: "Fallback"
+    };
+  }
+  
+  return {
+    response: `I'm experiencing a brief connection issue. Please try again in a moment.
+
+For immediate help, visit gov.uk/innovation-visa or ask me about:
+- Visa requirements
+- Endorsing bodies
+- Application fees
+- Processing times`,
+    provider: "Fallback"
+  };
 }
 
 // Confirm and execute a pending action
