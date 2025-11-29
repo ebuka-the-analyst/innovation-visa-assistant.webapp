@@ -8168,6 +8168,20 @@ Return a JSON object with:
       await db.execute(sql`DELETE FROM admin_notifications WHERE created_by = ${userId}`);
       await db.execute(sql`DELETE FROM marketing_campaigns WHERE created_by = ${userId}`);
       
+      // Lawyer review tables
+      await db.execute(sql`DELETE FROM lawyer_review_comments WHERE resolved_by = ${userId}`);
+      await db.execute(sql`DELETE FROM lawyer_document_reviews WHERE user_id = ${userId}`);
+      
+      // Promo codes (owner and creator)
+      await db.execute(sql`UPDATE promo_codes SET owner_id = NULL WHERE owner_id = ${userId}`);
+      await db.execute(sql`UPDATE promo_codes SET created_by = NULL WHERE created_by = ${userId}`);
+      
+      // Referral events by referrer
+      await db.execute(sql`DELETE FROM referral_events WHERE referrer_id = ${userId}`);
+      
+      // Referrals table (may have user_id column)
+      await db.execute(sql`DELETE FROM referrals WHERE user_id = ${userId}`);
+      
       // Delete business plans
       await db.delete(businessPlans).where(eq(businessPlans.userId, userId));
       
