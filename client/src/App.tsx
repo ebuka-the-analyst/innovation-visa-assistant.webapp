@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { Switch, Route, useLocation, Link } from "wouter";
 import { queryClient, apiRequest } from "./lib/queryClient";
 import { QueryClientProvider, useQuery, useMutation } from "@tanstack/react-query";
@@ -15,6 +15,7 @@ import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
 import { useSpotlightTour } from "@/components/SpotlightTour";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { initActivityTracking, trackRouteChange } from "@/lib/activityTracker";
 
 // Lazy load ChatBot and other heavy components
 const ChatBot = lazy(() => import("@/components/ChatBot"));
@@ -331,10 +332,34 @@ function UnifiedHeader() {
   );
 }
 
+function useActivityTracker() {
+  const [location] = useLocation();
+  const prevLocationRef = useRef<string | null>(null);
+  const { data: user } = useQuery<{ id: string }>({
+    queryKey: ["/api/user"],
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (user?.id) {
+      initActivityTracking();
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id && location !== prevLocationRef.current) {
+      trackRouteChange(location, document.title);
+      prevLocationRef.current = location;
+    }
+  }, [location, user?.id]);
+}
+
 function AppLayout() {
   const [location] = useLocation();
   const isPublicRoute = SIDEBAR_HIDDEN_ROUTES.includes(location);
   const isCustomLayoutRoute = CUSTOM_LAYOUT_ROUTES.includes(location);
+
+  useActivityTracker();
 
   if (isPublicRoute) {
     return (
