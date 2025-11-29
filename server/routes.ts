@@ -2716,10 +2716,25 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
       const total = allUsers.length;
       const users = allUsers.slice(offset, offset + limitNum);
       
+      // Get last activity for all users from user_sessions table
+      const lastActivityQuery = await db.execute(sql`
+        SELECT user_id, MAX(last_seen_at) as last_activity_at
+        FROM user_sessions
+        GROUP BY user_id
+      `);
+      
+      const lastActivityMap = new Map<string, Date>();
+      for (const row of lastActivityQuery.rows as any[]) {
+        if (row.user_id && row.last_activity_at) {
+          lastActivityMap.set(row.user_id, new Date(row.last_activity_at));
+        }
+      }
+      
       // Remove passwords and map isEmailVerified to isVerified for frontend compatibility
       const safeUsers = users.map(({ password, ...user }) => ({
         ...user,
         isVerified: user.isEmailVerified ?? false,
+        lastActivityAt: lastActivityMap.get(user.id) || null,
       }));
       
       res.json({

@@ -4727,6 +4727,7 @@ export default function AdminDashboard() {
                                 <TableHead>Status</TableHead>
                                 <TableHead>Plans</TableHead>
                                 <TableHead>Joined</TableHead>
+                                <TableHead>Last Activity</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                               </TableRow>
                             </TableHeader>
@@ -4781,6 +4782,24 @@ export default function AdminDashboard() {
                                   </TableCell>
                                   <TableCell className="text-sm text-muted-foreground">
                                     {format(new Date(user.createdAt), 'MMM dd, yyyy')}
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    {(user as any).lastActivityAt ? (
+                                      <div className="flex items-center gap-1.5">
+                                        <div className={`h-2 w-2 rounded-full ${
+                                          new Date((user as any).lastActivityAt) > new Date(Date.now() - 5 * 60 * 1000)
+                                            ? 'bg-green-500 animate-pulse'
+                                            : new Date((user as any).lastActivityAt) > new Date(Date.now() - 60 * 60 * 1000)
+                                            ? 'bg-yellow-500'
+                                            : 'bg-muted-foreground'
+                                        }`} />
+                                        <span className="text-muted-foreground">
+                                          {formatDistance(new Date((user as any).lastActivityAt), new Date(), { addSuffix: true })}
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      <span className="text-muted-foreground/50">No activity</span>
+                                    )}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <DropdownMenu>
