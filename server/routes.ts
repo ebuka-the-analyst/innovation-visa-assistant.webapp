@@ -7323,15 +7323,15 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
         }
       }
 
-      // Fallback to Gemini if OpenAI failed or unavailable
-      const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      // Fallback to Gemini if OpenAI failed or unavailable - prefer user's GEMINI_API_KEY
+      const geminiKey = process.env.GEMINI_API_KEY || process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
       if (!responseText && geminiKey) {
         try {
           const { GoogleGenAI } = await import("@google/genai");
           const genai = new GoogleGenAI({ apiKey: geminiKey });
           
           const result = await genai.models.generateContent({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash",
             contents: `${systemPrompt}\n\nUser query: ${userPrompt}`
           });
           
@@ -7478,8 +7478,8 @@ Reference actual visa requirements where relevant.`;
         console.log("[Autopilot] No OpenAI key available");
       }
 
-      // Fallback to Gemini
-      const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      // Fallback to Gemini - prefer user's GEMINI_API_KEY over integration key
+      const geminiKey = process.env.GEMINI_API_KEY || process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
       if (!output && geminiKey) {
         try {
           console.log(`[Autopilot] Attempting Gemini fallback for step: ${stepId}`);
