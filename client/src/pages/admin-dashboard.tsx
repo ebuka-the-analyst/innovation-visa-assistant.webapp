@@ -119,7 +119,12 @@ import {
   FileSearch,
   UserCog,
   BadgeCheck,
-  ShieldOff
+  ShieldOff,
+  Microscope,
+  Brain,
+  TrendingUp as TrendingUpIcon,
+  Gauge,
+  FileBarChart
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Link } from "wouter";
@@ -622,6 +627,7 @@ export default function AdminDashboard() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [viewingUserActivity, setViewingUserActivity] = useState<User | null>(null);
   const [exportingUser, setExportingUser] = useState<User | null>(null);
+  const [analyzingUser, setAnalyzingUser] = useState<User | null>(null);
   
   // Error logging states
   const [selectedError, setSelectedError] = useState<any>(null);
@@ -760,6 +766,18 @@ export default function AdminDashboard() {
   const { data: allUsersData } = useQuery<{ users: User[]; total: number }>({
     queryKey: ['/api/admin/users', { page: 1, pageSize: 1000 }],
     enabled: !!user?.isAdmin && activeSection === 'overview',
+  });
+
+  // User analysis query (PhD-level comprehensive analysis)
+  const { data: userAnalysis, isLoading: userAnalysisLoading, refetch: refetchUserAnalysis } = useQuery<any>({
+    queryKey: ['/api/admin/users', analyzingUser?.id, 'analysis'],
+    queryFn: async () => {
+      if (!analyzingUser?.id) return null;
+      const res = await fetch(`/api/admin/users/${analyzingUser.id}/analysis`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch analysis');
+      return res.json();
+    },
+    enabled: !!analyzingUser?.id && !!user?.isAdmin,
   });
 
   // Count real (non-demo) users from all users data
@@ -4404,6 +4422,10 @@ export default function AdminDashboard() {
                                         <DropdownMenuItem onClick={() => setViewingUserActivity(user)}>
                                           <Activity className="h-4 w-4 mr-2 text-green-500" />
                                           View Activity
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setAnalyzingUser(user)}>
+                                          <Microscope className="h-4 w-4 mr-2 text-purple-500" />
+                                          Deep Analysis
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => forceLogoutMutation.mutate(user.id)}>
                                           <LogOut className="h-4 w-4 mr-2 text-orange-500" />
@@ -12914,6 +12936,336 @@ export default function AdminDashboard() {
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setViewingUserDetails(null)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deep User Analysis Modal */}
+        <Dialog open={!!analyzingUser} onOpenChange={(open) => !open && setAnalyzingUser(null)}>
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Microscope className="h-5 w-5 text-purple-500" />
+                Comprehensive User Analysis
+              </DialogTitle>
+              <DialogDescription>
+                In-depth analysis of user engagement, behavior, and platform usage
+              </DialogDescription>
+            </DialogHeader>
+
+            <ScrollArea className="flex-1 -mx-6 px-6">
+              {userAnalysisLoading ? (
+                <div className="space-y-4 py-4">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-48 w-full" />
+                  <Skeleton className="h-32 w-full" />
+                </div>
+              ) : userAnalysis ? (
+                <div className="space-y-6 py-4">
+                  {/* User Identity Section */}
+                  <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/30">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={userAnalysis.user.avatar} />
+                      <AvatarFallback className="text-lg">
+                        {userAnalysis.user.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold">{userAnalysis.user.name || 'Unknown User'}</h3>
+                      <p className="text-muted-foreground">{userAnalysis.user.email}</p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <Badge variant="outline" className="capitalize">{userAnalysis.user.tier}</Badge>
+                        {userAnalysis.user.isVerified && <Badge className="bg-green-500">Verified</Badge>}
+                        {userAnalysis.user.isAdmin && <Badge className="bg-purple-500">Admin</Badge>}
+                        {userAnalysis.user.isBanned && <Badge variant="destructive">Banned</Badge>}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Member since</p>
+                      <p className="font-medium">{format(new Date(userAnalysis.user.createdAt), 'MMM dd, yyyy')}</p>
+                      <p className="text-sm text-muted-foreground mt-2">Last active</p>
+                      <p className="font-medium">{formatDistance(new Date(userAnalysis.activity.lastActive), new Date(), { addSuffix: true })}</p>
+                    </div>
+                  </div>
+
+                  {/* Key Metrics Grid */}
+                  <div className="grid grid-cols-4 gap-4">
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                        <Gauge className="h-4 w-4" />
+                        <span className="text-xs font-medium">Engagement Score</span>
+                      </div>
+                      <div className="text-2xl font-bold">{userAnalysis.insights.engagementScore}/100</div>
+                      <Progress value={userAnalysis.insights.engagementScore} className="h-1.5 mt-2" />
+                    </Card>
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                        <FileText className="h-4 w-4" />
+                        <span className="text-xs font-medium">Business Plans</span>
+                      </div>
+                      <div className="text-2xl font-bold">{userAnalysis.businessPlans.total}</div>
+                      <p className="text-xs text-muted-foreground mt-1">Created</p>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                        <Wallet className="h-4 w-4" />
+                        <span className="text-xs font-medium">Credits</span>
+                      </div>
+                      <div className="text-2xl font-bold">{userAnalysis.credits.current}</div>
+                      <p className="text-xs text-muted-foreground mt-1">Available ({userAnalysis.credits.used} used)</p>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                        <PoundSterling className="h-4 w-4" />
+                        <span className="text-xs font-medium">Lifetime Value</span>
+                      </div>
+                      <div className="text-2xl font-bold">£{userAnalysis.financials.lifetimeValue?.toFixed(2) || '0.00'}</div>
+                      <p className="text-xs text-muted-foreground mt-1">{userAnalysis.financials.transactionCount} transactions</p>
+                    </Card>
+                  </div>
+
+                  {/* Risk & Insights */}
+                  <Card className="p-4">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <Brain className="h-4 w-4 text-purple-500" />
+                      Insights & Recommendations
+                    </h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Churn Risk</p>
+                        <Badge variant={
+                          userAnalysis.insights.riskLevel === 'high' ? 'destructive' :
+                          userAnalysis.insights.riskLevel === 'medium' ? 'secondary' : 'default'
+                        } className={userAnalysis.insights.riskLevel === 'low' ? 'bg-green-500' : ''}>
+                          {userAnalysis.insights.riskLevel.toUpperCase()}
+                        </Badge>
+                        <p className="text-xs text-muted-foreground mt-1">{userAnalysis.insights.churnRisk}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Upgrade Readiness</p>
+                        <p className="font-medium">{userAnalysis.insights.upgradeReadiness}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Recommended Actions</p>
+                        {userAnalysis.insights.recommendedActions.length > 0 ? (
+                          <ul className="text-sm space-y-1">
+                            {userAnalysis.insights.recommendedActions.map((action: string, i: number) => (
+                              <li key={i} className="flex items-center gap-1">
+                                <ArrowRight className="h-3 w-3 text-primary" />
+                                {action}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">No actions needed</p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Tool Usage */}
+                  <Card className="p-4">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <Target className="h-4 w-4 text-blue-500" />
+                      Tool Engagement
+                    </h4>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-muted/30 rounded-lg">
+                        <div className="text-2xl font-bold">{userAnalysis.toolEngagement.uniqueToolsUsed}</div>
+                        <p className="text-xs text-muted-foreground">Unique Tools</p>
+                      </div>
+                      <div className="text-center p-3 bg-muted/30 rounded-lg">
+                        <div className="text-2xl font-bold">{userAnalysis.toolEngagement.totalToolInteractions}</div>
+                        <p className="text-xs text-muted-foreground">Total Interactions</p>
+                      </div>
+                      <div className="text-center p-3 bg-muted/30 rounded-lg">
+                        <div className="text-2xl font-bold">{userAnalysis.aiInteractions.total}</div>
+                        <p className="text-xs text-muted-foreground">AI Interactions</p>
+                      </div>
+                    </div>
+                    {userAnalysis.toolEngagement.topTools.length > 0 && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Top Tools Used</p>
+                        <div className="flex flex-wrap gap-2">
+                          {userAnalysis.toolEngagement.topTools.slice(0, 6).map((tool: any, i: number) => (
+                            <Badge key={i} variant="outline">
+                              {tool.tool_id} ({tool.uses}x)
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+
+                  {/* Business Plans Detail */}
+                  {userAnalysis.businessPlans.plans.length > 0 && (
+                    <Card className="p-4">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-green-500" />
+                        Business Plans
+                      </h4>
+                      <div className="space-y-2">
+                        {userAnalysis.businessPlans.plans.map((plan: any) => (
+                          <div key={plan.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                            <div>
+                              <p className="font-medium">{plan.name || 'Untitled Plan'}</p>
+                              <p className="text-xs text-muted-foreground">Created {format(new Date(plan.createdAt), 'MMM dd, yyyy')}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="capitalize">{plan.status || 'draft'}</Badge>
+                              <Progress value={plan.progress || 0} className="w-16 h-1.5" />
+                              <span className="text-xs text-muted-foreground">{plan.progress || 0}%</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  )}
+
+                  {/* Support & Security */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Card className="p-4">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4 text-orange-500" />
+                        Support History
+                      </h4>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="p-2 bg-muted/30 rounded">
+                          <div className="text-xl font-bold">{userAnalysis.support.totalTickets}</div>
+                          <p className="text-xs text-muted-foreground">Total</p>
+                        </div>
+                        <div className="p-2 bg-muted/30 rounded">
+                          <div className="text-xl font-bold text-orange-500">{userAnalysis.support.openTickets}</div>
+                          <p className="text-xs text-muted-foreground">Open</p>
+                        </div>
+                        <div className="p-2 bg-muted/30 rounded">
+                          <div className="text-xl font-bold text-green-500">{userAnalysis.support.resolvedTickets}</div>
+                          <p className="text-xs text-muted-foreground">Resolved</p>
+                        </div>
+                      </div>
+                    </Card>
+                    <Card className="p-4">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-red-500" />
+                        Security Events
+                      </h4>
+                      <div className="text-center p-2 bg-muted/30 rounded">
+                        <div className="text-xl font-bold">{userAnalysis.security.totalEvents}</div>
+                        <p className="text-xs text-muted-foreground">Total Events</p>
+                      </div>
+                      {userAnalysis.security.events.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {userAnalysis.security.events.slice(0, 3).map((event: any, i: number) => (
+                            <div key={i} className="flex justify-between text-xs">
+                              <span>{event.event_type}</span>
+                              <Badge variant={event.severity === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                                {event.count}x
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  </div>
+
+                  {/* Referrals & Files */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Card className="p-4">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <UserPlus className="h-4 w-4 text-blue-500" />
+                        Referrals
+                      </h4>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="p-2 bg-muted/30 rounded">
+                          <div className="text-xl font-bold">{userAnalysis.referrals.codesCreated}</div>
+                          <p className="text-xs text-muted-foreground">Codes</p>
+                        </div>
+                        <div className="p-2 bg-muted/30 rounded">
+                          <div className="text-xl font-bold">{userAnalysis.referrals.successfulReferrals}</div>
+                          <p className="text-xs text-muted-foreground">Referrals</p>
+                        </div>
+                        <div className="p-2 bg-muted/30 rounded">
+                          <div className="text-xl font-bold">£{userAnalysis.referrals.totalRewards?.toFixed(0) || 0}</div>
+                          <p className="text-xs text-muted-foreground">Rewards</p>
+                        </div>
+                      </div>
+                    </Card>
+                    <Card className="p-4">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <Upload className="h-4 w-4 text-purple-500" />
+                        Files & Documents
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2 text-center">
+                        <div className="p-2 bg-muted/30 rounded">
+                          <div className="text-xl font-bold">{userAnalysis.files.totalUploaded}</div>
+                          <p className="text-xs text-muted-foreground">Files</p>
+                        </div>
+                        <div className="p-2 bg-muted/30 rounded">
+                          <div className="text-xl font-bold">
+                            {userAnalysis.files.totalSize > 0 
+                              ? `${(userAnalysis.files.totalSize / 1024 / 1024).toFixed(1)}MB`
+                              : '0'}
+                          </div>
+                          <p className="text-xs text-muted-foreground">Total Size</p>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Feedback */}
+                  {userAnalysis.feedback.submissions.length > 0 && (
+                    <Card className="p-4">
+                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <Star className="h-4 w-4 text-yellow-500" />
+                        User Feedback
+                        {userAnalysis.feedback.averageRating && (
+                          <Badge variant="secondary" className="ml-2">
+                            Avg: {userAnalysis.feedback.averageRating.toFixed(1)}/5
+                          </Badge>
+                        )}
+                      </h4>
+                      <div className="space-y-2">
+                        {userAnalysis.feedback.submissions.slice(0, 3).map((fb: any, i: number) => (
+                          <div key={i} className="p-2 bg-muted/30 rounded">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="flex">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                  <Star 
+                                    key={s} 
+                                    className={`h-3 w-3 ${s <= fb.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted'}`} 
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(fb.created_at), 'MMM dd, yyyy')}
+                              </span>
+                            </div>
+                            {fb.comment && <p className="text-sm">{fb.comment}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  )}
+
+                  <p className="text-xs text-muted-foreground text-center">
+                    Analysis generated at {format(new Date(userAnalysis.generatedAt), 'PPpp')}
+                  </p>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">
+                  No analysis data available
+                </div>
+              )}
+            </ScrollArea>
+
+            <DialogFooter className="border-t pt-4 mt-2">
+              <Button variant="outline" onClick={() => refetchUserAnalysis()}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <Button variant="outline" onClick={() => setAnalyzingUser(null)}>
                 Close
               </Button>
             </DialogFooter>
