@@ -116,6 +116,7 @@ import {
   FileSearch,
   MessageSquare,
   CheckSquare,
+  Star,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
@@ -208,6 +209,13 @@ const menuGroups = [
     items: [
       { id: "comms-emails", label: "Email Analytics", icon: Mail, badge: null },
       { id: "comms-notifications", label: "Notifications", icon: Bell, badge: null },
+    ]
+  },
+  {
+    label: "User Feedback",
+    items: [
+      { id: "feedback-overview", label: "Feedback Analytics", icon: Star, badge: null },
+      { id: "feedback-responses", label: "All Responses", icon: MessageSquare, badge: null },
     ]
   },
   {

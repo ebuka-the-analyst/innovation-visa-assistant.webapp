@@ -1209,6 +1209,29 @@ export default function AdminDashboard() {
     },
   });
 
+  // Site Feedback Analytics query
+  const { data: feedbackData } = useQuery<{
+    feedback: Array<{
+      id: string;
+      userId: string | null;
+      rating: number;
+      comment: string | null;
+      pageUrl: string | null;
+      timeSpentMinutes: number | null;
+      userEmail: string | null;
+      userName: string | null;
+      userTier: string | null;
+      browserInfo: string | null;
+      screenSize: string | null;
+      referrer: string | null;
+      createdAt: string;
+    }>;
+  }>({
+    queryKey: ['/api/admin/feedback'],
+    enabled: !!user?.isAdmin && activeSection.startsWith('feedback'),
+    refetchInterval: 30000,
+  });
+
   // Refresh countdown timer
   useEffect(() => {
     if (overviewData?.lastUpdated) {
@@ -1945,6 +1968,8 @@ export default function AdminDashboard() {
       'logs-security': 'Security Events',
       'comms-emails': 'Email Analytics',
       'comms-notifications': 'Notification Center',
+      'feedback-overview': 'Feedback Analytics',
+      'feedback-responses': 'All Feedback Responses',
       'referrals-overview': 'Referral Programme Overview',
       'referrals-codes': 'Referral Codes Management',
       'referrals-rewards': 'Pending Rewards',
@@ -8576,6 +8601,290 @@ export default function AdminDashboard() {
                                   </motion.div>
                                 ))}
                               </div>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+                    </motion.div>
+                  </div>
+                )}
+
+                {/* User Feedback Section */}
+                {activeSection.startsWith('feedback') && (
+                  <div className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="space-y-6"
+                    >
+                      {/* Feedback Overview */}
+                      {activeSection === 'feedback-overview' && (
+                        <>
+                          {/* Summary Stats */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            {(() => {
+                              const feedback = feedbackData?.feedback || [];
+                              const totalResponses = feedback.length;
+                              const avgRating = totalResponses > 0 
+                                ? (feedback.reduce((sum, f) => sum + f.rating, 0) / totalResponses).toFixed(2)
+                                : '0';
+                              const fiveStars = feedback.filter(f => f.rating === 5).length;
+                              const fourStars = feedback.filter(f => f.rating === 4).length;
+                              const loggedInUsers = feedback.filter(f => f.userId).length;
+                              
+                              return [
+                                { label: 'Total Responses', value: totalResponses, icon: MessageSquare, color: 'blue' },
+                                { label: 'Avg Rating', value: `${avgRating}/5`, icon: Star, color: 'amber' },
+                                { label: '5 Stars', value: fiveStars, icon: Star, color: 'green' },
+                                { label: '4 Stars', value: fourStars, icon: Star, color: 'yellow' },
+                                { label: 'Logged-in Users', value: loggedInUsers, icon: Users, color: 'purple' },
+                              ].map((stat, index) => (
+                                <motion.div
+                                  key={stat.label}
+                                  initial={{ opacity: 0, scale: 0.9 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ delay: index * 0.1 }}
+                                >
+                                  <Card className="hover-elevate">
+                                    <CardContent className="pt-6">
+                                      <div className="flex items-center justify-between mb-3">
+                                        <stat.icon className={`h-6 w-6 text-${stat.color}-500`} />
+                                      </div>
+                                      <p className="text-3xl font-bold">{stat.value}</p>
+                                      <p className="text-sm text-muted-foreground">{stat.label}</p>
+                                    </CardContent>
+                                  </Card>
+                                </motion.div>
+                              ));
+                            })()}
+                          </div>
+
+                          {/* Rating Distribution Chart */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>Rating Distribution</CardTitle>
+                                <CardDescription>Breakdown by star rating</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-4">
+                                  {[5, 4, 3, 2, 1].map((rating) => {
+                                    const feedback = feedbackData?.feedback || [];
+                                    const count = feedback.filter(f => f.rating === rating).length;
+                                    const total = feedback.length || 1;
+                                    const percent = Math.round((count / total) * 100);
+                                    const colors: Record<number, string> = {
+                                      5: '#22c55e',
+                                      4: '#84cc16',
+                                      3: '#eab308',
+                                      2: '#f97316',
+                                      1: '#ef4444'
+                                    };
+                                    return (
+                                      <div key={rating} className="flex items-center gap-4">
+                                        <div className="flex items-center gap-1 w-20">
+                                          {Array.from({ length: rating }).map((_, i) => (
+                                            <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                                          ))}
+                                        </div>
+                                        <div className="flex-1">
+                                          <div className="relative h-4 rounded-full bg-muted overflow-hidden">
+                                            <motion.div
+                                              className="absolute inset-y-0 left-0 rounded-full"
+                                              style={{ backgroundColor: colors[rating] }}
+                                              initial={{ width: 0 }}
+                                              animate={{ width: `${percent}%` }}
+                                              transition={{ duration: 0.6 }}
+                                            />
+                                          </div>
+                                        </div>
+                                        <span className="text-sm font-medium w-12 text-right">{count} ({percent}%)</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>Feedback by Page</CardTitle>
+                                <CardDescription>Which pages received feedback</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-3">
+                                  {(() => {
+                                    const feedback = feedbackData?.feedback || [];
+                                    const pageMap: Record<string, number> = {};
+                                    feedback.forEach(f => {
+                                      const page = f.pageUrl || 'Unknown';
+                                      pageMap[page] = (pageMap[page] || 0) + 1;
+                                    });
+                                    return Object.entries(pageMap)
+                                      .sort((a, b) => b[1] - a[1])
+                                      .slice(0, 8)
+                                      .map(([page, count], index) => (
+                                        <motion.div
+                                          key={page}
+                                          initial={{ opacity: 0, x: -20 }}
+                                          animate={{ opacity: 1, x: 0 }}
+                                          transition={{ delay: index * 0.05 }}
+                                          className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
+                                        >
+                                          <span className="text-sm font-medium">{page}</span>
+                                          <Badge variant="secondary">{count}</Badge>
+                                        </motion.div>
+                                      ));
+                                  })()}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Recent Feedback with Comments */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Recent Feedback with Comments</CardTitle>
+                              <CardDescription>User suggestions and improvement ideas</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <ScrollArea className="h-[400px]">
+                                <div className="space-y-4">
+                                  {(feedbackData?.feedback || [])
+                                    .filter(f => f.comment && f.comment.trim())
+                                    .map((feedback, index) => (
+                                      <motion.div
+                                        key={feedback.id}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: index * 0.05 }}
+                                        className="p-4 rounded-lg border border-border/50 hover-elevate"
+                                      >
+                                        <div className="flex items-start justify-between">
+                                          <div className="flex items-center gap-3">
+                                            <div className="flex">
+                                              {Array.from({ length: feedback.rating }).map((_, i) => (
+                                                <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                                              ))}
+                                            </div>
+                                            <span className="text-sm text-muted-foreground">
+                                              {feedback.userName || feedback.userEmail || 'Anonymous'}
+                                            </span>
+                                            {feedback.userTier && (
+                                              <Badge variant="outline" className="text-xs">{feedback.userTier}</Badge>
+                                            )}
+                                          </div>
+                                          <span className="text-xs text-muted-foreground">
+                                            {format(new Date(feedback.createdAt), 'MMM d, yyyy h:mm a')}
+                                          </span>
+                                        </div>
+                                        <p className="mt-2 text-sm">{feedback.comment}</p>
+                                        <div className="flex items-center gap-2 mt-2">
+                                          <Badge variant="secondary" className="text-xs">{feedback.pageUrl || 'Unknown page'}</Badge>
+                                          {feedback.timeSpentMinutes && (
+                                            <span className="text-xs text-muted-foreground">
+                                              {feedback.timeSpentMinutes} min on site
+                                            </span>
+                                          )}
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  {(feedbackData?.feedback || []).filter(f => f.comment && f.comment.trim()).length === 0 && (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                      No feedback with comments yet
+                                    </div>
+                                  )}
+                                </div>
+                              </ScrollArea>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
+
+                      {/* All Responses */}
+                      {activeSection === 'feedback-responses' && (
+                        <>
+                          <Card className="bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-amber-500/10 border-amber-500/20">
+                            <CardContent className="py-6">
+                              <div className="flex items-center gap-4">
+                                <div className="p-3 rounded-xl bg-amber-500 text-white">
+                                  <Star className="h-6 w-6" />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">All Feedback Responses</p>
+                                  <p className="text-2xl font-bold text-amber-500">{feedbackData?.feedback?.length || 0} Total</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>All Feedback Entries</CardTitle>
+                              <CardDescription>Complete list of user feedback with all details</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <ScrollArea className="h-[600px]">
+                                <div className="space-y-3">
+                                  {(feedbackData?.feedback || []).map((feedback, index) => (
+                                    <motion.div
+                                      key={feedback.id}
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: index * 0.02 }}
+                                      className="p-4 rounded-lg border border-border/50 hover-elevate"
+                                    >
+                                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        {/* Rating & User */}
+                                        <div>
+                                          <div className="flex items-center gap-2 mb-2">
+                                            {Array.from({ length: feedback.rating }).map((_, i) => (
+                                              <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                                            ))}
+                                            {Array.from({ length: 5 - feedback.rating }).map((_, i) => (
+                                              <Star key={i} className="h-4 w-4 text-muted-foreground/30" />
+                                            ))}
+                                          </div>
+                                          <p className="text-sm font-medium">
+                                            {feedback.userName || feedback.userEmail || 'Anonymous'}
+                                          </p>
+                                          {feedback.userTier && (
+                                            <Badge variant="outline" className="text-xs mt-1">{feedback.userTier}</Badge>
+                                          )}
+                                        </div>
+                                        
+                                        {/* Comment */}
+                                        <div className="md:col-span-2">
+                                          {feedback.comment ? (
+                                            <p className="text-sm">{feedback.comment}</p>
+                                          ) : (
+                                            <p className="text-sm text-muted-foreground italic">No comment</p>
+                                          )}
+                                        </div>
+                                        
+                                        {/* Meta */}
+                                        <div className="text-right text-xs text-muted-foreground space-y-1">
+                                          <p>{format(new Date(feedback.createdAt), 'MMM d, yyyy h:mm a')}</p>
+                                          <p>{feedback.pageUrl || 'Unknown page'}</p>
+                                          {feedback.timeSpentMinutes && <p>{feedback.timeSpentMinutes} min on site</p>}
+                                          {feedback.screenSize && <p>{feedback.screenSize}</p>}
+                                          {feedback.referrer && feedback.referrer !== 'direct' && (
+                                            <p className="truncate max-w-[150px]" title={feedback.referrer}>
+                                              From: {feedback.referrer}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                  {(feedbackData?.feedback || []).length === 0 && (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                      No feedback collected yet
+                                    </div>
+                                  )}
+                                </div>
+                              </ScrollArea>
                             </CardContent>
                           </Card>
                         </>
