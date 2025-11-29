@@ -151,6 +151,19 @@ export function NeuralTwin({ founderProfile: initialProfile, mode = 'interview',
   };
 
   const evaluateResponse = async (response: string, question: string): Promise<{ score: number; feedback: string }> => {
+    // Local quality check first - catch garbage responses before API call
+    const cleanResponse = (response || "").trim();
+    const wordCount = cleanResponse.split(/\s+/).filter(w => w.length > 0).length;
+    
+    // Immediate low score for garbage responses
+    if (cleanResponse.length < 10 || wordCount < 3) {
+      const score = Math.min(25, cleanResponse.length * 2);
+      return {
+        score,
+        feedback: `Your response is too brief to evaluate. Endorsers expect detailed answers with specific examples, metrics, and clear explanations. Please provide at least 2-3 complete sentences.`
+      };
+    }
+    
     try {
       const apiResponse = await apiRequest("POST", "/api/ai/evaluate-response", {
         response,
@@ -159,15 +172,48 @@ export function NeuralTwin({ founderProfile: initialProfile, mode = 'interview',
         criteria: ['clarity', 'innovation', 'viability', 'confidence']
       });
       const data = await apiResponse.json();
+      
+      // Validate API response - enforce word count penalties
+      let score = data.score || calculateLocalScore(wordCount);
+      if (wordCount < 10 && score > 40) score = 40;
+      if (wordCount < 20 && score > 55) score = 55;
+      if (wordCount < 30 && score > 70) score = 70;
+      
       return {
-        score: data.score || Math.floor(Math.random() * 20) + 70,
-        feedback: data.feedback || "Good response. Consider adding more specific examples."
+        score,
+        feedback: data.feedback || generateLocalFeedback(score, wordCount)
       };
     } catch (error) {
+      // Intelligent local fallback
+      const score = calculateLocalScore(wordCount);
       return {
-        score: Math.floor(Math.random() * 20) + 70,
-        feedback: "Good response. Consider adding more specific examples and quantifiable metrics."
+        score,
+        feedback: generateLocalFeedback(score, wordCount)
       };
+    }
+  };
+  
+  const calculateLocalScore = (wordCount: number): number => {
+    if (wordCount < 5) return 15;
+    if (wordCount < 10) return 25;
+    if (wordCount < 20) return 40;
+    if (wordCount < 40) return 55;
+    if (wordCount < 60) return 65;
+    if (wordCount < 100) return 72;
+    return 78;
+  };
+  
+  const generateLocalFeedback = (score: number, wordCount: number): string => {
+    if (score < 30) {
+      return `Your response is far too brief. Endorsers expect comprehensive answers demonstrating expertise, specific examples, and clear metrics.`;
+    } else if (score < 45) {
+      return `Your response needs more detail. Add specific examples, quantifiable metrics, and UK market relevance.`;
+    } else if (score < 60) {
+      return `Reasonable start. Strengthen with more specific achievements, timeline projections, and competitive differentiation.`;
+    } else if (score < 75) {
+      return `Good response. To improve further, include more precise metrics and demonstrate deeper UK regulatory understanding.`;
+    } else {
+      return `Strong response with good detail. Consider adding even more specific data points and milestones.`;
     }
   };
 

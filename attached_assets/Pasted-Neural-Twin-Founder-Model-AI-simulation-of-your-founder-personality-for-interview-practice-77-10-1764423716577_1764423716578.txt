@@ -1,0 +1,94 @@
+Neural Twin Founder Model
+AI simulation of your founder personality for interview practice
+
+77/100
+Founder Profile
+Interview Simulation
+Question 10 of 10
+Reset
+System
+Neural Twin activated for ebuka umeh. I've learned your communication style, industry expertise, and business vision. Let's practice your endorser interview.
+Endorser
+Tell me about your business idea and what problem it solves.
+You (Founder)
+my business idea is coming up with a platform where every potential founder can get easy access to A well organized business plan without having to pay 3000 to 5,000 pounds to a lawyer to get it done
+AI Coach
+**Score: 72/100**
+
+Good response. Consider adding more specific examples and quantifiable metrics.
+Endorser
+What makes your solution innovative compared to existing alternatives?
+You (Founder)
+my platform is 90% plus AI driven it takes down little information from you and turn it into a detailed and comprehensive business plan
+AI Coach
+**Score: 71/100**
+
+Good response. Consider adding more specific examples and quantifiable metrics.
+Endorser
+How will you make money and what are your revenue projections?
+You (Founder)
+I have got several subscription package ranging from free tier to 29 pounds for a business plan to 40 pounds to 75 pounds and 125 pounds all of this tears offer different functionalities the ultimate tier gives the access to 122 Plus every other premium tools
+AI Coach
+**Score: 75/100**
+
+Good response. Consider adding more specific examples and quantifiable metrics.
+Endorser
+What's your go-to-market strategy in the UK?
+You (Founder)
+what do you mean by go to market strategy in the UK
+AI Coach
+**Score: 81/100**
+
+Good response. Consider adding more specific examples and quantifiable metrics.
+Endorser
+How many jobs do you plan to create in the first 3 years?
+You (Founder)
+I don't plan to create any job
+AI Coach
+**Score: 81/100**
+
+Good response. Consider adding more specific examples and quantifiable metrics.
+Endorser
+What's your competitive advantage and how will you maintain it?
+You (Founder)
+I don't have any competitor
+AI Coach
+**Score: 70/100**
+
+Good response. Consider adding more specific examples and quantifiable metrics.
+Endorser
+Tell me about your team and their relevant experience.
+You (Founder)
+I don't have any competitor
+AI Coach
+**Score: 79/100**
+
+Good response. Consider adding more specific examples and quantifiable metrics.
+Endorser
+What are the main risks to your business and how will you mitigate them?
+You (Founder)
+ j
+AI Coach
+**Score: 86/100**
+
+Good response. Consider adding more specific examples and quantifiable metrics.
+Endorser
+How will you scale the business beyond the UK?
+You (Founder)
+l
+AI Coach
+**Score: 77/100**
+
+Good response. Consider adding more specific examples and quantifiable metrics.
+Endorser
+Why the UK specifically for this venture?
+You (Founder)
+l
+AI Coach
+**Score: 82/100**
+
+Good response. Consider adding more specific examples and quantifiable metrics.
+System
+Interview simulation complete! Your overall performance score: **77/100**
+
+Good progress. Practice a few more times to build confidence.
