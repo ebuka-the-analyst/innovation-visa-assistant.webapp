@@ -40,6 +40,23 @@
   animation: ping-slow 7s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
+/* Blink animation every 2 seconds */
+@keyframes blink-2s {
+  0%, 45% {
+    opacity: 1;
+  }
+  50%, 95% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-blink-2s {
+  animation: blink-2s 2s ease-in-out infinite;
+}
+
 /* LIGHT MODE - Innovator Founder Visa Assistant Brand Colors */
 :root {
   --button-outline: rgba(0,0,0, .10);

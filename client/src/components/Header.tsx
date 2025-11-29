@@ -90,7 +90,7 @@ export default function Header() {
             data-testid="button-dismiss-disclaimer"
           >
             <X className="h-3 w-3" />
-            <div className="absolute -right-0.5 -top-0.5 w-2 h-2 rounded-full animate-ping-slow-red" style={{ backgroundColor: '#ef4444' }} />
+            <div className="absolute -right-0.5 -top-0.5 w-2 h-2 rounded-full animate-blink-2s" style={{ backgroundColor: '#991b1b' }} />
           </button>
         </div>
       )}
