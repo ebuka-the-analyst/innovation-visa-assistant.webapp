@@ -7460,10 +7460,7 @@ export default function AdminDashboard() {
                                   </CardHeader>
                                   <CardContent>
                                     <ResponsiveContainer width="100%" height={300}>
-                                      <RechartsAreaChart data={revenueAnalytics?.monthlyTrend || [
-                                    { month: 'Nov', revenue: 4890, target: 4000 },
-                                    { month: 'Dec', revenue: 5500, target: 4500 },
-                                  ]}>
+                                      <RechartsAreaChart data={revenueAnalytics?.monthlyTrend || []}>
                                     <defs>
                                       <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
@@ -11101,43 +11098,44 @@ export default function AdminDashboard() {
                             </Card>
                           </div>
 
-                          {/* Referral Trends Chart */}
+                          {/* Referral Summary - Real Data */}
                           <Card>
                             <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <LineChart className="h-5 w-5 text-cyan-500" />
-                                Referral Trends
-                              </CardTitle>
-                              <CardDescription>Monthly referral activity and conversions</CardDescription>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <LineChart className="h-5 w-5 text-cyan-500" />
+                                    Referral Summary
+                                  </CardTitle>
+                                  <CardDescription>Real-time referral program statistics</CardDescription>
+                                </div>
+                                <Badge variant="outline" className="text-cyan-500 border-cyan-500/30">Live</Badge>
+                              </div>
                             </CardHeader>
                             <CardContent>
-                              <ResponsiveContainer width="100%" height={300}>
-                                <RechartsAreaChart data={[
-                                  { month: 'Jan', referrals: 12, conversions: 8, revenue: 360 },
-                                  { month: 'Feb', referrals: 18, conversions: 12, revenue: 540 },
-                                  { month: 'Mar', referrals: 24, conversions: 16, revenue: 720 },
-                                  { month: 'Apr', referrals: 32, conversions: 22, revenue: 990 },
-                                  { month: 'May', referrals: 28, conversions: 19, revenue: 855 },
-                                  { month: 'Jun', referrals: 38, conversions: 26, revenue: 1170 },
-                                ]}>
-                                  <defs>
-                                    <linearGradient id="refGradient" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
-                                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
-                                    </linearGradient>
-                                    <linearGradient id="convGradient" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                                    </linearGradient>
-                                  </defs>
-                                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                                  <XAxis dataKey="month" className="text-xs" />
-                                  <YAxis className="text-xs" />
-                                  <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-                                  <Area type="monotone" dataKey="referrals" stroke="#06b6d4" fillOpacity={1} fill="url(#refGradient)" name="Referrals" />
-                                  <Area type="monotone" dataKey="conversions" stroke="#22c55e" fillOpacity={1} fill="url(#convGradient)" name="Conversions" />
-                                </RechartsAreaChart>
-                              </ResponsiveContainer>
+                              <div className="flex flex-col items-center justify-center h-[300px]">
+                                <div className="grid grid-cols-2 gap-6 w-full max-w-md">
+                                  <div className="text-center p-6 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                                    <p className="text-4xl font-bold text-cyan-500">{referralAnalytics?.totalReferrals || 0}</p>
+                                    <p className="text-sm text-muted-foreground mt-2">Total Referrals</p>
+                                  </div>
+                                  <div className="text-center p-6 rounded-lg bg-green-500/10 border border-green-500/20">
+                                    <p className="text-4xl font-bold text-green-500">{referralAnalytics?.successfulReferrals || 0}</p>
+                                    <p className="text-sm text-muted-foreground mt-2">Conversions</p>
+                                  </div>
+                                </div>
+                                <div className="text-center mt-6">
+                                  <p className="text-2xl font-bold text-amber-500">
+                                    £{Math.round((referralAnalytics?.successfulReferrals || 0) * 45)}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">Est. Revenue from Referrals</p>
+                                </div>
+                                {(referralAnalytics?.totalReferrals || 0) === 0 && (
+                                  <p className="text-sm text-muted-foreground text-center mt-6">
+                                    No referrals yet. Data will appear as users share referral links.
+                                  </p>
+                                )}
+                              </div>
                             </CardContent>
                           </Card>
 
@@ -11756,34 +11754,40 @@ export default function AdminDashboard() {
                             </Card>
                           </div>
 
-                          {/* Weekly Review Throughput Chart */}
+                          {/* Review Stats - Real Data */}
                           <Card>
                             <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <BarChart3 className="h-5 w-5 text-blue-500" />
-                                Weekly Review Throughput
-                              </CardTitle>
-                              <CardDescription>Reviews completed vs SLA breaches over time</CardDescription>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <BarChart3 className="h-5 w-5 text-blue-500" />
+                                    Review Statistics
+                                  </CardTitle>
+                                  <CardDescription>Real-time lawyer review performance</CardDescription>
+                                </div>
+                                <Badge variant="outline" className="text-blue-500 border-blue-500/30">Live</Badge>
+                              </div>
                             </CardHeader>
                             <CardContent>
-                              <ResponsiveContainer width="100%" height={280}>
-                                <RechartsBarChart data={[
-                                  { week: 'Week 1', completed: 12, breached: 1, pending: 3 },
-                                  { week: 'Week 2', completed: 18, breached: 2, pending: 4 },
-                                  { week: 'Week 3', completed: 15, breached: 0, pending: 2 },
-                                  { week: 'Week 4', completed: 22, breached: 1, pending: 5 },
-                                  { week: 'Week 5', completed: 25, breached: 0, pending: 3 },
-                                  { week: 'Week 6', completed: 20, breached: 1, pending: 4 },
-                                ]}>
-                                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                                  <XAxis dataKey="week" className="text-xs" />
-                                  <YAxis className="text-xs" />
-                                  <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-                                  <Bar dataKey="completed" fill="#22c55e" name="Completed" radius={[4, 4, 0, 0]} />
-                                  <Bar dataKey="breached" fill="#ef4444" name="SLA Breached" radius={[4, 4, 0, 0]} />
-                                  <Bar dataKey="pending" fill="#f59e0b" name="Still Pending" radius={[4, 4, 0, 0]} />
-                                </RechartsBarChart>
-                              </ResponsiveContainer>
+                              <div className="grid grid-cols-3 gap-4 h-[280px] content-center">
+                                <div className="text-center p-6 rounded-lg bg-green-500/10 border border-green-500/20">
+                                  <p className="text-4xl font-bold text-green-500">{lawyerAnalytics?.completedReviews || 0}</p>
+                                  <p className="text-sm text-muted-foreground mt-2">Completed</p>
+                                </div>
+                                <div className="text-center p-6 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                  <p className="text-4xl font-bold text-amber-500">{lawyerAnalytics?.pendingReviews || 0}</p>
+                                  <p className="text-sm text-muted-foreground mt-2">Pending</p>
+                                </div>
+                                <div className="text-center p-6 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                                  <p className="text-4xl font-bold text-blue-500">{lawyerAnalytics?.approvedReviews || 0}</p>
+                                  <p className="text-sm text-muted-foreground mt-2">Approved</p>
+                                </div>
+                              </div>
+                              {(lawyerAnalytics?.completedReviews || 0) === 0 && (
+                                <p className="text-sm text-muted-foreground text-center mt-4">
+                                  No reviews completed yet. Data will appear as lawyers review documents.
+                                </p>
+                              )}
                             </CardContent>
                           </Card>
 
@@ -12582,40 +12586,50 @@ export default function AdminDashboard() {
                             </Card>
                           </div>
 
-                          {/* Completion Trend Chart */}
+                          {/* Review Outcomes - Real Data */}
                           <Card>
                             <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <TrendingUp className="h-5 w-5 text-green-500" />
-                                Review Completion Trend
-                              </CardTitle>
-                              <CardDescription>Monthly completed reviews with outcomes</CardDescription>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <TrendingUp className="h-5 w-5 text-green-500" />
+                                    Review Outcomes
+                                  </CardTitle>
+                                  <CardDescription>Real-time document review results</CardDescription>
+                                </div>
+                                <Badge variant="outline" className="text-green-500 border-green-500/30">Live</Badge>
+                              </div>
                             </CardHeader>
                             <CardContent>
-                              <ResponsiveContainer width="100%" height={250}>
-                                <RechartsAreaChart data={[
-                                  { month: 'Jan', approved: 8, revision: 2, rejected: 1 },
-                                  { month: 'Feb', approved: 12, revision: 3, rejected: 1 },
-                                  { month: 'Mar', approved: 15, revision: 2, rejected: 0 },
-                                  { month: 'Apr', approved: 18, revision: 4, rejected: 1 },
-                                  { month: 'May', approved: 22, revision: 3, rejected: 2 },
-                                  { month: 'Jun', approved: 20, revision: 2, rejected: 0 },
-                                ]}>
-                                  <defs>
-                                    <linearGradient id="approvedGradient" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                                    </linearGradient>
-                                  </defs>
-                                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                                  <XAxis dataKey="month" className="text-xs" />
-                                  <YAxis className="text-xs" />
-                                  <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-                                  <Area type="monotone" dataKey="approved" stroke="#22c55e" fillOpacity={1} fill="url(#approvedGradient)" name="Approved" />
-                                  <Area type="monotone" dataKey="revision" stroke="#eab308" fillOpacity={0.2} fill="#eab308" name="Needs Revision" />
-                                  <Area type="monotone" dataKey="rejected" stroke="#ef4444" fillOpacity={0.2} fill="#ef4444" name="Rejected" />
-                                </RechartsAreaChart>
-                              </ResponsiveContainer>
+                              <div className="flex flex-col items-center justify-center h-[250px]">
+                                <div className="grid grid-cols-3 gap-4 w-full">
+                                  <div className="text-center p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                                    <p className="text-3xl font-bold text-green-500">{lawyerAnalytics?.approvedReviews || 0}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Approved</p>
+                                  </div>
+                                  <div className="text-center p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                                    <p className="text-3xl font-bold text-yellow-500">{lawyerAnalytics?.needsRevisionReviews || 0}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Needs Revision</p>
+                                  </div>
+                                  <div className="text-center p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+                                    <p className="text-3xl font-bold text-red-500">{lawyerAnalytics?.rejectedReviews || 0}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Rejected</p>
+                                  </div>
+                                </div>
+                                <div className="mt-6 text-center">
+                                  <p className="text-xl font-bold">
+                                    {lawyerAnalytics?.completedReviews 
+                                      ? Math.round((lawyerAnalytics.approvedReviews / lawyerAnalytics.completedReviews) * 100) 
+                                      : 0}%
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">Approval Rate</p>
+                                </div>
+                                {(lawyerAnalytics?.completedReviews || 0) === 0 && (
+                                  <p className="text-sm text-muted-foreground text-center mt-4">
+                                    No reviews completed yet.
+                                  </p>
+                                )}
+                              </div>
                             </CardContent>
                           </Card>
 
