@@ -621,6 +621,12 @@ export default function AdminDashboard() {
   const [deletingPromo, setDeletingPromo] = useState<string | null>(null);
   const [rejectingReward, setRejectingReward] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  
+  // Calendar dialog states (using Dialog instead of Popover for better positioning)
+  const [promoValidFromOpen, setPromoValidFromOpen] = useState(false);
+  const [promoValidUntilOpen, setPromoValidUntilOpen] = useState(false);
+  const [campaignStartDateOpen, setCampaignStartDateOpen] = useState(false);
+  const [campaignEndDateOpen, setCampaignEndDateOpen] = useState(false);
 
   // ADMIN CONTROL CENTER STATES
   const [banningUser, setBanningUser] = useState<User | null>(null);
@@ -14755,44 +14761,56 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Valid From</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {newPromoCode.validFrom 
-                          ? format(newPromoCode.validFrom, 'PPP') 
-                          : 'No start date'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
-                      <Calendar
-                        mode="single"
-                        selected={newPromoCode.validFrom || undefined}
-                        onSelect={(date) => setNewPromoCode({ ...newPromoCode, validFrom: date || null })}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setPromoValidFromOpen(true)}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {newPromoCode.validFrom 
+                      ? format(newPromoCode.validFrom, 'PPP') 
+                      : 'No start date'}
+                  </Button>
+                  <Dialog open={promoValidFromOpen} onOpenChange={setPromoValidFromOpen}>
+                    <DialogContent className="sm:max-w-[350px] p-4">
+                      <DialogHeader>
+                        <DialogTitle>Select Start Date</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex justify-center py-2">
+                        <Calendar
+                          mode="single"
+                          selected={newPromoCode.validFrom || undefined}
+                          onSelect={(date) => {
+                            setNewPromoCode({ ...newPromoCode, validFrom: date || null });
+                            setPromoValidFromOpen(false);
+                          }}
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Valid Until</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {newPromoCode.validUntil 
-                          ? format(newPromoCode.validUntil, 'PPP') 
-                          : 'No expiry'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
-                      <Calendar
-                        mode="single"
-                        selected={newPromoCode.validUntil || undefined}
-                        onSelect={(date) => setNewPromoCode({ ...newPromoCode, validUntil: date || null })}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setPromoValidUntilOpen(true)}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {newPromoCode.validUntil 
+                      ? format(newPromoCode.validUntil, 'PPP') 
+                      : 'No expiry'}
+                  </Button>
+                  <Dialog open={promoValidUntilOpen} onOpenChange={setPromoValidUntilOpen}>
+                    <DialogContent className="sm:max-w-[350px] p-4">
+                      <DialogHeader>
+                        <DialogTitle>Select End Date</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex justify-center py-2">
+                        <Calendar
+                          mode="single"
+                          selected={newPromoCode.validUntil || undefined}
+                          onSelect={(date) => {
+                            setNewPromoCode({ ...newPromoCode, validUntil: date || null });
+                            setPromoValidUntilOpen(false);
+                          }}
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </div>
@@ -15057,40 +15075,52 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Start Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {format(campaignData.startDate, 'PPP')}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
-                      <Calendar
-                        mode="single"
-                        selected={campaignData.startDate}
-                        onSelect={(date) => date && setCampaignData({ ...campaignData, startDate: date })}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setCampaignStartDateOpen(true)}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(campaignData.startDate, 'PPP')}
+                  </Button>
+                  <Dialog open={campaignStartDateOpen} onOpenChange={setCampaignStartDateOpen}>
+                    <DialogContent className="sm:max-w-[350px] p-4">
+                      <DialogHeader>
+                        <DialogTitle>Select Start Date</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex justify-center py-2">
+                        <Calendar
+                          mode="single"
+                          selected={campaignData.startDate}
+                          onSelect={(date) => {
+                            if (date) setCampaignData({ ...campaignData, startDate: date });
+                            setCampaignStartDateOpen(false);
+                          }}
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
                 <div className="space-y-2">
                   <Label>End Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {format(campaignData.endDate, 'PPP')}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={4}>
-                      <Calendar
-                        mode="single"
-                        selected={campaignData.endDate}
-                        onSelect={(date) => date && setCampaignData({ ...campaignData, endDate: date })}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setCampaignEndDateOpen(true)}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(campaignData.endDate, 'PPP')}
+                  </Button>
+                  <Dialog open={campaignEndDateOpen} onOpenChange={setCampaignEndDateOpen}>
+                    <DialogContent className="sm:max-w-[350px] p-4">
+                      <DialogHeader>
+                        <DialogTitle>Select End Date</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex justify-center py-2">
+                        <Calendar
+                          mode="single"
+                          selected={campaignData.endDate}
+                          onSelect={(date) => {
+                            if (date) setCampaignData({ ...campaignData, endDate: date });
+                            setCampaignEndDateOpen(false);
+                          }}
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
 
