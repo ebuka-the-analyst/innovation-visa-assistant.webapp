@@ -150,17 +150,17 @@ export function NeuralTwin({ founderProfile: initialProfile, mode = 'interview',
     return templates[style];
   };
 
-  const evaluateResponse = async (response: string, question: string): Promise<{ score: number; feedback: string }> => {
+  const evaluateResponse = async (response: string, question: string): Promise<{ score: number; feedback: string; error?: boolean }> => {
     // Local quality check first - catch garbage responses before API call
     const cleanResponse = (response || "").trim();
     const wordCount = cleanResponse.split(/\s+/).filter(w => w.length > 0).length;
     
-    // Immediate low score for garbage responses
-    if (cleanResponse.length < 10 || wordCount < 3) {
-      const score = Math.min(25, cleanResponse.length * 2);
+    // Immediate rejection for garbage responses - no AI needed
+    if (cleanResponse.length < 5 || wordCount < 2) {
       return {
-        score,
-        feedback: `Your response is too brief to evaluate. Endorsers expect detailed answers with specific examples, metrics, and clear explanations. Please provide at least 2-3 complete sentences.`
+        score: 0,
+        feedback: `**Cannot evaluate.** Your response "${cleanResponse}" is not a valid answer. Please provide a complete, thoughtful response to practice effectively.`,
+        error: true
       };
     }
     
@@ -169,51 +169,36 @@ export function NeuralTwin({ founderProfile: initialProfile, mode = 'interview',
         response,
         question,
         profile,
-        criteria: ['clarity', 'innovation', 'viability', 'confidence']
+        wordCount,
+        criteria: ['clarity', 'innovation', 'viability', 'confidence', 'uk_market_relevance', 'specificity', 'metrics']
       });
+      
+      if (!apiResponse.ok) {
+        throw new Error("API request failed");
+      }
+      
       const data = await apiResponse.json();
       
-      // Validate API response - enforce word count penalties
-      let score = data.score || calculateLocalScore(wordCount);
-      if (wordCount < 10 && score > 40) score = 40;
-      if (wordCount < 20 && score > 55) score = 55;
-      if (wordCount < 30 && score > 70) score = 70;
+      // Verify we got a real AI evaluation, not a fallback
+      if (data.error || !data.feedback || data.feedback.includes("connectivity issue")) {
+        return {
+          score: 0,
+          feedback: data.feedback || "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this persists, contact support@ukvisaassistant.com",
+          error: true
+        };
+      }
       
       return {
-        score,
-        feedback: data.feedback || generateLocalFeedback(score, wordCount)
+        score: data.score,
+        feedback: data.feedback
       };
     } catch (error) {
-      // Intelligent local fallback
-      const score = calculateLocalScore(wordCount);
+      // No fallback scoring - show error message
       return {
-        score,
-        feedback: generateLocalFeedback(score, wordCount)
+        score: 0,
+        feedback: "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this problem persists, please contact support@ukvisaassistant.com for assistance.",
+        error: true
       };
-    }
-  };
-  
-  const calculateLocalScore = (wordCount: number): number => {
-    if (wordCount < 5) return 15;
-    if (wordCount < 10) return 25;
-    if (wordCount < 20) return 40;
-    if (wordCount < 40) return 55;
-    if (wordCount < 60) return 65;
-    if (wordCount < 100) return 72;
-    return 78;
-  };
-  
-  const generateLocalFeedback = (score: number, wordCount: number): string => {
-    if (score < 30) {
-      return `Your response is far too brief. Endorsers expect comprehensive answers demonstrating expertise, specific examples, and clear metrics.`;
-    } else if (score < 45) {
-      return `Your response needs more detail. Add specific examples, quantifiable metrics, and UK market relevance.`;
-    } else if (score < 60) {
-      return `Reasonable start. Strengthen with more specific achievements, timeline projections, and competitive differentiation.`;
-    } else if (score < 75) {
-      return `Good response. To improve further, include more precise metrics and demonstrate deeper UK regulatory understanding.`;
-    } else {
-      return `Strong response with good detail. Consider adding even more specific data points and milestones.`;
     }
   };
 

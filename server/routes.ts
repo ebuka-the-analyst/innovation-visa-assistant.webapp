@@ -7587,136 +7587,174 @@ Keep responses focused, professional, and relevant to UK visa requirements.`;
     }
   });
 
-  // Evaluate interview responses
+  // Evaluate interview responses - PhD-level rigorous evaluation
   app.post("/api/ai/evaluate-response", isAuthenticated, async (req, res) => {
     try {
-      const { response, question, profile, criteria } = req.body;
+      const { response, question, profile, wordCount: clientWordCount, criteria } = req.body;
 
       // Quality validation - check for garbage responses FIRST
       const cleanResponse = (response || "").trim();
       const wordCount = cleanResponse.split(/\s+/).filter((w: string) => w.length > 0).length;
       
-      // Immediate rejection for extremely short/garbage responses
-      if (cleanResponse.length < 10 || wordCount < 3) {
-        const score = Math.min(25, cleanResponse.length * 2);
+      // Immediate rejection for garbage responses - no scoring needed
+      if (cleanResponse.length < 5 || wordCount < 2) {
         return res.json({
-          score,
-          feedback: `Score: ${score}/100. Your response is too brief to evaluate properly. A strong interview answer should be at least 2-3 sentences explaining your thinking, providing specific examples, and demonstrating your expertise. Please provide a more complete answer.`
+          score: 0,
+          feedback: `**Cannot evaluate.** Your response "${cleanResponse}" is not a valid interview answer. Endorsers expect substantive, detailed responses that demonstrate your expertise and vision. Please provide a complete answer.`,
+          error: true
         });
       }
 
-      // Check for nonsensical/irrelevant responses
-      const questionKeywords = question.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3);
-      const responseKeywords = cleanResponse.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3);
-      const relevanceScore = questionKeywords.filter((kw: string) => 
-        responseKeywords.some((rw: string) => rw.includes(kw) || kw.includes(rw))
-      ).length / Math.max(1, questionKeywords.length);
-
-      // Penalize responses that don't relate to the question at all
-      if (wordCount < 10 && relevanceScore < 0.1) {
-        const score = Math.max(15, Math.min(40, wordCount * 3));
+      // Check if AI is available - if not, return error instead of fake scores
+      if (!process.env.OPENAI_API_KEY && !process.env.GEMINI_API_KEY) {
         return res.json({
-          score,
-          feedback: `Score: ${score}/100. Your response doesn't adequately address the question asked. Endorsers expect detailed, thoughtful answers that directly answer what was asked. Please provide a more complete response with specific details relevant to "${question.substring(0, 50)}..."`
+          score: 0,
+          feedback: "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this problem persists, please contact support@ukvisaassistant.com for assistance.",
+          error: true
         });
       }
 
-      const systemPrompt = `You are an EXTREMELY STRICT endorser evaluating a founder's response in a UK Innovator Founder Visa interview.
+      const systemPrompt = `You are a PhD-level endorser conducting a rigorous evaluation of a founder's response in a UK Innovator Founder Visa interview.
 
-CRITICAL SCORING RULES - BE HARSH:
-- Single word/letter responses: 0-15 points
-- Vague 1-sentence answers: 15-35 points  
-- Basic answers without specifics: 35-55 points
-- Good answers with some detail: 55-75 points
-- Excellent detailed answers with metrics: 75-90 points
-- Exceptional comprehensive answers: 90-100 points
+YOUR EVALUATION MUST BE ACADEMICALLY RIGOROUS AND BRUTALLY HONEST.
 
-Evaluate based on: ${criteria?.join(', ') || 'clarity, innovation, viability, confidence, UK market relevance'}
+STRICT SCORING RUBRIC:
+0-10: Unintelligible, single words, or completely off-topic
+11-25: Extremely vague, no substance, fails to address the question
+26-40: Superficial response lacking specifics, generic statements
+41-55: Basic understanding shown but missing critical details, metrics, or evidence
+56-70: Competent response with some specifics but room for significant improvement
+71-85: Strong response with good detail, metrics, and UK market awareness
+86-95: Excellent comprehensive response with precise data, clear strategy, and innovation evidence
+96-100: Exceptional, publication-quality response (extremely rare)
 
-The founder's response has ${wordCount} words. Score accordingly - short responses MUST score low.
+EVALUATION CRITERIA:
+1. CLARITY (20%): Is the response coherent, well-structured, and easy to understand?
+2. SPECIFICITY (25%): Does it include concrete numbers, dates, metrics, examples?
+3. RELEVANCE (20%): Does it directly answer what was asked?
+4. INNOVATION (15%): Does it demonstrate genuine innovation suitable for the visa?
+5. UK MARKET (10%): Does it show understanding of UK market/regulations?
+6. VIABILITY (10%): Does it suggest a viable, scalable business?
 
-YOU MUST:
-1. Give a score from 0-100 in format "Score: XX/100" at the start
-2. Be critical and specific about weaknesses
-3. Never give above 70 for responses under 30 words
-4. Never give above 50 for responses under 15 words`;
+WORD COUNT IMPACT:
+- Under 10 words: Maximum possible score is 25
+- Under 20 words: Maximum possible score is 45  
+- Under 30 words: Maximum possible score is 60
+- Under 50 words: Maximum possible score is 75
 
-      if (process.env.OPENAI_API_KEY) {
-        const OpenAI = (await import("openai")).default;
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+The founder's response has exactly ${wordCount} words.
+
+FORMAT YOUR RESPONSE AS:
+**Score: XX/100**
+
+**Strengths:**
+[List specific strengths if any]
+
+**Critical Weaknesses:**
+[Be specific about what's missing or wrong]
+
+**How to Improve:**
+[Provide actionable, specific recommendations]
+
+BE HARSH BUT FAIR. This is visa preparation - false confidence could lead to rejection.`;
+
+      try {
+        // Try OpenAI first
+        if (process.env.OPENAI_API_KEY) {
+          const OpenAI = (await import("openai")).default;
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+          
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `QUESTION ASKED: "${question}"\n\nFOUNDER'S RESPONSE (${wordCount} words):\n"${response}"` }
+            ],
+            max_tokens: 600,
+            temperature: 0.3
+          });
+
+          const feedbackText = completion.choices[0]?.message?.content;
+          
+          if (!feedbackText) {
+            throw new Error("Empty AI response");
+          }
+          
+          const scoreMatch = feedbackText.match(/\*?\*?Score:\s*(\d{1,3})\/100\*?\*?/i) || 
+                            feedbackText.match(/(\d{1,3})\/100/);
+          
+          if (!scoreMatch) {
+            throw new Error("Could not parse score from AI response");
+          }
+          
+          let score = parseInt(scoreMatch[1]);
+          
+          // Enforce word count caps as safety net
+          if (wordCount < 10 && score > 25) score = 25;
+          else if (wordCount < 20 && score > 45) score = 45;
+          else if (wordCount < 30 && score > 60) score = 60;
+          else if (wordCount < 50 && score > 75) score = 75;
+
+          return res.json({
+            score: Math.min(100, Math.max(0, score)),
+            feedback: feedbackText
+          });
+        }
         
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: `Question: ${question}\n\nFounder's Response (${wordCount} words): ${response}` }
-          ],
-          max_tokens: 400
-        });
+        // Try Gemini as fallback
+        if (process.env.GEMINI_API_KEY) {
+          const { GoogleGenerativeAI } = await import("@google/genai");
+          const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+          
+          const result = await model.generateContent(`${systemPrompt}\n\nQUESTION ASKED: "${question}"\n\nFOUNDER'S RESPONSE (${wordCount} words):\n"${response}"`);
+          const feedbackText = result.response.text();
+          
+          if (!feedbackText) {
+            throw new Error("Empty AI response");
+          }
+          
+          const scoreMatch = feedbackText.match(/\*?\*?Score:\s*(\d{1,3})\/100\*?\*?/i) || 
+                            feedbackText.match(/(\d{1,3})\/100/);
+          
+          if (!scoreMatch) {
+            throw new Error("Could not parse score from AI response");
+          }
+          
+          let score = parseInt(scoreMatch[1]);
+          
+          // Enforce word count caps
+          if (wordCount < 10 && score > 25) score = 25;
+          else if (wordCount < 20 && score > 45) score = 45;
+          else if (wordCount < 30 && score > 60) score = 60;
+          else if (wordCount < 50 && score > 75) score = 75;
 
-        const feedbackText = completion.choices[0]?.message?.content || "";
-        const scoreMatch = feedbackText.match(/(\d{1,3})\/100|score[:\s]+(\d{1,3})/i);
-        let score = scoreMatch ? parseInt(scoreMatch[1] || scoreMatch[2]) : calculateFallbackScore(wordCount, relevanceScore);
+          return res.json({
+            score: Math.min(100, Math.max(0, score)),
+            feedback: feedbackText
+          });
+        }
         
-        // Enforce word count penalties even if AI is too generous
-        if (wordCount < 10 && score > 40) score = Math.min(40, score);
-        if (wordCount < 20 && score > 55) score = Math.min(55, score);
-        if (wordCount < 30 && score > 70) score = Math.min(70, score);
-
-        res.json({
-          score: Math.min(100, Math.max(0, score)),
-          feedback: feedbackText
+        throw new Error("No AI service available");
+        
+      } catch (aiError) {
+        console.error("AI evaluation error:", aiError);
+        // Return error message - NO FALLBACK SCORING
+        return res.json({
+          score: 0,
+          feedback: "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this problem persists, please contact support@ukvisaassistant.com for assistance.",
+          error: true
         });
-      } else {
-        // Intelligent fallback scoring without AI
-        const score = calculateFallbackScore(wordCount, relevanceScore);
-        const feedback = generateFallbackFeedback(score, wordCount, question);
-        res.json({ score, feedback });
       }
     } catch (error) {
       console.error("Evaluate response error:", error);
-      res.status(500).json({ error: "Failed to evaluate response" });
+      res.json({
+        score: 0,
+        feedback: "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this problem persists, please contact support@ukvisaassistant.com for assistance.",
+        error: true
+      });
     }
   });
-
-  // Helper function for fallback scoring
-  function calculateFallbackScore(wordCount: number, relevanceScore: number): number {
-    let baseScore = 0;
-    
-    // Word count scoring
-    if (wordCount < 5) baseScore = 10;
-    else if (wordCount < 10) baseScore = 20;
-    else if (wordCount < 20) baseScore = 35;
-    else if (wordCount < 40) baseScore = 50;
-    else if (wordCount < 60) baseScore = 60;
-    else if (wordCount < 100) baseScore = 70;
-    else baseScore = 75;
-    
-    // Relevance bonus (up to +15)
-    baseScore += Math.round(relevanceScore * 15);
-    
-    // Add small variance
-    baseScore += Math.floor(Math.random() * 5) - 2;
-    
-    return Math.min(90, Math.max(5, baseScore));
-  }
-
-  // Helper function for fallback feedback
-  function generateFallbackFeedback(score: number, wordCount: number, question: string): string {
-    if (score < 25) {
-      return `Score: ${score}/100. Your response is far too brief. Endorsers expect detailed, thoughtful answers. You need to provide at least 2-3 sentences with specific examples, metrics, and demonstrate clear understanding of your business.`;
-    } else if (score < 40) {
-      return `Score: ${score}/100. Your response lacks sufficient detail. Address the question more directly with specific examples. Consider: What makes your approach unique? What evidence supports your claims?`;
-    } else if (score < 55) {
-      return `Score: ${score}/100. Reasonable start, but needs more depth. Add specific metrics, UK market relevance, and concrete examples to strengthen your answer.`;
-    } else if (score < 70) {
-      return `Score: ${score}/100. Good response with some relevant content. To improve, include more quantifiable achievements, specific UK market strategy details, and clearer innovation differentiation.`;
-    } else if (score < 85) {
-      return `Score: ${score}/100. Strong response with good detail. To reach excellence, add more specific numbers, timeline projections, and demonstrate deeper understanding of UK regulatory requirements.`;
-    } else {
-      return `Score: ${score}/100. Excellent comprehensive response. You've demonstrated strong understanding and provided specific, relevant details.`;
-    }
-  }
 
   // Voice-to-Document AI endpoint
   app.post("/api/ai/voice-to-document", isAuthenticated, async (req, res) => {
