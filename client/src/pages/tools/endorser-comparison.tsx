@@ -29,28 +29,28 @@ const AI_TOOL_CONFIG: ToolConfig = {
     {
       id: 'business-sector',
       question: "What sector is your business in? Are you primarily tech-focused (AI, SaaS, FinTech) or do you operate in another innovative sector (services, manufacturing, creative)?",
-      hint: "Tech Nation focuses on tech; others are more flexible",
+      hint: "All endorsers accept diverse sectors; Envestors focuses on investment-ready ventures",
       fieldKey: 'sector_info',
       minLength: 20
     },
     {
       id: 'funding-stage',
       question: "What's your current funding situation? Are you self-funded, have angel investors, VC-backed, or planning to raise investment soon?",
-      hint: "Global Entrepreneurs Programme is for VC-backed ventures",
+      hint: "GEP is for VC-backed ventures; Envestors has strong investor network",
       fieldKey: 'funding_stage',
       minLength: 20
     },
     {
       id: 'timeline-urgency',
       question: "What's your timeline urgency? Do you need fast processing (6-8 weeks), or can you wait for a more thorough process (10-12 weeks)?",
-      hint: "Tech Nation typically processes faster than others",
+      hint: "Envestors and UKES typically process faster than others",
       fieldKey: 'timeline_urgency',
       minLength: 20
     },
     {
       id: 'budget-constraints',
-      question: "What's your budget for endorsement fees? Are you looking for the most affordable option, or is speed and success rate more important than cost?",
-      hint: "Global Entrepreneurs Programme is free but invitation-only",
+      question: "What's your budget for endorsement fees? Standard fee is £1,000 plus £500 per contact point meeting. Are speed and success rate more important than cost?",
+      hint: "GEP is free but invitation-only for exceptional founders",
       fieldKey: 'budget_info',
       minLength: 20
     },
@@ -102,9 +102,9 @@ type EndorserBody = {
 
 const ENDORSERS: EndorserBody[] = [
   {
-    id: "tech-nation",
-    name: "Tech Nation",
-    description: "Technology-focused endorser with fast processing and high success rates for tech startups",
+    id: "envestors",
+    name: "Envestors",
+    description: "Established endorsing body with strong investment network and fast processing",
     fees: {
       endorsement: 1000,
       checkIn: 500,
@@ -115,16 +115,16 @@ const ENDORSERS: EndorserBody[] = [
       daysMin: 42,
       daysMax: 56
     },
-    successRate: 88,
-    sectorFocus: ["AI/ML", "FinTech", "SaaS", "Cyber Security", "Deep Tech", "Climate Tech", "Biotech"],
+    successRate: 85,
+    sectorFocus: ["All innovative sectors", "Investment-ready businesses", "Scalable ventures", "Tech and non-tech innovation"],
     requirements: {
-      rdSpend: "10% of budget on R&D",
-      jobCreation: "5+ jobs in 3 years",
-      innovation: "Clear tech differentiation, IP strategy",
-      funding: "Verified investment appropriate for plan"
+      rdSpend: "Sector-appropriate R&D investment",
+      jobCreation: "Clear job creation plan aligned with visa requirements",
+      innovation: "Viable business plan, innovation evidence",
+      funding: "Investment-ready with market validation"
     },
-    strengths: ["Fast processing", "Tech expertise", "Investor network", "Founder community"],
-    ideal: ["Tech founders with IP", "AI/ML innovators", "Deep tech ventures", "Software companies"],
+    strengths: ["Fast processing", "Investor network access", "Investment community", "Post-endorsement support"],
+    ideal: ["Investment-ready founders", "Scalable ventures", "Tech innovators", "Growth-stage startups"],
     riskTolerance: "High",
     processingSpeed: "Fast"
   },

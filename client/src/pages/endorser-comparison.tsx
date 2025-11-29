@@ -7,48 +7,67 @@ import FeatureNavigation from "@/components/FeatureNavigation";
 
 const endorsers = [
   {
-    name: "Tech Nation",
-    description: "Technology-focused, fastest processing",
+    name: "Envestors",
+    description: "Established endorsing body with investment network",
+    website: "envestors-visa-endorsement.co.uk",
     features: {
-      focusAreas: "AI, Fintech, Biotech, Cyber Security, Deep Tech",
+      focusAreas: "All innovative sectors, investment-ready businesses",
       timeline: "6-8 weeks endorsement",
-      successRate: "88%",
-      requirements: "10% R&D spend, clear tech differentiation",
-      jobCreation: "5+ jobs in 3 years",
-      internationalExpansion: "Strong advantage",
-      advisorNetworkRequired: "No, but beneficial",
+      successRate: "85%",
+      requirements: "Viable business plan, innovation evidence, market validation",
+      jobCreation: "Job creation aligned with visa requirements",
+      internationalExpansion: "Strong investor network access",
+      advisorNetworkRequired: "Access to investment community",
       processSpeed: "Fast",
-      idealFor: "Tech founders with IP/innovation"
+      idealFor: "Investment-ready founders, scalable ventures"
+    }
+  },
+  {
+    name: "UKES",
+    description: "UK Endorsing Services - consortium of 6 UK businesses",
+    website: "ukesapp.co.uk",
+    features: {
+      focusAreas: "All innovative sectors, diverse business types",
+      timeline: "6-10 weeks endorsement",
+      successRate: "80%",
+      requirements: "Innovation, scalability, UK economic benefit",
+      jobCreation: "Clear job creation plan required",
+      internationalExpansion: "75+ years combined expertise",
+      advisorNetworkRequired: "Business mentorship available",
+      processSpeed: "Moderate",
+      idealFor: "First-time entrepreneurs, diverse backgrounds"
     }
   },
   {
     name: "Innovator International",
-    description: "Global scope, diverse sectors",
+    description: "Supports 700+ global entrepreneurs",
+    website: "innovatorinternational.com",
     features: {
-      focusAreas: "Any innovative business",
+      focusAreas: "Any innovative business globally",
       timeline: "8-10 weeks endorsement",
       successRate: "82%",
-      requirements: "Clear innovation, market validation",
+      requirements: "Clear innovation, market validation, growth potential",
       jobCreation: "3+ jobs in 3 years",
-      internationalExpansion: "Good support",
-      advisorNetworkRequired: "Recommended",
+      internationalExpansion: "UK Growth Accelerator community",
+      advisorNetworkRequired: "Recommended - accelerator access",
       processSpeed: "Moderate",
-      idealFor: "Non-tech innovators, service businesses"
+      idealFor: "Global entrepreneurs, non-tech innovators"
     }
   },
   {
-    name: "University Route",
-    description: "Academic partnerships, research-heavy",
+    name: "GEP",
+    description: "Global Entrepreneurs Programme - government-backed",
+    website: "gov.uk",
     features: {
-      focusAreas: "Research-backed innovation",
-      timeline: "4-6 weeks endorsement",
-      successRate: "85%",
-      requirements: "University partnership, research output",
-      jobCreation: "2+ jobs in 3 years",
-      internationalExpansion: "Limited advantage",
-      advisorNetworkRequired: "Yes - university",
-      processSpeed: "Fastest",
-      idealFor: "Researchers, spinouts, deep tech"
+      focusAreas: "High-growth potential, tech and innovation",
+      timeline: "4-8 weeks endorsement",
+      successRate: "88%",
+      requirements: "Exceptional talent, proven track record",
+      jobCreation: "Significant UK job creation expected",
+      internationalExpansion: "Government support and connections",
+      advisorNetworkRequired: "Strong advisory network access",
+      processSpeed: "Fast for eligible candidates",
+      idealFor: "Serial entrepreneurs, proven founders"
     }
   }
 ];
@@ -128,14 +147,16 @@ export default function EndorserComparison() {
           </div>
 
           <div className="mt-12 p-8 bg-accent/10 rounded-lg border border-accent/20">
-            <h3 className="font-semibold text-lg mb-4">Quick Assessment</h3>
+            <h3 className="font-semibold text-lg mb-4">Quick Assessment (November 2025)</h3>
             <div className="space-y-3">
-              <p className="text-sm">Use this tool to determine which endorser aligns with your business profile. Each route has different strengths:</p>
+              <p className="text-sm">Use this tool to determine which endorser aligns with your business profile. Each endorsing body has different strengths:</p>
               <ul className="text-sm space-y-2">
-                <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" /> <span><strong>Tech Nation:</strong> Best for tech innovation, fastest processing</span></li>
-                <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" /> <span><strong>Innovator International:</strong> Most flexible, any innovative sector</span></li>
-                <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" /> <span><strong>University:</strong> Fastest if you have academic partnership</span></li>
+                <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" /> <span><strong>Envestors:</strong> Best for investment-ready businesses, strong investor network</span></li>
+                <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" /> <span><strong>UKES:</strong> Great for first-time entrepreneurs, diverse sector support</span></li>
+                <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" /> <span><strong>Innovator International:</strong> Global focus, accelerator community access</span></li>
+                <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" /> <span><strong>GEP:</strong> Government-backed, ideal for proven serial entrepreneurs</span></li>
               </ul>
+              <p className="text-xs text-muted-foreground mt-4">Note: Endorsement fee is typically £1,000 per applicant. Contact point meetings cost £500 each (required at least twice during visa period).</p>
             </div>
           </div>
         </div>

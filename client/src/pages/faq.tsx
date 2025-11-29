@@ -33,7 +33,7 @@ const faqs = [
     questions: [
       {
         q: "What is an endorsing body and how do I choose one?",
-        a: "An endorsing body is a UK organization approved by the Home Office to assess whether your business idea meets the innovation, viability, and scalability requirements. Examples include Tech Nation (for digital technology), The Global Entrepreneurs Programme, and Innovator International. Choose based on your industry sector, their endorsement success rate, support services offered, and fee structure. Each body has specific expertise and assessment criteria."
+        a: "An endorsing body is a UK organization approved by the Home Office to assess whether your business idea meets the innovation, viability, and scalability requirements. Current endorsing bodies (November 2025) include Envestors, UK Endorsing Services (UKES), Innovator International, and the Global Entrepreneurs Programme (GEP). Choose based on your industry sector, their endorsement success rate, support services offered, and fee structure. Standard endorsement fee is £1,000 with £500 per contact point meeting."
       },
       {
         q: "What does 'innovative' mean for the visa requirements?",
