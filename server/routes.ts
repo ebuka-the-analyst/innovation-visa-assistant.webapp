@@ -4,7 +4,6 @@ import { storage } from "./storage";
 import { db } from "./db";
 import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents } from "@shared/schema";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
-import OpenAI from "openai";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
 import { getLatestNews, generateBreakingNews } from "./newsService";
@@ -19,6 +18,7 @@ import { allQuestions, getQuestion, getRandomQuestion, getTotalQuestionCount } f
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { GoogleGenAI } from "@google/genai";
 
 const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -58,9 +58,46 @@ const documentUpload = multer({
   },
 });
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+// Gemini 4-key rotation system for guaranteed AI uptime
+const GEMINI_API_KEYS = [
+  process.env.GEMINI_API_KEY,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3,
+  process.env.GEMINI_API_KEY_4,
+].filter(Boolean) as string[];
+
+let currentKeyIndex = 0;
+
+function getNextGeminiKey(): string {
+  if (GEMINI_API_KEYS.length === 0) {
+    throw new Error("No Gemini API keys configured");
+  }
+  const key = GEMINI_API_KEYS[currentKeyIndex];
+  currentKeyIndex = (currentKeyIndex + 1) % GEMINI_API_KEYS.length;
+  return key;
+}
+
+async function callGeminiWithRotation(prompt: string, maxRetries: number = 4): Promise<string> {
+  const errors: Error[] = [];
+  
+  for (let attempt = 0; attempt < Math.min(maxRetries, GEMINI_API_KEYS.length); attempt++) {
+    try {
+      const apiKey = getNextGeminiKey();
+      const ai = new GoogleGenAI({ apiKey });
+      const result = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt
+      });
+      return result.text || '';
+    } catch (error: any) {
+      console.error(`Gemini key ${currentKeyIndex} failed:`, error.message);
+      errors.push(error);
+      // Continue to next key
+    }
+  }
+  
+  throw new Error(`All ${GEMINI_API_KEYS.length} Gemini API keys failed. Last errors: ${errors.map(e => e.message).join('; ')}`);
+}
 
 const PRICING = {
   free: { amount: 0, name: "Free Plan" },
@@ -1418,17 +1455,10 @@ Write the complete narrative for: ${section.title}
 Remember: Write FULL prose content for this section. No outlines or placeholders. Use ALL relevant data above.`;
 
       try {
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: sectionSystemPrompt },
-            { role: "user", content: sectionUserPrompt },
-          ],
-          temperature: 0.6,
-          max_tokens: section.maxTokens,
-        });
+        // Use Gemini with 4-key rotation for business plan generation
+        const fullPrompt = `${sectionSystemPrompt}\n\n${sectionUserPrompt}`;
+        const sectionContent = await callGeminiWithRotation(fullPrompt);
 
-        const sectionContent = completion.choices[0]?.message?.content || "";
         generatedSections.push(`\n\n## ${section.title}\n\n${sectionContent}`);
         
         console.log(`✓ Section ${i + 1} complete (${sectionContent.length} chars)`);
@@ -1915,17 +1945,11 @@ Respond in JSON format:
   ]
 }`;
 
-      const openai = await import("openai");
-      const client = new openai.default({ apiKey: process.env.OPENAI_API_KEY });
+      const responseText = await callGeminiWithRotation(prompt + "\n\nRespond ONLY with valid JSON, no markdown formatting.");
       
-      const response = await client.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-        temperature: 0.7
-      });
-
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      // Clean up any markdown formatting from the response
+      const cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const result = JSON.parse(cleanedResponse);
       result.trend = 'stable';
       
       res.json(result);
@@ -1954,16 +1978,9 @@ Provide a more compelling, visa-focused version that:
 
 Keep it concise but impactful. Return only the enhanced text.`;
 
-      const openai = await import("openai");
-      const client = new openai.default({ apiKey: process.env.OPENAI_API_KEY });
-      
-      const response = await client.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7
-      });
+      const responseText = await callGeminiWithRotation(prompt);
 
-      res.json({ suggestion: response.choices[0].message.content });
+      res.json({ suggestion: responseText });
     } catch (error) {
       console.error("Coach enhance error:", error);
       res.status(500).json({ error: "Failed to enhance" });
@@ -1991,16 +2008,9 @@ Provide a helpful, specific answer focused on:
 
 Keep your response concise (2-3 paragraphs max) but actionable.`;
 
-      const openai = await import("openai");
-      const client = new openai.default({ apiKey: process.env.OPENAI_API_KEY });
-      
-      const response = await client.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7
-      });
+      const responseText = await callGeminiWithRotation(prompt);
 
-      res.json({ response: response.choices[0].message.content });
+      res.json({ response: responseText });
     } catch (error) {
       console.error("Coach ask error:", error);
       res.status(500).json({ error: "Failed to answer" });
@@ -2112,41 +2122,16 @@ EXAMPLES OF GOOD RESPONSES:
 - "I notice you mentioned 3 direct competitors - excellent. Adding HOW you differentiate from each would strengthen your innovation case."
 - "The 18-month breakeven timeline is realistic. However, endorsers will want to see the assumptions behind your £45K/month revenue target."`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 200
-      });
-
-      res.json({ feedback: response.choices[0].message.content });
-    } catch (error: any) {
-      console.error("Tool feedback error:", error);
-      
-      // Try Gemini fallback - use dedicated GEMINI_API_KEY
+      // Use Gemini with 4-key rotation for guaranteed uptime
       try {
-        const geminiKey = process.env.GEMINI_API_KEY;
-        if (geminiKey) {
-          const { GoogleGenAI } = await import("@google/genai");
-          const ai = new GoogleGenAI({ apiKey: geminiKey });
-          const { toolId, question, answer } = req.body;
-          
-          const result = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: `As a UK Innovator Founder Visa expert, provide brief feedback (2-3 sentences) on this answer.
-Question: ${question}
-Answer: ${answer}
-Tool: ${toolId}
-Focus on specificity and what endorsers look for. Be direct and reference their actual answer.`
-          });
-          
-          res.json({ feedback: result.text });
-          return;
-        }
-      } catch (geminiError) {
-        console.error("Gemini fallback also failed:", geminiError);
+        const feedback = await callGeminiWithRotation(prompt);
+        res.json({ feedback });
+      } catch (error: any) {
+        console.error("Tool feedback error:", error);
+        res.status(500).json({ error: "Failed to generate feedback" });
       }
-      
+    } catch (error: any) {
+      console.error("Tool feedback outer error:", error);
       res.status(500).json({ error: "Failed to generate feedback" });
     }
   });
@@ -4235,8 +4220,12 @@ Focus on specificity and what endorsers look for. Be direct and reference their 
         stripe: {
           secretKey: process.env.STRIPE_SECRET_KEY ? 'Configured' : 'Not configured',
         },
-        openai: {
-          apiKey: process.env.OPENAI_API_KEY ? 'Configured' : 'Not configured',
+        gemini: {
+          apiKey1: process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured',
+          apiKey2: process.env.GEMINI_API_KEY_2 ? 'Configured' : 'Not configured',
+          apiKey3: process.env.GEMINI_API_KEY_3 ? 'Configured' : 'Not configured',
+          apiKey4: process.env.GEMINI_API_KEY_4 ? 'Configured' : 'Not configured',
+          totalKeys: GEMINI_API_KEYS.length,
         },
         google: {
           clientId: process.env.GOOGLE_CLIENT_ID ? 'Configured' : 'Not configured',
@@ -7301,47 +7290,14 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
 
       let responseText: string | null = null;
 
-      // Try OpenAI first
-      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-      if (openaiKey) {
-        try {
-          const OpenAI = (await import("openai")).default;
-          const openai = new OpenAI({ apiKey: openaiKey });
-          
-          const completion = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: userPrompt }
-            ],
-            max_tokens: 1200
-          });
-
-          responseText = completion.choices[0]?.message?.content || null;
-        } catch (openaiError: any) {
-          console.log("OpenAI failed, trying Gemini fallback:", openaiError?.message || openaiError);
-        }
+      // Use Gemini with 4-key rotation for guaranteed uptime
+      try {
+        responseText = await callGeminiWithRotation(`${systemPrompt}\n\nUser query: ${userPrompt}`);
+      } catch (geminiError: any) {
+        console.log("Gemini rotation failed:", geminiError?.message || geminiError);
       }
 
-      // Fallback to Gemini if OpenAI failed or unavailable - prefer user's GEMINI_API_KEY
-      const geminiKey = process.env.GEMINI_API_KEY || process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-      if (!responseText && geminiKey) {
-        try {
-          const { GoogleGenAI } = await import("@google/genai");
-          const genai = new GoogleGenAI({ apiKey: geminiKey });
-          
-          const result = await genai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: `${systemPrompt}\n\nUser query: ${userPrompt}`
-          });
-          
-          responseText = result.text || null;
-        } catch (geminiError: any) {
-          console.log("Gemini also failed:", geminiError?.message || geminiError);
-        }
-      }
-
-      // If we got a response from either AI, return it
+      // If we got a response from Gemini, return it
       if (responseText) {
         res.json(processAIResponse(responseText));
         return;
@@ -7449,55 +7405,15 @@ Reference actual visa requirements where relevant.`;
       
       let output: string | null = null;
 
-      // Try OpenAI first
-      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-      if (openaiKey) {
-        try {
-          console.log(`[Autopilot] Attempting OpenAI for step: ${stepId}`);
-          const OpenAI = (await import("openai")).default;
-          const openai = new OpenAI({ apiKey: openaiKey });
-          
-          const completion = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: userMessage }
-            ],
-            max_tokens: 1200,
-            temperature: 0.7
-          });
-
-          output = completion.choices[0]?.message?.content || null;
-          if (output) {
-            console.log(`[Autopilot] OpenAI success for step: ${stepId}, output length: ${output.length}`);
-          }
-        } catch (openaiError: any) {
-          console.error(`[Autopilot] OpenAI failed for step ${stepId}:`, openaiError?.message || openaiError);
+      // Use Gemini with 4-key rotation for guaranteed uptime
+      try {
+        console.log(`[Autopilot] Attempting Gemini (4-key rotation) for step: ${stepId}`);
+        output = await callGeminiWithRotation(`${systemPrompt}\n\n${userMessage}`);
+        if (output) {
+          console.log(`[Autopilot] Gemini success for step: ${stepId}, output length: ${output.length}`);
         }
-      } else {
-        console.log("[Autopilot] No OpenAI key available");
-      }
-
-      // Fallback to Gemini - prefer user's GEMINI_API_KEY over integration key
-      const geminiKey = process.env.GEMINI_API_KEY || process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-      if (!output && geminiKey) {
-        try {
-          console.log(`[Autopilot] Attempting Gemini fallback for step: ${stepId}`);
-          const { GoogleGenAI } = await import("@google/genai");
-          const genai = new GoogleGenAI({ apiKey: geminiKey });
-          
-          const result = await genai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: `${systemPrompt}\n\n${userMessage}`
-          });
-          
-          output = result.text || null;
-          if (output) {
-            console.log(`[Autopilot] Gemini success for step: ${stepId}, output length: ${output.length}`);
-          }
-        } catch (geminiError: any) {
-          console.error(`[Autopilot] Gemini also failed for step ${stepId}:`, geminiError?.message || geminiError);
-        }
+      } catch (geminiError: any) {
+        console.error(`[Autopilot] Gemini rotation failed for step ${stepId}:`, geminiError?.message || geminiError);
       }
 
       // Calculate score based on content quality
@@ -7560,23 +7476,14 @@ Founder Profile:
 Respond as this founder would, matching their communication style and expertise.
 Keep responses focused, professional, and relevant to UK visa requirements.`;
 
-      if (process.env.OPENAI_API_KEY) {
-        const OpenAI = (await import("openai")).default;
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: question }
-          ],
-          max_tokens: 500
-        });
-
+      // Use Gemini with 4-key rotation for guaranteed uptime
+      try {
+        const responseText = await callGeminiWithRotation(`${systemPrompt}\n\nQuestion: ${question}`);
         res.json({
-          response: completion.choices[0]?.message?.content || "I would approach this by focusing on our unique value proposition and UK market opportunity."
+          response: responseText || "I would approach this by focusing on our unique value proposition and UK market opportunity."
         });
-      } else {
+      } catch (error: any) {
+        console.log("Gemini rotation failed for neural twin:", error?.message);
         res.json({
           response: `As the founder of ${profile.businessName}, I would highlight our innovative approach in the ${profile.industry} sector and our commitment to creating jobs in the UK economy.`
         });
@@ -7606,7 +7513,7 @@ Keep responses focused, professional, and relevant to UK visa requirements.`;
       }
 
       // Check if AI is available - if not, return error instead of fake scores
-      if (!process.env.OPENAI_API_KEY && !process.env.GEMINI_API_KEY) {
+      if (GEMINI_API_KEYS.length === 0) {
         return res.json({
           score: 0,
           feedback: "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this problem persists, please contact support@ukvisaassistant.com for assistance.",
@@ -7658,22 +7565,9 @@ FORMAT YOUR RESPONSE AS:
 
 BE HARSH BUT FAIR. This is visa preparation - false confidence could lead to rejection.`;
 
-      // Use Gemini exclusively for evaluation
-      if (!process.env.GEMINI_API_KEY) {
-        return res.json({
-          score: 0,
-          feedback: "**Evaluation Unavailable.** AI evaluation service is not configured. Please contact support@ukvisaassistant.com for assistance.",
-          error: true
-        });
-      }
-
+      // Use Gemini with 4-key rotation for evaluation
       try {
-        const { GoogleGenerativeAI } = await import("@google/genai");
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        
-        const result = await model.generateContent(`${systemPrompt}\n\nQUESTION ASKED: "${question}"\n\nFOUNDER'S RESPONSE (${wordCount} words):\n"${response}"`);
-        const feedbackText = result.response.text();
+        const feedbackText = await callGeminiWithRotation(`${systemPrompt}\n\nQUESTION ASKED: "${question}"\n\nFOUNDER'S RESPONSE (${wordCount} words):\n"${response}"`);
         
         if (!feedbackText) {
           throw new Error("Empty AI response");
@@ -7781,23 +7675,15 @@ Return a JSON object with:
 - suggestions: Array of improvement suggestions
 - wordCount: Total word count`;
 
-      if (process.env.OPENAI_API_KEY) {
-        const OpenAI = (await import("openai")).default;
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: transcript }
-          ],
-          response_format: { type: "json_object" },
-          max_tokens: 2000
-        });
-
-        const result = JSON.parse(completion.choices[0]?.message?.content || "{}");
+      // Use Gemini with 4-key rotation
+      try {
+        const jsonPrompt = `${systemPrompt}\n\nTranscript: ${transcript}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
+        const responseText = await callGeminiWithRotation(jsonPrompt);
+        const cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const result = JSON.parse(cleanedResponse);
         res.json(result);
-      } else {
+      } catch (error: any) {
+        console.log("Gemini failed for voice-to-document:", error?.message);
         // Fallback response
         const sections = template.sections.map((heading) => ({
           heading,
@@ -7931,23 +7817,15 @@ Return a JSON object with:
 
       const systemPrompt = `You are a UK patent attorney specialist. Generate a comprehensive patent blueprint for the following invention. Return JSON with: title, abstract (150 words), technicalField, backgroundProblem, solutionSummary, claims (array of 5 patent claims), advantages (array of 4), diagrams (array of 3 objects with name and description).`;
 
-      if (process.env.OPENAI_API_KEY) {
-        const OpenAI = (await import("openai")).default;
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: `Title: ${title}\nDescription: ${description}\nTechnical Details: ${technical || 'Not provided'}` }
-          ],
-          response_format: { type: "json_object" },
-          max_tokens: 1500
-        });
-
-        const result = JSON.parse(completion.choices[0]?.message?.content || "{}");
+      // Use Gemini with 4-key rotation
+      try {
+        const jsonPrompt = `${systemPrompt}\n\nTitle: ${title}\nDescription: ${description}\nTechnical Details: ${technical || 'Not provided'}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
+        const responseText = await callGeminiWithRotation(jsonPrompt);
+        const cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const result = JSON.parse(cleanedResponse);
         res.json({ blueprint: result });
-      } else {
+      } catch (error: any) {
+        console.log("Gemini failed for patent blueprint:", error?.message);
         res.json({
           blueprint: {
             title: `System and Method for ${title}`,
@@ -8073,23 +7951,15 @@ Each strategy should be 1-2 sentences and directly actionable.
 Return a JSON object with:
 - remediations: Array of 5 remediation strategy strings`;
 
-      if (process.env.OPENAI_API_KEY) {
-        const OpenAI = (await import("openai")).default;
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: `Risk: ${risk.name}\nCategory: ${risk.category}\nDescription: ${risk.description}\nCurrent Mitigation: ${risk.mitigation}` }
-          ],
-          response_format: { type: "json_object" },
-          max_tokens: 500
-        });
-
-        const result = JSON.parse(completion.choices[0]?.message?.content || "{}");
+      // Use Gemini with 4-key rotation
+      try {
+        const jsonPrompt = `${systemPrompt}\n\nRisk: ${risk.name}\nCategory: ${risk.category}\nDescription: ${risk.description}\nCurrent Mitigation: ${risk.mitigation}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
+        const responseText = await callGeminiWithRotation(jsonPrompt);
+        const cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const result = JSON.parse(cleanedResponse);
         res.json(result);
-      } else {
+      } catch (error: any) {
+        console.log("Gemini failed for auto-remediation:", error?.message);
         const remediations: Record<string, string[]> = {
           market: [
             "Conduct a detailed UK competitor analysis with differentiation matrix",
@@ -8177,23 +8047,15 @@ Return a JSON object with:
 - strengths: Array of strength statements
 - recommendations: Array of improvement recommendations`;
 
-      if (process.env.OPENAI_API_KEY) {
-        const OpenAI = (await import("openai")).default;
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: combinedContent.slice(0, 15000) }
-          ],
-          response_format: { type: "json_object" },
-          max_tokens: 2000
-        });
-
-        const result = JSON.parse(completion.choices[0]?.message?.content || "{}");
+      // Use Gemini with 4-key rotation
+      try {
+        const jsonPrompt = `${systemPrompt}\n\nDocuments:\n${combinedContent.slice(0, 15000)}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
+        const responseText = await callGeminiWithRotation(jsonPrompt);
+        const cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const result = JSON.parse(cleanedResponse);
         res.json(result);
-      } else {
+      } catch (error: any) {
+        console.log("Gemini failed for document scan:", error?.message);
         // Fallback response with simulated analysis
         res.json({
           overallScore: Math.floor(Math.random() * 25) + 55,
