@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Smartphone, Share2, Save, Lightbulb, Calendar, Download, RotateCcw, FileText, FileType, Cloud, Check, RefreshCw } from "lucide-react";
+import { Smartphone, Share2, Save, Lightbulb, Calendar, Download, RotateCcw, FileText, FileType, Cloud, Check, RefreshCw, FileType2 } from "lucide-react";
 import { useState } from "react";
 import { SessionHandoffDialog } from "./SessionHandoffDialog";
 import { ShareSheet } from "./ShareSheet";
+import { ExportFormatDialog } from "./ExportFormatDialog";
 import { useSessionHandoff } from "@/hooks/useSessionHandoff";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -19,6 +20,12 @@ interface AutoSaveStatus {
   showNotification?: boolean;
 }
 
+interface ExportSection {
+  title: string;
+  content: string;
+  score?: number;
+}
+
 interface ToolUtilityBarProps {
   toolId: string;
   toolName: string;
@@ -32,6 +39,9 @@ interface ToolUtilityBarProps {
   getSerializedState?: () => any;
   onGenerateShareableLink?: () => Promise<string>;
   autoSaveStatus?: AutoSaveStatus;
+  exportSections?: ExportSection[];
+  exportTitle?: string;
+  exportSubtitle?: string;
 }
 
 export function ToolUtilityBar({
@@ -47,9 +57,13 @@ export function ToolUtilityBar({
   getSerializedState,
   onGenerateShareableLink,
   autoSaveStatus,
+  exportSections,
+  exportTitle,
+  exportSubtitle,
 }: ToolUtilityBarProps) {
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const { handoffData, isGenerating, generateQRCode } = useSessionHandoff(toolId);
   const isMobile = useIsMobile();
 
@@ -122,7 +136,22 @@ export function ToolUtilityBar({
             </Tooltip>
           )}
 
-          {(onExport || onExportPdf || onExportWord) && (
+          {exportSections && exportSections.length > 0 ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  data-testid="button-export-report"
+                  onClick={() => setExportDialogOpen(true)}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Download your results as PDF, Word, or TXT</TooltipContent>
+            </Tooltip>
+          ) : (onExport || onExportPdf || onExportWord) && (
             <DropdownMenu>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -137,7 +166,7 @@ export function ToolUtilityBar({
                     </Button>
                   </DropdownMenuTrigger>
                 </TooltipTrigger>
-                <TooltipContent>Download your results as PDF or Word document</TooltipContent>
+                <TooltipContent>Download your results as PDF, Word, or TXT</TooltipContent>
               </Tooltip>
               <DropdownMenuContent align="start">
                 {(onExportPdf || onExport) && (
@@ -154,7 +183,7 @@ export function ToolUtilityBar({
                     onClick={onExportWord}
                     data-testid="button-export-word"
                   >
-                    <FileType className="h-4 w-4 mr-2" />
+                    <FileType2 className="h-4 w-4 mr-2" />
                     Export as Word (.docx)
                   </DropdownMenuItem>
                 )}
@@ -255,6 +284,17 @@ export function ToolUtilityBar({
         toolName={toolName}
         onGenerateShareableLink={onGenerateShareableLink}
       />
+
+      {exportSections && exportSections.length > 0 && (
+        <ExportFormatDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          title={exportTitle || toolName}
+          subtitle={exportSubtitle}
+          filename={`${toolId}-report-${new Date().toISOString().split('T')[0]}`}
+          sections={exportSections}
+        />
+      )}
     </>
   );
 }
