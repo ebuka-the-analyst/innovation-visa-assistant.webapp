@@ -1,9 +1,10 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, CheckCircle2, ArrowRight } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ArrowRight, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 import FeatureNavigation from "@/components/FeatureNavigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const risks = [
   {
@@ -34,6 +35,41 @@ const risks = [
 
 export default function RFEDefenceLab() {
   const [selectedRisk, setSelectedRisk] = useState(risks[0]);
+  const [actionPlan, setActionPlan] = useState<string[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("rfe-action-plan");
+    if (saved) {
+      try {
+        setActionPlan(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse action plan from localStorage");
+      }
+    }
+  }, []);
+
+  const isInActionPlan = actionPlan.includes(selectedRisk.risk);
+
+  const addToActionPlan = () => {
+    if (isInActionPlan) {
+      const updated = actionPlan.filter(r => r !== selectedRisk.risk);
+      setActionPlan(updated);
+      localStorage.setItem("rfe-action-plan", JSON.stringify(updated));
+      toast({
+        title: "Removed from Action Plan",
+        description: "The mitigation strategy has been removed from your action plan.",
+      });
+    } else {
+      const updated = [...actionPlan, selectedRisk.risk];
+      setActionPlan(updated);
+      localStorage.setItem("rfe-action-plan", JSON.stringify(updated));
+      toast({
+        title: "Added to Action Plan",
+        description: "The mitigation strategy has been added to your action plan.",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -113,9 +149,23 @@ export default function RFEDefenceLab() {
                     <p className="text-sm font-semibold mb-2">Mitigation Strategy</p>
                     <p className="text-sm text-muted-foreground">{selectedRisk.mitigation}</p>
                   </div>
-                  <Button className="w-full gap-2">
-                    <ArrowRight className="w-4 h-4" />
-                    Add to Action Plan
+                  <Button 
+                    className="w-full gap-2"
+                    variant={isInActionPlan ? "outline" : "default"}
+                    onClick={addToActionPlan}
+                    data-testid="button-add-to-action-plan"
+                  >
+                    {isInActionPlan ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        Added to Action Plan
+                      </>
+                    ) : (
+                      <>
+                        <ArrowRight className="w-4 h-4" />
+                        Add to Action Plan
+                      </>
+                    )}
                   </Button>
                 </div>
               </Card>
