@@ -124,7 +124,13 @@ import {
   Brain,
   TrendingUp as TrendingUpIcon,
   Gauge,
-  FileBarChart
+  FileBarChart,
+  Wifi,
+  MousePointerClick,
+  Timer,
+  Tablet,
+  Monitor,
+  Wrench
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Link } from "wouter";
@@ -456,6 +462,15 @@ const formatNumber = (num: number): string => {
 const getTimeUntilRefresh = (lastUpdated: string): number => {
   const secondsSinceUpdate = differenceInSeconds(new Date(), new Date(lastUpdated));
   return Math.max(0, 30 - secondsSinceUpdate);
+};
+
+const getCountryFlag = (countryCode: string): string => {
+  if (!countryCode) return '🌍';
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
 };
 
 const exportToCSV = (data: unknown[], filename: string): void => {
@@ -932,6 +947,117 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/activity-log'],
     enabled: !!user?.isAdmin,
     refetchInterval: REFRESH_INTERVAL,
+  });
+
+  // PhD-Level Real-Time Activity Overview
+  const { data: activityOverview, isLoading: activityOverviewLoading } = useQuery<{
+    realtime: {
+      activeUsersNow: number;
+      sessionsLastHour: number;
+      pageViewsToday: number;
+      eventsToday: number;
+      avgSessionDuration: number;
+    };
+    topPages: Array<{ page_path: string; views: string }>;
+    deviceBreakdown: Array<{ device_type: string; count: string }>;
+    browserBreakdown: Array<{ browser_name: string; count: string }>;
+    geoDistribution: Array<{ country: string; country_code: string; sessions: string }>;
+    hourlyActivity: Array<{ hour: string; page_views: string }>;
+    eventBreakdown: Array<{ event_type: string; event_category: string; count: string }>;
+    toolUsage: Array<{ tool_id: string; tool_category: string; usage_count: string }>;
+    generatedAt: string;
+  }>({
+    queryKey: ['/api/admin/activity/overview'],
+    enabled: !!user?.isAdmin && activeSection === 'realtime',
+    refetchInterval: 15000,
+  });
+
+  // Live Activity Feed
+  const { data: liveFeed, isLoading: liveFeedLoading } = useQuery<{
+    activities: Array<{
+      id: string;
+      activity_type: 'page_view' | 'event';
+      page_path?: string;
+      page_title?: string;
+      event_type?: string;
+      event_category?: string;
+      event_action?: string;
+      event_label?: string;
+      tool_id?: string;
+      occurred_at: string;
+      email: string;
+      first_name?: string;
+      last_name?: string;
+      subscription_tier?: string;
+      device_type?: string;
+      browser_name?: string;
+      country?: string;
+      city?: string;
+    }>;
+    count: number;
+    since: string;
+  }>({
+    queryKey: ['/api/admin/activity/live-feed'],
+    enabled: !!user?.isAdmin && activeSection === 'realtime',
+    refetchInterval: 10000,
+  });
+
+  // Active Sessions
+  const { data: activeSessions, isLoading: activeSessionsLoading } = useQuery<{
+    sessions: Array<{
+      id: string;
+      user_id: string;
+      session_started_at: string;
+      last_seen_at: string;
+      device_type?: string;
+      browser_name?: string;
+      os_name?: string;
+      country?: string;
+      city?: string;
+      current_page?: string;
+      page_view_count: number;
+      event_count: number;
+      total_duration_seconds: number;
+      email: string;
+      first_name?: string;
+      last_name?: string;
+      subscription_tier?: string;
+      is_admin?: boolean;
+      profile_image_url?: string;
+    }>;
+    count: number;
+    activeOnly: boolean;
+  }>({
+    queryKey: ['/api/admin/activity/sessions', { active: 'true' }],
+    enabled: !!user?.isAdmin && activeSection === 'realtime',
+    refetchInterval: 10000,
+  });
+
+  // Users with Activity (for Active Users table)
+  const { data: usersWithActivity, isLoading: usersWithActivityLoading } = useQuery<{
+    users: Array<{
+      id: string;
+      email: string;
+      first_name?: string;
+      last_name?: string;
+      subscription_tier?: string;
+      is_email_verified: boolean;
+      is_admin?: boolean;
+      created_at: string;
+      last_activity_at?: string;
+      profile_image_url?: string;
+      plan_count?: string;
+      last_session_started?: string;
+      last_seen_at?: string;
+      last_device?: string;
+      last_country?: string;
+      current_page?: string;
+      is_online: boolean;
+    }>;
+  }>({
+    queryKey: ['/api/admin/users/activity'],
+    enabled: !!user?.isAdmin && (activeSection === 'realtime' || activeSection === 'users'),
+    refetchInterval: 30000,
   });
 
   // Audit log
@@ -3044,6 +3170,308 @@ export default function AdminDashboard() {
                               </Card>
                             </div>
                           </div>
+
+                          {/* PhD-Level Real-Time Analytics */}
+                          {activityOverview && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                              <Card className="hover-elevate bg-gradient-to-br from-green-500/5 to-transparent">
+                                <CardContent className="p-4 text-center">
+                                  <div className="relative mx-auto mb-2 h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                                    <Users className="h-5 w-5 text-green-500" />
+                                    <motion.div
+                                      className="absolute inset-0 rounded-full border-2 border-green-500/30"
+                                      animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                                      transition={{ duration: 2, repeat: Infinity }}
+                                    />
+                                  </div>
+                                  <p className="text-2xl font-bold text-green-500">{activityOverview.realtime?.activeUsersNow || 0}</p>
+                                  <p className="text-xs text-muted-foreground">Active Now</p>
+                                </CardContent>
+                              </Card>
+                              <Card className="hover-elevate">
+                                <CardContent className="p-4 text-center">
+                                  <Wifi className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                                  <p className="text-2xl font-bold">{activityOverview.realtime?.sessionsLastHour || 0}</p>
+                                  <p className="text-xs text-muted-foreground">Sessions (1h)</p>
+                                </CardContent>
+                              </Card>
+                              <Card className="hover-elevate">
+                                <CardContent className="p-4 text-center">
+                                  <Eye className="h-6 w-6 mx-auto mb-2 text-purple-500" />
+                                  <p className="text-2xl font-bold">{activityOverview.realtime?.pageViewsToday || 0}</p>
+                                  <p className="text-xs text-muted-foreground">Page Views (24h)</p>
+                                </CardContent>
+                              </Card>
+                              <Card className="hover-elevate">
+                                <CardContent className="p-4 text-center">
+                                  <MousePointerClick className="h-6 w-6 mx-auto mb-2 text-orange-500" />
+                                  <p className="text-2xl font-bold">{activityOverview.realtime?.eventsToday || 0}</p>
+                                  <p className="text-xs text-muted-foreground">Events (24h)</p>
+                                </CardContent>
+                              </Card>
+                              <Card className="hover-elevate">
+                                <CardContent className="p-4 text-center">
+                                  <Timer className="h-6 w-6 mx-auto mb-2 text-cyan-500" />
+                                  <p className="text-2xl font-bold">
+                                    {Math.round((activityOverview.realtime?.avgSessionDuration || 0) / 60)}m
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">Avg Session</p>
+                                </CardContent>
+                              </Card>
+                              <Card className="hover-elevate">
+                                <CardContent className="p-4 text-center">
+                                  <Globe className="h-6 w-6 mx-auto mb-2 text-emerald-500" />
+                                  <p className="text-2xl font-bold">{activityOverview.geoDistribution?.length || 0}</p>
+                                  <p className="text-xs text-muted-foreground">Countries</p>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          )}
+
+                          {/* Active Sessions Board */}
+                          {activeSessions && activeSessions.sessions.length > 0 && (
+                            <Card>
+                              <CardHeader>
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <CardTitle className="flex items-center gap-2">
+                                      <Wifi className="h-5 w-5 text-green-500" />
+                                      Active Sessions
+                                      <Badge variant="default" className="bg-green-500 text-white ml-2">
+                                        {activeSessions.count} Live
+                                      </Badge>
+                                    </CardTitle>
+                                    <CardDescription>Currently active user sessions with real-time tracking</CardDescription>
+                                  </div>
+                                </div>
+                              </CardHeader>
+                              <CardContent>
+                                <ScrollArea className="h-[300px]">
+                                  <div className="space-y-3">
+                                    {activeSessions.sessions.slice(0, 20).map((session, index) => (
+                                      <motion.div
+                                        key={session.id}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.05 }}
+                                        className="flex items-center gap-4 p-3 rounded-lg border bg-card hover-elevate"
+                                      >
+                                        <div className="relative">
+                                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span className="text-sm font-bold text-primary">
+                                              {session.email?.charAt(0).toUpperCase()}
+                                            </span>
+                                          </div>
+                                          <motion.div
+                                            className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-background"
+                                            animate={{ scale: [1, 1.2, 1] }}
+                                            transition={{ duration: 2, repeat: Infinity }}
+                                          />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-2">
+                                            <p className="text-sm font-medium truncate">{session.email}</p>
+                                            {session.is_admin && (
+                                              <Badge variant="outline" className="text-xs">Admin</Badge>
+                                            )}
+                                            <Badge variant="secondary" className="text-xs capitalize">
+                                              {session.subscription_tier || 'free'}
+                                            </Badge>
+                                          </div>
+                                          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                            {session.current_page && (
+                                              <span className="flex items-center gap-1">
+                                                <Eye className="h-3 w-3" />
+                                                {session.current_page}
+                                              </span>
+                                            )}
+                                            {session.device_type && (
+                                              <span className="flex items-center gap-1">
+                                                {session.device_type === 'mobile' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
+                                                {session.device_type}
+                                              </span>
+                                            )}
+                                            {session.country && (
+                                              <span className="flex items-center gap-1">
+                                                <Globe className="h-3 w-3" />
+                                                {session.country}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <div className="text-right">
+                                          <p className="text-xs font-medium">{session.page_view_count} pages</p>
+                                          <p className="text-xs text-muted-foreground">
+                                            {Math.round(session.total_duration_seconds / 60)}m session
+                                          </p>
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
+                                </ScrollArea>
+                              </CardContent>
+                            </Card>
+                          )}
+
+                          {/* Analytics Breakdown Row */}
+                          {activityOverview && (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                              {/* Device Distribution */}
+                              <Card>
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-sm flex items-center gap-2">
+                                    <Monitor className="h-4 w-4" />
+                                    Device Distribution
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-3">
+                                    {activityOverview.deviceBreakdown?.map((device) => {
+                                      const total = activityOverview.deviceBreakdown?.reduce((acc, d) => acc + parseInt(d.count), 0) || 1;
+                                      const percentage = Math.round((parseInt(device.count) / total) * 100);
+                                      const Icon = device.device_type === 'mobile' ? Smartphone : 
+                                                   device.device_type === 'tablet' ? Tablet : Monitor;
+                                      return (
+                                        <div key={device.device_type} className="space-y-1">
+                                          <div className="flex items-center justify-between text-sm">
+                                            <span className="flex items-center gap-2">
+                                              <Icon className="h-4 w-4 text-muted-foreground" />
+                                              <span className="capitalize">{device.device_type || 'Unknown'}</span>
+                                            </span>
+                                            <span className="font-medium">{percentage}%</span>
+                                          </div>
+                                          <Progress value={percentage} className="h-2" />
+                                        </div>
+                                      );
+                                    })}
+                                    {(!activityOverview.deviceBreakdown || activityOverview.deviceBreakdown.length === 0) && (
+                                      <p className="text-sm text-muted-foreground text-center py-4">
+                                        No device data yet
+                                      </p>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+
+                              {/* Browser Distribution */}
+                              <Card>
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-sm flex items-center gap-2">
+                                    <Globe className="h-4 w-4" />
+                                    Browser Usage
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-3">
+                                    {activityOverview.browserBreakdown?.slice(0, 5).map((browser) => {
+                                      const total = activityOverview.browserBreakdown?.reduce((acc, b) => acc + parseInt(b.count), 0) || 1;
+                                      const percentage = Math.round((parseInt(browser.count) / total) * 100);
+                                      return (
+                                        <div key={browser.browser_name} className="space-y-1">
+                                          <div className="flex items-center justify-between text-sm">
+                                            <span>{browser.browser_name || 'Unknown'}</span>
+                                            <span className="font-medium">{percentage}%</span>
+                                          </div>
+                                          <Progress value={percentage} className="h-2" />
+                                        </div>
+                                      );
+                                    })}
+                                    {(!activityOverview.browserBreakdown || activityOverview.browserBreakdown.length === 0) && (
+                                      <p className="text-sm text-muted-foreground text-center py-4">
+                                        No browser data yet
+                                      </p>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+
+                              {/* Geographic Distribution */}
+                              <Card>
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-sm flex items-center gap-2">
+                                    <Globe className="h-4 w-4" />
+                                    Top Countries
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-2">
+                                    {activityOverview.geoDistribution?.slice(0, 6).map((geo, index) => (
+                                      <div key={geo.country_code || index} className="flex items-center justify-between p-2 rounded hover:bg-muted/50">
+                                        <span className="flex items-center gap-2 text-sm">
+                                          <span className="text-lg">{geo.country_code ? getCountryFlag(geo.country_code) : '🌍'}</span>
+                                          <span>{geo.country || 'Unknown'}</span>
+                                        </span>
+                                        <Badge variant="secondary">{geo.sessions} sessions</Badge>
+                                      </div>
+                                    ))}
+                                    {(!activityOverview.geoDistribution || activityOverview.geoDistribution.length === 0) && (
+                                      <p className="text-sm text-muted-foreground text-center py-4">
+                                        No geographic data yet
+                                      </p>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          )}
+
+                          {/* Top Pages & Tool Usage */}
+                          {activityOverview && (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              {/* Top Pages */}
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <TrendingUp className="h-5 w-5" />
+                                    Top Pages (24h)
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-3">
+                                    {activityOverview.topPages?.slice(0, 8).map((page, index) => (
+                                      <div key={page.page_path} className="flex items-center gap-3">
+                                        <span className="text-muted-foreground font-medium w-6">#{index + 1}</span>
+                                        <span className="flex-1 text-sm truncate">{page.page_path}</span>
+                                        <Badge variant="outline">{page.views} views</Badge>
+                                      </div>
+                                    ))}
+                                    {(!activityOverview.topPages || activityOverview.topPages.length === 0) && (
+                                      <p className="text-sm text-muted-foreground text-center py-4">
+                                        No page view data yet
+                                      </p>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+
+                              {/* Tool Usage */}
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Wrench className="h-5 w-5" />
+                                    Tool Usage (7d)
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-3">
+                                    {activityOverview.toolUsage?.slice(0, 8).map((tool, index) => (
+                                      <div key={tool.tool_id} className="flex items-center gap-3">
+                                        <span className="text-muted-foreground font-medium w-6">#{index + 1}</span>
+                                        <span className="flex-1 text-sm truncate">{tool.tool_id?.replace(/-/g, ' ')}</span>
+                                        <Badge variant="secondary" className="text-xs capitalize">{tool.tool_category}</Badge>
+                                        <Badge variant="outline">{tool.usage_count}</Badge>
+                                      </div>
+                                    ))}
+                                    {(!activityOverview.toolUsage || activityOverview.toolUsage.length === 0) && (
+                                      <p className="text-sm text-muted-foreground text-center py-4">
+                                        No tool usage data yet
+                                      </p>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          )}
 
                           {/* Activity Insights */}
                           <Card>
