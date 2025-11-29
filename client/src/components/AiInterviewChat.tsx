@@ -447,7 +447,6 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
         setAnsweredQuestionIds(saved.answeredIds);
         setIsInitialized(true);
         onSessionUpdate?.(saved.session);
-        console.log('Restored interview session from localStorage');
       } else {
         initializeSession();
       }

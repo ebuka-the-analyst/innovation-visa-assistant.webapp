@@ -151,7 +151,7 @@ export function RegulatoryCopilot({ onAlert }: RegulatoryCopilotProps) {
         setUpdates(data.updates);
       }
     } catch (error) {
-      console.log("Using cached regulatory data");
+      // Using cached regulatory data on error
     }
     setLastUpdated(new Date());
     setIsRefreshing(false);

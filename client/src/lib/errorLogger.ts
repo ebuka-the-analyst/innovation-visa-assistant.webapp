@@ -37,10 +37,8 @@ class ErrorLogger {
         body: JSON.stringify(errorData),
         credentials: 'include',
       });
-
-      console.log('[ErrorLogger] Error logged successfully:', data.message);
     } catch (err) {
-      console.error('[ErrorLogger] Failed to log error:', err);
+      // Silent fail - avoid console noise in production
     } finally {
       this.isLogging = false;
       this.processQueue();

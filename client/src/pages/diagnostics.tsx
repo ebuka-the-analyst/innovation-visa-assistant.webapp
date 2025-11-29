@@ -64,8 +64,6 @@ export default function DiagnosticsPage() {
 
   // Get planId from URL or localStorage
   const planId = new URLSearchParams(window.location.search).get("planId") || localStorage.getItem("lastPlanId");
-  
-  console.log("Diagnostics: planId =", planId);
 
   // Fetch all diagnostic data in parallel
   const { data: endorserData, isLoading: endorserLoading, error: endorserError } = useQuery<{ endorsers: EndorserResult[]; scores: any[] }>({
@@ -105,13 +103,6 @@ export default function DiagnosticsPage() {
 
   const errors = [endorserError, routeError, teamError, tractionError, ruleError].filter(Boolean);
   const isLoading = endorserLoading || routeLoading || teamLoading || tractionLoading || ruleLoading;
-
-  console.log("Diagnostics: isLoading =", isLoading, "errors =", errors.length);
-  console.log("Diagnostics: endorserData =", endorserData, "endorsers isArray?", endorserData ? Array.isArray(endorserData.endorsers) : "no endorserData");
-  console.log("Diagnostics: ruleData =", ruleData, "applicableRules isArray?", ruleData ? Array.isArray(ruleData.applicableRules) : "no ruleData");
-  console.log("Diagnostics: routeData =", routeData, "viableRoutes isArray?", routeData ? Array.isArray(routeData.viableRoutes) : "no routeData");
-  console.log("Diagnostics: teamData =", teamData);
-  console.log("Diagnostics: tractionData =", tractionData);
 
   useEffect(() => {
     if (!planId) {

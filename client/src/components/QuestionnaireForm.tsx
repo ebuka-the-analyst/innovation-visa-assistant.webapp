@@ -386,8 +386,6 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           supportingEvidence: formData.supportingEvidence || '',
         };
 
-        console.log('Submitting enhanced questionnaire:', data);
-        
         const response = await fetch('/api/questionnaire/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -395,10 +393,8 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
         });
 
         const responseData = await response.json();
-        console.log('Server response:', responseData);
 
         if (!response.ok) {
-          console.error('Validation errors:', responseData.details);
           throw new Error(responseData.error || 'Validation failed');
         }
 
