@@ -6206,70 +6206,84 @@ export default function AdminDashboard() {
                             </CardContent>
                           </Card>
 
-                          {/* Completion Trends */}
+                          {/* Completion Trends - Real Data */}
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <Card>
                               <CardHeader>
-                                <CardTitle>Completion Rate Trend</CardTitle>
-                                <CardDescription>Monthly completion rate progression</CardDescription>
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <CardTitle>Current Completion Rate</CardTitle>
+                                    <CardDescription>Real-time plan completion status</CardDescription>
+                                  </div>
+                                  <Badge variant="outline" className="text-green-500 border-green-500/30">Live</Badge>
+                                </div>
                               </CardHeader>
                               <CardContent>
-                                <ResponsiveContainer width="100%" height={280}>
-                                  <RechartsAreaChart data={[
-                                    { month: 'Jun', rate: 62 },
-                                    { month: 'Jul', rate: 65 },
-                                    { month: 'Aug', rate: 68 },
-                                    { month: 'Sep', rate: 70 },
-                                    { month: 'Oct', rate: 72 },
-                                    { month: 'Nov', rate: 73.4 },
-                                  ]}>
-                                    <defs>
-                                      <linearGradient id="completionGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                                      </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                                    <XAxis dataKey="month" stroke="hsl(var(--foreground))" fontSize={12} />
-                                    <YAxis stroke="hsl(var(--foreground))" fontSize={12} domain={[50, 100]} tickFormatter={(v) => `${v}%`} />
-                                    <RechartsTooltip
-                                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
-                                      formatter={(value: number) => [`${value}%`, 'Completion Rate']}
-                                    />
-                                    <Area type="monotone" dataKey="rate" stroke="#22c55e" fill="url(#completionGradient)" strokeWidth={3} />
-                                  </RechartsAreaChart>
-                                </ResponsiveContainer>
+                                <div className="flex flex-col items-center justify-center h-[280px]">
+                                  <div className="relative w-48 h-48">
+                                    <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                      <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
+                                      <circle 
+                                        cx="50" cy="50" r="40" fill="none" 
+                                        stroke="#22c55e" strokeWidth="8"
+                                        strokeDasharray={`${(overviewData.extendedKPIs?.planCompletionRate || 0) * 2.51} 251.2`}
+                                        strokeLinecap="round"
+                                      />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                      <span className="text-4xl font-bold">{overviewData.extendedKPIs?.planCompletionRate || 0}%</span>
+                                      <span className="text-sm text-muted-foreground">Complete</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-4 mt-4 text-sm">
+                                    <div className="text-center">
+                                      <p className="font-bold text-green-500">{overviewData.extendedKPIs?.completedPlans || 0}</p>
+                                      <p className="text-muted-foreground">Completed</p>
+                                    </div>
+                                    <div className="text-center">
+                                      <p className="font-bold">{overviewData.extendedKPIs?.totalPlans || 0}</p>
+                                      <p className="text-muted-foreground">Total Plans</p>
+                                    </div>
+                                  </div>
+                                </div>
                               </CardContent>
                             </Card>
 
                             <Card>
                               <CardHeader>
-                                <CardTitle>Abandonment Analysis</CardTitle>
-                                <CardDescription>Where users drop off in tool completion</CardDescription>
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <CardTitle>Plan Status Overview</CardTitle>
+                                    <CardDescription>Current business plan distribution</CardDescription>
+                                  </div>
+                                  <Badge variant="outline" className="text-blue-500 border-blue-500/30">Real-time</Badge>
+                                </div>
                               </CardHeader>
                               <CardContent>
                                 <div className="space-y-4">
                                   {[
-                                    { stage: 'Started but no input', percent: 8, count: 156 },
-                                    { stage: 'Partial completion (10-50%)', percent: 12, count: 234 },
-                                    { stage: 'Near completion (50-90%)', percent: 5, count: 98 },
-                                    { stage: 'Saved but not exported', percent: 6, count: 117 },
+                                    { stage: 'Completed Plans', count: overviewData.extendedKPIs?.completedPlans || 0, color: 'green' },
+                                    { stage: 'In Progress', count: (overviewData.extendedKPIs?.totalPlans || 0) - (overviewData.extendedKPIs?.completedPlans || 0), color: 'blue' },
                                   ].map((item, index) => (
                                     <motion.div
                                       key={item.stage}
                                       initial={{ opacity: 0 }}
                                       animate={{ opacity: 1 }}
                                       transition={{ delay: index * 0.1 }}
-                                      className="flex items-center gap-4 p-3 rounded-lg bg-red-500/5 border border-red-500/20"
+                                      className={`flex items-center gap-4 p-3 rounded-lg ${item.color === 'green' ? 'bg-green-500/5 border border-green-500/20' : 'bg-blue-500/5 border border-blue-500/20'}`}
                                     >
-                                      <AlertTriangle className="h-5 w-5 text-red-500" />
+                                      <CheckCircle2 className={`h-5 w-5 ${item.color === 'green' ? 'text-green-500' : 'text-blue-500'}`} />
                                       <div className="flex-1">
                                         <p className="font-medium text-sm">{item.stage}</p>
-                                        <p className="text-xs text-muted-foreground">{item.count} sessions</p>
                                       </div>
-                                      <Badge className="bg-red-500/10 text-red-500">{item.percent}%</Badge>
+                                      <Badge className={`${item.color === 'green' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}`}>{item.count}</Badge>
                                     </motion.div>
                                   ))}
+                                  {(overviewData.extendedKPIs?.totalPlans || 0) === 0 && (
+                                    <p className="text-sm text-muted-foreground text-center py-4">
+                                      No business plans created yet. Data will appear as users create plans.
+                                    </p>
+                                  )}
                                 </div>
                               </CardContent>
                             </Card>
@@ -7635,51 +7649,37 @@ export default function AdminDashboard() {
                             ))}
                           </div>
 
-                          {/* MRR Trend Chart */}
+                          {/* MRR Trend Chart - Real Stripe Data */}
                           <Card>
                             <CardHeader>
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle>MRR Growth Analysis</CardTitle>
-                                  <CardDescription>Monthly breakdown with movement analysis</CardDescription>
+                                  <CardTitle>Monthly Revenue (from Stripe)</CardTitle>
+                                  <CardDescription>Real revenue data since launch (Nov 26, 2025)</CardDescription>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                                    <span className="text-xs">New</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-blue-500" />
-                                    <span className="text-xs">Expansion</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                                    <span className="text-xs">Churned</span>
-                                  </div>
-                                </div>
+                                <Badge variant="outline" className="text-green-500 border-green-500/30">
+                                  Live Data
+                                </Badge>
                               </div>
                             </CardHeader>
                             <CardContent>
                               <ResponsiveContainer width="100%" height={350}>
-                                <RechartsBarChart data={[
-                                  { month: 'Jul', new: 320, expansion: 80, churned: -45, net: 355 },
-                                  { month: 'Aug', new: 380, expansion: 120, churned: -60, net: 440 },
-                                  { month: 'Sep', new: 290, expansion: 95, churned: -35, net: 350 },
-                                  { month: 'Oct', new: 410, expansion: 150, churned: -70, net: 490 },
-                                  { month: 'Nov', new: 420, expansion: 180, churned: -87, net: 513 },
-                                ]}>
+                                <RechartsBarChart data={revenueAnalytics?.monthlyTrend || []}>
                                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                                   <XAxis dataKey="month" stroke="hsl(var(--foreground))" fontSize={12} />
-                                  <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickFormatter={(v) => `£${Math.abs(v)}`} />
+                                  <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickFormatter={(v) => `£${v}`} />
                                   <RechartsTooltip
                                     contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
-                                    formatter={(value: number) => [`£${Math.abs(value)}`, '']}
+                                    formatter={(value: number, name: string) => [`£${value.toFixed(2)}`, name === 'revenue' ? 'Revenue' : 'Transactions']}
                                   />
-                                  <Bar dataKey="new" fill="#22c55e" name="New MRR" radius={[4, 4, 0, 0]} />
-                                  <Bar dataKey="expansion" fill="#3b82f6" name="Expansion" radius={[4, 4, 0, 0]} />
-                                  <Bar dataKey="churned" fill="#ef4444" name="Churned" radius={[4, 4, 0, 0]} />
+                                  <Bar dataKey="revenue" fill="#22c55e" name="Revenue" radius={[4, 4, 0, 0]} />
                                 </RechartsBarChart>
                               </ResponsiveContainer>
+                              {(!revenueAnalytics?.monthlyTrend || revenueAnalytics.monthlyTrend.every((m: any) => m.revenue === 0)) && (
+                                <div className="text-center text-muted-foreground mt-4">
+                                  <p className="text-sm">No revenue recorded yet. Revenue will appear here as Stripe payments come in.</p>
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
 
@@ -8224,39 +8224,44 @@ export default function AdminDashboard() {
                             </CardContent>
                           </Card>
 
-                          {/* LTV Trend & Cohort */}
+                          {/* LTV & Revenue Summary - Real Data */}
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <Card>
                               <CardHeader>
-                                <CardTitle>LTV Trend Over Time</CardTitle>
-                                <CardDescription>Average customer lifetime value progression</CardDescription>
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <CardTitle>Customer Lifetime Value</CardTitle>
+                                    <CardDescription>Real-time LTV from Stripe data</CardDescription>
+                                  </div>
+                                  <Badge variant="outline" className="text-purple-500 border-purple-500/30">Live</Badge>
+                                </div>
                               </CardHeader>
                               <CardContent>
-                                <ResponsiveContainer width="100%" height={300}>
-                                  <RechartsAreaChart data={[
-                                    { month: 'Jun', ltv: 98 },
-                                    { month: 'Jul', ltv: 112 },
-                                    { month: 'Aug', ltv: 125 },
-                                    { month: 'Sep', ltv: 138 },
-                                    { month: 'Oct', ltv: 148 },
-                                    { month: 'Nov', ltv: 156 },
-                                  ]}>
-                                    <defs>
-                                      <linearGradient id="ltvGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
-                                      </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                                    <XAxis dataKey="month" stroke="hsl(var(--foreground))" fontSize={12} />
-                                    <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickFormatter={(v) => `£${v}`} />
-                                    <RechartsTooltip
-                                      contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
-                                      formatter={(value: number) => [`£${value}`, 'LTV']}
-                                    />
-                                    <Area type="monotone" dataKey="ltv" stroke="#8b5cf6" fill="url(#ltvGradient)" strokeWidth={3} />
-                                  </RechartsAreaChart>
-                                </ResponsiveContainer>
+                                <div className="flex flex-col items-center justify-center h-[300px]">
+                                  <div className="text-center mb-6">
+                                    <p className="text-6xl font-bold text-purple-500">£{(revenueAnalytics?.avgLTV || 0).toFixed(2)}</p>
+                                    <p className="text-muted-foreground mt-2">Average Customer Lifetime Value</p>
+                                  </div>
+                                  <div className="grid grid-cols-3 gap-6 w-full mt-4">
+                                    <div className="text-center p-4 rounded-lg bg-muted/30">
+                                      <p className="text-2xl font-bold">{revenueAnalytics?.totalCustomers || 0}</p>
+                                      <p className="text-xs text-muted-foreground">Total Customers</p>
+                                    </div>
+                                    <div className="text-center p-4 rounded-lg bg-muted/30">
+                                      <p className="text-2xl font-bold">{revenueAnalytics?.activeSubscriptions || 0}</p>
+                                      <p className="text-xs text-muted-foreground">Active Subs</p>
+                                    </div>
+                                    <div className="text-center p-4 rounded-lg bg-muted/30">
+                                      <p className="text-2xl font-bold">£{(revenueAnalytics?.avgOrderValue || 0).toFixed(0)}</p>
+                                      <p className="text-xs text-muted-foreground">Avg Order</p>
+                                    </div>
+                                  </div>
+                                  {(revenueAnalytics?.totalCustomers || 0) === 0 && (
+                                    <p className="text-sm text-muted-foreground text-center mt-6">
+                                      No customers yet. LTV data will appear as payments are made.
+                                    </p>
+                                  )}
+                                </div>
                               </CardContent>
                             </Card>
 
