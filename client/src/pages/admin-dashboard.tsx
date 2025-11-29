@@ -947,6 +947,30 @@ export default function AdminDashboard() {
     refetchInterval: REFRESH_INTERVAL,
   });
 
+  // Core Web Vitals metrics
+  const { data: webVitalsData, isLoading: webVitalsLoading, refetch: refetchWebVitals } = useQuery<{
+    totalSamples: number;
+    averages: {
+      lcp: number | null;
+      fid: number | null;
+      cls: number | null;
+      fcp: number | null;
+      ttfb: number | null;
+      inp: number | null;
+    };
+    ratings: {
+      lcp: { good: number; needsImprovement: number; poor: number };
+      fid: { good: number; needsImprovement: number; poor: number };
+      cls: { good: number; needsImprovement: number; poor: number };
+    };
+    byPage: Array<{ pagePath: string; samples: number; avgLcp: number | null; avgFid: number | null; avgCls: number | null }>;
+    byDevice: Array<{ deviceType: string; samples: number; avgLcp: number | null }>;
+  }>({
+    queryKey: ['/api/admin/performance/stats'],
+    enabled: !!user?.isAdmin && activeSection === 'system-webvitals',
+    refetchInterval: REFRESH_INTERVAL,
+  });
+
   // Referral analytics
   const { data: referralAnalytics, isLoading: referralAnalyticsLoading, refetch: refetchReferralAnalytics } = useQuery<{
     totalReferralCodes: number;
@@ -1977,6 +2001,7 @@ export default function AdminDashboard() {
       'tools-completion': 'Tool Completion Rates',
       'system-overview': 'System Health Dashboard',
       'system-performance': 'Performance Metrics',
+      'system-webvitals': 'Core Web Vitals',
       'system-database': 'Database Health',
       'system-storage': 'Storage Analytics',
       'system-api': 'API Performance',
@@ -6024,6 +6049,304 @@ export default function AdminDashboard() {
                               </div>
                             </CardContent>
                           </Card>
+                        </>
+                      )}
+
+                      {/* CORE WEB VITALS - Real User Monitoring */}
+                      {activeSection === 'system-webvitals' && (
+                        <>
+                          {/* Web Vitals Header */}
+                          <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-green-500/10 border-green-500/20">
+                            <CardContent className="py-6">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                  <div className="p-3 rounded-xl bg-green-500 text-white">
+                                    <Activity className="h-6 w-6" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Core Web Vitals Monitoring</p>
+                                    <p className="text-2xl font-bold text-green-500">
+                                      {webVitalsData?.totalSamples || 0} Samples Collected
+                                    </p>
+                                  </div>
+                                </div>
+                                <Button variant="outline" size="sm" onClick={() => refetchWebVitals()} data-testid="button-refresh-webvitals">
+                                  <RefreshCw className="h-4 w-4 mr-2" />
+                                  Refresh
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Core Metrics Overview */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* LCP - Largest Contentful Paint */}
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <div className="w-3 h-3 rounded-full bg-blue-500" />
+                                  LCP (Largest Contentful Paint)
+                                </CardTitle>
+                                <CardDescription>Loading performance - Target: &lt; 2.5s</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-center mb-4">
+                                  <p className={`text-5xl font-bold ${
+                                    (webVitalsData?.averages?.lcp || 0) < 2500 ? 'text-green-500' :
+                                    (webVitalsData?.averages?.lcp || 0) < 4000 ? 'text-yellow-500' : 'text-red-500'
+                                  }`}>
+                                    {webVitalsData?.averages?.lcp ? (webVitalsData.averages.lcp / 1000).toFixed(2) : '--'}s
+                                  </p>
+                                  <p className="text-sm text-muted-foreground mt-1">Average</p>
+                                </div>
+                                {webVitalsData?.ratings?.lcp && (
+                                  <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-green-500">Good</span>
+                                      <span>{webVitalsData.ratings.lcp.good || 0}%</span>
+                                    </div>
+                                    <Progress value={webVitalsData.ratings.lcp.good || 0} className="h-2 bg-green-100" />
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-yellow-500">Needs Work</span>
+                                      <span>{webVitalsData.ratings.lcp.needsImprovement || 0}%</span>
+                                    </div>
+                                    <Progress value={webVitalsData.ratings.lcp.needsImprovement || 0} className="h-2 bg-yellow-100" />
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-red-500">Poor</span>
+                                      <span>{webVitalsData.ratings.lcp.poor || 0}%</span>
+                                    </div>
+                                    <Progress value={webVitalsData.ratings.lcp.poor || 0} className="h-2 bg-red-100" />
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+
+                            {/* FID - First Input Delay */}
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <div className="w-3 h-3 rounded-full bg-purple-500" />
+                                  FID (First Input Delay)
+                                </CardTitle>
+                                <CardDescription>Interactivity - Target: &lt; 100ms</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-center mb-4">
+                                  <p className={`text-5xl font-bold ${
+                                    (webVitalsData?.averages?.fid || 0) < 100 ? 'text-green-500' :
+                                    (webVitalsData?.averages?.fid || 0) < 300 ? 'text-yellow-500' : 'text-red-500'
+                                  }`}>
+                                    {webVitalsData?.averages?.fid ?? '--'}ms
+                                  </p>
+                                  <p className="text-sm text-muted-foreground mt-1">Average</p>
+                                </div>
+                                {webVitalsData?.ratings?.fid && (
+                                  <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-green-500">Good</span>
+                                      <span>{webVitalsData.ratings.fid.good || 0}%</span>
+                                    </div>
+                                    <Progress value={webVitalsData.ratings.fid.good || 0} className="h-2 bg-green-100" />
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-yellow-500">Needs Work</span>
+                                      <span>{webVitalsData.ratings.fid.needsImprovement || 0}%</span>
+                                    </div>
+                                    <Progress value={webVitalsData.ratings.fid.needsImprovement || 0} className="h-2 bg-yellow-100" />
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-red-500">Poor</span>
+                                      <span>{webVitalsData.ratings.fid.poor || 0}%</span>
+                                    </div>
+                                    <Progress value={webVitalsData.ratings.fid.poor || 0} className="h-2 bg-red-100" />
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+
+                            {/* CLS - Cumulative Layout Shift */}
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                  <div className="w-3 h-3 rounded-full bg-orange-500" />
+                                  CLS (Cumulative Layout Shift)
+                                </CardTitle>
+                                <CardDescription>Visual stability - Target: &lt; 0.1</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-center mb-4">
+                                  <p className={`text-5xl font-bold ${
+                                    (webVitalsData?.averages?.cls || 0) < 100 ? 'text-green-500' :
+                                    (webVitalsData?.averages?.cls || 0) < 250 ? 'text-yellow-500' : 'text-red-500'
+                                  }`}>
+                                    {webVitalsData?.averages?.cls ? (webVitalsData.averages.cls / 1000).toFixed(3) : '--'}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground mt-1">Average Score</p>
+                                </div>
+                                {webVitalsData?.ratings?.cls && (
+                                  <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-green-500">Good</span>
+                                      <span>{webVitalsData.ratings.cls.good || 0}%</span>
+                                    </div>
+                                    <Progress value={webVitalsData.ratings.cls.good || 0} className="h-2 bg-green-100" />
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-yellow-500">Needs Work</span>
+                                      <span>{webVitalsData.ratings.cls.needsImprovement || 0}%</span>
+                                    </div>
+                                    <Progress value={webVitalsData.ratings.cls.needsImprovement || 0} className="h-2 bg-yellow-100" />
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-red-500">Poor</span>
+                                      <span>{webVitalsData.ratings.cls.poor || 0}%</span>
+                                    </div>
+                                    <Progress value={webVitalsData.ratings.cls.poor || 0} className="h-2 bg-red-100" />
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Additional Metrics */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>FCP (First Contentful Paint)</CardTitle>
+                                <CardDescription>Time to first visible content</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-center">
+                                  <p className={`text-4xl font-bold ${
+                                    (webVitalsData?.averages?.fcp || 0) < 1800 ? 'text-green-500' :
+                                    (webVitalsData?.averages?.fcp || 0) < 3000 ? 'text-yellow-500' : 'text-red-500'
+                                  }`}>
+                                    {webVitalsData?.averages?.fcp ? (webVitalsData.averages.fcp / 1000).toFixed(2) : '--'}s
+                                  </p>
+                                  <p className="text-sm text-muted-foreground mt-1">Target: &lt; 1.8s</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>TTFB (Time to First Byte)</CardTitle>
+                                <CardDescription>Server response time</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-center">
+                                  <p className={`text-4xl font-bold ${
+                                    (webVitalsData?.averages?.ttfb || 0) < 800 ? 'text-green-500' :
+                                    (webVitalsData?.averages?.ttfb || 0) < 1800 ? 'text-yellow-500' : 'text-red-500'
+                                  }`}>
+                                    {webVitalsData?.averages?.ttfb ?? '--'}ms
+                                  </p>
+                                  <p className="text-sm text-muted-foreground mt-1">Target: &lt; 800ms</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>INP (Interaction to Next Paint)</CardTitle>
+                                <CardDescription>Overall responsiveness</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="text-center">
+                                  <p className={`text-4xl font-bold ${
+                                    (webVitalsData?.averages?.inp || 0) < 200 ? 'text-green-500' :
+                                    (webVitalsData?.averages?.inp || 0) < 500 ? 'text-yellow-500' : 'text-red-500'
+                                  }`}>
+                                    {webVitalsData?.averages?.inp ?? '--'}ms
+                                  </p>
+                                  <p className="text-sm text-muted-foreground mt-1">Target: &lt; 200ms</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Performance by Page */}
+                          {webVitalsData?.byPage && webVitalsData.byPage.length > 0 && (
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>Performance by Page</CardTitle>
+                                <CardDescription>Web vitals breakdown per page</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="overflow-x-auto">
+                                  <table className="w-full text-sm">
+                                    <thead>
+                                      <tr className="border-b">
+                                        <th className="text-left p-2">Page</th>
+                                        <th className="text-center p-2">Samples</th>
+                                        <th className="text-center p-2">Avg LCP</th>
+                                        <th className="text-center p-2">Avg FID</th>
+                                        <th className="text-center p-2">Avg CLS</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {webVitalsData.byPage.map((page, i) => (
+                                        <tr key={i} className="border-b hover-elevate">
+                                          <td className="p-2 font-medium">{page.pagePath}</td>
+                                          <td className="text-center p-2">{page.samples}</td>
+                                          <td className="text-center p-2">
+                                            {page.avgLcp ? `${(page.avgLcp / 1000).toFixed(2)}s` : '--'}
+                                          </td>
+                                          <td className="text-center p-2">
+                                            {page.avgFid ? `${page.avgFid}ms` : '--'}
+                                          </td>
+                                          <td className="text-center p-2">
+                                            {page.avgCls ? (page.avgCls / 1000).toFixed(3) : '--'}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+
+                          {/* Device Type Distribution */}
+                          {webVitalsData?.byDevice && webVitalsData.byDevice.length > 0 && (
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>Performance by Device</CardTitle>
+                                <CardDescription>How different devices experience your site</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                  {webVitalsData.byDevice.map((device, i) => (
+                                    <div key={i} className="p-4 rounded-lg border text-center">
+                                      <p className="text-lg font-semibold capitalize">{device.deviceType || 'Unknown'}</p>
+                                      <p className="text-3xl font-bold mt-2">
+                                        {device.avgLcp ? `${(device.avgLcp / 1000).toFixed(2)}s` : '--'}
+                                      </p>
+                                      <p className="text-sm text-muted-foreground">Avg LCP</p>
+                                      <p className="text-sm text-muted-foreground mt-1">{device.samples} samples</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+
+                          {/* No Data State */}
+                          {(!webVitalsData || webVitalsData.totalSamples === 0) && !webVitalsLoading && (
+                            <Card className="text-center py-12">
+                              <CardContent>
+                                <Activity className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                                <h3 className="text-xl font-semibold mb-2">No Performance Data Yet</h3>
+                                <p className="text-muted-foreground max-w-md mx-auto">
+                                  Performance metrics are automatically collected as users browse your site.
+                                  Check back later to see real user performance data.
+                                </p>
+                              </CardContent>
+                            </Card>
+                          )}
+
+                          {/* Loading State */}
+                          {webVitalsLoading && (
+                            <div className="flex items-center justify-center py-12">
+                              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                          )}
                         </>
                       )}
 

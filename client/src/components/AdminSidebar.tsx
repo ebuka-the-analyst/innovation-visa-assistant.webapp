@@ -190,6 +190,7 @@ const menuGroups = [
     items: [
       { id: "system-overview", label: "Health Dashboard", icon: Server, badge: null },
       { id: "system-performance", label: "Performance", icon: Cpu, badge: null },
+      { id: "system-webvitals", label: "Core Web Vitals", icon: Activity, badge: null },
       { id: "system-database", label: "Database", icon: Database, badge: null },
       { id: "system-storage", label: "Storage", icon: HardDrive, badge: null },
       { id: "system-api", label: "API Metrics", icon: Activity, badge: null },
