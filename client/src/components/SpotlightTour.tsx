@@ -267,7 +267,7 @@ interface SpotlightOverlayProps {
 function SpotlightOverlay({ targetRect, isActive }: SpotlightOverlayProps) {
   if (!isActive || !targetRect) {
     return (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 transition-opacity duration-500" />
+      <div className="fixed inset-0 bg-black/30 z-40 transition-opacity duration-500" />
     );
   }
 
@@ -299,7 +299,7 @@ function SpotlightOverlay({ targetRect, isActive }: SpotlightOverlayProps) {
           y="0"
           width="100%"
           height="100%"
-          fill="rgba(0, 0, 0, 0.75)"
+          fill="rgba(0, 0, 0, 0.35)"
           mask="url(#spotlight-mask)"
           className="transition-all duration-500"
         />
