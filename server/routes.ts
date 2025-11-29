@@ -8214,13 +8214,14 @@ Return a JSON object with:
         return res.status(400).json({ error: "Cannot delete admin users" });
       }
 
-      // Delete all related records - using safe delete that ignores missing tables
+      // Delete all related records - using safe delete that ignores missing tables and type mismatches
       const safeDelete = async (query: any) => {
         try {
           await db.execute(query);
         } catch (e: any) {
-          // Ignore "relation does not exist" errors
-          if (!e.message?.includes('does not exist')) {
+          // Ignore "relation does not exist" and type mismatch errors (some tables have integer user_id)
+          const ignoredErrors = ['does not exist', 'invalid input syntax for type integer'];
+          if (!ignoredErrors.some(err => e.message?.includes(err))) {
             throw e;
           }
         }
