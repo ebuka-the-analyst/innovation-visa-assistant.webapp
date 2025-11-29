@@ -8,7 +8,6 @@ import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ThemeToggle from "@/components/ThemeToggle";
-import { VoiceMicButton } from "@/components/VoiceMicButton";
 import { VoicePermissionProvider } from "@/contexts/VoicePermissionContext";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LogOut, Loader2, LayoutDashboard, Wrench, FileText, HelpCircle } from "lucide-react";
@@ -313,8 +312,6 @@ function UnifiedHeader() {
           {user.firstName || user.displayName || user.email}
         </span>
       )}
-      
-      <VoiceMicButton />
       
       <ThemeToggle />
       
