@@ -3030,13 +3030,36 @@ EXAMPLES OF GOOD RESPONSES:
         ? Math.round((cancelledThisMonth / (effectiveActiveSubscriptions + cancelledThisMonth)) * 100 * 10) / 10
         : 0;
       
-      // Calculate MRR from database tier data if Stripe MRR is 0
-      const dbMrr = (tierDistribution.basic * 29) + 
-                    (tierDistribution.premium * 49) + 
-                    (tierDistribution.enterprise * 89) + 
-                    (tierDistribution.ultimate * 129);
+      // Calculate MRR from database tier data, accounting for promo code discounts
+      // Get all promo redemptions to check for 100% discounts
+      const allRedemptions = await storage.getAllPromoRedemptions();
+      const allPromoCodesData = await storage.getAllPromoCodes();
+      
+      // Create a map of users with 100% discounts (free subscriptions)
+      const usersWithFreePromo = new Set<string>();
+      for (const redemption of allRedemptions) {
+        const promoCode = allPromoCodesData.find(p => p.id === redemption.promoCodeId);
+        if (promoCode && promoCode.discountType === 'percentage' && promoCode.discountValue >= 100) {
+          usersWithFreePromo.add(redemption.userId);
+        }
+      }
+      
+      // Count paying users (those without 100% free promo codes)
+      const payingBasic = allUsers.filter(u => u.subscriptionTier === 'basic' && !usersWithFreePromo.has(u.id)).length;
+      const payingPremium = allUsers.filter(u => u.subscriptionTier === 'premium' && !usersWithFreePromo.has(u.id)).length;
+      const payingEnterprise = allUsers.filter(u => u.subscriptionTier === 'enterprise' && !usersWithFreePromo.has(u.id)).length;
+      const payingUltimate = allUsers.filter(u => u.subscriptionTier === 'ultimate' && !usersWithFreePromo.has(u.id)).length;
+      
+      // Calculate actual MRR (excluding users with 100% free promo codes)
+      const dbMrr = (payingBasic * 29) + 
+                    (payingPremium * 49) + 
+                    (payingEnterprise * 89) + 
+                    (payingUltimate * 129);
       const effectiveMrr = mrr > 0 ? mrr : dbMrr;
       const effectiveArr = effectiveMrr * 12;
+      
+      // Count of free promo users for display
+      const freePromoUsers = usersWithFreePromo.size;
       
       res.json({
         // Live metrics
@@ -3070,6 +3093,7 @@ EXAMPLES OF GOOD RESPONSES:
         // Promo codes
         promoCodeStats,
         totalDiscounts,
+        freePromoUsers, // Users with 100% free promo codes
         
         // Metadata
         lastUpdated: new Date().toISOString(),
