@@ -63,8 +63,12 @@ const initializeTransporter = () => {
         user: AWS_SES_SMTP_USERNAME,
         pass: AWS_SES_SMTP_PASSWORD,
       },
+      connectionTimeout: 10000, // 10 seconds
+      socketTimeout: 15000, // 15 seconds
+      greetingTimeout: 10000, // 10 seconds
     });
     cachedProvider = 'aws_ses';
+    console.log('[Email Service] AWS SES SMTP configured with timeouts');
     return;
   }
   
