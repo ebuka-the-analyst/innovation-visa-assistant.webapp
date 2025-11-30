@@ -2965,10 +2965,14 @@ EXAMPLES OF GOOD RESPONSES:
         ultimate: monthCharges.filter(c => c.metadata?.tier === 'ultimate').reduce((s, c) => s + c.amount / 100, 0),
       };
       
-      // Calculate LTV (Lifetime Value) = Total Revenue / Total Customers (post-launch only)
-      const totalCustomers = validCharges.length > 0 
+      // Calculate Total Customers - use paid users from database as primary source
+      // Fall back to Stripe customer count if available
+      const stripeCustomerCount = validCharges.length > 0 
         ? new Set(validCharges.map(c => c.customer).filter(Boolean)).size 
         : 0;
+      const totalCustomers = paidUsers.length > 0 ? paidUsers.length : stripeCustomerCount;
+      
+      // Calculate LTV (Lifetime Value) = Total Revenue / Total Customers
       const avgLTV = totalCustomers > 0 ? revenueAllTime / totalCustomers : 0;
       
       // Average order value (post-launch only)
@@ -3016,9 +3020,23 @@ EXAMPLES OF GOOD RESPONSES:
         const cancelDate = s.canceled_at ? new Date(s.canceled_at * 1000) : null;
         return cancelDate && cancelDate >= startOfMonth;
       }).length;
-      const churnRate = activeSubscriptions.length > 0 
-        ? Math.round((cancelledThisMonth / (activeSubscriptions.length + cancelledThisMonth)) * 100 * 10) / 10
+      
+      // Use database paid users count if Stripe subscriptions are empty
+      const effectiveActiveSubscriptions = activeSubscriptions.length > 0 
+        ? activeSubscriptions.length 
+        : paidUsers.length;
+      
+      const churnRate = effectiveActiveSubscriptions > 0 
+        ? Math.round((cancelledThisMonth / (effectiveActiveSubscriptions + cancelledThisMonth)) * 100 * 10) / 10
         : 0;
+      
+      // Calculate MRR from database tier data if Stripe MRR is 0
+      const dbMrr = (tierDistribution.basic * 29) + 
+                    (tierDistribution.premium * 49) + 
+                    (tierDistribution.enterprise * 89) + 
+                    (tierDistribution.ultimate * 129);
+      const effectiveMrr = mrr > 0 ? mrr : dbMrr;
+      const effectiveArr = effectiveMrr * 12;
       
       res.json({
         // Live metrics
@@ -3029,10 +3047,10 @@ EXAMPLES OF GOOD RESPONSES:
         revenueAllTime,
         monthlyGrowth,
         
-        // Subscription metrics
-        mrr,
-        arr,
-        activeSubscriptions: activeSubscriptions.length,
+        // Subscription metrics - use database data if Stripe is empty
+        mrr: effectiveMrr,
+        arr: effectiveArr,
+        activeSubscriptions: effectiveActiveSubscriptions,
         cancelledSubscriptions: cancelledSubscriptions.length,
         churnRate,
         
