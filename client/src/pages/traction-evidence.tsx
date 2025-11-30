@@ -793,7 +793,7 @@ Best regards,
                   <Input 
                     value={newSurvey.surveyName || ""} 
                     onChange={(e) => setNewSurvey({...newSurvey, surveyName: e.target.value})}
-                    placeholder="Market Validation Survey Q4 2024"
+                    placeholder="Market Validation Survey Q4 2025"
                     data-testid="input-survey-name"
                   />
                 </div>

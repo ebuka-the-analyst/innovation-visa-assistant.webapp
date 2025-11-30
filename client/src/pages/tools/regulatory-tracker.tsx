@@ -63,11 +63,11 @@ const AI_TOOL_CONFIG: ToolConfig = {
 };
 
 const REGULATORY_CHANGES = [
-  {topic:"Immigration Rules",item:"Points-Based System refinements",date:"Apr 2024",impact:"High",status:"In Effect"},
-  {topic:"Employment",item:"National Minimum Wage increase to 11.44 pounds",date:"Apr 2024",impact:"High",status:"In Effect"},
-  {topic:"Tax",item:"Corporation tax rate change",date:"Apr 2023",impact:"High",status:"In Effect"},
+  {topic:"Immigration Rules",item:"Points-Based System refinements",date:"Nov 2025",impact:"High",status:"In Effect"},
+  {topic:"Employment",item:"National Minimum Wage increase to £11.44/hour",date:"Apr 2025",impact:"High",status:"In Effect"},
+  {topic:"Tax",item:"Corporation tax rate 25% for large profits",date:"Apr 2025",impact:"High",status:"In Effect"},
   {topic:"Data Protection",item:"GDPR enforcement increase by ICO",date:"Ongoing",impact:"High",status:"Active"},
-  {topic:"Company Law",item:"Large company reporting requirements",date:"Jan 2024",impact:"Medium",status:"In Effect"}
+  {topic:"Company Law",item:"Company reporting requirements update",date:"Nov 2025",impact:"Medium",status:"In Effect"}
 ];
 
 export default function RegulatoryTracker() {

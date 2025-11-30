@@ -199,7 +199,7 @@ const COMPLIANCE_ITEMS: ComplianceArea[] = [
     name: 'Acceptable documents verified and copies retained',
     description: 'Original documents checked, certified copies stored securely',
     priority: 'Critical',
-    legalReference: 'Immigration Rules 2024'
+    legalReference: 'Immigration Rules 2025'
   },
   {
     id: 'rtw-3',

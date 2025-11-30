@@ -237,7 +237,7 @@ export default function MarketDataVerifier() {
               <Input 
                 value={newStat.source || ""} 
                 onChange={(e) => setNewStat({...newStat, source: e.target.value})}
-                placeholder="Tech Nation Report 2024"
+                placeholder="Tech Nation Report 2025"
                 data-testid="input-stat-source"
               />
             </div>

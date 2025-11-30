@@ -91,7 +91,7 @@ export default function MarketSizing() {
   const [ukMarketShare, setUkMarketShare] = useState(30);
   const [targetCustomers, setTargetCustomers] = useState(50000);
   const [avgRevenue, setAvgRevenue] = useState(10000);
-  const [evidenceSources, setEvidenceSources] = useState("ONS Digital Economy Survey 2024, UK Government Statistics, UK SaaS Market Analysis");
+  const [evidenceSources, setEvidenceSources] = useState("ONS Digital Economy Survey 2025, UK Government Statistics, UK SaaS Market Analysis");
   const [activeTab, setActiveTab] = useState('calculator');
   const [savedDate, setSavedDate] = useState('');
 
@@ -941,7 +941,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                       id="evidence"
                       value={evidenceSources}
                       onChange={(e) => setEvidenceSources(e.target.value)}
-                      placeholder="e.g., ONS Digital Economy Survey 2024, Tech Nation Report 2025, Gartner UK SaaS Market Forecast..."
+                      placeholder="e.g., ONS Digital Economy Survey 2025, Tech Nation Report 2025, Gartner UK SaaS Market Forecast..."
                       rows={3}
                       data-testid="textarea-evidence"
                     />

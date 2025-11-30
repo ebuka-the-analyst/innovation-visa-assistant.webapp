@@ -97,7 +97,7 @@ const baseSections: FormSection[] = [
     fields: [
       { id: 'business_name', label: 'Business Name', type: 'text', placeholder: 'Enter your business name', required: true },
       { id: 'tagline', label: 'One-Line Description', type: 'text', placeholder: 'Describe your business in one sentence', required: true },
-      { id: 'founding_date', label: 'Founded / Planned Launch', type: 'text', placeholder: 'e.g., January 2024 or Planned Q2 2025' },
+      { id: 'founding_date', label: 'Founded / Planned Launch', type: 'text', placeholder: 'e.g., November 2025 or Planned Q1 2026' },
       { id: 'legal_structure', label: 'Legal Structure', type: 'select', options: ['Limited Company (Ltd)', 'Limited Liability Partnership (LLP)', 'Not yet incorporated', 'Other'], required: true }
     ]
   },

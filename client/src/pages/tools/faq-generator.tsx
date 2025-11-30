@@ -169,7 +169,7 @@ const DEFAULT_FAQ_ITEMS: Omit<FAQItem, 'yourAnswer' | 'preparednessScore' | 'isC
     id: 'faq-9',
     category: 'market',
     question: 'Who is your target market and what is the market size?',
-    recommendedAnswer: 'Define TAM, SAM, SOM with credible sources. Specify customer segments. Example: "Total Addressable Market: £15B (global healthcare SaaS). Serviceable Available Market: £3B (UK + EU enterprise healthcare). Serviceable Obtainable Market: £150M (UK SME clinics, 5,000 potential customers). Primary target: Private clinics with 10-100 staff, £1M-£20M revenue. Secondary: NHS trusts (longer sales cycle). Market growing 18% annually (Gartner 2024)."',
+    recommendedAnswer: 'Define TAM, SAM, SOM with credible sources. Specify customer segments. Example: "Total Addressable Market: £15B (global healthcare SaaS). Serviceable Available Market: £3B (UK + EU enterprise healthcare). Serviceable Obtainable Market: £150M (UK SME clinics, 5,000 potential customers). Primary target: Private clinics with 10-100 staff, £1M-£20M revenue. Secondary: NHS trusts (longer sales cycle). Market growing 18% annually (Gartner 2025)."',
     difficulty: 'intermediate',
     tags: ['market size', 'TAM', 'target customer'],
   },

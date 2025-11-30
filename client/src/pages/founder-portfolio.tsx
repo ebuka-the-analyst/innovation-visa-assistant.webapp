@@ -479,7 +479,7 @@ export default function FounderPortfolio() {
                   <Input 
                     value={newDemo.title || ""} 
                     onChange={(e) => setNewDemo({...newDemo, title: e.target.value})}
-                    placeholder="MVP Demo - November 2024"
+                    placeholder="MVP Demo - November 2025"
                     data-testid="input-demo-title"
                   />
                 </div>

@@ -80,11 +80,11 @@ type YearData = {
 };
 
 const INITIAL_YEARS: YearData[] = [
-  { year: 2024, revenue: 0, employees: 2, customers: 0, milestones: ["Company founded", "MVP development"], notes: "", status: "completed" },
-  { year: 2025, revenue: 50000, employees: 5, customers: 50, milestones: ["Visa approval", "First customers", "Seed funding"], notes: "", status: "current" },
-  { year: 2026, revenue: 200000, employees: 12, customers: 200, milestones: ["Series A", "Team expansion"], notes: "", status: "planned" },
-  { year: 2027, revenue: 500000, employees: 25, customers: 500, milestones: ["International expansion", "Product v2"], notes: "", status: "planned" },
-  { year: 2028, revenue: 1000000, employees: 50, customers: 1000, milestones: ["Profitability", "ILR eligibility"], notes: "", status: "planned" },
+  { year: 2025, revenue: 0, employees: 1, customers: 0, milestones: ["Company founded Nov 26", "Platform launch", "MVP live"], notes: "", status: "current" },
+  { year: 2026, revenue: 180000, employees: 3, customers: 1000, milestones: ["Visa approval", "First revenue", "Team expansion"], notes: "", status: "planned" },
+  { year: 2027, revenue: 600000, employees: 8, customers: 5000, milestones: ["Series A consideration", "Market leadership"], notes: "", status: "planned" },
+  { year: 2028, revenue: 1200000, employees: 12, customers: 10000, milestones: ["International expansion", "ILR eligibility"], notes: "", status: "planned" },
+  { year: 2029, revenue: 2000000, employees: 20, customers: 20000, milestones: ["Profitability", "New visa categories"], notes: "", status: "planned" },
 ];
 
 const STATUS_COLORS = {
