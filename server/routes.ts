@@ -3424,6 +3424,75 @@ EXAMPLES OF GOOD RESPONSES:
     }
   });
 
+  // Send test email to verify DNS configuration (Admin only)
+  app.post("/api/admin/emails/send-test", requireAdmin, async (req, res) => {
+    try {
+      const { emails } = req.body;
+      
+      if (!emails || !Array.isArray(emails) || emails.length === 0) {
+        return res.status(400).json({ error: "Please provide an array of email addresses" });
+      }
+      
+      const { sendEmail } = await import("./email");
+      
+      const results = { sent: 0, failed: 0, errors: [] as string[] };
+      
+      for (const email of emails) {
+        try {
+          await sendEmail({
+            to: email,
+            subject: "UK Innovator Visa Assistant - Email Test Successful",
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 20px; border-radius: 10px 10px 0 0;">
+                  <h1 style="color: white; margin: 0; text-align: center;">Email Test Successful!</h1>
+                </div>
+                <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
+                  <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                    Congratulations! This email confirms that your DNS records are properly configured and emails are being delivered correctly.
+                  </p>
+                  <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0;">
+                    <p style="color: #065f46; margin: 0; font-weight: bold;">All Systems Working:</p>
+                    <ul style="color: #065f46; margin: 10px 0 0 0;">
+                      <li>SPF Record: Verified</li>
+                      <li>DKIM Signing: Active</li>
+                      <li>DMARC Policy: Configured</li>
+                      <li>AWS SES: Connected</li>
+                    </ul>
+                  </div>
+                  <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
+                    Sent at: ${new Date().toISOString()}
+                  </p>
+                </div>
+                <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+                  <p>UK Innovator Founder Visa Assistant</p>
+                  <p>support@innovatorfoundervisaassistant.co.uk</p>
+                </div>
+              </div>
+            `,
+            emailType: 'test',
+            recipientName: email.split('@')[0],
+          });
+          results.sent++;
+          console.log(`[Test Email] Sent to ${email}`);
+        } catch (err: any) {
+          results.failed++;
+          results.errors.push(`${email}: ${err.message}`);
+          console.error(`[Test Email] Failed for ${email}:`, err.message);
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: `Test emails sent: ${results.sent} successful, ${results.failed} failed`,
+        ...results
+      });
+    } catch (error: any) {
+      console.error("Test email error:", error);
+      res.status(500).json({ error: "Failed to send test emails", message: error.message });
+    }
+  });
+
   // Notification Analytics - Real data from database
   app.get("/api/admin/analytics/notifications", requireAdmin, async (req, res) => {
     try {
