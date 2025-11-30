@@ -9391,15 +9391,16 @@ export default function AdminDashboard() {
                                         onClick={async () => {
                                           if (!confirm('Send welcome email to ALL users? This will email all 17 registered users.')) return;
                                           try {
-                                            const response = await apiRequest('/api/admin/emails/send-bulk-welcome', { method: 'POST' });
-                                            if (response.success) {
+                                            const response = await apiRequest('POST', '/api/admin/emails/send-bulk-welcome', {});
+                                            const data = await response.json();
+                                            if (data.success) {
                                               toast({
                                                 title: 'Welcome Emails Sent',
-                                                description: `Successfully sent ${response.sent} emails. ${response.failed > 0 ? `${response.failed} failed.` : ''}`,
+                                                description: `Successfully sent ${data.sent} emails. ${data.failed > 0 ? `${data.failed} failed.` : ''}`,
                                               });
                                               refetchEmailAnalytics();
                                             } else {
-                                              throw new Error(response.error);
+                                              throw new Error(data.error);
                                             }
                                           } catch (err: any) {
                                             toast({
