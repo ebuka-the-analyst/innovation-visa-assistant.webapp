@@ -10,15 +10,15 @@ export default function VisaAssistantDisclaimer() {
     <>
       <style>{`
         @keyframes brandFlash {
-          0%, 100% {
+          0%, 49% {
             background-color: #1e40af;
           }
-          50% {
+          50%, 100% {
             background-color: #ffa536;
           }
         }
         .disclaimer-flash {
-          animation: brandFlash 3s ease-in-out infinite;
+          animation: brandFlash 1s steps(1) infinite;
         }
       `}</style>
       <div 
