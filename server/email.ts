@@ -1,24 +1,27 @@
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { db } from "./db";
 import { emailLogs } from "@shared/schema";
 
-// Log email configuration status on startup - validate BOTH username AND password
+// Log email configuration status on startup - Resend is now primary (HTTP-based, works everywhere)
+const resendConfigured = !!process.env.RESEND_API_KEY;
 const awsSesConfigured = !!(process.env.AWS_SES_SMTP_USERNAME && process.env.AWS_SES_SMTP_PASSWORD);
 const hostingerConfigured = !!(process.env.HOSTINGER_EMAIL_USER && process.env.HOSTINGER_EMAIL_PASSWORD);
-const emailConfigured = awsSesConfigured || hostingerConfigured;
+const emailConfigured = resendConfigured || awsSesConfigured || hostingerConfigured;
 
-if (awsSesConfigured) {
+if (resendConfigured) {
+  console.log('[Email Service] Resend configured and ready (HTTP API - recommended)');
+} else if (awsSesConfigured) {
   console.log('[Email Service] AWS SES SMTP configured and ready');
 } else if (hostingerConfigured) {
   console.log('[Email Service] Hostinger SMTP configured and ready');
 } else {
   console.error('[Email Service] NOT CONFIGURED - emails will not be sent');
   console.error('[Email Service] Missing credentials:');
+  if (!process.env.RESEND_API_KEY) console.error('  - RESEND_API_KEY is missing');
   if (!process.env.AWS_SES_SMTP_USERNAME) console.error('  - AWS_SES_SMTP_USERNAME is missing');
   if (!process.env.AWS_SES_SMTP_PASSWORD) console.error('  - AWS_SES_SMTP_PASSWORD is missing');
-  if (!process.env.HOSTINGER_EMAIL_USER) console.error('  - HOSTINGER_EMAIL_USER is missing');
-  if (!process.env.HOSTINGER_EMAIL_PASSWORD) console.error('  - HOSTINGER_EMAIL_PASSWORD is missing');
 }
 
 interface SendEmailParams {
@@ -42,34 +45,43 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (char) => htmlEscapeMap[char] || char);
 }
 
-// Amazon SES SMTP transporter (primary) with Hostinger fallback
+// Email providers - Resend (HTTP) is primary, with SMTP fallbacks
 // CACHED at startup to prevent issues during server restarts when env vars temporarily unavailable
+let cachedResend: Resend | null = null;
 let cachedTransporter: nodemailer.Transporter | null = null;
 let cachedProvider: string = '';
 
 const initializeTransporter = () => {
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
   const AWS_SES_SMTP_USERNAME = process.env.AWS_SES_SMTP_USERNAME;
   const AWS_SES_SMTP_PASSWORD = process.env.AWS_SES_SMTP_PASSWORD;
   const HOSTINGER_EMAIL_USER = process.env.HOSTINGER_EMAIL_USER;
   const HOSTINGER_EMAIL_PASSWORD = process.env.HOSTINGER_EMAIL_PASSWORD;
   
-  // Primary: Amazon SES - auto-detect region from env or use eu-north-1
+  // Primary: Resend (HTTP API - works everywhere, no SMTP firewall issues)
+  if (RESEND_API_KEY) {
+    cachedResend = new Resend(RESEND_API_KEY);
+    cachedProvider = 'resend';
+    console.log('[Email Service] Using Resend HTTP API (recommended)');
+    return;
+  }
+  
+  // Fallback 1: Amazon SES SMTP
   if (AWS_SES_SMTP_USERNAME && AWS_SES_SMTP_PASSWORD) {
-    // Allow region override via env variable, default to eu-north-1 (Stockholm)
     const sesRegion = process.env.AWS_SES_REGION || 'eu-north-1';
     const sesHost = `email-smtp.${sesRegion}.amazonaws.com`;
     
     cachedTransporter = nodemailer.createTransport({
       host: sesHost,
-      port: 465, // Use TLS port for better compatibility
-      secure: true, // TLS
+      port: 465,
+      secure: true,
       auth: {
         user: AWS_SES_SMTP_USERNAME,
         pass: AWS_SES_SMTP_PASSWORD,
       },
-      connectionTimeout: 15000, // 15 seconds
-      socketTimeout: 20000, // 20 seconds
-      greetingTimeout: 15000, // 15 seconds
+      connectionTimeout: 15000,
+      socketTimeout: 20000,
+      greetingTimeout: 15000,
     });
     cachedProvider = 'aws_ses';
     console.log(`[Email Service] AWS SES SMTP configured: ${sesHost}:465 (TLS)`);
@@ -98,28 +110,28 @@ const initializeTransporter = () => {
 // Initialize transporter at module load time (startup)
 initializeTransporter();
 
+const getResend = () => cachedResend;
 const getTransporter = () => cachedTransporter;
 const getProvider = () => cachedProvider;
 
 export async function sendEmail({ to, subject, html, from, emailType = 'system', recipientName, userId }: SendEmailParams) {
   const DEFAULT_FROM_EMAIL = 'noreply@innovatorfoundervisaassistant.co.uk';
   
-  // Use cached transporter (initialized at startup)
   console.log('[Email Send] Attempting to send email to:', to);
   
+  const resend = getResend();
   const transporter = getTransporter();
   const provider = getProvider();
   
-  console.log('[Email Send] Transporter created:', !!transporter, 'Provider:', provider);
+  console.log('[Email Send] Provider:', provider, '| Resend:', !!resend, '| SMTP:', !!transporter);
   
-  if (!transporter) {
-    console.error("[Email Send] FAILED - Email transporter not initialized at startup!");
+  // Check if any email provider is configured
+  if (!resend && !transporter) {
+    console.error("[Email Send] FAILED - No email provider configured!");
     console.error("[Email Send] This usually means environment variables were missing when server started.");
-    console.error("[Email Send] Try restarting the server.");
     console.log("[Email Send] Would have sent email to:", to);
     console.log("[Email Send] Subject:", subject);
     
-    // Log failed email attempt
     try {
       await db.insert(emailLogs).values({
         recipientEmail: to,
@@ -138,19 +150,43 @@ export async function sendEmail({ to, subject, html, from, emailType = 'system',
     return { success: false, error: "Email service not configured" };
   }
 
-  try {
-    const fromAddress = from || `UK Innovator Visa Assistant <${DEFAULT_FROM_EMAIL}>`;
-    
-    const info = await transporter.sendMail({
-      from: fromAddress,
-      to: to,
-      subject: subject,
-      html: html,
-    });
+  const fromAddress = from || `UK Innovator Visa Assistant <${DEFAULT_FROM_EMAIL}>`;
 
-    console.log("Email sent successfully to:", to, "MessageId:", info.messageId);
+  try {
+    let messageId: string = '';
     
-    // Log successful email
+    // Use Resend (HTTP API) if available - works everywhere without firewall issues
+    if (resend) {
+      console.log('[Email Send] Using Resend HTTP API...');
+      const { data, error } = await resend.emails.send({
+        from: fromAddress,
+        to: [to],
+        subject: subject,
+        html: html,
+      });
+      
+      if (error) {
+        throw new Error(error.message || 'Resend API error');
+      }
+      
+      messageId = data?.id || 'resend-' + Date.now();
+      console.log('[Email Send] Resend success, messageId:', messageId);
+    } 
+    // Fallback to SMTP (nodemailer)
+    else if (transporter) {
+      console.log('[Email Send] Using SMTP transporter...');
+      const info = await transporter.sendMail({
+        from: fromAddress,
+        to: to,
+        subject: subject,
+        html: html,
+      });
+      messageId = info.messageId;
+      console.log('[Email Send] SMTP success, messageId:', messageId);
+    }
+
+    console.log("Email sent successfully to:", to, "MessageId:", messageId);
+    
     try {
       await db.insert(emailLogs).values({
         recipientEmail: to,
@@ -159,18 +195,17 @@ export async function sendEmail({ to, subject, html, from, emailType = 'system',
         emailType: emailType,
         status: 'sent',
         provider: provider,
-        messageId: info.messageId,
+        messageId: messageId,
         userId: userId || null,
       });
     } catch (logError) {
       console.error("Failed to log email:", logError);
     }
     
-    return { success: true, messageId: info.messageId };
+    return { success: true, messageId: messageId };
   } catch (error: any) {
     console.error("Email send error:", error);
     
-    // Log failed email
     try {
       await db.insert(emailLogs).values({
         recipientEmail: to,
