@@ -18,17 +18,17 @@ interface ILRMilestone {
 }
 
 const INITIAL_MILESTONES: ILRMilestone[] = [
-  { id: 'm1', title: 'Visa Granted', description: 'Initial Innovator Founder visa approved', year: 0, completed: true, dueDate: '2024-01-01', category: 'compliance' },
-  { id: 'm2', title: 'Business Registration', description: 'Company incorporated in UK (Companies House)', year: 0, completed: true, dueDate: '2024-02-01', category: 'business' },
-  { id: 'm3', title: 'First Progress Report', description: 'Submit progress report to endorsing body', year: 1, completed: false, dueDate: '2025-01-01', category: 'endorsement' },
-  { id: 'm4', title: 'First Employee Hired', description: 'First UK-based full-time employee', year: 1, completed: false, dueDate: '2025-06-01', category: 'business' },
-  { id: 'm5', title: 'Revenue Milestone', description: 'Achieve first revenue from UK operations', year: 1, completed: false, dueDate: '2025-06-01', category: 'business' },
-  { id: 'm6', title: '2 FTE Created', description: 'Minimum 2 full-time equivalent UK jobs', year: 2, completed: false, dueDate: '2026-01-01', category: 'business' },
-  { id: 'm7', title: 'Visa Extension', description: 'Apply for 3-year extension', year: 2, completed: false, dueDate: '2026-06-01', category: 'compliance' },
-  { id: 'm8', title: 'Continuous Endorsement', description: 'Maintain endorsing body support', year: 3, completed: false, dueDate: '2027-01-01', category: 'endorsement' },
-  { id: 'm9', title: '5 FTE Target', description: 'Scale to 5+ UK employees', year: 3, completed: false, dueDate: '2027-06-01', category: 'business' },
-  { id: 'm10', title: 'ILR Eligibility', description: 'Complete 5 years continuous residence', year: 5, completed: false, dueDate: '2029-01-01', category: 'residency' },
-  { id: 'm11', title: 'ILR Application', description: 'Submit Indefinite Leave to Remain application', year: 5, completed: false, dueDate: '2029-02-01', category: 'compliance' },
+  { id: 'm1', title: 'Visa Granted', description: 'Initial Innovator Founder visa approved', year: 0, completed: true, dueDate: '2025-12-01', category: 'compliance' },
+  { id: 'm2', title: 'Business Registration', description: 'Company incorporated in UK (Companies House)', year: 0, completed: true, dueDate: '2025-12-15', category: 'business' },
+  { id: 'm3', title: 'First Progress Report', description: 'Submit progress report to endorsing body', year: 1, completed: false, dueDate: '2026-12-01', category: 'endorsement' },
+  { id: 'm4', title: 'First Employee Hired', description: 'First UK-based full-time employee', year: 1, completed: false, dueDate: '2026-06-01', category: 'business' },
+  { id: 'm5', title: 'Revenue Milestone', description: 'Achieve first revenue from UK operations', year: 1, completed: false, dueDate: '2026-06-01', category: 'business' },
+  { id: 'm6', title: '2 FTE Created', description: 'Minimum 2 full-time equivalent UK jobs', year: 2, completed: false, dueDate: '2027-12-01', category: 'business' },
+  { id: 'm7', title: 'Visa Extension', description: 'Apply for 3-year extension', year: 2, completed: false, dueDate: '2027-10-01', category: 'compliance' },
+  { id: 'm8', title: 'Continuous Endorsement', description: 'Maintain endorsing body support', year: 3, completed: false, dueDate: '2028-12-01', category: 'endorsement' },
+  { id: 'm9', title: '5 FTE Target', description: 'Scale to 5+ UK employees', year: 3, completed: false, dueDate: '2028-06-01', category: 'business' },
+  { id: 'm10', title: 'ILR Eligibility', description: 'Complete 5 years continuous residence', year: 5, completed: false, dueDate: '2030-12-01', category: 'residency' },
+  { id: 'm11', title: 'ILR Application', description: 'Submit Indefinite Leave to Remain application', year: 5, completed: false, dueDate: '2031-01-01', category: 'compliance' },
 ];
 
 export default function ILRTracker() {
