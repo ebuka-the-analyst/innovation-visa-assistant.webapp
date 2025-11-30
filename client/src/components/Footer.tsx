@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
+import { ComplianceBadges } from "@/components/ComplianceBadges";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -61,8 +62,19 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li><a href="/guide" className="hover:text-primary transition-colors" data-testid="link-documentation">Documentation</a></li>
               <li><a href="/faq" className="hover:text-primary transition-colors" data-testid="link-faq">FAQ</a></li>
-              <li><a href="/guide" className="hover:text-primary transition-colors" data-testid="link-blog">Blog</a></li>
+              <li><a href="/ai-transparency" className="hover:text-primary transition-colors" data-testid="link-ai-transparency">AI Transparency</a></li>
               <li><a href="/support" className="hover:text-primary transition-colors" data-testid="link-support">Support</a></li>
+            </ul>
+          </div>
+
+          {/* Legal & Compliance */}
+          <div>
+            <h3 className="font-semibold mb-4">Legal & Compliance</h3>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li><a href="/ai-transparency" className="hover:text-primary transition-colors" data-testid="link-ai-how-it-works">How Our AI Works</a></li>
+              <li><a href="/testing-validation" className="hover:text-primary transition-colors" data-testid="link-testing">Testing & Validation</a></li>
+              <li><a href="/compliance-dashboard" className="hover:text-primary transition-colors" data-testid="link-compliance">Compliance Status</a></li>
+              <li><a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" data-testid="link-ico">ICO Registration</a></li>
             </ul>
           </div>
 
@@ -118,8 +130,13 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Compliance Badges */}
+        <div className="pt-8 border-t border-border mb-6">
+          <ComplianceBadges variant="footer" />
+        </div>
+
         {/* Bottom bar */}
-        <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-col md:flex-row items-center gap-3">
             <div className="isolate z-[9999] mix-blend-normal bg-transparent opacity-70">
               <div className="logo-container overflow-hidden">

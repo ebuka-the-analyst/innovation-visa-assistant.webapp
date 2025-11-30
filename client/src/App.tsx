@@ -111,6 +111,11 @@ const KnowledgeGraph = lazy(() => import("@/pages/knowledge-graph"));
 // Visa Application Prefill
 const VisaPrefillDashboard = lazy(() => import("@/pages/visa-prefill-dashboard"));
 
+// Legal & Compliance Pages
+const AITransparency = lazy(() => import("@/pages/ai-transparency"));
+const TestingValidation = lazy(() => import("@/pages/testing-validation"));
+const ComplianceDashboard = lazy(() => import("@/pages/compliance-dashboard"));
+
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
 
@@ -253,6 +258,9 @@ function Router() {
       <Route path="/mvp-demo-guide" component={MVPDemoGuide} />
       <Route path="/financial-resilience" component={FinancialResilience} />
       <Route path="/visa-prefill" component={VisaPrefillDashboard} />
+      <Route path="/ai-transparency" component={AITransparency} />
+      <Route path="/testing-validation" component={TestingValidation} />
+      <Route path="/compliance-dashboard" component={ComplianceDashboard} />
       <Route path="/faq" component={FAQ} />
       <Route path="/guide" component={Guide} />
       <Route path="/privacy" component={Privacy} />
