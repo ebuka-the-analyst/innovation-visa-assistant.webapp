@@ -3,6 +3,10 @@ import nodemailer from "nodemailer";
 import { db } from "./db";
 import { emailLogs } from "@shared/schema";
 
+// Log email configuration status on startup
+const emailConfigured = !!(process.env.AWS_SES_SMTP_USERNAME || process.env.HOSTINGER_EMAIL_USER);
+console.log(`[Email Service] ${emailConfigured ? 'Configured and ready' : 'NOT CONFIGURED - emails will not be sent'}`);
+
 interface SendEmailParams {
   to: string;
   subject: string;
@@ -33,7 +37,6 @@ const createTransporter = () => {
   
   // Primary: Amazon SES (eu-north-1 Stockholm region)
   if (AWS_SES_SMTP_USERNAME && AWS_SES_SMTP_PASSWORD) {
-    console.log('[Email] Using Amazon SES SMTP');
     return nodemailer.createTransport({
       host: 'email-smtp.eu-north-1.amazonaws.com',
       port: 587,
@@ -47,7 +50,6 @@ const createTransporter = () => {
   
   // Fallback: Hostinger SMTP
   if (HOSTINGER_EMAIL_USER && HOSTINGER_EMAIL_PASSWORD) {
-    console.log('[Email] Using Hostinger SMTP fallback');
     return nodemailer.createTransport({
       host: 'smtp.hostinger.com',
       port: 465,
