@@ -2520,8 +2520,8 @@ EXAMPLES OF GOOD RESPONSES:
           limit: 100,
         });
         monthlyRevenue = charges.data
-          .filter((c: any) => c.status === 'succeeded')
-          .reduce((sum: number, c: any) => sum + (c.amount / 100), 0);
+          .filter((c: any) => c.status === 'succeeded' && c.amount_captured > 0)
+          .reduce((sum: number, c: any) => sum + (c.amount_captured / 100), 0);
       } catch (stripeError) {
         console.error("Stripe revenue fetch error:", stripeError);
       }
@@ -2916,9 +2916,9 @@ EXAMPLES OF GOOD RESPONSES:
       const year1Cutoff = now <= YEAR_1_END_DATE ? now : YEAR_1_END_DATE;
       const year1Charges = validCharges.filter(c => {
         const chargeDate = new Date(c.created * 1000);
-        return chargeDate >= BUSINESS_LAUNCH_DATE && chargeDate <= year1Cutoff;
+        return chargeDate >= BUSINESS_LAUNCH_DATE && chargeDate <= year1Cutoff && c.amount_captured > 0;
       });
-      const revenueYear1ToDate = year1Charges.reduce((sum, c) => sum + (c.amount / 100), 0);
+      const revenueYear1ToDate = year1Charges.reduce((sum, c) => sum + (c.amount_captured / 100), 0);
       
       // Calculate revenue for different periods (using only post-launch charges)
       const todayCharges = validCharges.filter(c => new Date(c.created * 1000) >= startOfToday);
@@ -2929,12 +2929,19 @@ EXAMPLES OF GOOD RESPONSES:
         return chargeDate >= startOfLastMonth && chargeDate <= endOfLastMonth;
       });
       
-      const revenueToday = todayCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
-      const revenueThisWeek = weekCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
-      const revenueThisMonth = monthCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
-      const revenueLastMonth = lastMonthCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
-      // Use validCharges (post-launch only) for all-time revenue
-      const revenueAllTime = validCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
+      // Filter to only include charges with actual money captured (excludes 100% voucher codes)
+      const paidTodayCharges = todayCharges.filter(c => c.amount_captured > 0);
+      const paidWeekCharges = weekCharges.filter(c => c.amount_captured > 0);
+      const paidMonthCharges = monthCharges.filter(c => c.amount_captured > 0);
+      const paidLastMonthCharges = lastMonthCharges.filter(c => c.amount_captured > 0);
+      const paidValidCharges = validCharges.filter(c => c.amount_captured > 0);
+      
+      const revenueToday = paidTodayCharges.reduce((sum, c) => sum + (c.amount_captured / 100), 0);
+      const revenueThisWeek = paidWeekCharges.reduce((sum, c) => sum + (c.amount_captured / 100), 0);
+      const revenueThisMonth = paidMonthCharges.reduce((sum, c) => sum + (c.amount_captured / 100), 0);
+      const revenueLastMonth = paidLastMonthCharges.reduce((sum, c) => sum + (c.amount_captured / 100), 0);
+      // Use validCharges (post-launch only) for all-time revenue - only actual payments
+      const revenueAllTime = paidValidCharges.reduce((sum, c) => sum + (c.amount_captured / 100), 0);
       
       // Calculate discounts/refunds from charges (post-launch only)
       const totalDiscounts = validCharges.reduce((sum, c) => {
@@ -3015,12 +3022,12 @@ EXAMPLES OF GOOD RESPONSES:
         ultimate: allUsers.filter(u => u.subscriptionTier === 'ultimate').length,
       };
       
-      // Revenue by tier (from metadata or calculations)
+      // Revenue by tier (from metadata or calculations) - only count actual payments
       const revenueByTier = {
-        basic: monthCharges.filter(c => c.metadata?.tier === 'basic').reduce((s, c) => s + c.amount / 100, 0),
-        premium: monthCharges.filter(c => c.metadata?.tier === 'premium').reduce((s, c) => s + c.amount / 100, 0),
-        enterprise: monthCharges.filter(c => c.metadata?.tier === 'enterprise').reduce((s, c) => s + c.amount / 100, 0),
-        ultimate: monthCharges.filter(c => c.metadata?.tier === 'ultimate').reduce((s, c) => s + c.amount / 100, 0),
+        basic: paidMonthCharges.filter(c => c.metadata?.tier === 'basic').reduce((s, c) => s + c.amount_captured / 100, 0),
+        premium: paidMonthCharges.filter(c => c.metadata?.tier === 'premium').reduce((s, c) => s + c.amount_captured / 100, 0),
+        enterprise: paidMonthCharges.filter(c => c.metadata?.tier === 'enterprise').reduce((s, c) => s + c.amount_captured / 100, 0),
+        ultimate: paidMonthCharges.filter(c => c.metadata?.tier === 'ultimate').reduce((s, c) => s + c.amount_captured / 100, 0),
       };
       
       // Calculate Total Customers - use paid users from database as primary source
@@ -3066,10 +3073,11 @@ EXAMPLES OF GOOD RESPONSES:
           return chargeDate >= monthStart && chargeDate <= monthEnd;
         });
         const monthName = monthStart.toLocaleDateString('en-GB', { month: 'short' });
+        const paidMonthChargesData = monthChargesData.filter(c => c.amount_captured > 0);
         monthlyTrend.push({
           month: monthName,
-          revenue: monthChargesData.reduce((s, c) => s + c.amount / 100, 0),
-          transactions: monthChargesData.length,
+          revenue: paidMonthChargesData.reduce((s, c) => s + c.amount_captured / 100, 0),
+          transactions: paidMonthChargesData.length,
         });
       }
       
