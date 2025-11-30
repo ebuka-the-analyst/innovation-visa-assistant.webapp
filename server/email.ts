@@ -3,9 +3,23 @@ import nodemailer from "nodemailer";
 import { db } from "./db";
 import { emailLogs } from "@shared/schema";
 
-// Log email configuration status on startup
-const emailConfigured = !!(process.env.AWS_SES_SMTP_USERNAME || process.env.HOSTINGER_EMAIL_USER);
-console.log(`[Email Service] ${emailConfigured ? 'Configured and ready' : 'NOT CONFIGURED - emails will not be sent'}`);
+// Log email configuration status on startup - validate BOTH username AND password
+const awsSesConfigured = !!(process.env.AWS_SES_SMTP_USERNAME && process.env.AWS_SES_SMTP_PASSWORD);
+const hostingerConfigured = !!(process.env.HOSTINGER_EMAIL_USER && process.env.HOSTINGER_EMAIL_PASSWORD);
+const emailConfigured = awsSesConfigured || hostingerConfigured;
+
+if (awsSesConfigured) {
+  console.log('[Email Service] AWS SES SMTP configured and ready');
+} else if (hostingerConfigured) {
+  console.log('[Email Service] Hostinger SMTP configured and ready');
+} else {
+  console.error('[Email Service] NOT CONFIGURED - emails will not be sent');
+  console.error('[Email Service] Missing credentials:');
+  if (!process.env.AWS_SES_SMTP_USERNAME) console.error('  - AWS_SES_SMTP_USERNAME is missing');
+  if (!process.env.AWS_SES_SMTP_PASSWORD) console.error('  - AWS_SES_SMTP_PASSWORD is missing');
+  if (!process.env.HOSTINGER_EMAIL_USER) console.error('  - HOSTINGER_EMAIL_USER is missing');
+  if (!process.env.HOSTINGER_EMAIL_PASSWORD) console.error('  - HOSTINGER_EMAIL_PASSWORD is missing');
+}
 
 interface SendEmailParams {
   to: string;
@@ -1773,4 +1787,118 @@ export function generateVerificationEmail(code: string, displayName: string): st
 </body>
 </html>
   `.trim();
+}
+
+// Bulk welcome/thank you email for all users
+export async function sendBulkWelcomeEmail(users: Array<{ id: string; email: string; firstName: string | null; lastName: string | null }>): Promise<{ sent: number; failed: number; errors: string[] }> {
+  const results = { sent: 0, failed: 0, errors: [] as string[] };
+  
+  for (const user of users) {
+    const firstName = user.firstName || 'Valued User';
+    
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
+      <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Thank You for Joining!</h1>
+      </div>
+      
+      <div style="background: #ffffff; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 18px; margin-bottom: 20px;">Dear ${escapeHtml(firstName)},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          Thank you for joining the <strong>UK Innovator Founder Visa Assistant</strong> platform!
+        </p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          We're honoured to have you as part of our growing community.
+        </p>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
+          <h3 style="color: #ffa536; margin-top: 0;">What's waiting for you:</h3>
+          <ul style="list-style-type: none; padding: 0; margin: 0;">
+            <li style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong style="color: #11b6e9;">109+ Professional Tools</strong> - From business plan builders to compliance checkers</li>
+            <li style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong style="color: #11b6e9;">AI-Powered Guidance</strong> - Get expert-level assistance 24/7</li>
+            <li style="padding: 8px 0;"><strong style="color: #11b6e9;">Submission-Ready Documents</strong> - Generate visa-ready exports instantly</li>
+          </ul>
+        </div>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          We're here to support you every step of the way.
+        </p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          <strong>Need help getting started?</strong> Simply log in and explore our tools, or chat with our AI assistants who are ready to guide you.
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="https://innovatorfoundervisaassistant.co.uk/dashboard" 
+             style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); 
+                    color: white; 
+                    padding: 15px 40px; 
+                    text-decoration: none; 
+                    border-radius: 5px; 
+                    font-size: 18px; 
+                    font-weight: bold;
+                    display: inline-block;">
+            Explore Your Dashboard
+          </a>
+        </div>
+        
+        <p style="font-size: 16px; margin-bottom: 10px;">
+          If you have any questions, don't hesitate to reach out to our support team.
+        </p>
+        
+        <p style="font-size: 16px; margin-top: 30px;">
+          Warm regards,
+        </p>
+        
+        <p style="font-size: 16px; margin-bottom: 5px;">
+          <strong>Ebuka Benedict Umeh</strong>
+        </p>
+        <p style="font-size: 14px; color: #666; margin-top: 0;">
+          Founder, UK Innovator Founder Visa Assistant<br>
+          <a href="https://www.innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">www.innovatorfoundervisaassistant.co.uk</a>
+        </p>
+      </div>
+      
+      <div style="text-align: center; padding: 20px; color: #888; font-size: 12px;">
+        <p>This email was sent to ${escapeHtml(user.email)}.</p>
+        <p>If you believe you received this in error, please contact us.</p>
+      </div>
+    </body>
+    </html>
+    `;
+    
+    try {
+      const result = await sendEmail({
+        to: user.email,
+        subject: 'Thank You for Joining UK Innovator Founder Visa Assistant',
+        html,
+        emailType: 'welcome',
+        recipientName: firstName,
+        userId: user.id,
+      });
+      
+      if (result.success) {
+        results.sent++;
+      } else {
+        results.failed++;
+        results.errors.push(`${user.email}: ${result.error}`);
+      }
+    } catch (error: any) {
+      results.failed++;
+      results.errors.push(`${user.email}: ${error.message}`);
+    }
+    
+    // Small delay between emails to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  
+  return results;
 }

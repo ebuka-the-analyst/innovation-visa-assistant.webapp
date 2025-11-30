@@ -10,7 +10,7 @@ import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
 import crypto from "crypto";
 import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
-import { sendPaymentReceiptEmail, sendPasswordResetEmail, generateVerificationToken, getResetTokenExpiry, sendPlanCompletionEmail, sendReferralRewardEmail, sendPromoCodeRewardEmail, sendAdminVerificationSuccessEmail } from "./email";
+import { sendPaymentReceiptEmail, sendPasswordResetEmail, generateVerificationToken, getResetTokenExpiry, sendPlanCompletionEmail, sendReferralRewardEmail, sendPromoCodeRewardEmail, sendAdminVerificationSuccessEmail, sendBulkWelcomeEmail } from "./email";
 import bcrypt from "bcrypt";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import PDFDocument from "pdfkit";
@@ -3387,6 +3387,40 @@ EXAMPLES OF GOOD RESPONSES:
     } catch (error: any) {
       console.error("Email analytics error:", error);
       res.status(500).json({ error: "Failed to fetch email analytics" });
+    }
+  });
+
+  // Send bulk welcome emails to all users (Admin only)
+  app.post("/api/admin/emails/send-bulk-welcome", requireAdmin, async (req, res) => {
+    try {
+      // Get all users with emails
+      const allUsers = await db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+      }).from(users).where(sql`${users.email} IS NOT NULL`);
+      
+      if (allUsers.length === 0) {
+        return res.status(400).json({ error: "No users found to send emails to" });
+      }
+      
+      console.log(`[Bulk Email] Starting to send welcome emails to ${allUsers.length} users`);
+      
+      const results = await sendBulkWelcomeEmail(allUsers);
+      
+      console.log(`[Bulk Email] Completed: ${results.sent} sent, ${results.failed} failed`);
+      
+      res.json({
+        success: true,
+        totalUsers: allUsers.length,
+        sent: results.sent,
+        failed: results.failed,
+        errors: results.errors.slice(0, 10) // Only return first 10 errors to avoid huge responses
+      });
+    } catch (error: any) {
+      console.error("Bulk email error:", error);
+      res.status(500).json({ error: "Failed to send bulk emails", message: error.message });
     }
   });
 

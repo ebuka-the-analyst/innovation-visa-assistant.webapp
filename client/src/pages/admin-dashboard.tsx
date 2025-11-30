@@ -1337,7 +1337,7 @@ export default function AdminDashboard() {
   });
 
   // Email Analytics - Real data from email_logs table
-  const { data: emailAnalytics, isLoading: emailAnalyticsLoading } = useQuery<{
+  const { data: emailAnalytics, isLoading: emailAnalyticsLoading, refetch: refetchEmailAnalytics } = useQuery<{
     summary: {
       totalSent30Days: number;
       sentToday: number;
@@ -9367,7 +9367,7 @@ export default function AdminDashboard() {
                               {/* Email Overview Banner */}
                               <Card className="bg-gradient-to-r from-blue-500/10 via-sky-500/5 to-blue-500/10 border-blue-500/20">
                                 <CardContent className="py-6">
-                                  <div className="flex items-center justify-between">
+                                  <div className="flex items-center justify-between flex-wrap gap-4">
                                     <div className="flex items-center gap-4">
                                       <div className="p-3 rounded-xl bg-blue-500 text-white">
                                         <Mail className="h-6 w-6" />
@@ -9377,7 +9377,7 @@ export default function AdminDashboard() {
                                         <p className="text-2xl font-bold text-blue-500">Email Performance Dashboard</p>
                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-6">
+                                    <div className="flex items-center gap-6 flex-wrap">
                                       <div className="text-center">
                                         <p className="text-sm text-muted-foreground">Sent Today</p>
                                         <p className="text-xl font-bold">{emailAnalytics?.summary?.sentToday || 0}</p>
@@ -9386,6 +9386,34 @@ export default function AdminDashboard() {
                                         <p className="text-sm text-muted-foreground">Delivery Rate</p>
                                         <p className="text-xl font-bold text-green-500">{emailAnalytics?.summary?.deliveryRate || '0%'}</p>
                                       </div>
+                                      <Button
+                                        data-testid="button-send-bulk-welcome"
+                                        onClick={async () => {
+                                          if (!confirm('Send welcome email to ALL users? This will email all 17 registered users.')) return;
+                                          try {
+                                            const response = await apiRequest('/api/admin/emails/send-bulk-welcome', { method: 'POST' });
+                                            if (response.success) {
+                                              toast({
+                                                title: 'Welcome Emails Sent',
+                                                description: `Successfully sent ${response.sent} emails. ${response.failed > 0 ? `${response.failed} failed.` : ''}`,
+                                              });
+                                              refetchEmailAnalytics();
+                                            } else {
+                                              throw new Error(response.error);
+                                            }
+                                          } catch (err: any) {
+                                            toast({
+                                              title: 'Email Send Failed',
+                                              description: err.message || 'Failed to send bulk emails',
+                                              variant: 'destructive',
+                                            });
+                                          }
+                                        }}
+                                        className="bg-gradient-to-r from-orange-500 to-blue-500 text-white"
+                                      >
+                                        <Send className="h-4 w-4 mr-2" />
+                                        Send Bulk Welcome Email
+                                      </Button>
                                     </div>
                                   </div>
                                 </CardContent>
