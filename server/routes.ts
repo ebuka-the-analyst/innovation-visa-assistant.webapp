@@ -2856,11 +2856,17 @@ EXAMPLES OF GOOD RESPONSES:
         }
       }
       
-      // Calculate revenue for different periods
-      const todayCharges = allCharges.filter(c => new Date(c.created * 1000) >= startOfToday);
-      const weekCharges = allCharges.filter(c => new Date(c.created * 1000) >= startOfWeek);
-      const monthCharges = allCharges.filter(c => new Date(c.created * 1000) >= startOfMonth);
-      const lastMonthCharges = allCharges.filter(c => {
+      // Business launch date - filter all charges to only count from this date
+      const BUSINESS_LAUNCH_DATE = new Date('2025-11-26T00:00:00Z');
+      
+      // Filter charges to only include those from business launch date onwards
+      const validCharges = allCharges.filter(c => new Date(c.created * 1000) >= BUSINESS_LAUNCH_DATE);
+      
+      // Calculate revenue for different periods (using only post-launch charges)
+      const todayCharges = validCharges.filter(c => new Date(c.created * 1000) >= startOfToday);
+      const weekCharges = validCharges.filter(c => new Date(c.created * 1000) >= startOfWeek);
+      const monthCharges = validCharges.filter(c => new Date(c.created * 1000) >= startOfMonth);
+      const lastMonthCharges = validCharges.filter(c => {
         const chargeDate = new Date(c.created * 1000);
         return chargeDate >= startOfLastMonth && chargeDate <= endOfLastMonth;
       });
@@ -2869,10 +2875,11 @@ EXAMPLES OF GOOD RESPONSES:
       const revenueThisWeek = weekCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
       const revenueThisMonth = monthCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
       const revenueLastMonth = lastMonthCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
-      const revenueAllTime = allCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
+      // Use validCharges (post-launch only) for all-time revenue
+      const revenueAllTime = validCharges.reduce((sum, c) => sum + (c.amount / 100), 0);
       
-      // Calculate discounts/refunds from charges
-      const totalDiscounts = allCharges.reduce((sum, c) => {
+      // Calculate discounts/refunds from charges (post-launch only)
+      const totalDiscounts = validCharges.reduce((sum, c) => {
         // Check if there was a discount applied (metadata or amount_off)
         const discount = c.metadata?.discount_amount ? parseFloat(c.metadata.discount_amount) : 0;
         return sum + discount;
@@ -2958,14 +2965,14 @@ EXAMPLES OF GOOD RESPONSES:
         ultimate: monthCharges.filter(c => c.metadata?.tier === 'ultimate').reduce((s, c) => s + c.amount / 100, 0),
       };
       
-      // Calculate LTV (Lifetime Value) = Total Revenue / Total Customers
-      const totalCustomers = allCharges.length > 0 
-        ? new Set(allCharges.map(c => c.customer).filter(Boolean)).size 
-        : 1;
+      // Calculate LTV (Lifetime Value) = Total Revenue / Total Customers (post-launch only)
+      const totalCustomers = validCharges.length > 0 
+        ? new Set(validCharges.map(c => c.customer).filter(Boolean)).size 
+        : 0;
       const avgLTV = totalCustomers > 0 ? revenueAllTime / totalCustomers : 0;
       
-      // Average order value
-      const avgOrderValue = allCharges.length > 0 ? revenueAllTime / allCharges.length : 0;
+      // Average order value (post-launch only)
+      const avgOrderValue = validCharges.length > 0 ? revenueAllTime / validCharges.length : 0;
       
       // Monthly comparison
       const monthlyGrowth = revenueLastMonth > 0 
@@ -2985,12 +2992,14 @@ EXAMPLES OF GOOD RESPONSES:
           : code.discountValue / 100),
       }));
       
-      // Monthly revenue trend (last 12 months)
+      // Monthly revenue trend (last 12 months) - only count post-launch revenue
       const monthlyTrend: { month: string; revenue: number; transactions: number }[] = [];
       for (let i = 11; i >= 0; i--) {
         const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
-        const monthChargesData = allCharges.filter(c => {
+        
+        // Only count charges that are both in this month AND after business launch date
+        const monthChargesData = validCharges.filter(c => {
           const chargeDate = new Date(c.created * 1000);
           return chargeDate >= monthStart && chargeDate <= monthEnd;
         });
@@ -3031,7 +3040,7 @@ EXAMPLES OF GOOD RESPONSES:
         totalCustomers,
         avgLTV,
         avgOrderValue,
-        totalTransactions: allCharges.length,
+        totalTransactions: validCharges.length,
         
         // Tier data
         tierDistribution,
