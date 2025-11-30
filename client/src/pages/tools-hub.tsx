@@ -97,11 +97,17 @@ export default function ToolsHub() {
     const sessionId = params.get('session_id');
     const planId = params.get('plan_id');
     const upgraded = params.get('upgraded');
+    const tier = params.get('tier');
 
-    if (sessionId && planId && upgraded === 'true') {
+    if (sessionId && upgraded === 'true') {
       setIsVerifyingPayment(true);
       
-      apiRequest('POST', '/api/payment/verify', { sessionId, planId })
+      // Check if this is a direct subscription (no planId, has tier) or traditional flow
+      const isDirectSubscription = !planId && tier;
+      const endpoint = isDirectSubscription ? '/api/payment/verify-subscription' : '/api/payment/verify';
+      const payload = isDirectSubscription ? { sessionId } : { sessionId, planId };
+      
+      apiRequest('POST', endpoint, payload)
         .then(async (response) => {
           const data = await response.json();
           
@@ -110,7 +116,9 @@ export default function ToolsHub() {
           
           toast({
             title: "Payment Successful!",
-            description: `Your subscription has been activated. You now have ${data.tier || 'upgraded'} tier access to all tools.`,
+            description: isDirectSubscription 
+              ? `Welcome! Your ${data.tier} tier subscription is now active. Start your business plan questionnaire when ready.`
+              : `Your subscription has been activated. You now have ${data.tier || 'upgraded'} tier access to all tools.`,
           });
           
           // Clean up URL parameters

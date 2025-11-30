@@ -598,51 +598,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Create a minimal business plan for this direct subscription with all required fields
-      const businessPlan = await storage.createBusinessPlan({
-        userId: user.id,
-        tier: tier,
-        businessName: `Direct Subscription - ${pricing.name}`,
-        industry: "technology",
-        problem: "Direct subscription - complete questionnaire later to generate full business plan",
-        uniqueness: "Direct subscription purchase",
-        technology: "To be completed",
-        experience: "To be completed",
-        funding: 0,
-        revenue: "To be completed",
-        jobCreation: 2,
-        expansion: "UK and international markets",
-        vision: "To be completed after subscription",
-        innovationStage: "concept",
-        productStatus: "Direct subscription - details to be completed",
-        techStack: "To be completed",
-        dataArchitecture: "To be completed after subscription",
-        aiMethodology: "To be completed after subscription",
-        complianceDesign: "To be completed after subscription",
-        patentStatus: "none",
-        founderEducation: "To be completed",
-        founderWorkHistory: "To be completed after subscription",
-        founderAchievements: "To be completed",
-        relevantProjects: "To be completed",
-        monthlyProjections: "To be completed",
-        customerAcquisitionCost: 0,
-        lifetimeValue: 0,
-        paybackPeriod: 12,
-        fundingSources: "Self-funded",
-        detailedCosts: "To be completed",
-        competitors: "To be completed",
-        competitiveDifferentiation: "To be completed",
-        customerInterviews: "To be completed",
-        willingnessToPay: "To be completed",
-        marketSize: "To be completed",
-        regulatoryRequirements: "To be completed",
-        complianceTimeline: "To be completed",
-        complianceBudget: 0,
-        hiringPlan: "To be completed",
-        specificRegions: "United Kingdom",
-        targetEndorser: "To be selected",
-        contactPointsStrategy: "To be completed",
-      });
+      // NOTE: We no longer create a business plan on direct subscription
+      // Business plan will only be created when user actually fills out the questionnaire form
+      // The subscription/tier upgrade is tracked directly on the user record after payment
+      const pendingPlanId = `pending_${user.id}_${Date.now()}`;
 
       // Get the correct base URL for redirects
       const getBaseUrl = () => {
@@ -696,12 +655,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         ],
         mode: "payment",
-        success_url: `${baseUrl}/tools-hub?session_id={CHECKOUT_SESSION_ID}&plan_id=${businessPlan.id}&upgraded=true`,
+        success_url: `${baseUrl}/tools-hub?session_id={CHECKOUT_SESSION_ID}&upgraded=true&tier=${tier}`,
         cancel_url: `${baseUrl}/pricing`,
         metadata: {
-          planId: businessPlan.id,
+          pendingPlanId: pendingPlanId,
           directSubscription: 'true',
           tier: tier,
+          userId: user.id,
           promoCode: validPromoCode?.code || '',
           promoCodeId: validPromoCode?.id || '',
           originalAmount: pricing.amount.toString(),
@@ -709,14 +669,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
-      await storage.updateBusinessPlan(businessPlan.id, { stripeSessionId: session.id });
-
-      console.log(`[DIRECT SUBSCRIBE] User ${user.id} starting direct subscription to ${tier} tier`);
-      res.json({ sessionId: session.id, url: session.url, planId: businessPlan.id });
+      console.log(`[DIRECT SUBSCRIBE] User ${user.id} starting direct subscription to ${tier} tier (no plan created yet)`);
+      res.json({ sessionId: session.id, url: session.url, pendingPlanId: pendingPlanId });
     } catch (error: any) {
       console.error("Direct subscription error:", error);
       const errorMessage = error?.message || error?.raw?.message || "Failed to create subscription";
       res.status(500).json({ error: errorMessage });
+    }
+  });
+
+  // Verify direct subscription (tier upgrade without business plan)
+  app.post("/api/payment/verify-subscription", isAuthenticated, async (req, res) => {
+    try {
+      const { sessionId } = req.body;
+      const user = req.user as any;
+
+      if (!sessionId) {
+        return res.status(400).json({ error: "Session ID required" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      if (session.payment_status !== "paid") {
+        return res.status(402).json({ error: "Payment not completed", paymentStatus: session.payment_status });
+      }
+
+      // Verify this is a direct subscription for this user
+      if (session.metadata?.userId !== user.id) {
+        return res.status(403).json({ error: "User mismatch - security violation" });
+      }
+
+      if (session.metadata?.directSubscription !== 'true') {
+        return res.status(400).json({ error: "This is not a direct subscription session" });
+      }
+
+      const tier = session.metadata?.tier;
+      if (!tier || !['basic', 'premium', 'enterprise', 'ultimate'].includes(tier)) {
+        return res.status(400).json({ error: "Invalid tier in session metadata" });
+      }
+
+      // Upgrade user's tier directly (no business plan created yet)
+      await storage.updateUser(user.id, { 
+        subscriptionTier: tier,
+        subscriptionStatus: 'active'
+      });
+      console.log(`[DIRECT SUBSCRIBE] User ${user.id} upgraded to ${tier} tier after payment`);
+
+      const pricing = PRICING[tier as keyof typeof PRICING];
+      const purchaseAmount = pricing?.amount || 0;
+
+      // Send payment receipt email
+      try {
+        const fullUser = await storage.getUser(user.id);
+        if (fullUser && fullUser.email) {
+          await sendPaymentReceiptEmail(
+            fullUser.email,
+            fullUser.firstName || 'Customer',
+            pricing?.name || tier,
+            purchaseAmount,
+            sessionId
+          );
+        }
+      } catch (emailError) {
+        console.error("Failed to send payment receipt email:", emailError);
+      }
+
+      // Process promo code usage
+      try {
+        const promoCodeId = session.metadata?.promoCodeId;
+        const promoCodeUsed = session.metadata?.promoCode;
+        const discountAmount = parseInt(session.metadata?.discountAmount || '0');
+        const originalAmount = parseInt(session.metadata?.originalAmount || '0');
+        
+        if (promoCodeId && promoCodeUsed) {
+          await storage.createPromoRedemption({
+            promoCodeId,
+            userId: user.id,
+            orderId: sessionId,
+            discountApplied: discountAmount,
+            originalAmount: originalAmount,
+            finalAmount: originalAmount - discountAmount,
+            appliedAt: 'checkout',
+          });
+          await storage.incrementPromoCodeUsage(promoCodeId);
+        }
+      } catch (promoError) {
+        console.error("Failed to track promo code usage:", promoError);
+      }
+
+      res.json({ 
+        success: true, 
+        tier,
+        message: `Successfully upgraded to ${tier} tier. You can now start your business plan questionnaire.`
+      });
+    } catch (error: any) {
+      console.error("Subscription verification error:", error);
+      res.status(500).json({ error: "Verification failed", details: error.message });
     }
   });
 
