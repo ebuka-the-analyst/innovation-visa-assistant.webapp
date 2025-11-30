@@ -43,7 +43,11 @@ function escapeHtml(text: string): string {
 }
 
 // Amazon SES SMTP transporter (primary) with Hostinger fallback
-const createTransporter = () => {
+// CACHED at startup to prevent issues during server restarts when env vars temporarily unavailable
+let cachedTransporter: nodemailer.Transporter | null = null;
+let cachedProvider: string = '';
+
+const initializeTransporter = () => {
   const AWS_SES_SMTP_USERNAME = process.env.AWS_SES_SMTP_USERNAME;
   const AWS_SES_SMTP_PASSWORD = process.env.AWS_SES_SMTP_PASSWORD;
   const HOSTINGER_EMAIL_USER = process.env.HOSTINGER_EMAIL_USER;
@@ -51,7 +55,7 @@ const createTransporter = () => {
   
   // Primary: Amazon SES (eu-north-1 Stockholm region)
   if (AWS_SES_SMTP_USERNAME && AWS_SES_SMTP_PASSWORD) {
-    return nodemailer.createTransport({
+    cachedTransporter = nodemailer.createTransport({
       host: 'email-smtp.eu-north-1.amazonaws.com',
       port: 587,
       secure: false,
@@ -60,11 +64,13 @@ const createTransporter = () => {
         pass: AWS_SES_SMTP_PASSWORD,
       },
     });
+    cachedProvider = 'aws_ses';
+    return;
   }
   
   // Fallback: Hostinger SMTP
   if (HOSTINGER_EMAIL_USER && HOSTINGER_EMAIL_PASSWORD) {
-    return nodemailer.createTransport({
+    cachedTransporter = nodemailer.createTransport({
       host: 'smtp.hostinger.com',
       port: 465,
       secure: true,
@@ -73,32 +79,37 @@ const createTransporter = () => {
         pass: HOSTINGER_EMAIL_PASSWORD,
       },
     });
+    cachedProvider = 'hostinger';
+    return;
   }
   
-  return null;
+  cachedTransporter = null;
+  cachedProvider = '';
 };
+
+// Initialize transporter at module load time (startup)
+initializeTransporter();
+
+const getTransporter = () => cachedTransporter;
+const getProvider = () => cachedProvider;
 
 export async function sendEmail({ to, subject, html, from, emailType = 'system', recipientName, userId }: SendEmailParams) {
   const DEFAULT_FROM_EMAIL = 'noreply@innovatorfoundervisaassistant.co.uk';
   
-  // Debug: Log environment variable availability at send time
+  // Use cached transporter (initialized at startup)
   console.log('[Email Send] Attempting to send email to:', to);
-  console.log('[Email Send] AWS_SES available:', !!process.env.AWS_SES_SMTP_USERNAME, !!process.env.AWS_SES_SMTP_PASSWORD);
-  console.log('[Email Send] Hostinger available:', !!process.env.HOSTINGER_EMAIL_USER, !!process.env.HOSTINGER_EMAIL_PASSWORD);
   
-  const transporter = createTransporter();
-  const provider = process.env.AWS_SES_SMTP_USERNAME ? 'aws_ses' : 'hostinger';
+  const transporter = getTransporter();
+  const provider = getProvider();
   
   console.log('[Email Send] Transporter created:', !!transporter, 'Provider:', provider);
   
   if (!transporter) {
-    console.error("[Email Send] FAILED - Email service not configured!");
-    console.error("[Email Send] AWS_SES_SMTP_USERNAME:", process.env.AWS_SES_SMTP_USERNAME ? 'SET' : 'NOT SET');
-    console.error("[Email Send] AWS_SES_SMTP_PASSWORD:", process.env.AWS_SES_SMTP_PASSWORD ? 'SET' : 'NOT SET');
-    console.error("[Email Send] HOSTINGER_EMAIL_USER:", process.env.HOSTINGER_EMAIL_USER ? 'SET' : 'NOT SET');
-    console.error("[Email Send] HOSTINGER_EMAIL_PASSWORD:", process.env.HOSTINGER_EMAIL_PASSWORD ? 'SET' : 'NOT SET');
-    console.log("Would have sent email to:", to);
-    console.log("Subject:", subject);
+    console.error("[Email Send] FAILED - Email transporter not initialized at startup!");
+    console.error("[Email Send] This usually means environment variables were missing when server started.");
+    console.error("[Email Send] Try restarting the server.");
+    console.log("[Email Send] Would have sent email to:", to);
+    console.log("[Email Send] Subject:", subject);
     
     // Log failed email attempt
     try {
