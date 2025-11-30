@@ -2907,9 +2907,18 @@ EXAMPLES OF GOOD RESPONSES:
       
       // Business launch date - filter all charges to only count from this date
       const BUSINESS_LAUNCH_DATE = new Date('2025-11-26T00:00:00Z');
+      const YEAR_1_END_DATE = new Date('2026-11-25T23:59:59Z');
       
       // Filter charges to only include those from business launch date onwards
       const validCharges = allCharges.filter(c => new Date(c.created * 1000) >= BUSINESS_LAUNCH_DATE);
+      
+      // Year 1 to-date revenue (Nov 26, 2025 - today or Nov 25, 2026, whichever is earlier)
+      const year1Cutoff = now <= YEAR_1_END_DATE ? now : YEAR_1_END_DATE;
+      const year1Charges = validCharges.filter(c => {
+        const chargeDate = new Date(c.created * 1000);
+        return chargeDate >= BUSINESS_LAUNCH_DATE && chargeDate <= year1Cutoff;
+      });
+      const revenueYear1ToDate = year1Charges.reduce((sum, c) => sum + (c.amount / 100), 0);
       
       // Calculate revenue for different periods (using only post-launch charges)
       const todayCharges = validCharges.filter(c => new Date(c.created * 1000) >= startOfToday);
@@ -3117,6 +3126,7 @@ EXAMPLES OF GOOD RESPONSES:
         revenueThisMonth,
         revenueLastMonth,
         revenueAllTime,
+        revenueYear1ToDate,
         monthlyGrowth,
         
         // Subscription metrics - use database data if Stripe is empty

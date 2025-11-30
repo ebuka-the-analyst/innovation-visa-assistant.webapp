@@ -1127,6 +1127,7 @@ export default function AdminDashboard() {
     revenueThisMonth: number;
     revenueLastMonth: number;
     revenueAllTime: number;
+    revenueYear1ToDate: number;
     monthlyGrowth: number;
     mrr: number;
     arr: number;
@@ -7583,6 +7584,114 @@ export default function AdminDashboard() {
                               </CardContent>
                             </Card>
                           </div>
+
+                          {/* Revenue vs Target Comparison Chart */}
+                          <Card className="border-l-4 border-l-primary">
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <CardTitle className="flex items-center gap-2">
+                                    <Target className="h-5 w-5 text-primary" />
+                                    Revenue vs Target (Year 1)
+                                  </CardTitle>
+                                  <CardDescription>Actual performance compared to Year 1 projections (£72,000 target)</CardDescription>
+                                </div>
+                                <Badge variant="outline" className="bg-primary/10 text-primary">
+                                  Since Nov 26, 2025
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              {(() => {
+                                const year1Target = 72000;
+                                const monthlyTarget = year1Target / 12;
+                                const launchDate = new Date('2025-11-26');
+                                const year1EndDate = new Date('2026-11-25');
+                                const now = new Date();
+                                const daysSinceLaunch = Math.max(1, Math.floor((now.getTime() - launchDate.getTime()) / (1000 * 60 * 60 * 24)));
+                                const totalYear1Days = Math.floor((year1EndDate.getTime() - launchDate.getTime()) / (1000 * 60 * 60 * 24));
+                                const year1Progress = Math.min(daysSinceLaunch / totalYear1Days, 1);
+                                const actualRevenue = revenueAnalytics?.revenueYear1ToDate || revenueAnalytics?.revenueAllTime || 0;
+                                const currentMRR = revenueAnalytics?.mrr || 0;
+                                const projectedARR = currentMRR * 12;
+                                const expectedRevenue = year1Target * year1Progress;
+                                const progressPercent = Math.min((actualRevenue / year1Target) * 100, 100);
+                                const isAheadOfTarget = actualRevenue >= expectedRevenue;
+                                
+                                return (
+                                  <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                      <div className="p-4 rounded-lg bg-muted/50 border">
+                                        <p className="text-xs text-muted-foreground">Year 1 Target</p>
+                                        <p className="text-2xl font-bold">£{year1Target.toLocaleString()}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">£{monthlyTarget.toLocaleString()}/mo average</p>
+                                      </div>
+                                      <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                                        <p className="text-xs text-muted-foreground">Actual Revenue</p>
+                                        <p className="text-2xl font-bold text-green-500">£{actualRevenue.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">{daysSinceLaunch} days since launch</p>
+                                      </div>
+                                      <div className={`p-4 rounded-lg ${isAheadOfTarget ? 'bg-green-500/10 border-green-500/20' : 'bg-amber-500/10 border-amber-500/20'} border`}>
+                                        <p className="text-xs text-muted-foreground">Projected ARR (based on MRR)</p>
+                                        <p className={`text-2xl font-bold ${isAheadOfTarget ? 'text-green-500' : 'text-amber-500'}`}>£{projectedARR.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">{projectedARR >= year1Target ? 'On track' : 'Below target'}</p>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                      <div className="flex items-center justify-between text-sm">
+                                        <span className="text-muted-foreground">Progress to Year 1 Target</span>
+                                        <span className="font-bold">{progressPercent.toFixed(1)}%</span>
+                                      </div>
+                                      <div className="relative h-4 rounded-full bg-muted overflow-hidden">
+                                        <motion.div
+                                          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-green-500 to-emerald-400"
+                                          initial={{ width: 0 }}
+                                          animate={{ width: `${progressPercent}%` }}
+                                          transition={{ duration: 1, ease: "easeOut" }}
+                                        />
+                                        <div 
+                                          className="absolute inset-y-0 w-0.5 bg-primary"
+                                          style={{ left: `${Math.min((expectedRevenue / year1Target) * 100, 100)}%` }}
+                                        />
+                                      </div>
+                                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                        <span>£0</span>
+                                        <span className="flex items-center gap-1">
+                                          <div className="w-2 h-2 rounded-full bg-primary" />
+                                          Expected: £{expectedRevenue.toFixed(0)}
+                                        </span>
+                                        <span>£{year1Target.toLocaleString()}</span>
+                                      </div>
+                                    </div>
+
+                                    <div className="pt-4 border-t">
+                                      <ResponsiveContainer width="100%" height={200}>
+                                        <RechartsBarChart
+                                          data={[
+                                            { name: 'Target (Expected)', value: expectedRevenue, fill: 'hsl(var(--muted-foreground))' },
+                                            { name: 'Actual Revenue', value: actualRevenue, fill: '#22c55e' },
+                                            { name: 'Projected ARR', value: projectedARR, fill: '#3b82f6' },
+                                            { name: 'Year 1 Target', value: year1Target, fill: 'hsl(var(--primary))' },
+                                          ]}
+                                          layout="vertical"
+                                        >
+                                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                          <XAxis type="number" tickFormatter={(v) => `£${v >= 1000 ? (v/1000).toFixed(0) + 'K' : v}`} stroke="hsl(var(--foreground))" fontSize={12} />
+                                          <YAxis type="category" dataKey="name" width={120} stroke="hsl(var(--foreground))" fontSize={11} />
+                                          <RechartsTooltip
+                                            contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                                            formatter={(value: number) => [`£${value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, '']}
+                                          />
+                                          <Bar dataKey="value" radius={[0, 4, 4, 0]} />
+                                        </RechartsBarChart>
+                                      </ResponsiveContainer>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </CardContent>
+                          </Card>
 
                           {/* Recent Transactions - Real Stripe Data */}
                           <Card>
