@@ -53,22 +53,26 @@ const initializeTransporter = () => {
   const HOSTINGER_EMAIL_USER = process.env.HOSTINGER_EMAIL_USER;
   const HOSTINGER_EMAIL_PASSWORD = process.env.HOSTINGER_EMAIL_PASSWORD;
   
-  // Primary: Amazon SES (eu-north-1 Stockholm region)
+  // Primary: Amazon SES - auto-detect region from env or use eu-north-1
   if (AWS_SES_SMTP_USERNAME && AWS_SES_SMTP_PASSWORD) {
+    // Allow region override via env variable, default to eu-north-1 (Stockholm)
+    const sesRegion = process.env.AWS_SES_REGION || 'eu-north-1';
+    const sesHost = `email-smtp.${sesRegion}.amazonaws.com`;
+    
     cachedTransporter = nodemailer.createTransport({
-      host: 'email-smtp.eu-north-1.amazonaws.com',
-      port: 587,
-      secure: false,
+      host: sesHost,
+      port: 465, // Use TLS port for better compatibility
+      secure: true, // TLS
       auth: {
         user: AWS_SES_SMTP_USERNAME,
         pass: AWS_SES_SMTP_PASSWORD,
       },
-      connectionTimeout: 10000, // 10 seconds
-      socketTimeout: 15000, // 15 seconds
-      greetingTimeout: 10000, // 10 seconds
+      connectionTimeout: 15000, // 15 seconds
+      socketTimeout: 20000, // 20 seconds
+      greetingTimeout: 15000, // 15 seconds
     });
     cachedProvider = 'aws_ses';
-    console.log('[Email Service] AWS SES SMTP configured with timeouts');
+    console.log(`[Email Service] AWS SES SMTP configured: ${sesHost}:465 (TLS)`);
     return;
   }
   
