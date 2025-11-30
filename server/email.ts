@@ -67,11 +67,22 @@ const createTransporter = () => {
 export async function sendEmail({ to, subject, html, from, emailType = 'system', recipientName, userId }: SendEmailParams) {
   const DEFAULT_FROM_EMAIL = 'noreply@innovatorfoundervisaassistant.co.uk';
   
+  // Debug: Log environment variable availability at send time
+  console.log('[Email Send] Attempting to send email to:', to);
+  console.log('[Email Send] AWS_SES available:', !!process.env.AWS_SES_SMTP_USERNAME, !!process.env.AWS_SES_SMTP_PASSWORD);
+  console.log('[Email Send] Hostinger available:', !!process.env.HOSTINGER_EMAIL_USER, !!process.env.HOSTINGER_EMAIL_PASSWORD);
+  
   const transporter = createTransporter();
   const provider = process.env.AWS_SES_SMTP_USERNAME ? 'aws_ses' : 'hostinger';
   
+  console.log('[Email Send] Transporter created:', !!transporter, 'Provider:', provider);
+  
   if (!transporter) {
-    console.error("Email service not configured. Email not sent.");
+    console.error("[Email Send] FAILED - Email service not configured!");
+    console.error("[Email Send] AWS_SES_SMTP_USERNAME:", process.env.AWS_SES_SMTP_USERNAME ? 'SET' : 'NOT SET');
+    console.error("[Email Send] AWS_SES_SMTP_PASSWORD:", process.env.AWS_SES_SMTP_PASSWORD ? 'SET' : 'NOT SET');
+    console.error("[Email Send] HOSTINGER_EMAIL_USER:", process.env.HOSTINGER_EMAIL_USER ? 'SET' : 'NOT SET');
+    console.error("[Email Send] HOSTINGER_EMAIL_PASSWORD:", process.env.HOSTINGER_EMAIL_PASSWORD ? 'SET' : 'NOT SET');
     console.log("Would have sent email to:", to);
     console.log("Subject:", subject);
     
