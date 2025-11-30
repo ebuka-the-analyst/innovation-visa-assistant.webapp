@@ -1,11 +1,15 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText, FileIcon, FileType2 } from "lucide-react";
+import { FileText, FileIcon, FileType2, Crown, Eye } from "lucide-react";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
 import { saveAs } from "file-saver";
 import { useToast } from "@/hooks/use-toast";
+import { useProfessionalPdfExport } from "@/hooks/useProfessionalPdfExport";
+import { useProfessionalWordExport } from "@/hooks/useProfessionalWordExport";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 declare module 'jspdf' {
   interface jsPDF {
@@ -27,6 +31,8 @@ interface ExportFormatDialogProps {
   subtitle?: string;
   filename: string;
   sections: ExportSection[];
+  authorName?: string;
+  authorEmail?: string;
 }
 
 export function ExportFormatDialog({
@@ -35,9 +41,14 @@ export function ExportFormatDialog({
   title,
   subtitle,
   filename,
-  sections
+  sections,
+  authorName = "UK Innovator Founder Visa Assistant",
+  authorEmail = "support@innovatorfoundervisaassistant.co.uk"
 }: ExportFormatDialogProps) {
   const { toast } = useToast();
+  const { generateSimpleProfessionalPdf } = useProfessionalPdfExport();
+  const { generateSimpleProfessionalWord } = useProfessionalWordExport();
+  const [exportMode, setExportMode] = useState<'standard' | 'professional'>('professional');
   const timestamp = new Date().toLocaleString('en-GB');
   const safeFilename = filename.replace(/[^a-z0-9]/gi, '-').toLowerCase();
 
@@ -189,6 +200,68 @@ export function ExportFormatDialog({
     });
   };
 
+  const handleDownloadProfessionalPDF = () => {
+    try {
+      const content = sections.map(section => ({
+        heading: section.title,
+        text: section.content || '',
+        list: undefined as string[] | undefined,
+      }));
+      
+      generateSimpleProfessionalPdf(
+        title,
+        subtitle || 'Professional Report',
+        content,
+        authorName,
+        authorEmail
+      );
+      
+      onOpenChange(false);
+      toast({
+        title: "Professional PDF Downloaded",
+        description: "Your report has been saved with professional formatting.",
+      });
+    } catch (error) {
+      console.error('Professional PDF export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error creating the professional PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownloadProfessionalDOCX = async () => {
+    try {
+      const content = sections.map(section => ({
+        heading: section.title,
+        text: section.content || '',
+        list: undefined as string[] | undefined,
+      }));
+      
+      await generateSimpleProfessionalWord(
+        title,
+        subtitle || 'Professional Report',
+        content,
+        authorName,
+        authorEmail
+      );
+      
+      onOpenChange(false);
+      toast({
+        title: "Professional Word Document Downloaded",
+        description: "Your report has been saved with professional formatting.",
+      });
+    } catch (error) {
+      console.error('Professional Word export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error creating the professional Word document. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDownloadDOCX = async () => {
     const children: Paragraph[] = [
       new Paragraph({
@@ -310,57 +383,114 @@ export function ExportFormatDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Choose Export Format</DialogTitle>
           <DialogDescription>
-            Select the format for your report download
+            Select the format and style for your report download
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-3 py-4">
-          <Button 
-            variant="outline" 
-            className="h-16 justify-start gap-4 hover-elevate"
-            onClick={handleDownloadDOCX}
-            data-testid="button-export-docx"
-          >
-            <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <FileType2 className="h-5 w-5 text-blue-500" />
+        
+        <Tabs value={exportMode} onValueChange={(v) => setExportMode(v as 'standard' | 'professional')} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="professional" className="gap-2" data-testid="tab-professional">
+              <Crown className="h-4 w-4" />
+              Professional
+            </TabsTrigger>
+            <TabsTrigger value="standard" data-testid="tab-standard">
+              Standard
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="professional" className="space-y-3">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 mb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Crown className="h-4 w-4 text-amber-500" />
+                <span className="font-semibold text-sm">Professional Format</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Cover page, table of contents, numbered sections, and visa-ready formatting
+              </p>
             </div>
-            <div className="text-left">
-              <div className="font-medium">Word Document (.docx)</div>
-              <div className="text-sm text-muted-foreground">Best for editing and formatting</div>
-            </div>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-16 justify-start gap-4 hover-elevate"
-            onClick={handleDownloadPDF}
-            data-testid="button-export-pdf"
-          >
-            <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-              <FileIcon className="h-5 w-5 text-red-500" />
-            </div>
-            <div className="text-left">
-              <div className="font-medium">PDF Document (.pdf)</div>
-              <div className="text-sm text-muted-foreground">Best for sharing and printing</div>
-            </div>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-16 justify-start gap-4 hover-elevate"
-            onClick={handleDownloadTXT}
-            data-testid="button-export-txt"
-          >
-            <div className="h-10 w-10 rounded-lg bg-gray-500/10 flex items-center justify-center">
-              <FileText className="h-5 w-5 text-gray-500" />
-            </div>
-            <div className="text-left">
-              <div className="font-medium">Plain Text (.txt)</div>
-              <div className="text-sm text-muted-foreground">Simple text format</div>
-            </div>
-          </Button>
-        </div>
+            
+            <Button 
+              variant="outline" 
+              className="w-full h-16 justify-start gap-4 hover-elevate border-amber-500/30"
+              onClick={handleDownloadProfessionalDOCX}
+              data-testid="button-export-professional-docx"
+            >
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+                <FileType2 className="h-5 w-5 text-amber-600" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">Professional Word (.docx)</div>
+                <div className="text-xs text-muted-foreground">Cover page, TOC, professional sections</div>
+              </div>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="w-full h-16 justify-start gap-4 hover-elevate border-amber-500/30"
+              onClick={handleDownloadProfessionalPDF}
+              data-testid="button-export-professional-pdf"
+            >
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+                <FileIcon className="h-5 w-5 text-amber-600" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">Professional PDF (.pdf)</div>
+                <div className="text-xs text-muted-foreground">Visa submission-ready format</div>
+              </div>
+            </Button>
+          </TabsContent>
+          
+          <TabsContent value="standard" className="space-y-3">
+            <Button 
+              variant="outline" 
+              className="w-full h-16 justify-start gap-4 hover-elevate"
+              onClick={handleDownloadDOCX}
+              data-testid="button-export-docx"
+            >
+              <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <FileType2 className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">Word Document (.docx)</div>
+                <div className="text-sm text-muted-foreground">Best for editing and formatting</div>
+              </div>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="w-full h-16 justify-start gap-4 hover-elevate"
+              onClick={handleDownloadPDF}
+              data-testid="button-export-pdf"
+            >
+              <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+                <FileIcon className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">PDF Document (.pdf)</div>
+                <div className="text-sm text-muted-foreground">Best for sharing and printing</div>
+              </div>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="w-full h-16 justify-start gap-4 hover-elevate"
+              onClick={handleDownloadTXT}
+              data-testid="button-export-txt"
+            >
+              <div className="h-10 w-10 rounded-lg bg-gray-500/10 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-gray-500" />
+              </div>
+              <div className="text-left">
+                <div className="font-medium">Plain Text (.txt)</div>
+                <div className="text-sm text-muted-foreground">Simple text format</div>
+              </div>
+            </Button>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
