@@ -319,13 +319,14 @@ function SpotlightOverlay({ targetRect, isActive }: SpotlightOverlayProps) {
 
 interface SpotlightTourProps {
   onComplete: () => void;
+  onSkip?: () => void;
   isOpen: boolean;
 }
 
 // Local storage key for step persistence
 const STEP_STORAGE_KEY = 'spotlight-tour-current-step';
 
-export function SpotlightTour({ onComplete, isOpen }: SpotlightTourProps) {
+export function SpotlightTour({ onComplete, onSkip, isOpen }: SpotlightTourProps) {
   // Load initial step from localStorage to persist across navigation
   const [currentStep, setCurrentStep] = useState(() => {
     try {
@@ -459,7 +460,21 @@ export function SpotlightTour({ onComplete, isOpen }: SpotlightTourProps) {
   };
 
   const handleSkip = () => {
-    handleComplete();
+    // Do NOT call completeMutation - let user see the tour again next time
+    setIsVisible(false);
+    // Clean up localStorage but don't mark as completed
+    try {
+      localStorage.removeItem(STEP_STORAGE_KEY);
+      localStorage.removeItem('spotlight-tour-active');
+    } catch {
+      // Ignore
+    }
+    // Call onSkip if provided, otherwise fall back to onComplete
+    if (onSkip) {
+      onSkip();
+    } else {
+      onComplete();
+    }
   };
 
   const getPositionClasses = () => {
@@ -723,31 +738,27 @@ export function useSpotlightTour() {
     if (isLoading) return;
     
     if (onboardingStatus) {
-      // Tour ONLY shows if:
-      // 1. User has a PAID plan (tier is NOT 'free')
-      // 2. AND tour has NOT been completed yet
-      // 3. AND trigger has been explicitly set (via payment flow)
-      const hasPaidPlan = onboardingStatus.subscriptionTier !== 'free';
+      // Tour shows for ANY tier (including free) if:
+      // 1. Tour has NOT been completed yet
+      // 2. AND trigger has been explicitly set (via subscription flow)
       const hasNotCompletedTour = !onboardingStatus.hasCompletedOnboarding;
       
-      // Only show tour if explicitly triggered AND has paid plan AND hasn't completed
-      if (shouldTrigger && hasPaidPlan && hasNotCompletedTour) {
+      // Show tour if explicitly triggered AND hasn't completed
+      if (shouldTrigger && hasNotCompletedTour) {
         setTimeout(() => setShowTour(true), 500);
       }
       
       // Also check if tour was in progress (user navigated away and came back)
       const tourWasActive = localStorage.getItem(TOUR_ACTIVE_KEY) === 'true';
-      if (tourWasActive && hasPaidPlan && hasNotCompletedTour) {
+      if (tourWasActive && hasNotCompletedTour) {
         setShowTour(true);
       }
     }
   }, [onboardingStatus, isLoading, shouldTrigger]);
 
   const triggerTour = useCallback(() => {
-    // Only trigger if user has paid plan and hasn't completed tour
-    if (onboardingStatus && 
-        onboardingStatus.subscriptionTier !== 'free' && 
-        !onboardingStatus.hasCompletedOnboarding) {
+    // Trigger tour for any tier if user hasn't completed it
+    if (onboardingStatus && !onboardingStatus.hasCompletedOnboarding) {
       setShouldTrigger(true);
       setTimeout(() => setShowTour(true), 500);
     }

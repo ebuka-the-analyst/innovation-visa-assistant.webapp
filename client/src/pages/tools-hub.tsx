@@ -113,16 +113,18 @@ export default function ToolsHub() {
           
           // Invalidate user query to refresh tier access
           await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+          await queryClient.invalidateQueries({ queryKey: ['/api/onboarding/status'] });
           
           toast({
             title: "Payment Successful!",
-            description: isDirectSubscription 
-              ? `Welcome! Your ${data.tier} tier subscription is now active. Start your business plan questionnaire when ready.`
-              : `Your subscription has been activated. You now have ${data.tier || 'upgraded'} tier access to all tools.`,
+            description: `Welcome! Your ${data.tier || 'upgraded'} tier subscription is now active.`,
           });
           
           // Clean up URL parameters
           window.history.replaceState({}, '', '/tools-hub');
+          
+          // Trigger onboarding tour for new subscribers
+          localStorage.setItem('trigger-onboarding-tour', 'true');
         })
         .catch((error) => {
           console.error('Payment verification failed:', error);

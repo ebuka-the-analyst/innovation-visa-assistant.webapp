@@ -409,18 +409,30 @@ function AppLayout() {
 
 // Global Spotlight Tour wrapper - persists across all page navigation
 function GlobalSpotlightTour() {
-  const { showTour, setShowTour, triggerTour, hasPaidPlan, hasCompletedOnboarding, isLoading } = useSpotlightTour();
+  const [, setLocation] = useLocation();
+  const { showTour, setShowTour, triggerTour, hasCompletedOnboarding, isLoading } = useSpotlightTour();
   
-  // Check for tour trigger flag after payment completion
+  // Check for tour trigger flag after payment completion (works for both free and paid tiers)
   useEffect(() => {
-    if (!isLoading && hasPaidPlan && !hasCompletedOnboarding) {
+    if (!isLoading && !hasCompletedOnboarding) {
       const shouldTriggerTour = localStorage.getItem('trigger-onboarding-tour');
       if (shouldTriggerTour === 'true') {
         localStorage.removeItem('trigger-onboarding-tour');
+        // Trigger tour for any subscription (free or paid)
         triggerTour();
       }
     }
-  }, [isLoading, hasPaidPlan, hasCompletedOnboarding, triggerTour]);
+  }, [isLoading, hasCompletedOnboarding, triggerTour]);
+
+  // Handle tour completion - redirect to create plan page
+  // This is called when user finishes or skips the tour
+  const handleTourComplete = (wasSkipped: boolean = false) => {
+    setShowTour(false);
+    // Only redirect to questionnaire if tour was completed (not skipped)
+    if (!wasSkipped) {
+      setLocation('/questionnaire');
+    }
+  };
 
   if (!showTour) return null;
 
@@ -428,7 +440,8 @@ function GlobalSpotlightTour() {
     <Suspense fallback={null}>
       <SpotlightTour 
         isOpen={showTour} 
-        onComplete={() => setShowTour(false)} 
+        onComplete={() => handleTourComplete(false)}
+        onSkip={() => handleTourComplete(true)}
       />
     </Suspense>
   );

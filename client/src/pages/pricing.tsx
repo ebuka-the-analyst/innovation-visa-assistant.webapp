@@ -498,7 +498,13 @@ export default function Pricing() {
                     className="w-full"
                     variant={tier.popular ? "default" : "outline"}
                     size="lg"
-                    onClick={() => tier.id === 'free' ? setLocation('/tools-hub') : undefined}
+                    onClick={() => {
+                      if (tier.id === 'free') {
+                        // Trigger onboarding tour for free tier users
+                        localStorage.setItem('trigger-onboarding-tour', 'true');
+                        setLocation('/tools-hub');
+                      }
+                    }}
                     disabled={isCurrentTier && tier.id !== 'free'}
                     data-testid={`button-select-${tier.id}`}
                   >
