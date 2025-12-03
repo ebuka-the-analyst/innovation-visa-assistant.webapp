@@ -347,8 +347,12 @@ export default function VoiceBuilder() {
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      try {
+        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      } catch (e) {
+        // Ignore - may already be stopped
+      }
     }
     
     // Stop speech recognition
@@ -363,15 +367,23 @@ export default function VoiceBuilder() {
     
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
     }
     
     if (timerRef.current) {
       clearInterval(timerRef.current);
+      timerRef.current = null;
     }
     
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
+    // Only close AudioContext if it's not already closed
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      try {
+        audioContextRef.current.close();
+      } catch (e) {
+        // Ignore - may already be closed
+      }
     }
+    audioContextRef.current = null;
     
     setIsRecording(false);
     setIsPaused(false);
@@ -461,7 +473,13 @@ export default function VoiceBuilder() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-      if (audioContextRef.current) audioContextRef.current.close();
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        try {
+          audioContextRef.current.close();
+        } catch (e) {
+          // Ignore - may already be closed
+        }
+      }
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop();
