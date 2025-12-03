@@ -78,33 +78,21 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl">
-      {/* Disclaimer Bar with Flashing Animation */}
+      {/* Disclaimer Bar */}
       {!disclaimerDismissed && (
-        <>
-          <style>{`
-            @keyframes disclaimerFlash {
-              0%, 50% { background-color: #1e40af; }
-              51%, 100% { background-color: #ffa536; }
-            }
-            .disclaimer-flash-bar {
-              animation: disclaimerFlash 1s steps(1) infinite;
-            }
-          `}</style>
-          <div className="w-full disclaimer-flash-bar text-white text-xs py-4 px-3 md:py-5 flex items-center justify-between md:justify-center gap-2 md:gap-4 border-b border-border/40">
-            <span className="line-clamp-2 md:line-clamp-1">
-              <strong>UK Innovator Founder Visa Assistant Disclaimer:</strong> Trained on GOV.UK guidance. This doesn't substitute legal advice. Always verify with official sources.{' '}
-              <a href="/ai-transparency" className="underline hover:opacity-80">Learn more</a>
-            </span>
-            <button
-              onClick={() => setDisclaimerDismissed(true)}
-              className="text-white hover:opacity-75 transition-opacity flex-shrink-0 relative overflow-visible"
-              data-testid="button-dismiss-disclaimer"
-            >
-              <X className="h-3 w-3" />
-              <div className="absolute -right-0.5 -top-0.5 w-2 h-2 rounded-full animate-blink-2s" style={{ backgroundColor: '#991b1b' }} />
-            </button>
-          </div>
-        </>
+        <div className="w-full text-xs py-2 px-3 flex items-center justify-between md:justify-center gap-2 md:gap-4 border-b border-border/40" style={{ backgroundColor: '#ffa536' }}>
+          <span className="line-clamp-2 md:line-clamp-1 text-black dark:text-white">
+            <strong>UK Innovator Founder Visa Assistant Disclaimer:</strong> Trained on GOV.UK guidance. This doesn't substitute legal advice. Always verify with official sources.{' '}
+            <a href="/ai-transparency" className="underline hover:opacity-80">Learn more</a>
+          </span>
+          <button
+            onClick={() => setDisclaimerDismissed(true)}
+            className="text-black dark:text-white hover:opacity-75 transition-opacity flex-shrink-0"
+            data-testid="button-dismiss-disclaimer"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        </div>
       )}
       
       <nav className={`container mx-auto px-3 md:px-6 flex items-center justify-between border-b border-border/40 transition-[height] duration-200 ease-out will-change-[height] ${isScrolled ? 'h-14 md:h-16' : 'h-20 md:h-24'}`}>
