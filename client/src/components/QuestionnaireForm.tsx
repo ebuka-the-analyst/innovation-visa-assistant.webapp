@@ -12,13 +12,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw, Building2, Stethoscope, ShoppingBag, Laptop, Lightbulb } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useQuery } from "@tanstack/react-query";
+
+// Industry template definitions
+const INDUSTRY_TEMPLATES = {
+  fintech: {
+    name: "FinTech / Financial Services",
+    icon: Building2,
+    description: "AI-powered financial tools, payment solutions, lending platforms",
+    templates: ["FinFlow AI - Cash Flow Forecasting", "PaymentPro - B2B Payments", "LendSmart - SME Lending"]
+  },
+  healthtech: {
+    name: "HealthTech / MedTech",
+    icon: Stethoscope,
+    description: "Healthcare AI, digital health platforms, medical devices",
+    templates: ["CareAI - Patient Management", "MedAssist - Clinical Decision Support", "HealthFlow - NHS Integration"]
+  },
+  ecommerce: {
+    name: "E-commerce / Retail Tech",
+    icon: ShoppingBag,
+    description: "Retail platforms, marketplace solutions, inventory management",
+    templates: ["ShopSmart - AI Recommendations", "RetailFlow - Inventory Optimization", "MarketPro - Marketplace Platform"]
+  },
+  saas: {
+    name: "SaaS / B2B Software",
+    icon: Laptop,
+    description: "Business software, productivity tools, enterprise solutions",
+    templates: ["TeamFlow - Collaboration Platform", "DataSync - Integration Platform", "AutomateHQ - Workflow Automation"]
+  },
+  other: {
+    name: "Other / General Tech",
+    icon: Lightbulb,
+    description: "EdTech, PropTech, CleanTech, or other innovative sectors",
+    templates: ["EduAI - Learning Platform", "PropFlow - Property Management", "GreenTech - Sustainability Platform"]
+  }
+};
 
 const steps = [
   {
@@ -261,6 +302,14 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const [promoCode, setPromoCode] = useState('');
   const [promoValidation, setPromoValidation] = useState<PromoCodeValidation | null>(null);
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+  
+  // Template selection states
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  
+  // Check if current user is Ebuka (founder) - only they get access to their personal data
+  const isFounderAccount = user?.email?.toLowerCase() === 'ebuka.umeh40@outlook.com';
 
   useEffect(() => {
     if (savedData && Object.keys(savedData).length > 0) {
@@ -697,6 +746,236 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     });
   };
 
+  // Load industry-specific template for non-founder users
+  const handleLoadIndustryTemplate = (industry: string, templateIndex: number) => {
+    const userName = user?.displayName || user?.firstName || user?.email?.split('@')[0] || 'Your Name';
+    const templateNotice = "[TEMPLATE - Replace with your own details] ";
+    
+    // Industry-specific template data
+    const industryTemplates: Record<string, Record<string, string>[]> = {
+      fintech: [
+        { // FinFlow AI - Cash Flow Forecasting
+          businessName: templateNotice + "FinFlow AI",
+          industry: templateNotice + "FinTech / AI-powered Financial Technology / B2B SaaS",
+          problem: templateNotice + "UK SMEs face a critical cash flow crisis: 50,000 businesses fail annually due to poor cash flow management. Current solutions (spreadsheets, basic accounting software) have only 71-76% forecast accuracy, missing seasonal patterns and anomalies.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "MVP launched October 2025: AI-powered cash flow forecasting platform using machine learning achieving 94% forecast accuracy (vs 73% industry average). Live at finflow-ai.co.uk with 45 beta users.",
+          uniqueness: templateNotice + "Measurable advantages: (1) 94% forecast accuracy vs 73% industry average. (2) 12-minute setup via Open Banking vs 3-7 day manual entry. (3) 18-day advance shortfall warnings. (4) 40% cheaper than Fluidly (£60 vs £99/month).",
+          techStack: templateNotice + "Python 3.11, TensorFlow 2.x, FastAPI, PostgreSQL, Redis, React/TypeScript, AWS (Lambda, S3, RDS), Open Banking APIs, Docker, GitHub Actions CI/CD",
+        },
+        { // PaymentPro - B2B Payments
+          businessName: templateNotice + "PaymentPro",
+          industry: templateNotice + "FinTech / B2B Payments / Payment Processing",
+          problem: templateNotice + "UK SMEs lose £2.5 billion annually to late B2B payments. 62% of businesses experience cash flow issues due to slow payment collection. Existing solutions are expensive (2.9%+ fees) and complex.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "MVP launched with core features: instant invoice payments, automated reconciliation, and cash flow integration. Currently testing with 25 pilot customers.",
+          uniqueness: templateNotice + "Key differentiators: (1) Flat 1.5% transaction fee vs 2.9% competitors. (2) Same-day settlements. (3) AI-powered payment chasing. (4) Integrated accounting software sync.",
+          techStack: templateNotice + "Node.js, TypeScript, PostgreSQL, Stripe Connect, Open Banking, React, AWS, Kubernetes",
+        },
+        { // LendSmart - SME Lending
+          businessName: templateNotice + "LendSmart",
+          industry: templateNotice + "FinTech / Alternative Lending / SME Finance",
+          problem: templateNotice + "78% of UK SME loan applications are rejected by traditional banks. The average approval time is 3-6 weeks. SMEs need faster access to working capital with fair, transparent terms.",
+          innovationStage: "pre-mvp",
+          productStatus: templateNotice + "Building AI-powered credit assessment platform using Open Banking data. Technical architecture complete, regulatory pathway mapped (FCA authorization timeline: 9-12 months).",
+          uniqueness: templateNotice + "Innovation: (1) Decision in 24 hours vs 3-6 weeks. (2) 85% approval rate using alternative data (vs 22% bank rate). (3) Transparent pricing calculator. (4) Revenue-based repayments.",
+          techStack: templateNotice + "Python, scikit-learn, FastAPI, PostgreSQL, Open Banking APIs, React, AWS, FCA-compliant infrastructure",
+        },
+      ],
+      healthtech: [
+        { // CareAI - Patient Management
+          businessName: templateNotice + "CareAI",
+          industry: templateNotice + "HealthTech / AI Healthcare / Patient Management",
+          problem: templateNotice + "NHS trusts waste £2.3 billion annually on missed appointments and inefficient patient scheduling. Staff spend 40% of time on administrative tasks instead of patient care.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "MVP deployed in 3 NHS pilot sites. AI scheduling system reducing DNA rates by 35%. DCB0129 compliance achieved. Currently processing 1,200 appointments weekly.",
+          uniqueness: templateNotice + "Measured impact: (1) 35% reduction in missed appointments. (2) 28% improvement in clinic utilization. (3) 4-hour admin time saved per clinician per week. (4) NHS Digital approved.",
+          techStack: templateNotice + "Python, TensorFlow, HL7 FHIR APIs, PostgreSQL, React, AWS (HIPAA-compliant), NHS Spine integration",
+        },
+        { // MedAssist - Clinical Decision Support
+          businessName: templateNotice + "MedAssist",
+          industry: templateNotice + "HealthTech / Clinical Decision Support / Medical AI",
+          problem: templateNotice + "Diagnostic errors affect 10-15% of patients. Junior doctors lack immediate access to specialist knowledge. Current clinical decision support tools are outdated and not AI-powered.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "AI-powered clinical decision support system trained on 2.5 million anonymized patient records. Validated with 94% accuracy in diagnostic suggestions. Piloting with 5 NHS trusts.",
+          uniqueness: templateNotice + "Clinical advantages: (1) 94% diagnostic accuracy. (2) Real-time evidence-based recommendations. (3) Integration with NHS electronic health records. (4) MHRA Class IIa certification pathway.",
+          techStack: templateNotice + "Python, PyTorch, BERT/GPT medical models, HL7 FHIR, PostgreSQL, React, Azure (UK South), DCB0129/DCB0160 compliant",
+        },
+        { // HealthFlow - NHS Integration
+          businessName: templateNotice + "HealthFlow",
+          industry: templateNotice + "HealthTech / NHS Integration / Healthcare Interoperability",
+          problem: templateNotice + "NHS systems are fragmented - data is siloed across 200+ different IT systems. Clinicians waste 2 hours daily searching for patient information across multiple platforms.",
+          innovationStage: "pre-mvp",
+          productStatus: templateNotice + "Building unified NHS data integration platform. Technical architecture designed, NHS Digital partnership discussions initiated. HL7 FHIR compliant design.",
+          uniqueness: templateNotice + "Platform advantages: (1) Single patient view across all NHS systems. (2) 90% reduction in data lookup time. (3) Built on NHS approved standards. (4) Open API for third-party integration.",
+          techStack: templateNotice + "Java, Spring Boot, HL7 FHIR, Apache Kafka, PostgreSQL, Angular, NHS Cloud (Azure), NHS Spine APIs",
+        },
+      ],
+      ecommerce: [
+        { // ShopSmart - AI Recommendations
+          businessName: templateNotice + "ShopSmart AI",
+          industry: templateNotice + "E-commerce / AI Recommendations / Retail Technology",
+          problem: templateNotice + "UK retailers lose £18 billion annually to poor product recommendations. Generic recommendation engines have only 2-3% click-through rates. SME retailers can't afford enterprise solutions.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "AI recommendation engine live with 15 e-commerce clients. Achieving 8.5% CTR (vs 2.5% industry average). Processing 2.3 million product interactions monthly.",
+          uniqueness: templateNotice + "Measurable results: (1) 8.5% CTR vs 2.5% industry. (2) 23% increase in average order value. (3) 5-minute integration via Shopify/WooCommerce plugins. (4) £99/month vs £500+ competitors.",
+          techStack: templateNotice + "Python, TensorFlow Recommenders, FastAPI, Redis, PostgreSQL, React, Shopify/WooCommerce APIs, AWS",
+        },
+        { // RetailFlow - Inventory Optimization
+          businessName: templateNotice + "RetailFlow",
+          industry: templateNotice + "E-commerce / Inventory Management / Supply Chain",
+          problem: templateNotice + "UK retailers hold £15.2 billion in excess inventory while simultaneously losing £6.8 billion to stockouts. Manual inventory forecasting has 65% accuracy, causing waste and lost sales.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "AI inventory optimization platform with 22 retail clients. Reducing stockouts by 42% and excess inventory by 31%. Integration with major POS and ERP systems.",
+          uniqueness: templateNotice + "ROI proven: (1) 91% demand forecast accuracy (vs 65% manual). (2) 42% stockout reduction. (3) 31% inventory cost savings. (4) Automated reorder recommendations.",
+          techStack: templateNotice + "Python, Prophet/ARIMA, PostgreSQL, React, Stripe, Shopify/Square POS integration, AWS, Docker",
+        },
+        { // MarketPro - Marketplace Platform
+          businessName: templateNotice + "MarketPro",
+          industry: templateNotice + "E-commerce / Marketplace / Multi-vendor Platform",
+          problem: templateNotice + "UK SME sellers struggle on Amazon/eBay due to high fees (15-25%) and algorithm bias toward large sellers. There's no UK-focused B2B marketplace for wholesale and trade.",
+          innovationStage: "pre-mvp",
+          productStatus: templateNotice + "Building UK-first B2B trade marketplace. Wireframes complete, 50 merchant expressions of interest. Payment and logistics partnerships in negotiation.",
+          uniqueness: templateNotice + "Market opportunity: (1) 8% flat commission vs 15-25% on Amazon. (2) UK-focused with local logistics. (3) Built-in trade credit. (4) Verified UK supplier network.",
+          techStack: templateNotice + "Next.js, TypeScript, PostgreSQL, Stripe Connect, UK carrier APIs, Vercel, Redis",
+        },
+      ],
+      saas: [
+        { // TeamFlow - Collaboration Platform
+          businessName: templateNotice + "TeamFlow",
+          industry: templateNotice + "SaaS / Team Collaboration / Productivity Software",
+          problem: templateNotice + "Remote teams use 9+ different tools on average, causing context-switching that costs £12,000 per employee annually. Integration complexity leads to information silos and reduced productivity.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Unified collaboration platform with 180 active teams. Combines chat, docs, tasks, and video in one interface. 40% reduction in tool-switching measured.",
+          uniqueness: templateNotice + "Productivity gains: (1) 40% less tool-switching. (2) All-in-one workspace (chat + docs + tasks + video). (3) £8/user/month vs £25+ for separate tools. (4) AI-powered meeting summaries.",
+          techStack: templateNotice + "React, TypeScript, Node.js, PostgreSQL, WebRTC, Socket.io, AWS, Kubernetes, Redis",
+        },
+        { // DataSync - Integration Platform
+          businessName: templateNotice + "DataSync",
+          industry: templateNotice + "SaaS / Integration Platform / iPaaS",
+          problem: templateNotice + "UK businesses use 75+ SaaS applications on average. Manual data entry between systems costs £23,000 per employee annually. Existing iPaaS solutions (Zapier, Workato) are expensive and complex.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "No-code integration platform with 95 customers. 200+ pre-built connectors. Processing 4.5 million data syncs monthly with 99.9% uptime.",
+          uniqueness: templateNotice + "Value proposition: (1) 80% cheaper than Workato. (2) No-code visual builder. (3) UK-focused connectors (Sage, Xero, UK banks). (4) Real-time sync vs batch processing.",
+          techStack: templateNotice + "Node.js, TypeScript, PostgreSQL, Redis, RabbitMQ, React, Docker, AWS, OAuth 2.0 for 200+ APIs",
+        },
+        { // AutomateHQ - Workflow Automation
+          businessName: templateNotice + "AutomateHQ",
+          industry: templateNotice + "SaaS / Workflow Automation / Business Process",
+          problem: templateNotice + "UK SMEs spend 28% of employee time on repetitive tasks that could be automated. Existing RPA solutions cost £50K+ and require technical expertise to implement.",
+          innovationStage: "pre-mvp",
+          productStatus: templateNotice + "Building AI-powered workflow automation for SMEs. Natural language workflow creation prototype complete. 35 pilot applications received.",
+          uniqueness: templateNotice + "SME-first approach: (1) Describe workflows in plain English. (2) £199/month vs £50K+ RPA. (3) No-code/low-code interface. (4) AI learns from user corrections.",
+          techStack: templateNotice + "Python, GPT-4, LangChain, FastAPI, PostgreSQL, React, AWS Lambda, Selenium for web automation",
+        },
+      ],
+      other: [
+        { // EduAI - Learning Platform
+          businessName: templateNotice + "EduAI",
+          industry: templateNotice + "EdTech / AI Learning / Personalized Education",
+          problem: templateNotice + "One-size-fits-all education fails 40% of students. Teachers lack time to personalize learning for 30+ students. Existing EdTech platforms don't adapt to individual learning styles.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "AI adaptive learning platform used by 12 UK schools. Personalizes curriculum paths for each student. 32% improvement in learning outcomes measured in pilot.",
+          uniqueness: templateNotice + "Educational impact: (1) 32% improvement in test scores. (2) AI identifies learning gaps in real-time. (3) Reduces teacher admin by 8 hours/week. (4) Ofsted-aligned curriculum.",
+          techStack: templateNotice + "Python, TensorFlow, FastAPI, PostgreSQL, React, AWS, LTI integration for LMS compatibility",
+        },
+        { // PropFlow - Property Management
+          businessName: templateNotice + "PropFlow",
+          industry: templateNotice + "PropTech / Property Management / Real Estate Technology",
+          problem: templateNotice + "UK landlords with 5+ properties spend 15 hours weekly on management tasks. Maintenance coordination, rent collection, and tenant communication are fragmented across multiple systems.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "All-in-one property management platform with 85 landlords managing 420 properties. Automated rent collection achieving 98% on-time payment rate.",
+          uniqueness: templateNotice + "Landlord benefits: (1) 12 hours/week time saved. (2) 98% rent collection rate (vs 89% industry). (3) AI maintenance triage. (4) Tenant portal with self-service.",
+          techStack: templateNotice + "Next.js, TypeScript, PostgreSQL, Stripe, Twilio, GoCardless, React Native (mobile), AWS",
+        },
+        { // GreenTech - Sustainability Platform
+          businessName: templateNotice + "GreenTech Analytics",
+          industry: templateNotice + "CleanTech / Sustainability / ESG Technology",
+          problem: templateNotice + "UK businesses face mandatory carbon reporting (SECR) but 78% struggle to measure emissions accurately. Existing consultancy-based solutions cost £10K+ and provide only annual snapshots.",
+          innovationStage: "pre-mvp",
+          productStatus: templateNotice + "Building automated carbon accounting platform. IoT sensor integration designed, utility API partnerships in progress. 40 corporate expressions of interest.",
+          uniqueness: templateNotice + "Sustainability advantages: (1) Real-time carbon tracking vs annual reports. (2) 90% cheaper than consultancy. (3) Automated SECR compliance. (4) AI reduction recommendations.",
+          techStack: templateNotice + "Python, IoT protocols (MQTT), PostgreSQL, React, AWS IoT, utility APIs, carbon calculation engines",
+        },
+      ],
+    };
+    
+    const templates = industryTemplates[industry];
+    if (!templates || !templates[templateIndex]) return;
+    
+    const selectedTemplateData = templates[templateIndex];
+    
+    // Base template data (shared across all industries)
+    const baseTemplateData: Record<string, string> = {
+      tier: 'premium',
+      fullLegalName: userName,
+      currentVisaStatus: "graduate-visa",
+      visaExpiryDate: templateNotice + "DD/MM/YYYY - Enter your visa expiry date",
+      workAuthorizationDetails: templateNotice + "Describe your current work authorization status, any restrictions, and self-employment permissions.",
+      educationBackground: templateNotice + "List ALL degrees: Degree Name, Institution, Location, Year, Grade. Include dissertation topics if relevant.",
+      professionalCertifications: templateNotice + "List professional certifications: AWS, Google Cloud, Microsoft, industry-specific accreditations.",
+      totalProfessionalExperience: "5",
+      industryExperience: templateNotice + "Describe your years of experience in your target industry with specific projects and roles.",
+      technicalSkillsProficiency: templateNotice + "Rate each skill 1-10: Python (8/10), JavaScript (7/10), SQL (8/10), etc.",
+      languagesSpoken: templateNotice + "English (Fluent), other languages with proficiency levels.",
+      linkedInProfile: templateNotice + "https://linkedin.com/in/your-profile",
+      portfolioUrl: templateNotice + "https://github.com/username | https://your-website.com",
+      existingCustomers: templateNotice + "List beta users, pilot customers, or testimonials if any.",
+      tractionEvidence: templateNotice + "Usage metrics, pilot results, revenue to date, user feedback.",
+      dataArchitecture: templateNotice + "Describe how you integrate data sources, APIs, and system architecture.",
+      aiMethodology: templateNotice + "Specific algorithms, models, training data, accuracy metrics (if AI/ML is involved).",
+      complianceDesign: templateNotice + "Regulatory standards your product complies with (GDPR, industry-specific).",
+      patentStatus: templateNotice + "Patent filed/pending/none. Include reference numbers if applicable.",
+      founderEducation: templateNotice + "Your education summary with degree names, institutions, and grades.",
+      founderWorkHistory: templateNotice + "Relevant work history with company names, roles, and achievements.",
+      founderAchievements: templateNotice + "Measurable achievements: projects delivered, revenue generated, users served.",
+      relevantProjects: templateNotice + "Projects directly relevant to this business showing domain expertise.",
+      funding: "100000",
+      fundingSources: templateNotice + "£X Personal savings, £Y Family loan, £Z Grant applications. Total: £100,000.",
+      monthlyProjections: templateNotice + "Month-by-month revenue and costs for 36 months. Year 1: £X revenue, £Y costs.",
+      customerAcquisitionCost: "150",
+      lifetimeValue: "2500",
+      paybackPeriod: "4",
+      detailedCosts: templateNotice + "Development: £X, Marketing: £X, Operations: £X, Team: £X. Provide detailed breakdown.",
+      competitors: templateNotice + "List 5+ real competitors with their strengths, weaknesses, pricing, and market position.",
+      competitiveDifferentiation: templateNotice + "Specific measurable advantages: X% better than Y, Z% faster than W.",
+      customerInterviews: templateNotice + "Summary of 20-30 customer discovery interviews with key findings.",
+      lettersOfIntent: templateNotice + "LOIs or pilot agreements if any: Company Name, Value, Date signed.",
+      willingnessToPay: templateNotice + "Survey data on price sensitivity, conversion rates from trials.",
+      marketSize: templateNotice + "TAM: Total market. SAM: Serviceable market. SOM: Obtainable market Year 1-3.",
+      regulatoryRequirements: templateNotice + "All applicable regulations, certifications, and compliance requirements.",
+      complianceTimeline: templateNotice + "Month-by-month timeline for achieving regulatory compliance.",
+      complianceBudget: "50000",
+      jobCreation: "12",
+      hiringPlan: templateNotice + "Year 1: Role (£Salary). Year 2: Role (£Salary). Year 3: Role (£Salary).",
+      specificRegions: templateNotice + "Year 1: Cities/regions. Year 2: Expansion cities. Year 3: National coverage.",
+      expansion: templateNotice + "Vertical expansion into new sectors, horizontal into new customer segments.",
+      internationalPlan: templateNotice + "Year 4+ international expansion plans (after UK validation).",
+      vision: templateNotice + "5-year vision: market position, team size, revenue, customer impact.",
+      targetEndorser: templateNotice + "Primary: Tech Nation / other endorsing body. Rationale for selection.",
+      contactPointsStrategy: templateNotice + "6+ engagement points with endorser over 3 years.",
+      experience: templateNotice + "Why you are uniquely qualified: technical expertise, industry knowledge, execution track record.",
+      revenue: templateNotice + "Revenue model: pricing tiers, add-ons, unit economics (LTV, CAC, payback).",
+    };
+    
+    // Merge base template with industry-specific data
+    const finalTemplateData = { ...baseTemplateData, ...selectedTemplateData };
+    
+    setFormData(finalTemplateData);
+    Object.entries(finalTemplateData).forEach(([key, value]) => {
+      saveField(key, value);
+    });
+    
+    const industryName = INDUSTRY_TEMPLATES[industry as keyof typeof INDUSTRY_TEMPLATES]?.name || industry;
+    const templateName = INDUSTRY_TEMPLATES[industry as keyof typeof INDUSTRY_TEMPLATES]?.templates[templateIndex] || 'Template';
+    
+    toast({
+      title: `${templateName} Template Loaded`,
+      description: `Industry: ${industryName}. All fields prefilled with [TEMPLATE] markers. Replace each section with your own details.`,
+      duration: 5000,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -734,19 +1013,104 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
               <div>
                 <h3 className="font-bold text-sm mb-1 text-primary">Quick Start Template</h3>
                 <p className="text-xs text-muted-foreground">
-                  Load a complete example template to see how each field should be filled out. Use it as a guide for structuring your own responses, then replace with your details.
+                  {isFounderAccount 
+                    ? "Load your saved business plan data to continue where you left off."
+                    : "Choose your industry to load a relevant template. Use it as a guide for structuring your own responses."}
                 </p>
               </div>
               <Button
-                onClick={handleEbukaUltimatePlanAutoFill}
+                onClick={() => isFounderAccount ? handleEbukaUltimatePlanAutoFill() : setShowTemplateModal(true)}
                 className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
                 data-testid="button-load-demo-template"
               >
-                Load Template
+                {isFounderAccount ? "Load My Data" : "Choose Template"}
               </Button>
             </div>
           </Card>
         )}
+        
+        {/* Template Selection Modal - For non-founder users */}
+        <Dialog open={showTemplateModal} onOpenChange={setShowTemplateModal}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold">Choose Your Industry Template</DialogTitle>
+              <DialogDescription>
+                Select the industry closest to your business to get a relevant example template. All templates include "[TEMPLATE - Replace with your own details]" markers.
+              </DialogDescription>
+            </DialogHeader>
+            
+            {!selectedIndustry ? (
+              <div className="grid gap-3 mt-4">
+                {Object.entries(INDUSTRY_TEMPLATES).map(([key, industry]) => {
+                  const IconComponent = industry.icon;
+                  return (
+                    <Card 
+                      key={key}
+                      className="p-4 cursor-pointer hover-elevate border-2 border-transparent hover:border-primary/50 transition-all"
+                      onClick={() => setSelectedIndustry(key)}
+                      data-testid={`industry-${key}`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <IconComponent className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold">{industry.name}</h4>
+                          <p className="text-sm text-muted-foreground">{industry.description}</p>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-muted-foreground mt-1" />
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mt-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setSelectedIndustry(null)}
+                  className="mb-4"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Industries
+                </Button>
+                
+                <h4 className="font-semibold mb-3">
+                  Top 3 Templates for {INDUSTRY_TEMPLATES[selectedIndustry as keyof typeof INDUSTRY_TEMPLATES]?.name}
+                </h4>
+                
+                <div className="grid gap-3">
+                  {INDUSTRY_TEMPLATES[selectedIndustry as keyof typeof INDUSTRY_TEMPLATES]?.templates.map((template, index) => (
+                    <Card 
+                      key={template}
+                      className="p-4 cursor-pointer hover-elevate border-2 border-transparent hover:border-primary/50 transition-all"
+                      onClick={() => {
+                        handleLoadIndustryTemplate(selectedIndustry, index);
+                        setShowTemplateModal(false);
+                        setSelectedIndustry(null);
+                      }}
+                      data-testid={`template-${index}`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <Badge variant="outline" className="text-xs">
+                          #{index + 1}
+                        </Badge>
+                        <div className="flex-1">
+                          <h5 className="font-medium">{template}</h5>
+                          <p className="text-xs text-muted-foreground">
+                            Click to load this template with example data
+                          </p>
+                        </div>
+                        <Check className="w-5 h-5 text-green-500" />
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Auto-save status indicator */}
         {hasUnsavedData && (
