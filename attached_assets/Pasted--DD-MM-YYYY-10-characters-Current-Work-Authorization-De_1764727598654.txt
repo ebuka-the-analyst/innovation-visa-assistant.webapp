@@ -1,0 +1,44 @@
+
+DD/MM/YYYY
+10 characters
+
+Current Work Authorization Details*
+Can you work in the UK? Any restrictions? Hours limits? Self-employment allowed?
+
+[EXAMPLE] Graduate Visa holder with full work authorization in the UK. Permitted to work unlimited hours in any sector including self-employment. No restrictions on starting or running a business. Visa valid until [DATE], providing sufficient runway for Innovator Founder Visa application and transition. REPLACE WITH YOUR OWN VISA DETAILS.
+340 characters
+
+Educational Background (All Degrees)*
+List ALL degrees: Degree Name, Institution, Location, Year, Grade. Example: MSc Data Science, Leeds Beckett University, UK, 2023, Distinction
+
+[EXAMPLE] MSc [Your Subject], [University Name], UK, [Year], [Grade/Classification]. BSc [Subject], [University], [Country], [Year], [Grade]. Include dissertation topics if relevant. REPLACE WITH YOUR OWN EDUCATION HISTORY.
+223 characters
+
+Professional Certifications & Accreditations
+AWS, Google Cloud, Microsoft, industry certifications, professional body memberships (BCS, IET, etc.)
+
+[EXAMPLE] List all relevant certifications: AWS Certified Solutions Architect, Google Cloud Professional, Microsoft Azure, Scrum certifications, industry-specific licenses, professional body memberships (BCS, IET, ACCA, etc.). REPLACE WITH YOUR OWN CERTIFICATIONS.
+264 characters
+
+Total Years of Professional Experience*
+Include all relevant work experience since graduation
+
+Enter total years of professional experience...
+Industry-Specific Experience (years and details)*
+How many years in your target industry? What specific projects/roles?
+
+Enter detailed response...
+Technical Skills & Proficiency Levels*
+Rate 1-10 for each skill. Example: Python (9/10), SQL (8/10), JavaScript (7/10), AI/ML (8/10), Cloud Platforms (7/10), Data Analysis (9/10)
+
+Enter detailed response...
+Languages & Proficiency
+List languages: English (Native/Fluent), other languages with proficiency level
+
+Enter detailed response...
+LinkedIn Profile URL
+Your LinkedIn profile URL for verification
+
+Enter linkedin profile url...
+Portfolio/GitHub/Website URL
+Links to your work samples, GitHub, personal website

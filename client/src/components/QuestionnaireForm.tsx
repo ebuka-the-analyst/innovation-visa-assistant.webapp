@@ -561,40 +561,30 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     });
   };
 
-  // Pre-fill with comprehensive demo template data
+  // Pre-fill with comprehensive demo template data - ALL fields filled with realistic examples
   const handleEbukaUltimatePlanAutoFill = () => {
-    const userName = user?.displayName || user?.firstName || user?.email?.split('@')[0] || '[Your Full Name]';
+    const userName = user?.displayName || user?.firstName || user?.email?.split('@')[0] || 'James Alexander Thompson';
     const demoData: Record<string, string> = {
       tier: 'premium',
-      // Section 1: Personal Profile & Credentials
+      // STEP 1: Personal Profile & Credentials - ALL FIELDS COMPREHENSIVE
       fullLegalName: userName,
       currentVisaStatus: "graduate-visa",
-      visaExpiryDate: "DD/MM/YYYY",
-      workAuthorizationDetails: "[EXAMPLE] Graduate Visa holder with full work authorization in the UK. Permitted to work unlimited hours in any sector including self-employment. No restrictions on starting or running a business. Visa valid until [DATE], providing sufficient runway for Innovator Founder Visa application and transition. REPLACE WITH YOUR OWN VISA DETAILS.",
-      educationBackground: "[EXAMPLE] MSc [Your Subject], [University Name], UK, [Year], [Grade/Classification]. BSc [Subject], [University], [Country], [Year], [Grade]. Include dissertation topics if relevant. REPLACE WITH YOUR OWN EDUCATION HISTORY.",
-      professionalCertifications: "[EXAMPLE] List all relevant certifications: AWS Certified Solutions Architect, Google Cloud Professional, Microsoft Azure, Scrum certifications, industry-specific licenses, professional body memberships (BCS, IET, ACCA, etc.). REPLACE WITH YOUR OWN CERTIFICATIONS.",
-      businessName: "[Your Business Name]",
-      industry: "[Your Industry - e.g., FinTech / HealthTech / EdTech / SaaS]",
-      problem: "[EXAMPLE] Describe the specific problem your business solves. Be specific about: (1) Who experiences this problem (target customers), (2) How severe the problem is (pain points, costs), (3) Current solutions and their limitations, (4) Why existing solutions fail. Example: 'UK SMEs lose £X billion annually due to [problem]. Current solutions like [competitor A, B, C] fail because [reasons]. Our target customers (businesses with £200K-£10M revenue) need [specific solution].' REPLACE WITH YOUR ACTUAL PROBLEM STATEMENT.",
+      visaExpiryDate: "15/06/2026",
+      workAuthorizationDetails: "Graduate Visa holder with full work authorization in the UK. Permitted to work unlimited hours in any sector including self-employment. No restrictions on starting or running a business. Visa valid until June 2026, providing 7+ months runway for Innovator Founder Visa application and transition. Previously held Tier 4 Student Visa (2021-2024) with clean immigration history and no visa refusals.",
+      educationBackground: "MSc Data Science, University of Leeds, UK, 2024, Distinction (78% overall). Dissertation: 'Machine Learning Approaches for Financial Time Series Prediction' - developed novel LSTM architecture achieving 94% accuracy on cash flow forecasting. Modules included: Advanced Machine Learning, Big Data Analytics, Statistical Modelling, Business Intelligence. BSc Computer Science, University of Manchester, UK, 2022, First Class Honours (72% average). Final year project: 'Automated Invoice Processing System using Computer Vision' - deployed in 3 SME businesses. A-Levels: Mathematics (A*), Computer Science (A), Physics (A) - Manchester Grammar School, 2019.",
+      professionalCertifications: "AWS Certified Solutions Architect - Associate (2023, valid until 2026). AWS Certified Machine Learning - Specialty (2024, valid until 2027). Google Cloud Professional Data Engineer (2023, valid until 2025). Certified ScrumMaster (CSM) - Scrum Alliance (2022, active). FCA Financial Services Training Certificate (2024). Part-qualified Financial Risk Manager (FRM) - GARP (Level 1 passed 2024). Python for Finance Certificate - DataCamp (2022). Member of British Computer Society (BCS) since 2022. Member of Institution of Engineering and Technology (IET) since 2023.",
+      totalYearsExperience: "6",
+      industryExperience: "4 years in FinTech and financial services technology. 2021-2023: Data Analyst at Barclays Bank UK (2 years) - built credit risk models, analyzed 2M+ transactions monthly, reduced fraud detection time by 35%. 2023-2024: Senior Data Scientist at FinTech Innovations Ltd (1.5 years) - led team of 4, deployed 12 ML models to production, processed 450K+ business transactions. 2024-present: Founder/CTO at FinFlow AI (1 year) - building AI-powered cash flow forecasting for UK SMEs. Deep understanding of SME financial challenges, Open Banking APIs, FCA regulatory requirements, and accounting software integrations (Xero, QuickBooks, Sage).",
+      technicalSkills: "Python (9/10) - 5 years production experience, pandas, scikit-learn, TensorFlow, FastAPI. SQL (9/10) - PostgreSQL, MySQL, complex queries, optimization, 4 years. JavaScript/TypeScript (8/10) - React, Node.js, full-stack development, 3 years. Machine Learning (9/10) - regression, classification, time series, NLP, 4 years research + production. Cloud Platforms - AWS (8/10), GCP (7/10), Azure (6/10). Data Engineering (8/10) - ETL pipelines, Airflow, Spark. DevOps (7/10) - Docker, CI/CD, Kubernetes basics. API Development (8/10) - REST, GraphQL, Open Banking APIs.",
+      languages: "English (Native/Fluent - IELTS 8.5). French (Intermediate - B2 level, lived in Paris 6 months). Spanish (Basic - A2 level, conversational). Mandarin (Beginner - A1 level, currently learning for China market expansion).",
+      linkedInUrl: "https://linkedin.com/in/jamesathompson-fintech",
+      portfolioUrl: "https://github.com/jthompson-fintech | https://jamesathompson.dev | https://finflow-ai.co.uk",
+      // STEP 2: Business Concept & Innovation
+      businessName: "FinFlow AI",
+      industry: "FinTech / AI-powered Financial Technology / B2B SaaS",
+      problem: "UK SMEs face a critical cash flow crisis: 50,000 businesses fail annually due to poor cash flow management, representing £12.8 billion in lost economic value. Current solutions fail SMEs: (1) Spreadsheets are manual, error-prone, and lack predictive capability - used by 67% of SMEs but only 23% accuracy in forecasting. (2) Accounting software forecasts (Xero, QuickBooks) use simple linear projections with 71-76% accuracy, missing seasonal patterns and anomalies. (3) Enterprise solutions (Fluidly, Float) cost £75-150/month, require 3-7 day setup, and are designed for larger businesses. (4) Bank overdrafts and emergency loans carry 15-25% APR, costing SMEs £2.3B annually in preventable interest. The target market - 186,000 UK SMEs with £200K-£10M revenue - desperately needs affordable, accurate, automated cash flow intelligence with genuine advance warning of shortfalls.",
       innovationStage: "mvp-complete",
-      productStatus: "[EXAMPLE] Describe your product development status in detail:\n\n" +
-        "CURRENT STATUS: [MVP Complete / In Development / Live Product]\n" +
-        "- Platform URL: [your-website.co.uk] (if live)\n" +
-        "- Demo available: [Yes/No]\n" +
-        "- Repository: [GitHub/GitLab link if applicable]\n\n" +
-        "KEY FEATURES BUILT:\n" +
-        "1. [Feature 1] - [Brief description]\n" +
-        "2. [Feature 2] - [Brief description]\n" +
-        "3. [Feature 3] - [Brief description]\n\n" +
-        "TECHNICAL ARCHITECTURE:\n" +
-        "- Frontend: [Technologies used]\n" +
-        "- Backend: [Technologies used]\n" +
-        "- Database: [Technologies used]\n" +
-        "- Integrations: [APIs, third-party services]\n\n" +
-        "MEASURABLE METRICS:\n" +
-        "- Uptime: [percentage]\n" +
-        "- Response time: [ms]\n" +
-        "- Users/Beta testers: [number]\n\n" +
+      productStatus: "FULLY OPERATIONAL MVP - LIVE IN PRODUCTION (September 2025). Platform URL: finflow-ai.co.uk (live, accepting customers). Demo: Interactive demo available at demo.finflow-ai.co.uk. GitHub: github.com/finflow-ai/platform (private repository, demo access available for endorser review).\n\n" +
         "PROPRIETARY AI ARCHITECTURE - WORLD'S FIRST MULTI-LLM VISA ORCHESTRATOR: Unlike any existing solution, our platform features an 'Expert AI Command Orchestrator' - a novel architecture integrating OpenAI GPT-4 AND Google Gemini simultaneously. This dual-LLM approach provides: (a) Redundancy - if one AI provider fails, the other maintains service, (b) Quality validation - responses cross-checked between models, (c) Specialized routing - compliance questions to GPT-4 (stronger reasoning), creative content to Gemini (faster generation). Four specialized AI agents work in concert: SAGE (Compliance Agent) - validates against November 2025 Home Office requirements, NOVA (Innovation Agent) - assesses uniqueness and market differentiation, STERLING (Financial Agent) - analyzes viability and projections, ATLAS (Growth Agent) - evaluates scalability potential. This orchestration methodology is patent-pending.\n\n" +
         "UNIQUE TECHNICAL INNOVATIONS: (1) REAL-TIME COMPLIANCE INTELLIGENCE GRAPH - A dynamic knowledge graph mapping user inputs directly to 47 specific Home Office visa criteria (updated November 2025). Visual dashboard shows compliance score (0-100%) with specific improvement recommendations. No other tool provides this granular mapping. (2) EVIDENCE STRENGTH SCORING SYSTEM - Proprietary algorithm analyzing 8 critical endorser rejection reasons (identified through analysis of 200+ rejection letters). Provides actionable feedback: 'Your traction evidence scores 3/10 - add customer testimonials, revenue proof, or LOIs to improve.' (3) INDUSTRY-ADAPTIVE INTAKE SYSTEM - Questionnaire dynamically adjusts based on 6 industry sectors (Technology, Healthcare, Finance, Retail, Manufacturing, Services), asking sector-specific questions about regulatory requirements, market dynamics, and competitive landscapes. (4) SMART DOCUMENT GENERATION ENGINE - AI-powered templates that generate personalized, endorser-ready documents including: 60-80 page business plans, financial projection spreadsheets, pitch decks, personal statements, supporting evidence portfolios. Documents formatted to exact endorsing body specifications.\n\n" +
         "PRODUCTION-READY FEATURE SET: User Authentication - Dual-method (email/password + Google OAuth 2.0) with Cloudflare Turnstile bot protection, email verification, secure password reset. Payment Processing - Full Stripe integration with checkout, webhooks, subscription management, promo codes, referral system. 5-Tier Access Control - Bulletproof system (Free/Basic/Premium/Enterprise/Ultimate) with real-time access verification, upgrade prompts, and zero-loophole security. Data Persistence - PostgreSQL database (Neon serverless) with Drizzle ORM, auto-save functionality, progress restoration across sessions. Export Capabilities - PDF generation (jspdf), Word documents (docx library), QR code mobile transfer for cross-device access. UI/UX Excellence - Mobile-responsive design, dark mode support, accessibility compliance (WCAG 2.1), professional animations (Framer Motion).\n\n" +
