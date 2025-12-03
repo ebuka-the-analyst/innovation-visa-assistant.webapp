@@ -810,11 +810,11 @@ export default function VoiceBuilder() {
 
                   <div className="mt-6 pt-4 border-t">
                     <Progress 
-                      value={(currentPromptIndex / currentPrompts.length) * 100} 
+                      value={editedTranscript ? 100 : (currentPromptIndex / currentPrompts.length) * 100} 
                       className="h-2 mb-2" 
                     />
                     <p className="text-xs text-muted-foreground text-center">
-                      {currentPromptIndex}/{currentPrompts.length} prompts completed
+                      {editedTranscript ? currentPrompts.length : currentPromptIndex}/{currentPrompts.length} prompts completed
                     </p>
                   </div>
                 </CardContent>
