@@ -18,6 +18,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import { useQuery } from "@tanstack/react-query";
 
 const steps = [
   {
@@ -237,6 +238,11 @@ const defaultFormData: Record<string, string> = {
 export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string }) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  
+  const { data: user } = useQuery<{ id: string; email: string; displayName?: string; firstName?: string; lastName?: string }>({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+  });
   
   const {
     savedData,
@@ -555,23 +561,40 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     });
   };
 
-  // Pre-fill with Ebuka Umeh's Ultimate Plan data for UK Innovator Founder Visa Assistant
+  // Pre-fill with comprehensive demo template data
   const handleEbukaUltimatePlanAutoFill = () => {
-    const ebukaData: Record<string, string> = {
-      tier: 'ultimate',
+    const userName = user?.displayName || user?.firstName || user?.email?.split('@')[0] || '[Your Full Name]';
+    const demoData: Record<string, string> = {
+      tier: 'premium',
       // Section 1: Personal Profile & Credentials
-      fullLegalName: "Ebuka Benedict Umeh",
+      fullLegalName: userName,
       currentVisaStatus: "graduate-visa",
-      visaExpiryDate: "15/03/2026",
-      workAuthorizationDetails: "Graduate Visa holder with full work authorization in the UK. Permitted to work unlimited hours in any sector including self-employment. No restrictions on starting or running a business. Visa valid until March 2026, providing 4+ months runway for Innovator Founder Visa application and transition.",
-      educationBackground: "MSc Data Science, Leeds Beckett University, UK, 2023, Distinction (75% overall). BSc Computer Science, University of Nigeria Nsukka, Nigeria, 2018, First Class Honours (4.5/5.0 GPA). Dissertation: 'Machine Learning Approaches for Financial Time Series Prediction' - developed novel LSTM architecture achieving 94% accuracy on cash flow forecasting.",
-      professionalCertifications: "AWS Certified Solutions Architect - Associate (2023). AWS Certified Machine Learning - Specialty (2024). Google Cloud Professional Data Engineer (2023). Certified ScrumMaster (CSM) - Scrum Alliance (2022). FCA Financial Services Training Certificate (2024). Part-qualified Financial Risk Manager (FRM) - GARP (2024). Python for Finance Certificate - DataCamp (2022).",
-      businessName: "UK Innovator Founder Visa Assistant",
-      industry: "LegalTech / Immigration Technology / AI-powered SaaS",
-      problem: "Navigating the UK Innovator Founder Visa process presents significant challenges for talented entrepreneurs worldwide. Traditional immigration lawyers charge £3,000-15,000, creating barriers for qualified entrepreneurs with limited capital. The process involves a complex two-stage application (endorsement + Home Office), with 60-70% rejection rate at endorsement stage due to weak business plans, lack of traction evidence, and insufficient documentation. Free online resources are fragmented, outdated, and generic - not tailored to individual circumstances. Applicants lack tools to assess their readiness, and there is no integrated platform providing comprehensive, affordable guidance across compliance, documentation, business planning, and interview preparation.",
+      visaExpiryDate: "DD/MM/YYYY",
+      workAuthorizationDetails: "[EXAMPLE] Graduate Visa holder with full work authorization in the UK. Permitted to work unlimited hours in any sector including self-employment. No restrictions on starting or running a business. Visa valid until [DATE], providing sufficient runway for Innovator Founder Visa application and transition. REPLACE WITH YOUR OWN VISA DETAILS.",
+      educationBackground: "[EXAMPLE] MSc [Your Subject], [University Name], UK, [Year], [Grade/Classification]. BSc [Subject], [University], [Country], [Year], [Grade]. Include dissertation topics if relevant. REPLACE WITH YOUR OWN EDUCATION HISTORY.",
+      professionalCertifications: "[EXAMPLE] List all relevant certifications: AWS Certified Solutions Architect, Google Cloud Professional, Microsoft Azure, Scrum certifications, industry-specific licenses, professional body memberships (BCS, IET, ACCA, etc.). REPLACE WITH YOUR OWN CERTIFICATIONS.",
+      businessName: "[Your Business Name]",
+      industry: "[Your Industry - e.g., FinTech / HealthTech / EdTech / SaaS]",
+      problem: "[EXAMPLE] Describe the specific problem your business solves. Be specific about: (1) Who experiences this problem (target customers), (2) How severe the problem is (pain points, costs), (3) Current solutions and their limitations, (4) Why existing solutions fail. Example: 'UK SMEs lose £X billion annually due to [problem]. Current solutions like [competitor A, B, C] fail because [reasons]. Our target customers (businesses with £200K-£10M revenue) need [specific solution].' REPLACE WITH YOUR ACTUAL PROBLEM STATEMENT.",
       innovationStage: "mvp-complete",
-      productStatus: "FULLY OPERATIONAL MVP - LIVE IN PRODUCTION (November 2025). Platform URL: innovatorfoundervisaassistant.co.uk. GitHub: github.com/bhenmedia/visa-assistant (private repository, demo access available for endorser review).\n\n" +
-        "PLATFORM SCALE & CAPABILITIES: 109 professional-grade AI-powered tools - the most comprehensive Innovator Founder Visa toolkit in existence. No competitor offers more than 20 generic tools. Tools organized across 8 specialized categories: (1) Compliance Intelligence (14 tools), (2) Documentation Suite (16 tools), (3) Team & Advisory (12 tools), (4) Business Strategy (18 tools), (5) Financial Modelling (15 tools), (6) Growth & Scaling (14 tools), (7) Innovation Assessment (11 tools), (8) Application Defense (9 tools).\n\n" +
+      productStatus: "[EXAMPLE] Describe your product development status in detail:\n\n" +
+        "CURRENT STATUS: [MVP Complete / In Development / Live Product]\n" +
+        "- Platform URL: [your-website.co.uk] (if live)\n" +
+        "- Demo available: [Yes/No]\n" +
+        "- Repository: [GitHub/GitLab link if applicable]\n\n" +
+        "KEY FEATURES BUILT:\n" +
+        "1. [Feature 1] - [Brief description]\n" +
+        "2. [Feature 2] - [Brief description]\n" +
+        "3. [Feature 3] - [Brief description]\n\n" +
+        "TECHNICAL ARCHITECTURE:\n" +
+        "- Frontend: [Technologies used]\n" +
+        "- Backend: [Technologies used]\n" +
+        "- Database: [Technologies used]\n" +
+        "- Integrations: [APIs, third-party services]\n\n" +
+        "MEASURABLE METRICS:\n" +
+        "- Uptime: [percentage]\n" +
+        "- Response time: [ms]\n" +
+        "- Users/Beta testers: [number]\n\n" +
         "PROPRIETARY AI ARCHITECTURE - WORLD'S FIRST MULTI-LLM VISA ORCHESTRATOR: Unlike any existing solution, our platform features an 'Expert AI Command Orchestrator' - a novel architecture integrating OpenAI GPT-4 AND Google Gemini simultaneously. This dual-LLM approach provides: (a) Redundancy - if one AI provider fails, the other maintains service, (b) Quality validation - responses cross-checked between models, (c) Specialized routing - compliance questions to GPT-4 (stronger reasoning), creative content to Gemini (faster generation). Four specialized AI agents work in concert: SAGE (Compliance Agent) - validates against November 2025 Home Office requirements, NOVA (Innovation Agent) - assesses uniqueness and market differentiation, STERLING (Financial Agent) - analyzes viability and projections, ATLAS (Growth Agent) - evaluates scalability potential. This orchestration methodology is patent-pending.\n\n" +
         "UNIQUE TECHNICAL INNOVATIONS: (1) REAL-TIME COMPLIANCE INTELLIGENCE GRAPH - A dynamic knowledge graph mapping user inputs directly to 47 specific Home Office visa criteria (updated November 2025). Visual dashboard shows compliance score (0-100%) with specific improvement recommendations. No other tool provides this granular mapping. (2) EVIDENCE STRENGTH SCORING SYSTEM - Proprietary algorithm analyzing 8 critical endorser rejection reasons (identified through analysis of 200+ rejection letters). Provides actionable feedback: 'Your traction evidence scores 3/10 - add customer testimonials, revenue proof, or LOIs to improve.' (3) INDUSTRY-ADAPTIVE INTAKE SYSTEM - Questionnaire dynamically adjusts based on 6 industry sectors (Technology, Healthcare, Finance, Retail, Manufacturing, Services), asking sector-specific questions about regulatory requirements, market dynamics, and competitive landscapes. (4) SMART DOCUMENT GENERATION ENGINE - AI-powered templates that generate personalized, endorser-ready documents including: 60-80 page business plans, financial projection spreadsheets, pitch decks, personal statements, supporting evidence portfolios. Documents formatted to exact endorsing body specifications.\n\n" +
         "PRODUCTION-READY FEATURE SET: User Authentication - Dual-method (email/password + Google OAuth 2.0) with Cloudflare Turnstile bot protection, email verification, secure password reset. Payment Processing - Full Stripe integration with checkout, webhooks, subscription management, promo codes, referral system. 5-Tier Access Control - Bulletproof system (Free/Basic/Premium/Enterprise/Ultimate) with real-time access verification, upgrade prompts, and zero-loophole security. Data Persistence - PostgreSQL database (Neon serverless) with Drizzle ORM, auto-save functionality, progress restoration across sessions. Export Capabilities - PDF generation (jspdf), Word documents (docx library), QR code mobile transfer for cross-device access. UI/UX Excellence - Mobile-responsive design, dark mode support, accessibility compliance (WCAG 2.1), professional animations (Framer Motion).\n\n" +
@@ -672,13 +695,13 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
         "SUSTAINABILITY ANALYSIS: Unlike competitors relying on high one-time fees, our model generates recurring revenue through: (1) Add-on credit purchases, (2) Ultimate Assurance annual subscriptions, (3) Referral-driven new customers, (4) B2B partnership licensing. This creates predictable revenue streams while maintaining accessible pricing for individual applicants.",
     };
     
-    setFormData(ebukaData);
-    Object.entries(ebukaData).forEach(([key, value]) => {
+    setFormData(demoData);
+    Object.entries(demoData).forEach(([key, value]) => {
       saveField(key, value);
     });
     toast({
-      title: "Your Ultimate Plan Data Loaded",
-      description: "All fields pre-filled with your CV and business plan data. Review each section and edit as needed before submitting.",
+      title: "Demo Template Loaded",
+      description: "All fields filled with example data showing the detail level endorsers expect. Replace each [EXAMPLE] section with your own information.",
       duration: 5000,
     });
   };
