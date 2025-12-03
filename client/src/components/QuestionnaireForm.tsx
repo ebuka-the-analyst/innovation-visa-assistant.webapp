@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useQuery } from "@tanstack/react-query";
 
-// Industry template definitions
+// Industry template definitions - Tech AND Non-Tech sectors
 const INDUSTRY_TEMPLATES = {
   fintech: {
     name: "FinTech / Financial Services",
@@ -53,10 +53,40 @@ const INDUSTRY_TEMPLATES = {
     description: "Business software, productivity tools, enterprise solutions",
     templates: ["TeamFlow - Collaboration Platform", "DataSync - Integration Platform", "AutomateHQ - Workflow Automation"]
   },
-  other: {
-    name: "Other / General Tech",
+  foodbev: {
+    name: "Food & Beverage",
+    icon: ShoppingBag,
+    description: "Innovative food products, sustainable packaging, new production methods",
+    templates: ["GreenBite - Plant-Based Foods", "BrewCraft - Artisan Beverages", "FreshPack - Sustainable Packaging"]
+  },
+  manufacturing: {
+    name: "Manufacturing & Products",
+    icon: Building2,
+    description: "New manufacturing processes, sustainable products, innovative materials",
+    templates: ["EcoMake - Sustainable Manufacturing", "SmartBuild - Construction Innovation", "CleanMaterials - Eco Products"]
+  },
+  creative: {
+    name: "Creative & Media",
     icon: Lightbulb,
-    description: "EdTech, PropTech, CleanTech, or other innovative sectors",
+    description: "Content innovation, new distribution models, creative services",
+    templates: ["StoryStream - Content Platform", "ArtConnect - Creative Marketplace", "MediaFlow - Distribution Innovation"]
+  },
+  services: {
+    name: "Professional Services",
+    icon: Building2,
+    description: "Innovative consulting, new service delivery, business solutions",
+    templates: ["ConsultX - Advisory Platform", "TalentBridge - Recruitment Innovation", "ServicePro - B2B Solutions"]
+  },
+  social: {
+    name: "Social Enterprise",
+    icon: Lightbulb,
+    description: "Impact-driven businesses, community solutions, sustainability",
+    templates: ["ImpactFirst - Social Innovation", "CommunityHub - Local Solutions", "GreenFuture - Sustainability Venture"]
+  },
+  other: {
+    name: "Other Innovative Sectors",
+    icon: Lightbulb,
+    description: "EdTech, PropTech, CleanTech, Fashion, Tourism, or other",
     templates: ["EduAI - Learning Platform", "PropFlow - Property Management", "GreenTech - Sustainability Platform"]
   }
 };
@@ -84,7 +114,7 @@ const steps = [
       { name: "professionalCertifications", label: "Professional Certifications & Accreditations", type: "textarea", required: false, help: "AWS, Google Cloud, Microsoft, industry certifications, professional body memberships (BCS, IET, etc.)" },
       { name: "totalProfessionalExperience", label: "Total Years of Professional Experience", type: "number", required: true, help: "Include all relevant work experience since graduation" },
       { name: "industryExperience", label: "Industry-Specific Experience (years and details)", type: "textarea", required: true, minLength: 50, help: "How many years in your target industry? What specific projects/roles?" },
-      { name: "technicalSkillsProficiency", label: "Technical Skills & Proficiency Levels", type: "textarea", required: true, minLength: 100, help: "Rate 1-10 for each skill. Example: Python (9/10), SQL (8/10), JavaScript (7/10), AI/ML (8/10), Cloud Platforms (7/10), Data Analysis (9/10)" },
+      { name: "technicalSkillsProficiency", label: "Core Skills & Proficiency Levels", type: "textarea", required: true, minLength: 100, help: "Rate 1-10 for each skill. Tech: Python (9/10), JavaScript (7/10). Non-tech: Operations (9/10), Sales (8/10), Product Development (8/10), Supply Chain (7/10), etc." },
       { name: "languagesSpoken", label: "Languages & Proficiency", type: "textarea", required: false, help: "List languages: English (Native/Fluent), other languages with proficiency level" },
       { name: "linkedInProfile", label: "LinkedIn Profile URL", type: "text", required: false, help: "Your LinkedIn profile URL for verification" },
       { name: "portfolioUrl", label: "Portfolio/GitHub/Website URL", type: "text", required: false, help: "Links to your work samples, GitHub, personal website" },
@@ -111,15 +141,15 @@ const steps = [
   },
   {
     id: 2,
-    title: "Innovation & Technical Architecture",
-    description: "Endorsers have technical assessors who need specifics, not buzzwords",
+    title: "Innovation & How It Works",
+    description: "Endorsers need specifics about your innovation - what makes it genuinely new?",
     fields: [
-      { name: "uniqueness", label: "What makes your solution different? (Be specific with measurable claims)", type: "textarea", required: true, minLength: 100 },
-      { name: "techStack", label: "Exact Technology Stack", type: "textarea", required: true, minLength: 50, help: "List specific tools: React, Python, PostgreSQL, AWS Lambda, etc. Vague = red flag" },
-      { name: "dataArchitecture", label: "Data Architecture & Integration Approach", type: "textarea", required: true, minLength: 100, help: "How do you integrate systems? HL7/FHIR APIs? Data pipelines? Be technical." },
-      { name: "aiMethodology", label: "AI/ML Methodology (if applicable)", type: "textarea", required: true, minLength: 100, help: "Specific algorithms (GPT-4, Random Forest, etc.), training data, validation metrics, baseline improvements. 'AI-assisted' is not enough." },
-      { name: "complianceDesign", label: "Compliance by Design", type: "textarea", required: true, minLength: 100, help: "For healthcare: DCB0129, DCB0160, GDPR Article 25. For other sectors: relevant standards" },
-      { name: "patentStatus", label: "Intellectual Property Status", type: "textarea", required: true, minLength: 20, help: "Patent filed (GB reference number)? Pending? None? Defensive publication?" },
+      { name: "uniqueness", label: "What makes your solution different? (Be specific with measurable claims)", type: "textarea", required: true, minLength: 100, help: "Measurable advantages: 30% faster, 50% cheaper, first in UK, new process, sustainable approach, etc." },
+      { name: "techStack", label: "Tools, Technology & Methods Used", type: "textarea", required: true, minLength: 50, help: "Tech: React, Python, AWS. Non-tech: Equipment, processes, suppliers, production methods, key partnerships. Be specific about HOW you do it." },
+      { name: "dataArchitecture", label: "How Your Business/Product Works", type: "textarea", required: true, minLength: 100, help: "Tech: APIs, data flow, integrations. Non-tech: Production process, supply chain, service delivery model. Explain the operational mechanics." },
+      { name: "aiMethodology", label: "Innovation Methodology (optional for non-tech)", type: "textarea", required: false, minLength: 50, help: "If using AI: specific algorithms. If not: describe your innovative process, method, recipe, or approach that competitors don't have." },
+      { name: "complianceDesign", label: "Quality & Compliance Standards", type: "textarea", required: true, minLength: 100, help: "Food: HACCP, BRC. Healthcare: DCB0129. Manufacturing: ISO 9001. Services: professional certifications. GDPR. List all relevant standards." },
+      { name: "patentStatus", label: "Intellectual Property Status", type: "textarea", required: true, minLength: 20, help: "Patent filed? Trademark registered? Trade secrets? Recipe/formula protection? Design registration? Brand protection? None yet?" },
     ],
   },
   {
@@ -867,6 +897,151 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           productStatus: templateNotice + "Building AI-powered workflow automation for SMEs. Natural language workflow creation prototype complete. 35 pilot applications received.",
           uniqueness: templateNotice + "SME-first approach: (1) Describe workflows in plain English. (2) £199/month vs £50K+ RPA. (3) No-code/low-code interface. (4) AI learns from user corrections.",
           techStack: templateNotice + "Python, GPT-4, LangChain, FastAPI, PostgreSQL, React, AWS Lambda, Selenium for web automation",
+        },
+      ],
+      foodbev: [
+        { // GreenBite - Plant-Based Foods
+          businessName: templateNotice + "GreenBite Foods",
+          industry: templateNotice + "Food & Beverage / Plant-Based / Sustainable Food",
+          problem: templateNotice + "UK consumers want sustainable protein alternatives but current options taste artificial and cost 40% more than meat. 67% of flexitarians abandon plant-based products due to taste.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Launched 3 plant-based products in 45 UK independent retailers. Proprietary fermentation process creates meat-like texture. Customer satisfaction 4.6/5 stars.",
+          uniqueness: templateNotice + "Innovation: (1) Proprietary fermentation (patent pending). (2) 30% cheaper than Beyond Meat. (3) Tastes 'indistinguishable from chicken' in blind tests (n=200). (4) 100% UK-sourced ingredients.",
+          techStack: templateNotice + "Production: Commercial kitchen (HACCP certified), fermentation tanks, packaging line. Suppliers: UK pea protein, natural flavourings. Distribution: 3PL partner.",
+        },
+        { // BrewCraft - Artisan Beverages
+          businessName: templateNotice + "BrewCraft",
+          industry: templateNotice + "Food & Beverage / Craft Drinks / Low-Alcohol",
+          problem: templateNotice + "UK low/no-alcohol market growing 30% annually but premium options lack taste complexity. 58% of consumers find alcohol-free beers 'watery' or 'artificial'.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Award-winning low-alcohol craft beers sold in 120 UK pubs and 80 retail locations. Great Taste Award 2024. 15,000 units sold monthly.",
+          uniqueness: templateNotice + "Brewing innovation: (1) Cold-extraction process preserves flavour (patent pending). (2) Only 0.5% ABV vs competitors' 0.0% with better taste. (3) 2x more complex flavour profile in blind tests.",
+          techStack: templateNotice + "Microbrewery (2,000L capacity), cold-extraction system, canning line, quality testing lab. SALSA certification. UK hop suppliers.",
+        },
+        { // FreshPack - Sustainable Packaging
+          businessName: templateNotice + "FreshPack Solutions",
+          industry: templateNotice + "Packaging / Sustainability / Food Service",
+          problem: templateNotice + "UK food industry uses 2.4 million tonnes of plastic packaging annually. Biodegradable alternatives cost 3x more and don't maintain food freshness as effectively.",
+          innovationStage: "pre-mvp",
+          productStatus: templateNotice + "Developed seaweed-based packaging prototype. Lab tests show 45-day shelf life (vs 30 days for plastic). 8 food manufacturers expressed interest. Seeking £150K for production scale-up.",
+          uniqueness: templateNotice + "Material innovation: (1) Seaweed-based, fully compostable in 90 days. (2) Same cost as plastic at scale. (3) Better freshness retention. (4) UK seaweed farming partnerships.",
+          techStack: templateNotice + "R&D lab, seaweed processing equipment, film extrusion machinery. Key partners: Scottish seaweed farms, food science consultants.",
+        },
+      ],
+      manufacturing: [
+        { // EcoMake - Sustainable Manufacturing
+          businessName: templateNotice + "EcoMake Industries",
+          industry: templateNotice + "Manufacturing / Sustainability / Circular Economy",
+          problem: templateNotice + "UK manufacturing generates 5.4 million tonnes of plastic waste annually. Recycled plastic products are 40% weaker and 3x more expensive than virgin materials.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Operating recycled plastic manufacturing facility producing outdoor furniture. 35 B2B customers (councils, schools). £180K revenue Year 1. ISO 14001 certified.",
+          uniqueness: templateNotice + "Process innovation: (1) Proprietary reinforcement makes recycled plastic 95% as strong as virgin. (2) 20% cheaper than competitors. (3) 50-year product warranty. (4) Full circularity - old products recycled.",
+          techStack: templateNotice + "Manufacturing: Injection moulding, extrusion lines, recycling shredders. Quality: Tensile testing, UV weathering chamber. Certifications: ISO 14001, CE marking.",
+        },
+        { // SmartBuild - Construction Innovation
+          businessName: templateNotice + "SmartBuild Systems",
+          industry: templateNotice + "Construction / Modular Building / Sustainable Construction",
+          problem: templateNotice + "UK faces 4.3 million home shortage. Traditional construction takes 6-12 months per home, costs £2,000/sqm, and generates 35% material waste.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Delivered 12 modular homes (2-bed units) for housing association pilot. Build time: 8 weeks vs 6 months. Customer satisfaction: 4.8/5. £420K revenue.",
+          uniqueness: templateNotice + "Construction innovation: (1) 70% faster build time. (2) 25% cost reduction. (3) 95% factory-built = near-zero on-site waste. (4) EPC A rating standard. (5) NHBC warranty.",
+          techStack: templateNotice + "Factory: CNC cutting, modular assembly line, quality testing. Materials: Timber frame, SIPs panels, triple glazing. Transport: Oversized load logistics.",
+        },
+        { // CleanMaterials - Eco Products
+          businessName: templateNotice + "CleanMaterials Co",
+          industry: templateNotice + "Manufacturing / Sustainable Materials / B2B Products",
+          problem: templateNotice + "UK businesses spend £2.1 billion on cleaning products containing harmful chemicals. 23% of workplace skin conditions are caused by cleaning chemicals.",
+          innovationStage: "pre-mvp",
+          productStatus: templateNotice + "Developed bio-enzyme cleaning concentrate. Lab tests show 40% better cleaning performance than chemical alternatives. 15 corporate pilot agreements secured.",
+          uniqueness: templateNotice + "Product innovation: (1) Bio-enzyme formula, zero harmful chemicals. (2) Concentrate = 90% less packaging/transport. (3) 30% cheaper per-use than chemicals. (4) COSHH compliant, reduces H&S burden.",
+          techStack: templateNotice + "Production: Mixing tanks, filling line, quality lab. Formulation: Enzyme cultivation, stability testing. Certifications: EU Ecolabel pending.",
+        },
+      ],
+      creative: [
+        { // StoryStream - Content Platform
+          businessName: templateNotice + "StoryStream Media",
+          industry: templateNotice + "Media / Content Creation / Creator Economy",
+          problem: templateNotice + "UK content creators lose 30-50% revenue to platforms (YouTube, TikTok). Monetisation tools are fragmented, analytics are basic, and audience ownership is limited.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Creator monetisation platform with 450 active creators. £85K monthly transaction volume. Average creator earns 40% more than on YouTube. 15% platform fee vs 45% YouTube.",
+          uniqueness: templateNotice + "Creator benefits: (1) Keep 85% of revenue (vs 55% YouTube). (2) Own your audience (email, SMS access). (3) Unified analytics across platforms. (4) Direct sponsorship marketplace.",
+          techStack: templateNotice + "Platform: React, Node.js, PostgreSQL. Payments: Stripe Connect. Video: Mux streaming. Analytics: Custom dashboard.",
+        },
+        { // ArtConnect - Creative Marketplace
+          businessName: templateNotice + "ArtConnect Gallery",
+          industry: templateNotice + "Art / Creative Marketplace / E-commerce",
+          problem: templateNotice + "Emerging UK artists struggle to reach buyers - galleries take 50% commission, online platforms lack curation, and art shipping is complex and expensive.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Curated online art marketplace with 280 UK artists, 1,200 artworks listed. £145K GMV in first year. Average order value £380. 25% commission (vs 50% galleries).",
+          uniqueness: templateNotice + "Artist benefits: (1) Only 25% commission. (2) Curated quality (acceptance rate 35%). (3) End-to-end shipping included. (4) AR 'view in room' feature increases conversion 3x.",
+          techStack: templateNotice + "E-commerce: Shopify Plus, custom theme. AR: 8thWall integration. Shipping: integrated fine art courier APIs. Payments: Stripe, PayPal.",
+        },
+        { // MediaFlow - Distribution Innovation
+          businessName: templateNotice + "MediaFlow Distribution",
+          industry: templateNotice + "Media / Content Distribution / Film & TV",
+          problem: templateNotice + "Independent UK filmmakers face £50K+ distribution costs and 18-month delays to reach audiences. Major distributors reject 95% of indie content.",
+          innovationStage: "pre-mvp",
+          productStatus: templateNotice + "Building direct-to-audience distribution platform for indie films. Partnerships with 3 film festivals for content pipeline. 45 filmmaker applications received.",
+          uniqueness: templateNotice + "Distribution model: (1) Self-service platform, films live in 48 hours. (2) 70% revenue share (vs 30% traditional). (3) Built-in marketing tools. (4) Audience data ownership.",
+          techStack: templateNotice + "Platform: Next.js, PostgreSQL. Video: Cloudflare Stream. Payments: Stripe. DRM: BuyDRM integration.",
+        },
+      ],
+      services: [
+        { // ConsultX - Advisory Platform
+          businessName: templateNotice + "ConsultX Advisory",
+          industry: templateNotice + "Professional Services / Consulting / Expert Marketplace",
+          problem: templateNotice + "UK SMEs need strategic advice but can't afford £500/hour consultants. Freelance consultants struggle to find clients and lack professional infrastructure.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Expert marketplace connecting 120 vetted consultants with 340 SME clients. £420K platform revenue. Average project value £3,200. Client satisfaction 4.7/5.",
+          uniqueness: templateNotice + "Platform advantages: (1) Vetted experts only (15% acceptance rate). (2) Fixed-price projects (no hourly billing surprises). (3) Escrow payments protect both parties. (4) £150/hour average vs £500 traditional.",
+          techStack: templateNotice + "Platform: React, Node.js, PostgreSQL. Payments: Stripe escrow. Video: Zoom API integration. Contracts: DocuSign integration.",
+        },
+        { // TalentBridge - Recruitment Innovation
+          businessName: templateNotice + "TalentBridge",
+          industry: templateNotice + "Recruitment / HR Tech / Staffing",
+          problem: templateNotice + "UK hospitality and retail suffer 30% annual staff turnover. Traditional recruitment agencies charge 15-20% fees and take 4-6 weeks to fill roles.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Rapid hiring platform for hospitality/retail with 85 employer clients. 2,400 placements in Year 1. Average time-to-hire: 5 days. Flat £150 fee per hire.",
+          uniqueness: templateNotice + "Recruitment innovation: (1) Flat £150 fee vs 15% of salary. (2) 5-day average placement vs 4 weeks. (3) Video interviews built-in. (4) 90-day replacement guarantee.",
+          techStack: templateNotice + "Platform: React, PostgreSQL. Video: Twilio Video. Matching: Custom algorithm. Background checks: Onfido API.",
+        },
+        { // ServicePro - B2B Solutions
+          businessName: templateNotice + "ServicePro Solutions",
+          industry: templateNotice + "Business Services / Facilities Management / B2B",
+          problem: templateNotice + "UK SMEs manage 5+ service providers (cleaning, security, maintenance) with no central oversight. Service quality inconsistent, costs uncontrolled, contracts scattered.",
+          innovationStage: "pre-mvp",
+          productStatus: templateNotice + "Building integrated facilities management platform for SMEs. 28 pilot customer agreements. Partnerships with 15 vetted service providers.",
+          uniqueness: templateNotice + "SME benefits: (1) Single platform for all facility services. (2) Pre-vetted, quality-guaranteed providers. (3) 15-20% cost savings through bulk negotiation. (4) Real-time service tracking.",
+          techStack: templateNotice + "Platform: React, PostgreSQL. Scheduling: Custom booking system. Payments: GoCardless direct debit. Reporting: Custom dashboards.",
+        },
+      ],
+      social: [
+        { // ImpactFirst - Social Innovation
+          businessName: templateNotice + "ImpactFirst Ventures",
+          industry: templateNotice + "Social Enterprise / Impact Investment / Community Development",
+          problem: templateNotice + "UK social enterprises struggle to access growth capital - too commercial for grants, too 'risky' for banks. £2.3 billion funding gap for impact-driven businesses.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Impact investment platform connecting 45 social enterprises with 180 impact investors. £2.1M raised across 12 deals. Average investment £175K. B Corp certified.",
+          uniqueness: templateNotice + "Platform innovation: (1) Impact measurement framework (standardised metrics). (2) Blended finance structures (grant + investment). (3) Due diligence as a service. (4) Community investor network.",
+          techStack: templateNotice + "Platform: React, PostgreSQL. Payments: Stripe Connect. Impact tracking: Custom dashboard. Documents: DocuSign.",
+        },
+        { // CommunityHub - Local Solutions
+          businessName: templateNotice + "CommunityHub",
+          industry: templateNotice + "Social Enterprise / Community / Local Services",
+          problem: templateNotice + "UK high streets have 15% vacancy rates. Local businesses can't compete with online giants. Community connections weakened post-pandemic.",
+          innovationStage: "mvp-complete",
+          productStatus: templateNotice + "Hyperlocal marketplace connecting 340 local businesses with 8,500 residents in 3 pilot areas. £95K monthly transaction volume. 85% of revenue stays local.",
+          uniqueness: templateNotice + "Community impact: (1) Keep 85% of spending local (vs 13% Amazon). (2) Same-day local delivery. (3) Community events integration. (4) Local currency/loyalty scheme.",
+          techStack: templateNotice + "Platform: React, PostgreSQL. Payments: Stripe. Delivery: Partner courier network. Engagement: Push notifications, email.",
+        },
+        { // GreenFuture - Sustainability Venture
+          businessName: templateNotice + "GreenFuture Initiative",
+          industry: templateNotice + "Social Enterprise / Sustainability / Education",
+          problem: templateNotice + "UK schools lack practical sustainability education. 78% of teachers say they're not equipped to teach climate action. Students feel helpless about environmental issues.",
+          innovationStage: "pre-mvp",
+          productStatus: templateNotice + "Developing hands-on sustainability curriculum and school garden programme. Pilot with 8 schools agreed. £45K grant funding secured. Social enterprise model.",
+          uniqueness: templateNotice + "Educational innovation: (1) Practical learning (grow food, reduce waste, measure carbon). (2) Student-led projects build agency. (3) Teacher training included. (4) Revenue from corporate sponsorship.",
+          techStack: templateNotice + "Curriculum: Custom LMS platform. Impact: Student engagement tracking. Community: School network forum. Operations: Volunteer management system.",
         },
       ],
       other: [
