@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LogOut, Loader2, LayoutDashboard, Wrench, FileText, HelpCircle } from "lucide-react";
 import logoLightImg from "@assets/official_logo.png";
 import logoDarkImg from "@assets/logo_dark.png";
-import { useSpotlightTour } from "@/components/SpotlightTour";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initActivityTracking, trackRouteChange } from "@/lib/activityTracker";
 
@@ -22,7 +21,6 @@ const ChatBot = lazy(() => import("@/components/ChatBot"));
 const CookieConsent = lazy(() => import("@/components/CookieConsent"));
 const ToolsChronographWheel = lazy(() => import("@/components/ToolsChronographWheel"));
 // Black November banner removed - promotion ended
-const SpotlightTour = lazy(() => import("@/components/SpotlightTour"));
 const SiteFeedbackPopup = lazy(() => import("@/components/SiteFeedbackPopup").then(m => ({ default: m.SiteFeedbackPopup })));
 
 // ============ LAZY LOADED PAGES ============
@@ -72,7 +70,7 @@ const AIAssistant = lazy(() => import("@/pages/ai-assistant"));
 const Handoff = lazy(() => import("@/pages/handoff"));
 const AdaptiveIntake = lazy(() => import("@/pages/adaptive-intake"));
 
-// Evidence and Endorser Preparation (PhD-level tools)
+// Evidence and Endorser Preparation
 const TractionEvidence = lazy(() => import("@/pages/traction-evidence"));
 const FounderPortfolio = lazy(() => import("@/pages/founder-portfolio"));
 const EndorserCoverLetter = lazy(() => import("@/pages/endorser-cover-letter"));
