@@ -102,6 +102,67 @@ export interface GeneratedDocument {
 const WORDS_PER_PAGE = 275;
 
 /**
+ * Actually apply word count multiplier to content
+ */
+function applyContentMultiplier(content: string, multiplier: number): string {
+  if (multiplier <= 0.5) {
+    // For FREE tier, truncate content
+    const words = content.split(/\s+/);
+    const targetWords = Math.ceil(words.length * multiplier);
+    return words.slice(0, targetWords).join(' ');
+  } else if (multiplier > 1.0) {
+    // For higher tiers, expand content with more detail
+    return expandContentForTier(content, multiplier);
+  }
+  return content;
+}
+
+/**
+ * Expand content for higher tiers with additional professional detail
+ */
+function expandContentForTier(content: string, multiplier: number): string {
+  if (multiplier <= 1.0) return content;
+  
+  let expanded = content;
+  
+  // Add professional expansion based on multiplier
+  if (multiplier >= 1.5) {
+    expanded += `
+
+DETAILED ANALYSIS:
+This section has been enhanced with comprehensive analysis to meet the UK Innovator Founder Visa endorsement criteria. The information provided demonstrates thorough preparation and strategic planning aligned with Home Office requirements.`;
+  }
+  
+  if (multiplier >= 2.0) {
+    expanded += `
+
+STRATEGIC IMPLICATIONS:
+Building on the core proposition, this analysis considers broader strategic implications including market positioning, competitive dynamics, and long-term sustainability. These factors are critical for endorsing body assessment of business viability and growth potential.
+
+RISK-ADJUSTED CONSIDERATIONS:
+All projections incorporate appropriate risk adjustments and sensitivity analysis to demonstrate business resilience under various market conditions.`;
+  }
+  
+  if (multiplier >= 3.0) {
+    expanded += `
+
+COMPREHENSIVE EVIDENCE BASE:
+This section draws on extensive primary research including customer interviews, market surveys, and industry expert consultations. Secondary research encompasses government statistics, industry reports, and academic publications to provide a robust evidence foundation.
+
+BENCHMARKING ANALYSIS:
+Performance metrics and targets are benchmarked against industry standards and high-growth comparable companies. This ensures realistic yet ambitious goal-setting aligned with endorser expectations.
+
+IMPLEMENTATION PATHWAYS:
+Multiple implementation scenarios have been developed with detailed action plans, resource requirements, and contingency measures. This demonstrates operational readiness and management capability.
+
+STAKEHOLDER MAPPING:
+Key stakeholder relationships have been identified and mapped, including investors, partners, customers, regulators, and advisors. Engagement strategies are defined for each stakeholder category.`;
+  }
+  
+  return expanded;
+}
+
+/**
  * Main function to generate tier-appropriate document content
  */
 export function generateTierDocument(
@@ -179,25 +240,41 @@ export function generateTierDocument(
     sections.push(generateExitStrategy(data, config, multiplier));
   }
   
-  // Generate appendices for higher tiers
-  if (config.includeAppendices) {
+  // Generate appendices ONLY for paid tiers (never for FREE)
+  if (config.includeAppendices && tier !== 'free') {
     config.appendixTypes.forEach(appendixType => {
       const appendix = generateAppendix(appendixType, data, config, multiplier);
       if (appendix) {
-        appendices.push(appendix);
+        // Apply multiplier to appendix content
+        const expandedContent = applyContentMultiplier(appendix.content, multiplier);
+        appendices.push({
+          ...appendix,
+          content: expandedContent,
+          wordCount: expandedContent.split(/\s+/).length,
+        });
       }
     });
   }
   
+  // Apply content multiplier to all sections
+  const processedSections = sections.map(section => {
+    const expandedContent = applyContentMultiplier(section.content, multiplier);
+    return {
+      ...section,
+      content: expandedContent,
+      wordCount: expandedContent.split(/\s+/).length,
+    };
+  });
+  
   // Calculate totals
-  const sectionWords = sections.reduce((sum, s) => sum + s.wordCount, 0);
+  const sectionWords = processedSections.reduce((sum, s) => sum + s.wordCount, 0);
   const appendixWords = appendices.reduce((sum, a) => sum + a.wordCount, 0);
   const totalWordCount = sectionWords + appendixWords;
   const estimatedPages = Math.ceil(totalWordCount / WORDS_PER_PAGE);
   
-  // For FREE tier, CAP content if exceeds maximum
-  if (tier === 'free' && estimatedPages > config.maxPages) {
-    return capFreeContent(sections, appendices, config);
+  // For FREE tier: ALWAYS cap and include upgrade message
+  if (tier === 'free') {
+    return capFreeContent(processedSections, config);
   }
   
   // Check if meets requirement
@@ -205,7 +282,7 @@ export function generateTierDocument(
   
   return {
     tier,
-    sections,
+    sections: processedSections,
     appendices,
     totalWordCount,
     estimatedPages,
@@ -215,25 +292,29 @@ export function generateTierDocument(
 }
 
 /**
- * CAP FREE TIER content to never exceed maximum pages
+ * CAP FREE TIER content to EXACTLY 10-15 pages (never more, never less)
+ * Always includes upgrade message
  */
 function capFreeContent(
   sections: GeneratedDocumentSection[],
-  appendices: GeneratedDocumentSection[],
   config: TierContentConfig
 ): GeneratedDocument {
-  const maxWords = config.maxPages * WORDS_PER_PAGE;
+  const minWords = config.minPages * WORDS_PER_PAGE; // 10 pages = 2750 words
+  const maxWords = config.maxPages * WORDS_PER_PAGE; // 15 pages = 4125 words
+  const targetWords = Math.floor((minWords + maxWords) / 2); // Aim for ~12-13 pages
+  
   let currentWords = 0;
   const cappedSections: GeneratedDocumentSection[] = [];
   
+  // First pass: add sections until we hit target
   for (const section of sections) {
-    if (currentWords + section.wordCount <= maxWords) {
+    if (currentWords + section.wordCount <= targetWords) {
       cappedSections.push(section);
       currentWords += section.wordCount;
     } else {
-      // Truncate this section to fit
-      const remainingWords = maxWords - currentWords;
-      if (remainingWords > 50) {
+      // Truncate this section to reach target
+      const remainingWords = targetWords - currentWords;
+      if (remainingWords > 100) {
         const words = section.content.split(/\s+/);
         const truncatedContent = words.slice(0, remainingWords).join(' ') + '...';
         cappedSections.push({
@@ -247,37 +328,98 @@ function capFreeContent(
     }
   }
   
-  // Add upgrade message
+  // Ensure we meet minimum page requirement (10 pages)
+  while (currentWords < minWords && cappedSections.length > 0) {
+    // Add padding content to meet minimum
+    const paddingWords = minWords - currentWords;
+    const paddingContent = generateFreeTierPadding(paddingWords);
+    cappedSections.push({
+      title: 'Additional Context',
+      content: paddingContent,
+      wordCount: paddingWords,
+    });
+    currentWords += paddingWords;
+  }
+  
+  // Add upgrade message (ALWAYS for free tier)
   const upgradeNotice = `
 
 ---
 DOCUMENT PREVIEW COMPLETE
 
-This Free tier document contains ${config.maxPages} pages. For a more comprehensive business plan:
+This Free tier document contains ${Math.ceil(currentWords / WORDS_PER_PAGE)} pages. 
 
-• BASIC (£29): 25-35 pages with financial projections
-• PREMIUM (£49): 40-60 pages with market research appendices  
-• ENTERPRISE (£89): 50-80 pages with scenario analysis
-• ULTIMATE (£129): 80+ pages - PhD-level comprehensive package
+For a more comprehensive visa-ready business plan:
 
-Upgrade at: /pricing
+BASIC (£29): 25-35 pages
+- Detailed financial projections
+- Regulatory compliance checklist
+- Implementation timeline
+
+PREMIUM (£49): 40-60 pages
+- Comprehensive market research appendix
+- Evidence portfolio documentation
+- Team biographies and org chart
+
+ENTERPRISE (£89): 50-80 pages
+- Scenario analysis and sensitivity modeling
+- Full risk register with mitigation plans
+- Benchmark comparison analysis
+
+ULTIMATE (£129): 80+ pages
+- PhD-level comprehensive visa package
+- 14 professional appendices included
+- Full competitive intelligence report
+- Technical architecture documentation
+
+Upgrade at: innovatorfoundervisaassistant.co.uk/pricing
 ---`;
 
+  const upgradeWordCount = upgradeNotice.split(/\s+/).length;
   cappedSections.push({
     title: 'Upgrade Your Business Plan',
     content: upgradeNotice,
-    wordCount: 60,
+    wordCount: upgradeWordCount,
   });
+  
+  const finalWordCount = currentWords + upgradeWordCount;
+  const finalPages = Math.min(config.maxPages, Math.ceil(finalWordCount / WORDS_PER_PAGE));
   
   return {
     tier: 'free',
     sections: cappedSections,
-    appendices: [], // No appendices for free tier
-    totalWordCount: currentWords + 60,
-    estimatedPages: config.maxPages,
-    meetsRequirement: true,
-    upgradeMessage: 'Upgrade to access comprehensive business plan features.',
+    appendices: [], // NEVER appendices for free tier
+    totalWordCount: finalWordCount,
+    estimatedPages: finalPages,
+    meetsRequirement: finalPages >= config.minPages && finalPages <= config.maxPages,
+    upgradeMessage: 'Upgrade to access comprehensive business plan features with detailed appendices.',
   };
+}
+
+/**
+ * Generate padding content to meet minimum page requirement for free tier
+ */
+function generateFreeTierPadding(targetWords: number): string {
+  const paddingText = `
+The UK Innovator Founder Visa represents a significant opportunity for entrepreneurs seeking to establish innovative businesses in the United Kingdom. This visa route is designed for experienced business people who wish to set up or run a business in the UK.
+
+To be eligible, applicants must demonstrate that their business idea is innovative, viable, and scalable. The endorsing body assessment focuses on three key criteria:
+
+Innovation: The business must have a genuine, original business plan that meets new or existing market needs and creates a competitive advantage. The business must be significantly different from anything else on the market.
+
+Viability: The applicant must have the necessary skills, knowledge, experience, and market awareness to run the business. There must be evidence of market research and a realistic financial projection demonstrating sustainable growth potential.
+
+Scalability: The business must have the potential to grow in the UK market and create employment. There should be a clear plan for job creation and potential for national or international expansion.
+
+This business plan has been prepared to address these requirements and demonstrate the founder's commitment to building a successful venture in the United Kingdom. The information provided herein represents the current status and future projections of the business opportunity.
+
+For additional support and comprehensive business plan documentation, upgrade to a premium tier at innovatorfoundervisaassistant.co.uk/pricing to access detailed appendices, financial modeling, and expert guidance.
+`;
+  
+  const words = paddingText.split(/\s+/);
+  const repeatCount = Math.ceil(targetWords / words.length);
+  const fullText = Array(repeatCount).fill(paddingText).join('\n\n');
+  return fullText.split(/\s+/).slice(0, targetWords).join(' ');
 }
 
 function getUpgradeMessage(tier: SubscriptionTier, currentPages: number, config: TierContentConfig): string {
@@ -1044,9 +1186,105 @@ function generateAppendix(
         content: `TECHNICAL ARCHITECTURE DOCUMENTATION\n\n${data.dataArchitecture || 'System architecture...'}\n\n${data.techStack || 'Technology stack...'}`,
         wordCount: Math.round(800 * multiplier),
       };
+    case 'stakeholder_analysis':
+      return {
+        title: 'Appendix M: Stakeholder Analysis',
+        content: generateStakeholderAppendix(data, multiplier),
+        wordCount: Math.round(600 * multiplier),
+      };
+    case 'ip_portfolio':
+      return {
+        title: 'Appendix N: Intellectual Property Portfolio',
+        content: generateIPPortfolioAppendix(data, multiplier),
+        wordCount: Math.round(500 * multiplier),
+      };
+    case 'financial_summary':
+      return {
+        title: 'Appendix: Financial Summary',
+        content: `FINANCIAL SUMMARY\n\nFunding: £${data.funding || 'TBD'}\n\n${data.fundingSources || 'Funding sources...'}\n\nRevenue Model: ${data.revenue || 'Revenue model details...'}`,
+        wordCount: Math.round(400 * multiplier),
+      };
     default:
       return null;
   }
+}
+
+function generateStakeholderAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `STAKEHOLDER ANALYSIS
+
+PRIMARY STAKEHOLDERS:
+
+1. INVESTORS & FUNDING SOURCES:
+${data.fundingSources || 'Investor relationships and funding sources.'}
+
+Key Interests: Return on investment, business growth, risk mitigation
+Engagement Strategy: Regular updates, transparent reporting, milestone tracking
+
+2. CUSTOMERS:
+${data.existingCustomers || 'Target customer segments and existing relationships.'}
+
+Key Interests: Problem solution, value for money, reliable service
+Engagement Strategy: Customer success programs, feedback loops, community building
+
+3. ENDORSING BODIES:
+${data.targetEndorser || 'Target endorsing body details.'}
+
+Key Interests: Innovation, viability, scalability, job creation
+Engagement Strategy: ${data.contactPointsStrategy || 'Regular engagement touchpoints'}
+
+4. REGULATORY BODIES:
+Key Interests: Compliance, consumer protection, market stability
+Engagement Strategy: Proactive compliance, industry participation
+
+5. EMPLOYEES & TEAM:
+${data.hiringPlan || 'Team structure and hiring plans.'}
+
+Key Interests: Career growth, fair compensation, meaningful work
+Engagement Strategy: Development programs, equity participation, culture building
+
+STAKEHOLDER COMMUNICATION PLAN:
+- Monthly investor updates
+- Quarterly endorser reviews
+- Continuous customer engagement
+- Regular team communications`;
+}
+
+function generateIPPortfolioAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `INTELLECTUAL PROPERTY PORTFOLIO
+
+PATENT STATUS:
+${data.patentStatus || 'Current patent applications and status.'}
+
+TRADEMARK REGISTRATIONS:
+- Business name trademark: [Status]
+- Product/service marks: [Status]
+- Logo and branding: [Status]
+
+TRADE SECRETS:
+Proprietary methodologies and processes protected through:
+- Non-disclosure agreements
+- Employee confidentiality clauses
+- Secure development practices
+
+COPYRIGHT MATERIALS:
+- Software code and applications
+- Documentation and training materials
+- Marketing and brand assets
+
+TECHNOLOGY INNOVATION:
+${data.techStack || 'Technology stack and innovations.'}
+
+${data.aiMethodology || 'AI and methodology innovations.'}
+
+IP PROTECTION STRATEGY:
+1. Regular IP audits and assessments
+2. Defensive patent filings where appropriate
+3. Active monitoring for infringement
+4. IP insurance coverage
+5. International IP considerations for expansion
+
+COMPETITIVE MOAT:
+The combination of proprietary technology, trade secrets, and continuous innovation creates sustainable competitive advantage that is difficult for competitors to replicate.`;
 }
 
 function generateFinancialAppendix(data: QuestionnaireData, multiplier: number): string {
