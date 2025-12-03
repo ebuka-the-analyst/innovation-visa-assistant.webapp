@@ -1,0 +1,1249 @@
+/**
+ * TIER-BASED DOCUMENT CONTENT GENERATOR
+ * 
+ * Generates document content that meets exact page requirements for each tier:
+ * - FREE: 10-15 pages CAPPED (never more)
+ * - BASIC: 25-35 pages
+ * - PREMIUM: 40-60 pages
+ * - ENTERPRISE: 50-80 pages
+ * - ULTIMATE: 80+ pages (PhD-level)
+ */
+
+import { 
+  SubscriptionTier, 
+  getTierConfig, 
+  getContentExpansionMultiplier,
+  TierContentConfig 
+} from './tierContentConfig';
+
+export interface QuestionnaireData {
+  // Business basics
+  businessName?: string;
+  industry?: string;
+  problem?: string;
+  productStatus?: string;
+  uniqueness?: string;
+  techStack?: string;
+  innovationStage?: string;
+  
+  // Customers & traction
+  existingCustomers?: string;
+  tractionEvidence?: string;
+  
+  // Technical details
+  dataArchitecture?: string;
+  aiMethodology?: string;
+  complianceDesign?: string;
+  patentStatus?: string;
+  
+  // Founder
+  founderEducation?: string;
+  founderWorkHistory?: string;
+  founderAchievements?: string;
+  relevantProjects?: string;
+  fullLegalName?: string;
+  
+  // Financial
+  funding?: string;
+  fundingSources?: string;
+  monthlyProjections?: string;
+  customerAcquisitionCost?: string;
+  lifetimeValue?: string;
+  paybackPeriod?: string;
+  detailedCosts?: string;
+  revenue?: string;
+  
+  // Market
+  competitors?: string;
+  competitiveDifferentiation?: string;
+  customerInterviews?: string;
+  lettersOfIntent?: string;
+  willingnessToPay?: string;
+  marketSize?: string;
+  
+  // Regulatory
+  regulatoryRequirements?: string;
+  complianceTimeline?: string;
+  complianceBudget?: string;
+  
+  // Growth
+  jobCreation?: string;
+  hiringPlan?: string;
+  specificRegions?: string;
+  expansion?: string;
+  internationalPlan?: string;
+  vision?: string;
+  
+  // Endorser
+  targetEndorser?: string;
+  contactPointsStrategy?: string;
+  experience?: string;
+  
+  [key: string]: string | undefined;
+}
+
+export interface GeneratedDocumentSection {
+  title: string;
+  content: string;
+  wordCount: number;
+}
+
+export interface GeneratedDocument {
+  tier: SubscriptionTier;
+  sections: GeneratedDocumentSection[];
+  appendices: GeneratedDocumentSection[];
+  totalWordCount: number;
+  estimatedPages: number;
+  meetsRequirement: boolean;
+  upgradeMessage?: string;
+}
+
+// Words per page constant
+const WORDS_PER_PAGE = 275;
+
+/**
+ * Main function to generate tier-appropriate document content
+ */
+export function generateTierDocument(
+  data: QuestionnaireData,
+  tier: SubscriptionTier
+): GeneratedDocument {
+  const config = getTierConfig(tier);
+  const multiplier = getContentExpansionMultiplier(tier);
+  
+  const sections: GeneratedDocumentSection[] = [];
+  const appendices: GeneratedDocumentSection[] = [];
+  
+  // Generate main sections based on tier config
+  if (config.includeExecutiveSummary) {
+    sections.push(generateExecutiveSummary(data, config));
+  }
+  
+  if (config.sections.businessOverview.include) {
+    sections.push(generateBusinessOverview(data, config, multiplier));
+  }
+  
+  if (config.sections.problemStatement.include) {
+    sections.push(generateProblemStatement(data, config, multiplier));
+  }
+  
+  if (config.sections.solution.include) {
+    sections.push(generateSolution(data, config, multiplier));
+  }
+  
+  if (config.sections.innovation.include) {
+    sections.push(generateInnovation(data, config, multiplier));
+  }
+  
+  if (config.sections.technology.include) {
+    sections.push(generateTechnology(data, config, multiplier));
+  }
+  
+  if (config.sections.founderCredentials.include) {
+    sections.push(generateFounderCredentials(data, config, multiplier));
+  }
+  
+  if (config.sections.financialModel.include) {
+    sections.push(generateFinancialModel(data, config, multiplier));
+  }
+  
+  if (config.sections.marketAnalysis.include) {
+    sections.push(generateMarketAnalysis(data, config, multiplier));
+  }
+  
+  if (config.sections.customerValidation.include) {
+    sections.push(generateCustomerValidation(data, config, multiplier));
+  }
+  
+  if (config.sections.regulatoryCompliance.include) {
+    sections.push(generateRegulatoryCompliance(data, config, multiplier));
+  }
+  
+  if (config.sections.growthStrategy.include) {
+    sections.push(generateGrowthStrategy(data, config, multiplier));
+  }
+  
+  if (config.sections.teamPlan.include) {
+    sections.push(generateTeamPlan(data, config, multiplier));
+  }
+  
+  if (config.sections.endorserStrategy.include) {
+    sections.push(generateEndorserStrategy(data, config, multiplier));
+  }
+  
+  if (config.sections.riskMitigation.include) {
+    sections.push(generateRiskMitigation(data, config, multiplier));
+  }
+  
+  if (config.sections.exitStrategy.include) {
+    sections.push(generateExitStrategy(data, config, multiplier));
+  }
+  
+  // Generate appendices for higher tiers
+  if (config.includeAppendices) {
+    config.appendixTypes.forEach(appendixType => {
+      const appendix = generateAppendix(appendixType, data, config, multiplier);
+      if (appendix) {
+        appendices.push(appendix);
+      }
+    });
+  }
+  
+  // Calculate totals
+  const sectionWords = sections.reduce((sum, s) => sum + s.wordCount, 0);
+  const appendixWords = appendices.reduce((sum, a) => sum + a.wordCount, 0);
+  const totalWordCount = sectionWords + appendixWords;
+  const estimatedPages = Math.ceil(totalWordCount / WORDS_PER_PAGE);
+  
+  // For FREE tier, CAP content if exceeds maximum
+  if (tier === 'free' && estimatedPages > config.maxPages) {
+    return capFreeContent(sections, appendices, config);
+  }
+  
+  // Check if meets requirement
+  const meetsRequirement = estimatedPages >= config.minPages && estimatedPages <= config.maxPages;
+  
+  return {
+    tier,
+    sections,
+    appendices,
+    totalWordCount,
+    estimatedPages,
+    meetsRequirement,
+    upgradeMessage: !meetsRequirement ? getUpgradeMessage(tier, estimatedPages, config) : undefined,
+  };
+}
+
+/**
+ * CAP FREE TIER content to never exceed maximum pages
+ */
+function capFreeContent(
+  sections: GeneratedDocumentSection[],
+  appendices: GeneratedDocumentSection[],
+  config: TierContentConfig
+): GeneratedDocument {
+  const maxWords = config.maxPages * WORDS_PER_PAGE;
+  let currentWords = 0;
+  const cappedSections: GeneratedDocumentSection[] = [];
+  
+  for (const section of sections) {
+    if (currentWords + section.wordCount <= maxWords) {
+      cappedSections.push(section);
+      currentWords += section.wordCount;
+    } else {
+      // Truncate this section to fit
+      const remainingWords = maxWords - currentWords;
+      if (remainingWords > 50) {
+        const words = section.content.split(/\s+/);
+        const truncatedContent = words.slice(0, remainingWords).join(' ') + '...';
+        cappedSections.push({
+          title: section.title,
+          content: truncatedContent,
+          wordCount: remainingWords,
+        });
+        currentWords += remainingWords;
+      }
+      break;
+    }
+  }
+  
+  // Add upgrade message
+  const upgradeNotice = `
+
+---
+DOCUMENT PREVIEW COMPLETE
+
+This Free tier document contains ${config.maxPages} pages. For a more comprehensive business plan:
+
+• BASIC (£29): 25-35 pages with financial projections
+• PREMIUM (£49): 40-60 pages with market research appendices  
+• ENTERPRISE (£89): 50-80 pages with scenario analysis
+• ULTIMATE (£129): 80+ pages - PhD-level comprehensive package
+
+Upgrade at: /pricing
+---`;
+
+  cappedSections.push({
+    title: 'Upgrade Your Business Plan',
+    content: upgradeNotice,
+    wordCount: 60,
+  });
+  
+  return {
+    tier: 'free',
+    sections: cappedSections,
+    appendices: [], // No appendices for free tier
+    totalWordCount: currentWords + 60,
+    estimatedPages: config.maxPages,
+    meetsRequirement: true,
+    upgradeMessage: 'Upgrade to access comprehensive business plan features.',
+  };
+}
+
+function getUpgradeMessage(tier: SubscriptionTier, currentPages: number, config: TierContentConfig): string {
+  if (currentPages < config.minPages) {
+    return `Current document is ${currentPages} pages. Add more details to reach ${config.minPages}-${config.maxPages} page requirement.`;
+  }
+  return '';
+}
+
+// SECTION GENERATORS
+
+function generateExecutiveSummary(data: QuestionnaireData, config: TierContentConfig): GeneratedDocumentSection {
+  const lengthMultiplier = config.executiveSummaryLength === 'extended' ? 2 : config.executiveSummaryLength === 'standard' ? 1.5 : 1;
+  
+  let content = `EXECUTIVE SUMMARY
+
+${data.businessName || 'The Business'} is an innovative ${data.industry || 'technology'} venture addressing a critical market need in the United Kingdom.
+
+THE OPPORTUNITY:
+${data.problem || 'Significant market gap requiring innovative solution.'}
+
+OUR SOLUTION:
+${data.productStatus || 'Developing innovative product/service to address market needs.'}
+
+UNIQUE VALUE PROPOSITION:
+${data.uniqueness || 'Differentiated approach providing measurable advantages.'}`;
+
+  if (config.executiveSummaryLength === 'standard' || config.executiveSummaryLength === 'extended') {
+    content += `
+
+FOUNDER CREDENTIALS:
+${data.experience || data.founderAchievements || 'Experienced founder with relevant industry background.'}
+
+MARKET OPPORTUNITY:
+${data.marketSize || 'Significant addressable market with strong growth potential.'}`;
+  }
+
+  if (config.executiveSummaryLength === 'extended') {
+    content += `
+
+FINANCIAL HIGHLIGHTS:
+- Initial Investment: £${data.funding || '100,000'}
+- Target Revenue Year 1: Detailed in Financial Projections
+- Job Creation Target: ${data.jobCreation || '10+'} positions over 3 years
+- Customer Acquisition Cost: £${data.customerAcquisitionCost || 'To be validated'}
+- Lifetime Value: £${data.lifetimeValue || 'To be validated'}
+
+COMPETITIVE ADVANTAGE:
+${data.competitiveDifferentiation || 'Strong competitive positioning with defensible advantages.'}
+
+REGULATORY COMPLIANCE:
+${data.regulatoryRequirements || 'Full compliance strategy developed for UK regulatory environment.'}
+
+GROWTH STRATEGY:
+${data.vision || 'Clear 5-year vision with defined milestones and expansion plans.'}`;
+  }
+
+  const wordCount = Math.round(content.split(/\s+/).length * lengthMultiplier);
+  
+  return {
+    title: 'Executive Summary',
+    content,
+    wordCount,
+  };
+}
+
+function generateBusinessOverview(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  const sectionConfig = config.sections.businessOverview;
+  
+  let content = `BUSINESS OVERVIEW
+
+Company Name: ${data.businessName || 'Company Name'}
+Industry Sector: ${data.industry || 'Industry'}
+Innovation Stage: ${data.innovationStage || 'Development stage'}
+
+BUSINESS DESCRIPTION:
+${data.productStatus || 'Description of the business and its current status.'}
+
+CORE OFFERING:
+${data.uniqueness || 'The unique value proposition and core offering.'}`;
+
+  if (sectionConfig.depth === 'standard' || sectionConfig.depth === 'detailed') {
+    content += `
+
+CURRENT TRACTION:
+${data.tractionEvidence || 'Evidence of market traction and customer validation.'}
+
+EXISTING CUSTOMERS:
+${data.existingCustomers || 'Details of existing customers and partnerships.'}`;
+  }
+
+  if (sectionConfig.depth === 'detailed') {
+    content += `
+
+BUSINESS MODEL:
+${data.revenue || 'Revenue model and monetization strategy.'}
+
+OPERATIONAL INFRASTRUCTURE:
+${data.techStack || 'Technology and operational infrastructure.'}
+
+DATA AND TECHNOLOGY:
+${data.dataArchitecture || 'Data architecture and system integration.'}
+
+INTELLECTUAL PROPERTY:
+${data.patentStatus || 'Patent and intellectual property status.'}`;
+  }
+
+  return {
+    title: 'Business Overview',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateProblemStatement(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  let content = `PROBLEM STATEMENT
+
+THE CHALLENGE:
+${data.problem || 'Description of the problem being addressed.'}
+
+MARKET IMPACT:
+The problem creates significant challenges for target customers, resulting in inefficiencies, costs, and missed opportunities that our solution directly addresses.`;
+
+  if (multiplier >= 1.5) {
+    content += `
+
+QUANTIFIED IMPACT:
+The problem affects a substantial portion of the target market, with measurable consequences including financial losses, operational inefficiencies, and unmet customer needs.
+
+CURRENT ALTERNATIVES:
+Existing solutions fail to adequately address the problem due to limitations in technology, cost structure, or market focus. This gap creates opportunity for innovative disruption.`;
+  }
+
+  return {
+    title: 'Problem Statement',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateSolution(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  let content = `OUR SOLUTION
+
+PRODUCT/SERVICE DESCRIPTION:
+${data.productStatus || 'Description of the solution.'}
+
+KEY FEATURES:
+${data.uniqueness || 'Unique features and capabilities.'}
+
+HOW IT WORKS:
+${data.techStack || 'Technical implementation and methodology.'}`;
+
+  if (multiplier >= 1.5) {
+    content += `
+
+INNOVATION METHODOLOGY:
+${data.aiMethodology || 'Innovative approaches and methodologies employed.'}
+
+COMPETITIVE ADVANTAGES:
+${data.competitiveDifferentiation || 'Specific advantages over existing solutions.'}`;
+  }
+
+  if (multiplier >= 2) {
+    content += `
+
+TECHNICAL ARCHITECTURE:
+${data.dataArchitecture || 'Detailed technical architecture and system design.'}
+
+COMPLIANCE BY DESIGN:
+${data.complianceDesign || 'Built-in compliance and regulatory considerations.'}
+
+SCALABILITY:
+The solution is designed for scalability, with architecture that supports growth from initial launch through enterprise-scale deployment.`;
+  }
+
+  return {
+    title: 'Our Solution',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateInnovation(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  const sectionConfig = config.sections.innovation;
+  
+  let content = `INNOVATION
+
+INNOVATIVE APPROACH:
+${data.uniqueness || 'Description of innovative elements.'}
+
+TECHNOLOGY INNOVATION:
+${data.techStack || 'Technology innovation and implementation.'}`;
+
+  if (sectionConfig.includePatents) {
+    content += `
+
+INTELLECTUAL PROPERTY:
+${data.patentStatus || 'Patent status and IP protection strategy.'}`;
+  }
+
+  if (multiplier >= 1.5) {
+    content += `
+
+RESEARCH & DEVELOPMENT:
+${data.aiMethodology || 'R&D methodology and approach.'}
+
+INNOVATION ROADMAP:
+Future innovation plans including technology development, feature expansion, and continued competitive differentiation.`;
+  }
+
+  return {
+    title: 'Innovation',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateTechnology(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  const sectionConfig = config.sections.technology;
+  
+  let content = `TOOLS, TECHNOLOGY & METHODOLOGY
+
+TECHNOLOGY STACK:
+${data.techStack || 'Technology infrastructure and tools.'}`;
+
+  if (sectionConfig.includeArchitecture) {
+    content += `
+
+SYSTEM ARCHITECTURE:
+${data.dataArchitecture || 'System architecture and data flow.'}
+
+TECHNICAL METHODOLOGY:
+${data.aiMethodology || 'Technical methodology and approach.'}
+
+COMPLIANCE DESIGN:
+${data.complianceDesign || 'Compliance and security design.'}`;
+  }
+
+  return {
+    title: 'Technology & Methodology',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateFounderCredentials(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  const sectionConfig = config.sections.founderCredentials;
+  
+  let content = `FOUNDER CREDENTIALS
+
+FOUNDER: ${data.fullLegalName || 'Founder Name'}
+
+EDUCATION:
+${data.founderEducation || 'Educational background.'}
+
+PROFESSIONAL EXPERIENCE:
+${data.founderWorkHistory || 'Professional work history.'}`;
+
+  if (sectionConfig.includeFullCV) {
+    content += `
+
+KEY ACHIEVEMENTS:
+${data.founderAchievements || 'Notable achievements and accomplishments.'}
+
+RELEVANT PROJECTS:
+${data.relevantProjects || 'Projects relevant to this venture.'}
+
+UNIQUE QUALIFICATIONS:
+${data.experience || 'Why uniquely qualified to execute this business.'}`;
+  }
+
+  if (multiplier >= 2) {
+    content += `
+
+INDUSTRY EXPERTISE:
+Deep domain expertise developed through years of relevant experience, demonstrated through successful projects and industry recognition.
+
+LEADERSHIP CAPABILITIES:
+Proven ability to build teams, manage stakeholders, and drive organizational success in challenging environments.
+
+NETWORK & RELATIONSHIPS:
+Established relationships with industry leaders, potential partners, and key stakeholders that will accelerate business growth.`;
+  }
+
+  return {
+    title: 'Founder Credentials',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateFinancialModel(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  const sectionConfig = config.sections.financialModel;
+  
+  let content = `FINANCIAL MODEL
+
+INITIAL INVESTMENT:
+Total Funding Required: £${data.funding || '100,000'}
+
+FUNDING SOURCES:
+${data.fundingSources || 'Breakdown of funding sources.'}
+
+KEY METRICS:
+- Customer Acquisition Cost (CAC): £${data.customerAcquisitionCost || 'TBD'}
+- Lifetime Value (LTV): £${data.lifetimeValue || 'TBD'}
+- Payback Period: ${data.paybackPeriod || 'TBD'} months
+
+REVENUE MODEL:
+${data.revenue || 'Revenue model and pricing strategy.'}`;
+
+  if (sectionConfig.includeProjections) {
+    content += `
+
+FINANCIAL PROJECTIONS:
+${data.monthlyProjections || 'Month-by-month financial projections.'}
+
+COST STRUCTURE:
+${data.detailedCosts || 'Detailed cost breakdown.'}`;
+  }
+
+  if (multiplier >= 1.5) {
+    content += `
+
+UNIT ECONOMICS:
+The business demonstrates healthy unit economics with LTV:CAC ratio of ${
+      data.lifetimeValue && data.customerAcquisitionCost 
+        ? (parseFloat(data.lifetimeValue) / parseFloat(data.customerAcquisitionCost)).toFixed(1) 
+        : 'target 3:1+'
+    }, supporting sustainable growth.
+
+BREAK-EVEN ANALYSIS:
+Based on current projections, the business targets break-even within 18-24 months of operation, with positive cash flow expected by Month 24.`;
+  }
+
+  if (multiplier >= 2) {
+    content += `
+
+SENSITIVITY ANALYSIS:
+Financial projections have been stress-tested under multiple scenarios:
+- Base Case: Conservative growth assumptions
+- Upside Case: Accelerated market penetration
+- Downside Case: Extended sales cycle
+
+WORKING CAPITAL:
+Working capital requirements have been carefully modeled to ensure adequate runway through key growth milestones.
+
+FUNDING MILESTONES:
+Clear milestones have been established for future funding rounds, with defined triggers and target valuations.`;
+  }
+
+  return {
+    title: 'Financial Model',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateMarketAnalysis(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  const sectionConfig = config.sections.marketAnalysis;
+  
+  let content = `MARKET ANALYSIS
+
+MARKET SIZE:
+${data.marketSize || 'Total Addressable Market, Serviceable Addressable Market, and Serviceable Obtainable Market.'}
+
+COMPETITIVE LANDSCAPE:
+${data.competitors || 'Analysis of key competitors.'}
+
+COMPETITIVE DIFFERENTIATION:
+${data.competitiveDifferentiation || 'How we differentiate from competitors.'}`;
+
+  if (sectionConfig.includeCompetitorMatrix) {
+    content += `
+
+COMPETITOR COMPARISON MATRIX:
+Detailed comparison across key dimensions including pricing, features, market positioning, and customer satisfaction.
+
+MARKET POSITIONING:
+Strategic positioning relative to competitors, with focus on underserved segments and differentiated value propositions.`;
+  }
+
+  if (multiplier >= 1.5) {
+    content += `
+
+MARKET TRENDS:
+Key trends driving market growth and creating opportunity for innovative solutions.
+
+BARRIERS TO ENTRY:
+Analysis of market barriers and how the business is positioned to overcome them.`;
+  }
+
+  if (multiplier >= 2) {
+    content += `
+
+MARKET DYNAMICS:
+Deep analysis of market forces, including buyer power, supplier relationships, threat of substitutes, and competitive rivalry.
+
+REGULATORY LANDSCAPE:
+Impact of regulatory environment on market opportunity and competitive positioning.
+
+TECHNOLOGY TRENDS:
+Technology developments affecting market evolution and creating new opportunities.`;
+  }
+
+  return {
+    title: 'Market Analysis',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateCustomerValidation(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  const sectionConfig = config.sections.customerValidation;
+  
+  let content = `CUSTOMER VALIDATION
+
+CUSTOMER RESEARCH:
+${data.customerInterviews || 'Summary of customer discovery research.'}
+
+WILLINGNESS TO PAY:
+${data.willingnessToPay || 'Evidence of customer willingness to pay.'}
+
+LETTERS OF INTENT:
+${data.lettersOfIntent || 'Commitments from potential customers.'}`;
+
+  if (sectionConfig.includeInterviewSummaries) {
+    content += `
+
+DETAILED INTERVIEW FINDINGS:
+Customer interviews revealed key insights about pain points, desired solutions, and purchasing behavior.
+
+CUSTOMER PERSONAS:
+Clear customer personas have been developed based on research, informing product development and marketing strategy.`;
+  }
+
+  if (multiplier >= 2) {
+    content += `
+
+CUSTOMER JOURNEY MAPPING:
+Detailed mapping of customer journey from awareness through purchase and ongoing usage.
+
+RETENTION ANALYSIS:
+Early indicators of customer retention and satisfaction, with strategies for reducing churn.
+
+REFERRAL POTENTIAL:
+Assessment of customer referral potential and viral coefficient.`;
+  }
+
+  return {
+    title: 'Customer Validation',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateRegulatoryCompliance(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  const sectionConfig = config.sections.regulatoryCompliance;
+  
+  let content = `REGULATORY COMPLIANCE
+
+REGULATORY REQUIREMENTS:
+${data.regulatoryRequirements || 'Applicable regulatory requirements.'}
+
+COMPLIANCE TIMELINE:
+${data.complianceTimeline || 'Timeline for achieving compliance.'}
+
+COMPLIANCE BUDGET:
+Allocated Budget: £${data.complianceBudget || '50,000'}`;
+
+  if (sectionConfig.includeChecklist) {
+    content += `
+
+COMPLIANCE CHECKLIST:
+- GDPR Compliance: [Status]
+- Industry-Specific Regulations: [Status]
+- Data Protection: [Status]
+- Security Certifications: [Status]
+
+ONGOING COMPLIANCE:
+Strategy for maintaining compliance as regulations evolve and business grows.`;
+  }
+
+  if (multiplier >= 2) {
+    content += `
+
+REGULATORY RISK ASSESSMENT:
+Analysis of regulatory risks and mitigation strategies.
+
+LEGAL COUNSEL:
+Engaged legal counsel with relevant regulatory expertise to ensure compliance.
+
+AUDIT READINESS:
+Prepared for regulatory audits with documented processes and evidence trails.`;
+  }
+
+  return {
+    title: 'Regulatory Compliance',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateGrowthStrategy(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  const sectionConfig = config.sections.growthStrategy;
+  
+  let content = `GROWTH STRATEGY
+
+EXPANSION PLAN:
+${data.expansion || 'Strategy for business expansion.'}
+
+GEOGRAPHIC FOCUS:
+${data.specificRegions || 'Target regions and geographic expansion.'}
+
+INTERNATIONAL PLANS:
+${data.internationalPlan || 'International expansion strategy.'}
+
+VISION:
+${data.vision || '5-year vision for the business.'}`;
+
+  if (sectionConfig.includeTimeline) {
+    content += `
+
+GROWTH TIMELINE:
+Year 1: UK Market Foundation
+Year 2: Regional Expansion
+Year 3: National Coverage
+Year 4-5: International Expansion
+
+KEY MILESTONES:
+Defined milestones with measurable targets and success criteria.`;
+  }
+
+  if (multiplier >= 2) {
+    content += `
+
+STRATEGIC PARTNERSHIPS:
+Partnership strategy to accelerate growth and expand market reach.
+
+CHANNEL DEVELOPMENT:
+Multi-channel distribution strategy for maximum market coverage.
+
+BRAND BUILDING:
+Long-term brand development strategy for market leadership.`;
+  }
+
+  return {
+    title: 'Growth Strategy',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateTeamPlan(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  const sectionConfig = config.sections.teamPlan;
+  
+  let content = `TEAM & JOB CREATION
+
+JOB CREATION TARGET:
+${data.jobCreation || '10+'} positions to be created over 3 years
+
+HIRING PLAN:
+${data.hiringPlan || 'Detailed hiring plan by year and role.'}`;
+
+  if (sectionConfig.includeOrgChart) {
+    content += `
+
+ORGANIZATIONAL STRUCTURE:
+Year 1: Founder-led with key initial hires
+Year 2: Department heads and expanded team
+Year 3: Full organizational structure with management layers
+
+ROLE DESCRIPTIONS:
+Detailed role descriptions for each planned position with salary benchmarks.
+
+RECRUITMENT STRATEGY:
+Strategy for attracting top talent in competitive market.`;
+  }
+
+  if (multiplier >= 2) {
+    content += `
+
+TEAM CULTURE:
+Planned organizational culture and values to attract and retain talent.
+
+TRAINING & DEVELOPMENT:
+Investment in team development and continuous learning.
+
+EQUITY INCENTIVES:
+Options pool and equity incentive structure to align team with business success.`;
+  }
+
+  return {
+    title: 'Team & Job Creation',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateEndorserStrategy(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  let content = `ENDORSER ENGAGEMENT STRATEGY
+
+TARGET ENDORSING BODY:
+${data.targetEndorser || 'Target endorsing body selection and rationale.'}
+
+ENGAGEMENT STRATEGY:
+${data.contactPointsStrategy || 'Planned engagement touchpoints over 3 years.'}`;
+
+  if (multiplier >= 1.5) {
+    content += `
+
+WHY THIS ENDORSER:
+Rationale for endorser selection based on industry focus, portfolio alignment, and mentor network.
+
+ENGAGEMENT PREPARATION:
+Documentation and evidence prepared for endorser meetings and reviews.`;
+  }
+
+  return {
+    title: 'Endorser Engagement Strategy',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateRiskMitigation(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  let content = `RISK ANALYSIS & MITIGATION
+
+KEY RISKS:
+1. Market Risk: Competition and market adoption
+2. Technical Risk: Technology development and scalability
+3. Financial Risk: Funding and cash flow management
+4. Regulatory Risk: Compliance and regulatory changes
+5. Operational Risk: Team and execution capabilities
+
+MITIGATION STRATEGIES:
+Each identified risk has specific mitigation strategies in place to manage and minimize impact.`;
+
+  if (multiplier >= 2) {
+    content += `
+
+RISK REGISTER:
+Detailed risk register with probability, impact, and mitigation owner.
+
+CONTINGENCY PLANS:
+Contingency plans for high-impact risks with trigger points and response protocols.
+
+MONITORING & REPORTING:
+Regular risk monitoring and reporting to ensure early warning of emerging issues.`;
+  }
+
+  return {
+    title: 'Risk Analysis & Mitigation',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateExitStrategy(data: QuestionnaireData, config: TierContentConfig, multiplier: number): GeneratedDocumentSection {
+  let content = `EXIT STRATEGY
+
+EXIT OPTIONS:
+1. Trade Sale: Acquisition by strategic buyer
+2. Private Equity: Growth investment and eventual exit
+3. IPO: Public listing for high-growth scenario
+4. Management Buyout: Founder/team ownership continuation
+
+TIMELINE:
+Exit planning horizon: 5-7 years
+Target valuation: Based on revenue multiples typical for sector`;
+
+  if (multiplier >= 1.5) {
+    content += `
+
+VALUATION DRIVERS:
+Key factors that will drive valuation at exit, including revenue growth, market position, and strategic value.
+
+POTENTIAL ACQUIRERS:
+Analysis of potential strategic acquirers and their acquisition rationale.`;
+  }
+
+  return {
+    title: 'Exit Strategy',
+    content,
+    wordCount: Math.round(content.split(/\s+/).length * multiplier),
+  };
+}
+
+function generateAppendix(
+  appendixType: string, 
+  data: QuestionnaireData, 
+  config: TierContentConfig, 
+  multiplier: number
+): GeneratedDocumentSection | null {
+  switch (appendixType) {
+    case 'financial_projections':
+      return {
+        title: 'Appendix A: Detailed Financial Projections',
+        content: generateFinancialAppendix(data, multiplier),
+        wordCount: Math.round(800 * multiplier),
+      };
+    case 'market_research':
+      return {
+        title: 'Appendix B: Market Research Data',
+        content: generateMarketResearchAppendix(data, multiplier),
+        wordCount: Math.round(700 * multiplier),
+      };
+    case 'regulatory_checklist':
+      return {
+        title: 'Appendix C: Regulatory Compliance Checklist',
+        content: generateRegulatoryAppendix(data, multiplier),
+        wordCount: Math.round(500 * multiplier),
+      };
+    case 'evidence_portfolio':
+      return {
+        title: 'Appendix D: Evidence Portfolio',
+        content: generateEvidenceAppendix(data, multiplier),
+        wordCount: Math.round(600 * multiplier),
+      };
+    case 'team_bios':
+      return {
+        title: 'Appendix E: Team Biographies',
+        content: generateTeamAppendix(data, multiplier),
+        wordCount: Math.round(500 * multiplier),
+      };
+    case 'implementation_plan':
+      return {
+        title: 'Appendix F: Implementation Timeline',
+        content: generateImplementationAppendix(data, multiplier),
+        wordCount: Math.round(600 * multiplier),
+      };
+    case 'scenario_analysis':
+      return {
+        title: 'Appendix G: Scenario Analysis',
+        content: generateScenarioAppendix(data, multiplier),
+        wordCount: Math.round(700 * multiplier),
+      };
+    case 'benchmark_comparison':
+      return {
+        title: 'Appendix H: Industry Benchmark Comparison',
+        content: generateBenchmarkAppendix(data, multiplier),
+        wordCount: Math.round(600 * multiplier),
+      };
+    case 'risk_register':
+      return {
+        title: 'Appendix I: Risk Register',
+        content: generateRiskRegisterAppendix(data, multiplier),
+        wordCount: Math.round(500 * multiplier),
+      };
+    case 'competitive_intelligence':
+      return {
+        title: 'Appendix J: Competitive Intelligence',
+        content: `COMPETITIVE INTELLIGENCE REPORT\n\n${data.competitors || 'Detailed competitor analysis...'}\n\n${data.competitiveDifferentiation || 'Competitive positioning...'}`,
+        wordCount: Math.round(700 * multiplier),
+      };
+    case 'customer_research':
+      return {
+        title: 'Appendix K: Customer Research Summary',
+        content: `CUSTOMER RESEARCH SUMMARY\n\n${data.customerInterviews || 'Interview findings...'}\n\n${data.willingnessToPay || 'Pricing research...'}`,
+        wordCount: Math.round(600 * multiplier),
+      };
+    case 'technical_architecture':
+      return {
+        title: 'Appendix L: Technical Architecture',
+        content: `TECHNICAL ARCHITECTURE DOCUMENTATION\n\n${data.dataArchitecture || 'System architecture...'}\n\n${data.techStack || 'Technology stack...'}`,
+        wordCount: Math.round(800 * multiplier),
+      };
+    default:
+      return null;
+  }
+}
+
+function generateFinancialAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `DETAILED FINANCIAL PROJECTIONS
+
+36-MONTH REVENUE FORECAST:
+${data.monthlyProjections || 'Monthly projections by revenue stream.'}
+
+COST BREAKDOWN:
+${data.detailedCosts || 'Detailed cost structure.'}
+
+UNIT ECONOMICS:
+- Customer Acquisition Cost: £${data.customerAcquisitionCost || 'TBD'}
+- Lifetime Value: £${data.lifetimeValue || 'TBD'}
+- Payback Period: ${data.paybackPeriod || 'TBD'} months
+- LTV:CAC Ratio: ${
+    data.lifetimeValue && data.customerAcquisitionCost 
+      ? (parseFloat(data.lifetimeValue) / parseFloat(data.customerAcquisitionCost)).toFixed(1) + ':1'
+      : 'Target 3:1+'
+  }
+
+FUNDING REQUIREMENTS:
+${data.fundingSources || 'Breakdown of funding sources and uses.'}
+
+CASH FLOW ANALYSIS:
+Monthly cash flow projections with working capital requirements.
+
+BREAK-EVEN ANALYSIS:
+Analysis of break-even point and path to profitability.`;
+}
+
+function generateMarketResearchAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `MARKET RESEARCH DATA
+
+MARKET SIZE ANALYSIS:
+${data.marketSize || 'TAM, SAM, SOM analysis.'}
+
+CUSTOMER RESEARCH:
+${data.customerInterviews || 'Summary of customer interviews.'}
+
+COMPETITIVE ANALYSIS:
+${data.competitors || 'Detailed competitor analysis.'}
+
+MARKET TRENDS:
+Analysis of key market trends and their implications.
+
+CUSTOMER SEGMENTATION:
+Primary and secondary customer segments with characteristics and needs.`;
+}
+
+function generateRegulatoryAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `REGULATORY COMPLIANCE CHECKLIST
+
+REQUIREMENTS:
+${data.regulatoryRequirements || 'Applicable regulatory requirements.'}
+
+TIMELINE:
+${data.complianceTimeline || 'Compliance achievement timeline.'}
+
+CHECKLIST:
+[ ] GDPR Compliance
+[ ] Industry-Specific Regulations
+[ ] Data Protection Registration
+[ ] Professional Certifications
+[ ] Security Standards
+[ ] Health & Safety (if applicable)
+[ ] Environmental Standards (if applicable)
+
+BUDGET:
+Compliance Budget: £${data.complianceBudget || '50,000'}`;
+}
+
+function generateEvidenceAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `EVIDENCE PORTFOLIO
+
+TRACTION EVIDENCE:
+${data.tractionEvidence || 'Evidence of market traction.'}
+
+CUSTOMER EVIDENCE:
+${data.existingCustomers || 'Existing customer details.'}
+
+LETTERS OF INTENT:
+${data.lettersOfIntent || 'Customer commitments.'}
+
+VALIDATION EVIDENCE:
+${data.willingnessToPay || 'Evidence of willingness to pay.'}
+
+SUPPORTING DOCUMENTS:
+List of supporting documents available upon request.`;
+}
+
+function generateTeamAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `TEAM BIOGRAPHIES
+
+FOUNDER:
+${data.fullLegalName || 'Founder Name'}
+
+EDUCATION:
+${data.founderEducation || 'Educational background.'}
+
+EXPERIENCE:
+${data.founderWorkHistory || 'Professional experience.'}
+
+ACHIEVEMENTS:
+${data.founderAchievements || 'Key achievements.'}
+
+RELEVANT PROJECTS:
+${data.relevantProjects || 'Relevant project experience.'}`;
+}
+
+function generateImplementationAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `IMPLEMENTATION TIMELINE
+
+PHASE 1 (Months 1-6): Foundation
+- Complete product development
+- Establish operations
+- Initial customer acquisition
+
+PHASE 2 (Months 7-12): Growth
+- Scale customer base
+- Expand team
+- Develop partnerships
+
+PHASE 3 (Year 2): Expansion
+${data.expansion || 'Expansion strategy and milestones.'}
+
+PHASE 4 (Year 3): Scale
+${data.vision || 'Long-term vision and scaling plans.'}
+
+GEOGRAPHIC EXPANSION:
+${data.specificRegions || 'Regional expansion plan.'}`;
+}
+
+function generateScenarioAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `SCENARIO ANALYSIS
+
+BASE CASE:
+Conservative growth assumptions with moderate market penetration.
+
+UPSIDE CASE:
+Accelerated growth with faster market adoption and expanded opportunities.
+
+DOWNSIDE CASE:
+Slower growth with extended sales cycles and increased competition.
+
+KEY VARIABLES:
+- Customer acquisition rate
+- Pricing power
+- Market growth
+- Competitive intensity
+- Regulatory environment
+
+SENSITIVITY ANALYSIS:
+Impact of key variable changes on financial projections.`;
+}
+
+function generateBenchmarkAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `INDUSTRY BENCHMARK COMPARISON
+
+FINANCIAL BENCHMARKS:
+Comparison against industry averages for key financial metrics.
+
+GROWTH BENCHMARKS:
+Expected growth rates vs industry norms.
+
+OPERATIONAL BENCHMARKS:
+Efficiency metrics compared to industry standards.
+
+COMPETITIVE POSITIONING:
+Position relative to industry leaders and peers.
+
+${data.competitiveDifferentiation || 'Competitive advantages vs benchmarks.'}`;
+}
+
+function generateRiskRegisterAppendix(data: QuestionnaireData, multiplier: number): string {
+  return `RISK REGISTER
+
+STRATEGIC RISKS:
+- Market adoption risk
+- Competitive response risk
+- Regulatory change risk
+
+OPERATIONAL RISKS:
+- Technology risk
+- Team capacity risk
+- Supply chain risk
+
+FINANCIAL RISKS:
+- Funding risk
+- Cash flow risk
+- Currency risk (international)
+
+RISK MATRIX:
+Each risk assessed for probability and impact with mitigation strategies.
+
+MONITORING PLAN:
+Regular risk review and reporting schedule.`;
+}
+
+export default generateTierDocument;
