@@ -314,11 +314,11 @@ export type ToolAnalytic = typeof toolAnalytics.$inferSelect;
 
 // Tier credit configuration - defines credits per tier
 export const TIER_CREDITS = {
-  free: { planCredits: 0, maxBusinesses: 1, maxRevisions: 0 },
-  basic: { planCredits: 1, maxBusinesses: 1, maxRevisions: 2 },
-  premium: { planCredits: 3, maxBusinesses: 2, maxRevisions: 4 },
-  enterprise: { planCredits: 6, maxBusinesses: 3, maxRevisions: 6 },
-  ultimate: { planCredits: 12, maxBusinesses: Infinity, maxRevisions: Infinity },
+  free: { planCredits: 1, maxBusinesses: 1, maxRevisions: 0 }, // 1 free business plan included
+  basic: { planCredits: 2, maxBusinesses: 1, maxRevisions: 2 },
+  premium: { planCredits: 4, maxBusinesses: 2, maxRevisions: 4 },
+  enterprise: { planCredits: 7, maxBusinesses: 3, maxRevisions: 6 },
+  ultimate: { planCredits: 13, maxBusinesses: Infinity, maxRevisions: Infinity },
 } as const;
 
 // Tier pricing in pence (for upgrade calculations)
