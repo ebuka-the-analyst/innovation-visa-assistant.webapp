@@ -53,7 +53,7 @@ const SAMPLE_PLANS = [
     summary: "IoT-enabled smart energy management system for reducing commercial building energy consumption.",
     highlights: [
       "MVP complete with 5 beta customers saving 25-35% energy costs",
-      "Founder: PhD in Environmental Engineering",
+      "Founder: Expert in Environmental Engineering",
       "£50K bootstrapped from personal savings",
       "Hiring Head of Sales Q2 2025",
       "£250K revenue target Year 2"
@@ -69,7 +69,7 @@ const SAMPLE_PLANS = [
     summary: "Rapid diagnostic platform using proprietary biomarker detection for early cancer screening.",
     highlights: [
       "2 patents filed, 1 pending approval",
-      "Founder team: 2 PhDs + NHS consultant",
+      "Founder team: 2 Research Scientists + NHS consultant",
       "£1.2M Series A from Imperial Innovations",
       "NHS pilot agreement for 50K annual tests",
       "Hiring 3 lab technicians + 1 regulatory officer"

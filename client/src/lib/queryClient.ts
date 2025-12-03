@@ -83,7 +83,7 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: Infinity,
       retry: false,
-      // PhD-level optimizations for better performance
+      // Advanced optimizations for better performance
       gcTime: 1000 * 60 * 60 * 24, // Keep unused data in cache for 24 hours
       refetchOnMount: false, // Don't refetch on component mount if data exists
       refetchOnReconnect: false, // Don't refetch on network reconnect

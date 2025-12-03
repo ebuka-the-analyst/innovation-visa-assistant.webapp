@@ -789,7 +789,7 @@ export default function AdminDashboard() {
     enabled: !!user?.isAdmin && activeSection === 'overview',
   });
 
-  // User analysis query (PhD-level comprehensive analysis)
+  // User analysis query (comprehensive analysis)
   const { data: userAnalysis, isLoading: userAnalysisLoading, refetch: refetchUserAnalysis } = useQuery<any>({
     queryKey: ['/api/admin/users', analyzingUser?.id, 'analysis'],
     queryFn: async () => {
@@ -955,7 +955,7 @@ export default function AdminDashboard() {
     refetchInterval: REFRESH_INTERVAL,
   });
 
-  // PhD-Level Real-Time Activity Overview
+  // Real-Time Activity Overview
   const { data: activityOverview, isLoading: activityOverviewLoading } = useQuery<{
     realtime: {
       activeUsersNow: number;
@@ -2919,7 +2919,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* REAL-TIME ACTIVITY SECTION - PhD-level live monitoring */}
+                {/* REAL-TIME ACTIVITY SECTION - live monitoring */}
                 {activeSection === 'realtime' && (
                   <div className="space-y-6">
                     <AnimatePresence mode="wait">
@@ -3296,7 +3296,7 @@ export default function AdminDashboard() {
                             </div>
                           </div>
 
-                          {/* PhD-Level Real-Time Analytics */}
+                          {/* Real-Time Analytics */}
                           {activityOverview && (
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                               <Card className="hover-elevate bg-gradient-to-br from-green-500/5 to-transparent">
@@ -4154,7 +4154,7 @@ export default function AdminDashboard() {
                 transition={{ duration: 0.5 }}
                 className="space-y-6"
               >
-                {/* User Journey Analytics - PhD-level detail with funnel visualization */}
+                {/* User Journey Analytics - detailed funnel visualization */}
                 {(activeSection === 'users-journey' || activeSection === 'users-overview') && (
                   <Card data-testid="card-user-journey-analytics">
                     <CardHeader>
@@ -4216,7 +4216,7 @@ export default function AdminDashboard() {
                                 </div>
                               </div>
                               
-                              {/* Funnel Stage Breakdown - PhD-level detail */}
+                              {/* Funnel Stage Breakdown - detailed */}
                               <div>
                                 <h4 className="text-sm font-semibold mb-6">Funnel Stage Breakdown</h4>
                                 <div className="space-y-5">
@@ -10086,7 +10086,7 @@ export default function AdminDashboard() {
                       {/* Advanced Referral Programme Overview */}
                       {activeSection === 'referrals-overview' && (
                         <>
-                          {/* Hero Stats - PhD Level KPI Cards */}
+                          {/* Hero Stats - KPI Cards */}
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/20">
                               <CardHeader className="pb-2">
@@ -13132,7 +13132,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* Settings Section - PhD Level */}
+                {/* Settings Section */}
                 {activeSection.startsWith('settings') && (
                   <div className="space-y-6">
                     <motion.div

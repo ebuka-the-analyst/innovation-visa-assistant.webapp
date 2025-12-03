@@ -409,7 +409,7 @@ export async function sendVerificationEmail(
   });
 }
 
-// Payment receipt email - PhD-level detailed receipt
+// Payment receipt email - detailed receipt
 export async function sendPaymentReceiptEmail(
   email: string,
   firstName: string,
@@ -635,7 +635,7 @@ export async function sendWelcomeEmail(
         <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <h3 style="margin: 0 0 10px 0; color: #2e7d32;">Here's what you can do now:</h3>
           <ul style="margin: 0; padding-left: 20px; color: #333;">
-            <li>Access 109 PhD-level visa preparation tools</li>
+            <li>Access 109 professional visa preparation tools</li>
             <li>Generate your comprehensive business plan</li>
             <li>Practice endorser interviews with AI coaching</li>
             <li>Track your visa readiness score</li>
@@ -900,7 +900,7 @@ export async function sendUpgradeReminderEmail(
         <div style="background: #fff; border: 2px solid #ffa536; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin: 0 0 15px 0; color: #333;">Upgrade to ${recommendedPlan.name} and get:</h3>
           <ul style="margin: 0; padding-left: 20px; color: #333;">
-            <li><strong>${recommendedPlan.tools} PhD-level tools</strong> (${recommendedPlan.tools - currentPlan.tools} more!)</li>
+            <li><strong>${recommendedPlan.tools} professional tools</strong> (${recommendedPlan.tools - currentPlan.tools} more!)</li>
             <li>AI-powered pitch practice coaching</li>
             <li>Advanced financial modeling tools</li>
             <li>Innovation score calculator</li>
