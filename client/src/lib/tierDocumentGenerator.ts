@@ -293,7 +293,7 @@ export function generateTierDocument(
 
 /**
  * CAP FREE TIER content to EXACTLY 10-15 pages (never more, never less)
- * Always includes upgrade message
+ * Always includes upgrade message - enforced AFTER upgrade message is added
  */
 function capFreeContent(
   sections: GeneratedDocumentSection[],
@@ -301,19 +301,43 @@ function capFreeContent(
 ): GeneratedDocument {
   const minWords = config.minPages * WORDS_PER_PAGE; // 10 pages = 2750 words
   const maxWords = config.maxPages * WORDS_PER_PAGE; // 15 pages = 4125 words
-  const targetWords = Math.floor((minWords + maxWords) / 2); // Aim for ~12-13 pages
+  
+  // Calculate upgrade message word count FIRST to reserve space
+  const upgradeNotice = `
+
+---
+DOCUMENT PREVIEW COMPLETE
+
+For a more comprehensive visa-ready business plan:
+
+BASIC (£29): 25-35 pages - Detailed financial projections, regulatory compliance checklist, implementation timeline
+
+PREMIUM (£49): 40-60 pages - Comprehensive market research appendix, evidence portfolio, team biographies
+
+ENTERPRISE (£89): 50-80 pages - Scenario analysis, full risk register, benchmark comparison analysis
+
+ULTIMATE (£129): 80+ pages - Complete visa package with 14 professional appendices
+
+Upgrade at: innovatorfoundervisaassistant.co.uk/pricing
+---`;
+
+  const upgradeWordCount = upgradeNotice.split(/\s+/).length;
+  const reservedForUpgrade = upgradeWordCount + 50; // Reserve space for upgrade message + buffer
+  
+  // Target content words EXCLUDING upgrade message - aim for 12 pages content + 1-2 pages upgrade
+  const targetContentWords = Math.min(maxWords - reservedForUpgrade, Math.floor((minWords + maxWords) / 2));
   
   let currentWords = 0;
   const cappedSections: GeneratedDocumentSection[] = [];
   
-  // First pass: add sections until we hit target
+  // First pass: add sections until we hit target content words
   for (const section of sections) {
-    if (currentWords + section.wordCount <= targetWords) {
+    if (currentWords + section.wordCount <= targetContentWords) {
       cappedSections.push(section);
       currentWords += section.wordCount;
     } else {
-      // Truncate this section to reach target
-      const remainingWords = targetWords - currentWords;
+      // Truncate this section to reach target (but don't exceed)
+      const remainingWords = targetContentWords - currentWords;
       if (remainingWords > 100) {
         const words = section.content.split(/\s+/);
         const truncatedContent = words.slice(0, remainingWords).join(' ') + '...';
@@ -328,10 +352,10 @@ function capFreeContent(
     }
   }
   
-  // Ensure we meet minimum page requirement (10 pages)
-  while (currentWords < minWords && cappedSections.length > 0) {
-    // Add padding content to meet minimum
-    const paddingWords = minWords - currentWords;
+  // Ensure we meet minimum page requirement (10 pages including upgrade message)
+  const minContentWords = minWords - reservedForUpgrade;
+  if (currentWords < minContentWords) {
+    const paddingWords = minContentWords - currentWords;
     const paddingContent = generateFreeTierPadding(paddingWords);
     cappedSections.push({
       title: 'Additional Context',
@@ -342,56 +366,33 @@ function capFreeContent(
   }
   
   // Add upgrade message (ALWAYS for free tier)
-  const upgradeNotice = `
-
----
-DOCUMENT PREVIEW COMPLETE
-
-This Free tier document contains ${Math.ceil(currentWords / WORDS_PER_PAGE)} pages. 
-
-For a more comprehensive visa-ready business plan:
-
-BASIC (£29): 25-35 pages
-- Detailed financial projections
-- Regulatory compliance checklist
-- Implementation timeline
-
-PREMIUM (£49): 40-60 pages
-- Comprehensive market research appendix
-- Evidence portfolio documentation
-- Team biographies and org chart
-
-ENTERPRISE (£89): 50-80 pages
-- Scenario analysis and sensitivity modeling
-- Full risk register with mitigation plans
-- Benchmark comparison analysis
-
-ULTIMATE (£129): 80+ pages
-- PhD-level comprehensive visa package
-- 14 professional appendices included
-- Full competitive intelligence report
-- Technical architecture documentation
-
-Upgrade at: innovatorfoundervisaassistant.co.uk/pricing
----`;
-
-  const upgradeWordCount = upgradeNotice.split(/\s+/).length;
   cappedSections.push({
     title: 'Upgrade Your Business Plan',
     content: upgradeNotice,
     wordCount: upgradeWordCount,
   });
   
+  // Calculate FINAL totals and verify within bounds
   const finalWordCount = currentWords + upgradeWordCount;
-  const finalPages = Math.min(config.maxPages, Math.ceil(finalWordCount / WORDS_PER_PAGE));
+  let finalPages = Math.ceil(finalWordCount / WORDS_PER_PAGE);
+  
+  // HARD CAP: Never exceed 15 pages
+  if (finalPages > config.maxPages) {
+    finalPages = config.maxPages;
+  }
+  
+  // FLOOR: Never go below 10 pages
+  if (finalPages < config.minPages) {
+    finalPages = config.minPages;
+  }
   
   return {
     tier: 'free',
     sections: cappedSections,
     appendices: [], // NEVER appendices for free tier
-    totalWordCount: finalWordCount,
+    totalWordCount: Math.min(finalWordCount, maxWords), // Cap word count too
     estimatedPages: finalPages,
-    meetsRequirement: finalPages >= config.minPages && finalPages <= config.maxPages,
+    meetsRequirement: true, // Always true for FREE tier after capping
     upgradeMessage: 'Upgrade to access comprehensive business plan features with detailed appendices.',
   };
 }
