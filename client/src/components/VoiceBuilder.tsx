@@ -151,12 +151,15 @@ export default function VoiceBuilder() {
   const [editedTranscript, setEditedTranscript] = useState("");
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [liveTranscript, setLiveTranscript] = useState("");
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   const currentPrompts = VOICE_PROMPTS[selectedDocType as keyof typeof VOICE_PROMPTS] || [];
   const currentDocType = DOCUMENT_TYPES.find(d => d.id === selectedDocType);
@@ -216,19 +219,75 @@ export default function VoiceBuilder() {
       updateAudioLevel();
 
       mediaRecorderRef.current = new MediaRecorder(stream);
-      const chunks: Blob[] = [];
-
-      mediaRecorderRef.current.ondataavailable = (e) => {
-        chunks.push(e.data);
-      };
-
-      mediaRecorderRef.current.onstop = () => {
-        simulateTranscription();
-      };
-
       mediaRecorderRef.current.start();
+
+      // Initialize Web Speech API for real-time transcription
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.lang = 'en-GB';
+
+        recognitionRef.current.onresult = (event: any) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+          
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript + ' ';
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+          
+          if (finalTranscript) {
+            setEditedTranscript(prev => prev + (prev ? ' ' : '') + finalTranscript.trim());
+            const newSegment: TranscriptionSegment = {
+              id: `seg-${Date.now()}`,
+              text: finalTranscript.trim(),
+              timestamp: recordingTime,
+              confidence: Math.round(event.results[event.results.length - 1][0].confidence * 100) || 92,
+              documentType: selectedDocType
+            };
+            setTranscriptionSegments(prev => [...prev, newSegment]);
+          }
+          
+          setLiveTranscript(interimTranscript);
+          setIsTranscribing(true);
+        };
+
+        recognitionRef.current.onerror = (event: any) => {
+          console.log('Speech recognition error:', event.error);
+          if (event.error === 'no-speech') {
+            setIsTranscribing(false);
+          }
+        };
+
+        recognitionRef.current.onend = () => {
+          // Restart recognition if still recording
+          if (isRecording && !isPaused && recognitionRef.current) {
+            try {
+              recognitionRef.current.start();
+            } catch (e) {
+              // Ignore - may already be running
+            }
+          }
+        };
+
+        recognitionRef.current.start();
+      } else {
+        toast({
+          title: "Speech Recognition Not Supported",
+          description: "Your browser doesn't support speech recognition. Try Chrome or Edge for real-time transcription.",
+          variant: "destructive"
+        });
+      }
+
       setIsRecording(true);
       setIsPaused(false);
+      setLiveTranscript("");
       
       timerRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1);
@@ -236,7 +295,7 @@ export default function VoiceBuilder() {
 
       toast({
         title: "Recording Started",
-        description: "Speak clearly about your business. Click the prompt buttons for guidance."
+        description: "Speak clearly - your words will be transcribed in real-time."
       });
 
     } catch (error) {
@@ -246,7 +305,7 @@ export default function VoiceBuilder() {
         variant: "destructive"
       });
     }
-  }, [toast]);
+  }, [toast, isRecording, isPaused, recordingTime, selectedDocType]);
 
   const simulateTranscription = useCallback(() => {
     const sampleResponses: Record<string, string[]> = {
@@ -292,6 +351,16 @@ export default function VoiceBuilder() {
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
     }
     
+    // Stop speech recognition
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        // Ignore
+      }
+      recognitionRef.current = null;
+    }
+    
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -307,17 +376,35 @@ export default function VoiceBuilder() {
     setIsRecording(false);
     setIsPaused(false);
     setAudioLevel(0);
+    setIsTranscribing(false);
+    setLiveTranscript("");
   }, [isRecording]);
 
   const togglePause = useCallback(() => {
     if (mediaRecorderRef.current) {
       if (isPaused) {
         mediaRecorderRef.current.resume();
+        // Resume speech recognition
+        if (recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+          } catch (e) {
+            // May already be running
+          }
+        }
         timerRef.current = setInterval(() => {
           setRecordingTime(prev => prev + 1);
         }, 1000);
       } else {
         mediaRecorderRef.current.pause();
+        // Pause speech recognition
+        if (recognitionRef.current) {
+          try {
+            recognitionRef.current.stop();
+          } catch (e) {
+            // Ignore
+          }
+        }
         if (timerRef.current) {
           clearInterval(timerRef.current);
         }
@@ -332,6 +419,8 @@ export default function VoiceBuilder() {
     setEditedTranscript("");
     setRecordingTime(0);
     setCurrentPromptIndex(0);
+    setLiveTranscript("");
+    setIsTranscribing(false);
   }, [stopRecording]);
 
   const handleGenerate = () => {
@@ -373,6 +462,13 @@ export default function VoiceBuilder() {
       if (timerRef.current) clearInterval(timerRef.current);
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       if (audioContextRef.current) audioContextRef.current.close();
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          // Ignore
+        }
+      }
     };
   }, []);
 
@@ -585,22 +681,71 @@ export default function VoiceBuilder() {
                     </div>
                   </div>
 
-                  {transcriptionSegments.length > 0 && (
+                  {/* Live transcription preview */}
+                  {(liveTranscript || isTranscribing) && isRecording && (
+                    <div className="bg-blue-500/10 rounded-lg p-4 border border-blue-500/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Listening...</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground italic">
+                        {liveTranscript || "Speak now - your words will appear here..."}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Transcribed content display */}
+                  {editedTranscript && (
                     <div className="bg-muted/50 rounded-lg p-4 max-h-48 overflow-y-auto">
                       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
-                        Live Transcription ({transcriptionSegments.length} segments)
+                        Transcribed Content ({editedTranscript.split(/\s+/).filter(Boolean).length} words)
                       </h4>
-                      <div className="space-y-2">
-                        {transcriptionSegments.map((segment) => (
-                          <div key={segment.id} className="text-sm">
-                            <span className="text-muted-foreground">[{formatTime(segment.timestamp)}]</span>{' '}
-                            <span>{segment.text}</span>
-                            <Badge variant="outline" className="ml-2 text-xs">
-                              {segment.confidence.toFixed(0)}% confidence
-                            </Badge>
-                          </div>
-                        ))}
+                      <p className="text-sm">{editedTranscript}</p>
+                    </div>
+                  )}
+
+                  {/* Generate Document Button - THE KEY UX FIX */}
+                  {editedTranscript && !isRecording && (
+                    <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg p-6 border border-green-500/20">
+                      <div className="text-center space-y-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <CheckCircle2 className="w-6 h-6 text-green-500" />
+                          <h3 className="text-lg font-semibold">Recording Complete!</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          You have {editedTranscript.split(/\s+/).filter(Boolean).length} words transcribed. 
+                          Ready to generate your {currentDocType?.name}?
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                          <Button
+                            onClick={handleGenerate}
+                            disabled={generateDocumentMutation.isPending}
+                            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+                            size="lg"
+                            data-testid="button-generate-from-record"
+                          >
+                            {generateDocumentMutation.isPending ? (
+                              <>
+                                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                Generating Document...
+                              </>
+                            ) : (
+                              <>
+                                <Wand2 className="w-5 h-5 mr-2" />
+                                Generate {currentDocType?.name}
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setActiveTab("edit")}
+                            data-testid="button-edit-first"
+                          >
+                            <FileText className="w-4 h-4 mr-2" />
+                            Edit First
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
