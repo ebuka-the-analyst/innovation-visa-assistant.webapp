@@ -713,22 +713,22 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           </Card>
         )}
 
-        {/* Load My Info - Auto-fill form with founder data */}
+        {/* Load Demo Template - Auto-fill form with sample data */}
         {currentStep === 0 && (
           <Card className="p-4 mb-6 border-primary/50 bg-gradient-to-r from-primary/10 to-primary/5">
             <div className="flex gap-4 items-center justify-between">
               <div>
-                <h3 className="font-bold text-sm mb-1 text-primary">Quick Start</h3>
+                <h3 className="font-bold text-sm mb-1 text-primary">Quick Start Template</h3>
                 <p className="text-xs text-muted-foreground">
-                  Auto-fill the entire form with your saved business information. Review and edit each section before submitting.
+                  Load a complete example template to see how each field should be filled out. Use it as a guide for structuring your own responses, then replace with your details.
                 </p>
               </div>
               <Button
                 onClick={handleEbukaUltimatePlanAutoFill}
                 className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
-                data-testid="button-load-my-info"
+                data-testid="button-load-demo-template"
               >
-                Load my Info
+                Load Template
               </Button>
             </div>
           </Card>
