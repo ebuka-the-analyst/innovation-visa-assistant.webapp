@@ -148,7 +148,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           description: "Overview & business plans",
         },
         {
-          title: "Questionnaire",
+          title: "Generate Plan",
           url: "/questionnaire",
           icon: FileText,
           description: "Business plan builder",

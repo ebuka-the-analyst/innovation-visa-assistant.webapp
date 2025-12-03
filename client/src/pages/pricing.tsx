@@ -500,9 +500,8 @@ export default function Pricing() {
                     size="lg"
                     onClick={() => {
                       if (tier.id === 'free') {
-                        // Trigger onboarding tour for free tier users
-                        localStorage.setItem('trigger-onboarding-tour', 'true');
-                        setLocation('/tools-hub');
+                        // Redirect free tier users to generate plan page
+                        setLocation('/questionnaire');
                       }
                     }}
                     disabled={isCurrentTier && tier.id !== 'free'}

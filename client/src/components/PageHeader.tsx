@@ -15,7 +15,7 @@ export default function PageHeader({ title, description, breadcrumbs }: PageHead
 
   const navItems = [
     { label: "Home", href: "/" },
-    { label: "Questionnaire", href: "/questionnaire" },
+    { label: "Generate Plan", href: "/questionnaire" },
     { label: "Dashboard", href: "/dashboard" },
     { label: "Features", href: "/features-dashboard" },
     { label: "Pricing", href: "/pricing" },

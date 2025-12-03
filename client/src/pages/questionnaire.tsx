@@ -14,6 +14,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 import QuestionnaireForm from "@/components/QuestionnaireForm";
 import EvidencePreparationGuide from "@/components/EvidencePreparationGuide";
@@ -41,11 +42,15 @@ export default function Questionnaire() {
   const [tier, setTier] = useState('premium');
   const [mode, setMode] = useState<'select' | 'form' | 'ai-interview'>('select');
   const [interviewSession, setInterviewSession] = useState<InterviewSession | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tierParam = params.get('tier');
     const modeParam = params.get('mode');
+    const upgraded = params.get('upgraded');
+    const sessionId = params.get('session_id');
+    
     if (tierParam) {
       setTier(tierParam);
     }
@@ -54,7 +59,15 @@ export default function Questionnaire() {
     } else if (modeParam === 'form') {
       setMode('form');
     }
-  }, []);
+    
+    if (upgraded === 'true' && sessionId) {
+      toast({
+        title: "Payment Successful!",
+        description: `Your ${tierParam || 'subscription'} tier has been activated. You can now generate your business plan.`,
+      });
+      window.history.replaceState({}, '', '/questionnaire');
+    }
+  }, [toast]);
 
   const handleSessionUpdate = (session: InterviewSession) => {
     setInterviewSession(session);

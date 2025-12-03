@@ -655,7 +655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         ],
         mode: "payment",
-        success_url: `${baseUrl}/tools-hub?session_id={CHECKOUT_SESSION_ID}&upgraded=true&tier=${tier}`,
+        success_url: `${baseUrl}/questionnaire?session_id={CHECKOUT_SESSION_ID}&upgraded=true&tier=${tier}`,
         cancel_url: `${baseUrl}/pricing`,
         metadata: {
           pendingPlanId: pendingPlanId,
