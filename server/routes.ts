@@ -9578,6 +9578,96 @@ Return a JSON object with:
     }
   });
 
+  // Floating Feedback - Bug reports, suggestions, questions from floating button
+  app.post("/api/feedback/floating", async (req, res) => {
+    try {
+      const { type, subject, message, email, pageUrl, userId, browserInfo, screenSize } = req.body;
+      
+      const validTypes = ['bug', 'suggestion', 'question', 'praise', 'other'];
+      if (!type || !validTypes.includes(type)) {
+        return res.status(400).json({ error: "Invalid feedback type" });
+      }
+      
+      if (!message || !message.trim()) {
+        return res.status(400).json({ error: "Message is required" });
+      }
+      
+      if (!email || !email.trim()) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+      
+      const user = req.user as any;
+      
+      await db.execute(sql`
+        INSERT INTO floating_feedback (user_id, type, subject, message, email, page_url, browser_info, screen_size)
+        VALUES (${userId || user?.id || null}, ${type}, ${subject || null}, ${message.trim()}, ${email.trim()}, ${pageUrl || null}, ${browserInfo || null}, ${screenSize || null})
+      `);
+      
+      console.log(`[Floating Feedback] New ${type} feedback from ${email}`);
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Floating feedback error:", error);
+      res.status(500).json({ error: "Failed to save feedback" });
+    }
+  });
+
+  // Admin: Get floating feedback
+  app.get("/api/admin/floating-feedback", requireAdmin, async (req, res) => {
+    try {
+      const feedback = await db.execute(sql`
+        SELECT * FROM floating_feedback ORDER BY created_at DESC LIMIT 100
+      `);
+      res.json({ feedback: feedback.rows });
+    } catch (error) {
+      console.error("Admin floating feedback fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch feedback" });
+    }
+  });
+
+  // Admin: Update floating feedback status
+  app.patch("/api/admin/floating-feedback/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, priority, adminNotes } = req.body;
+      const adminUser = req.user as any;
+      
+      const updates: string[] = [];
+      const values: any[] = [];
+      
+      if (status) {
+        updates.push(`status = $${values.length + 1}`);
+        values.push(status);
+        if (status === 'resolved') {
+          updates.push(`resolved_at = NOW()`);
+          updates.push(`resolved_by = $${values.length + 1}`);
+          values.push(adminUser.id);
+        }
+      }
+      if (priority) {
+        updates.push(`priority = $${values.length + 1}`);
+        values.push(priority);
+      }
+      if (adminNotes !== undefined) {
+        updates.push(`admin_notes = $${values.length + 1}`);
+        values.push(adminNotes);
+      }
+      
+      if (updates.length === 0) {
+        return res.status(400).json({ error: "No updates provided" });
+      }
+      
+      await db.execute(sql`
+        UPDATE floating_feedback SET ${sql.raw(updates.join(', '))} WHERE id = ${id}
+      `);
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Update floating feedback error:", error);
+      res.status(500).json({ error: "Failed to update feedback" });
+    }
+  });
+
   // ============================================
   // ADMIN NOTIFICATIONS API
   // ============================================

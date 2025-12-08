@@ -2215,6 +2215,42 @@ export const insertSiteFeedbackSchema = createInsertSchema(siteFeedback).omit({
 export type SiteFeedback = typeof siteFeedback.$inferSelect;
 export type InsertSiteFeedback = z.infer<typeof insertSiteFeedbackSchema>;
 
+// Floating Feedback - Always-visible feedback button for bug reports, suggestions, questions
+export const floatingFeedback = pgTable("floating_feedback", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  type: varchar("type", { length: 20 }).notNull(), // bug, suggestion, question, praise, other
+  subject: varchar("subject", { length: 200 }),
+  message: text("message").notNull(),
+  email: varchar("email").notNull(),
+  pageUrl: text("page_url"),
+  browserInfo: text("browser_info"),
+  screenSize: varchar("screen_size", { length: 20 }),
+  status: varchar("status", { length: 20 }).notNull().default('new'), // new, in_progress, resolved, closed
+  priority: varchar("priority", { length: 20 }).default('normal'), // low, normal, high, urgent
+  adminNotes: text("admin_notes"),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_floating_feedback_type").on(table.type),
+  index("idx_floating_feedback_status").on(table.status),
+  index("idx_floating_feedback_date").on(table.createdAt),
+]);
+
+export const insertFloatingFeedbackSchema = createInsertSchema(floatingFeedback).omit({
+  id: true,
+  status: true,
+  priority: true,
+  adminNotes: true,
+  resolvedAt: true,
+  resolvedBy: true,
+  createdAt: true,
+});
+
+export type FloatingFeedback = typeof floatingFeedback.$inferSelect;
+export type InsertFloatingFeedback = z.infer<typeof insertFloatingFeedbackSchema>;
+
 // Security Events - Track security-related events for admin monitoring
 export const securityEvents = pgTable("security_events", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

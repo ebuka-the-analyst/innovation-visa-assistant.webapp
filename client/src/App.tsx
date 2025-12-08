@@ -16,8 +16,9 @@ import logoDarkImg from "@assets/logo_dark.png";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initActivityTracking, trackRouteChange } from "@/lib/activityTracker";
 
-// Lazy load ChatBot and other heavy components
+// Lazy load ChatBot, FloatingFeedback and other heavy components
 const ChatBot = lazy(() => import("@/components/ChatBot"));
+const FloatingFeedback = lazy(() => import("@/components/FloatingFeedback"));
 const CookieConsent = lazy(() => import("@/components/CookieConsent"));
 const ToolsChronographWheel = lazy(() => import("@/components/ToolsChronographWheel"));
 // Black November banner removed - promotion ended
@@ -413,6 +414,7 @@ function App() {
           <TooltipProvider>
             <Suspense fallback={null}>
               <ChatBot />
+              <FloatingFeedback />
               <ToolsChronographWheel />
               <SiteFeedbackPopup />
             </Suspense>
