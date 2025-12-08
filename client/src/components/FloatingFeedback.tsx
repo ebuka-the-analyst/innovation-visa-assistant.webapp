@@ -126,7 +126,7 @@ export default function FloatingFeedback() {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center text-white z-[9999]"
+        className="fixed left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center text-white z-[9999]"
         style={{
           background: "linear-gradient(135deg, #11b6e9 0%, #ffa536 100%)",
           animation: isOpen ? "none" : "feedback-pulse 3s ease-in-out infinite"
@@ -135,9 +135,9 @@ export default function FloatingFeedback() {
         aria-label={isOpen ? "Close feedback" : "Send feedback"}
       >
         {isOpen ? (
-          <X className="w-5 h-5 sm:w-6 sm:h-6" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
         ) : (
-          <MessageSquareWarning className="w-5 h-5 sm:w-6 sm:h-6" />
+          <MessageSquareWarning className="w-4 h-4 sm:w-5 sm:h-5" />
         )}
       </button>
 
@@ -145,9 +145,9 @@ export default function FloatingFeedback() {
         <div
           className="fixed z-[9998] flex flex-col rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-border overflow-hidden bg-background
             inset-0 sm:inset-auto
-            sm:bottom-20 sm:left-4 md:bottom-24 md:left-6
+            sm:left-16 sm:top-1/2 sm:-translate-y-1/2
             sm:w-[340px] md:w-[380px]
-            sm:h-auto sm:max-h-[calc(100vh-120px)]"
+            sm:h-auto sm:max-h-[80vh]"
           data-testid="feedback-window"
         >
           <div 
