@@ -1,0 +1,466 @@
+
+2s
+
+stage-0
+RUN npm install && npm run build && node scripts/db-migrate.js
+29s
+npm warn config production Use `--omit=dev` instead.
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@google/genai@1.30.0',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.5', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@vercel/oidc@3.0.5',
+npm warn EBADENGINE   required: { node: '>= 20' },
+npm warn EBADENGINE   current: { node: 'v18.20.5', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'resend@6.5.2',
+npm warn EBADENGINE   required: { node: '>=20' },
+npm warn EBADENGINE   current: { node: 'v18.20.5', npm: '10.8.2' }
+npm warn EBADENGINE }
+up to date, audited 1120 packages in 4s
+123 packages are looking for funding
+  run `npm fund` for details
+39 vulnerabilities (3 low, 6 moderate, 30 high)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.20 building for production...
+transforming...
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 4469 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                                               4.56 kB │ gzip:   1.51 kB
+../dist/public/assets/sage_compliance_agent_avatar-DrMa9lZG.png       901.76 kB
+../dist/public/assets/nova_innovation_agent_avatar-DxK4Q4Uk.png       968.46 kB
+../dist/public/assets/atlas_growth_agent_avatar-Cl0o_kRr.png        1,093.15 kB
+../dist/public/assets/sage_compliance_ai_avatar-ohuJ2D14.png        1,160.55 kB
+../dist/public/assets/sterling_financial_agent_avatar-eB6VDH-1.png  1,228.30 kB
+../dist/public/assets/sterling_financial_ai_avatar-Cy8N-ecK.png     1,313.99 kB
+../dist/public/assets/atlas_growth_ai_avatar-1jZ_cGQh.png           1,321.93 kB
+../dist/public/assets/nova_innovation_ai_avatar-DWqkFxpn.png        1,366.91 kB
+../dist/public/assets/official_logo-iZL64dBH.png                    1,694.47 kB
+../dist/public/assets/logo_dark-DMBF1wvr.png                        1,803.82 kB
+../dist/public/assets/index-BjF9xCDj.css                              202.72 kB │ gzip:  28.02 kB
+../dist/public/assets/index-BdQq_4o_.js                                 0.06 kB │ gzip:   0.08 kB
+../dist/public/assets/collapsible-Dg8gKUT0.js                           0.10 kB │ gzip:   0.11 kB
+../dist/public/assets/index-C7Cig583.js                                 0.14 kB │ gzip:   0.14 kB
+../dist/public/assets/skeleton-3iIFwwuc.js                              0.17 kB │ gzip:   0.16 kB
+../dist/public/assets/index-BfatAyOs.js                                 0.23 kB │ gzip:   0.17 kB
+../dist/public/assets/sage_compliance_ai_avatar-XtDHeQUf.js             0.24 kB │ gzip:   0.18 kB
+../dist/public/assets/sage_compliance_agent_avatar-BhSxVjet.js          0.25 kB │ gzip:   0.18 kB
+../dist/public/assets/isBefore-CQ5r1P14.js                              0.28 kB │ gzip:   0.19 kB
+../dist/public/assets/check-D_HGS83d.js                                 0.29 kB │ gzip:   0.25 kB
+../dist/public/assets/chevron-up-DzSGcp9-.js                            0.30 kB │ gzip:   0.25 kB
+../dist/public/assets/chevron-down-BgbJF-xe.js                          0.30 kB │ gzip:   0.25 kB
+../dist/public/assets/circle-DjktGqHf.js                                0.30 kB │ gzip:   0.24 kB
+../dist/public/assets/LineChart-LFXUAwVB.js                             0.31 kB │ gzip:   0.23 kB
+../dist/public/assets/AreaChart-B7rOz7Dr.js                             0.31 kB │ gzip:   0.23 kB
+../dist/public/assets/message-circle-BHDFFhcD.js                        0.32 kB │ gzip:   0.26 kB
+../dist/public/assets/square-CaPVoQBm.js                                0.32 kB │ gzip:   0.26 kB
+../dist/public/assets/plus-BmRmCX7c.js                                  0.32 kB │ gzip:   0.26 kB
+../dist/public/assets/cloud-Bav9rdMK.js                                 0.33 kB │ gzip:   0.27 kB
+../dist/public/assets/filter-78Kmp4oT.js                                0.33 kB │ gzip:   0.27 kB
+../dist/public/assets/arrow-left-DB41mzw-.js                            0.33 kB │ gzip:   0.27 kB
+../dist/public/assets/arrow-right-BwRV7D_S.js                           0.33 kB │ gzip:   0.27 kB
+../dist/public/assets/search-CYyllYtY.js                                0.34 kB │ gzip:   0.27 kB
+../dist/public/assets/message-square-Yo9YsScx.js                        0.35 kB │ gzip:   0.27 kB
+../dist/public/assets/BarChart-x5ULBSKb.js                              0.35 kB │ gzip:   0.25 kB
+../dist/public/assets/clock-CNaeMEoL.js                                 0.35 kB │ gzip:   0.27 kB
+../dist/public/assets/chart-line-DsHFo90v.js                            0.35 kB │ gzip:   0.27 kB
+../dist/public/assets/code-D6apYtCT.js                                  0.35 kB │ gzip:   0.27 kB
+../dist/public/assets/copyright-DU-LDUvm.js                             0.36 kB │ gzip:   0.28 kB
+../dist/public/assets/circle-check-big-DBc0fHAk.js                      0.36 kB │ gzip:   0.28 kB
+../dist/public/assets/book-H7JAm9m8.js                                  0.36 kB │ gzip:   0.28 kB
+../dist/public/assets/user-C3V_mMtA.js                                  0.37 kB │ gzip:   0.28 kB
+../dist/public/assets/smartphone-CRllM7YZ.js                            0.37 kB │ gzip:   0.29 kB
+../dist/public/assets/rotate-ccw-DXAsm-qd.js                            0.37 kB │ gzip:   0.29 kB
+../dist/public/assets/info-DPui--Ih.js                                  0.37 kB │ gzip:   0.28 kB
+../dist/public/assets/credit-card-DZ8xgifL.js                           0.38 kB │ gzip:   0.29 kB
+../dist/public/assets/lock-C5VKxj6j.js                                  0.38 kB │ gzip:   0.29 kB
+../dist/public/assets/circle-x-D2J17oiv.js                              0.38 kB │ gzip:   0.28 kB
+../dist/public/assets/trending-down-CwFTnsyZ.js                         0.38 kB │ gzip:   0.28 kB
+../dist/public/assets/bell-D2v8-1GD.js                                  0.38 kB │ gzip:   0.29 kB
+../dist/public/assets/star-D0zgHWyz.js                                  0.38 kB │ gzip:   0.29 kB
+../dist/public/assets/infinity-BJuSEjlU.js                              0.38 kB │ gzip:   0.30 kB
+../dist/public/assets/mail-DDynbNdZ.js                                  0.39 kB │ gzip:   0.30 kB
+../dist/public/assets/file-BDF2IpRp.js                                  0.39 kB │ gzip:   0.28 kB
+../dist/public/assets/flag-Cqd5dPPL.js                                  0.39 kB │ gzip:   0.30 kB
+../dist/public/assets/briefcase-3F2WSVPU.js                             0.39 kB │ gzip:   0.30 kB
+../dist/public/assets/activity-CUSr-GzO.js                              0.40 kB │ gzip:   0.30 kB
+../dist/public/assets/presentation-SZucsGM0.js                          0.40 kB │ gzip:   0.30 kB
+../dist/public/assets/copy-Bb20KOGq.js                                  0.41 kB │ gzip:   0.31 kB
+../dist/public/assets/headphones-CovILZms.js                            0.41 kB │ gzip:   0.29 kB
+../dist/public/assets/timer-DOzjMaDE.js                                 0.41 kB │ gzip:   0.29 kB
+../dist/public/assets/menu-mEZqzRcR.js                                  0.41 kB │ gzip:   0.28 kB
+../dist/public/assets/globe-DZposY47.js                                 0.41 kB │ gzip:   0.29 kB
+../dist/public/assets/percent-CCJe9fk6.js                               0.41 kB │ gzip:   0.29 kB
+../dist/public/assets/database-Clocoell.js                              0.41 kB │ gzip:   0.30 kB
+../dist/public/assets/banknote-CJVZYwrN.js                              0.42 kB │ gzip:   0.31 kB
+../dist/public/assets/heart-Dj8FpSYT.js                                 0.42 kB │ gzip:   0.31 kB
+../dist/public/assets/camera-wVcELHKj.js                                0.42 kB │ gzip:   0.31 kB
+../dist/public/assets/file-warning-Ce09mje-.js                          0.42 kB │ gzip:   0.30 kB
+../dist/public/assets/test-tube-BkQ99bz3.js                             0.42 kB │ gzip:   0.30 kB
+../dist/public/assets/video-BtvZRmda.js                                 0.42 kB │ gzip:   0.32 kB
+../dist/public/assets/circle-alert-BobuPLy7.js                          0.42 kB │ gzip:   0.29 kB
+../dist/public/assets/external-link-CzVJuav0.js                         0.42 kB │ gzip:   0.30 kB
+../dist/public/assets/ScatterChart-DuY7wgIh.js                          0.42 kB │ gzip:   0.28 kB
+../dist/public/assets/pound-sterling-BUVDTJz2.js                        0.42 kB │ gzip:   0.30 kB
+../dist/public/assets/user-check-urXkw3Jr.js                            0.42 kB │ gzip:   0.32 kB
+../dist/public/assets/eye-CtOTB5DN.js                                   0.43 kB │ gzip:   0.31 kB
+../dist/public/assets/calendar-Djr6xuDz.js                              0.43 kB │ gzip:   0.30 kB
+../dist/public/assets/upload-DV7dlMsq.js                                0.43 kB │ gzip:   0.32 kB
+../dist/public/assets/map-pin-DxRjErDs.js                               0.43 kB │ gzip:   0.32 kB
+../dist/public/assets/log-in-BXd6c0Iz.js                                0.43 kB │ gzip:   0.32 kB
+../dist/public/assets/monitor-DN10O6Zm.js                               0.43 kB │ gzip:   0.31 kB
+../dist/public/assets/download-d3HZ77-S.js                              0.43 kB │ gzip:   0.32 kB
+../dist/public/assets/key-0gH0zU-y.js                                   0.43 kB │ gzip:   0.32 kB
+../dist/public/assets/file-check-yiS2Ym8V.js                            0.44 kB │ gzip:   0.30 kB
+../dist/public/assets/file-question-DrPKbxrk.js                         0.45 kB │ gzip:   0.32 kB
+../dist/public/assets/pen-line-3VW7qu83.js                              0.45 kB │ gzip:   0.32 kB
+../dist/public/assets/flame-Cnug6Ige.js                                 0.45 kB │ gzip:   0.33 kB
+../dist/public/assets/ComposedChart-C_V57sLu.js                         0.45 kB │ gzip:   0.29 kB
+../dist/public/assets/git-branch-Cr6RIAp8.js                            0.45 kB │ gzip:   0.32 kB
+../dist/public/assets/lightbulb-B-_EAiJj.js                             0.46 kB │ gzip:   0.32 kB
+../dist/public/assets/wallet-B9kYqyaX.js                                0.46 kB │ gzip:   0.31 kB
+../dist/public/assets/scan-C1rWbpZe.js                                  0.46 kB │ gzip:   0.31 kB
+../dist/public/assets/send-CLnlwV-E.js                                  0.46 kB │ gzip:   0.33 kB
+../dist/public/assets/linkedin-DnuyjZLo.js                              0.46 kB │ gzip:   0.33 kB
+../dist/public/assets/user-plus-DFZLvdT4.js                             0.48 kB │ gzip:   0.33 kB
+../dist/public/assets/box-5GWH6geM.js                                   0.48 kB │ gzip:   0.33 kB
+../dist/public/assets/shield-check-BVZvfJb5.js                          0.49 kB │ gzip:   0.35 kB
+../dist/public/assets/file-type-2-DgjrBv-f.js                           0.50 kB │ gzip:   0.32 kB
+../dist/public/assets/textarea-sipugUeW.js                              0.50 kB │ gzip:   0.33 kB
+../dist/public/assets/tag-dxsVvW1M.js                                   0.50 kB │ gzip:   0.35 kB
+../dist/public/assets/save-Hj73xI2f.js                                  0.50 kB │ gzip:   0.33 kB
+../dist/public/assets/graduation-cap-C06v_4pU.js                        0.50 kB │ gzip:   0.35 kB
+../dist/public/assets/server-xJXXq9FD.js                                0.51 kB │ gzip:   0.32 kB
+../dist/public/assets/share-2-CDhT5gCU.js                               0.53 kB │ gzip:   0.34 kB
+../dist/public/assets/trash-2-COYZhx5h.js                               0.53 kB │ gzip:   0.35 kB
+../dist/public/assets/cookie-CFUgpzZH.js                                0.53 kB │ gzip:   0.32 kB
+../dist/public/assets/crown-DDh5pFhM.js                                 0.53 kB │ gzip:   0.36 kB
+../dist/public/assets/layers-HaOwI8Pv.js                                0.53 kB │ gzip:   0.34 kB
+../dist/public/assets/scale-Cx2ucLpE.js                                 0.54 kB │ gzip:   0.34 kB
+../dist/public/assets/tram-front-aIYHnst0.js                            0.55 kB │ gzip:   0.35 kB
+../dist/public/assets/label-DRU3qMH_.js                                 0.56 kB │ gzip:   0.38 kB
+../dist/public/assets/package-xywoyBNQ.js                               0.56 kB │ gzip:   0.36 kB
+../dist/public/assets/quote-i15saO7F.js                                 0.56 kB │ gzip:   0.30 kB
+../dist/public/assets/volume-2-BmjDr8RD.js                              0.56 kB │ gzip:   0.37 kB
+../dist/public/assets/file-pen-line-A96TggCD.js                         0.56 kB │ gzip:   0.37 kB
+../dist/public/assets/phone-wFNb9vQI.js                                 0.56 kB │ gzip:   0.36 kB
+../dist/public/assets/truck-WlXAkJX0.js                                 0.58 kB │ gzip:   0.37 kB
+../dist/public/assets/car-B7kRhYyv.js                                   0.58 kB │ gzip:   0.39 kB
+../dist/public/assets/github-CtMkNRS_.js                                0.58 kB │ gzip:   0.39 kB
+../dist/public/assets/clipboard-list-CRJisBPD.js                        0.58 kB │ gzip:   0.36 kB
+../dist/public/assets/mic-off-_vF1XE8t.js                               0.59 kB │ gzip:   0.38 kB
+../dist/public/assets/map-Dw32EX2Z.js                                   0.60 kB │ gzip:   0.38 kB
+../dist/public/assets/eye-off-BSG4EDgg.js                               0.60 kB │ gzip:   0.37 kB
+../dist/public/assets/medal-DXTvdRiR.js                                 0.61 kB │ gzip:   0.39 kB
+../dist/public/assets/building-2-s7Q_c92O.js                            0.61 kB │ gzip:   0.35 kB
+../dist/public/assets/arrow-up-right-Bvjhg6mm.js                        0.62 kB │ gzip:   0.31 kB
+../dist/public/assets/play-CgFltF8c.js                                  0.63 kB │ gzip:   0.32 kB
+../dist/public/assets/not-found-Cmolc9zB.js                             0.63 kB │ gzip:   0.36 kB
+../dist/public/assets/cpu-DQ8yJWpi.js                                   0.67 kB │ gzip:   0.36 kB
+../dist/public/assets/wand-sparkles-DwsCzMqe.js                         0.68 kB │ gzip:   0.39 kB
+../dist/public/assets/calculator-Btfrnhl0.js                            0.70 kB │ gzip:   0.38 kB
+../dist/public/assets/building-WuhuyIJf.js                              0.71 kB │ gzip:   0.37 kB
+../dist/public/assets/badge-DKjATS9E.js                                 0.73 kB │ gzip:   0.40 kB
+../dist/public/assets/palette-BO0z31Gz.js                               0.79 kB │ gzip:   0.44 kB
+../dist/public/assets/thumbs-up-Bi3liBaf.js                             0.85 kB │ gzip:   0.43 kB
+../dist/public/assets/list-todo-DQhpn2i8.js                             0.89 kB │ gzip:   0.41 kB
+../dist/public/assets/alert-BwkUJpai.js                                 0.91 kB │ gzip:   0.47 kB
+../dist/public/assets/file-spreadsheet-3fgL3giC.js                      1.01 kB │ gzip:   0.42 kB
+../dist/public/assets/twitter-U68egOp5.js                               1.19 kB │ gzip:   0.52 kB
+../dist/public/assets/zoom-out-CdbpJGrp.js                              1.25 kB │ gzip:   0.44 kB
+../dist/public/assets/SEOHead-Cix_3Tg-.js                               1.44 kB │ gzip:   0.73 kB
+../dist/public/assets/table-WYqJGkKN.js                                 1.49 kB │ gzip:   0.52 kB
+../dist/public/assets/useTierAccess-CDIDgtzH.js                         1.54 kB │ gzip:   0.77 kB
+../dist/public/assets/CookieConsent-WKph6ff9.js                         1.55 kB │ gzip:   0.75 kB
+../dist/public/assets/knowledge-graph-D4VVmT8I.js                       1.59 kB │ gzip:   0.81 kB
+../dist/public/assets/regulatory-copilot-DNX_Zax2.js                    1.63 kB │ gzip:   0.83 kB
+../dist/public/assets/volume-x-aW5BzjK6.js                              1.73 kB │ gzip:   0.65 kB
+../dist/public/assets/neural-twin-BsPWIscp.js                           1.78 kB │ gzip:   0.91 kB
+../dist/public/assets/economic-impact-4QVcJX3e.js                       1.81 kB │ gzip:   0.92 kB
+../dist/public/assets/oracle-supervisor-D5fq3RDe.js                     1.83 kB │ gzip:   0.94 kB
+../dist/public/assets/wheat-DMW_3RYZ.js                                 1.85 kB │ gzip:   0.67 kB
+../dist/public/assets/founder-autopilot-C5fOuwdD.js                     1.86 kB │ gzip:   0.94 kB
+../dist/public/assets/FeatureNavigation-DnwVHZ6q.js                     1.89 kB │ gzip:   0.83 kB
+../dist/public/assets/progress-8lMkIgZ3.js                              1.90 kB │ gzip:   0.94 kB
+../dist/public/assets/dialog-wFPehgiY.js                                2.14 kB │ gzip:   0.83 kB
+../dist/public/assets/handoff-Bwf9oFAC.js                               2.15 kB │ gzip:   0.96 kB
+../dist/public/assets/index-CMDLqc2v.js                                 2.16 kB │ gzip:   0.97 kB
+../dist/public/assets/formatDistance-SfVy8A0_.js                        2.29 kB │ gzip:   0.92 kB
+../dist/public/assets/avatar-BX1XpwVS.js                                2.35 kB │ gzip:   1.08 kB
+../dist/public/assets/switch-BiOwxTCk.js                                2.38 kB │ gzip:   1.21 kB
+../dist/public/assets/checkbox-CT1XQADm.js                              2.83 kB │ gzip:   1.40 kB
+../dist/public/assets/index-DQxnCiSZ.js                                 2.91 kB │ gzip:   1.39 kB
+../dist/public/assets/tabs-BoE4Galq.js                                  3.25 kB │ gzip:   1.37 kB
+../dist/public/assets/index-sgiSndRA.js                                 3.38 kB │ gzip:   1.55 kB
+../dist/public/assets/verify-email-CeoYvBsT.js                          3.60 kB │ gzip:   1.36 kB
+../dist/public/assets/data-modal-Cig34-q3.js                            3.70 kB │ gzip:   1.37 kB
+../dist/public/assets/useWordExport-Bi90Xkdo.js                         3.72 kB │ gzip:   1.40 kB
+../dist/public/assets/radio-group-DMXS50Xl.js                           3.97 kB │ gzip:   1.80 kB
+../dist/public/assets/ComplianceBadges-BWZwuIcN.js                      4.17 kB │ gzip:   1.13 kB
+../dist/public/assets/SiteFeedbackPopup-dPFYHvgT.js                     4.21 kB │ gzip:   1.96 kB
+../dist/public/assets/seo-schemas-Dxfe8CWG.js                           4.41 kB │ gzip:   1.64 kB
+../dist/public/assets/forgot-password-fFGuZ8R7.js                       4.44 kB │ gzip:   1.54 kB
+../dist/public/assets/OISCDisclaimer-D9ogmYYv.js                        4.52 kB │ gzip:   1.64 kB
+../dist/public/assets/accordion-sMhzW_aC.js                             4.61 kB │ gzip:   1.84 kB
+../dist/public/assets/evidence-graph-leyun660.js                        4.70 kB │ gzip:   1.86 kB
+../dist/public/assets/alert-dialog-CAgeQEgX.js                          4.74 kB │ gzip:   1.74 kB
+../dist/public/assets/rejection-analysis-BITIY8AP.js                    5.09 kB │ gzip:   2.10 kB
+../dist/public/assets/ChatBot-evxA6Ba_.js                               5.17 kB │ gzip:   2.21 kB
+../dist/public/assets/fileUploadConfigs-D2RauFm8.js                     5.21 kB │ gzip:   1.82 kB
+../dist/public/assets/expert-booking-CGRPlm79.js                        5.42 kB │ gzip:   2.01 kB
+../dist/public/assets/features-dashboard-Ccsm1q0W.js                    5.53 kB │ gzip:   1.91 kB
+../dist/public/assets/ToolAccessGuard-DNP2AMPR.js                       5.78 kB │ gzip:   2.16 kB
+../dist/public/assets/kpi-dashboard-BRT1aKpX.js                         5.97 kB │ gzip:   1.99 kB
+../dist/public/assets/login-WqZzn8dN.js                                 6.18 kB │ gzip:   2.26 kB
+../dist/public/assets/endorser-comparison-CRquqpYx.js                   6.19 kB │ gzip:   2.18 kB
+../dist/public/assets/rfe-defence-lab-ZDmcM8F0.js                       6.21 kB │ gzip:   2.13 kB
+../dist/public/assets/FloatingFeedback-D9hICL5a.js                      6.70 kB │ gzip:   2.52 kB
+../dist/public/assets/CartesianGrid-PFH3J7Ve.js                         6.87 kB │ gzip:   2.40 kB
+../dist/public/assets/team-bios-XFJG2L7e.js                             6.96 kB │ gzip:   3.01 kB
+../dist/public/assets/Footer-B_zvQrYf.js                                7.18 kB │ gzip:   1.76 kB
+../dist/public/assets/ai-patent-generator-DJf8szrX.js                   7.22 kB │ gzip:   2.49 kB
+../dist/public/assets/ai-network-builder-BkywaoJy.js                    7.26 kB │ gzip:   2.57 kB
+../dist/public/assets/product-overview-CfJ_6jlR.js                      7.33 kB │ gzip:   2.85 kB
+../dist/public/assets/ilr-tracker-bMAqsxN6.js                           7.56 kB │ gzip:   2.56 kB
+../dist/public/assets/en-US-INwdnNYB.js                                 7.72 kB │ gzip:   2.67 kB
+../dist/public/assets/quality-checklist-Ci4tglK-.js                     7.72 kB │ gzip:   3.19 kB
+../dist/public/assets/reset-password-B2Rk2-NT.js                        7.88 kB │ gzip:   2.22 kB
+../dist/public/assets/advisory-board-profiles-BekXpgbh.js               8.15 kB │ gzip:   3.28 kB
+../dist/public/assets/slider-BEppv_V4.js                                8.25 kB │ gzip:   3.34 kB
+../dist/public/assets/news-C4jwamIR.js                                  8.50 kB │ gzip:   2.67 kB
+../dist/public/assets/personal-statement-DCmbteAw.js                    8.70 kB │ gzip:   3.40 kB
+../dist/public/assets/signup-D1oEUN87.js                                8.84 kB │ gzip:   2.81 kB
+../dist/public/assets/settlement-planning-agY1MQvK.js                   9.55 kB │ gzip:   3.03 kB
+../dist/public/assets/company-history-sYKE6uNf.js                       9.56 kB │ gzip:   3.64 kB
+../dist/public/assets/diagnostics-DfzP4MNe.js                           9.67 kB │ gzip:   2.45 kB
+../dist/public/assets/ai-funding-negotiator-Ke4lmenY.js                 9.68 kB │ gzip:   2.97 kB
+../dist/public/assets/tax-compliance-4KUwumaN.js                        9.78 kB │ gzip:   3.81 kB
+../dist/public/assets/document-organizer-BrIraLdN.js                   10.03 kB │ gzip:   3.55 kB
+../dist/public/assets/interview-prep-CXjiiX6v.js                       10.10 kB │ gzip:   3.56 kB
+../dist/public/assets/founder-bio-DDrZcSFW.js                          10.18 kB │ gzip:   4.05 kB
+../dist/public/assets/cover-letter-builder-BHNdMG_J.js                 10.25 kB │ gzip:   3.97 kB
+../dist/public/assets/RadialBarChart-D6EJ4bDh.js                       10.64 kB │ gzip:   3.60 kB
+../dist/public/assets/regulatory-tracker-CaLZTI-r.js                   10.70 kB │ gzip:   3.89 kB
+../dist/public/assets/documents-SHRSxKKS.js                            10.70 kB │ gzip:   3.69 kB
+../dist/public/assets/Area-DbLWBqJz.js                                 10.83 kB │ gzip:   4.00 kB
+../dist/public/assets/Line-DOnFqJ0L.js                                 10.98 kB │ gzip:   4.22 kB
+../dist/public/assets/achievements-DqvrcxEl.js                         11.06 kB │ gzip:   3.18 kB
+../dist/public/assets/points-calculator-eak9xXtd.js                    11.29 kB │ gzip:   4.03 kB
+../dist/public/assets/success-stories-BlPeRUa7.js                      11.45 kB │ gzip:   3.20 kB
+../dist/public/assets/privacy-nD0sH1aK.js                              11.51 kB │ gzip:   2.98 kB
+../dist/public/assets/team-assessment-CGmYz_7h.js                      11.62 kB │ gzip:   4.45 kB
+../dist/public/assets/PieChart-CyPKGEC7.js                             11.70 kB │ gzip:   4.36 kB
+../dist/public/assets/RegulatoryCopilot-rSDgxZIg.js                    11.77 kB │ gzip:   3.97 kB
+../dist/public/assets/RadarChart-D0YKtyxO.js                           11.82 kB │ gzip:   3.76 kB
+../dist/public/assets/Scatter-BVmnsN9R.js                              11.87 kB │ gzip:   3.78 kB
+../dist/public/assets/legal-compliance-CU2lFBw-.js                     12.25 kB │ gzip:   4.47 kB
+../dist/public/assets/compliance-checker-J6LVq_it.js                   12.25 kB │ gzip:   4.58 kB
+../dist/public/assets/EconomicImpactSimulator-7q0EyKIF.js              12.29 kB │ gzip:   3.10 kB
+../dist/public/assets/endorser-cover-letter-DVySueaF.js                12.35 kB │ gzip:   4.25 kB
+../dist/public/assets/wifi-DQr1n6Xe.js                                 12.45 kB │ gzip:   2.75 kB
+../dist/public/assets/scroll-area-DLhXnHDA.js                          12.53 kB │ gzip:   3.96 kB
+../dist/public/assets/mvp-demo-guide-BLfH_diE.js                       12.76 kB │ gzip:   4.41 kB
+../dist/public/assets/market-data-verifier-DoXvIeE5.js                 12.78 kB │ gzip:   4.41 kB
+../dist/public/assets/ai-assistant-JOz9w-9A.js                         12.93 kB │ gzip:   4.22 kB
+../dist/public/assets/NeuralTwin-2dvq6R0G.js                           12.97 kB │ gzip:   4.85 kB
+../dist/public/assets/pricing-m1mBMucr.js                              12.99 kB │ gzip:   4.43 kB
+../dist/public/assets/terms-DInPaXOm.js                                13.04 kB │ gzip:   3.31 kB
+../dist/public/assets/format-GBQCH8QJ.js                               13.06 kB │ gzip:   3.46 kB
+../dist/public/assets/market-data-verifier-DKrEsGlc.js                 13.08 kB │ gzip:   3.60 kB
+../dist/public/assets/progress-BHBzn4zx.js                             13.38 kB │ gzip:   3.54 kB
+../dist/public/assets/cookies-Bgw2qjP0.js                              13.45 kB │ gzip:   3.23 kB
+../dist/public/assets/KnowledgeGraph-D3qBbX-Z.js                       13.50 kB │ gzip:   4.20 kB
+../dist/public/assets/support-BVs7lS7J.js                              13.68 kB │ gzip:   4.73 kB
+../dist/public/assets/calendar-sync-DHbPXewL.js                        13.74 kB │ gzip:   4.20 kB
+../dist/public/assets/visa-timeline-CFejBOlD.js                        13.79 kB │ gzip:   4.46 kB
+../dist/public/assets/team-scaling-utJBiXtl.js                         13.84 kB │ gzip:   4.77 kB
+../dist/public/assets/testing-validation-IOAWYrso.js                   13.90 kB │ gzip:   3.30 kB
+../dist/public/assets/features-showcase-DvNpXcQE.js                    14.24 kB │ gzip:   4.69 kB
+../dist/public/assets/financial-resilience-DaV_u2em.js                 14.39 kB │ gzip:   4.20 kB
+../dist/public/assets/compliance-dashboard-CdGqOi8Z.js                 14.46 kB │ gzip:   3.34 kB
+../dist/public/assets/PolarAngleAxis-Ctz8aNUX.js                       14.47 kB │ gzip:   4.01 kB
+../dist/public/assets/ToolsChronographWheel-BfPKQ9NO.js                14.66 kB │ gzip:   5.09 kB
+../dist/public/assets/faq-C3O2ig5c.js                                  14.67 kB │ gzip:   5.65 kB
+../dist/public/assets/site-strategy-DCQms95x.js                        14.71 kB │ gzip:   4.86 kB
+../dist/public/assets/kpi-dashboard-CYnwtrSv.js                        14.90 kB │ gzip:   4.80 kB
+../dist/public/assets/settlement-guide-CYWD6mHz.js                     14.94 kB │ gzip:   4.85 kB
+../dist/public/assets/lawyer-finder-Cs5pCkAf.js                        15.04 kB │ gzip:   5.04 kB
+../dist/public/assets/doc-verification-7jzfPVlx.js                     15.07 kB │ gzip:   5.34 kB
+../dist/public/assets/oisc-compliance-DDhvB9rZ.js                      15.12 kB │ gzip:   5.18 kB
+../dist/public/assets/document-review-DFYvuZWX.js                      15.23 kB │ gzip:   4.20 kB
+../dist/public/assets/timeline-tracker-Bs1AyWnu.js                     15.26 kB │ gzip:   4.60 kB
+../dist/public/assets/deep-xray--uQm8VyT.js                            15.32 kB │ gzip:   5.14 kB
+../dist/public/assets/milestones-tracker-Du8tzMUJ.js                   15.35 kB │ gzip:   4.83 kB
+../dist/public/assets/FounderAutopilot-CKMXHgmW.js                     15.65 kB │ gzip:   5.10 kB
+../dist/public/assets/risk-analysis-DsWPDzD9.js                        15.65 kB │ gzip:   5.23 kB
+../dist/public/assets/template-library-BS8vnlhd.js                     15.69 kB │ gzip:   4.75 kB
+../dist/public/assets/success-predictor-C-K_YUb4.js                    15.72 kB │ gzip:   5.17 kB
+../dist/public/assets/traction-evidence-BQA_-i7x.js                    15.74 kB │ gzip:   4.62 kB
+../dist/public/assets/settlement-planning-Du0rbQdh.js                  15.77 kB │ gzip:   4.93 kB
+../dist/public/assets/mvp-demo-guide-nDqd9Spu.js                       16.10 kB │ gzip:   4.17 kB
+../dist/public/assets/year-tracker-m6a5b68e.js                         16.18 kB │ gzip:   5.02 kB
+../dist/public/assets/compliance-xray-DraqfMIZ.js                      16.21 kB │ gzip:   5.41 kB
+../dist/public/assets/generation-ClyN0YXv.js                           16.24 kB │ gzip:   5.39 kB
+../dist/public/assets/commercial-validation-D_wYrini.js                16.28 kB │ gzip:   4.63 kB
+../dist/public/assets/skills-matrix-CABfw_Qq.js                        16.44 kB │ gzip:   5.99 kB
+../dist/public/assets/financial-resilience-DrWE_LeC.js                 16.59 kB │ gzip:   5.14 kB
+../dist/public/assets/oisc-compliance-D029ppaP.js                      16.64 kB │ gzip:   5.39 kB
+../dist/public/assets/success-metrics-Cv9L1eva.js                      16.72 kB │ gzip:   5.11 kB
+../dist/public/assets/premium-features-CqN5fLfn.js                     16.73 kB │ gzip:   4.61 kB
+../dist/public/assets/zone-planning-Bzl2VfI4.js                        16.86 kB │ gzip:   5.43 kB
+../dist/public/assets/app-req-checker-D9IBrDFD.js                      17.01 kB │ gzip:   5.94 kB
+../dist/public/assets/partner-dashboard-4nZRIGRM.js                    17.17 kB │ gzip:   4.56 kB
+../dist/public/assets/zero-approved-BLix22xw.js                        17.41 kB │ gzip:   5.43 kB
+../dist/public/assets/endorser-investment-requirements-CBZ5Q8oV.js     17.53 kB │ gzip:   3.40 kB
+../dist/public/assets/founder-portfolio-C41CWdHH.js                    17.54 kB │ gzip:   4.87 kB
+../dist/public/assets/ai-transparency-D3-awYZ-.js                      17.61 kB │ gzip:   3.75 kB
+../dist/public/assets/YAxis-C-0_I_-v.js                                17.75 kB │ gzip:   4.76 kB
+../dist/public/assets/settings-CnE0bNLu.js                             17.86 kB │ gzip:   4.47 kB
+../dist/public/assets/performance-bench-DpwLLoAl.js                    17.91 kB │ gzip:   5.13 kB
+../dist/public/assets/visa-status-tracker-CdqWCoqy.js                  18.25 kB │ gzip:   5.29 kB
+../dist/public/assets/data-security-BWK3vm_n.js                        18.39 kB │ gzip:   5.82 kB
+../dist/public/assets/milestone-timeline-B2pM52ML.js                   18.41 kB │ gzip:   5.33 kB
+../dist/public/assets/leadership-development-Dd6Xm9g-.js               18.42 kB │ gzip:   6.24 kB
+../dist/public/assets/Treemap-CD9Cl3qP.js                              18.48 kB │ gzip:   7.15 kB
+../dist/public/assets/diversity-inclusion-DdlQaPh4.js                  18.52 kB │ gzip:   5.73 kB
+../dist/public/assets/financial-projections-CxgvGJbU.js                18.61 kB │ gzip:   6.47 kB
+../dist/public/assets/scenario-planner-CFtTew9W.js                     18.71 kB │ gzip:   5.19 kB
+../dist/public/assets/performance-management-DcQOOUGz.js               18.98 kB │ gzip:   6.31 kB
+../dist/public/assets/AiToolGuide-B--uOKCr.js                          19.13 kB │ gzip:   5.78 kB
+../dist/public/assets/rfe-defense-Bbb6JsiZ.js                          19.33 kB │ gzip:   6.12 kB
+../dist/public/assets/funding-sources-C2QEclHC.js                      19.38 kB │ gzip:   6.32 kB
+../dist/public/assets/competitor-bench-QdU42iVY.js                     19.83 kB │ gzip:   6.27 kB
+../dist/public/assets/min-investment-calc-CwijxEhc.js                  19.85 kB │ gzip:   5.89 kB
+../dist/public/assets/culture-framework-DLdyboYW.js                    19.89 kB │ gzip:   6.25 kB
+../dist/public/assets/retention-strategy-CH8ZBb0k.js                   20.00 kB │ gzip:   6.60 kB
+../dist/public/assets/funding-checker-BeEWG4K7.js                      20.24 kB │ gzip:   6.40 kB
+../dist/public/assets/market-entry-plan-ipGuTtZz.js                    20.31 kB │ gzip:   6.83 kB
+../dist/public/assets/OracleSupervisor-DLZBUb0J.js                     20.82 kB │ gzip:   7.06 kB
+../dist/public/assets/founderData-9htxet-1.js                          20.87 kB │ gzip:   7.59 kB
+../dist/public/assets/criteria-scorer-CEmLPY9E.js                      21.03 kB │ gzip:   6.48 kB
+../dist/public/assets/dropdown-menu-BEeYxefW.js                        21.07 kB │ gzip:   6.13 kB
+../dist/public/assets/jurisdiction-checker-DORysaMT.js                 21.08 kB │ gzip:   5.73 kB
+../dist/public/assets/tools-hub-CTVSwfQR.js                            21.23 kB │ gzip:   6.59 kB
+../dist/public/assets/select-B4Nqi16L.js                               21.24 kB │ gzip:   7.36 kB
+../dist/public/assets/visa-prefill-dashboard-BoNB36TC.js               21.37 kB │ gzip:   5.36 kB
+../dist/public/assets/compensation-planning-BuBwPwEA.js                21.86 kB │ gzip:   6.99 kB
+../dist/public/assets/purify.es-sOfw8HaZ.js                            22.67 kB │ gzip:   8.75 kB
+../dist/public/assets/appeal-strategy-pIVFecIx.js                      22.91 kB │ gzip:   6.72 kB
+../dist/public/assets/commercial-validation-CPB1acT_.js                23.09 kB │ gzip:   5.60 kB
+../dist/public/assets/founder-portfolio-CG3A1_Ah.js                    23.68 kB │ gzip:   5.11 kB
+../dist/public/assets/cac-calculator-BzCkxUzP.js                       23.77 kB │ gzip:   7.64 kB
+../dist/public/assets/browser-CjSdxGTc.js                              24.08 kB │ gzip:   9.36 kB
+../dist/public/assets/referral-dashboard-D26bWYOE.js                   24.57 kB │ gzip:   6.35 kB
+../dist/public/assets/tools-data-D9WloGv1.js                           24.60 kB │ gzip:   5.71 kB
+../dist/public/assets/traction-evidence-BEyKlJtj.js                    24.68 kB │ gzip:   6.12 kB
+../dist/public/assets/dashboard-Fx3bBjNF.js                            25.07 kB │ gzip:   7.04 kB
+../dist/public/assets/voice-builder-DBiOoSRp.js                        25.99 kB │ gzip:   8.27 kB
+../dist/public/assets/funding-strategy-DIE0xwrb.js                     26.87 kB │ gzip:   8.29 kB
+../dist/public/assets/succession-planning-DLhQlAfX.js                  26.96 kB │ gzip:   8.65 kB
+../dist/public/assets/role-designer-DZvnW7fl.js                        27.30 kB │ gzip:   8.91 kB
+../dist/public/assets/exec-summary-Wt9Zt9s9.js                         28.71 kB │ gzip:   9.45 kB
+../dist/public/assets/income-calculator-Dm77NLNE.js                    28.99 kB │ gzip:   8.57 kB
+../dist/public/assets/business-plan-CS0d4dMp.js                        29.94 kB │ gzip:   9.93 kB
+../dist/public/assets/endorser-cover-letter-Cz-isV8d.js                30.41 kB │ gzip:   8.99 kB
+../dist/public/assets/savings-validator-Da9bcndQ.js                    31.10 kB │ gzip:   8.99 kB
+../dist/public/assets/evidence-validator-Bcg_6rLk.js                   31.67 kB │ gzip:   8.62 kB
+../dist/public/assets/eligibility-validator-B-2VrM-x.js                32.23 kB │ gzip:   8.93 kB
+../dist/public/assets/breakeven-calculator-Doc6kYjg.js                 32.24 kB │ gzip:   9.18 kB
+../dist/public/assets/innovation-validation-CT9dKZnq.js                32.55 kB │ gzip:   9.15 kB
+../dist/public/assets/roadmap-builder-DtvnE5ud.js                      33.22 kB │ gzip:   9.57 kB
+../dist/public/assets/pitch-deck-BQMXeHqG.js                           33.39 kB │ gzip:  10.35 kB
+../dist/public/assets/contingency-plan-Deh1Pw4X.js                     34.32 kB │ gzip:   9.94 kB
+../dist/public/assets/endorsement-readiness-mpwofSZG.js                35.07 kB │ gzip:   9.42 kB
+../dist/public/assets/endorser-comparison-DUvKNt-C.js                  35.20 kB │ gzip:  10.78 kB
+../dist/public/assets/usp-validator-B1-Ik_85.js                        35.39 kB │ gzip:  10.02 kB
+../dist/public/assets/verification-checklist-UZRbePty.js               35.43 kB │ gzip:   9.52 kB
+../dist/public/assets/budget-cost-analyzer-DlPDdTvz.js                 35.47 kB │ gzip:  10.26 kB
+../dist/public/assets/narrative-builder-BuhGHzJQ.js                    35.47 kB │ gzip:  10.92 kB
+../dist/public/assets/yoy-projector-CbHcygnr.js                        35.68 kB │ gzip:   9.95 kB
+../dist/public/assets/financial-modeling-Bq6cEE9e.js                   35.99 kB │ gzip:   9.13 kB
+../dist/public/assets/ip-strategy-w0CUNYKI.js                          36.43 kB │ gzip:   9.76 kB
+../dist/public/assets/guide-GgzGsGXe.js                                36.49 kB │ gzip:   9.18 kB
+../dist/public/assets/fee-estimator-CITSZvfv.js                        36.65 kB │ gzip:   9.45 kB
+../dist/public/assets/salary-threshold-eh9-p0Xi.js                     37.02 kB │ gzip:   9.33 kB
+../dist/public/assets/business-model-validator-7F7NZYtl.js             37.14 kB │ gzip:   9.92 kB
+../dist/public/assets/due-diligence-Cnc5Pe-q.js                        37.50 kB │ gzip:   9.65 kB
+../dist/public/assets/company-formation-DRufvfUF.js                    38.03 kB │ gzip:  10.18 kB
+../dist/public/assets/ip-audit-jLRy7fDk.js                             39.07 kB │ gzip:  10.42 kB
+../dist/public/assets/rebuttal-letter-ClyKVO33.js                      39.74 kB │ gzip:  11.84 kB
+../dist/public/assets/rejection-analysis-BdopGwLX.js                   40.26 kB │ gzip:  10.86 kB
+../dist/public/assets/revenue-forecast-BcFVFb1O.js                     40.41 kB │ gzip:  11.17 kB
+../dist/public/assets/ip-roadmap-CV8dLL9P.js                           41.36 kB │ gzip:  11.52 kB
+../dist/public/assets/rfe-qa-BdzMq0rg.js                               41.47 kB │ gzip:  11.60 kB
+../dist/public/assets/win-predictor-DusMIXat.js                        41.49 kB │ gzip:  11.22 kB
+../dist/public/assets/doc-organizer-TXvvdPp1.js                        41.94 kB │ gzip:  11.72 kB
+../dist/public/assets/growth-strategy-1wSSlR1O.js                      43.23 kB │ gzip:  11.51 kB
+../dist/public/assets/unit-economics-D-KzvMxa.js                       43.52 kB │ gzip:  11.48 kB
+../dist/public/assets/advisor-prep-guide-CkgRHz5M.js                   43.89 kB │ gzip:  11.64 kB
+../dist/public/assets/tax-planning-BWyRahij.js                         44.05 kB │ gzip:  10.65 kB
+../dist/public/assets/validation-report-DVaqffnu.js                    44.14 kB │ gzip:  11.48 kB
+../dist/public/assets/market-gap-D8LIE4HT.js                           44.27 kB │ gzip:  12.77 kB
+../dist/public/assets/advisors-finder-BoKejTCY.js                      44.45 kB │ gzip:  11.82 kB
+../dist/public/assets/org-chart-BacecIvK.js                            44.61 kB │ gzip:  11.87 kB
+../dist/public/assets/pitch-coach-Bsjxf11r.js                          44.84 kB │ gzip:  14.08 kB
+../dist/public/assets/evidence-collection-Du5FmF_f.js                  45.69 kB │ gzip:  10.95 kB
+../dist/public/assets/pmf-validator-CrhSpP4b.js                        46.48 kB │ gzip:  12.55 kB
+../dist/public/assets/geographic-expansion-DTArWPx-.js                 46.53 kB │ gzip:  11.64 kB
+../dist/public/assets/tool-page-B9wBx4K9.js                            46.97 kB │ gzip:   9.13 kB
+../dist/public/assets/weakness-analysis-Cgn_tfex.js                    46.99 kB │ gzip:  13.33 kB
+../dist/public/assets/interview-prep-DyJ8gC3n.js                       47.18 kB │ gzip:  12.71 kB
+../dist/public/assets/hr-compliance-DFsvMpQx.js                        47.22 kB │ gzip:  12.82 kB
+../dist/public/assets/scalability-roadmap-CgBe3xYd.js                  47.27 kB │ gzip:  12.23 kB
+../dist/public/assets/gtm-plan-BjGBePdE.js                             47.27 kB │ gzip:  12.40 kB
+../dist/public/assets/uvp-generator-Ddw_goxE.js                        47.54 kB │ gzip:  12.16 kB
+../dist/public/assets/adaptive-intake-B5ZMTIq1.js                      47.61 kB │ gzip:  11.63 kB
+../dist/public/assets/market-research-DjUmKzGT.js                      48.08 kB │ gzip:  12.42 kB
+../dist/public/assets/viability-checker-AGn5zaSP.js                    48.21 kB │ gzip:  12.42 kB
+../dist/public/assets/growth-metrics-BrDc2Z2y.js                       48.87 kB │ gzip:  13.46 kB
+../dist/public/assets/tech-stack-assess-D5E7PVX4.js                    49.37 kB │ gzip:  12.79 kB
+../dist/public/assets/legal-templates-BviuiIy7.js                      49.45 kB │ gzip:  13.22 kB
+../dist/public/assets/advisory-board-builder-CSakh3Mi.js               49.87 kB │ gzip:  12.70 kB
+../dist/public/assets/org-designer-BjQ5Bsw_.js                         49.92 kB │ gzip:  12.65 kB
+../dist/public/assets/question-bank-BF5TGQaC.js                        49.99 kB │ gzip:  13.44 kB
+../dist/public/assets/operations-plan-Ce_i4bQC.js                      50.48 kB │ gzip:  12.58 kB
+../dist/public/assets/strength-scorer-CDO-L7RA.js                      51.79 kB │ gzip:  13.00 kB
+../dist/public/assets/process-docs-BLZNzq0n.js                         52.15 kB │ gzip:  12.00 kB
+../dist/public/assets/market-analysis-48jD8f8F.js                      52.16 kB │ gzip:  14.04 kB
+../dist/public/assets/red-flag-fixer-BryB-Tjc.js                       53.43 kB │ gzip:  14.89 kB
+../dist/public/assets/market-size-BoCrc-Ia.js                          54.56 kB │ gzip:  14.59 kB
+../dist/public/assets/innovation-score-Cu7hCvtl.js                     55.05 kB │ gzip:  14.12 kB
+../dist/public/assets/faq-generator-Drd_gxf-.js                        55.83 kB │ gzip:  15.48 kB
+../dist/public/assets/hiring-plan-BYCTD-Tf.js                          58.24 kB │ gzip:  14.77 kB
+../dist/public/assets/supply-chain-1Wqg0biE.js                         66.91 kB │ gzip:  18.57 kB
+../dist/public/assets/ToolUtilityBar-DaAsTHY4.js                       71.23 kB │ gzip:  20.88 kB
+../dist/public/assets/home-Cc9spE2m.js                                 80.15 kB │ gzip:  20.56 kB
+../dist/public/assets/proxy-C7rxadZf.js                               111.43 kB │ gzip:  36.49 kB
+../dist/public/assets/index.es-BGaGUwAg.js                            150.60 kB │ gzip:  51.34 kB
+../dist/public/assets/html2canvas.esm-CBrSDip1.js                     201.42 kB │ gzip:  47.70 kB
+../dist/public/assets/questionnaire-3g_7ou0S.js                       234.13 kB │ gzip:  75.02 kB
+../dist/public/assets/generateCategoricalChart-Dv0L3abX.js            350.56 kB │ gzip:  98.08 kB
+../dist/public/assets/index-16BGdH9c.js                               375.22 kB │ gzip: 120.10 kB
+../dist/public/assets/admin-dashboard-YNLZP0Fm.js                     514.19 kB │ gzip:  92.87 kB
+../dist/public/assets/lucide-react-D3zUjHzY.js                        697.05 kB │ gzip: 125.89 kB
+../dist/public/assets/FileSaver.min-DeX0dPdM.js                       767.77 kB │ gzip: 236.26 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 23.32s
+  dist/index.js  945.1kb
+⚡ Done in 73ms
+Connecting to database...
+Migration failed: getaddrinfo ENOTFOUND postgres.railway.internal
+Build Failed: build daemon returned an error < failed to solve: process "/bin/bash -ol pipefail -c npm install && npm run build && node scripts/db-migrate.js" did not complete successfully: exit code: 1 >
