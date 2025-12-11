@@ -1,0 +1,81 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+2
+
+(@deployment:141ddc9f-b15b-4fb6-a931-5b3181bd6e1b)
+(@deployment:141ddc9f-b15b-4fb6-a931-5b3181bd6e1b)
+
+
+12/11/25, 10:52 AM
+
+
+You reached the start of the range
+Dec 11, 2025, 10:52 AM
+Starting Container
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+10:57:20 AM [express] serving on port 8080
+10:57:20 AM [express] [STRIPE] Secret Key Mode: TEST | Public Key Mode: TEST
+10:57:20 AM [express] [STRIPE WARNING] Using TEST keys - payments will not be real!
+      open: [Function]
+Initial notification processing error: ErrorEvent {
+    },
+    _readyState: 3,
+    _eventsCount: 4,
+  [Symbol(kTarget)]: WebSocket {
+    _receiver: null,
+    _maxListeners: undefined,
+    _events: [Object: null prototype] {
+    _sender: null,
+    _binaryType: 'arraybuffer',
+      error: [Function],
+    _closeCode: 1006,
+      message: [Function],
+    _closeFrameReceived: false,
+      close: [Function],
+    _closeFrameSent: false,
+    _socket: null,
+    _closeMessage: <Buffer >,
+    _bufferedAmount: 0,
+    _closeTimer: null,
+    _isServer: false,
+    _errorEmitted: true,
+    _extensions: {},
+    _paused: false,
+    _redirects: 0,
+    _protocol: '',
+    _autoPong: true,
+    _url: 'wss://postgres.railway.internal/v2',
+    _req: null,
+    [Symbol(kCapture)]: false
+}
+  },
+  [Symbol(kType)]: 'error',
+  [Symbol(kError)]: Error: connect ECONNREFUSED fd12:bb6c:79c8:1:9000:47:76c2:1c3f:443
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1555:16) {
+    errno: -111,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: 'fd12:bb6c:79c8:1:9000:47:76c2:1c3f',
+    port: 443
+  },
+  [Symbol(kMessage)]: 'connect ECONNREFUSED fd12:bb6c:79c8:1:9000:47:76c2:1c3f:443'
+
+
+Log Explorer | Railway
