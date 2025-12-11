@@ -1,13 +1,28 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite as originalSetupVite, serveStatic as originalServeStatic, log } from "./vite";
 import type { Express as ExpressType } from "express";
 import type { Server } from "http";
 import path from "path";
 import fs from "fs";
 import compression from "compression";
+import { fileURLToPath } from "url";
 
-// Wrapper for setupVite that skips API routes
+// Get __dirname equivalent for ESM (works in Node 18+)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Production logging function
+function log(message: string, source = "express") {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
+
+// Wrapper for setupVite that skips API routes (only used in development)
 async function setupVite(app: ExpressType, server: Server) {
   // Add middleware to prevent Vite from handling API routes
   app.use((req, res, next) => {
@@ -18,12 +33,14 @@ async function setupVite(app: ExpressType, server: Server) {
     next();
   });
   
+  // Dynamic import to avoid loading vite.ts in production (it uses Node 20+ features)
+  const { setupVite: originalSetupVite } = await import("./vite");
   await originalSetupVite(app, server);
 }
 
 // Wrapper for serveStatic that skips API routes
 function serveStatic(app: ExpressType) {
-  const distPath = path.resolve(import.meta.dirname, "public");
+  const distPath = path.resolve(__dirname, "public");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
