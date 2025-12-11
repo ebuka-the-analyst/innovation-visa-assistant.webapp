@@ -1,16 +1,23 @@
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import { Pool, neonConfig } from '@neondatabase/serverless';
+import { drizzle as drizzleNeon } from 'drizzle-orm/neon-serverless';
+import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres';
+import { Pool as NeonPool, neonConfig } from '@neondatabase/serverless';
+import { Pool as PgPool } from 'pg';
 import * as schema from '@shared/schema';
 import ws from 'ws';
 
-// Only use WebSocket on Neon serverless (Replit uses Neon)
-// Railway has direct PostgreSQL access and doesn't support WebSocket
 const isRailway = process.env.DATABASE_URL?.includes('railway.internal') || 
-                   process.env.DATABASE_URL?.includes('railway.app');
+                   process.env.DATABASE_URL?.includes('railway.app') ||
+                   process.env.RAILWAY_ENVIRONMENT !== undefined;
 
-if (!isRailway) {
+let db: ReturnType<typeof drizzleNeon> | ReturnType<typeof drizzlePg>;
+
+if (isRailway) {
+  const pool = new PgPool({ connectionString: process.env.DATABASE_URL! });
+  db = drizzlePg({ client: pool, schema });
+} else {
   neonConfig.webSocketConstructor = ws;
+  const pool = new NeonPool({ connectionString: process.env.DATABASE_URL! });
+  db = drizzleNeon({ client: pool, schema });
 }
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
-export const db = drizzle({ client: pool, schema });
+export { db };
