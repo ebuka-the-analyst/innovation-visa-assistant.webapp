@@ -114,8 +114,19 @@ const getResend = () => cachedResend;
 const getTransporter = () => cachedTransporter;
 const getProvider = () => cachedProvider;
 
+// Helper function to add timeout to promises
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => 
+      setTimeout(() => reject(new Error(`${operation} timed out after ${timeoutMs}ms`)), timeoutMs)
+    )
+  ]);
+}
+
 export async function sendEmail({ to, subject, html, from, emailType = 'system', recipientName, userId }: SendEmailParams) {
   const DEFAULT_FROM_EMAIL = 'noreply@innovatorfoundervisaassistant.co.uk';
+  const EMAIL_TIMEOUT_MS = 15000; // 15 second timeout for email operations
   
   console.log('[Email Send] Attempting to send email to:', to);
   
@@ -132,20 +143,17 @@ export async function sendEmail({ to, subject, html, from, emailType = 'system',
     console.log("[Email Send] Would have sent email to:", to);
     console.log("[Email Send] Subject:", subject);
     
-    try {
-      await db.insert(emailLogs).values({
-        recipientEmail: to,
-        recipientName: recipientName || null,
-        subject: subject,
-        emailType: emailType,
-        status: 'failed',
-        provider: null,
-        errorMessage: 'Email service not configured',
-        userId: userId || null,
-      });
-    } catch (logError) {
-      console.error("Failed to log email:", logError);
-    }
+    // Fire-and-forget logging (don't block the response)
+    db.insert(emailLogs).values({
+      recipientEmail: to,
+      recipientName: recipientName || null,
+      subject: subject,
+      emailType: emailType,
+      status: 'failed',
+      provider: null,
+      errorMessage: 'Email service not configured',
+      userId: userId || null,
+    }).catch(logError => console.error("Failed to log email:", logError));
     
     return { success: false, error: "Email service not configured" };
   }
@@ -158,12 +166,16 @@ export async function sendEmail({ to, subject, html, from, emailType = 'system',
     // Use Resend (HTTP API) if available - works everywhere without firewall issues
     if (resend) {
       console.log('[Email Send] Using Resend HTTP API...');
-      const { data, error } = await resend.emails.send({
-        from: fromAddress,
-        to: [to],
-        subject: subject,
-        html: html,
-      });
+      const { data, error } = await withTimeout(
+        resend.emails.send({
+          from: fromAddress,
+          to: [to],
+          subject: subject,
+          html: html,
+        }),
+        EMAIL_TIMEOUT_MS,
+        'Resend email send'
+      );
       
       if (error) {
         throw new Error(error.message || 'Resend API error');
@@ -175,51 +187,49 @@ export async function sendEmail({ to, subject, html, from, emailType = 'system',
     // Fallback to SMTP (nodemailer)
     else if (transporter) {
       console.log('[Email Send] Using SMTP transporter...');
-      const info = await transporter.sendMail({
-        from: fromAddress,
-        to: to,
-        subject: subject,
-        html: html,
-      });
+      const info = await withTimeout(
+        transporter.sendMail({
+          from: fromAddress,
+          to: to,
+          subject: subject,
+          html: html,
+        }),
+        EMAIL_TIMEOUT_MS,
+        'SMTP email send'
+      );
       messageId = info.messageId;
       console.log('[Email Send] SMTP success, messageId:', messageId);
     }
 
     console.log("Email sent successfully to:", to, "MessageId:", messageId);
     
-    try {
-      await db.insert(emailLogs).values({
-        recipientEmail: to,
-        recipientName: recipientName || null,
-        subject: subject,
-        emailType: emailType,
-        status: 'sent',
-        provider: provider,
-        messageId: messageId,
-        userId: userId || null,
-      });
-    } catch (logError) {
-      console.error("Failed to log email:", logError);
-    }
+    // Fire-and-forget logging (don't block the response)
+    db.insert(emailLogs).values({
+      recipientEmail: to,
+      recipientName: recipientName || null,
+      subject: subject,
+      emailType: emailType,
+      status: 'sent',
+      provider: provider,
+      messageId: messageId,
+      userId: userId || null,
+    }).catch(logError => console.error("Failed to log email:", logError));
     
     return { success: true, messageId: messageId };
   } catch (error: any) {
     console.error("Email send error:", error);
     
-    try {
-      await db.insert(emailLogs).values({
-        recipientEmail: to,
-        recipientName: recipientName || null,
-        subject: subject,
-        emailType: emailType,
-        status: 'failed',
-        provider: provider,
-        errorMessage: error?.message || 'Unknown error',
-        userId: userId || null,
-      });
-    } catch (logError) {
-      console.error("Failed to log email:", logError);
-    }
+    // Fire-and-forget error logging (don't block the response)
+    db.insert(emailLogs).values({
+      recipientEmail: to,
+      recipientName: recipientName || null,
+      subject: subject,
+      emailType: emailType,
+      status: 'failed',
+      provider: provider,
+      errorMessage: error?.message || 'Unknown error',
+      userId: userId || null,
+    }).catch(logError => console.error("Failed to log email:", logError));
     
     return { success: false, error: "Failed to send email" };
   }
