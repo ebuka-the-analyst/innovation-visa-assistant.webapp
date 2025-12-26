@@ -1,0 +1,117 @@
+AI Conversation Quality Specialist (Voice & Digital) - Operations
+Location
+Cape Town
+
+Employment Type
+Full time
+
+Location Type
+Hybrid
+
+Department
+Operations
+
+Overview
+Application
+Got Drive? Join AnyVan as we make moving anything, anywhere miles better and build a career that moves just as fast.
+
+
+Back in 2009, our CEO Angus saw half-empty vans everywhere and knew there had to be a better way! That's how AnyVan began. He set out to create the world's most efficient logistics technology and help halve the number of wasted miles by filling those empty vans.
+
+
+Since then we've become the nation's favourite way to move, with over 150k five-star reviews and 5 million customers in the UK and Europe. Our team of 400 AnyVanners across London, Cape Town and Bogota is proving that moving doesn't have to cost the earth by helping save 8,520 tonnes of Carbon each year.
+
+AnyVan is deploying AI-powered agents across voice and digital/chat to support customers throughout both service and sales journeys.
+
+To ensure these interactions feel natural, human, commercially effective, and operationally correct, we’re hiring an AI Conversation Quality Specialist.
+
+This is a non-technical role (a keen interest in how technology (and AI in particular) solves problems would be preferable and helpful) focused on language quality, customer experience, and operational accuracy / efficiency.
+
+You will spend much of your time reviewing interactions, ensuring the AI performs correct system actions, and will provide clear direction to internal and external teams who implement updates.
+
+This role is all about true ownership – think of yourself as the person delivering service via the AI → its’ service is your service.
+
+Your mission: Ensure the AI agent communicates like our best service and operations agents—warm, clear, empathetic, persuasive, and correct, all the while looking to increase the capability of AI to handle more.
+
+What You’ll Do
+1. Ensure Natural, Human & On-Brand Language
+Review voice and chat interactions for tone, empathy, conversational flow, and naturalness.
+
+Ensure responses sound human—never robotic, overly factual, or stiff. They must represent ‘the voice’ and brand of AnyVan.
+
+Provide examples of improved responses that balance clarity, warmth, and confidence. Implement updates to AI Prompts (make changes yourself, in accordance with our controls). Monitor the impact of changes and present results.
+
+Adopt a data-led approach: identify where the AI fails to handle queries, update prompts accordingly, and evaluate whether changes succeed.
+
+Develop new use cases to expand AI success across service and operations. Relentlessly seek opportunities to improve quality or reach of AI.
+
+2. Validate Operational Accuracy (API, Rules & Policies)
+Check that system/API actions were completed correctly and in line with customer intent. Ensure a risk-based approach is followed to limit the impact of mistakes.
+
+Confirm the AI followed all operational rules, policies, and escalation requirements.
+
+Flag incorrect advice, failed actions, or compliance risks. Report possible technical issues.
+
+4. Run QA & Scenario-Based Testing
+Review daily samples and test new behaviours before deployment.
+
+Stress-test the AI for edge cases, sales scenarios, and operationally complex journeys.
+
+Maintain a structured log of issues, themes, and priorities.
+
+5. Build a Library of Example Responses
+Capture best-in-class service and sales responses.
+
+Document incorrect or unnatural interactions for continuous learning.
+
+Maintain a library of examples to guide improvements and training.
+
+What you'll bring:
+A customer experience expert passionate about delivering outstanding service.
+
+Excellent command of natural language with strong tone awareness and empathy.
+
+Deep experience in Customer Service, QA, Training, Coaching, or Copywriting. You are acknowledged as a guru. This is not an entry level role.
+
+Detail-oriented, structured, and comfortable reviewing transcripts and calls.
+
+Data-literate, able to interpret performance trends and present findings with insights.
+
+Keen interest in AI technologies.
+
+Success Looks Like
+The primary goal is to increase the number of customer queries successfully handled by AI while ensuring compliance, accuracy, and a consistently high standard of service quality.
+
+Some of the metrics you’ll be chasing:
+
+Customer Experience Metrics
+CSAT for AI-handled queries:
+AI interactions achieve CSAT scores that match or exceed human-agent performance.
+
+NPS impact:
+AI-assisted journeys maintain or improve NPS.
+
+AI Resolution & Escalation Metrics
+Escalation Rate:
+Reduction in % of calls/chats escalated to human agents as AI competency improves.
+
+Operational & Accuracy Metrics
+AI Error Rate:
+Ongoing reduction in incorrect system actions, incorrect advice, or rule breaches.
+
+Operational/API Accuracy:
+High accuracy in API calls and system actions correctly aligned with customer intent.
+
+
+
+Our company values are:
+
+Have fun, get it done (work hard play hard, satisfaction in results, do the right thing)
+
+Progress over perfection (Innovate and disrupt, Curious and adaptable, Work quick, learn quicker)
+
+One team thinking big (Collaborate and communicate, Celebrate wins , Embrace challenges)
+
+DE&I
+
+We are committed to building an inclusive and diverse workplace where every voice is heard, every perspective is valued, and every individual has the opportunity to thrive. We welcome applicants from all backgrounds to be part of our mission and contribute to our vibrant culture.

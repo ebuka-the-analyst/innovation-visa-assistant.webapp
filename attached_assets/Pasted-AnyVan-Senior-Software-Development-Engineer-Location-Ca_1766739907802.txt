@@ -1,0 +1,117 @@
+AnyVan
+Senior Software Development Engineer
+Location
+Cape Town
+
+Employment Type
+Full time
+
+Location Type
+Hybrid
+
+Department
+Technology
+Engineering
+
+Overview
+Application
+Got Drive? Join AnyVan as we make moving anything, anywhere miles better and build a career that moves just as fast.
+
+
+Back in 2009, our CEO Angus saw half-empty vans everywhere and knew there had to be a better way! That's how AnyVan began. He set out to create the world's most efficient logistics technology and help halve the number of wasted miles by filling those empty vans.
+
+
+Since then we've become the nation's favourite way to move, with over 150k five-star reviews and 5 million customers in the UK and Europe. Our team of 400 AnyVanners across London, Cape Town and Bogota is proving that moving doesn't have to cost the earth by helping save 8,520 tonnes of Carbon each year.
+
+Our innovative tech stack is a key part of how we can deliver a world class service at market beating prices. By intelligently matching customer’s jobs to driver’s availability, we can better use vans on the road. This smart allocation allows us to constantly lower prices for our customers, while ensuring our drivers get a fair slice of the pie - all the while cutting miles driven, reducing waste and emissions.
+
+But we've only just started! Over the next few years, we’ll be levelling up our platform, building tech which allows us to:
+
+Better understand the cost to fulfil jobs, allowing us to price more accurately for our customers.
+
+Build a deeper relationship with our drivers - becoming a key part of their workflow, and better understanding which jobs are a great fit for them and even explore new business opportunities. For example, buying and selling non-AnyVan jobs between drivers to help them best use their time.
+
+We’re an agile organisation - while most of our teams use scrum with two week sprints, we’re not prescriptive and encourage engineering and product managers to adapt processes to match their team.
+
+We strongly believe in delivering business value, and our senior engineers will regularly interact with stakeholders from all backgrounds and seniority.
+
+The technologies we work with include:
+
+We're a cloud-first organisation and use AWS.
+
+Back end - Java - with Spring - and Python.
+
+Front end - Javascript - using Vue.js
+
+We’re not against exploring other languages where appropriate, with other projects using TypeScript. And of course, no scale up would be complete without a legacy PHP stack we’re slowly migrating away from! Well, no-one’s perfect…
+
+What you'll be doing:
+
+Troubleshoot and solve complex software issues using the coding languages above to help scale and future proof the business.
+
+Deliver excellent production ready, logical and pragmatic code in the following languages, following best-in-class agile processes.
+
+Communicate and collaborate working with technical and non-technical stakeholders to anticipate and communicate blockers, manage expectations and solve problems.
+
+Ensure testing techniques and frameworks are considered and champion improvements to achieve company quality goals more efficiently.
+
+Mentor and develop more junior colleagues .
+
+Set for Success:
+
+Experience working with our tech stack or experience working in similar languages with a desire to work in our tech stack.
+
+Genuine passion for the end product and delivering outstanding customer solutions with pragmatic, logical and maintainable code.
+
+Enjoy working with internal stakeholders to consistently deliver against key projects.
+
+An understanding of web development practices and technologies and tools. Exposure to e-commerce a bonus.
+
+Familiar with software architecture patterns, database optimisations, infrastructure, scalability and deployment.
+
+A broad understanding of the software development lifecycle and practical hands-on experience with continuous integration and continuous delivery & QA.
+
+Experience working in and driving an Agile development environment.
+
+A bias to action and the capability to deliver good work quickly.
+
+The ability to commute to our offices in the Central Business District at least 3 days a week.
+
+A strong alignment with our company values and able to make an impact!
+
+What We Offer:
+
+💰 Competitive Salary - Highly competitive salaries
+
+🌴 Generous Time Off - 20 days +public holidays and Christmas Eve on us
+
+💪 Health & Wellbeing - ZAR1000 pr month towards cover with Momentum/Discovery
+
+📈 Future Ready - 5% you, 5% us
+
+🚲 Easy Travel - Free parking or transport home after 7pm
+
+☕ Daily Perks - In-house barista coffee, free breakfast every day
+
+🎉 Culture & Community - Weekly drinks, fun socials, and rewards that take you places (literally - last winners hit the Alps)
+
+🚀 Career Growth - Join a disruptive technology leader and fast forward your career move
+
+Our company values are:
+
+Have fun, get it done (work hard play hard, satisfaction in results, do the right thing)
+
+Progress over perfection (Innovate and disrupt, Curious and adaptable, Work quick, learn quicker)
+
+One team thinking big (Collaborate and communicate, Celebrate wins , Embrace challenges)
+
+DE&I
+
+We are committed to building an inclusive and diverse workplace where every voice is heard, every perspective is valued, and every individual has the opportunity to thrive. We welcome applicants from all backgrounds to be part of our mission and contribute to our vibrant culture.
+
+Apply for this Job
+This site is protected by reCAPTCHA and the Google Privacy Policy and Terms of Service apply.
+
+Powered by 
+Privacy PolicySecurityVulnerability Disclosure
+
