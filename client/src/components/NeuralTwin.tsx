@@ -351,9 +351,9 @@ export function NeuralTwin({ founderProfile: initialProfile, mode = 'interview',
 
   return (
     <div className="space-y-6">
-      <Card className="p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-cyan-500/20">
+      <Card className="p-6 bg-gradient-to-r from-[#41B6E6]/10 to-[#005EB8]/10 border-cyan-500/20">
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+          <div className="h-14 w-14 rounded-full bg-gradient-to-br from-[#41B6E6] to-[#005EB8] flex items-center justify-center">
             <Brain className="h-7 w-7 text-white" />
           </div>
           <div>

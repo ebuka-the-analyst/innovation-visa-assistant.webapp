@@ -243,8 +243,8 @@ const KNOWLEDGE_NODES: KnowledgeNode[] = [
 ];
 
 const NODE_COLORS: Record<string, string> = {
-  criterion: '#ffa536',
-  requirement: '#11b6e9',
+  criterion: '#005EB8',
+  requirement: '#41B6E6',
   document: '#22c55e',
   process: '#8b5cf6',
   endorser: '#ec4899',

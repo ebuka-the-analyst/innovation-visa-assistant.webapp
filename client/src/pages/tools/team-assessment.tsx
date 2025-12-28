@@ -295,7 +295,7 @@ export default function TeamAssessment() {
           </div>
 
           {getRadarData().length > 0 && (
-            <Card className="p-4 mb-6"><h3 className="font-bold mb-4">Team Capabilities</h3><ResponsiveContainer width="100%" height={400}><RadarChart data={getRadarData()}><PolarGrid/><PolarAngleAxis dataKey="category"/><PolarRadiusAxis/><Radar name="Avg Score" dataKey="value" stroke="#ffa536" fill="#ffa536" fillOpacity={0.5}/></RadarChart></ResponsiveContainer></Card>
+            <Card className="p-4 mb-6"><h3 className="font-bold mb-4">Team Capabilities</h3><ResponsiveContainer width="100%" height={400}><RadarChart data={getRadarData()}><PolarGrid/><PolarAngleAxis dataKey="category"/><PolarRadiusAxis/><Radar name="Avg Score" dataKey="value" stroke="#005EB8" fill="#005EB8" fillOpacity={0.5}/></RadarChart></ResponsiveContainer></Card>
           )}
 
           <h3 className="font-bold text-lg mb-4">Team Members</h3>

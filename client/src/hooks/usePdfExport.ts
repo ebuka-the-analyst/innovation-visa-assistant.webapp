@@ -38,8 +38,8 @@ interface ExportSection {
 
 export function usePdfExport() {
   const brandColors = {
-    primary: '#ffa536',
-    secondary: '#11b6e9',
+    primary: '#005EB8',
+    secondary: '#41B6E6',
     dark: '#1a1a2e',
     text: '#333333',
     muted: '#666666',

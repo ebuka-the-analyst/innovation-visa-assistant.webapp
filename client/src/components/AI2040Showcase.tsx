@@ -59,7 +59,7 @@ const features = [
     description: "Quantify your business's contribution to UK economy",
     icon: LineChart,
     color: "#06b6d4",
-    gradient: "from-cyan-500 to-teal-500",
+    gradient: "from-[#41B6E6] to-[#0072CE]",
     href: "/economic-impact"
   },
   {
@@ -183,8 +183,8 @@ export default function AI2040Showcase() {
                 />
                 <defs>
                   <linearGradient id="showcase-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#ffa536" />
-                    <stop offset="50%" stopColor="#11b6e9" />
+                    <stop offset="0%" stopColor="#005EB8" />
+                    <stop offset="50%" stopColor="#41B6E6" />
                     <stop offset="100%" stopColor="#8b5cf6" />
                   </linearGradient>
                 </defs>

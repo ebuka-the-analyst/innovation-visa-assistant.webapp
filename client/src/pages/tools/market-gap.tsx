@@ -697,7 +697,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
       .map(gap => ({
         name: gap.name || 'Unnamed',
         opportunity: gap.opportunitySize,
-        fill: gap.innovationPotential >= 7 ? '#10b981' : gap.innovationPotential >= 5 ? '#11b6e9' : '#ffa536'
+        fill: gap.innovationPotential >= 7 ? '#10b981' : gap.innovationPotential >= 5 ? '#41B6E6' : '#005EB8'
       }));
   };
 
@@ -1177,11 +1177,11 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                           />
                           <Scatter 
                             data={getGapMatrix()} 
-                            fill="#11b6e9" 
+                            fill="#41B6E6" 
                             shape={(props: any) => {
                               const { cx, cy, payload } = props;
                               const size = payload.innovation >= 7 ? 12 : 8;
-                              const color = payload.competition <= 4 ? '#10b981' : payload.competition >= 7 ? '#ef4444' : '#11b6e9';
+                              const color = payload.competition <= 4 ? '#10b981' : payload.competition >= 7 ? '#ef4444' : '#41B6E6';
                               return <circle cx={cx} cy={cy} r={size} fill={color} stroke="#fff" strokeWidth={2} />;
                             }}
                           />
@@ -1197,7 +1197,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                           <span>Low competition (white space)</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full bg-[#11b6e9]"></div>
+                          <div className="w-3 h-3 rounded-full bg-[#41B6E6]"></div>
                           <span>Moderate competition</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -1239,11 +1239,11 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                           <span>High innovation (7+/10)</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded bg-[#11b6e9]"></div>
+                          <div className="w-3 h-3 rounded bg-[#41B6E6]"></div>
                           <span>Medium innovation (5-7/10)</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded bg-[#ffa536]"></div>
+                          <div className="w-3 h-3 rounded bg-[#005EB8]"></div>
                           <span>Lower innovation</span>
                         </div>
                       </div>
@@ -1265,7 +1265,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                           <PolarGrid />
                           <PolarAngleAxis dataKey="characteristic" />
                           <PolarRadiusAxis angle={90} domain={[0, 10]} />
-                          <Radar name="Gap Profile" dataKey="value" stroke="#11b6e9" fill="#11b6e9" fillOpacity={0.6} />
+                          <Radar name="Gap Profile" dataKey="value" stroke="#41B6E6" fill="#41B6E6" fillOpacity={0.6} />
                           <Tooltip />
                         </RadarChart>
                       </ResponsiveContainer>

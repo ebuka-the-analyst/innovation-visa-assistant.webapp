@@ -347,7 +347,7 @@ export default function ToolsChronographWheel() {
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
             color: "#ffffff", 
-            backgroundColor: isMinimized ? "#11b6e9" : "#e63946",
+            backgroundColor: isMinimized ? "#41B6E6" : "#e63946",
             fontSize: "clamp(1.5rem, 3vw, 2.5rem)", 
             lineHeight: "1",
             boxShadow: "none",
@@ -366,12 +366,12 @@ export default function ToolsChronographWheel() {
               recordActivity();
               setIsMinimized(false);
             }}
-            className="font-black text-center pulse-glow-orange px-4 py-2 rounded-full hover:opacity-90 transition-opacity cursor-pointer"
+            className="font-black text-center pulse-glow-gold px-4 py-2 rounded-full hover:opacity-90 transition-opacity cursor-pointer"
             data-testid="button-toggle-text-label"
             aria-label="Expand Tools Hub"
             style={{ 
               color: "#000000", 
-              backgroundColor: "#ffa536",
+              backgroundColor: "#005EB8",
               fontSize: "clamp(0.8rem, 2vw, 1.5rem)", 
               lineHeight: "1.2",
               border: "none",
@@ -410,8 +410,8 @@ export default function ToolsChronographWheel() {
         
         {/* Static Header Section - "100+ TOOLS HUB" - Only when expanded */}
         {!isMinimized && (
-          <div className="flex flex-col items-center justify-center gap-2 px-3 border-b-2 border-gray-400 pulse-glow-orange" style={{ 
-            backgroundColor: "#ffa536",
+          <div className="flex flex-col items-center justify-center gap-2 px-3 border-b-2 border-gray-400 pulse-glow-gold" style={{ 
+            backgroundColor: "#005EB8",
             borderRadius: "0.5rem 0.5rem 0 0",
             borderBottom: "2px solid rgb(107, 114, 128)",
             padding: "6px 10px",
@@ -433,7 +433,7 @@ export default function ToolsChronographWheel() {
           data-testid="button-toggle-tools-hub"
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
-            backgroundColor: isMinimized ? "#11b6e9" : "#e63946",
+            backgroundColor: isMinimized ? "#41B6E6" : "#e63946",
             color: "#ffffff",
             scale: "0.7",
             transformOrigin: "top right",
@@ -459,7 +459,7 @@ export default function ToolsChronographWheel() {
 
         {/* Static Section Header - "APPLICATION REQUIREMENT CHECKS" - Hidden when minimized */}
         {!isMinimized && (
-          <div className="px-3 py-2 border-b-2 border-gray-400" style={{ backgroundColor: "#ffa536" }}>
+          <div className="px-3 py-2 border-b-2 border-gray-400" style={{ backgroundColor: "#005EB8" }}>
             <p className="font-black tracking-wide" style={{ color: "#000000", fontSize: "clamp(0.8rem, 2vw, 1.5rem)", lineHeight: "1.2" }}>APPLICATION REQUIREMENT CHECKS</p>
           </div>
         )}

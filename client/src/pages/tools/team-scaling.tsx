@@ -359,7 +359,7 @@ ${getSmartRecommendations().join('\n')}
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Area type="monotone" dataKey="headcount" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} name="Total Headcount" />
+                  <Area type="monotone" dataKey="headcount" stroke="#005EB8" fill="#005EB8" fillOpacity={0.6} name="Total Headcount" />
                 </AreaChart>
               </ResponsiveContainer>
             </Card>
@@ -372,7 +372,7 @@ ${getSmartRecommendations().join('\n')}
                   <XAxis dataKey="quarter" />
                   <YAxis />
                   <Tooltip formatter={(value) => `£${value}k`} />
-                  <Bar dataKey="budget" fill="#11b6e9" name="Budget (£k)" />
+                  <Bar dataKey="budget" fill="#41B6E6" name="Budget (£k)" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>

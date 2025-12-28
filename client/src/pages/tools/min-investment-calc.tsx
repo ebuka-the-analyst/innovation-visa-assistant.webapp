@@ -90,7 +90,7 @@ const INITIAL_CATEGORIES: InvestmentCategory[] = [
   { id: "6", name: "Contingency", amount: 15000, description: "Emergency buffer (10-15% recommended)" },
 ];
 
-const CHART_COLORS = ["#ffa536", "#11b6e9", "#10B981", "#8B5CF6", "#F59E0B", "#EC4899"];
+const CHART_COLORS = ["#005EB8", "#41B6E6", "#10B981", "#8B5CF6", "#F59E0B", "#EC4899"];
 
 export default function MinInvestmentCalc() {
   const { toast } = useToast();
@@ -457,7 +457,7 @@ export default function MinInvestmentCalc() {
                         <YAxis tickFormatter={(v) => `£${(v / 1000).toFixed(0)}k`} />
                         <Tooltip formatter={(value: number) => `£${value.toLocaleString()}`} />
                         <Legend />
-                        <Bar dataKey="amount" fill="#ffa536" name="Amount" />
+                        <Bar dataKey="amount" fill="#005EB8" name="Amount" />
                       </BarChart>
                     </ResponsiveContainer>
 

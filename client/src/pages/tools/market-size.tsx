@@ -622,8 +622,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
 
   // Chart 1: TAM/SAM/SOM Market Funnel (Waterfall/Funnel)
   const getMarketFunnel = () => [
-    { stage: "TAM", value: tam / 1000000, fill: "#ffa536" },
-    { stage: "SAM", value: sam / 1000000, fill: "#11b6e9" },
+    { stage: "TAM", value: tam / 1000000, fill: "#005EB8" },
+    { stage: "SAM", value: sam / 1000000, fill: "#41B6E6" },
     { stage: "SOM", value: som / 1000000, fill: "#10b981" }
   ];
 
@@ -639,8 +639,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
 
   // Chart 3: Geographic Market Distribution
   const getGeographicDistribution = () => [
-    { region: "UK", value: sam * (ukMarketShare / 100), fill: "#ffa536" },
-    { region: "EU", value: sam * 0.35, fill: "#11b6e9" },
+    { region: "UK", value: sam * (ukMarketShare / 100), fill: "#005EB8" },
+    { region: "EU", value: sam * 0.35, fill: "#41B6E6" },
     { region: "US", value: sam * 0.25, fill: "#10b981" },
     { region: "Other", value: sam * (1 - ukMarketShare/100 - 0.35 - 0.25), fill: "#8b5cf6" }
   ];
@@ -649,8 +649,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
   const getMethodologyComparison = () => {
     const bottomUpSOM = targetCustomers * avgRevenue;
     return [
-      { method: "Top-Down", value: som / 1000000, fill: "#ffa536" },
-      { method: "Bottom-Up", value: bottomUpSOM / 1000000, fill: "#11b6e9" }
+      { method: "Top-Down", value: som / 1000000, fill: "#005EB8" },
+      { method: "Bottom-Up", value: bottomUpSOM / 1000000, fill: "#41B6E6" }
     ];
   };
 
@@ -662,8 +662,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
     const growthScore = growthRate >= 30 ? 20 : growthRate >= 20 ? 15 : 5;
     
     return [
-      { component: "TAM Size", score: tamScore, max: 30, fill: "#ffa536" },
-      { component: "SAM Ratio", score: samRatioScore, max: 25, fill: "#11b6e9" },
+      { component: "TAM Size", score: tamScore, max: 30, fill: "#005EB8" },
+      { component: "SAM Ratio", score: samRatioScore, max: 25, fill: "#41B6E6" },
       { component: "SOM Ratio", score: somRatioScore, max: 25, fill: "#10b981" },
       { component: "Growth", score: growthScore, max: 20, fill: "#8b5cf6" }
     ];
@@ -678,8 +678,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
     const evidenceScore = evidenceSources.split(',').length >= 3 ? 30 : evidenceSources.split(',').length >= 2 ? 20 : 10;
     
     return [
-      { component: "Methodology", score: methodScore, max: 30, fill: "#ffa536" },
-      { component: "Ratio Validation", score: ratioScore, max: 40, fill: "#11b6e9" },
+      { component: "Methodology", score: methodScore, max: 30, fill: "#005EB8" },
+      { component: "Ratio Validation", score: ratioScore, max: 40, fill: "#41B6E6" },
       { component: "Evidence Quality", score: evidenceScore, max: 30, fill: "#10b981" }
     ];
   };
@@ -1044,7 +1044,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                         <YAxis label={{ value: '£ Millions', angle: -90, position: 'insideLeft' }} />
                         <Tooltip formatter={(value: number) => `£${value}M`} />
                         <Legend />
-                        <Line type="monotone" dataKey="SAM" stroke="#ffa536" strokeWidth={2} name="SAM Growth" />
+                        <Line type="monotone" dataKey="SAM" stroke="#005EB8" strokeWidth={2} name="SAM Growth" />
                         <Line type="monotone" dataKey="SOM" stroke="#10b981" strokeWidth={2} name="SOM Growth" />
                       </LineChart>
                     </ResponsiveContainer>

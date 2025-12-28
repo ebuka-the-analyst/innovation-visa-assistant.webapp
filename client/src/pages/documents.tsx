@@ -157,7 +157,7 @@ export default function DocumentsPage() {
 
           <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9] text-white" data-testid="button-upload">
+              <Button className="bg-gradient-to-r from-[#005EB8] to-[#41B6E6] text-white" data-testid="button-upload">
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Document
               </Button>

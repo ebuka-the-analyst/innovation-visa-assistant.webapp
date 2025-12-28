@@ -435,7 +435,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
   const { totalCost36Mo, monthlyBurnRate, viabilityScore } = getTeamBudgetAnalysis();
   const { totalRecruitmentCost } = getRecruitmentAnalysis();
 
-  const COLORS = ['#ffa536', '#11b6e9', '#8b5cf6', '#10b981', '#ef4444'];
+  const COLORS = ['#005EB8', '#41B6E6', '#8b5cf6', '#10b981', '#ef4444'];
 
   return (
     <>
@@ -581,7 +581,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
                       <YAxis label={{ value: 'Jobs', angle: -90, position: 'insideLeft' }} />
                       <Tooltip />
                       <Legend />
-                      <Area type="monotone" dataKey="jobs" stackId="1" stroke="#ffa536" fill="#ffa536" name="Total Jobs" />
+                      <Area type="monotone" dataKey="jobs" stackId="1" stroke="#005EB8" fill="#005EB8" name="Total Jobs" />
                       <Area type="monotone" dataKey="jobsAt25k" stackId="2" stroke="#22c55e" fill="#22c55e" name="Jobs £25k+" />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -596,8 +596,8 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
                       <YAxis label={{ value: '£', angle: -90, position: 'insideLeft' }} />
                       <Tooltip formatter={(value: number) => `£${value.toLocaleString()}`} />
                       <Legend />
-                      <Line type="monotone" dataKey="cost" stroke="#ffa536" name="Quarterly Cost" />
-                      <Line type="monotone" dataKey="cumulative" stroke="#11b6e9" name="Cumulative" />
+                      <Line type="monotone" dataKey="cost" stroke="#005EB8" name="Quarterly Cost" />
+                      <Line type="monotone" dataKey="cumulative" stroke="#41B6E6" name="Cumulative" />
                     </LineChart>
                   </ResponsiveContainer>
                 </Card>
@@ -611,8 +611,8 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
                       <YAxis label={{ value: '£', angle: -90, position: 'insideLeft' }} />
                       <Tooltip formatter={(value: number) => `£${value.toLocaleString()}`} />
                       <Legend />
-                      <Bar dataKey="base" stackId="a" fill="#ffa536" name="Base Salary" />
-                      <Bar dataKey="bonus" stackId="a" fill="#11b6e9" name="Bonus" />
+                      <Bar dataKey="base" stackId="a" fill="#005EB8" name="Base Salary" />
+                      <Bar dataKey="bonus" stackId="a" fill="#41B6E6" name="Bonus" />
                       <Bar dataKey="equity" stackId="a" fill="#8b5cf6" name="Equity Value" />
                     </BarChart>
                   </ResponsiveContainer>

@@ -398,7 +398,7 @@ STATUS: ${complianceScore >= 80 ? 'GDPR Ready' : complianceScore >= 60 ? 'At Ris
                         <PolarGrid />
                         <PolarAngleAxis dataKey="category" />
                         <PolarRadiusAxis />
-                        <Radar name="Compliance Percent" dataKey="value" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
+                        <Radar name="Compliance Percent" dataKey="value" stroke="#005EB8" fill="#005EB8" fillOpacity={0.6} />
                       </RadarChart>
                     </ResponsiveContainer>
                   </Card>

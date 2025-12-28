@@ -64,10 +64,10 @@ const AUTOPILOT_STEPS: AutopilotStep[] = [
 
 const AGENT_COLORS = {
   oracle: { primary: '#d946ef', gradient: 'from-purple-500 to-pink-500' },
-  nova: { primary: '#ffa536', gradient: 'from-orange-500 to-amber-500' },
-  sterling: { primary: '#11b6e9', gradient: 'from-cyan-500 to-blue-500' },
-  atlas: { primary: '#22c55e', gradient: 'from-green-500 to-emerald-500' },
-  sage: { primary: '#8b5cf6', gradient: 'from-violet-500 to-purple-500' },
+  nova: { primary: '#41B6E6', gradient: 'from-[#41B6E6] to-[#0072CE]' },
+  sterling: { primary: '#eab308', gradient: 'from-[#eab308] to-[#ca8a04]' },
+  atlas: { primary: '#059669', gradient: 'from-[#059669] to-[#047857]' },
+  sage: { primary: '#005EB8', gradient: 'from-[#005EB8] to-[#003087]' },
 };
 
 const AGENT_ICONS = {

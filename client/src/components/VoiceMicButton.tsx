@@ -225,7 +225,7 @@ export function VoiceMicButton({ className, showLabel = false, size = 'icon' }: 
               </div>
               <Button 
                 onClick={handleEnableVoice} 
-                className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
+                className="w-full bg-gradient-to-r from-[#eab308] to-[#ca8a04] hover:from-[#ca8a04] hover:to-[#a16207]"
                 disabled={isRequesting}
                 data-testid="button-enable-voice"
               >

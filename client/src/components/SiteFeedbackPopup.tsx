@@ -213,7 +213,7 @@ export function SiteFeedbackPopup() {
         </button>
         
         <DialogHeader className="text-center space-y-3">
-          <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-[#ffa536] to-[#11b6e9] flex items-center justify-center">
+          <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-[#005EB8] to-[#41B6E6] flex items-center justify-center">
             <Sparkles className="h-6 w-6 text-white" />
           </div>
           <DialogTitle className="text-xl font-semibold">
@@ -235,7 +235,7 @@ export function SiteFeedbackPopup() {
                 <Star
                   className={`h-10 w-10 transition-colors ${
                     star <= (hoveredRating || rating)
-                      ? "fill-[#ffa536] text-[#ffa536]"
+                      ? "fill-[#005EB8] text-[#005EB8]"
                       : "text-muted-foreground/40"
                   }`}
                 />
@@ -248,7 +248,7 @@ export function SiteFeedbackPopup() {
               placeholder="What would make this better? (optional)"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="resize-none min-h-[80px] bg-muted/50 border-muted-foreground/20 focus:border-[#ffa536]/50"
+              className="resize-none min-h-[80px] bg-muted/50 border-muted-foreground/20 focus:border-[#005EB8]/50"
               data-testid="input-feedback-comment"
             />
           </div>
@@ -265,7 +265,7 @@ export function SiteFeedbackPopup() {
             <Button
               onClick={handleSubmit}
               disabled={submitMutation.isPending}
-              className="flex-1 bg-gradient-to-r from-[#ffa536] to-[#11b6e9] hover:opacity-90"
+              className="flex-1 bg-gradient-to-r from-[#005EB8] to-[#41B6E6] hover:opacity-90"
               data-testid="button-feedback-submit"
             >
               {submitMutation.isPending ? (

@@ -74,9 +74,9 @@ export const AGENTS: Record<AgentType, AgentPersona> = {
     name: 'Nova',
     title: 'Innovation Specialist',
     avatar: novaAvatar,
-    primaryColor: '#ffa536',
-    gradientFrom: '#ffa536',
-    gradientTo: '#ff7b00',
+    primaryColor: '#005EB8',
+    gradientFrom: '#005EB8',
+    gradientTo: '#003087',
     criterion: 'innovation',
     personality: 'Creative, enthusiastic, forward-thinking',
     expertise: ['Innovation assessment', 'Unique value proposition', 'Technology novelty', 'Disruption potential'],
@@ -88,8 +88,8 @@ export const AGENTS: Record<AgentType, AgentPersona> = {
     name: 'Sterling',
     title: 'Financial Analyst',
     avatar: sterlingAvatar,
-    primaryColor: '#11b6e9',
-    gradientFrom: '#11b6e9',
+    primaryColor: '#41B6E6',
+    gradientFrom: '#41B6E6',
     gradientTo: '#0891b2',
     criterion: 'viability',
     personality: 'Analytical, precise, business-focused',
@@ -200,8 +200,8 @@ function NeuralHub({ isProcessing, activeAgents }: { isProcessing: boolean; acti
           />
           <defs>
             <linearGradient id="neuralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ffa536" />
-              <stop offset="50%" stopColor="#11b6e9" />
+              <stop offset="0%" stopColor="#005EB8" />
+              <stop offset="50%" stopColor="#41B6E6" />
               <stop offset="100%" stopColor="#8b5cf6" />
             </linearGradient>
           </defs>
@@ -315,8 +315,8 @@ function NeuralConnections({ activeAgents }: { activeAgents: AgentType[] }) {
     <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ overflow: 'visible' }}>
       <defs>
         <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#ffa536" stopOpacity="0.6" />
-          <stop offset="50%" stopColor="#11b6e9" stopOpacity="0.8" />
+          <stop offset="0%" stopColor="#005EB8" stopOpacity="0.6" />
+          <stop offset="50%" stopColor="#41B6E6" stopOpacity="0.8" />
           <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.6" />
         </linearGradient>
         <filter id="glow">

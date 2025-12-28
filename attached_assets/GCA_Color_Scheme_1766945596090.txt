@@ -1,0 +1,143 @@
+================================================================================
+                    GCA - GLOBAL COMPETENCY ASSESSMENT
+                          BRAND COLOR SCHEME
+================================================================================
+
+BRAND IDENTITY:
+GCA (Global Competency Assessment) - International private assessment and 
+certification authority for cross-border professional mobility across 32 countries.
+
+================================================================================
+PRIMARY NHS BLUE PALETTE
+================================================================================
+
+NHS Blue (Primary Brand)         #005EB8     HSL: 209, 100%, 36%
+NHS Dark Blue (Headers/Footers)  #003087     HSL: 219, 100%, 27%
+NHS Darkest Blue (Sidebar)       #003399     HSL: 219, 100%, 26%
+NHS Light Blue (Accents)         #41B6E6     HSL: 197, 76%, 58%
+NHS Bright Blue                  #0072CE     HSL: 206, 100%, 40%
+NHS Aqua Blue                    #00A9CE     HSL: 191, 100%, 40%
+
+================================================================================
+NHS BLUE GRADIENT SCALE (Dark to Light)
+================================================================================
+
+#001a4d    Darkest (Dark mode backgrounds)
+#003087    NHS Dark Blue (Headers, Footers, Navigation)
+#003399    Sidebar (Fixed across all themes)
+#003d7a    Dark accent
+#004a94    Medium dark
+#005EB8    NHS Primary Blue (Main brand color)
+#0072CE    NHS Bright Blue
+#41B6E6    NHS Light Blue (Accents, highlights)
+#7dd3fc    Light accent
+#bae6fd    Very light
+#e0f2fe    Ultra light
+#f0f9ff    Almost white
+
+================================================================================
+ACCENT COLORS
+================================================================================
+
+Gold/Yellow (Primary CTA)        #eab308     HSL: 48, 96%, 47%
+Gold Hover                       #ca8a04     HSL: 45, 93%, 40%
+Gold Light                       #fef3c7     HSL: 48, 96%, 89%
+Emerald Green (Success/Secondary)#059669     HSL: 160, 84%, 39%
+
+================================================================================
+NEUTRAL COLORS
+================================================================================
+
+NHS Black                        #231f20
+NHS White                        #ffffff
+Muted Foreground                 HSL: 215, 16%, 47%
+
+================================================================================
+SEMANTIC COLORS
+================================================================================
+
+Destructive/Error                HSL: 0, 84%, 60%    (Red)
+Success                          #059669             (Emerald Green)
+Warning                          #eab308             (Gold/Yellow)
+Info                             #005EB8             (NHS Blue)
+
+================================================================================
+CHART COLORS
+================================================================================
+
+Chart 1 (Primary)                NHS Blue        HSL: 209, 100%, 36%
+Chart 2 (Secondary)              Emerald         HSL: 160, 84%, 39%
+Chart 3                          Purple          HSL: 280, 65%, 60%
+Chart 4                          Gold            HSL: 43, 96%, 56%
+Chart 5                          Cyan            HSL: 190, 95%, 39%
+
+================================================================================
+GLASSMORPHISM EFFECTS
+================================================================================
+
+Glass Background (Light)         rgba(255, 255, 255, 0.7)
+Glass Background (Dark)          rgba(15, 23, 42, 0.7)
+Glass Border                     rgba(255, 255, 255, 0.5)
+Glass Shadow                     0 8px 32px rgba(31, 38, 135, 0.15)
+Glass Blur                       12px
+
+================================================================================
+TYPOGRAPHY
+================================================================================
+
+Primary Font:     Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif
+Serif Font:       Fraunces, Georgia, serif
+Monospace Font:   ui-monospace, SFMono-Regular, Menlo, monospace
+
+================================================================================
+UI COMPONENT COLORS
+================================================================================
+
+BUTTONS:
+- Primary (Gold CTA):      bg-yellow-500, text-[#003087], hover:bg-yellow-600
+- NHS Blue:                bg-[#005EB8], text-white, hover:bg-[#003087]
+- Outline (White):         border-white, text-white, hover:bg-white/10
+- Ghost:                   Transparent with hover elevation
+
+SIDEBAR (Fixed - Never Changes):
+- Background:              #003399 (NHS Dark Blue)
+- Text:                    White (#ffffff)
+- Active Item:             Lighter blue with white text
+- Border:                  Darker blue accent
+
+HEADER/NAVIGATION:
+- Background:              #003087 (NHS Dark Blue)
+- Logo/Text:               White
+- CTA Button:              Gold (#eab308)
+
+FOOTER:
+- Background:              #003087 (NHS Dark Blue)
+- Text:                    White
+
+CARDS:
+- Light Mode:              White background with subtle shadow
+- Dark Mode:               NHS Dark Blue (#003087-ish) with glassmorphism
+
+================================================================================
+DARK MODE ADJUSTMENTS
+================================================================================
+
+Background:                HSL: 219, 100%, 10%
+Card Background:           HSL: 219, 80%, 13%
+Primary Blue (Brighter):   HSL: 209, 100%, 50%
+Secondary Green (Brighter):HSL: 160, 84%, 45%
+Border:                    HSL: 209, 60%, 20%
+
+================================================================================
+DESIGN SYSTEM NOTES
+================================================================================
+
+- Border Radius:           0.75rem (12px) - Rounded but not pill-shaped
+- Sidebar:                 Fixed dark NHS Blue (#003399) - same in light/dark mode
+- Glassmorphism:           Used for premium SaaS feel with blur and transparency
+- Holographic Gradients:   Subtle blue gradients for visual interest
+- Animations:              Fast (150ms), Normal (300ms), Slow (500ms)
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================

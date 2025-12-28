@@ -588,7 +588,7 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
                 <XAxis dataKey="month" label={{ value: 'Month', position: 'insideBottom', offset: -5 }} />
                 <YAxis label={{ value: 'Cash (£)', angle: -90, position: 'insideLeft' }} />
                 <Tooltip formatter={(value) => `£${Number(value).toLocaleString()}`} />
-                <Line type="monotone" dataKey="cash" stroke="#ffa536" strokeWidth={3} name="Cash Balance" />
+                <Line type="monotone" dataKey="cash" stroke="#005EB8" strokeWidth={3} name="Cash Balance" />
               </LineChart>
             </ResponsiveContainer>
           </Card>

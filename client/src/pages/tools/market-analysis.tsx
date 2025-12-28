@@ -648,8 +648,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
 
   // Chart 1: TAM/SAM/SOM Funnel
   const getMarketFunnel = () => [
-    { stage: "TAM", value: tam / 1000000, fill: "#ffa536" },
-    { stage: "SAM", value: sam / 1000000, fill: "#11b6e9" },
+    { stage: "TAM", value: tam / 1000000, fill: "#005EB8" },
+    { stage: "SAM", value: sam / 1000000, fill: "#41B6E6" },
     { stage: "SOM", value: som / 1000000, fill: "#10b981" }
   ];
 
@@ -671,8 +671,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
     const maturityScore = marketMaturity === "growth" ? 30 : marketMaturity === "emerging" ? 25 : marketMaturity === "mature" ? 15 : 5;
     
     return [
-      { component: "Market Size", score: tamScore, max: 40, fill: "#ffa536" },
-      { component: "Growth Rate", score: growthScore, max: 30, fill: "#11b6e9" },
+      { component: "Market Size", score: tamScore, max: 40, fill: "#005EB8" },
+      { component: "Growth Rate", score: growthScore, max: 30, fill: "#41B6E6" },
       { component: "Maturity", score: maturityScore, max: 30, fill: "#10b981" }
     ];
   };
@@ -693,7 +693,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
       risk = "Medium-High Risk";
     } else if (competitorCount > 10) {
       category = "Moderate";
-      color = "#11b6e9";
+      color = "#41B6E6";
       risk = "Medium Risk";
     }
     
@@ -1077,8 +1077,8 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                         <YAxis label={{ value: '£M', angle: -90, position: 'insideLeft' }} />
                         <Tooltip formatter={(value: number) => `£${value.toFixed(1)}M`} />
                         <Legend />
-                        <Area type="monotone" dataKey="TAM" stackId="1" stroke="#ffa536" fill="#ffa536" fillOpacity={0.3} />
-                        <Area type="monotone" dataKey="SAM" stackId="2" stroke="#11b6e9" fill="#11b6e9" fillOpacity={0.5} />
+                        <Area type="monotone" dataKey="TAM" stackId="1" stroke="#005EB8" fill="#005EB8" fillOpacity={0.3} />
+                        <Area type="monotone" dataKey="SAM" stackId="2" stroke="#41B6E6" fill="#41B6E6" fillOpacity={0.5} />
                         <Area type="monotone" dataKey="SOM" stackId="3" stroke="#10b981" fill="#10b981" fillOpacity={0.8} />
                       </AreaChart>
                     </ResponsiveContainer>

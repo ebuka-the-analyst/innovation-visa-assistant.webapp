@@ -91,7 +91,7 @@ function getTierBadge(tier: string) {
   const styles: Record<string, string> = {
     free: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
     basic: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-    premium: "bg-gradient-to-r from-[#ffa536] to-[#11b6e9] text-white",
+    premium: "bg-gradient-to-r from-[#005EB8] to-[#41B6E6] text-white",
     enterprise: "bg-purple-600 text-white",
     ultimate: "bg-gradient-to-r from-amber-500 to-yellow-400 text-black",
   };

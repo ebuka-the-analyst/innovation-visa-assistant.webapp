@@ -356,7 +356,7 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
                     <XAxis dataKey="name" fontSize={12} />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="value" fill="#ffa536" />
+                    <Bar dataKey="value" fill="#005EB8" />
                   </BarChart>
                 </ResponsiveContainer>
               </Card>

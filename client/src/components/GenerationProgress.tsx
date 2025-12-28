@@ -254,7 +254,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 />
                 <defs>
                   <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#11b6e9" />
+                    <stop offset="0%" stopColor="#41B6E6" />
                     <stop offset="100%" stopColor="#10B981" />
                   </linearGradient>
                 </defs>

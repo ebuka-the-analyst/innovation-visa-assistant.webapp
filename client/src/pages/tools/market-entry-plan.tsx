@@ -295,7 +295,7 @@ Market Entry Methodology: International expansion framework
   }, []);
 
   const { score: readinessScore, grade } = getEntryReadiness();
-  const COLORS = ['#ffa536', '#11b6e9', '#10b981', '#ef4444'];
+  const COLORS = ['#005EB8', '#41B6E6', '#10b981', '#ef4444'];
 
   return (
     <>
@@ -370,7 +370,7 @@ Market Entry Methodology: International expansion framework
                   <PolarGrid />
                   <PolarAngleAxis dataKey="metric" />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                  <Radar name="Score" dataKey="score" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
+                  <Radar name="Score" dataKey="score" stroke="#005EB8" fill="#005EB8" fillOpacity={0.6} />
                   <Radar name="Target" dataKey="target" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
                   <Tooltip />
                   <Legend />
@@ -387,7 +387,7 @@ Market Entry Methodology: International expansion framework
                   <YAxis label={{ value: 'Progress %', angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="planning" fill="#11b6e9" name="Planning" stackId="a" />
+                  <Bar dataKey="planning" fill="#41B6E6" name="Planning" stackId="a" />
                   <Bar dataKey="execution" fill="#10b981" name="Execution" stackId="a" />
                 </BarChart>
               </ResponsiveContainer>
@@ -403,7 +403,7 @@ Market Entry Methodology: International expansion framework
                   <Tooltip />
                   <Bar dataKey="level" fill="#ef4444" name="Risk Level">
                     {getRiskProfile().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.level < 30 ? '#10b981' : entry.level < 50 ? '#ffa536' : '#ef4444'} />
+                      <Cell key={`cell-${index}`} fill={entry.level < 30 ? '#10b981' : entry.level < 50 ? '#005EB8' : '#ef4444'} />
                     ))}
                   </Bar>
                 </BarChart>

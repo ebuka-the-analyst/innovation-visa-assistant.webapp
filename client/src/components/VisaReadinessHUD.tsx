@@ -79,14 +79,14 @@ export default function VisaReadinessHUD({
       name: 'Innovation',
       score: innovationScore,
       icon: Lightbulb,
-      color: '#ffa536',
+      color: '#005EB8',
       description: 'Technical uniqueness & IP potential'
     },
     {
       name: 'Viability',
       score: viabilityScore,
       icon: TrendingUp,
-      color: '#11b6e9',
+      color: '#41B6E6',
       description: 'Financial sustainability & market validation'
     },
     {
@@ -143,8 +143,8 @@ export default function VisaReadinessHUD({
                 />
                 <defs>
                   <linearGradient id="readinessGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#ffa536" />
-                    <stop offset="50%" stopColor="#11b6e9" />
+                    <stop offset="0%" stopColor="#005EB8" />
+                    <stop offset="50%" stopColor="#41B6E6" />
                     <stop offset="100%" stopColor="#22c55e" />
                   </linearGradient>
                 </defs>

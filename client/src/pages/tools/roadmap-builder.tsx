@@ -901,7 +901,7 @@ for personalized guidance on your UK Innovator Founder visa application.
                         <YAxis domain={[0, 100]} />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="innovation" stroke="#ffa536" strokeWidth={3} name="Innovation" />
+                        <Line type="monotone" dataKey="innovation" stroke="#005EB8" strokeWidth={3} name="Innovation" />
                         <Line type="monotone" dataKey="target" stroke="#10b981" strokeWidth={2} strokeDasharray="5 5" name="Target (75)" />
                       </LineChart>
                     </ResponsiveContainer>
@@ -924,7 +924,7 @@ for personalized guidance on your UK Innovator Founder visa application.
                         <Legend />
                         <Area yAxisId="left" type="monotone" dataKey="revenue" fill="#3b82f6" stroke="#3b82f6" fillOpacity={0.6} name="Revenue (£)" />
                         <Line yAxisId="right" type="monotone" dataKey="customers" stroke="#10b981" strokeWidth={2} name="Customers" />
-                        <Line yAxisId="right" type="monotone" dataKey="teamSize" stroke="#ffa536" strokeWidth={2} name="Team Size" />
+                        <Line yAxisId="right" type="monotone" dataKey="teamSize" stroke="#005EB8" strokeWidth={2} name="Team Size" />
                       </ComposedChart>
                     </ResponsiveContainer>
                   </CardContent>

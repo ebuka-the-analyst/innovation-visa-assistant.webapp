@@ -394,11 +394,11 @@ export function SpotlightTour({ onComplete, onSkip, isOpen }: SpotlightTourProps
         style={getPositionStyles()}
       >
         <Card className="shadow-2xl border-2 overflow-hidden">
-          <div className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9] p-0.5">
+          <div className="bg-gradient-to-r from-[#005EB8] to-[#41B6E6] p-0.5">
             <div className="bg-background p-4">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#ffa536] to-[#11b6e9] flex items-center justify-center shadow-lg flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#005EB8] to-[#41B6E6] flex items-center justify-center shadow-lg flex-shrink-0">
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -492,7 +492,7 @@ export function SpotlightTour({ onComplete, onSkip, isOpen }: SpotlightTourProps
                     <Button 
                       onClick={handleNext}
                       size="sm"
-                      className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9] text-white hover:opacity-90"
+                      className="bg-gradient-to-r from-[#005EB8] to-[#41B6E6] text-white hover:opacity-90"
                       data-testid="button-spotlight-next"
                     >
                       {currentStep === currentPageTour.length - 1 ? (
@@ -513,7 +513,7 @@ export function SpotlightTour({ onComplete, onSkip, isOpen }: SpotlightTourProps
                 <Button 
                   onClick={handleSkip}
                   size="sm"
-                  className="w-full bg-gradient-to-r from-[#ffa536] to-[#11b6e9] text-white hover:opacity-90"
+                  className="w-full bg-gradient-to-r from-[#005EB8] to-[#41B6E6] text-white hover:opacity-90"
                   data-testid="button-spotlight-dismiss"
                 >
                   <CheckCircle2 className="w-4 h-4 mr-1" />

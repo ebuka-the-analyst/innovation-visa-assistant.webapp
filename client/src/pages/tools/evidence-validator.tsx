@@ -86,7 +86,7 @@ const EVIDENCE_CATEGORIES = {
   innovation: {
     name: 'Innovation Evidence',
     required: ['Patent Application', 'Technical Architecture', 'IP Documentation', 'Competitive Analysis'],
-    color: '#11b6e9'
+    color: '#41B6E6'
   },
   viability: {
     name: 'Viability Evidence',

@@ -38,7 +38,7 @@ const JOURNEY_PHASES: JourneyPhase[] = [
     name: "Preparation",
     description: "Gather requirements and assess eligibility",
     icon: FileText,
-    color: "#ffa536",
+    color: "#005EB8",
     steps: [
       { id: "questionnaire", name: "Generate Business Plan", description: "Tell us about your business idea", toolPath: "/questionnaire", storageKey: "questionnaire-autosave", required: true },
       { id: "innovation-score", name: "Check Innovation Score", description: "Assess your innovation criteria", toolPath: "/tools/innovation-score", storageKey: "innovation-score-state", required: true },
@@ -50,7 +50,7 @@ const JOURNEY_PHASES: JourneyPhase[] = [
     name: "Business Planning",
     description: "Create your visa-compliant business plan",
     icon: Calculator,
-    color: "#11b6e9",
+    color: "#41B6E6",
     steps: [
       { id: "business-plan", name: "Generate Business Plan", description: "Create comprehensive business plan", toolPath: "/tools/business-plan", storageKey: "business-plan-state", required: true },
       { id: "financial-projections", name: "Financial Projections", description: "5-year financial forecasts", toolPath: "/tools/financial-projections", storageKey: "financialProjectionsProgress", required: true },
@@ -145,7 +145,7 @@ export default function ProgressPage() {
         </div>
 
         <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gradient-to-br from-[#ffa536]/10 to-[#11b6e9]/10">
+          <Card className="bg-gradient-to-br from-[#005EB8]/10 to-[#41B6E6]/10">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-muted-foreground">Overall Progress</span>

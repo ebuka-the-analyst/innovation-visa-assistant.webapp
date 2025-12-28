@@ -534,8 +534,8 @@ ${c.name}:
                           <PolarGrid />
                           <PolarAngleAxis dataKey="metric" />
                           <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                          <Radar name="Your Business" dataKey="you" stroke="#ffa536" fill="#ffa536" fillOpacity={0.5} />
-                          <Radar name="Market Average" dataKey="market" stroke="#11b6e9" fill="#11b6e9" fillOpacity={0.3} />
+                          <Radar name="Your Business" dataKey="you" stroke="#005EB8" fill="#005EB8" fillOpacity={0.5} />
+                          <Radar name="Market Average" dataKey="market" stroke="#41B6E6" fill="#41B6E6" fillOpacity={0.3} />
                           <Legend />
                           <Tooltip />
                         </RadarChart>
@@ -551,8 +551,8 @@ ${c.name}:
                           <YAxis />
                           <Tooltip />
                           <Legend />
-                          <Bar dataKey="you" fill="#ffa536" name="Your Business" />
-                          <Bar dataKey="avg" fill="#11b6e9" name="Competitor Avg" />
+                          <Bar dataKey="you" fill="#005EB8" name="Your Business" />
+                          <Bar dataKey="avg" fill="#41B6E6" name="Competitor Avg" />
                         </BarChart>
                       </ResponsiveContainer>
                     </Card>
@@ -579,8 +579,8 @@ ${c.name}:
                           <YAxis type="number" dataKey="innovation" name="Innovation" />
                           <Tooltip cursor={{ strokeDasharray: '3 3' }} />
                           <Legend />
-                          <Scatter name="Your Business" data={marketPositionData.filter(d => d.type === 'you')} fill="#ffa536" />
-                          <Scatter name="Competitors" data={marketPositionData.filter(d => d.type === 'competitor')} fill="#11b6e9" />
+                          <Scatter name="Your Business" data={marketPositionData.filter(d => d.type === 'you')} fill="#005EB8" />
+                          <Scatter name="Competitors" data={marketPositionData.filter(d => d.type === 'competitor')} fill="#41B6E6" />
                         </ScatterChart>
                       </ResponsiveContainer>
                     </Card>

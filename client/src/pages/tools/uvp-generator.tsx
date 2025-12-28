@@ -549,9 +549,9 @@ Scalability Criterion: Significant growth potential in UK market
   }));
 
   const CHART_COLORS = {
-    primary: '#ffa536',
+    primary: '#005EB8',
     success: '#10b981',
-    info: '#11b6e9',
+    info: '#41B6E6',
     warning: '#f59e0b',
     danger: '#ef4444',
     purple: '#8b5cf6'

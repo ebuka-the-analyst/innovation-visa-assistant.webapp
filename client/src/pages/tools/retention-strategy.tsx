@@ -324,7 +324,7 @@ GOV.UK: Innovator Founder Visa viability criterion
 
   const { score: retentionScore, grade } = getRetentionHealth();
   const { annualCost, potentialSavings, atRiskCost } = getTurnoverCost();
-  const COLORS = ['#ef4444', '#ffa536', '#11b6e9', '#10b981'];
+  const COLORS = ['#ef4444', '#005EB8', '#41B6E6', '#10b981'];
 
   return (
     <>
@@ -395,7 +395,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                   <Tooltip />
                   <Legend />
                   <Line type="monotone" dataKey="current" stroke="#ef4444" strokeWidth={2} name="Current" dot={{ r: 6 }} />
-                  <Line type="monotone" dataKey="projected" stroke="#ffa536" strokeWidth={2} name="Projected" />
+                  <Line type="monotone" dataKey="projected" stroke="#005EB8" strokeWidth={2} name="Projected" />
                   <Line type="monotone" dataKey="target" stroke="#10b981" strokeWidth={2} strokeDasharray="5 5" name="Target" />
                 </LineChart>
               </ResponsiveContainer>
@@ -422,7 +422,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                   <XAxis type="number" label={{ value: 'Replacement Cost £', position: 'insideBottom', offset: -5 }} />
                   <YAxis dataKey="employee" type="category" width={100} />
                   <Tooltip formatter={(value: number) => `£${value.toLocaleString()}`} />
-                  <Bar dataKey="cost" fill="#ffa536" name="Replacement Cost" />
+                  <Bar dataKey="cost" fill="#005EB8" name="Replacement Cost" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -448,9 +448,9 @@ GOV.UK: Innovator Founder Visa viability criterion
                     }
                     return null;
                   }} />
-                  <Scatter name="Employees" data={getRiskScatter()} fill="#ffa536">
+                  <Scatter name="Employees" data={getRiskScatter()} fill="#005EB8">
                     {getRiskScatter().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.risk === 'critical' ? '#ef4444' : entry.risk === 'high' ? '#ffa536' : '#11b6e9'} />
+                      <Cell key={`cell-${index}`} fill={entry.risk === 'critical' ? '#ef4444' : entry.risk === 'high' ? '#005EB8' : '#41B6E6'} />
                     ))}
                   </Scatter>
                 </ScatterChart>

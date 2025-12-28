@@ -496,8 +496,8 @@ export default function YearTracker() {
                             name === "revenue" ? `£${value.toLocaleString()}` : value
                           } />
                           <Legend />
-                          <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#ffa536" name="Revenue" strokeWidth={2} />
-                          <Line yAxisId="right" type="monotone" dataKey="employees" stroke="#11b6e9" name="Employees" strokeWidth={2} />
+                          <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#005EB8" name="Revenue" strokeWidth={2} />
+                          <Line yAxisId="right" type="monotone" dataKey="employees" stroke="#41B6E6" name="Employees" strokeWidth={2} />
                         </LineChart>
                       </ResponsiveContainer>
                     </CardContent>

@@ -82,7 +82,7 @@ export default function NewsTicker() {
     <>
       <div className="flex items-center gap-1 px-2 py-2 bg-background border-b">
         {/* Left Navigation */}
-        <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1 flex-shrink-0">
+        <div style={{ backgroundColor: "#41B6E6" }} className="rounded px-1 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
@@ -123,7 +123,7 @@ export default function NewsTicker() {
         </div>
 
         {/* Right Navigation */}
-        <div style={{ backgroundColor: "#11b6e9" }} className="rounded px-1 flex-shrink-0">
+        <div style={{ backgroundColor: "#41B6E6" }} className="rounded px-1 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"

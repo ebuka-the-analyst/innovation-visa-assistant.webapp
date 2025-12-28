@@ -408,7 +408,7 @@ Productivity = (Avg Leadership Score / 100) × 25%
                   <PolarGrid />
                   <PolarAngleAxis dataKey="skill" />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                  <Radar name="Current" dataKey="score" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
+                  <Radar name="Current" dataKey="score" stroke="#005EB8" fill="#005EB8" fillOpacity={0.6} />
                   <Radar name="Target" dataKey="target" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
                   <Tooltip />
                   <Legend />
@@ -425,7 +425,7 @@ Productivity = (Avg Leadership Score / 100) × 25%
                   <YAxis label={{ value: 'Overall %', angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="score" fill="#ffa536" name="Current Score" />
+                  <Bar dataKey="score" fill="#005EB8" name="Current Score" />
                   <Bar dataKey="target" fill="#10b981" fillOpacity={0.3} name="Target (75%)" />
                 </BarChart>
               </ResponsiveContainer>
@@ -441,8 +441,8 @@ Productivity = (Avg Leadership Score / 100) × 25%
                   <YAxis yAxisId="right" orientation="right" label={{ value: 'Score %', angle: 90, position: 'insideRight' }} />
                   <Tooltip />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="investment" fill="#11b6e9" name="Investment" />
-                  <Bar yAxisId="right" dataKey="score" fill="#ffa536" name="Score" />
+                  <Bar yAxisId="left" dataKey="investment" fill="#41B6E6" name="Investment" />
+                  <Bar yAxisId="right" dataKey="score" fill="#005EB8" name="Score" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>

@@ -513,7 +513,7 @@ Assessment: Innovation, Viability, Scalability criteria
   const { totalInvestment, roi } = getDevelopmentROI();
   const avgReadiness = roles.length > 0 ? Math.round(roles.reduce((sum, r) => sum + r.readinessLevel, 0) / roles.length) : 0;
 
-  const COLORS = ['#ffa536', '#11b6e9', '#8b5cf6', '#10b981', '#ef4444'];
+  const COLORS = ['#005EB8', '#41B6E6', '#8b5cf6', '#10b981', '#ef4444'];
 
   return (
     <>
@@ -608,9 +608,9 @@ Assessment: Innovation, Viability, Scalability criteria
                     }
                     return null;
                   }} />
-                  <Scatter name="Roles" data={getReadinessUrgencyScatter()} fill="#ffa536">
+                  <Scatter name="Roles" data={getReadinessUrgencyScatter()} fill="#005EB8">
                     {getReadinessUrgencyScatter().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.y > 70 && entry.x < 50 ? '#ef4444' : entry.impact > 80 ? '#ffa536' : '#11b6e9'} />
+                      <Cell key={`cell-${index}`} fill={entry.y > 70 && entry.x < 50 ? '#ef4444' : entry.impact > 80 ? '#005EB8' : '#41B6E6'} />
                     ))}
                   </Scatter>
                 </ScatterChart>
@@ -626,7 +626,7 @@ Assessment: Innovation, Viability, Scalability criteria
                   <YAxis label={{ value: 'Number of Roles', angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="count" fill="#ffa536" name="Current" />
+                  <Bar dataKey="count" fill="#005EB8" name="Current" />
                   <Bar dataKey="target" fill="#10b981" fillOpacity={0.3} name="Target" />
                 </BarChart>
               </ResponsiveContainer>
@@ -657,8 +657,8 @@ Assessment: Innovation, Viability, Scalability criteria
                   <YAxis yAxisId="right" orientation="right" label={{ value: 'Impact %', angle: 90, position: 'insideRight' }} />
                   <Tooltip />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="investment" fill="#ffa536" name="Annual Investment" />
-                  <Bar yAxisId="right" dataKey="impact" fill="#11b6e9" name="Business Impact" />
+                  <Bar yAxisId="left" dataKey="investment" fill="#005EB8" name="Annual Investment" />
+                  <Bar yAxisId="right" dataKey="impact" fill="#41B6E6" name="Business Impact" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>

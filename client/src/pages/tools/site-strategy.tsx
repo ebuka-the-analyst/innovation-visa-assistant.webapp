@@ -320,8 +320,8 @@ export default function SiteStrategy() {
                           <Radar
                             name={selectedLocation}
                             dataKey="value"
-                            stroke="#ffa536"
-                            fill="#ffa536"
+                            stroke="#005EB8"
+                            fill="#005EB8"
                             fillOpacity={0.5}
                           />
                         </RadarChart>
@@ -370,7 +370,7 @@ export default function SiteStrategy() {
                         <YAxis dataKey="name" type="category" width={100} />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="score" fill="#ffa536" name="Weighted Score" />
+                        <Bar dataKey="score" fill="#005EB8" name="Weighted Score" />
                       </BarChart>
                     </ResponsiveContainer>
 

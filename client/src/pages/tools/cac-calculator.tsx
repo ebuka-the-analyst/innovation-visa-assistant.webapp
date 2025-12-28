@@ -452,7 +452,7 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
 
   const { cac, ltv, ltvCacRatio, paybackMonths } = getMetrics();
   const { score: healthScore, grade } = getUnitEconomicsHealth();
-  const COLORS = ['#ffa536', '#11b6e9', '#10b981', '#8b5cf6'];
+  const COLORS = ['#005EB8', '#41B6E6', '#10b981', '#8b5cf6'];
 
   return (
     <>
@@ -546,7 +546,7 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
                   <Legend />
                   <Line type="monotone" dataKey="ltv" stroke="#10b981" strokeWidth={2} name="LTV" />
                   <Line type="monotone" dataKey="cac" stroke="#ef4444" strokeWidth={2} name="CAC" />
-                  <Line type="monotone" dataKey="target" stroke="#ffa536" strokeWidth={2} strokeDasharray="5 5" name="Target (3x CAC)" />
+                  <Line type="monotone" dataKey="target" stroke="#005EB8" strokeWidth={2} strokeDasharray="5 5" name="Target (3x CAC)" />
                 </LineChart>
               </ResponsiveContainer>
             </Card>
@@ -575,7 +575,7 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
                   <YAxis label={{ value: 'Value', angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="actual" fill="#ffa536" name="Your Metrics" />
+                  <Bar dataKey="actual" fill="#005EB8" name="Your Metrics" />
                   <Bar dataKey="benchmark" fill="#10b981" fillOpacity={0.3} name="Industry Benchmark" />
                 </BarChart>
               </ResponsiveContainer>

@@ -1,15 +1,50 @@
-# Innovator Founder Visa Assistant - Design Guidelines
+# UK Innovator Founder Visa Assistant - Design Guidelines
 
-## Design Approach
+## Brand Identity
 
-**Reference-Based Approach**: Draw inspiration from premium SaaS platforms (Stripe, Linear, Notion) while incorporating futuristic holographic aesthetics. The design must convey innovation, trust, and professionalism—critical for visa applicants demonstrating business credibility.
+The UK Innovator Founder Visa Assistant uses a professional NHS Blue-inspired color palette that conveys trust, authority, and UK governmental credibility. This design language reflects the platform's official nature as a visa assistance service.
 
 ## Core Design Elements
 
-### A. Typography
+### A. Color Palette
 
-**Primary Font**: Inter or Satoshi (UI elements, body text)
-**Display Font**: Fraunces or Playfair Display (headlines only)
+**Primary Colors**
+| Color | Hex | HSL | Usage |
+|-------|-----|-----|-------|
+| NHS Blue (Primary) | #005EB8 | 209, 100%, 36% | Primary brand, buttons, links |
+| NHS Dark Blue | #003087 | 219, 100%, 27% | Headers, footers, sidebar |
+| NHS Light Blue | #41B6E6 | 197, 76%, 58% | Accents, highlights, Nova agent |
+| NHS Bright Blue | #0072CE | 206, 100%, 40% | Interactive elements |
+
+**Accent Colors**
+| Color | Hex | HSL | Usage |
+|-------|-----|-----|-------|
+| Gold (CTA) | #eab308 | 48, 96%, 47% | Primary calls-to-action, Sterling agent |
+| Gold Hover | #ca8a04 | 45, 93%, 40% | Button hover states |
+| Emerald Green (Success) | #059669 | 160, 84%, 39% | Success states, Atlas agent |
+| Emerald Dark | #047857 | 162, 90%, 28% | Green hover states |
+
+**AI Agent Color System**
+| Agent | Role | Primary | Gradient |
+|-------|------|---------|----------|
+| Nova | Innovation | #41B6E6 | from-[#41B6E6] to-[#0072CE] |
+| Sterling | Financial | #eab308 | from-[#eab308] to-[#ca8a04] |
+| Atlas | Growth | #059669 | from-[#059669] to-[#047857] |
+| Sage | Compliance | #005EB8 | from-[#005EB8] to-[#003087] |
+
+**Semantic Colors**
+| Purpose | Light Mode | Dark Mode |
+|---------|------------|-----------|
+| Background | HSL 210 40% 98% | HSL 219 100% 6% |
+| Card | #FFFFFF | HSL 219 80% 10% |
+| Border | HSL 209 30% 85% | HSL 209 60% 20% |
+| Destructive | HSL 0 84% 60% | HSL 0 84% 60% |
+
+### B. Typography
+
+**Primary Font**: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif
+**Display Font**: Fraunces, Georgia, serif (headlines only)
+**Monospace Font**: ui-monospace, SFMono-Regular, Menlo, monospace
 
 **Type Scale** (Perfect Fourth - 1.333 ratio):
 - h1: 87px (display headlines)
@@ -27,7 +62,7 @@
 - Use `tabular-nums` for financial tables
 - Responsive sizing with clamp(): `clamp(2rem, 5vw, 5.4rem)`
 
-### B. Layout System
+### C. Layout System
 
 **Spacing Tokens** (4px base unit):
 - Core units: 2, 4, 8, 12, 16, 20, 24 (Tailwind: p-2, p-4, p-8, etc.)
@@ -40,81 +75,63 @@
 - Gutters: 24px (desktop), 16px (tablet), 12px (mobile)
 - Container max-widths: sm:640px, md:768px, lg:1024px, xl:1280px, 2xl:1536px
 
+**Border Radius**: 0.75rem (12px) - Rounded but not pill-shaped
+
 **Breakpoints**:
 - sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px
 
-### C. Component Library
+### D. Component Library
 
-**Holographic Cards**:
-- Glassmorphic design: `backdrop-filter: blur(20px)`
-- Semi-transparent backgrounds: `rgba(17, 182, 233, 0.1)`
-- Subtle borders: `1px solid rgba(255, 255, 255, 0.18)`
-- Multi-layer shadows: `0 8px 32px rgba(17, 182, 233, 0.15)` + inset highlights
+**Glassmorphism Effects**:
+- Light mode: `rgba(255, 255, 255, 0.7)` background
+- Dark mode: `rgba(15, 23, 42, 0.7)` background
+- Border: `rgba(255, 255, 255, 0.5)` (light) / `rgba(255, 255, 255, 0.1)` (dark)
+- Shadow: `0 8px 32px rgba(31, 38, 135, 0.15)` (light) / `rgba(0, 94, 184, 0.2)` (dark)
+- Blur: `backdrop-filter: blur(12px)`
+
+**Cards**:
+- Semi-transparent backgrounds with glassmorphism
+- Subtle NHS Blue-tinted shadows
 - Hover: elevate with `translateY(-8px)`, shimmer gradient animation
 
 **AI Agent Avatars** (4 characters):
-1. **Nova** (Innovation - #11b6e9): Hexagon/circuit geometric design
-2. **Sterling** (Financial - #FFD700): Calculator/growth chart motifs
-3. **Atlas** (Growth - #10B981): Expanding node network
-4. **Sage** (Compliance - #8B5CF6): Checkmark/shield elements
+1. **Nova** (Innovation - NHS Light Blue #41B6E6): Hexagon/circuit geometric design
+2. **Sterling** (Financial - Gold #eab308): Calculator/growth chart motifs
+3. **Atlas** (Growth - Emerald #059669): Expanding node network
+4. **Sage** (Compliance - NHS Blue #005EB8): Checkmark/shield elements
 - Size: 80px circular avatars
 - Animated gradient backgrounds with rotating particles
 - Active agent: 1.3x scale, pulsing animation
 
-**Agent Handover Animation**:
-- Horizontal lineup (vertical on mobile)
-- SVG path animation connecting agents (500ms ease-in-out)
-- Document icon travels along path using CSS offset-path
-- Particle stream effect (Three.js) showing data transfer
-- Progress percentage and time remaining below
-
-**Spatial Timeline** (Generation Progress):
-- Fixed position: left 5% (desktop), bottom 80px (mobile)
-- Nodes: 40px circles with icons
-- Connected by gradient SVG paths with stroke-dasharray animation
-- Active node: pulsing scale + rotating orbital ring
-- States: completed (green checkmark), pending (hollow), current (animated)
-
-**AR-Inspired Panels** (Modals/Dialogs):
-- Ultra-low opacity dark background: `rgba(10, 10, 10, 0.85)`
-- Heavy backdrop blur: 30px
-- Entrance: slide from right + fade + subtle rotation
-- Holographic corner indicators (triangular SVGs with animated gradients)
-- Gesture interactions: swipe to dismiss (mobile), parallax cursor tracking (desktop)
-
 **Buttons**:
-- Glassmorphic background with blur
-- Hover: `hue-rotate(15deg)`, `scale(1.02)`, elevated shadow
-- Active: `translateZ(-10px)` 3D press effect
-- On images: blurred background, no custom hover states (native Button styling)
+- Primary: NHS Blue background (#005EB8), white text
+- Gold CTA: Gold background (#eab308), NHS Dark Blue text (#003087)
+- Outline: White border on dark backgrounds with hover elevation
+- Ghost: Transparent with hover elevation
+- Glassmorphic background with blur for special uses
+- Hover: subtle elevation, scale(1.02)
+- Active: press effect with scale(0.98)
 
-**Forms & Inputs**:
-- Floating label pattern
-- Touch targets: min 44px height
-- Inline validation on blur
-- Error states: red left border, icon, shake animation
-- Progressive disclosure for follow-up questions
+**Sidebar** (Fixed across themes):
+- Background: NHS Dark Blue (#003087)
+- Text: White (#FFFFFF)
+- Active Item: Lighter blue highlight
+- Border: Darker blue accent
 
-**Progress Indicators**:
-- Circular: SVG circle with stroke-dasharray (280px diameter)
-- Inside ring: active agent avatar + percentage
-- Typewriter animation for task descriptions
-- Ambient particle background (floating dots in brand colors)
+**Header/Navigation**:
+- Background: NHS Dark Blue (#003087)
+- Logo/Text: White
+- CTA Button: Gold (#eab308)
 
-**Document Cards**:
-- Aspect ratio 16:9, min-height 240px
-- Top: holographic gradient + icon + date
-- Middle: title (2-line truncation)
-- Bottom: status badge + action buttons
-- Hover sequence: elevate → shimmer → reveal preview button
+### E. Animations
 
-**Navigation**:
-- Desktop: 280px sidebar (collapsible to 64px icons)
-- Mobile: bottom tab bar (5 icons)
-- Sticky header: 60px (desktop), 48px (mobile)
-- Z-index: sidebar 10, header 20, modals 1000
-
-### D. Animations
+**Custom Keyframe Animations**:
+- `rotate-glow`: NHS Blue rotating glow (3s linear infinite)
+- `rotate-glow-gold`: Gold rotating glow for tools widget
+- `pulse-glow`: NHS Blue pulsing glow for chat
+- `pulse-glow-gold`: Gold pulsing glow for tools
+- `ping-slow`: 7s double flash with 5s pause
+- `widget-swipe-pulse`: Gold ADHD-friendly swipe animation
 
 **Timing Functions**:
 - Entrances: ease-out (0.25s)
@@ -122,78 +139,64 @@
 - State changes: ease-in-out (0.3s)
 - Playful bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55)
 
-**Key Animations**:
-- Route transitions: fade + translateY(20px→0), 400ms, stagger children 50ms
-- Button press: scale(0.97), 100ms
-- Loading skeletons: shimmer gradient sweep, 2s infinite
-- Scroll-triggered: Intersection Observer, opacity 0→1 + translateY(40px→0)
-- Use transform/opacity only (GPU-accelerated)
+**GPU-Optimized**:
+- Use transform/opacity only for animations
 - Apply will-change sparingly, remove after completion
 
-**3D Effects**:
-- Perspective containers: `perspective: 1000px`
-- Pricing cards: hover applies `translateZ(50px) rotateY(-5deg)` to selected, `translateZ(-20px)` to siblings
-- Scroll animations: cards rotate from `rotateX(-15deg)` to flat on entry
+### F. Shadows
+
+**NHS Blue-Tinted Shadow Scale**:
+- shadow-2xs: `0px 1px 2px hsl(209 100% 36% / 0.05)`
+- shadow-xs: `0px 1px 3px hsl(209 100% 36% / 0.08)`
+- shadow-sm: `0px 2px 4px hsl(209 100% 36% / 0.08)`
+- shadow: `0px 4px 6px hsl(209 100% 36% / 0.08)`
+- shadow-md: `0px 6px 10px hsl(209 100% 36% / 0.10)`
+- shadow-lg: `0px 10px 15px hsl(209 100% 36% / 0.12)`
+- shadow-xl: `0px 20px 25px hsl(209 100% 36% / 0.12)`
+- shadow-2xl: `0px 25px 50px hsl(209 100% 36% / 0.25)`
+
+### G. Charts (Recharts)
+
+| Chart Variable | Color | Purpose |
+|----------------|-------|---------|
+| chart-1 | NHS Blue (209, 100%, 36%) | Primary data |
+| chart-2 | Emerald (160, 84%, 39%) | Secondary data |
+| chart-3 | Purple (280, 65%, 60%) | Tertiary data |
+| chart-4 | Gold (43, 96%, 56%) | Accent data |
+| chart-5 | Cyan (190, 95%, 39%) | Additional data |
 
 ## Page-Specific Guidelines
 
 **Landing Page**:
-- Hero: Split layout (55% text, 45% 3D mockup of business plan)
-- Headline: "Get Your UK Innovation Visa Approved - AI-Generated Business Plans in Minutes"
-- Dual CTA: primary button + "See Sample Plan" link
-- Trust signals: "Join 500+ approved applicants" with count-up animation
-- Sections: Hero, Features (cards), Pricing, Testimonials, FAQ
+- Hero: Split layout with NHS Blue gradient accents
+- Headline: Professional, authority-conveying messaging
+- Dual CTA: NHS Blue primary + Gold secondary
+- Trust signals with UK government-inspired styling
 
 **Pricing Page**:
-- Three-tier cards: Basic (gray), Premium (brand gradient, elevated, "Most Popular"), Enterprise (navy)
-- Center tier: translateY(-20px), scale(1.05)
-- Below: testimonial carousel, FAQ accordion, trust badges
-
-**Questionnaire**:
-- Full-screen steps with progression indicator
-- Step circles: 40px, filled/hollow/pulsing
-- Autosave with "Saved" indicator
-- Encouraging micro-copy with completion percentage
+- Three-tier cards with NHS Blue hierarchy
+- Featured tier: Gold accent, elevated positioning
+- Trust badges with NHS styling
 
 **Dashboard**:
-- Sidebar navigation (280px)
-- Main: 8-column content + 4-column contextual sidebar
-- Document cards in grid
-- Sticky header with search and notifications
-
-**Document Preview**:
-- Split-pane: 60% PDF preview, 40% metadata/tools
-- Zoom controls, page navigation, full-screen toggle
-- Thumbnail sidebar (collapsible)
-- Share: unique URL, QR code, copy link
-
-## Images
-
-**Hero Section**: Large 3D mockup of professional business plan document rotating in space (right 45% of hero). Background: subtle animated gradient mesh suggesting tech/innovation.
-
-**Pricing Cards**: Icon illustrations for each tier (Basic: document outline, Premium: starred document with glow, Enterprise: crowned document).
-
-**Testimonial Section**: User photos in circular frames (if available), or use abstract avatars with brand color gradients.
-
-**Feature Cards**: Abstract icon illustrations representing each feature (AI brain for generation, shield for compliance, rocket for scalability).
-
-No large background hero images—use gradient meshes and 3D elements instead to maintain futuristic aesthetic.
+- NHS Dark Blue sidebar navigation
+- White/light content area
+- Gold accent for important actions
+- NHS Blue for navigation and links
 
 ## Accessibility
 
 - Color contrast: min 4.5:1 (text), 3:1 (large text)
-- Keyboard navigation: visible focus indicators (3px outline, 2px offset)
+- Keyboard navigation: visible focus indicators (NHS Blue outline)
 - ARIA landmarks: nav, main, aside
-- Form labels: for/id pairing, aria-describedby for errors
 - Touch targets: min 44x44px
-- Reduced motion: detect `prefers-reduced-motion`, disable non-essential animations
+- Reduced motion: respect `prefers-reduced-motion`
 
 ## Implementation Notes
 
 - Mobile-first CSS with progressive enhancement
 - Use Tailwind for utility-first styling
 - Radix UI (via Shadcn) for accessible primitives
-- React Query for server state
-- React Hook Form + Zod for forms
-- Performance: Virtual scrolling for long lists, lazy loading for images, code splitting by route
-- Target 60fps: use transform/opacity only, monitor with React DevTools Profiler
+- CSS variables for all brand colors
+- Dark mode via `.dark` class toggle
+- Target 60fps animations

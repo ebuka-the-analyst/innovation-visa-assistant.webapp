@@ -665,7 +665,7 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
                         <PolarGrid />
                         <PolarAngleAxis dataKey="criteria" />
                         <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                        <Radar name="Your Score" dataKey="value" stroke="#ffa536" fill="#ffa536" fillOpacity={0.5} />
+                        <Radar name="Your Score" dataKey="value" stroke="#005EB8" fill="#005EB8" fillOpacity={0.5} />
                         <Legend />
                         <Tooltip />
                       </RadarChart>
@@ -683,7 +683,7 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="yourScore" fill="#ffa536" name="Your Score" />
+                        <Bar dataKey="yourScore" fill="#005EB8" name="Your Score" />
                         <Bar dataKey="required" fill="#22c55e" name="Required" />
                       </BarChart>
                     </ResponsiveContainer>

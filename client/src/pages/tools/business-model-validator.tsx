@@ -838,7 +838,7 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
                         <PolarGrid />
                         <PolarAngleAxis dataKey="block" tick={{ fontSize: 11 }} />
                         <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                        <Radar name="Score" dataKey="score" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
+                        <Radar name="Score" dataKey="score" stroke="#005EB8" fill="#005EB8" fillOpacity={0.6} />
                         <Tooltip />
                       </RadarChart>
                     </ResponsiveContainer>
@@ -885,9 +885,9 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
                         <XAxis dataKey="block" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 10 }} />
                         <YAxis domain={[0, 100]} />
                         <Tooltip />
-                        <Bar dataKey="score" fill="#ffa536">
+                        <Bar dataKey="score" fill="#005EB8">
                           {getBlockScores().map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.score >= 75 ? '#10b981' : entry.score >= 60 ? '#ffa536' : '#ef4444'} />
+                            <Cell key={`cell-${index}`} fill={entry.score >= 75 ? '#10b981' : entry.score >= 60 ? '#005EB8' : '#ef4444'} />
                           ))}
                         </Bar>
                       </BarChart>

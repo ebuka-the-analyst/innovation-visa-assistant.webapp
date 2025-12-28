@@ -111,11 +111,11 @@ export function OnboardingTour({ onComplete, isOpen }: OnboardingTourProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
       <Card className="w-full max-w-lg mx-4 shadow-2xl border-2 overflow-hidden">
-        <div className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9] p-1">
+        <div className="bg-gradient-to-r from-[#005EB8] to-[#41B6E6] p-1">
           <div className="bg-background p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#ffa536] to-[#11b6e9] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#005EB8] to-[#41B6E6] flex items-center justify-center">
                   <Icon className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -194,7 +194,7 @@ export function OnboardingTour({ onComplete, isOpen }: OnboardingTourProps) {
                   )}
                   <Button 
                     onClick={handleNext}
-                    className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9] text-white"
+                    className="bg-gradient-to-r from-[#005EB8] to-[#41B6E6] text-white"
                     data-testid="button-tour-next"
                   >
                     {currentStep === TOUR_STEPS.length - 1 ? (

@@ -348,7 +348,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
   const { score: cultureScore, grade } = getCultureStrength();
   const { avgImpact, estimatedRetentionBoost, costSavings } = getRetentionImpact();
 
-  const COLORS = ['#ffa536', '#11b6e9', '#8b5cf6', '#10b981', '#ef4444'];
+  const COLORS = ['#005EB8', '#41B6E6', '#8b5cf6', '#10b981', '#ef4444'];
 
   return (
     <>
@@ -476,7 +476,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
                       <YAxis label={{ value: 'Alignment %', angle: -90, position: 'insideLeft' }} />
                       <Tooltip />
                       <Legend />
-                      <Bar dataKey="alignment" fill="#ffa536" name="Current" />
+                      <Bar dataKey="alignment" fill="#005EB8" name="Current" />
                       <Bar dataKey="target" fill="#10b981" fillOpacity={0.3} name="Target (80%)" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -490,7 +490,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
                       <XAxis type="number" label={{ value: 'Impact %', position: 'insideBottom', offset: -5 }} />
                       <YAxis dataKey="value" type="category" width={100} />
                       <Tooltip />
-                      <Bar dataKey="impact" fill="#11b6e9" name="Retention Impact" />
+                      <Bar dataKey="impact" fill="#41B6E6" name="Retention Impact" />
                     </BarChart>
                   </ResponsiveContainer>
                 </Card>
@@ -502,8 +502,8 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
                       <PolarGrid />
                       <PolarAngleAxis dataKey="value" />
                       <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                      <Radar name="Alignment" dataKey="alignment" stroke="#ffa536" fill="#ffa536" fillOpacity={0.5} />
-                      <Radar name="Behaviors" dataKey="behaviors" stroke="#11b6e9" fill="#11b6e9" fillOpacity={0.5} />
+                      <Radar name="Alignment" dataKey="alignment" stroke="#005EB8" fill="#005EB8" fillOpacity={0.5} />
+                      <Radar name="Behaviors" dataKey="behaviors" stroke="#41B6E6" fill="#41B6E6" fillOpacity={0.5} />
                       <Radar name="Retention" dataKey="retention" stroke="#10b981" fill="#10b981" fillOpacity={0.5} />
                       <Tooltip />
                       <Legend />
@@ -521,7 +521,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
                       <Tooltip />
                       <Bar dataKey="score" fill="#8b5cf6" name="Maturity">
                         {getImplementationMaturity().map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.score >= 80 ? '#10b981' : entry.score >= 60 ? '#ffa536' : '#ef4444'} />
+                          <Cell key={`cell-${index}`} fill={entry.score >= 80 ? '#10b981' : entry.score >= 60 ? '#005EB8' : '#ef4444'} />
                         ))}
                       </Bar>
                     </BarChart>

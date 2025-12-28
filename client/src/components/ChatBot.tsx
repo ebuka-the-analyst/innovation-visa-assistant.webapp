@@ -90,7 +90,7 @@ export default function ChatBot() {
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center text-white z-[9999]"
         style={{
-          background: "linear-gradient(135deg, #ffa536 0%, #11b6e9 100%)",
+          background: "linear-gradient(135deg, #005EB8 0%, #41B6E6 100%)",
           animation: isOpen ? "none" : "pulse-glow 2s ease-in-out infinite"
         }}
         data-testid="button-chatbot-toggle"
@@ -127,7 +127,7 @@ export default function ChatBot() {
           {/* Header */}
           <div 
             className="px-3 py-3 sm:px-4 sm:py-4 text-white flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #0D2C4A 0%, #11b6e9 100%)" }}
+            style={{ background: "linear-gradient(135deg, #0D2C4A 0%, #41B6E6 100%)" }}
           >
             <div className="flex justify-between items-center gap-2">
               <h3 className="font-bold text-sm sm:text-base md:text-lg truncate">
@@ -201,7 +201,7 @@ export default function ChatBot() {
                 data-testid="button-chat-send"
                 className="h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0"
                 style={{ 
-                  background: input.trim() ? "linear-gradient(135deg, #ffa536 0%, #11b6e9 100%)" : undefined
+                  background: input.trim() ? "linear-gradient(135deg, #005EB8 0%, #41B6E6 100%)" : undefined
                 }}
               >
                 {isLoading ? (

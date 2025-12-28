@@ -344,7 +344,7 @@ GOV.UK: Innovator Founder Visa viability criterion
 
   const { score: performanceScore, grade } = getTeamPerformance();
   const { alignmentScore, performersUnderpaid } = getPayAlignment();
-  const COLORS = ['#10b981', '#ffa536', '#11b6e9', '#ef4444'];
+  const COLORS = ['#10b981', '#005EB8', '#41B6E6', '#ef4444'];
 
   return (
     <>
@@ -431,8 +431,8 @@ GOV.UK: Innovator Founder Visa viability criterion
                   <YAxis yAxisId="right" orientation="right" label={{ value: 'Salary £', angle: 90, position: 'insideRight' }} />
                   <Tooltip />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="rating" fill="#ffa536" name="Rating (1-4)" />
-                  <Bar yAxisId="right" dataKey="salary" fill="#11b6e9" name="Salary" />
+                  <Bar yAxisId="left" dataKey="rating" fill="#005EB8" name="Rating (1-4)" />
+                  <Bar yAxisId="right" dataKey="salary" fill="#41B6E6" name="Salary" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -444,7 +444,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                   <PolarGrid />
                   <PolarAngleAxis dataKey="metric" />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                  <Radar name="Health %" dataKey="score" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
+                  <Radar name="Health %" dataKey="score" stroke="#005EB8" fill="#005EB8" fillOpacity={0.6} />
                   <Tooltip />
                 </RadarChart>
               </ResponsiveContainer>
@@ -459,7 +459,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                   <YAxis label={{ value: 'Score %', angle: -90, position: 'insideLeft' }} domain={[0, 100]} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="score" fill="#ffa536" name="Team Score" />
+                  <Bar dataKey="score" fill="#005EB8" name="Team Score" />
                   <Bar dataKey="target" fill="#10b981" fillOpacity={0.3} name="Target (75%)" />
                 </BarChart>
               </ResponsiveContainer>

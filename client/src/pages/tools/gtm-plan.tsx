@@ -575,8 +575,8 @@ https://www.gov.uk/innovator-founder-visa
   ];
 
   const COLORS = {
-    primary: '#ffa536',
-    secondary: '#11b6e9',
+    primary: '#005EB8',
+    secondary: '#41B6E6',
     success: '#10b981',
     warning: '#f59e0b',
     danger: '#ef4444',

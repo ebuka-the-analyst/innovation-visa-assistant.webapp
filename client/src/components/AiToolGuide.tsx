@@ -51,9 +51,9 @@ const AGENTS: Record<AgentType, AgentPersona> = {
     name: 'Nova',
     title: 'Innovation Specialist',
     avatar: novaAvatar,
-    primaryColor: '#ffa536',
-    gradientFrom: '#ffa536',
-    gradientTo: '#ff7b00',
+    primaryColor: '#005EB8',
+    gradientFrom: '#005EB8',
+    gradientTo: '#003087',
     criterion: 'innovation',
     personality: 'Creative, enthusiastic, forward-thinking',
     icon: Lightbulb
@@ -63,8 +63,8 @@ const AGENTS: Record<AgentType, AgentPersona> = {
     name: 'Sterling',
     title: 'Financial Analyst',
     avatar: sterlingAvatar,
-    primaryColor: '#11b6e9',
-    gradientFrom: '#11b6e9',
+    primaryColor: '#41B6E6',
+    gradientFrom: '#41B6E6',
     gradientTo: '#0891b2',
     criterion: 'viability',
     personality: 'Analytical, precise, business-focused',
@@ -356,7 +356,7 @@ export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePan
     return (
       <Card className="p-6">
         <div className="flex items-center gap-4 mb-4">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-[#ffa536] to-[#11b6e9] text-white">
+          <div className="p-3 rounded-xl bg-gradient-to-br from-[#005EB8] to-[#41B6E6] text-white">
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
@@ -370,7 +370,7 @@ export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePan
         </p>
         <div className="flex gap-3">
           <a href="/pricing">
-            <Button className="bg-gradient-to-r from-[#ffa536] to-[#11b6e9]">
+            <Button className="bg-gradient-to-r from-[#005EB8] to-[#41B6E6]">
               <Sparkles className="h-4 w-4 mr-2" />
               View Plans
             </Button>
@@ -837,7 +837,7 @@ export function AiTraditionalToggle({
           onClick={handleAiClick}
           className={`relative flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
             mode === 'ai' && isPaidUser
-              ? 'bg-gradient-to-r from-[#ffa536] to-[#11b6e9] text-white shadow-md' 
+              ? 'bg-gradient-to-r from-[#005EB8] to-[#41B6E6] text-white shadow-md' 
               : 'text-muted-foreground hover:text-foreground'
           }`}
           data-testid="button-mode-ai"
@@ -883,7 +883,7 @@ export function AiTraditionalToggle({
               >
                 <Card className="p-6 shadow-xl border overflow-hidden">
                   <div className="flex items-start gap-4 mb-5">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-[#ffa536] to-[#11b6e9] text-white shadow-lg">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-[#005EB8] to-[#41B6E6] text-white shadow-lg">
                       <Sparkles className="w-5 h-5" />
                     </div>
                     <div className="flex-1">
@@ -925,7 +925,7 @@ export function AiTraditionalToggle({
                         setShowUpgradePrompt(false);
                         window.location.href = '/pricing';
                       }}
-                      className="flex-1 bg-gradient-to-r from-[#ffa536] to-[#11b6e9] hover:opacity-90"
+                      className="flex-1 bg-gradient-to-r from-[#005EB8] to-[#41B6E6] hover:opacity-90"
                       data-testid="button-upgrade-ai"
                     >
                       <Sparkles className="h-4 w-4 mr-2" />

@@ -310,7 +310,7 @@ GOV.UK: Innovator Founder Visa scalability criterion
 
   const { score: coverageScore, grade, criticalGaps } = getSkillCoverage();
   const { singlePointsOfFailure, avgDepth } = getSkillRedundancy();
-  const COLORS = ['#10b981', '#ffa536', '#11b6e9', '#ef4444'];
+  const COLORS = ['#10b981', '#005EB8', '#41B6E6', '#ef4444'];
 
   return (
     <>
@@ -381,7 +381,7 @@ GOV.UK: Innovator Founder Visa scalability criterion
                   <YAxis label={{ value: 'Coverage %', angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="coverage" fill="#ffa536" name="Current Coverage" />
+                  <Bar dataKey="coverage" fill="#005EB8" name="Current Coverage" />
                   <Bar dataKey="target" fill="#10b981" fillOpacity={0.3} name="Target (75%)" />
                 </BarChart>
               </ResponsiveContainer>
@@ -407,7 +407,7 @@ GOV.UK: Innovator Founder Visa scalability criterion
                   <PolarGrid />
                   <PolarAngleAxis dataKey="skill" />
                   <PolarRadiusAxis angle={90} domain={[0, Math.max(5, skillEntries.length)]} />
-                  <Radar name="Total Depth" dataKey="depth" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
+                  <Radar name="Total Depth" dataKey="depth" stroke="#005EB8" fill="#005EB8" fillOpacity={0.6} />
                   <Radar name="Experts" dataKey="experts" stroke="#10b981" fill="#10b981" fillOpacity={0.4} />
                   <Tooltip />
                   <Legend />

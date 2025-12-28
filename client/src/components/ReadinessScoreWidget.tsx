@@ -48,8 +48,8 @@ export default function ReadinessScoreWidget({
               </feMerge>
             </filter>
             <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ffa536" />
-              <stop offset="100%" stopColor="#11b6e9" />
+              <stop offset="0%" stopColor="#005EB8" />
+              <stop offset="100%" stopColor="#41B6E6" />
             </linearGradient>
           </defs>
 

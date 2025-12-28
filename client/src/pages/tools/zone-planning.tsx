@@ -543,8 +543,8 @@ export default function ZonePlanning() {
                           <Radar
                             name="Priorities"
                             dataKey="value"
-                            stroke="#ffa536"
-                            fill="#ffa536"
+                            stroke="#005EB8"
+                            fill="#005EB8"
                             fillOpacity={0.5}
                           />
                         </RadarChart>

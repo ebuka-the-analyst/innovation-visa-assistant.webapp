@@ -245,7 +245,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
     if (d) setSavedDate(d);
   }, []);
 
-  const COLORS = ['#ffa536', '#11b6e9', '#8b5cf6', '#10b981'];
+  const COLORS = ['#005EB8', '#41B6E6', '#8b5cf6', '#10b981'];
   const genderGap = ((paygapData.maleAvg - paygapData.femaleAvg) / paygapData.maleAvg * 100).toFixed(1);
   const { score: diversityScore, grade } = getDiversityScore();
   const { diversityBonus, talentPoolExpansion } = getInnovationImpact();
@@ -391,7 +391,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
                       <XAxis dataKey="group" />
                       <YAxis label={{ value: 'Avg Salary £', angle: -90, position: 'insideLeft' }} />
                       <Tooltip formatter={(value: number) => `£${value.toLocaleString()}`} />
-                      <Bar dataKey="avg" fill="#ffa536" name="Average Salary" />
+                      <Bar dataKey="avg" fill="#005EB8" name="Average Salary" />
                     </BarChart>
                   </ResponsiveContainer>
                 </Card>
@@ -403,7 +403,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
                       <PolarGrid />
                       <PolarAngleAxis dataKey="metric" />
                       <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                      <Radar name="D&I Score" dataKey="score" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
+                      <Radar name="D&I Score" dataKey="score" stroke="#005EB8" fill="#005EB8" fillOpacity={0.6} />
                       <Tooltip />
                     </RadarChart>
                   </ResponsiveContainer>

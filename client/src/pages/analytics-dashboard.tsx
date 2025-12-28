@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Download, TrendingUp, Users, Clock, Target } from "lucide-react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
-const COLORS = ["#ffa536", "#11b6e9", "#6366f1", "#ec4899", "#14b8a6"];
+const COLORS = ["#005EB8", "#41B6E6", "#6366f1", "#ec4899", "#14b8a6"];
 
 export default function AnalyticsDashboard() {
   const [analytics, setAnalytics] = useState<any>(null);
@@ -110,8 +110,8 @@ export default function AnalyticsDashboard() {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="sessions" stroke="#ffa536" />
-                  <Line type="monotone" dataKey="users" stroke="#11b6e9" />
+                  <Line type="monotone" dataKey="sessions" stroke="#005EB8" />
+                  <Line type="monotone" dataKey="users" stroke="#41B6E6" />
                 </LineChart>
               </ResponsiveContainer>
             </Card>
@@ -127,7 +127,7 @@ export default function AnalyticsDashboard() {
                     labelLine={false}
                     label={({ name, value }) => `${name}: ${value}`}
                     outerRadius={80}
-                    fill="#ffa536"
+                    fill="#005EB8"
                     dataKey="value"
                   >
                     {analytics.eventBreakdown.map((entry: any, index: number) => (
@@ -163,7 +163,7 @@ export default function AnalyticsDashboard() {
                   <XAxis dataKey="tool" angle={-45} textAnchor="end" height={80} />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="completion" fill="#11b6e9" />
+                  <Bar dataKey="completion" fill="#41B6E6" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>

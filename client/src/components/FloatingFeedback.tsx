@@ -19,8 +19,8 @@ interface FeedbackOption {
 
 const feedbackOptions: FeedbackOption[] = [
   { type: "bug", label: "Report a Bug", icon: Bug, color: "#ef4444" },
-  { type: "suggestion", label: "Suggestion", icon: Lightbulb, color: "#ffa536" },
-  { type: "question", label: "Question", icon: HelpCircle, color: "#11b6e9" },
+  { type: "suggestion", label: "Suggestion", icon: Lightbulb, color: "#005EB8" },
+  { type: "question", label: "Question", icon: HelpCircle, color: "#41B6E6" },
   { type: "praise", label: "Praise", icon: ThumbsUp, color: "#22c55e" },
 ];
 
@@ -128,7 +128,7 @@ export default function FloatingFeedback() {
         onClick={() => setIsOpen(!isOpen)}
         className="fixed left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center text-white z-[9999]"
         style={{
-          background: "linear-gradient(135deg, #11b6e9 0%, #ffa536 100%)",
+          background: "linear-gradient(135deg, #41B6E6 0%, #005EB8 100%)",
           animation: isOpen ? "none" : "feedback-pulse 3s ease-in-out infinite"
         }}
         data-testid="button-feedback-toggle"
@@ -152,7 +152,7 @@ export default function FloatingFeedback() {
         >
           <div 
             className="p-4 flex-shrink-0 flex items-center justify-between"
-            style={{ background: "linear-gradient(135deg, #11b6e9 0%, #ffa536 100%)" }}
+            style={{ background: "linear-gradient(135deg, #41B6E6 0%, #005EB8 100%)" }}
           >
             <div className="flex items-center gap-2">
               <MessageSquareWarning className="w-5 h-5 text-white" />
@@ -272,7 +272,7 @@ export default function FloatingFeedback() {
               <Button
                 onClick={handleSubmit}
                 disabled={submitMutation.isPending || !feedbackType || !message.trim()}
-                className="w-full bg-gradient-to-r from-[#11b6e9] to-[#ffa536] hover:opacity-90"
+                className="w-full bg-gradient-to-r from-[#41B6E6] to-[#005EB8] hover:opacity-90"
                 data-testid="button-feedback-send"
               >
                 {submitMutation.isPending ? (

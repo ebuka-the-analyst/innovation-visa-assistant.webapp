@@ -85,7 +85,7 @@ type RFEQuestion = {
 const COMMON_RFE_CATEGORIES = {
   innovation: {
     name: 'Innovation Evidence',
-    color: '#11b6e9',
+    color: '#41B6E6',
     description: 'Questions about your innovation, IP, and technical differentiation'
   },
   viability: {

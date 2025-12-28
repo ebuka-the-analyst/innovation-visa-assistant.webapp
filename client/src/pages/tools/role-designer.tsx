@@ -607,7 +607,7 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
   const { phasing } = getHiringRoadmapAnalysis();
   const { totalUniqueSkills } = getSkillCoverageAnalysis();
 
-  const COLORS = ['#ffa536', '#11b6e9', '#8b5cf6', '#10b981', '#ef4444'];
+  const COLORS = ['#005EB8', '#41B6E6', '#8b5cf6', '#10b981', '#ef4444'];
 
   return (
     <>
@@ -690,8 +690,8 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
                   <YAxis label={{ value: 'Cumulative Team Size', angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="Engineering" stackId="a" fill="#ffa536" />
-                  <Bar dataKey="Product" stackId="a" fill="#11b6e9" />
+                  <Bar dataKey="Engineering" stackId="a" fill="#005EB8" />
+                  <Bar dataKey="Product" stackId="a" fill="#41B6E6" />
                   <Bar dataKey="Sales" stackId="a" fill="#8b5cf6" />
                   <Bar dataKey="Operations" stackId="a" fill="#10b981" />
                   <Bar dataKey="Other" stackId="a" fill="#ef4444" />
@@ -723,7 +723,7 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
                   <YAxis label={{ value: 'Clarity %', angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="clarity" fill="#ffa536" name="Clarity Score" />
+                  <Bar dataKey="clarity" fill="#005EB8" name="Clarity Score" />
                   <Bar dataKey="target" fill="#10b981" fillOpacity={0.3} name="Target (80%)" />
                 </BarChart>
               </ResponsiveContainer>
@@ -736,7 +736,7 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
                   <PolarGrid />
                   <PolarAngleAxis dataKey="category" />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                  <Radar name="Skill Coverage" dataKey="coverage" stroke="#ffa536" fill="#ffa536" fillOpacity={0.6} />
+                  <Radar name="Skill Coverage" dataKey="coverage" stroke="#005EB8" fill="#005EB8" fillOpacity={0.6} />
                   <Tooltip />
                   <Legend />
                 </RadarChart>
