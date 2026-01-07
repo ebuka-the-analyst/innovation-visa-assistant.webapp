@@ -324,10 +324,10 @@ export const TIER_CREDITS = {
 // Tier pricing in pence (for upgrade calculations)
 export const TIER_PRICING = {
   free: 0,
-  basic: 2900, // £29
-  premium: 4900, // £49
-  enterprise: 8900, // £89
-  ultimate: 12900, // £129
+  basic: 2900, // £15
+  premium: 4900, // £29
+  enterprise: 8900, // £45
+  ultimate: 12900, // £60
 } as const;
 
 // Add-on pricing in pence
@@ -335,8 +335,8 @@ export const ADDON_PRICING = {
   single_credit: 3900, // £39
   triple_pack: 9900, // £99 (3 credits)
   partner_bundle: 5900, // £59 (+2 seats)
-  rejection_recovery: 8900, // £89 (2 credits + coaching)
-  rush_delivery: 4900, // £49
+  rejection_recovery: 8900, // £45 (2 credits + coaching)
+  rush_delivery: 4900, // £29
   compliance_refresh: 5900, // £59/year
   ultimate_assurance: 9900, // £99/year
 } as const;

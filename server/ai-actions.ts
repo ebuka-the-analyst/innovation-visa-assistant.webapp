@@ -456,25 +456,25 @@ function getTierInfo(tier: string): { name: string; price: string; toolCount: nu
     },
     basic: {
       name: 'Basic',
-      price: '£29/month',
+      price: '£15/month',
       toolCount: 20,
       benefits: ['20 tools total', 'Essential documentation', 'Email support']
     },
     premium: {
       name: 'Premium',
-      price: '£49/month',
+      price: '£29/month',
       toolCount: 83,
       benefits: ['83 tools total', 'Comprehensive coverage', 'Priority support', 'AI assistance']
     },
     enterprise: {
       name: 'Enterprise',
-      price: '£89/month',
+      price: '£45/month',
       toolCount: 109,
       benefits: ['All 109 tools', 'Advanced IP strategy', 'Patent guidance', 'Dedicated support']
     },
     ultimate: {
       name: 'Ultimate',
-      price: '£129/month',
+      price: '£60/month',
       toolCount: 109,
       benefits: ['All 109 tools', 'VIP support', 'Personal strategist', 'Success guarantee']
     }

@@ -339,16 +339,16 @@ export function shouldCapContent(tier: SubscriptionTier, currentWordCount: numbe
  */
 export function getUpgradeMessage(tier: SubscriptionTier): string {
   if (tier === 'free') {
-    return 'Upgrade to Basic (£29) for 25-35 pages with detailed financial projections and regulatory checklists.';
+    return 'Upgrade to Basic (£15) for 25-35 pages with detailed financial projections and regulatory checklists.';
   }
   if (tier === 'basic') {
-    return 'Upgrade to Premium (£49) for 40-60 pages with comprehensive market research and evidence appendices.';
+    return 'Upgrade to Premium (£29) for 40-60 pages with comprehensive market research and evidence appendices.';
   }
   if (tier === 'premium') {
-    return 'Upgrade to Enterprise (£89) for 50-80 pages with scenario analysis and full implementation planning.';
+    return 'Upgrade to Enterprise (£45) for 50-80 pages with scenario analysis and full implementation planning.';
   }
   if (tier === 'enterprise') {
-    return 'Upgrade to Ultimate (£129) for 80+ pages - our most comprehensive PhD-level visa package.';
+    return 'Upgrade to Ultimate (£60) for 80+ pages - our most comprehensive PhD-level visa package.';
   }
   return '';
 }

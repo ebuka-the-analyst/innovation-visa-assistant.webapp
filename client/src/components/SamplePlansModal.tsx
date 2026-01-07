@@ -266,7 +266,7 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                 <h3 className="font-bold mb-4 text-lg">Tier Comparison</h3>
                 <div className="grid md:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <h4 className="font-bold mb-3">Basic (£49)</h4>
+                    <h4 className="font-bold mb-3">Basic (£29)</h4>
                     <ul className="space-y-2 text-muted-foreground">
                       <li>✓ 25-35 pages</li>
                       <li>✓ Core sections</li>

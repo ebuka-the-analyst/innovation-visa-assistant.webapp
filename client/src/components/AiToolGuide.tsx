@@ -915,7 +915,7 @@ export function AiTraditionalToggle({
                   
                   <div className="bg-muted/50 rounded-lg p-3 mb-5 text-center">
                     <p className="text-sm text-muted-foreground">
-                      Available from <span className="font-semibold text-primary">Basic Plan (£29/mo)</span>
+                      Available from <span className="font-semibold text-primary">Basic Plan (£15/mo)</span>
                     </p>
                   </div>
                   

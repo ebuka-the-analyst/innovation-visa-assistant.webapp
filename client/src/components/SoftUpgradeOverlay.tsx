@@ -17,10 +17,10 @@ interface SoftUpgradeOverlayProps {
 
 const tierPrices: Record<ToolTier, string> = {
   free: "£0",
-  basic: "£29",
-  premium: "£49",
-  enterprise: "£89",
-  ultimate: "£129",
+  basic: "£15",
+  premium: "£29",
+  enterprise: "£45",
+  ultimate: "£60",
 };
 
 const tierNames: Record<ToolTier, string> = {

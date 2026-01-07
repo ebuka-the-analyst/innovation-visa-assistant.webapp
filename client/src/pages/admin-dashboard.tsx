@@ -7544,10 +7544,10 @@ export default function AdminDashboard() {
                                 <div className="space-y-4">
                                   {(() => {
                                     const tierData = [
-                                      { source: 'Basic (£29)', amount: revenueAnalytics?.revenueByTier?.basic || 0, color: 'bg-green-500' },
-                                      { source: 'Premium (£49)', amount: revenueAnalytics?.revenueByTier?.premium || 0, color: 'bg-blue-500' },
-                                      { source: 'Enterprise (£89)', amount: revenueAnalytics?.revenueByTier?.enterprise || 0, color: 'bg-purple-500' },
-                                      { source: 'Ultimate (£129)', amount: revenueAnalytics?.revenueByTier?.ultimate || 0, color: 'bg-amber-500' },
+                                      { source: 'Basic (£15)', amount: revenueAnalytics?.revenueByTier?.basic || 0, color: 'bg-green-500' },
+                                      { source: 'Premium (£29)', amount: revenueAnalytics?.revenueByTier?.premium || 0, color: 'bg-blue-500' },
+                                      { source: 'Enterprise (£45)', amount: revenueAnalytics?.revenueByTier?.enterprise || 0, color: 'bg-purple-500' },
+                                      { source: 'Ultimate (£60)', amount: revenueAnalytics?.revenueByTier?.ultimate || 0, color: 'bg-amber-500' },
                                     ];
                                     const totalRevenue = tierData.reduce((sum, t) => sum + t.amount, 0) || 1;
                                     return tierData.map((item, index) => {
@@ -7853,10 +7853,10 @@ export default function AdminDashboard() {
                                 <div className="space-y-4">
                                   {(() => {
                                     const tierData = [
-                                      { tier: 'Ultimate (£129)', mrr: (revenueAnalytics?.tierDistribution?.ultimate || 0) * 129, users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6' },
-                                      { tier: 'Enterprise (£89)', mrr: (revenueAnalytics?.tierDistribution?.enterprise || 0) * 89, users: revenueAnalytics?.tierDistribution?.enterprise || 0, color: '#f59e0b' },
-                                      { tier: 'Premium (£49)', mrr: (revenueAnalytics?.tierDistribution?.premium || 0) * 49, users: revenueAnalytics?.tierDistribution?.premium || 0, color: '#3b82f6' },
-                                      { tier: 'Basic (£29)', mrr: (revenueAnalytics?.tierDistribution?.basic || 0) * 29, users: revenueAnalytics?.tierDistribution?.basic || 0, color: '#22c55e' },
+                                      { tier: 'Ultimate (£60)', mrr: (revenueAnalytics?.tierDistribution?.ultimate || 0) * 129, users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6' },
+                                      { tier: 'Enterprise (£45)', mrr: (revenueAnalytics?.tierDistribution?.enterprise || 0) * 89, users: revenueAnalytics?.tierDistribution?.enterprise || 0, color: '#f59e0b' },
+                                      { tier: 'Premium (£29)', mrr: (revenueAnalytics?.tierDistribution?.premium || 0) * 49, users: revenueAnalytics?.tierDistribution?.premium || 0, color: '#3b82f6' },
+                                      { tier: 'Basic (£15)', mrr: (revenueAnalytics?.tierDistribution?.basic || 0) * 29, users: revenueAnalytics?.tierDistribution?.basic || 0, color: '#22c55e' },
                                     ];
                                     const totalMrr = tierData.reduce((sum, t) => sum + t.mrr, 0) || 1;
                                     return tierData.map((item, index) => {

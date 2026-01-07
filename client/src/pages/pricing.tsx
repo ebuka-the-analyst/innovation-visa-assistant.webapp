@@ -36,7 +36,7 @@ const tiers = [
   {
     id: "basic",
     name: "Basic Plan",
-    price: "£29",
+    price: "£15",
     credits: 1,
     description: "Perfect for straightforward businesses",
     pages: "25-35 pages",
@@ -55,7 +55,7 @@ const tiers = [
   {
     id: "premium",
     name: "Premium Plan",
-    price: "£49",
+    price: "£29",
     credits: 3,
     description: "Most popular - comprehensive coverage",
     pages: "40-60 pages",
@@ -77,7 +77,7 @@ const tiers = [
   {
     id: "enterprise",
     name: "Enterprise Plan",
-    price: "£89",
+    price: "£45",
     credits: 6,
     description: "Maximum detail for complex ventures",
     pages: "50-80 pages",
@@ -99,7 +99,7 @@ const tiers = [
   {
     id: "ultimate",
     name: "Ultimate Plan",
-    price: "£129",
+    price: "£60",
     credits: "unlimited",
     description: "Everything you need for guaranteed approval",
     pages: "80+ pages",
@@ -123,7 +123,7 @@ const addons = [
   {
     id: "single_credit",
     name: "Single Credit",
-    price: "£39",
+    price: "£19",
     description: "Generate one additional business plan",
     icon: CreditCard,
     highlight: false,
@@ -131,8 +131,8 @@ const addons = [
   {
     id: "triple_pack",
     name: "Triple Credit Pack",
-    price: "£99",
-    savings: "Save £18",
+    price: "£49",
+    savings: "Save £8",
     description: "3 business plan credits - perfect for iterations",
     icon: Gift,
     highlight: true,
@@ -140,7 +140,7 @@ const addons = [
   {
     id: "partner_bundle",
     name: "Partner Bundle",
-    price: "£59",
+    price: "£29",
     description: "Plans for you and your co-founder",
     icon: Users,
     highlight: false,
@@ -148,8 +148,8 @@ const addons = [
   {
     id: "family_pack",
     name: "Family Pack",
-    price: "£149",
-    savings: "Save £46",
+    price: "£75",
+    savings: "Save £20",
     description: "5 business plans - ideal for multiple ventures",
     icon: Heart,
     highlight: false,
@@ -157,7 +157,7 @@ const addons = [
   {
     id: "ultimate_assurance",
     name: "Ultimate Assurance",
-    price: "£99/year",
+    price: "£49/year",
     description: "Unlimited business plan generations for 1 year",
     icon: Infinity,
     highlight: true,
@@ -357,8 +357,8 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
       <SEOHead
-        title="Pricing Plans | UK Innovator Founder Visa Assistant - £0 to £129"
-        description="Choose from 5 pricing tiers for your UK Innovator Founder Visa application. Free, Basic £29, Premium £49 (most popular), Enterprise £89, Ultimate £129. All plans include 100+ professional-level tools, business plan generation and expert guidance."
+        title="Pricing Plans | UK Innovator Founder Visa Assistant - £0 to £60"
+        description="Choose from 5 pricing tiers for your UK Innovator Founder Visa application. Free, Basic £15, Premium £29 (most popular), Enterprise £45, Ultimate £60. All plans include 100+ professional-level tools, business plan generation and expert guidance."
         canonical="https://innovatorfoundervisaassistant.co.uk/pricing"
         keywords="UK Innovator Founder Visa cost, visa application pricing, business plan cost, innovator founder visa fees, visa assistance pricing"
         schema={combinedSchema}

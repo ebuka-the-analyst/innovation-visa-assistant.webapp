@@ -228,7 +228,7 @@ export default function ToolsHub() {
     <>
       <SEOHead
         title="100+ UK Innovator Founder Visa Tools | Expert Application Assistant"
-        description="Access 100+ professional tools for your UK Innovator Founder Visa application. From compliance checkers to business plan generators, financial modeling to pitch coaching. Free to £129 tiers available."
+        description="Access 100+ professional tools for your UK Innovator Founder Visa application. From compliance checkers to business plan generators, financial modeling to pitch coaching. Free to £60 tiers available."
         canonical="https://innovatorfoundervisaassistant.co.uk/tools-hub"
         keywords="UK Innovator Founder Visa tools, business plan generator, compliance checker, financial projections, market analysis, visa application tools"
         schema={combinedSchema}

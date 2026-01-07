@@ -406,7 +406,7 @@ export const FOUNDER_DATA: FounderProfile = {
       "109+ purpose-built tools specifically for Innovator Founder Visa",
       "AI orchestration layer combining multiple language models (GPT-4, Gemini)",
       "Multi-agent endorsement readiness scoring (ORACLE with Nova, Sterling, Atlas, Sage)",
-      "90%+ cost reduction compared to traditional services (£29-299 vs £3,000-15,000)",
+      "90%+ cost reduction compared to traditional services (£15-299 vs £3,000-15,000)",
       "24/7 online access with real-time policy updates",
       "PhD-level quality standards backed by immigration expertise"
     ],
@@ -484,7 +484,7 @@ export const FOUNDER_DATA: FounderProfile = {
       "100% Innovator Founder focused (vs generic or broad focus)",
       "Advanced AI integration (GPT-4, Gemini) vs limited or none",
       "109+ purpose-built tools vs 10-20 generic tools",
-      "£29-299 price point vs £1,000-15,000",
+      "£15-299 price point vs £1,000-15,000",
       "Full self-service capability vs limited",
       "24/7 online access vs office hours only",
       "Real-time policy updates vs manual, delayed"
@@ -757,7 +757,7 @@ Traditional immigration services charge between £3,000 to £15,000 for Innovato
 KEY HIGHLIGHTS
 
 • Product: ${business.uniqueSellingPoints.length}+ professional-level AI-powered tools across 8 categories
-• Pricing: Tiered model from Free to Ultimate (£0 to £299)
+• Pricing: Tiered model from Free to Ultimate (£0 to £159)
 • Target Market: Global entrepreneurs seeking UK Innovator Founder Visa
 • Launch Date: ${business.launchDate}
 • Initial Investment: Under £1,000 (self-developed)

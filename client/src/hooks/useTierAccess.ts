@@ -21,10 +21,10 @@ const TIER_NAMES: Record<UserTier, string> = {
 
 const TIER_PRICES: Record<UserTier, string> = {
   free: "£0",
-  basic: "£29",
-  premium: "£49",
-  enterprise: "£89",
-  ultimate: "£129",
+  basic: "£15",
+  premium: "£29",
+  enterprise: "£45",
+  ultimate: "£60",
 };
 
 const TIER_PRICE_VALUES: Record<UserTier, number> = {
