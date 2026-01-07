@@ -30,8 +30,8 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-border bg-gradient-to-b from-background to-accent/5">
-      <div className="container mx-auto px-4 md:px-6 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-12 mb-12">
+      <div className="responsive-container py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4 lg:col-span-2">
             <div className="isolate z-[9999] mix-blend-normal bg-transparent">
@@ -136,8 +136,8 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex flex-col md:flex-row items-center gap-3">
+        <div className="pt-6 border-t border-border flex flex-col lg:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
             <div className="isolate z-[9999] mix-blend-normal bg-transparent opacity-70">
               <div className="logo-container overflow-hidden">
                 <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />

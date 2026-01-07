@@ -240,7 +240,7 @@ export default function MvpDemoGuide() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
+      <div className="responsive-container max-w-6xl">
         <ToolUtilityBar
           toolId="mvp-demo-guide"
           toolName="MVP & Demo Builder Guide"

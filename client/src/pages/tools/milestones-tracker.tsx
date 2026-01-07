@@ -280,7 +280,7 @@ export default function MilestonesTracker() {
   return (
     <ToolAccessGuard requiredTier="premium" toolName="Key Milestones Tracker">
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-        <div className="container mx-auto px-4 max-w-6xl">
+        <div className="responsive-container max-w-6xl">
           <div className="mb-6">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
               <div>

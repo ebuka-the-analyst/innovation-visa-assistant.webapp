@@ -57,7 +57,7 @@ export default function EvidenceGraph() {
   return (
     <div className="min-h-screen">
       
-      <div className="container mx-auto px-4 md:px-6 py-16">
+      <div className="responsive-container py-16">
         <div className="max-w-6xl mx-auto">
           <FeatureNavigation currentPage="document-organizer" />
           <div className="mb-12">

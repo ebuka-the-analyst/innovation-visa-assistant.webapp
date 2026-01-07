@@ -14,7 +14,7 @@ export default function CookiePolicy() {
       
       <div className="min-h-screen bg-gradient-to-b from-background to-accent/5">
         <div className="border-b bg-primary/5">
-          <div className="container mx-auto px-4 py-12 max-w-4xl">
+          <div className="responsive-container py-12 max-w-4xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Cookie className="w-6 h-6 text-primary" />
@@ -30,7 +30,7 @@ export default function CookiePolicy() {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-12 max-w-4xl">
+        <div className="responsive-container py-12 max-w-4xl">
           <div className="grid gap-6">
             <Card className="p-6">
               <div className="flex items-start gap-4">

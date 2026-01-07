@@ -123,7 +123,7 @@ export default function FeaturesShowcase() {
           <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
             {/* Hero */}
             <div className="border-b">
-              <div className="container mx-auto px-4 md:px-6 py-12">
+              <div className="responsive-container py-12">
                 <h1 className="text-4xl md:text-5xl font-bold mb-4" data-testid="heading-features">Everything You Need for UK Innovator Founder Visa Success</h1>
                 <p className="text-xl text-muted-foreground max-w-2xl">
                   A complete platform with 100+ tools, AI agents, expert guidance, and everything required to turn your innovation into a visa-approved business
@@ -131,7 +131,7 @@ export default function FeaturesShowcase() {
               </div>
             </div>
 
-            <div className="container mx-auto px-4 md:px-6 py-16">
+            <div className="responsive-container py-16">
               {/* Main Features Grid */}
               <section className="mb-20">
                 <h2 className="text-3xl font-bold mb-8">Core Features</h2>

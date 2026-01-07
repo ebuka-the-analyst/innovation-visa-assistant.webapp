@@ -35,7 +35,7 @@ export default function EverythingWeOfferSection() {
 
   return (
     <section className="py-20 md:py-32 bg-gradient-to-b from-background to-accent/5">
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="responsive-container md:px-6">
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">Everything You Need</h2>

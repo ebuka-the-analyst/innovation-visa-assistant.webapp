@@ -20,7 +20,7 @@ function LoadingFallback() {
 function ToolNotFound({ toolId }: { toolId: string }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-      <div className="container mx-auto px-4 max-w-2xl">
+      <div className="responsive-container max-w-2xl">
         <Card className="p-8 text-center">
           <AlertCircle className="w-16 h-16 mx-auto mb-4 text-orange-500" />
           <h1 className="text-2xl font-bold mb-2">Tool Not Found</h1>

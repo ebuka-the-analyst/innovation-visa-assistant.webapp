@@ -43,7 +43,7 @@ const faqs = [
 export default function FAQSection() {
   return (
     <section className="py-20 md:py-32 bg-gradient-to-b from-accent/5 to-background">
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
             Frequently Asked Questions

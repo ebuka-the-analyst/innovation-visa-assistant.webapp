@@ -19,7 +19,7 @@ export default function KPIDashboard() {
   return (
     <div className="min-h-screen">
       
-      <div className="container mx-auto px-4 md:px-6 py-16">
+      <div className="responsive-container py-16">
         <div className="max-w-6xl mx-auto">
           <FeatureNavigation currentPage="questionnaire" />
           <div className="mb-12">

@@ -225,7 +225,7 @@ export default function VisaTimeline() {
   return (
     <ToolAccessGuard requiredTier="free" toolName="Visa Journey Timeline Planner">
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-        <div className="container mx-auto px-4 max-w-6xl">
+        <div className="responsive-container max-w-6xl">
           <div className="mb-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>

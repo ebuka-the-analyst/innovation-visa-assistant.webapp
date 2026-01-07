@@ -2,6 +2,225 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================
+   RESPONSIVE FOUNDATION v1.0
+   100% Responsive Display Standard
+   Works across: 320px → 2560px+
+   =========================== */
+
+/* 1) Reset + box sizing for responsive */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+body { margin: 0; }
+
+img, video, canvas, svg { display: block; max-width: 100%; height: auto; }
+
+/* Prevent accidental horizontal scroll */
+html { overflow-x: hidden; }
+body { overflow-x: hidden; }
+
+/* 2) Responsive Design Tokens */
+:root {
+  /* Breakpoints (documentation reference) */
+  --bp-xs: 320px;
+  --bp-sm: 375px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1440px;
+  --bp-3xl: 1600px;
+
+  /* Container */
+  --container-max: 1320px;
+  --container-pad: clamp(16px, 4vw, 32px);
+
+  /* Section spacing */
+  --section-pad-y: clamp(48px, 8vw, 120px);
+
+  /* Fluid Typography scale */
+  --fs-body: clamp(0.95rem, 0.4vw + 0.9rem, 1.1rem);
+  --fs-small: clamp(0.85rem, 0.3vw + 0.8rem, 1rem);
+  --fs-h1: clamp(2rem, 2vw + 1.6rem, 3.5rem);
+  --fs-h2: clamp(1.75rem, 1.5vw + 1.4rem, 2.75rem);
+  --fs-h3: clamp(1.4rem, 1vw + 1.2rem, 2rem);
+  --fs-h4: clamp(1.15rem, 0.6vw + 1.05rem, 1.5rem);
+
+  /* Component sizing */
+  --tap: 44px; /* minimum touch target height */
+}
+
+/* 3) Fluid Typography - applies clamp to headings */
+h1 { font-size: var(--fs-h1); line-height: 1.1; }
+h2 { font-size: var(--fs-h2); line-height: 1.15; }
+h3 { font-size: var(--fs-h3); line-height: 1.2; }
+h4 { font-size: var(--fs-h4); line-height: 1.25; }
+small { font-size: var(--fs-small); }
+
+/* 4) Core Layout Utilities */
+.responsive-container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+.responsive-section {
+  padding-block: var(--section-pad-y);
+}
+
+/* 5) Grid Utilities - mobile-first */
+.responsive-grid {
+  display: grid;
+  gap: clamp(12px, 2vw, 24px);
+}
+
+.responsive-grid-2 { grid-template-columns: 1fr; }
+.responsive-grid-3 { grid-template-columns: 1fr; }
+.responsive-grid-4 { grid-template-columns: 1fr; }
+
+@media (min-width: 768px) {
+  .responsive-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .responsive-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .responsive-grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .responsive-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .responsive-grid-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* 6) Footer Grid - 4→2→1 columns */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .footer-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .footer-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* 7) Mega Menu Grid */
+.mega-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .mega-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .mega-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* 8) Forms - safe defaults */
+input, textarea, select, button {
+  min-height: var(--tap);
+}
+
+input, textarea, select {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 9) Media wrappers (videos/iframes) */
+.media-16x9 {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.media-16x9 > iframe,
+.media-16x9 > video {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.media-4x3 {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.media-1x1 {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+/* 10) Tables - mobile-safe wrapper */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 11) Motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 12) Modal responsiveness */
+.responsive-modal {
+  width: 100%;
+  max-width: min(90vw, 600px);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 767px) {
+  .responsive-modal {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    margin: 0;
+  }
+}
+
+/* 13) Card stacking - mobile */
+.card-stack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(16px, 3vw, 24px);
+}
+
+@media (min-width: 640px) {
+  .card-stack { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .card-stack { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1280px) {
+  .card-stack { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* 14) Long word/URL handling */
+.break-words {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+}
+
 /* Custom ping animation - flashes 2 times, waits 5 seconds, repeats */
 @keyframes ping-slow {
   /* First flash */

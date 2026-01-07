@@ -6,7 +6,7 @@ import { DollarSign, TrendingUp, Target, AlertCircle, CheckCircle, Clock, Users 
 export default function EndorserInvestmentRequirements() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-      <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+      <div className="responsive-container max-w-6xl">
         {/* Header */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-4">

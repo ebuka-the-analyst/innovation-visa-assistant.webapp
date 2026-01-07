@@ -63,7 +63,7 @@ export default function TestingValidationPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="responsive-container py-8 max-w-5xl">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600">

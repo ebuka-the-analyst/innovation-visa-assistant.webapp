@@ -269,7 +269,7 @@ export default function Dashboard() {
       )}
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="responsive-container py-8">
         {/* Email Verification Banner - show if user hasn't verified email */}
         {user && !user.isEmailVerified && user.email && (
           <EmailVerificationBanner 

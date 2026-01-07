@@ -355,7 +355,7 @@ export default function ScenarioPlanner() {
   return (
     <ToolAccessGuard requiredTier="premium" toolName="Scenario Planner">
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-        <div className="container mx-auto px-4 max-w-6xl">
+        <div className="responsive-container max-w-6xl">
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <h1 className="text-3xl font-bold">Scenario Planner</h1>

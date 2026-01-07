@@ -6,7 +6,7 @@ import { Link } from "wouter";
 export default function LawyerCTA() {
   return (
     <section className="py-20 md:py-32 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10">
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="responsive-container">
         <Card className="max-w-3xl mx-auto overflow-hidden">
           <div className="p-8 md:p-12">
             <div className="flex items-start gap-6">

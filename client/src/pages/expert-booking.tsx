@@ -72,7 +72,7 @@ export default function ExpertBooking() {
   return (
     <div className="min-h-screen">
       
-      <div className="container mx-auto px-4 md:px-6 py-16">
+      <div className="responsive-container py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
             <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">LAUNCHPAD EXPERT NETWORK</span>

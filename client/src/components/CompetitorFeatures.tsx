@@ -37,7 +37,7 @@ const features = [
 export default function CompetitorFeatures() {
   return (
     <section className="py-20 md:py-32 bg-background">
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
             Everything You Need to Succeed

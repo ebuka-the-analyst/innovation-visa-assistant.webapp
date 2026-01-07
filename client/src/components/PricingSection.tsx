@@ -58,7 +58,7 @@ const tiers = [
 export default function PricingSection() {
   return (
     <section className="py-20 md:py-32 bg-gradient-to-b from-background to-accent/5" id="pricing">
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
             Simple, Transparent Pricing

@@ -120,7 +120,7 @@ export default function FeaturesDashboard() {
   return (
     <div className="min-h-screen">
       
-      <div className="container mx-auto px-4 md:px-6 py-16">
+      <div className="responsive-container py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16">
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Your Visa Journey</h1>

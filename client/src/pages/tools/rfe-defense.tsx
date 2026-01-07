@@ -288,7 +288,7 @@ export default function RFEDefense() {
   return (
     <ToolAccessGuard requiredTier="premium" toolName="RFE Defence Lab">
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-        <div className="container mx-auto px-4">
+        <div className="responsive-container">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>

@@ -76,7 +76,7 @@ export default function Questionnaire() {
   if (mode === 'select') {
     return (
       <div className="min-h-screen">
-        <div className="container mx-auto px-4 py-12">
+        <div className="responsive-container py-12">
           <div className="max-w-5xl mx-auto">
             <FeatureNavigation currentPage="questionnaire" />
             
@@ -211,7 +211,7 @@ export default function Questionnaire() {
     return (
       <div className="min-h-screen flex flex-col">
         <div className="border-b bg-background">
-          <div className="container mx-auto px-4 py-4">
+          <div className="responsive-container py-4">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-4">
                 <Button 
@@ -261,7 +261,7 @@ export default function Questionnaire() {
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-12">
+      <div className="responsive-container py-12">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <Button 
