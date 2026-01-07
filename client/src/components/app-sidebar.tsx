@@ -103,6 +103,13 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
 
   const currentUser = demoMode ? demoUser : user;
   
+  // Debug logging - remove after testing
+  console.log('[DEBUG] AppSidebar user data:', { 
+    isAdmin: currentUser?.isAdmin, 
+    email: currentUser?.email,
+    demoMode 
+  });
+  
   if (!currentUser && !demoMode) return null;
 
   const isOnAdminPage = location.startsWith("/admin");
