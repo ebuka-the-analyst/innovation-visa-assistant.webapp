@@ -275,7 +275,7 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-bold mb-3">Premium (£99)</h4>
+                    <h4 className="font-bold mb-3">Premium (£49)</h4>
                     <ul className="space-y-2 text-muted-foreground">
                       <li>✓ 40-60 pages</li>
                       <li>✓ All sections</li>

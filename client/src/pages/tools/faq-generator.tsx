@@ -105,7 +105,7 @@ const DEFAULT_FAQ_ITEMS: Omit<FAQItem, 'yourAnswer' | 'preparednessScore' | 'isC
     id: 'faq-1',
     category: 'business-model',
     question: 'What is your primary revenue model and how will you generate income in the UK?',
-    recommendedAnswer: 'Describe your revenue streams (SaaS subscriptions, licensing, services, etc.). Include pricing strategy, customer segments, and projected revenue timeline. For example: "We operate a B2B SaaS model with three pricing tiers (£99/£299/£999 per month). We target SMEs in healthcare with 50-500 employees. Based on market analysis, we project £250K ARR by Year 1 through direct sales and partnership channels."',
+    recommendedAnswer: 'Describe your revenue streams (SaaS subscriptions, licensing, services, etc.). Include pricing strategy, customer segments, and projected revenue timeline. For example: "We operate a B2B SaaS model with three pricing tiers (£49/£299/£499 per month). We target SMEs in healthcare with 50-500 employees. Based on market analysis, we project £250K ARR by Year 1 through direct sales and partnership channels."',
     difficulty: 'basic',
     tags: ['revenue', 'business model', 'pricing'],
   },

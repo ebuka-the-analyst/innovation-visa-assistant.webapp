@@ -22,7 +22,7 @@ const tiers = [
   },
   {
     name: "Premium",
-    price: "£39",
+    price: "£19",
     description: "Most comprehensive Innovator Founder plan",
     features: [
       { name: "Enhanced business plan", included: true },

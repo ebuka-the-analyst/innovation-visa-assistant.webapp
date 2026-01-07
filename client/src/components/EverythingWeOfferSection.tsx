@@ -119,7 +119,7 @@ export default function EverythingWeOfferSection() {
             {[
               { name: "Free", price: "£0", color: "bg-gray-50", access: "Essential" },
               { name: "Basic", price: "£29", color: "bg-blue-50", access: "Extended" },
-              { name: "Premium", price: "£99", color: "bg-purple-50", access: "Comprehensive", popular: true },
+              { name: "Premium", price: "£49", color: "bg-purple-50", access: "Comprehensive", popular: true },
               { name: "Enterprise", price: "£199", color: "bg-orange-50", access: "Full" },
               { name: "Ultimate", price: "£159", color: "bg-amber-50", access: "Complete 100+", premium: true },
             ].map((tier, idx) => (
