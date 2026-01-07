@@ -433,8 +433,26 @@ export async function setupAuth(app: Express) {
   );
 
   // Get current user endpoint
-  app.get("/api/auth/user", isAuthenticated, (req, res) => {
-    res.json(req.user);
+  app.get("/api/auth/user", isAuthenticated, async (req, res) => {
+    const sessionUser = req.user as User;
+    // Fetch fresh user data to ensure isAdmin is up-to-date
+    const freshUser = await storage.getUser(sessionUser.id);
+    if (freshUser) {
+      res.json({
+        id: freshUser.id,
+        email: freshUser.email,
+        displayName: `${freshUser.firstName || ""} ${freshUser.lastName || ""}`.trim() || freshUser.email,
+        firstName: freshUser.firstName,
+        lastName: freshUser.lastName,
+        profileImageUrl: freshUser.profileImageUrl,
+        isAdmin: freshUser.isAdmin || false,
+        isEmailVerified: freshUser.isEmailVerified || false,
+        subscriptionTier: freshUser.subscriptionTier || "free",
+        subscriptionStatus: freshUser.subscriptionStatus || "inactive",
+      });
+    } else {
+      res.json(sessionUser);
+    }
   });
 
   // Logout routes (both GET and POST)
