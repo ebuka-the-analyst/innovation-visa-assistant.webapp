@@ -114,31 +114,34 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
 
   const isOnAdminPage = location.startsWith("/admin");
   
+  // Always show admin section for admins - positioned FIRST
+  const adminSection: NavGroup[] = currentUser?.isAdmin && !demoMode
+    ? [
+        {
+          label: "Admin Access",
+          items: [
+            isOnAdminPage
+              ? {
+                  title: "User Portal",
+                  url: "/dashboard",
+                  icon: LayoutDashboard,
+                  description: "Back to user dashboard",
+                  badge: "USER",
+                }
+              : {
+                  title: "Admin Dashboard",
+                  url: "/admin-dashboard",
+                  icon: Shield,
+                  description: "System analytics & management",
+                  badge: "ADMIN",
+                },
+          ],
+        },
+      ]
+    : [];
+
   const navGroups: NavGroup[] = [
-    ...(currentUser?.isAdmin && !demoMode
-      ? [
-          {
-            label: "Portal Switch",
-            items: [
-              isOnAdminPage
-                ? {
-                    title: "User Portal",
-                    url: "/dashboard",
-                    icon: LayoutDashboard,
-                    description: "Back to user dashboard",
-                    badge: "USER",
-                  }
-                : {
-                    title: "Admin Dashboard",
-                    url: "/admin-dashboard",
-                    icon: Shield,
-                    description: "System analytics & management",
-                    badge: "ADMIN",
-                  },
-            ],
-          },
-        ]
-      : []),
+    ...adminSection,
     ...(partnerStatus?.isPartner && !demoMode
       ? [
           {
