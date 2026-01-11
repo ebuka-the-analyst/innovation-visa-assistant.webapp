@@ -26,9 +26,9 @@ const features = [
     color: "from-chart-3 to-chart-5",
   },
   {
-    id: "five-minute",
+    id: "fifteen-minute",
     icon: Clock,
-    title: "5-Minute Generation",
+    title: "15-Minute Generation",
     description: "Complete business plans generated in minutes, not weeks of manual work",
     color: "from-chart-2 to-chart-3",
   },
