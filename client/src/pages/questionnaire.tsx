@@ -11,10 +11,13 @@ import {
   Target,
   Zap,
   Award,
-  TrendingUp
+  TrendingUp,
+  Lock
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { useTierAccess } from "@/hooks/useTierAccess";
+import { Link } from "wouter";
 
 import QuestionnaireForm from "@/components/QuestionnaireForm";
 import EvidencePreparationGuide from "@/components/EvidencePreparationGuide";
@@ -39,22 +42,22 @@ interface InterviewSession {
 }
 
 export default function Questionnaire() {
-  const [tier, setTier] = useState('premium');
+  const { userTier, hasAccessToTier, isLoading: tierLoading } = useTierAccess();
   const [mode, setMode] = useState<'select' | 'form' | 'ai-interview'>('select');
   const [interviewSession, setInterviewSession] = useState<InterviewSession | null>(null);
   const { toast } = useToast();
 
+  // AI Interview requires Premium or higher tier
+  const canAccessAiInterview = hasAccessToTier('premium');
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const tierParam = params.get('tier');
     const modeParam = params.get('mode');
     const upgraded = params.get('upgraded');
     const sessionId = params.get('session_id');
     
-    if (tierParam) {
-      setTier(tierParam);
-    }
-    if (modeParam === 'ai') {
+    // Only allow AI mode if user has access
+    if (modeParam === 'ai' && canAccessAiInterview) {
       setMode('ai-interview');
     } else if (modeParam === 'form') {
       setMode('form');
@@ -63,11 +66,11 @@ export default function Questionnaire() {
     if (upgraded === 'true' && sessionId) {
       toast({
         title: "Payment Successful!",
-        description: `Your ${tierParam || 'subscription'} tier has been activated. You can now generate your business plan.`,
+        description: `Your ${userTier || 'subscription'} tier has been activated. You can now generate your business plan.`,
       });
       window.history.replaceState({}, '', '/questionnaire');
     }
-  }, [toast]);
+  }, [toast, canAccessAiInterview, userTier]);
 
   const handleSessionUpdate = (session: InterviewSession) => {
     setInterviewSession(session);
@@ -100,21 +103,36 @@ export default function Questionnaire() {
                 transition={{ delay: 0.1 }}
               >
                 <Card 
-                  className="p-6 h-full hover-elevate cursor-pointer border-2 border-transparent hover:border-primary/50 transition-all"
-                  onClick={() => setMode('ai-interview')}
+                  className={`p-6 h-full border-2 transition-all ${
+                    canAccessAiInterview 
+                      ? "hover-elevate cursor-pointer border-transparent hover:border-primary/50" 
+                      : "border-muted opacity-80"
+                  }`}
+                  onClick={() => canAccessAiInterview && setMode('ai-interview')}
                   data-testid="card-ai-interview-mode"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20">
-                      <MessageSquare className="h-8 w-8 text-amber-500" />
+                    <div className={`p-3 rounded-xl ${canAccessAiInterview ? "bg-gradient-to-br from-amber-500/20 to-orange-500/20" : "bg-muted"}`}>
+                      {canAccessAiInterview ? (
+                        <MessageSquare className="h-8 w-8 text-amber-500" />
+                      ) : (
+                        <Lock className="h-8 w-8 text-muted-foreground" />
+                      )}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <h3 className="text-xl font-bold">AI-Guided Interview</h3>
-                        <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-                          <Sparkles className="h-3 w-3 mr-1" />
-                          Recommended
-                        </Badge>
+                        {canAccessAiInterview ? (
+                          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Recommended
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">
+                            <Lock className="h-3 w-3 mr-1" />
+                            Premium+
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-muted-foreground mb-4">
                         Have a natural conversation with our specialized AI agents who guide you through 475 questions with real-time feedback and scoring.
@@ -139,10 +157,19 @@ export default function Questionnaire() {
                         </div>
                       </div>
 
-                      <Button className="w-full mt-6" data-testid="button-start-ai-interview">
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Start AI Interview
-                      </Button>
+                      {canAccessAiInterview ? (
+                        <Button className="w-full mt-6" data-testid="button-start-ai-interview">
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          Start AI Interview
+                        </Button>
+                      ) : (
+                        <Link href="/pricing">
+                          <Button variant="outline" className="w-full mt-6" data-testid="button-upgrade-ai-interview">
+                            <Lock className="h-4 w-4 mr-2" />
+                            Upgrade to Premium
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -208,6 +235,29 @@ export default function Questionnaire() {
   }
 
   if (mode === 'ai-interview') {
+    // Security: Redirect non-premium users back to select mode
+    if (!canAccessAiInterview) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <Card className="p-8 max-w-md text-center">
+            <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h2 className="text-xl font-bold mb-2">Premium Feature</h2>
+            <p className="text-muted-foreground mb-6">
+              The AI-Guided Interview requires Premium tier or higher.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link href="/pricing">
+                <Button className="w-full" data-testid="button-upgrade">Upgrade to Premium</Button>
+              </Link>
+              <Button variant="outline" onClick={() => setMode('select')} data-testid="button-go-back">
+                Go Back
+              </Button>
+            </div>
+          </Card>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen flex flex-col">
         <div className="border-b bg-background">
@@ -235,7 +285,7 @@ export default function Questionnaire() {
         <div className="flex-1 flex">
           <div className="flex-1 flex flex-col lg:flex-row">
             <div className="flex-1 h-[calc(100vh-80px)]">
-              <AiInterviewChat tier={tier} onSessionUpdate={handleSessionUpdate} />
+              <AiInterviewChat tier={userTier} onSessionUpdate={handleSessionUpdate} />
             </div>
             
             <div className="lg:w-96 border-l bg-muted/20 overflow-y-auto p-4 h-[calc(100vh-80px)]">
@@ -286,7 +336,7 @@ export default function Questionnaire() {
           </div>
         </div>
         <EvidencePreparationGuide />
-        <QuestionnaireForm tier={tier} />
+        <QuestionnaireForm tier={userTier} />
       </div>
     </div>
   );
