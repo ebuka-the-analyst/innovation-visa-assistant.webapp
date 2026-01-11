@@ -72,26 +72,12 @@ export default function ChatBot() {
 
   return (
     <>
-      <style>{`
-        @keyframes pulse-glow {
-          0%, 100% { 
-            opacity: 1; 
-            box-shadow: 0 0 20px rgba(255, 165, 54, 0.5);
-          }
-          50% { 
-            opacity: 0.85; 
-            box-shadow: 0 0 30px rgba(17, 182, 233, 0.6);
-          }
-        }
-      `}</style>
-
-      {/* Floating Chat Button - Responsive positioning */}
+      {/* Floating Chat Button - Calm, non-distracting positioning */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center text-white z-[9999]"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 flex items-center justify-center text-white z-[60]"
         style={{
-          background: "linear-gradient(135deg, #005EB8 0%, #41B6E6 100%)",
-          animation: isOpen ? "none" : "pulse-glow 2s ease-in-out infinite"
+          background: "#005EB8",
         }}
         data-testid="button-chatbot-toggle"
         aria-label={isOpen ? "Close chat" : "Open AI Assistant"}
@@ -106,7 +92,7 @@ export default function ChatBot() {
       {/* Chat Window - Fully responsive */}
       {isOpen && (
         <div
-          className="fixed z-[9998] flex flex-col rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-border overflow-hidden bg-background
+          className="fixed z-[59] flex flex-col rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-border overflow-hidden bg-background
             inset-0 sm:inset-auto
             sm:bottom-20 sm:right-4 md:bottom-24 md:right-6
             sm:w-[340px] md:w-[400px] lg:w-[440px]

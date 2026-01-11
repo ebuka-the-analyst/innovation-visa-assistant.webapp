@@ -206,49 +206,42 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           url: "/oracle-supervisor",
           icon: Brain,
           description: "Master AI with 4 specialist agents",
-          badge: "NEW",
         },
         {
           title: "Founder Autopilot",
           url: "/founder-autopilot",
           icon: Rocket,
           description: "Full visa automation mode",
-          badge: "NEW",
         },
         {
           title: "Neural Twin",
           url: "/neural-twin",
           icon: Bot,
           description: "AI simulation of you for practice",
-          badge: "NEW",
         },
         {
           title: "Voice Builder",
           url: "/voice-builder",
           icon: Mic,
           description: "Speak to build your documents",
-          badge: "NEW",
         },
         {
           title: "Regulatory Copilot",
           url: "/regulatory-copilot",
           icon: Shield,
           description: "Real-time UK law monitoring",
-          badge: "NEW",
         },
         {
           title: "Economic Impact",
           url: "/economic-impact",
           icon: Globe2,
           description: "UK job & GDP calculator",
-          badge: "NEW",
         },
         {
           title: "Knowledge Graph",
           url: "/knowledge-graph",
           icon: Network,
           description: "Visual UK visa rules map",
-          badge: "NEW",
         },
       ],
     },
@@ -299,28 +292,25 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           title: "Tools Hub",
           url: "/tools-hub",
           icon: Zap,
-          description: "100+ professional-level tools",
-          badge: "100+",
+          description: "100+ professional tools",
         },
         {
           title: "Achievements",
           url: "/achievements",
           icon: Trophy,
-          description: "Badges, milestones & certificates",
+          description: "Badges & certificates",
         },
         {
           title: "Template Library",
           url: "/template-library",
           icon: FolderOpen,
           description: "60+ document templates",
-          badge: "60+",
         },
         {
           title: "AI Document Review",
           url: "/document-review",
           icon: Sparkles,
-          description: "AI-powered document feedback",
-          badge: "AI",
+          description: "AI-powered feedback",
         },
         {
           title: "Success Stories",
@@ -332,14 +322,13 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           title: "Immigration News",
           url: "/news",
           icon: Newspaper,
-          description: "Live UK visa news updates",
-          badge: "LIVE",
+          description: "UK visa news updates",
         },
         {
           title: "Calendar & Deadlines",
           url: "/calendar",
           icon: CalendarDays,
-          description: "Track visa timeline",
+          description: "Track your timeline",
         },
         {
           title: "Endorser Comparison",
@@ -351,7 +340,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           title: "Investment Requirements",
           url: "/endorser-investment",
           icon: DollarSign,
-          description: "Minimum investment by route",
+          description: "Investment by route",
         },
         {
           title: "Document Organizer",
@@ -369,8 +358,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           title: "Premium Features",
           url: "/premium-features",
           icon: Sparkles,
-          description: "Achievements, templates & more",
-          badge: "NEW",
+          description: "Achievements & more",
         },
       ],
     },
@@ -404,8 +392,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           title: "Referral Programme",
           url: "/referral-dashboard",
           icon: Gift,
-          description: "Earn money by referring others",
-          badge: "EARN",
+          description: "Earn by referring others",
         },
         {
           title: "Settings",
@@ -422,12 +409,12 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
       <SidebarContent>
         {navGroups.map((group, idx) => (
           <div key={idx}>
-            <SidebarGroup className="py-1">
-              <SidebarGroupLabel className="text-[10px] font-bold px-2 py-1 rounded-md mb-1" style={{ backgroundColor: "#005EB8", color: "#000000" }}>
+            <SidebarGroup className="py-2">
+              <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-wide px-3 py-1.5 text-muted-foreground/80">
                 {group.label}
               </SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu className="gap-0.5">
+                <SidebarMenu className="gap-1">
                   {group.items.map((item) => {
                     const isActive = location === item.url;
                     const Icon = item.icon;
@@ -438,30 +425,27 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
                           asChild
                           isActive={isActive}
                           onClick={() => setLocation(item.url)}
-                          className={`cursor-pointer transition-all py-1.5 ${
+                          className={`cursor-pointer transition-colors py-2.5 px-3 rounded-md ${
                             isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : "hover:bg-muted"
+                              ? "bg-primary/10 text-primary border-l-2 border-primary"
+                              : "hover:bg-muted/50"
                           }`}
                           data-testid={`nav-button-${item.url}`}
                         >
                           <div className="flex items-center gap-3 w-full">
-                            <Icon className="h-4 w-4 flex-shrink-0" />
-                            <div className="flex-1 min-w-0 overflow-hidden">
-                              <div className="text-sm font-medium leading-tight truncate">
-                                {item.title}
-                              </div>
-                              <div className="text-xs text-muted-foreground truncate">
-                                {item.description}
-                              </div>
-                            </div>
+                            <Icon className="h-4 w-4 flex-shrink-0 opacity-70" />
+                            <span className="text-sm font-medium truncate">
+                              {item.title}
+                            </span>
                             {item.badge && (
-                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                              <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 ${
                                 item.badge === "ADMIN"
-                                  ? "bg-orange-500 text-white"
+                                  ? "bg-orange-500/20 text-orange-600 dark:text-orange-400"
                                   : item.badge === "PARTNER"
-                                  ? "bg-blue-500 text-white"
-                                  : "text-primary bg-primary/10"
+                                  ? "bg-blue-500/20 text-blue-600 dark:text-blue-400"
+                                  : item.badge === "USER"
+                                  ? "bg-green-500/20 text-green-600 dark:text-green-400"
+                                  : "text-muted-foreground bg-muted"
                               }`}>
                                 {item.badge}
                               </span>
@@ -474,7 +458,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-            {idx < navGroups.length - 1 && <SidebarSeparator className="my-1" />}
+            {idx < navGroups.length - 1 && <SidebarSeparator className="my-2 opacity-50" />}
           </div>
         ))}
       </SidebarContent>

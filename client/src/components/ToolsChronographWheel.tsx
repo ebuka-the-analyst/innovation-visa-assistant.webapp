@@ -335,22 +335,21 @@ export default function ToolsChronographWheel() {
         setIsHoveringWidget(false);
       }}
     >
-      {/* Expand/Collapse Indicator */}
-      <div className="absolute -top-32 left-0 right-0 flex items-center justify-center">
+      {/* Expand/Collapse Indicator - Subtle design */}
+      <div className="absolute -top-28 left-0 right-0 flex items-center justify-center">
         <button
           onClick={() => {
             recordActivity();
             setIsMinimized(!isMinimized);
           }}
-          className="font-black text-center px-4 py-2 rounded-full hover:opacity-80 transition-opacity cursor-pointer"
+          className="font-medium text-center w-8 h-8 rounded-full hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center shadow-sm"
           data-testid="button-toggle-indicator"
           aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
           style={{ 
             color: "#ffffff", 
-            backgroundColor: isMinimized ? "#41B6E6" : "#e63946",
-            fontSize: "clamp(1.5rem, 3vw, 2.5rem)", 
+            backgroundColor: isMinimized ? "#005EB8" : "#dc2626",
+            fontSize: "1.25rem", 
             lineHeight: "1",
-            boxShadow: "none",
             border: "none"
           }}
         >
@@ -358,7 +357,7 @@ export default function ToolsChronographWheel() {
         </button>
       </div>
 
-      {/* Text Label Above Widget */}
+      {/* Text Label Above Widget - Calm, non-pulsing design */}
       {isMinimized && (
         <div className="absolute -top-16 left-0 right-0 flex items-center justify-center">
           <button
@@ -366,19 +365,18 @@ export default function ToolsChronographWheel() {
               recordActivity();
               setIsMinimized(false);
             }}
-            className="font-black text-center pulse-glow-gold px-4 py-2 rounded-full hover:opacity-90 transition-opacity cursor-pointer"
+            className="font-semibold text-center px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
             data-testid="button-toggle-text-label"
             aria-label="Expand Tools Hub"
             style={{ 
-              color: "#000000", 
+              color: "#ffffff", 
               backgroundColor: "#005EB8",
-              fontSize: "clamp(0.8rem, 2vw, 1.5rem)", 
-              lineHeight: "1.2",
-              border: "none",
-              boxShadow: "none"
+              fontSize: "0.75rem", 
+              lineHeight: "1.3",
+              border: "none"
             }}
           >
-            100+<br/>Tools-Hub
+            100+ Tools
           </button>
         </div>
       )}
@@ -410,16 +408,15 @@ export default function ToolsChronographWheel() {
         
         {/* Static Header Section - "100+ TOOLS HUB" - Only when expanded */}
         {!isMinimized && (
-          <div className="flex flex-col items-center justify-center gap-2 px-3 border-b-2 border-gray-400 pulse-glow-gold" style={{ 
+          <div className="flex flex-col items-center justify-center gap-2 px-3 border-b border-border" style={{ 
             backgroundColor: "#005EB8",
             borderRadius: "0.5rem 0.5rem 0 0",
-            borderBottom: "2px solid rgb(107, 114, 128)",
-            padding: "6px 10px",
+            padding: "8px 12px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center"
           }}>
-            <h3 className="font-black text-center whitespace-nowrap" style={{ color: "#000000", fontSize: "clamp(0.8rem, 2vw, 1.5rem)", lineHeight: "1.2" }}>100+ TOOLS-HUB</h3>
+            <h3 className="font-semibold text-center whitespace-nowrap text-white" style={{ fontSize: "1rem", lineHeight: "1.2" }}>100+ Tools Hub</h3>
           </div>
         )}
 
