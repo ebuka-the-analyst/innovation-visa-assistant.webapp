@@ -120,22 +120,24 @@ export default function FeaturesShowcase() {
             </div>
           </header>
           
-          <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
-            {/* Hero */}
-            <div className="border-b">
-              <div className="responsive-container py-12">
-                <h1 className="text-4xl md:text-5xl font-bold mb-4" data-testid="heading-features">Everything You Need for UK Innovator Founder Visa Success</h1>
-                <p className="text-xl text-muted-foreground max-w-2xl">
+          <div className="min-h-screen bg-background">
+            {/* Hero - Clean, spacious, ADHD-friendly */}
+            <div className="border-b bg-muted/30">
+              <div className="responsive-container py-10 md:py-14 lg:py-16">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight" data-testid="heading-features">
+                  Everything You Need for UK Innovator Founder Visa Success
+                </h1>
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
                   A complete platform with 100+ tools, AI agents, expert guidance, and everything required to turn your innovation into a visa-approved business
                 </p>
               </div>
             </div>
 
-            <div className="responsive-container py-16">
-              {/* Main Features Grid */}
-              <section className="mb-20">
-                <h2 className="text-3xl font-bold mb-8">Core Features</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="responsive-container py-10 md:py-14 lg:py-16">
+              {/* Main Features Grid - Increased spacing */}
+              <section className="mb-12 md:mb-16 lg:mb-20">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8">Core Features</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
                   {MAIN_FEATURES.map((feature, idx) => (
                     <Card key={idx} className="p-6 hover-elevate" data-testid={`card-feature-${idx}`}>
                       <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
@@ -146,9 +148,9 @@ export default function FeaturesShowcase() {
               </section>
 
               {/* Tool Categories */}
-              <section className="mb-20">
-                <h2 className="text-3xl font-bold mb-8">100+ Professional-Level Tools</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <section className="mb-12 md:mb-16 lg:mb-20">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8">100+ Professional-Level Tools</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 lg:gap-8">
                   {FEATURE_CATEGORIES.map((category, idx) => (
                     <Card key={idx} className="p-6 hover-elevate border-l-4 border-l-primary" data-testid={`card-category-${idx}`}>
                       <div className="flex items-start gap-4 mb-4">
@@ -181,9 +183,9 @@ export default function FeaturesShowcase() {
               </section>
 
               {/* Pricing Tiers Comparison */}
-              <section className="mb-20">
-                <h2 className="text-3xl font-bold mb-8">Simple, Transparent Pricing</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <section className="mb-12 md:mb-16 lg:mb-20">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8">Simple, Transparent Pricing</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
                   {PRICING_TIERS.map((tier, idx) => (
                     <Card 
                       key={idx} 
@@ -209,9 +211,9 @@ export default function FeaturesShowcase() {
               </section>
 
               {/* Quick Links */}
-              <section className="mb-20">
-                <h2 className="text-3xl font-bold mb-8">Explore Our Platform</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <section className="mb-12 md:mb-16 lg:mb-20">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8">Explore Our Platform</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
                   <Link href="/tools-hub">
                     <Card className="p-6 hover-elevate cursor-pointer text-center" data-testid="card-link-tools">
                       <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center text-primary">
