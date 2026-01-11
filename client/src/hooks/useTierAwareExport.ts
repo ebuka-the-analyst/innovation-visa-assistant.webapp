@@ -496,10 +496,10 @@ export function useTierAwareExport() {
       );
 
       const upgradeOptions = [
-        'BASIC (£15): 25-35 pages with financial projections',
-        'PREMIUM (£29): 40-60 pages with market research appendices',
-        'ENTERPRISE (£45): 50-80 pages with scenario analysis',
-        'ULTIMATE (£60): 80+ pages - comprehensive package'
+        'BASIC (£9): 25-35 pages with financial projections',
+        'PREMIUM (£19): 40-60 pages with market research appendices',
+        'ENTERPRISE (£29): 50-80 pages with scenario analysis',
+        'ULTIMATE (£39): 80+ pages - comprehensive package'
       ];
 
       upgradeOptions.forEach(option => {
@@ -872,10 +872,10 @@ export function useTierAwareExport() {
       currentY += 15;
 
       const options = [
-        'BASIC (£15): 25-35 pages with financial projections',
-        'PREMIUM (£29): 40-60 pages with market research appendices',
-        'ENTERPRISE (£45): 50-80 pages with scenario analysis',
-        'ULTIMATE (£60): 80+ pages - comprehensive package'
+        'BASIC (£9): 25-35 pages with financial projections',
+        'PREMIUM (£19): 40-60 pages with market research appendices',
+        'ENTERPRISE (£29): 50-80 pages with scenario analysis',
+        'ULTIMATE (£39): 80+ pages - comprehensive package'
       ];
 
       options.forEach(opt => {

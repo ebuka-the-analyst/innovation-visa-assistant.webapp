@@ -310,13 +310,13 @@ DOCUMENT PREVIEW COMPLETE
 
 For a more comprehensive visa-ready business plan:
 
-BASIC (£15): 25-35 pages - Detailed financial projections, regulatory compliance checklist, implementation timeline
+BASIC (£9): 25-35 pages - Detailed financial projections, regulatory compliance checklist, implementation timeline
 
-PREMIUM (£29): 40-60 pages - Comprehensive market research appendix, evidence portfolio, team biographies
+PREMIUM (£19): 40-60 pages - Comprehensive market research appendix, evidence portfolio, team biographies
 
-ENTERPRISE (£45): 50-80 pages - Scenario analysis, full risk register, benchmark comparison analysis
+ENTERPRISE (£29): 50-80 pages - Scenario analysis, full risk register, benchmark comparison analysis
 
-ULTIMATE (£60): 80+ pages - Complete visa package with 14 professional appendices
+ULTIMATE (£39): 80+ pages - Complete visa package with 14 professional appendices
 
 Upgrade at: innovatorfoundervisaassistant.co.uk/pricing
 ---`;

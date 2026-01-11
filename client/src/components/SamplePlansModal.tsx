@@ -266,7 +266,7 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                 <h3 className="font-bold mb-4 text-lg">Tier Comparison</h3>
                 <div className="grid md:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <h4 className="font-bold mb-3">Basic (£29)</h4>
+                    <h4 className="font-bold mb-3">Basic (£9)</h4>
                     <ul className="space-y-2 text-muted-foreground">
                       <li>✓ 25-35 pages</li>
                       <li>✓ Core sections</li>
@@ -275,7 +275,7 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-bold mb-3">Premium (£49)</h4>
+                    <h4 className="font-bold mb-3">Premium (£19)</h4>
                     <ul className="space-y-2 text-muted-foreground">
                       <li>✓ 40-60 pages</li>
                       <li>✓ All sections</li>
@@ -285,7 +285,7 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-bold mb-3">Enterprise (£199)</h4>
+                    <h4 className="font-bold mb-3">Enterprise (£29)</h4>
                     <ul className="space-y-2 text-muted-foreground">
                       <li>✓ 50-80 pages</li>
                       <li>✓ All sections +</li>

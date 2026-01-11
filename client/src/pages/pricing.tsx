@@ -357,8 +357,8 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
       <SEOHead
-        title="Pricing Plans | UK Innovator Founder Visa Assistant - £0 to £60"
-        description="Choose from 5 pricing tiers for your UK Innovator Founder Visa application. Free, Basic £15, Premium £29 (most popular), Enterprise £45, Ultimate £60. All plans include 100+ professional-level tools, business plan generation and expert guidance."
+        title="Pricing Plans | UK Innovator Founder Visa Assistant - £0 to £39"
+        description="Choose from 5 pricing tiers for your UK Innovator Founder Visa application. Free, Basic £9, Premium £19 (most popular), Enterprise £29, Ultimate £39. All plans include 100+ professional-level tools, business plan generation and expert guidance."
         canonical="https://innovatorfoundervisaassistant.co.uk/pricing"
         keywords="UK Innovator Founder Visa cost, visa application pricing, business plan cost, innovator founder visa fees, visa assistance pricing"
         schema={combinedSchema}
