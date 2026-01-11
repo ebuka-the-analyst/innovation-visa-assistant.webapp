@@ -5503,7 +5503,7 @@ EXAMPLES OF GOOD RESPONSES:
         discountType,
         discountValue,
         eligibleTiers: tiers || null,
-        minPurchaseAmount: minPurchaseAmount || null,
+        minPurchaseAmount: minPurchaseAmount ? Math.round(minPurchaseAmount * 100) : null,
         maxTotalUses: totalUses || null,
         maxUsesPerUser: maxUsesPerUser || 1,
         validFrom: validFrom ? new Date(validFrom) : new Date(),
@@ -5516,6 +5516,89 @@ EXAMPLES OF GOOD RESPONSES:
     } catch (error) {
       console.error("Admin create promo code error:", error);
       res.status(500).json({ error: "Failed to create promo code" });
+    }
+  });
+
+  // Bulk create promo codes (admin)
+  app.post("/api/admin/promos/bulk", requireAdmin, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { codes, batchName } = req.body;
+      
+      if (!codes || !Array.isArray(codes) || codes.length === 0) {
+        return res.status(400).json({ error: "Codes array is required" });
+      }
+      
+      if (codes.length > 100) {
+        return res.status(400).json({ error: "Maximum 100 codes per batch" });
+      }
+      
+      const results = {
+        created: [] as any[],
+        failed: [] as { code: string; error: string }[],
+      };
+      
+      for (const codeData of codes) {
+        try {
+          const promoCodeValue = codeData.code?.toUpperCase();
+          
+          if (!promoCodeValue) {
+            results.failed.push({ code: 'unknown', error: 'Code is required' });
+            continue;
+          }
+          
+          // Validate discount type
+          const discountType = codeData.discountType;
+          if (!discountType || !['percentage', 'fixed'].includes(discountType)) {
+            results.failed.push({ code: promoCodeValue, error: 'Invalid discount type - must be percentage or fixed' });
+            continue;
+          }
+          
+          // Validate discount value
+          const discountValue = codeData.discountValue;
+          if (discountValue === undefined || discountValue === null || discountValue <= 0) {
+            results.failed.push({ code: promoCodeValue, error: 'Discount value must be greater than 0' });
+            continue;
+          }
+          
+          // Check if code already exists
+          const existing = await storage.getPromoCodeByCode(promoCodeValue);
+          if (existing) {
+            results.failed.push({ code: promoCodeValue, error: 'Code already exists' });
+            continue;
+          }
+          
+          const promoCode = await storage.createPromoCode({
+            code: promoCodeValue,
+            name: batchName ? `${batchName} - ${promoCodeValue}` : promoCodeValue,
+            description: batchName || null,
+            discountType,
+            discountValue,
+            eligibleTiers: codeData.eligibleTiers || null,
+            minPurchaseAmount: codeData.minPurchaseAmount ? Math.round(codeData.minPurchaseAmount * 100) : null,
+            maxTotalUses: codeData.maxTotalUses || null,
+            maxUsesPerUser: codeData.maxUsesPerUser || 1,
+            validFrom: codeData.validFrom ? new Date(codeData.validFrom) : new Date(),
+            validUntil: codeData.validUntil ? new Date(codeData.validUntil) : null,
+            status: 'active',
+            createdBy: user.id,
+          });
+          
+          results.created.push(promoCode);
+        } catch (err: any) {
+          results.failed.push({ code: codeData.code || 'unknown', error: err.message });
+        }
+      }
+      
+      res.json({
+        success: true,
+        created: results.created.length,
+        failed: results.failed.length,
+        results,
+      });
+    } catch (error) {
+      console.error("Admin bulk create promo codes error:", error);
+      res.status(500).json({ error: "Failed to create promo codes" });
     }
   });
 

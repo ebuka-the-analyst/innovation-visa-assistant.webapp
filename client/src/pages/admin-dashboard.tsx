@@ -25,6 +25,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
+import { PromoCodeGenerator } from "@/components/admin/PromoCodeGenerator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format, formatDistance, subDays, subHours, startOfDay, endOfDay, differenceInSeconds } from "date-fns";
@@ -11184,56 +11185,9 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* Advanced Create Promo Section */}
+                      {/* Advanced Create Promo Section - Smart Generator */}
                       {activeSection === 'promos-create' && (
-                        <>
-                          <Card>
-                            <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <Plus className="h-5 w-5 text-purple-500" />
-                                Create New Promo Code
-                              </CardTitle>
-                              <CardDescription>Design a promotional code with advanced targeting options</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                                <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-purple-500" onClick={() => setShowCreatePromoModal(true)}>
-                                  <CardContent className="p-6 text-center">
-                                    <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
-                                      <Percent className="h-6 w-6 text-purple-500" />
-                                    </div>
-                                    <h3 className="font-semibold mb-2">Percentage Discount</h3>
-                                    <p className="text-sm text-muted-foreground">10%, 20%, 50% off</p>
-                                  </CardContent>
-                                </Card>
-                                <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-green-500" onClick={() => setShowCreatePromoModal(true)}>
-                                  <CardContent className="p-6 text-center">
-                                    <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-green-500/10 flex items-center justify-center">
-                                      <PoundSterling className="h-6 w-6 text-green-500" />
-                                    </div>
-                                    <h3 className="font-semibold mb-2">Fixed Amount</h3>
-                                    <p className="text-sm text-muted-foreground">£5, £10, £25 off</p>
-                                  </CardContent>
-                                </Card>
-                                <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-blue-500" onClick={() => setShowCreatePromoModal(true)}>
-                                  <CardContent className="p-6 text-center">
-                                    <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-500/10 flex items-center justify-center">
-                                      <Gift className="h-6 w-6 text-blue-500" />
-                                    </div>
-                                    <h3 className="font-semibold mb-2">Free Upgrade</h3>
-                                    <p className="text-sm text-muted-foreground">Tier upgrade bonus</p>
-                                  </CardContent>
-                                </Card>
-                              </div>
-                              <div className="text-center">
-                                <Button size="lg" onClick={() => setShowCreatePromoModal(true)}>
-                                  <Plus className="h-5 w-5 mr-2" />
-                                  Open Promo Code Wizard
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </>
+                        <PromoCodeGenerator />
                       )}
 
                       {/* Advanced Referral Analytics */}
