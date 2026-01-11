@@ -5519,6 +5519,19 @@ EXAMPLES OF GOOD RESPONSES:
     }
   });
 
+  // Zod schema for bulk promo code validation
+  const bulkPromoCodeSchema = z.object({
+    code: z.string().min(1, "Code is required"),
+    discountType: z.enum(['percentage', 'fixed'], { errorMap: () => ({ message: "Must be 'percentage' or 'fixed'" }) }),
+    discountValue: z.number().positive("Discount value must be positive"),
+    maxTotalUses: z.number().positive().nullable().optional(),
+    maxUsesPerUser: z.number().positive().default(1),
+    validFrom: z.union([z.string(), z.date()]).nullable().optional(),
+    validUntil: z.union([z.string(), z.date()]).nullable().optional(),
+    eligibleTiers: z.array(z.string()).nullable().optional(),
+    minPurchaseAmount: z.number().nonnegative().nullable().optional(), // In pounds (GBP)
+  });
+
   // Bulk create promo codes (admin)
   app.post("/api/admin/promos/bulk", requireAdmin, async (req, res) => {
     try {
@@ -5540,26 +5553,16 @@ EXAMPLES OF GOOD RESPONSES:
       
       for (const codeData of codes) {
         try {
-          const promoCodeValue = codeData.code?.toUpperCase();
-          
-          if (!promoCodeValue) {
-            results.failed.push({ code: 'unknown', error: 'Code is required' });
+          // Validate using Zod schema
+          const parseResult = bulkPromoCodeSchema.safeParse(codeData);
+          if (!parseResult.success) {
+            const errorMsg = parseResult.error.errors.map(e => e.message).join(', ');
+            results.failed.push({ code: codeData.code || 'unknown', error: errorMsg });
             continue;
           }
           
-          // Validate discount type
-          const discountType = codeData.discountType;
-          if (!discountType || !['percentage', 'fixed'].includes(discountType)) {
-            results.failed.push({ code: promoCodeValue, error: 'Invalid discount type - must be percentage or fixed' });
-            continue;
-          }
-          
-          // Validate discount value
-          const discountValue = codeData.discountValue;
-          if (discountValue === undefined || discountValue === null || discountValue <= 0) {
-            results.failed.push({ code: promoCodeValue, error: 'Discount value must be greater than 0' });
-            continue;
-          }
+          const validatedData = parseResult.data;
+          const promoCodeValue = validatedData.code.toUpperCase();
           
           // Check if code already exists
           const existing = await storage.getPromoCodeByCode(promoCodeValue);
@@ -5572,14 +5575,15 @@ EXAMPLES OF GOOD RESPONSES:
             code: promoCodeValue,
             name: batchName ? `${batchName} - ${promoCodeValue}` : promoCodeValue,
             description: batchName || null,
-            discountType,
-            discountValue,
-            eligibleTiers: codeData.eligibleTiers || null,
-            minPurchaseAmount: codeData.minPurchaseAmount ? Math.round(codeData.minPurchaseAmount * 100) : null,
-            maxTotalUses: codeData.maxTotalUses || null,
-            maxUsesPerUser: codeData.maxUsesPerUser || 1,
-            validFrom: codeData.validFrom ? new Date(codeData.validFrom) : new Date(),
-            validUntil: codeData.validUntil ? new Date(codeData.validUntil) : null,
+            discountType: validatedData.discountType,
+            discountValue: validatedData.discountValue,
+            eligibleTiers: validatedData.eligibleTiers || null,
+            // Convert pounds to pence for storage
+            minPurchaseAmount: validatedData.minPurchaseAmount ? Math.round(validatedData.minPurchaseAmount * 100) : null,
+            maxTotalUses: validatedData.maxTotalUses || null,
+            maxUsesPerUser: validatedData.maxUsesPerUser || 1,
+            validFrom: validatedData.validFrom ? new Date(validatedData.validFrom as string) : new Date(),
+            validUntil: validatedData.validUntil ? new Date(validatedData.validUntil as string) : null,
             status: 'active',
             createdBy: user.id,
           });

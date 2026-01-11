@@ -49,15 +49,22 @@ import {
   Shuffle,
 } from "lucide-react";
 
+/** 
+ * Represents a generated promo code in memory before saving to database.
+ * Currency values (minPurchaseAmount, discountValue for fixed type) are in GBP pounds.
+ * The API converts to pence when saving to the database.
+ */
 interface GeneratedCode {
   code: string;
   discountType: 'percentage' | 'fixed';
+  /** For percentage: 0-100 percent. For fixed: amount in GBP pounds */
   discountValue: number;
   maxTotalUses: number | null;
   maxUsesPerUser: number;
   validFrom: Date | null;
   validUntil: Date | null;
   eligibleTiers: string[] | null;
+  /** Minimum purchase amount in GBP pounds (converted to pence by API) */
   minPurchaseAmount: number | null;
 }
 
