@@ -302,22 +302,6 @@ export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUs
           </div>
         </div>
         
-        {onHideDemoUsersChange && (
-          <div className="mt-3 flex items-center justify-between rounded-lg bg-card/50 border border-border/50 p-2">
-            <div className="flex items-center gap-2">
-              {hideDemoUsers ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-              <span className="text-xs text-muted-foreground">
-                {hideDemoUsers ? 'Demo users hidden' : 'Show all users'}
-              </span>
-            </div>
-            <Switch
-              checked={hideDemoUsers}
-              onCheckedChange={onHideDemoUsersChange}
-              data-testid="switch-hide-demo-users"
-              className="scale-90"
-            />
-          </div>
-        )}
       </SidebarHeader>
 
       <SidebarContent className="px-2">
