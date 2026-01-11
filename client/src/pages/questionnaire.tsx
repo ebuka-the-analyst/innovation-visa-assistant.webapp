@@ -47,8 +47,8 @@ export default function Questionnaire() {
   const [interviewSession, setInterviewSession] = useState<InterviewSession | null>(null);
   const { toast } = useToast();
 
-  // AI Interview requires Premium or higher tier
-  const canAccessAiInterview = hasAccessToTier('premium');
+  // AI Interview requires Basic or higher tier
+  const canAccessAiInterview = hasAccessToTier('basic');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -130,7 +130,7 @@ export default function Questionnaire() {
                         ) : (
                           <Badge variant="secondary">
                             <Lock className="h-3 w-3 mr-1" />
-                            Premium+
+                            Basic+
                           </Badge>
                         )}
                       </div>
@@ -166,7 +166,7 @@ export default function Questionnaire() {
                         <Link href="/pricing">
                           <Button variant="outline" className="w-full mt-6" data-testid="button-upgrade-ai-interview">
                             <Lock className="h-4 w-4 mr-2" />
-                            Upgrade to Premium
+                            Upgrade to Basic
                           </Button>
                         </Link>
                       )}
@@ -241,13 +241,13 @@ export default function Questionnaire() {
         <div className="min-h-screen flex items-center justify-center">
           <Card className="p-8 max-w-md text-center">
             <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-xl font-bold mb-2">Premium Feature</h2>
+            <h2 className="text-xl font-bold mb-2">Paid Feature</h2>
             <p className="text-muted-foreground mb-6">
-              The AI-Guided Interview requires Premium tier or higher.
+              The AI-Guided Interview requires Basic tier or higher.
             </p>
             <div className="flex flex-col gap-3">
               <Link href="/pricing">
-                <Button className="w-full" data-testid="button-upgrade">Upgrade to Premium</Button>
+                <Button className="w-full" data-testid="button-upgrade">Upgrade to Basic</Button>
               </Link>
               <Button variant="outline" onClick={() => setMode('select')} data-testid="button-go-back">
                 Go Back
