@@ -36,7 +36,7 @@ const tiers = [
   {
     id: "basic",
     name: "Basic Plan",
-    price: "£15",
+    price: "£9",
     credits: 1,
     description: "Perfect for straightforward businesses",
     pages: "25-35 pages",
@@ -55,7 +55,7 @@ const tiers = [
   {
     id: "premium",
     name: "Premium Plan",
-    price: "£29",
+    price: "£19",
     credits: 3,
     description: "Most popular - comprehensive coverage",
     pages: "40-60 pages",
@@ -77,7 +77,7 @@ const tiers = [
   {
     id: "enterprise",
     name: "Enterprise Plan",
-    price: "£45",
+    price: "£29",
     credits: 6,
     description: "Maximum detail for complex ventures",
     pages: "50-80 pages",
@@ -99,7 +99,7 @@ const tiers = [
   {
     id: "ultimate",
     name: "Ultimate Plan",
-    price: "£60",
+    price: "£39",
     credits: "unlimited",
     description: "Everything you need for guaranteed approval",
     pages: "80+ pages",
@@ -123,7 +123,7 @@ const addons = [
   {
     id: "single_credit",
     name: "Single Credit",
-    price: "£19",
+    price: "£12",
     description: "Generate one additional business plan",
     icon: CreditCard,
     highlight: false,
@@ -131,8 +131,8 @@ const addons = [
   {
     id: "triple_pack",
     name: "Triple Credit Pack",
-    price: "£49",
-    savings: "Save £8",
+    price: "£29",
+    savings: "Save £7",
     description: "3 business plan credits - perfect for iterations",
     icon: Gift,
     highlight: true,
@@ -140,7 +140,7 @@ const addons = [
   {
     id: "partner_bundle",
     name: "Partner Bundle",
-    price: "£29",
+    price: "£19",
     description: "Plans for you and your co-founder",
     icon: Users,
     highlight: false,
@@ -148,8 +148,8 @@ const addons = [
   {
     id: "family_pack",
     name: "Family Pack",
-    price: "£75",
-    savings: "Save £20",
+    price: "£49",
+    savings: "Save £11",
     description: "5 business plans - ideal for multiple ventures",
     icon: Heart,
     highlight: false,
@@ -157,7 +157,7 @@ const addons = [
   {
     id: "ultimate_assurance",
     name: "Ultimate Assurance",
-    price: "£49/year",
+    price: "£35/year",
     description: "Unlimited business plan generations for 1 year",
     icon: Infinity,
     highlight: true,

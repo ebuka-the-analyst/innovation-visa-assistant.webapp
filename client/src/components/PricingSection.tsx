@@ -6,7 +6,7 @@ import { Link } from "wouter";
 const tiers = [
   {
     name: "Basic",
-    price: "£19",
+    price: "£9",
     description: "Perfect for Innovator Founder Visa applications",
     features: [
       { name: "Standard business plan template", included: true },
@@ -38,7 +38,7 @@ const tiers = [
   },
   {
     name: "Enterprise",
-    price: "£79",
+    price: "£29",
     description: "Complete Innovator Founder Visa preparation",
     features: [
       { name: "Full business plan package", included: true },

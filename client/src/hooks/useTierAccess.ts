@@ -21,18 +21,18 @@ const TIER_NAMES: Record<UserTier, string> = {
 
 const TIER_PRICES: Record<UserTier, string> = {
   free: "£0",
-  basic: "£15",
-  premium: "£29",
-  enterprise: "£45",
-  ultimate: "£60",
+  basic: "£9",
+  premium: "£19",
+  enterprise: "£29",
+  ultimate: "£39",
 };
 
 const TIER_PRICE_VALUES: Record<UserTier, number> = {
   free: 0,
-  basic: 29,
-  premium: 49,
-  enterprise: 89,
-  ultimate: 129,
+  basic: 9,
+  premium: 19,
+  enterprise: 29,
+  ultimate: 39,
 };
 
 const TIER_TOOL_COUNTS: Record<UserTier, number> = {
@@ -52,11 +52,11 @@ export const TIER_CREDITS: Record<UserTier, number | "unlimited"> = {
 };
 
 export const ADDON_PRICING = {
-  singleCredit: { price: 39, credits: 1, name: "Single Credit" },
-  triplePack: { price: 99, credits: 3, name: "Triple Credit Pack", savings: 18 },
-  partnerBundle: { price: 59, credits: 1, name: "Partner Bundle (2 plans)", description: "Generate plans for you and your co-founder" },
-  familyPack: { price: 149, credits: 4, name: "Family Pack (5 plans)", savings: 46 },
-  ultimateAssurance: { price: 99, name: "Ultimate Assurance (Annual)", description: "Unlimited business plan generations for 1 year" },
+  singleCredit: { price: 12, credits: 1, name: "Single Credit" },
+  triplePack: { price: 29, credits: 3, name: "Triple Credit Pack", savings: 7 },
+  partnerBundle: { price: 19, credits: 1, name: "Partner Bundle (2 plans)", description: "Generate plans for you and your co-founder" },
+  familyPack: { price: 49, credits: 4, name: "Family Pack (5 plans)", savings: 11 },
+  ultimateAssurance: { price: 35, name: "Ultimate Assurance (Annual)", description: "Unlimited business plan generations for 1 year" },
 } as const;
 
 export const REFERRAL_REWARDS = {
