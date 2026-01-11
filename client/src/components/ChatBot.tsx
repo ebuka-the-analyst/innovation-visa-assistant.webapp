@@ -10,6 +10,7 @@ interface Message {
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -72,22 +73,52 @@ export default function ChatBot() {
 
   return (
     <>
-      {/* Floating Chat Button - Calm, non-distracting positioning */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 flex items-center justify-center text-white z-[60]"
-        style={{
-          background: "#005EB8",
-        }}
-        data-testid="button-chatbot-toggle"
-        aria-label={isOpen ? "Close chat" : "Open AI Assistant"}
+      {/* Floating Chat Button - With dismiss option */}
+      <div 
+        className={`fixed z-[60] transition-all duration-300 ${
+          isDismissed 
+            ? "bottom-4 left-4 sm:bottom-6 sm:left-6" 
+            : "bottom-4 right-4 sm:bottom-6 sm:right-6"
+        }`}
       >
-        {isOpen ? (
-          <X className="w-5 h-5 sm:w-6 sm:h-6" />
-        ) : (
-          <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+        {/* Dismiss X button - only show when not dismissed and chat is closed */}
+        {!isDismissed && !isOpen && (
+          <button
+            onClick={() => setIsDismissed(true)}
+            className="absolute -top-2 -right-2 w-5 h-5 bg-muted hover:bg-muted/80 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm border border-border"
+            data-testid="button-dismiss-chat"
+            aria-label="Minimize chat button"
+          >
+            <X className="w-3 h-3" />
+          </button>
         )}
-      </button>
+        
+        <button
+          onClick={() => {
+            if (isDismissed) {
+              setIsDismissed(false);
+            } else {
+              setIsOpen(!isOpen);
+            }
+          }}
+          className={`rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center text-white ${
+            isDismissed 
+              ? "w-5 h-5 opacity-60 hover:opacity-100 hover:scale-110" 
+              : "w-11 h-11 sm:w-12 sm:h-12 hover:scale-105"
+          }`}
+          style={{
+            background: "#005EB8",
+          }}
+          data-testid="button-chatbot-toggle"
+          aria-label={isDismissed ? "Restore chat button" : isOpen ? "Close chat" : "Open AI Assistant"}
+        >
+          {isOpen ? (
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
+          ) : (
+            <MessageCircle className={isDismissed ? "w-3 h-3" : "w-5 h-5 sm:w-6 sm:h-6"} />
+          )}
+        </button>
+      </div>
 
       {/* Chat Window - Fully responsive */}
       {isOpen && (
