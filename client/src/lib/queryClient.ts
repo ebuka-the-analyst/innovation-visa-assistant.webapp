@@ -4,7 +4,12 @@ async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     try {
       const json = await res.json();
-      throw new Error(json.error || json.message || `Request failed with status ${res.status}`);
+      // Create error message that includes details if available
+      let message = json.error || json.message || `Request failed with status ${res.status}`;
+      if (json.details) {
+        message = `${message}: ${json.details}`;
+      }
+      throw new Error(message);
     } catch (e) {
       if (e instanceof SyntaxError) {
         const text = res.statusText || `Request failed with status ${res.status}`;
