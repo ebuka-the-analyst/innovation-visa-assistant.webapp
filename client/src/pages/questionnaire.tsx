@@ -66,20 +66,46 @@ export default function Questionnaire() {
     }
     
     if (upgraded === 'true' && sessionId) {
-      // Force actual refetch of user data (not just invalidation)
+      // Call backend to confirm subscription and update user tier in database
       (async () => {
-        await queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
-        
-        // Get fresh user data from cache after refetch
-        const freshUserData = queryClient.getQueryData<{ subscriptionTier?: string }>(['/api/auth/user']);
-        const freshTier = freshUserData?.subscriptionTier || tierFromUrl || 'subscription';
-        
-        console.log('[Payment Success] Fresh tier from API:', freshTier, 'URL tier:', tierFromUrl, 'Hook tier:', userTier);
-        
-        toast({
-          title: "Payment Successful!",
-          description: `Your ${freshTier} tier has been activated. You can now access premium features.`,
-        });
+        try {
+          // CRITICAL: Call the confirm endpoint to actually update the tier in the database
+          const confirmResponse = await fetch('/api/payments/confirm-subscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ sessionId }),
+          });
+          
+          if (!confirmResponse.ok) {
+            const errorData = await confirmResponse.json().catch(() => ({}));
+            console.error('[Payment Confirm] Failed:', errorData);
+            // Don't fail silently - the tier might already be updated via webhook
+          } else {
+            console.log('[Payment Confirm] Subscription confirmed successfully');
+          }
+          
+          // Refetch user data to get the updated tier
+          await queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
+          
+          // Get fresh user data from cache after refetch
+          const freshUserData = queryClient.getQueryData<{ subscriptionTier?: string }>(['/api/auth/user']);
+          const freshTier = freshUserData?.subscriptionTier || tierFromUrl || 'subscription';
+          
+          console.log('[Payment Success] Fresh tier from API:', freshTier, 'URL tier:', tierFromUrl);
+          
+          toast({
+            title: "Payment Successful!",
+            description: `Your ${freshTier} tier has been activated. You can now access premium features.`,
+          });
+        } catch (error) {
+          console.error('[Payment Confirm] Error:', error);
+          toast({
+            title: "Payment Received",
+            description: "Your payment was successful. Please refresh the page if features don't unlock immediately.",
+            variant: "default",
+          });
+        }
         
         window.history.replaceState({}, '', '/questionnaire');
       })();
