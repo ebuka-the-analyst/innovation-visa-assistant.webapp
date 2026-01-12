@@ -459,34 +459,6 @@ export default function Pricing() {
                       </Button>
                     )}
 
-                    {/* Business Plan with Questionnaire - Secondary option */}
-                    {tier.id !== 'free' && !isCurrentTier && (
-                      <Button
-                        className="w-full"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleSelectTier(tier.id)}
-                        disabled={processingTier === tier.id || checkoutMutation.isPending}
-                        data-testid={`button-questionnaire-${tier.id}`}
-                      >
-                        {processingTier === tier.id && checkoutMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Processing...
-                          </>
-                        ) : latestPlan && latestPlan.tier === tier.id && latestPlan.status === 'pending' ? (
-                          <>
-                            <FileText className="mr-2 h-4 w-4" />
-                            Continue Plan
-                          </>
-                        ) : (
-                          <>
-                            <FileText className="mr-2 h-4 w-4" />
-                            Create Plan First
-                          </>
-                        )}
-                      </Button>
-                    )}
                   </CardFooter>
                 </Card>
               );

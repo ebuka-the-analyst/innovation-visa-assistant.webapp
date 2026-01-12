@@ -453,7 +453,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
             </Button>
           ) : (
             <Button
-              variant="outline"
+              variant="destructive"
               size="sm"
               className="w-full justify-start gap-2 h-7 text-xs"
               onClick={() => logoutMutation.mutate()}
