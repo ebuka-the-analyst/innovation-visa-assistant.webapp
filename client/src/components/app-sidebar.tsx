@@ -346,17 +346,6 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
       ],
     },
     {
-      label: "Your Journey",
-      items: [
-        {
-          title: "Support",
-          url: "/support",
-          icon: HelpCircle,
-          description: "Help & contact us",
-        },
-      ],
-    },
-    {
       label: "Account",
       items: [
         {
@@ -364,6 +353,12 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           url: "/referral-dashboard",
           icon: Gift,
           description: "Earn by referring others",
+        },
+        {
+          title: "Support",
+          url: "/support",
+          icon: HelpCircle,
+          description: "Help & contact us",
         },
         {
           title: "Settings",
