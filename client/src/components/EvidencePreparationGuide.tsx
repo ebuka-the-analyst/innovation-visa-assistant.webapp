@@ -377,7 +377,7 @@ export default function EvidencePreparationGuide() {
 
       <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
         <p className="text-sm text-muted-foreground">
-          <strong className="text-foreground">Expert Guarantee:</strong> "If you can answer all {totalQuestions} questions with specific, evidence-backed responses, you'll have a 70-80% approval rate application. With our AI generation using your answers, we target 95% approval."
+          <strong className="text-foreground">Expert Guarantee:</strong> "Complete this guide with specific, evidence-backed responses and you'll have a 70-80% approval rate application. With our AI generation using your answers, we target 95% approval."
         </p>
       </div>
     </Card>
