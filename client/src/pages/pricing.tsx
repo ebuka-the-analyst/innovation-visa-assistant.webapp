@@ -7,25 +7,15 @@ import { AppSidebar } from "@/components/app-sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart, Tag, X } from "lucide-react";
+import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { TIER_CREDITS, ADDON_PRICING, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
 import logoLight from "@assets/official_logo.png";
 import logoDark from "@assets/logo_dark.png";
-
-interface PromoValidation {
-  valid: boolean;
-  message?: string;
-  discount?: number;
-  discountType?: 'percentage' | 'fixed';
-  grantsTier?: string;
-  tierUpgraded?: boolean;
-}
 
 const tiers = [
   {
@@ -186,9 +176,6 @@ export default function Pricing() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [processingTier, setProcessingTier] = useState<string | null>(null);
-  const [promoCode, setPromoCode] = useState('');
-  const [promoValidation, setPromoValidation] = useState<PromoValidation | null>(null);
-  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   
   const { data: user } = useQuery<{ 
     id: string; 
@@ -217,101 +204,6 @@ export default function Pricing() {
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )[0];
 
-  // Promo code validation
-  const validatePromoCode = async () => {
-    if (!promoCode.trim()) {
-      setPromoValidation(null);
-      return;
-    }
-    
-    setIsValidatingPromo(true);
-    try {
-      const validateResponse = await fetch(`/api/promos/validate/${encodeURIComponent(promoCode.trim())}`);
-      const validateData = await validateResponse.json();
-      
-      if (!validateData.valid) {
-        setPromoValidation({
-          valid: false,
-          message: validateData.message,
-        });
-        return;
-      }
-      
-      // If this is a tier-granting promo code, redeem it immediately
-      if (validateData.grantsTier && user) {
-        try {
-          const redeemResponse = await apiRequest('POST', '/api/promos/redeem', {
-            code: promoCode.trim(),
-          });
-          const redeemData = await redeemResponse.json();
-          
-          if (redeemData.success && redeemData.tierUpgrade) {
-            queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-            
-            setPromoValidation({
-              valid: true,
-              message: redeemData.message,
-              grantsTier: redeemData.newTier,
-              tierUpgraded: true,
-            });
-            
-            toast({
-              title: "Tier Upgraded!",
-              description: `You now have ${redeemData.newTier.charAt(0).toUpperCase() + redeemData.newTier.slice(1)} tier access!`,
-            });
-            setPromoCode('');
-            
-            setTimeout(() => {
-              setLocation('/dashboard');
-            }, 2000);
-            return;
-          }
-        } catch (redeemError) {
-          console.error('Error redeeming tier promo:', redeemError);
-        }
-      }
-      
-      // Regular discount code
-      setPromoValidation({
-        valid: validateData.valid,
-        message: validateData.message,
-        discount: validateData.discountValue,
-        discountType: validateData.discountType,
-        grantsTier: validateData.grantsTier,
-      });
-      
-      if (validateData.valid && validateData.discountValue) {
-        toast({
-          title: "Promo code applied!",
-          description: validateData.discountType === 'percentage' 
-            ? `${validateData.discountValue}% discount will be applied`
-            : `£${(validateData.discountValue / 100).toFixed(2)} discount will be applied`,
-        });
-      }
-    } catch (error) {
-      setPromoValidation({ valid: false, message: 'Failed to validate promo code' });
-    } finally {
-      setIsValidatingPromo(false);
-    }
-  };
-
-  const clearPromoCode = () => {
-    setPromoCode('');
-    setPromoValidation(null);
-  };
-
-  // Calculate discounted price for a tier
-  const getDiscountedPrice = (priceInPence: number) => {
-    if (!promoValidation?.valid || !promoValidation.discount || priceInPence === 0) {
-      return priceInPence;
-    }
-    
-    if (promoValidation.discountType === 'percentage') {
-      return Math.round(priceInPence * (1 - promoValidation.discount / 100));
-    }
-    return Math.max(0, priceInPence - promoValidation.discount);
-  };
-
   const checkoutMutation = useMutation({
     mutationFn: async ({ planId, newTier }: { planId: string; newTier: string }) => {
       const response = await apiRequest('POST', '/api/payment/create-checkout', { planId });
@@ -334,14 +226,10 @@ export default function Pricing() {
     },
   });
 
-  // Direct subscribe mutation with promo code
+  // Direct subscribe mutation - Stripe handles promo codes on checkout page
   const directSubscribeMutation = useMutation({
     mutationFn: async (tierId: string) => {
-      const payload: { tier: string; promoCode?: string } = { tier: tierId };
-      if (promoValidation?.valid && promoCode.trim()) {
-        payload.promoCode = promoCode.trim();
-      }
-      const response = await apiRequest('POST', '/api/payment/direct-subscribe', payload);
+      const response = await apiRequest('POST', '/api/payment/direct-subscribe', { tier: tierId });
       return response.json();
     },
     onSuccess: (data: any) => {
@@ -350,10 +238,6 @@ export default function Pricing() {
       }
     },
     onError: (error: any) => {
-      if (error.promoError) {
-        setPromoValidation({ valid: false, message: error.message });
-        setPromoCode('');
-      }
       toast({
         title: "Error",
         description: error.message || "Failed to proceed to payment",
@@ -479,77 +363,6 @@ export default function Pricing() {
                 </p>
               </div>
 
-              {/* Promo Code Section */}
-              <div className="max-w-md mx-auto mb-8">
-                <Card className="p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Tag className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">Have a promo code?</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="flex-1 relative">
-                      <Input
-                        placeholder="Enter promo code"
-                        value={promoCode}
-                        onChange={(e) => {
-                          setPromoCode(e.target.value.toUpperCase());
-                          if (promoValidation) setPromoValidation(null);
-                        }}
-                        className="uppercase"
-                        disabled={promoValidation?.valid}
-                        data-testid="input-pricing-promo-code"
-                      />
-                      {promoValidation?.valid && (
-                        <button
-                          onClick={clearPromoCode}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                          data-testid="button-clear-promo"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={validatePromoCode}
-                      disabled={isValidatingPromo || !promoCode.trim() || promoValidation?.valid}
-                      data-testid="button-apply-promo"
-                    >
-                      {isValidatingPromo ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        "Apply"
-                      )}
-                    </Button>
-                  </div>
-                  {promoValidation && (
-                    <div className="mt-3">
-                      {promoValidation.valid ? (
-                        promoValidation.tierUpgraded ? (
-                          <Badge className="bg-emerald-600 text-white">
-                            <Gift className="w-3 h-3 mr-1" />
-                            {promoValidation.grantsTier?.charAt(0).toUpperCase()}{promoValidation.grantsTier?.slice(1)} tier unlocked! Redirecting...
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-green-500 text-white">
-                            <Check className="w-3 h-3 mr-1" />
-                            {promoValidation.discountType === 'percentage' 
-                              ? `${promoValidation.discount}% discount applied`
-                              : `£${((promoValidation.discount || 0) / 100).toFixed(2)} off applied`}
-                          </Badge>
-                        )
-                      ) : (
-                        <Badge variant="destructive">
-                          <X className="w-3 h-3 mr-1" />
-                          {promoValidation.message || 'Invalid code'}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                </Card>
-              </div>
-
         {/* Horizontal scrollable container on mobile/tablet, grid on larger screens */}
         <div className="w-full overflow-x-auto pb-4 -mx-4 px-4 lg:overflow-visible lg:mx-0 lg:px-0">
           <div className="flex gap-4 lg:grid lg:grid-cols-3 xl:grid-cols-5 lg:gap-6 min-w-max lg:min-w-0 max-w-7xl mx-auto">
@@ -580,16 +393,7 @@ export default function Pricing() {
                     <CardTitle className="text-lg lg:text-xl">{tier.name}</CardTitle>
                     <CardDescription className="text-xs lg:text-sm line-clamp-2">{tier.description}</CardDescription>
                     <div className="mt-3">
-                      {tier.priceInPence > 0 && promoValidation?.valid && promoValidation.discount ? (
-                        <>
-                          <span className="text-xl lg:text-2xl text-muted-foreground line-through mr-2">{tier.price}</span>
-                          <span className="text-3xl lg:text-4xl font-bold text-green-600">
-                            £{(getDiscountedPrice(tier.priceInPence) / 100).toFixed(0)}
-                          </span>
-                        </>
-                      ) : (
-                        <span className="text-3xl lg:text-4xl font-bold">{tier.price}</span>
-                      )}
+                      <span className="text-3xl lg:text-4xl font-bold">{tier.price}</span>
                       <span className="text-muted-foreground text-xs ml-1">one-time</span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
