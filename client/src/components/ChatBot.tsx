@@ -75,49 +75,51 @@ export default function ChatBot() {
     <>
       {/* Floating Chat Button - With dismiss option */}
       <div 
-        className={`fixed z-[60] transition-all duration-300 ${
-          isDismissed 
-            ? "bottom-4 left-4 sm:bottom-6 sm:left-6" 
-            : "bottom-4 right-4 sm:bottom-6 sm:right-6"
-        }`}
+        className="fixed z-[60] transition-all duration-300 bottom-4 right-4 sm:bottom-6 sm:right-6"
       >
-        {/* Dismiss X button - only show when not dismissed and chat is closed */}
-        {!isDismissed && !isOpen && (
+        {/* Container with chat icon and dismiss X - pill shape when not dismissed */}
+        <div className={`flex items-center gap-0.5 transition-all duration-300 ${
+          isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : ""
+        }`}>
+          {/* Main chat button */}
           <button
-            onClick={() => setIsDismissed(true)}
-            className="absolute -top-2 -right-2 w-5 h-5 bg-muted hover:bg-muted/80 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm border border-border"
-            data-testid="button-dismiss-chat"
-            aria-label="Minimize chat button"
+            onClick={() => {
+              if (isDismissed) {
+                setIsDismissed(false);
+              } else {
+                setIsOpen(!isOpen);
+              }
+            }}
+            className={`rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center text-white ${
+              isDismissed 
+                ? "w-8 h-8" 
+                : "w-11 h-11 sm:w-12 sm:h-12 hover:scale-105"
+            }`}
+            style={{
+              background: "#005EB8",
+            }}
+            data-testid="button-chatbot-toggle"
+            aria-label={isDismissed ? "Restore chat button" : isOpen ? "Close chat" : "Open AI Assistant"}
           >
-            <X className="w-3 h-3" />
+            {isOpen ? (
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
+            ) : (
+              <MessageCircle className={isDismissed ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
+            )}
           </button>
-        )}
-        
-        <button
-          onClick={() => {
-            if (isDismissed) {
-              setIsDismissed(false);
-            } else {
-              setIsOpen(!isOpen);
-            }
-          }}
-          className={`rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center text-white ${
-            isDismissed 
-              ? "w-5 h-5 opacity-60 hover:opacity-100 hover:scale-110" 
-              : "w-11 h-11 sm:w-12 sm:h-12 hover:scale-105"
-          }`}
-          style={{
-            background: "#005EB8",
-          }}
-          data-testid="button-chatbot-toggle"
-          aria-label={isDismissed ? "Restore chat button" : isOpen ? "Close chat" : "Open AI Assistant"}
-        >
-          {isOpen ? (
-            <X className="w-5 h-5 sm:w-6 sm:h-6" />
-          ) : (
-            <MessageCircle className={isDismissed ? "w-3 h-3" : "w-5 h-5 sm:w-6 sm:h-6"} />
+          
+          {/* Dismiss X button - attached to the right, reduced height (50%) */}
+          {!isDismissed && !isOpen && (
+            <button
+              onClick={() => setIsDismissed(true)}
+              className="w-5 h-6 bg-muted hover:bg-muted/80 rounded-r-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm border border-l-0 border-border"
+              data-testid="button-dismiss-chat"
+              aria-label="Minimize chat button"
+            >
+              <X className="w-3 h-3" />
+            </button>
           )}
-        </button>
+        </div>
       </div>
 
       {/* Chat Window - Fully responsive */}

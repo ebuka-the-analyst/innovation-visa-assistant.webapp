@@ -311,8 +311,21 @@ export default function ToolsChronographWheel() {
     };
   }, [isHoveringDown]);
 
+  // When dismissed, show minimized version in corner
   if (isDismissed) {
-    return null;
+    return (
+      <div className="fixed bottom-4 left-4 z-40">
+        <button
+          onClick={() => setIsDismissed(false)}
+          className="w-8 h-8 rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center text-white opacity-60 hover:opacity-100 hover:scale-110"
+          style={{ background: "#005EB8" }}
+          data-testid="button-restore-tools"
+          aria-label="Restore Tools Hub"
+        >
+          <Icons.Wrench className="w-4 h-4" />
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -335,39 +348,36 @@ export default function ToolsChronographWheel() {
         setIsHoveringWidget(false);
       }}
     >
-      {/* Expand/Collapse Indicator - Subtle design */}
-      <div className="absolute -top-28 left-0 right-0 flex items-center justify-center">
-        <button
-          onClick={() => {
-            recordActivity();
-            setIsMinimized(!isMinimized);
-          }}
-          className="font-medium text-center w-8 h-8 rounded-full hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center shadow-sm"
-          data-testid="button-toggle-indicator"
-          aria-label={isMinimized ? "Expand Tools Hub" : "Minimize Tools Hub"}
-          style={{ 
-            color: "#ffffff", 
-            backgroundColor: isMinimized ? "#005EB8" : "#dc2626",
-            fontSize: "1.25rem", 
-            lineHeight: "1",
-            border: "none"
-          }}
-        >
-          {isMinimized ? "+" : "−"}
-        </button>
-      </div>
-
-      {/* Text Label Above Widget - Calm, non-pulsing design */}
+      {/* Minimized state - small icon with dismiss X on left side */}
       {isMinimized && (
-        <div className="absolute -top-16 left-0 right-0 flex items-center justify-center">
+        <div className={`absolute -top-16 left-0 flex items-center gap-0.5 transition-all duration-300 ${
+          isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : ""
+        }`}>
+          {/* Dismiss X button - on the LEFT (minimizes to left) */}
+          {!isDismissed && (
+            <button
+              onClick={() => setIsDismissed(true)}
+              className="w-5 h-6 bg-muted hover:bg-muted/80 rounded-l-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm border border-r-0 border-border"
+              data-testid="button-dismiss-tools"
+              aria-label="Minimize tools button"
+            >
+              <Icons.X className="w-3 h-3" />
+            </button>
+          )}
+          
+          {/* Main toggle button */}
           <button
             onClick={() => {
-              recordActivity();
-              setIsMinimized(false);
+              if (isDismissed) {
+                setIsDismissed(false);
+              } else {
+                recordActivity();
+                setIsMinimized(false);
+              }
             }}
             className="font-semibold text-center px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
             data-testid="button-toggle-text-label"
-            aria-label="Expand Tools Hub"
+            aria-label={isDismissed ? "Restore Tools Hub" : "Expand Tools Hub"}
             style={{ 
               color: "#ffffff", 
               backgroundColor: "#005EB8",
@@ -377,6 +387,30 @@ export default function ToolsChronographWheel() {
             }}
           >
             100+ Tools
+          </button>
+        </div>
+      )}
+
+      {/* Expand/Collapse Indicator - Only shown when expanded */}
+      {!isMinimized && (
+        <div className="absolute -top-28 left-0 right-0 flex items-center justify-center">
+          <button
+            onClick={() => {
+              recordActivity();
+              setIsMinimized(!isMinimized);
+            }}
+            className="font-medium text-center w-8 h-8 rounded-full hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center shadow-sm"
+            data-testid="button-toggle-indicator"
+            aria-label="Minimize Tools Hub"
+            style={{ 
+              color: "#ffffff", 
+              backgroundColor: "#dc2626",
+              fontSize: "1.25rem", 
+              lineHeight: "1",
+              border: "none"
+            }}
+          >
+            −
           </button>
         </div>
       )}
