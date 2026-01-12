@@ -323,13 +323,13 @@ export default function Questionnaire() {
         </div>
 
         <div className="flex-1 flex">
-          <div className="flex-1 flex flex-col lg:flex-row">
+          <div className="flex-1 flex flex-col xl:flex-row">
             <div className="flex-1 h-[calc(100vh-80px)] overflow-hidden">
               <AiInterviewChat tier={userTier} onSessionUpdate={handleSessionUpdate} />
             </div>
             
-            {/* Right sidebar - hidden on mobile, visible on large screens */}
-            <div className="hidden lg:block lg:w-80 xl:w-96 border-l bg-muted/20 overflow-y-auto p-3 h-[calc(100vh-80px)]">
+            {/* Right sidebar - hidden on mobile/tablet, visible on xl screens only */}
+            <div className="hidden xl:block xl:w-80 2xl:w-96 border-l bg-muted/20 overflow-y-auto p-3 h-[calc(100vh-80px)]">
               <VisaReadinessHUD 
                 innovationScore={interviewSession?.innovationScore || 0}
                 viabilityScore={interviewSession?.viabilityScore || 0}
