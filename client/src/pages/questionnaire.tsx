@@ -18,6 +18,7 @@ import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useTierAccess } from "@/hooks/useTierAccess";
 import { Link } from "wouter";
+import { queryClient } from "@/lib/queryClient";
 
 import QuestionnaireForm from "@/components/QuestionnaireForm";
 import EvidencePreparationGuide from "@/components/EvidencePreparationGuide";
@@ -64,6 +65,9 @@ export default function Questionnaire() {
     }
     
     if (upgraded === 'true' && sessionId) {
+      // Force refresh user data to get updated tier after payment
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      
       toast({
         title: "Payment Successful!",
         description: `Your ${userTier || 'subscription'} tier has been activated. You can now generate your business plan.`,
