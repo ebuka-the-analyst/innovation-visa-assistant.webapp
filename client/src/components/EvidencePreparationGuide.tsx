@@ -343,14 +343,14 @@ export default function EvidencePreparationGuide() {
       <Accordion type="single" collapsible className="space-y-2">
         {Object.entries(expertQuestions).map(([section, data], sectionIndex) => (
           <AccordionItem key={sectionIndex} value={`section-${sectionIndex}`} className="border rounded-lg px-4">
-            <AccordionTrigger className="hover:no-underline" data-testid={`accordion-section-${sectionIndex}`}>
+            <AccordionTrigger className="hover:no-underline py-3" data-testid={`accordion-section-${sectionIndex}`}>
               <div className="flex items-start gap-3 text-left">
-                <span className="font-mono text-sm text-muted-foreground mt-1">
+                <span className="font-mono text-xs text-muted-foreground mt-0.5">
                   {String(sectionIndex + 1).padStart(2, '0')}
                 </span>
                 <div>
-                  <div className="font-semibold">{section}</div>
-                  <div className="text-sm text-muted-foreground mt-1">{data.description}</div>
+                  <div className="font-semibold text-sm">{section}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{data.description}</div>
                 </div>
               </div>
             </AccordionTrigger>

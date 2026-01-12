@@ -979,7 +979,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     free: 0,
     basic: 1,
     premium: 3,
-    enterprise: 6,
+    enterprise: 'unlimited',
     ultimate: 'unlimited',
   };
 
@@ -1003,7 +1003,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const userTier = freshUser.subscriptionTier || 'free';
       const tierCredits = TIER_CREDITS[userTier];
-      const hasUnlimited = userTier === 'ultimate' || freshUser.hasUltimateAssurance;
+      // Enterprise and Ultimate tiers have unlimited credits
+      const hasUnlimited = userTier === 'ultimate' || userTier === 'enterprise' || freshUser.hasUltimateAssurance;
       
       res.json({
         planCredits: freshUser.planCredits || 0,
@@ -1011,9 +1012,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalCredits: (freshUser.planCredits || 0) + (freshUser.bonusCredits || 0),
         creditsUsed: freshUser.creditsUsed || 0,
         hasUnlimitedCredits: hasUnlimited,
-        tierCreditLimit: tierCredits,
+        tierCreditLimit: hasUnlimited ? 'unlimited' : tierCredits,
         hasUltimateAssurance: freshUser.hasUltimateAssurance || false,
         lastCreditRefresh: freshUser.lastCreditRefresh,
+        subscriptionTier: userTier, // Include tier in response for debugging
       });
     } catch (error) {
       console.error("Get credit balance error:", error);
@@ -1026,7 +1028,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       const { creditsToConsume = 1, referenceId, referenceType, description } = req.body;
       
-      const hasUnlimited = user.subscriptionTier === 'ultimate' || user.hasUltimateAssurance;
+      const hasUnlimited = user.subscriptionTier === 'ultimate' || user.subscriptionTier === 'enterprise' || user.hasUltimateAssurance;
       
       // Ultimate users have unlimited credits
       if (hasUnlimited) {
