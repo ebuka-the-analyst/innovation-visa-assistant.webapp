@@ -5629,6 +5629,8 @@ EXAMPLES OF GOOD RESPONSES:
         maxUsesPerUser,
         validFrom,
         validUntil,
+        grantsTier,
+        grantsCredits,
       } = req.body;
       
       // Use code as name if name not provided
@@ -5636,8 +5638,15 @@ EXAMPLES OF GOOD RESPONSES:
       const tiers = eligibleTiers || applicableTiers;
       const totalUses = maxTotalUses || maxUses;
       
-      if (!code || !discountType || discountValue === undefined) {
-        return res.status(400).json({ error: "Code, discount type, and discount value are required" });
+      // Parse numeric values from strings if needed
+      const parsedDiscountValue = typeof discountValue === 'string' ? parseInt(discountValue, 10) : discountValue;
+      const parsedMinPurchase = minPurchaseAmount ? (typeof minPurchaseAmount === 'string' ? parseFloat(minPurchaseAmount) : minPurchaseAmount) : null;
+      const parsedTotalUses = totalUses ? (typeof totalUses === 'string' ? parseInt(totalUses, 10) : totalUses) : null;
+      const parsedMaxUsesPerUser = maxUsesPerUser ? (typeof maxUsesPerUser === 'string' ? parseInt(maxUsesPerUser, 10) : maxUsesPerUser) : 1;
+      const parsedGrantsCredits = grantsCredits ? (typeof grantsCredits === 'string' ? parseInt(grantsCredits, 10) : grantsCredits) : null;
+      
+      if (!code || !discountType || parsedDiscountValue === undefined || isNaN(parsedDiscountValue)) {
+        return res.status(400).json({ error: "Code, discount type, and valid discount value are required" });
       }
       
       // Generate code if not provided
@@ -5649,16 +5658,27 @@ EXAMPLES OF GOOD RESPONSES:
         return res.status(400).json({ error: "A promo code with this code already exists" });
       }
       
+      console.log("Creating promo code with data:", {
+        code: promoCodeValue,
+        name: promoName,
+        discountType,
+        discountValue: parsedDiscountValue,
+        grantsTier: grantsTier || null,
+        grantsCredits: parsedGrantsCredits,
+      });
+      
       const promoCode = await storage.createPromoCode({
         code: promoCodeValue,
         name: promoName,
-        description,
+        description: description || null,
         discountType,
-        discountValue,
+        discountValue: parsedDiscountValue,
+        grantsTier: grantsTier || null,
+        grantsCredits: parsedGrantsCredits,
         eligibleTiers: tiers || null,
-        minPurchaseAmount: minPurchaseAmount ? Math.round(minPurchaseAmount * 100) : null,
-        maxTotalUses: totalUses || null,
-        maxUsesPerUser: maxUsesPerUser || 1,
+        minPurchaseAmount: parsedMinPurchase ? Math.round(parsedMinPurchase * 100) : null,
+        maxTotalUses: parsedTotalUses,
+        maxUsesPerUser: parsedMaxUsesPerUser,
         validFrom: validFrom ? new Date(validFrom) : new Date(),
         validUntil: validUntil ? new Date(validUntil) : null,
         status: 'active',
@@ -5666,9 +5686,9 @@ EXAMPLES OF GOOD RESPONSES:
       });
       
       res.json(promoCode);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Admin create promo code error:", error);
-      res.status(500).json({ error: "Failed to create promo code" });
+      res.status(500).json({ error: "Failed to create promo code", details: error?.message || String(error) });
     }
   });
 
