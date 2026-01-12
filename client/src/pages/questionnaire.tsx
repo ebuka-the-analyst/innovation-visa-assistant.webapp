@@ -70,16 +70,19 @@ export default function Questionnaire() {
       (async () => {
         await queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
         
-        // Use tier from URL as backup since it's passed from Stripe success_url
-        const displayTier = tierFromUrl || userTier || 'subscription';
+        // Get fresh user data from cache after refetch
+        const freshUserData = queryClient.getQueryData<{ subscriptionTier?: string }>(['/api/auth/user']);
+        const freshTier = freshUserData?.subscriptionTier || tierFromUrl || 'subscription';
+        
+        console.log('[Payment Success] Fresh tier from API:', freshTier, 'URL tier:', tierFromUrl, 'Hook tier:', userTier);
         
         toast({
           title: "Payment Successful!",
-          description: `Your ${displayTier} tier has been activated. You can now access premium features.`,
+          description: `Your ${freshTier} tier has been activated. You can now access premium features.`,
         });
+        
+        window.history.replaceState({}, '', '/questionnaire');
       })();
-      
-      window.history.replaceState({}, '', '/questionnaire');
     }
   }, [toast, canAccessAiInterview, userTier]);
 

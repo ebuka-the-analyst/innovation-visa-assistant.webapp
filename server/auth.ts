@@ -438,6 +438,8 @@ export async function setupAuth(app: Express) {
     // Fetch fresh user data to ensure isAdmin is up-to-date
     const freshUser = await storage.getUser(sessionUser.id);
     if (freshUser) {
+      const tierToReturn = freshUser.subscriptionTier || "free";
+      console.log(`[AUTH] Returning user ${freshUser.email} with subscriptionTier: ${tierToReturn} (raw: ${freshUser.subscriptionTier})`);
       res.json({
         id: freshUser.id,
         email: freshUser.email,
@@ -447,7 +449,7 @@ export async function setupAuth(app: Express) {
         profileImageUrl: freshUser.profileImageUrl,
         isAdmin: freshUser.isAdmin || false,
         isEmailVerified: freshUser.isEmailVerified || false,
-        subscriptionTier: freshUser.subscriptionTier || "free",
+        subscriptionTier: tierToReturn,
         subscriptionStatus: freshUser.subscriptionStatus || "inactive",
       });
     } else {
