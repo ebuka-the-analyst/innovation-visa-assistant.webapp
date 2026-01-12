@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award, Eye, EyeOff, RefreshCw, MessageCircle, Calculator, BookOpen, Users, ArrowRight, Sparkles, Settings, Shield } from "lucide-react";
+import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award, Eye, EyeOff, RefreshCw, MessageCircle, Calculator, BookOpen, Users, ArrowRight, Sparkles, Settings, Shield, Gift, Crown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 import ChatBot from "@/components/ChatBot";
@@ -176,6 +176,29 @@ export default function Dashboard() {
     queryKey: ['/api/dashboard/plans'],
     enabled: !!user,
     staleTime: 30000,
+  });
+
+  // Fetch user's redeemed promo codes
+  const { data: redemptionsData } = useQuery<{
+    redemptions: Array<{
+      id: string;
+      promoCodeId: string;
+      appliedAt: string;
+      createdAt: string;
+      promoCode: {
+        code: string;
+        name: string;
+        description?: string;
+        grantsTier?: string;
+        grantsCredits?: number;
+        discountType?: string;
+        discountValue?: number;
+      } | null;
+    }>;
+  }>({
+    queryKey: ['/api/promos/my-redemptions'],
+    enabled: !!user,
+    staleTime: 60000,
   });
 
   // Handle redirect to login when not authenticated
@@ -513,6 +536,57 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Redeemed Promo Codes Section */}
+            {redemptionsData?.redemptions && redemptionsData.redemptions.length > 0 && (
+              <Card data-testid="card-redeemed-promos">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Gift className="h-5 w-5 text-primary" />
+                    <CardTitle>Your Redeemed Codes</CardTitle>
+                  </div>
+                  <CardDescription>Promo codes you've applied to your account</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {redemptionsData.redemptions.map((redemption) => (
+                      <div 
+                        key={redemption.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-accent/30 border border-border/50"
+                        data-testid={`redemption-${redemption.id}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            {redemption.promoCode?.grantsTier ? (
+                              <Crown className="h-5 w-5 text-primary" />
+                            ) : (
+                              <Gift className="h-5 w-5 text-primary" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium">{redemption.promoCode?.name || redemption.promoCode?.code}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Code: <span className="font-mono">{redemption.promoCode?.code}</span>
+                              {redemption.promoCode?.grantsTier && (
+                                <Badge className="ml-2 capitalize">
+                                  {redemption.promoCode.grantsTier} Tier Unlocked
+                                </Badge>
+                              )}
+                              {redemption.promoCode?.grantsCredits && redemption.promoCode.grantsCredits > 0 && (
+                                <span className="ml-2 text-green-600">+{redemption.promoCode.grantsCredits} credits</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right text-sm text-muted-foreground">
+                          {format(new Date(redemption.createdAt), 'MMM d, yyyy')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* My Saved Work Section */}
             <MyWorkSection />

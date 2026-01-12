@@ -5228,6 +5228,40 @@ EXAMPLES OF GOOD RESPONSES:
     }
   });
 
+  // Get user's redeemed promo codes with details
+  app.get("/api/promos/my-redemptions", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      // Get all redemptions for this user
+      const redemptions = await storage.getPromoRedemptionsByUser(user.id);
+      
+      // Fetch promo code details for each redemption
+      const redemptionsWithDetails = await Promise.all(
+        redemptions.map(async (redemption) => {
+          const promoCode = await storage.getPromoCode(redemption.promoCodeId);
+          return {
+            ...redemption,
+            promoCode: promoCode ? {
+              code: promoCode.code,
+              name: promoCode.name,
+              description: promoCode.description,
+              grantsTier: promoCode.grantsTier,
+              grantsCredits: promoCode.grantsCredits,
+              discountType: promoCode.discountType,
+              discountValue: promoCode.discountValue,
+            } : null,
+          };
+        })
+      );
+      
+      res.json({ redemptions: redemptionsWithDetails });
+    } catch (error) {
+      console.error("Get my redemptions error:", error);
+      res.status(500).json({ message: "Failed to fetch redemptions" });
+    }
+  });
+
   // ============================================
   // PAYOUT REQUEST ROUTES
   // ============================================
