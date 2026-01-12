@@ -336,139 +336,145 @@ export default function Pricing() {
                 </p>
               </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 max-w-7xl mx-auto">
-          {tiers.map((tier) => {
-            const isCurrentTier = user && tier.id === currentTier;
-            return (
-              <Card 
-                key={tier.id} 
-                className={`relative hover-elevate ${tier.popular ? 'border-primary shadow-lg' : ''} ${isCurrentTier ? 'border-green-500 shadow-md' : ''}`}
-                data-testid={`card-tier-${tier.id}`}
-              >
-                {tier.popular && !isCurrentTier && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-primary text-primary-foreground px-4 py-1">
-                      Most Popular
-                    </Badge>
-                  </div>
-                )}
-                {isCurrentTier && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-green-500 text-white px-4 py-1" data-testid={`badge-current-tier-${tier.id}`}>
-                      Current Plan
-                    </Badge>
-                  </div>
-                )}
-                
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-2xl">{tier.name}</CardTitle>
-                  <CardDescription>{tier.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold">{tier.price}</span>
-                  <span className="text-muted-foreground ml-2">one-time</span>
-                </div>
-                <div className="text-sm text-muted-foreground mt-2">
-                  {tier.pages} comprehensive business plan
-                </div>
-              </CardHeader>
+        {/* Horizontal scrollable container on mobile/tablet, grid on larger screens */}
+        <div className="w-full overflow-x-auto pb-4 -mx-4 px-4 lg:overflow-visible lg:mx-0 lg:px-0">
+          <div className="flex gap-4 lg:grid lg:grid-cols-3 xl:grid-cols-5 lg:gap-6 min-w-max lg:min-w-0 max-w-7xl mx-auto">
+            {tiers.map((tier) => {
+              const isCurrentTier = user && tier.id === currentTier;
+              return (
+                <Card 
+                  key={tier.id} 
+                  className={`relative hover-elevate flex-shrink-0 w-72 lg:w-auto ${tier.popular ? 'border-primary shadow-lg' : ''} ${isCurrentTier ? 'border-green-500 shadow-md' : ''}`}
+                  data-testid={`card-tier-${tier.id}`}
+                >
+                  {tier.popular && !isCurrentTier && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                      <Badge className="bg-primary text-primary-foreground px-3 py-0.5 text-xs whitespace-nowrap">
+                        Most Popular
+                      </Badge>
+                    </div>
+                  )}
+                  {isCurrentTier && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                      <Badge className="bg-green-500 text-white px-3 py-0.5 text-xs whitespace-nowrap" data-testid={`badge-current-tier-${tier.id}`}>
+                        Current Plan
+                      </Badge>
+                    </div>
+                  )}
+                  
+                  <CardHeader className="pb-3 pt-5">
+                    <CardTitle className="text-lg lg:text-xl">{tier.name}</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm line-clamp-2">{tier.description}</CardDescription>
+                    <div className="mt-3">
+                      <span className="text-3xl lg:text-4xl font-bold">{tier.price}</span>
+                      <span className="text-muted-foreground text-xs ml-1">one-time</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {tier.pages} business plan
+                    </div>
+                  </CardHeader>
 
-              <CardContent className="pb-4">
-                <ul className="space-y-3">
-                  {tier.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
+                  <CardContent className="pb-3 pt-0">
+                    <ul className="space-y-2">
+                      {tier.features.slice(0, 6).map((feature, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <Check className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                          <span className="text-xs lg:text-sm leading-tight">{feature}</span>
+                        </li>
+                      ))}
+                      {tier.features.length > 6 && (
+                        <li className="text-xs text-muted-foreground pl-6">
+                          +{tier.features.length - 6} more features
+                        </li>
+                      )}
+                    </ul>
+                  </CardContent>
 
-              <CardFooter className="flex-col gap-2">
-                {/* Direct Subscribe Button - Primary action for paid tiers */}
-                {tier.id !== 'free' && !isCurrentTier && (
-                  <Button
-                    className="w-full"
-                    variant={tier.popular ? "default" : "outline"}
-                    size="lg"
-                    onClick={() => handleDirectSubscribe(tier.id)}
-                    disabled={processingTier === tier.id || checkoutMutation.isPending}
-                    data-testid={`button-subscribe-${tier.id}`}
-                  >
-                    <Zap className="mr-2 h-4 w-4" />
-                    Subscribe Now
-                  </Button>
-                )}
-                
-                {/* Free tier or Current Plan button */}
-                {(tier.id === 'free' || isCurrentTier) && (
-                  <Button
-                    className="w-full"
-                    variant={tier.popular ? "default" : "outline"}
-                    size="lg"
-                    onClick={() => {
-                      if (tier.id === 'free') {
-                        // Redirect free tier users to generate plan page
-                        setLocation('/questionnaire');
-                      }
-                    }}
-                    disabled={isCurrentTier && tier.id !== 'free'}
-                    data-testid={`button-select-${tier.id}`}
-                  >
-                    {isCurrentTier ? "Current Plan" : "Access Free Tools"}
-                  </Button>
-                )}
-
-                {/* Business Plan with Questionnaire - Secondary option */}
-                {tier.id !== 'free' && !isCurrentTier && (
-                  <Button
-                    className="w-full"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleSelectTier(tier.id)}
-                    disabled={processingTier === tier.id || checkoutMutation.isPending}
-                    data-testid={`button-questionnaire-${tier.id}`}
-                  >
-                    {processingTier === tier.id && checkoutMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : latestPlan && latestPlan.tier === tier.id && latestPlan.status === 'pending' ? (
-                      <>
-                        <FileText className="mr-2 h-4 w-4" />
-                        Continue Pending Plan
-                      </>
-                    ) : (
-                      <>
-                        <FileText className="mr-2 h-4 w-4" />
-                        Create Business Plan First
-                      </>
+                  <CardFooter className="flex-col gap-2 pt-2">
+                    {/* Direct Subscribe Button - Primary action for paid tiers */}
+                    {tier.id !== 'free' && !isCurrentTier && (
+                      <Button
+                        className="w-full"
+                        variant={tier.popular ? "default" : "outline"}
+                        size="default"
+                        onClick={() => handleDirectSubscribe(tier.id)}
+                        disabled={processingTier === tier.id || checkoutMutation.isPending}
+                        data-testid={`button-subscribe-${tier.id}`}
+                      >
+                        <Zap className="mr-2 h-4 w-4" />
+                        Subscribe
+                      </Button>
                     )}
-                  </Button>
-                )}
-                
-                {tier.id !== 'free' && !isCurrentTier && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    Subscribe now for instant access, or create a business plan first
-                  </p>
-                )}
-              </CardFooter>
-            </Card>
-            );
-          })}
+                    
+                    {/* Free tier or Current Plan button */}
+                    {(tier.id === 'free' || isCurrentTier) && (
+                      <Button
+                        className="w-full"
+                        variant={tier.popular ? "default" : "outline"}
+                        size="default"
+                        onClick={() => {
+                          if (tier.id === 'free') {
+                            setLocation('/questionnaire');
+                          }
+                        }}
+                        disabled={isCurrentTier && tier.id !== 'free'}
+                        data-testid={`button-select-${tier.id}`}
+                      >
+                        {isCurrentTier ? "Current Plan" : "Get Started"}
+                      </Button>
+                    )}
+
+                    {/* Business Plan with Questionnaire - Secondary option */}
+                    {tier.id !== 'free' && !isCurrentTier && (
+                      <Button
+                        className="w-full"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSelectTier(tier.id)}
+                        disabled={processingTier === tier.id || checkoutMutation.isPending}
+                        data-testid={`button-questionnaire-${tier.id}`}
+                      >
+                        {processingTier === tier.id && checkoutMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Processing...
+                          </>
+                        ) : latestPlan && latestPlan.tier === tier.id && latestPlan.status === 'pending' ? (
+                          <>
+                            <FileText className="mr-2 h-4 w-4" />
+                            Continue Plan
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="mr-2 h-4 w-4" />
+                            Create Plan First
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </CardFooter>
+                </Card>
+              );
+            })}
+          </div>
         </div>
+        
+        {/* Scroll hint for mobile */}
+        <p className="text-xs text-muted-foreground text-center mt-2 lg:hidden">
+          Swipe to see all plans
+        </p>
 
         {/* Add-ons Section - Only show for authenticated users */}
         {user && (
-          <div className="mt-16 max-w-5xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-3">Need More Business Plans?</h2>
-              <p className="text-muted-foreground">
-                Purchase additional credits or get unlimited generations with Ultimate Assurance
+          <div className="mt-12 lg:mt-16 max-w-5xl mx-auto">
+            <div className="text-center mb-6 lg:mb-8">
+              <h2 className="text-2xl lg:text-3xl font-bold mb-2 lg:mb-3">Need More Business Plans?</h2>
+              <p className="text-sm lg:text-base text-muted-foreground">
+                Purchase additional credits or get unlimited generations
               </p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
               {addons.map((addon) => {
                 const Icon = addon.icon;
                 return (
@@ -478,26 +484,26 @@ export default function Pricing() {
                     data-testid={`card-addon-${addon.id}`}
                   >
                     {addon.savings && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <Badge className="bg-green-500 text-white px-3 py-0.5 text-xs">
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
+                        <Badge className="bg-green-500 text-white px-2 py-0 text-[10px] lg:text-xs whitespace-nowrap">
                           {addon.savings}
                         </Badge>
                       </div>
                     )}
                     
-                    <CardHeader className="pb-2 pt-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Icon className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-lg">{addon.name}</CardTitle>
+                    <CardHeader className="pb-1 pt-4 px-3 lg:px-4">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Icon className="h-4 w-4 text-primary flex-shrink-0" />
+                        <CardTitle className="text-sm lg:text-base truncate">{addon.name}</CardTitle>
                       </div>
-                      <div className="text-2xl font-bold">{addon.price}</div>
+                      <div className="text-xl lg:text-2xl font-bold">{addon.price}</div>
                     </CardHeader>
                     
-                    <CardContent className="pb-2">
-                      <p className="text-sm text-muted-foreground">{addon.description}</p>
+                    <CardContent className="pb-2 px-3 lg:px-4">
+                      <p className="text-xs lg:text-sm text-muted-foreground line-clamp-2">{addon.description}</p>
                     </CardContent>
                     
-                    <CardFooter className="pt-2">
+                    <CardFooter className="pt-1 px-3 lg:px-4 pb-3">
                       <Button
                         className="w-full"
                         variant={addon.highlight ? "default" : "outline"}
@@ -507,12 +513,9 @@ export default function Pricing() {
                         data-testid={`button-purchase-${addon.id}`}
                       >
                         {processingTier === addon.id && addonMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Processing...
-                          </>
+                          <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          "Purchase"
+                          "Buy"
                         )}
                       </Button>
                     </CardFooter>
@@ -522,22 +525,18 @@ export default function Pricing() {
             </div>
             
             {/* Referral Program */}
-            <div className="mt-8 text-center p-6 bg-accent/10 rounded-lg border border-accent/20">
-              <Gift className="h-8 w-8 mx-auto mb-3 text-primary" />
-              <h3 className="text-xl font-semibold mb-2">Earn Free Credits</h3>
-              <p className="text-muted-foreground mb-2">
-                Refer a friend and earn {REFERRAL_REWARDS.creditsPerReferral} free business plan credit when they subscribe
-              </p>
-              <p className="text-sm text-muted-foreground">
-                No limit - invite as many friends as you want!
+            <div className="mt-6 lg:mt-8 text-center p-4 lg:p-6 bg-accent/10 rounded-lg border border-accent/20">
+              <Gift className="h-6 w-6 lg:h-8 lg:w-8 mx-auto mb-2 lg:mb-3 text-primary" />
+              <h3 className="text-lg lg:text-xl font-semibold mb-1 lg:mb-2">Earn Free Credits</h3>
+              <p className="text-sm lg:text-base text-muted-foreground">
+                Refer a friend and earn {REFERRAL_REWARDS.creditsPerReferral} free credit when they subscribe
               </p>
             </div>
           </div>
         )}
 
-              <div className="mt-12 text-center text-sm text-muted-foreground">
-                <p>All plans include AI-powered generation that answers comprehensive expert framework questions</p>
-                <p className="mt-2">Optimized for UK Innovator Founder Visa endorsing body approval</p>
+              <div className="mt-8 lg:mt-12 text-center text-xs lg:text-sm text-muted-foreground px-4">
+                <p>All plans include AI-powered generation optimized for UK Innovator Founder Visa approval</p>
               </div>
             </main>
           </div>
