@@ -7,12 +7,11 @@ import { AppSidebar } from "@/components/app-sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart, Tag, X } from "lucide-react";
+import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { TIER_CREDITS, ADDON_PRICING, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
 import logoLight from "@assets/official_logo.png";
@@ -168,22 +167,10 @@ const addons = [
   },
 ];
 
-interface PromoValidation {
-  valid: boolean;
-  message?: string;
-  discount?: number;
-  discountType?: string;
-  grantsTier?: string;
-  tierUpgraded?: boolean;
-}
-
 export default function Pricing() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [processingTier, setProcessingTier] = useState<string | null>(null);
-  const [promoCode, setPromoCode] = useState('');
-  const [promoValidation, setPromoValidation] = useState<PromoValidation | null>(null);
-  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   
   const { data: user } = useQuery<{ 
     id: string; 
@@ -234,105 +221,6 @@ export default function Pricing() {
     },
   });
 
-  // Validate and potentially redeem promo code
-  const validatePromoCode = async () => {
-    if (!promoCode.trim()) {
-      setPromoValidation(null);
-      return;
-    }
-    
-    setIsValidatingPromo(true);
-    try {
-      // First validate the code
-      const validateResponse = await fetch(`/api/promos/validate/${encodeURIComponent(promoCode.trim())}`);
-      const validateData = await validateResponse.json();
-      
-      if (!validateData.valid) {
-        setPromoValidation({
-          valid: false,
-          message: validateData.message,
-        });
-        return;
-      }
-      
-      // If the promo code grants a tier upgrade, redeem it immediately
-      if (validateData.grantsTier && user) {
-        const redeemResponse = await apiRequest('POST', '/api/promos/redeem', {
-          code: promoCode.trim(),
-        });
-        const redeemData = await redeemResponse.json();
-        
-        if (redeemData.success && redeemData.tierUpgrade) {
-          // Invalidate user query to refresh tier info
-          queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-          
-          setPromoValidation({
-            valid: true,
-            message: redeemData.message,
-            grantsTier: redeemData.newTier,
-            tierUpgraded: true,
-          });
-          
-          toast({
-            title: "Tier Upgraded!",
-            description: `You now have ${redeemData.newTier.charAt(0).toUpperCase() + redeemData.newTier.slice(1)} tier access. AI-Guided Interview is now unlocked!`,
-          });
-          setPromoCode('');
-          return;
-        }
-      }
-      
-      // Regular discount code
-      setPromoValidation({
-        valid: validateData.valid,
-        message: validateData.message,
-        discount: validateData.discountValue,
-        discountType: validateData.discountType,
-      });
-      if (validateData.valid) {
-        toast({
-          title: "Promo code applied!",
-          description: validateData.discountType === 'percentage' 
-            ? `${validateData.discountValue}% discount will be applied at checkout`
-            : `£${validateData.discountValue / 100} discount will be applied at checkout`,
-        });
-      }
-    } catch (error) {
-      setPromoValidation({ valid: false, message: 'Failed to validate promo code' });
-    } finally {
-      setIsValidatingPromo(false);
-    }
-  };
-
-  // Direct subscription mutation - allows immediate payment without questionnaire
-  const directSubscribeMutation = useMutation({
-    mutationFn: async (tier: string) => {
-      const payload: { tier: string; promoCode?: string } = { tier };
-      if (promoValidation?.valid && promoCode.trim()) {
-        payload.promoCode = promoCode.trim();
-      }
-      const response = await apiRequest('POST', '/api/payment/direct-subscribe', payload);
-      return response.json();
-    },
-    onSuccess: (data: any) => {
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    },
-    onError: (error: any) => {
-      if (error.promoError) {
-        setPromoValidation({ valid: false, message: error.message });
-        setPromoCode('');
-      }
-      toast({
-        title: "Error",
-        description: error.message || "Failed to start subscription",
-        variant: "destructive",
-      });
-      setProcessingTier(null);
-    },
-  });
-
   // Addon purchase mutation
   const addonMutation = useMutation({
     mutationFn: async (addonType: string) => {
@@ -363,14 +251,13 @@ export default function Pricing() {
     addonMutation.mutate(addonId);
   };
 
-  // Direct subscribe - go straight to payment
+  // Direct subscribe - go to checkout page with promo code support
   const handleDirectSubscribe = (tierId: string) => {
     if (!user) {
       setLocation(`/signup?tier=${tierId}&direct=true`);
       return;
     }
-    setProcessingTier(tierId);
-    directSubscribeMutation.mutate(tierId);
+    setLocation(`/checkout?tier=${tierId}`);
   };
 
   // Full flow with questionnaire
@@ -504,20 +391,11 @@ export default function Pricing() {
                     variant={tier.popular ? "default" : "outline"}
                     size="lg"
                     onClick={() => handleDirectSubscribe(tier.id)}
-                    disabled={processingTier === tier.id || directSubscribeMutation.isPending || checkoutMutation.isPending}
+                    disabled={processingTier === tier.id || checkoutMutation.isPending}
                     data-testid={`button-subscribe-${tier.id}`}
                   >
-                    {processingTier === tier.id && directSubscribeMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="mr-2 h-4 w-4" />
-                        Subscribe Now
-                      </>
-                    )}
+                    <Zap className="mr-2 h-4 w-4" />
+                    Subscribe Now
                   </Button>
                 )}
                 

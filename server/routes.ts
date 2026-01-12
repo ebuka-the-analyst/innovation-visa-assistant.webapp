@@ -443,7 +443,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (validPromoCode.discountType === 'percentage') {
           finalAmount = Math.round(pricing.amount * (1 - validPromoCode.discountValue / 100));
         } else {
-          finalAmount = Math.max(0, pricing.amount - validPromoCode.discountValue * 100);
+          // Fixed amount - discountValue is already stored in pence
+          finalAmount = Math.max(0, pricing.amount - validPromoCode.discountValue);
         }
       }
 
@@ -594,7 +595,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (validPromoCode.discountType === 'percentage') {
           finalAmount = Math.round(pricing.amount * (1 - validPromoCode.discountValue / 100));
         } else {
-          finalAmount = Math.max(0, pricing.amount - validPromoCode.discountValue * 100);
+          // Fixed amount - discountValue is already stored in pence
+          finalAmount = Math.max(0, pricing.amount - validPromoCode.discountValue);
         }
       }
 
@@ -645,23 +647,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
               currency: "gbp",
               product_data: {
                 name: `UK Innovator Founder Visa - ${pricing.name} Access`,
-                description: `Unlock ${pricing.name} tier access to all tools and features`,
+                description: validPromoCode 
+                  ? `Unlock ${pricing.name} tier access (${validPromoCode.discountValue}% discount applied)`
+                  : `Unlock ${pricing.name} tier access to all tools and features`,
               },
-              unit_amount: pricing.amount,
+              unit_amount: finalAmount,
             },
             quantity: 1,
           },
         ],
         mode: "payment",
-        allow_promotion_codes: true,
         success_url: `${baseUrl}/questionnaire?session_id={CHECKOUT_SESSION_ID}&upgraded=true&tier=${tier}`,
-        cancel_url: `${baseUrl}/pricing`,
+        cancel_url: `${baseUrl}/checkout?tier=${tier}`,
         metadata: {
           pendingPlanId: pendingPlanId,
           directSubscription: 'true',
           tier: tier,
           userId: user.id,
+          promoCode: validPromoCode?.code || '',
+          promoCodeId: validPromoCode?.id || '',
           originalAmount: pricing.amount.toString(),
+          discountAmount: (pricing.amount - finalAmount).toString(),
         },
       });
 
