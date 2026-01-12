@@ -645,16 +645,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               currency: "gbp",
               product_data: {
                 name: `UK Innovator Founder Visa - ${pricing.name} Access`,
-                description: validPromoCode 
-                  ? `Unlock ${pricing.name} tier access (${validPromoCode.discountValue}% discount applied)`
-                  : `Unlock ${pricing.name} tier access to all tools and features`,
+                description: `Unlock ${pricing.name} tier access to all tools and features`,
               },
-              unit_amount: finalAmount,
+              unit_amount: pricing.amount,
             },
             quantity: 1,
           },
         ],
         mode: "payment",
+        allow_promotion_codes: true,
         success_url: `${baseUrl}/questionnaire?session_id={CHECKOUT_SESSION_ID}&upgraded=true&tier=${tier}`,
         cancel_url: `${baseUrl}/pricing`,
         metadata: {
@@ -662,10 +661,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           directSubscription: 'true',
           tier: tier,
           userId: user.id,
-          promoCode: validPromoCode?.code || '',
-          promoCodeId: validPromoCode?.id || '',
           originalAmount: pricing.amount.toString(),
-          discountAmount: (pricing.amount - finalAmount).toString(),
         },
       });
 

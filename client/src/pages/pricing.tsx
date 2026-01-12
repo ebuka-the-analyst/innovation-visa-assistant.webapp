@@ -449,63 +449,6 @@ export default function Pricing() {
                 </p>
               </div>
 
-        {/* Promo Code Section */}
-        <div className="max-w-md mx-auto mb-8">
-          <div className="flex items-center gap-2 justify-center mb-2">
-            <Tag className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">Have a promo code?</span>
-          </div>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Enter promo code"
-              value={promoCode}
-              onChange={(e) => {
-                setPromoCode(e.target.value.toUpperCase());
-                setPromoValidation(null);
-              }}
-              className="uppercase text-center"
-              data-testid="input-pricing-promo-code"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={validatePromoCode}
-              disabled={isValidatingPromo || !promoCode.trim()}
-              data-testid="button-validate-pricing-promo"
-            >
-              {isValidatingPromo ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                "Apply"
-              )}
-            </Button>
-          </div>
-          {promoValidation && (
-            <div className="mt-2 text-center">
-              {promoValidation.valid ? (
-                promoValidation.tierUpgraded ? (
-                  <Badge className="bg-emerald-600 text-white">
-                    <Check className="w-3 h-3 mr-1" />
-                    {promoValidation.grantsTier?.charAt(0).toUpperCase()}{promoValidation.grantsTier?.slice(1)} tier unlocked!
-                  </Badge>
-                ) : (
-                  <Badge className="bg-green-500 text-white">
-                    <Check className="w-3 h-3 mr-1" />
-                    {promoValidation.discountType === 'percentage' 
-                      ? `${promoValidation.discount}% discount will be applied`
-                      : `£${(promoValidation.discount || 0) / 100} discount will be applied`}
-                  </Badge>
-                )
-              ) : (
-                <Badge variant="destructive">
-                  <X className="w-3 h-3 mr-1" />
-                  {promoValidation.message || 'Invalid code'}
-                </Badge>
-              )}
-            </div>
-          )}
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 max-w-7xl mx-auto">
           {tiers.map((tier) => {
             const isCurrentTier = user && tier.id === currentTier;
