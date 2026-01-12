@@ -313,30 +313,40 @@ export function PromoCodeGenerator() {
 
   const createPromoCodeMutation = useMutation({
     mutationFn: async (code: GeneratedCode) => {
-      await apiRequest('POST', '/api/admin/promos', {
+      const response = await apiRequest('POST', '/api/admin/promos', {
         code: code.code,
         discountType: code.discountType,
         discountValue: code.discountValue,
         maxTotalUses: code.maxTotalUses,
         maxUsesPerUser: code.maxUsesPerUser,
-        validFrom: code.validFrom,
-        validUntil: code.validUntil,
+        validFrom: code.validFrom?.toISOString() || null,
+        validUntil: code.validUntil?.toISOString() || null,
         eligibleTiers: code.eligibleTiers,
         minPurchaseAmount: code.minPurchaseAmount,
       });
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (_, savedCode) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/promos'] });
       toast({ title: "Promo code saved successfully" });
+      // Remove this code from the list after successful save
+      setGeneratedCodes(prev => prev.filter(c => c.code !== savedCode.code));
     },
     onError: (error: any) => {
-      toast({ title: "Failed to save promo code", description: error.message, variant: "destructive" });
+      const details = error?.details || error?.message || 'Unknown error';
+      toast({ title: "Failed to save promo code", description: details, variant: "destructive" });
     },
   });
 
   const createBulkPromoCodesMutation = useMutation({
     mutationFn: async (codes: GeneratedCode[]) => {
-      await apiRequest('POST', '/api/admin/promos/bulk', { codes, batchName: bulkConfig.batchName });
+      // Convert dates to ISO strings for proper JSON serialization
+      const serializedCodes = codes.map(c => ({
+        ...c,
+        validFrom: c.validFrom?.toISOString() || null,
+        validUntil: c.validUntil?.toISOString() || null,
+      }));
+      await apiRequest('POST', '/api/admin/promos/bulk', { codes: serializedCodes, batchName: bulkConfig.batchName });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/promos'] });
@@ -344,7 +354,8 @@ export function PromoCodeGenerator() {
       setGeneratedCodes([]);
     },
     onError: (error: any) => {
-      toast({ title: "Failed to save promo codes", description: error.message, variant: "destructive" });
+      const details = error?.details || error?.message || 'Unknown error';
+      toast({ title: "Failed to save promo codes", description: details, variant: "destructive" });
     },
   });
 
