@@ -144,6 +144,18 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           icon: FileText,
           description: "Business plan builder",
         },
+        {
+          title: "Progress Tracker",
+          url: "/progress",
+          icon: Target,
+          description: "Track your visa journey",
+        },
+        {
+          title: "My Documents",
+          url: "/documents",
+          icon: FolderOpen,
+          description: "Secure document storage",
+        },
       ],
     },
     {
@@ -336,18 +348,6 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
     {
       label: "Your Journey",
       items: [
-        {
-          title: "Progress Tracker",
-          url: "/progress",
-          icon: Target,
-          description: "Track your visa journey",
-        },
-        {
-          title: "My Documents",
-          url: "/documents",
-          icon: FolderOpen,
-          description: "Secure document storage",
-        },
         {
           title: "Support",
           url: "/support",
