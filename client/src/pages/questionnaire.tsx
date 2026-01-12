@@ -175,7 +175,7 @@ export default function Questionnaire() {
                         )}
                       </div>
                       <p className="text-muted-foreground mb-4">
-                        Have a natural conversation with our specialized AI agents who guide you through 475 questions with real-time feedback and scoring.
+                        Have a natural conversation with our specialized AI agents who guide you through your visa application with real-time feedback and scoring.
                       </p>
                       
                       <div className="space-y-3">
