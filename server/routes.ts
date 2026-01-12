@@ -694,7 +694,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stripe = await getUncachableStripeClient();
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       
-      if (session.payment_status !== "paid") {
+      // Accept both "paid" (normal payment) and "no_payment_required" (100% discount)
+      if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
         return res.status(402).json({ error: "Payment not completed", paymentStatus: session.payment_status });
       }
 
@@ -769,6 +770,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Subscription verification error:", error);
       res.status(500).json({ error: "Verification failed", details: error.message });
+    }
+  });
+
+  // Alias for /api/payment/verify-subscription - client calls this endpoint
+  app.post("/api/payments/confirm-subscription", isAuthenticated, async (req, res) => {
+    try {
+      const { sessionId } = req.body;
+      const user = req.user as any;
+
+      if (!sessionId) {
+        return res.status(400).json({ error: "Session ID required" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      // Accept both "paid" (normal payment) and "no_payment_required" (100% discount)
+      if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
+        return res.status(402).json({ error: "Payment not completed", paymentStatus: session.payment_status });
+      }
+
+      // Verify this is a direct subscription for this user
+      if (session.metadata?.userId !== user.id) {
+        return res.status(403).json({ error: "User mismatch - security violation" });
+      }
+
+      if (session.metadata?.directSubscription !== 'true') {
+        return res.status(400).json({ error: "This is not a direct subscription session" });
+      }
+
+      const tier = session.metadata?.tier;
+      if (!tier || !['basic', 'premium', 'enterprise', 'ultimate'].includes(tier)) {
+        return res.status(400).json({ error: "Invalid tier in session metadata" });
+      }
+
+      // Upgrade user's tier directly
+      await storage.updateUser(user.id, { 
+        subscriptionTier: tier,
+        subscriptionStatus: 'active'
+      });
+      console.log(`[CONFIRM SUBSCRIPTION] User ${user.id} upgraded to ${tier} tier after payment`);
+
+      res.json({ 
+        success: true, 
+        tier,
+        message: `Successfully upgraded to ${tier} tier.`
+      });
+    } catch (error: any) {
+      console.error("Subscription confirmation error:", error);
+      res.status(500).json({ error: "Confirmation failed", details: error.message });
     }
   });
 
