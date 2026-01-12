@@ -40,8 +40,8 @@ const tiers = [
   {
     id: "basic",
     name: "Basic Plan",
-    price: "£29",
-    priceInPence: 2900,
+    price: "£9",
+    priceInPence: 900,
     credits: 1,
     description: "Perfect for straightforward businesses",
     pages: "25-35 pages",
@@ -60,8 +60,8 @@ const tiers = [
   {
     id: "premium",
     name: "Premium Plan",
-    price: "£49",
-    priceInPence: 4900,
+    price: "£19",
+    priceInPence: 1900,
     credits: 3,
     description: "Most popular - comprehensive coverage",
     pages: "40-60 pages",
@@ -83,8 +83,8 @@ const tiers = [
   {
     id: "enterprise",
     name: "Enterprise Plan",
-    price: "£89",
-    priceInPence: 8900,
+    price: "£29",
+    priceInPence: 2900,
     credits: 6,
     description: "Maximum detail for complex ventures",
     pages: "50-80 pages",
@@ -106,8 +106,8 @@ const tiers = [
   {
     id: "ultimate",
     name: "Ultimate Plan",
-    price: "£129",
-    priceInPence: 12900,
+    price: "£39",
+    priceInPence: 3900,
     credits: "unlimited",
     description: "Everything you need for guaranteed approval",
     pages: "80+ pages",

@@ -101,10 +101,10 @@ async function callGeminiWithRotation(prompt: string, maxRetries: number = 4): P
 
 const PRICING = {
   free: { amount: 0, name: "Free Plan" },
-  basic: { amount: 2900, name: "Basic Plan" },
-  premium: { amount: 4900, name: "Premium Plan" },
-  enterprise: { amount: 8900, name: "Enterprise Plan" },
-  ultimate: { amount: 12900, name: "Ultimate Plan" },
+  basic: { amount: 900, name: "Basic Plan" },
+  premium: { amount: 1900, name: "Premium Plan" },
+  enterprise: { amount: 2900, name: "Enterprise Plan" },
+  ultimate: { amount: 3900, name: "Ultimate Plan" },
 };
 
 // Helper function to format time ago for email analytics
