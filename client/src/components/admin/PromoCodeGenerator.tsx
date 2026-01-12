@@ -520,14 +520,14 @@ export function PromoCodeGenerator() {
                     <div className="space-y-2">
                       <Label>Separator</Label>
                       <Select
-                        value={codeConfig.separator}
-                        onValueChange={(v) => setCodeConfig({ ...codeConfig, separator: v })}
+                        value={codeConfig.separator || "none"}
+                        onValueChange={(v) => setCodeConfig({ ...codeConfig, separator: v === "none" ? "" : v })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="None" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="none">None</SelectItem>
                           <SelectItem value="-">Dash (-)</SelectItem>
                           <SelectItem value="_">Underscore (_)</SelectItem>
                         </SelectContent>
