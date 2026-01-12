@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-import Header from "@/components/Header";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import ThemeToggle from "@/components/ThemeToggle";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +15,8 @@ import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { TIER_CREDITS, ADDON_PRICING, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
+import logoLight from "@assets/official_logo.png";
+import logoDark from "@assets/logo_dark.png";
 
 const tiers = [
   {
@@ -354,23 +358,54 @@ export default function Pricing() {
     ]
   };
 
+  const sidebarStyle = {
+    "--sidebar-width": "16rem",
+    "--sidebar-width-icon": "3rem",
+  };
+
+  const isDemoMode = !user;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5">
-      <SEOHead
-        title="Pricing Plans | UK Innovator Founder Visa Assistant - £0 to £39"
-        description="Choose from 5 pricing tiers for your UK Innovator Founder Visa application. Free, Basic £9, Premium £19 (most popular), Enterprise £29, Ultimate £39. All plans include 100+ professional-level tools, business plan generation and expert guidance."
-        canonical="https://innovatorfoundervisaassistant.co.uk/pricing"
-        keywords="UK Innovator Founder Visa cost, visa application pricing, business plan cost, innovator founder visa fees, visa assistance pricing"
-        schema={combinedSchema}
-      />
-      
-      <main className="responsive-container py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Choose Your Plan</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Select the tier that best matches your business complexity for your Innovator Founder Visa application
-          </p>
-        </div>
+    <SidebarProvider style={sidebarStyle as React.CSSProperties}>
+      <div className="flex h-screen w-full">
+        <AppSidebar demoMode={isDemoMode} />
+        <SidebarInset className="flex-1 overflow-auto">
+          <header className="sticky top-0 z-50 flex h-14 items-center justify-between gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <Link href="/">
+                <div className="logo-container h-8">
+                  <img src={logoLight} alt="Logo" className="h-8 w-auto logo-light" loading="lazy" />
+                  <img src={logoDark} alt="Logo" className="h-8 w-auto logo-dark" loading="lazy" />
+                </div>
+              </Link>
+            </div>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              {isDemoMode && (
+                <Link href="/login">
+                  <Button size="sm" data-testid="button-login">Sign In</Button>
+                </Link>
+              )}
+            </div>
+          </header>
+          
+          <div className="min-h-screen bg-background">
+            <SEOHead
+              title="Pricing Plans | UK Innovator Founder Visa Assistant - £0 to £39"
+              description="Choose from 5 pricing tiers for your UK Innovator Founder Visa application. Free, Basic £9, Premium £19 (most popular), Enterprise £29, Ultimate £39. All plans include 100+ professional-level tools, business plan generation and expert guidance."
+              canonical="https://innovatorfoundervisaassistant.co.uk/pricing"
+              keywords="UK Innovator Founder Visa cost, visa application pricing, business plan cost, innovator founder visa fees, visa assistance pricing"
+              schema={combinedSchema}
+            />
+            
+            <main className="responsive-container py-10 md:py-12">
+              <div className="text-center mb-10 md:mb-12">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Choose Your Plan</h1>
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                  Select the tier that best matches your business complexity for your Innovator Founder Visa application
+                </p>
+              </div>
 
         {/* Promo Code Section */}
         <div className="max-w-md mx-auto mb-8">
@@ -628,11 +663,14 @@ export default function Pricing() {
           </div>
         )}
 
-        <div className="mt-12 text-center text-sm text-muted-foreground">
-          <p>All plans include AI-powered generation that answers comprehensive expert framework questions</p>
-          <p className="mt-2">Optimized for UK Innovator Founder Visa endorsing body approval • 99.9% target approval rate</p>
-        </div>
-      </main>
-    </div>
+              <div className="mt-12 text-center text-sm text-muted-foreground">
+                <p>All plans include AI-powered generation that answers comprehensive expert framework questions</p>
+                <p className="mt-2">Optimized for UK Innovator Founder Visa endorsing body approval</p>
+              </div>
+            </main>
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }
