@@ -78,7 +78,7 @@ function AchievementCard({ achievement, isUnlocked }: { achievement: Achievement
             {isUnlocked ? (
               <IconComponent className="w-7 h-7" style={{ color: achievement.badgeColor }} />
             ) : (
-              <Lock className="w-6 h-6 text-muted-foreground" />
+              <Lock className="w-6 h-6 text-destructive" />
             )}
           </div>
           

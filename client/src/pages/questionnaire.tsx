@@ -156,7 +156,7 @@ export default function Questionnaire() {
                       {canAccessAiInterview ? (
                         <MessageSquare className="h-8 w-8 text-amber-500" />
                       ) : (
-                        <Lock className="h-8 w-8 text-muted-foreground" />
+                        <Lock className="h-8 w-8 text-destructive" />
                       )}
                     </div>
                     <div className="flex-1">
@@ -204,7 +204,7 @@ export default function Questionnaire() {
                         </Button>
                       ) : (
                         <Link href="/pricing">
-                          <Button variant="outline" className="w-full mt-6" data-testid="button-upgrade-ai-interview">
+                          <Button variant="destructive" className="w-full mt-6" data-testid="button-upgrade-ai-interview">
                             <Lock className="h-4 w-4 mr-2" />
                             Upgrade to Unlock
                           </Button>
@@ -257,7 +257,7 @@ export default function Questionnaire() {
                         </div>
                       </div>
 
-                      <Button variant="outline" className="w-full mt-6" data-testid="button-start-form">
+                      <Button className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white" data-testid="button-start-form">
                         <FileText className="h-4 w-4 mr-2" />
                         Use Traditional Form
                       </Button>
@@ -280,14 +280,14 @@ export default function Questionnaire() {
       return (
         <div className="min-h-screen flex items-center justify-center">
           <Card className="p-8 max-w-md text-center">
-            <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <Lock className="h-12 w-12 mx-auto text-destructive mb-4" />
             <h2 className="text-xl font-bold mb-2">Paid Feature</h2>
             <p className="text-muted-foreground mb-6">
               The AI-Guided Interview requires a paid subscription.
             </p>
             <div className="flex flex-col gap-3">
               <Link href="/pricing">
-                <Button className="w-full" data-testid="button-upgrade">Upgrade to Unlock</Button>
+                <Button variant="destructive" className="w-full" data-testid="button-upgrade">Upgrade to Unlock</Button>
               </Link>
               <Button variant="outline" onClick={() => setMode('select')} data-testid="button-go-back">
                 Go Back

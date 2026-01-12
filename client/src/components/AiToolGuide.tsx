@@ -20,7 +20,8 @@ import {
   ArrowRight,
   RotateCcw,
   MessageSquare,
-  FileText
+  FileText,
+  Lock
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
@@ -366,17 +367,17 @@ export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePan
         </div>
         <p className="text-sm text-muted-foreground mb-4">
           Get personalised guidance from our AI agents who specialise in UK Innovator Founder Visa requirements. 
-          Upgrade to Basic or higher to unlock this feature.
+          Upgrade to unlock this feature.
         </p>
         <div className="flex gap-3">
           <a href="/pricing">
-            <Button className="bg-gradient-to-r from-[#005EB8] to-[#41B6E6]">
-              <Sparkles className="h-4 w-4 mr-2" />
-              View Plans
+            <Button variant="destructive">
+              <Lock className="h-4 w-4 mr-2" />
+              Upgrade to Unlock
             </Button>
           </a>
           {onSwitchToTraditional && (
-            <Button variant="outline" onClick={onSwitchToTraditional}>
+            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={onSwitchToTraditional}>
               Use Traditional Form
             </Button>
           )}

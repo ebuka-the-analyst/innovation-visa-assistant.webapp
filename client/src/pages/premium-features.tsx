@@ -453,12 +453,12 @@ export default function PremiumFeatures() {
                       </div>
                     ) : (
                       <div className="text-center py-6">
-                        <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                        <Lock className="h-8 w-8 mx-auto text-destructive mb-2" />
                         <p className="text-sm text-muted-foreground mb-4">
-                          Upgrade to {story.requiredTier} tier to read the full story
+                          Upgrade to read the full story
                         </p>
                         <Link href="/pricing">
-                          <Button>Upgrade Now</Button>
+                          <Button variant="destructive">Upgrade to Unlock</Button>
                         </Link>
                       </div>
                     )}
