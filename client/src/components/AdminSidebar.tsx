@@ -227,7 +227,7 @@ const menuGroups = [
       { id: "referrals-rewards", label: "Pending Rewards", icon: Receipt, badge: "rewards" },
       { id: "referrals-analytics", label: "Referral Analytics", icon: TrendingUp, badge: null },
       { id: "promos-overview", label: "Promo Codes", icon: Tag, badge: null },
-      { id: "promos-create", label: "Create Promo", icon: Percent, badge: null },
+      { id: "promos-create", label: "Create Coupon", icon: Percent, badge: null },
       { id: "promos-analytics", label: "Promo Analytics", icon: BarChart3, badge: null },
       { id: "promos-campaigns", label: "Campaign Manager", icon: Target, badge: null },
       { id: "promos-reports", label: "Promo Reports", icon: FileText, badge: null },
