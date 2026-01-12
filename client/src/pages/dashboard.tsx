@@ -322,9 +322,14 @@ export default function Dashboard() {
             <Button 
               size="lg"
               onClick={() => {
-                // Ultimate users go directly to questionnaire, others to pricing
-                const isUltimate = user?.subscriptionTier === 'ultimate';
-                setLocation(isUltimate ? "/questionnaire?tier=ultimate" : "/pricing");
+                // Users with unlocked tiers go directly to questionnaire
+                const tier = user?.subscriptionTier;
+                const paidTiers = ['basic', 'premium', 'enterprise', 'ultimate'];
+                if (tier && paidTiers.includes(tier)) {
+                  setLocation(`/questionnaire?tier=${tier}`);
+                } else {
+                  setLocation("/pricing");
+                }
               }}
               data-testid="button-create-plan"
             >
@@ -578,8 +583,20 @@ export default function Dashboard() {
                             </p>
                           </div>
                         </div>
-                        <div className="text-right text-sm text-muted-foreground">
-                          {format(new Date(redemption.createdAt), 'MMM d, yyyy')}
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm text-muted-foreground">
+                            {format(new Date(redemption.createdAt), 'MMM d, yyyy')}
+                          </span>
+                          {redemption.promoCode?.grantsTier && (
+                            <Button
+                              size="sm"
+                              onClick={() => setLocation(`/questionnaire?tier=${redemption.promoCode?.grantsTier}`)}
+                              data-testid={`button-generate-plan-${redemption.id}`}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Generate Plan
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -716,9 +733,14 @@ export default function Dashboard() {
             <Button 
               size="lg"
               onClick={() => {
-                // Ultimate users go directly to questionnaire, others to pricing
-                const isUltimate = user?.subscriptionTier === 'ultimate';
-                setLocation(isUltimate ? "/questionnaire?tier=ultimate" : "/pricing");
+                // Users with unlocked tiers go directly to questionnaire
+                const tier = user?.subscriptionTier;
+                const paidTiers = ['basic', 'premium', 'enterprise', 'ultimate'];
+                if (tier && paidTiers.includes(tier)) {
+                  setLocation(`/questionnaire?tier=${tier}`);
+                } else {
+                  setLocation("/pricing");
+                }
               }}
               data-testid="button-create-first-plan"
             >
