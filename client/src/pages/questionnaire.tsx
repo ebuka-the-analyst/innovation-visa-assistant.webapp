@@ -56,6 +56,7 @@ export default function Questionnaire() {
     const modeParam = params.get('mode');
     const upgraded = params.get('upgraded');
     const sessionId = params.get('session_id');
+    const tierFromUrl = params.get('tier');
     
     // Only allow AI mode if user has access
     if (modeParam === 'ai' && canAccessAiInterview) {
@@ -65,13 +66,19 @@ export default function Questionnaire() {
     }
     
     if (upgraded === 'true' && sessionId) {
-      // Force refresh user data to get updated tier after payment
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      // Force actual refetch of user data (not just invalidation)
+      (async () => {
+        await queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
+        
+        // Use tier from URL as backup since it's passed from Stripe success_url
+        const displayTier = tierFromUrl || userTier || 'subscription';
+        
+        toast({
+          title: "Payment Successful!",
+          description: `Your ${displayTier} tier has been activated. You can now access premium features.`,
+        });
+      })();
       
-      toast({
-        title: "Payment Successful!",
-        description: `Your ${userTier || 'subscription'} tier has been activated. You can now generate your business plan.`,
-      });
       window.history.replaceState({}, '', '/questionnaire');
     }
   }, [toast, canAccessAiInterview, userTier]);
