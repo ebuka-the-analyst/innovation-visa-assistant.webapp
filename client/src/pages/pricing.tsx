@@ -12,7 +12,7 @@ import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart
 import { Badge } from "@/components/ui/badge";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { TIER_CREDITS, ADDON_PRICING, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
 import logoLight from "@assets/official_logo.png";
@@ -173,6 +173,8 @@ interface PromoValidation {
   message?: string;
   discount?: number;
   discountType?: string;
+  grantsTier?: string;
+  tierUpgraded?: boolean;
 }
 
 export default function Pricing() {
@@ -232,7 +234,7 @@ export default function Pricing() {
     },
   });
 
-  // Validate promo code
+  // Validate and potentially redeem promo code
   const validatePromoCode = async () => {
     if (!promoCode.trim()) {
       setPromoValidation(null);
@@ -241,18 +243,58 @@ export default function Pricing() {
     
     setIsValidatingPromo(true);
     try {
-      const response = await fetch(`/api/promos/validate/${encodeURIComponent(promoCode.trim())}`);
-      const data = await response.json();
+      // First validate the code
+      const validateResponse = await fetch(`/api/promos/validate/${encodeURIComponent(promoCode.trim())}`);
+      const validateData = await validateResponse.json();
+      
+      if (!validateData.valid) {
+        setPromoValidation({
+          valid: false,
+          message: validateData.message,
+        });
+        return;
+      }
+      
+      // If the promo code grants a tier upgrade, redeem it immediately
+      if (validateData.grantsTier && user) {
+        const redeemResponse = await apiRequest('POST', '/api/promos/redeem', {
+          code: promoCode.trim(),
+        });
+        const redeemData = await redeemResponse.json();
+        
+        if (redeemData.success && redeemData.tierUpgrade) {
+          // Invalidate user query to refresh tier info
+          queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+          
+          setPromoValidation({
+            valid: true,
+            message: redeemData.message,
+            grantsTier: redeemData.newTier,
+            tierUpgraded: true,
+          });
+          
+          toast({
+            title: "Tier Upgraded!",
+            description: `You now have ${redeemData.newTier.charAt(0).toUpperCase() + redeemData.newTier.slice(1)} tier access. AI-Guided Interview is now unlocked!`,
+          });
+          setPromoCode('');
+          return;
+        }
+      }
+      
+      // Regular discount code
       setPromoValidation({
-        valid: data.valid,
-        message: data.message,
-        discount: data.discountValue,
-        discountType: data.discountType,
+        valid: validateData.valid,
+        message: validateData.message,
+        discount: validateData.discountValue,
+        discountType: validateData.discountType,
       });
-      if (data.valid) {
+      if (validateData.valid) {
         toast({
           title: "Promo code applied!",
-          description: `${data.discountValue}% discount will be applied at checkout`,
+          description: validateData.discountType === 'percentage' 
+            ? `${validateData.discountValue}% discount will be applied at checkout`
+            : `£${validateData.discountValue / 100} discount will be applied at checkout`,
         });
       }
     } catch (error) {
@@ -441,10 +483,19 @@ export default function Pricing() {
           {promoValidation && (
             <div className="mt-2 text-center">
               {promoValidation.valid ? (
-                <Badge className="bg-green-500 text-white">
-                  <Check className="w-3 h-3 mr-1" />
-                  {promoValidation.discount}% discount will be applied
-                </Badge>
+                promoValidation.tierUpgraded ? (
+                  <Badge className="bg-emerald-600 text-white">
+                    <Check className="w-3 h-3 mr-1" />
+                    {promoValidation.grantsTier?.charAt(0).toUpperCase()}{promoValidation.grantsTier?.slice(1)} tier unlocked!
+                  </Badge>
+                ) : (
+                  <Badge className="bg-green-500 text-white">
+                    <Check className="w-3 h-3 mr-1" />
+                    {promoValidation.discountType === 'percentage' 
+                      ? `${promoValidation.discount}% discount will be applied`
+                      : `£${(promoValidation.discount || 0) / 100} discount will be applied`}
+                  </Badge>
+                )
               ) : (
                 <Badge variant="destructive">
                   <X className="w-3 h-3 mr-1" />

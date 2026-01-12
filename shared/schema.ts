@@ -532,8 +532,12 @@ export const promoCodes = pgTable("promo_codes", {
   description: text("description"),
   
   // Discount configuration
-  discountType: varchar("discount_type", { length: 20 }).notNull(), // percentage, fixed_amount
+  discountType: varchar("discount_type", { length: 20 }).notNull(), // percentage, fixed
   discountValue: integer("discount_value").notNull(), // e.g., 20 for 20% or £20
+  
+  // Tier upgrade - if set, this promo code grants a tier upgrade when redeemed
+  grantsTier: varchar("grants_tier", { length: 20 }), // basic, premium, enterprise, ultimate
+  grantsCredits: integer("grants_credits"), // Optional bonus credits to grant
   
   // Eligibility
   eligibleTiers: text("eligible_tiers").array(), // Which tiers can use this: ['basic', 'premium']

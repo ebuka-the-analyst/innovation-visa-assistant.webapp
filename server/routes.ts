@@ -5049,14 +5049,133 @@ EXAMPLES OF GOOD RESPONSES:
         valid: true,
         discountType: promoCode.discountType,
         discountValue: promoCode.discountValue,
+        grantsTier: promoCode.grantsTier,
+        grantsCredits: promoCode.grantsCredits,
         name: promoCode.name,
-        message: promoCode.discountType === 'percentage' 
-          ? `${promoCode.discountValue}% off your purchase!`
-          : `£${promoCode.discountValue / 100} off your purchase!`,
+        message: promoCode.grantsTier 
+          ? `Unlock ${promoCode.grantsTier.charAt(0).toUpperCase() + promoCode.grantsTier.slice(1)} tier features!`
+          : promoCode.discountType === 'percentage' 
+            ? `${promoCode.discountValue}% off your purchase!`
+            : `£${promoCode.discountValue / 100} off your purchase!`,
       });
     } catch (error) {
       console.error("Validate promo code error:", error);
       res.status(500).json({ valid: false, message: "Failed to validate code" });
+    }
+  });
+
+  // Redeem promo code - upgrades user tier if applicable
+  app.post("/api/promos/redeem", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { code } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ success: false, message: "Promo code is required" });
+      }
+      
+      const promoCode = await storage.getPromoCodeByCode(code.toUpperCase());
+      
+      if (!promoCode) {
+        return res.status(404).json({ success: false, message: "Invalid promo code" });
+      }
+      
+      if (promoCode.status !== 'active') {
+        return res.status(400).json({ success: false, message: "This promo code is no longer active" });
+      }
+      
+      // Check validity period
+      const now = new Date();
+      if (now < promoCode.validFrom) {
+        return res.status(400).json({ success: false, message: "This promo code is not yet active" });
+      }
+      if (promoCode.validUntil && now > promoCode.validUntil) {
+        return res.status(400).json({ success: false, message: "This promo code has expired" });
+      }
+      
+      // Check usage limits
+      if (promoCode.maxTotalUses && promoCode.currentUses >= promoCode.maxTotalUses) {
+        return res.status(400).json({ success: false, message: "This promo code has reached its usage limit" });
+      }
+      
+      // Check per-user usage limit
+      if (promoCode.maxUsesPerUser) {
+        const userRedemptions = await storage.getUserPromoRedemptionCount(user.id, promoCode.id);
+        if (userRedemptions >= promoCode.maxUsesPerUser) {
+          return res.status(400).json({ success: false, message: "You have already used this promo code" });
+        }
+      }
+      
+      // If promo code grants a tier upgrade
+      if (promoCode.grantsTier) {
+        // Build update object with tier upgrade and optional bonus credits
+        const currentBonusCredits = user.bonusCredits || 0;
+        const updateData: Record<string, any> = {
+          subscriptionTier: promoCode.grantsTier,
+        };
+        
+        // Add bonus credits if applicable
+        if (promoCode.grantsCredits && promoCode.grantsCredits > 0) {
+          updateData.bonusCredits = currentBonusCredits + promoCode.grantsCredits;
+        }
+        
+        // Single update call for tier and credits
+        await storage.updateUser(user.id, updateData);
+        
+        // Record redemption
+        await storage.createPromoRedemption({
+          promoCodeId: promoCode.id,
+          userId: user.id,
+          discountApplied: 0,
+          originalAmount: 0,
+          finalAmount: 0,
+          appliedAt: 'tier_upgrade',
+        });
+        
+        // Increment promo code usage
+        await storage.incrementPromoCodeUsage(promoCode.id);
+        
+        // Fetch updated user and refresh session
+        const updatedUser = await storage.getUser(user.id);
+        
+        // Refresh the Passport session with updated user data (promisified)
+        await new Promise<void>((resolve, reject) => {
+          req.login(updatedUser, (loginErr) => {
+            if (loginErr) {
+              console.error("Session refresh error:", loginErr);
+              reject(loginErr);
+            } else {
+              resolve();
+            }
+          });
+        }).catch((err) => {
+          // Log error but continue - the database update succeeded
+          console.error("Failed to refresh session after tier upgrade:", err);
+        });
+        
+        return res.json({
+          success: true,
+          tierUpgrade: true,
+          newTier: promoCode.grantsTier,
+          creditsGranted: promoCode.grantsCredits || 0,
+          message: `Congratulations! You've been upgraded to ${promoCode.grantsTier!.charAt(0).toUpperCase() + promoCode.grantsTier!.slice(1)} tier!`,
+          user: updatedUser,
+        });
+      }
+      
+      // Regular discount code - just validate for checkout
+      res.json({
+        success: true,
+        tierUpgrade: false,
+        discountType: promoCode.discountType,
+        discountValue: promoCode.discountValue,
+        message: promoCode.discountType === 'percentage' 
+          ? `${promoCode.discountValue}% discount will be applied at checkout!`
+          : `£${promoCode.discountValue / 100} discount will be applied at checkout!`,
+      });
+    } catch (error) {
+      console.error("Redeem promo code error:", error);
+      res.status(500).json({ success: false, message: "Failed to redeem promo code" });
     }
   });
 
