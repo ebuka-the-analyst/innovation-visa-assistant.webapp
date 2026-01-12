@@ -896,10 +896,10 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
             <span className="flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3" />
-              {session?.totalQuestionsAnswered || 0} / {session?.totalQuestions || 475} questions
+              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+              Your Progress
             </span>
-            <span className="font-medium">{progressPercent.toFixed(1)}% Complete</span>
+            <span className="font-medium text-emerald-600">{progressPercent.toFixed(1)}% Complete</span>
           </div>
           <div className="relative">
             <Progress value={progressPercent} className="h-2.5" />

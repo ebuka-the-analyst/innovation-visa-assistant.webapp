@@ -267,29 +267,17 @@ export default function VisaReadinessHUD({
         </p>
       </Card>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4 text-center">
-          <Zap className="h-6 w-6 mx-auto mb-2 text-amber-500" />
-          <div className="text-2xl font-bold">{totalXP}</div>
-          <div className="text-xs text-muted-foreground">Total XP</div>
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="p-3 text-center">
+          <Zap className="h-5 w-5 mx-auto mb-1 text-amber-500" />
+          <div className="text-xl font-bold text-emerald-600">{totalXP}</div>
+          <div className="text-xs text-muted-foreground">XP Earned</div>
         </Card>
         
-        <Card className="p-4 text-center">
-          <Award className="h-6 w-6 mx-auto mb-2 text-primary" />
-          <div className="text-2xl font-bold">{currentStreak}</div>
-          <div className="text-xs text-muted-foreground">Answer Streak</div>
-        </Card>
-        
-        <Card className="p-4 text-center">
-          <CheckCircle2 className="h-6 w-6 mx-auto mb-2 text-green-500" />
-          <div className="text-2xl font-bold">{sectionsCompleted}/{totalSections}</div>
-          <div className="text-xs text-muted-foreground">Sections Complete</div>
-        </Card>
-        
-        <Card className="p-4 text-center">
-          <Sparkles className="h-6 w-6 mx-auto mb-2 text-purple-500" />
-          <div className="text-2xl font-bold">{questionsAnswered}</div>
-          <div className="text-xs text-muted-foreground">Questions Answered</div>
+        <Card className="p-3 text-center">
+          <Award className="h-5 w-5 mx-auto mb-1 text-primary" />
+          <div className="text-xl font-bold text-emerald-600">{currentStreak}x</div>
+          <div className="text-xs text-muted-foreground">Streak</div>
         </Card>
       </div>
       

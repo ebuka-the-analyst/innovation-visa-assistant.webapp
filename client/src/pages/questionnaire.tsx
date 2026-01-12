@@ -324,11 +324,12 @@ export default function Questionnaire() {
 
         <div className="flex-1 flex">
           <div className="flex-1 flex flex-col lg:flex-row">
-            <div className="flex-1 h-[calc(100vh-80px)]">
+            <div className="flex-1 h-[calc(100vh-80px)] overflow-hidden">
               <AiInterviewChat tier={userTier} onSessionUpdate={handleSessionUpdate} />
             </div>
             
-            <div className="lg:w-96 border-l bg-muted/20 overflow-y-auto p-4 h-[calc(100vh-80px)]">
+            {/* Right sidebar - hidden on mobile, visible on large screens */}
+            <div className="hidden lg:block lg:w-80 xl:w-96 border-l bg-muted/20 overflow-y-auto p-3 h-[calc(100vh-80px)]">
               <VisaReadinessHUD 
                 innovationScore={interviewSession?.innovationScore || 0}
                 viabilityScore={interviewSession?.viabilityScore || 0}
@@ -340,7 +341,7 @@ export default function Questionnaire() {
                 sectionsCompleted={Math.floor((interviewSession?.totalQuestionsAnswered || 0) / 10)}
                 totalSections={48}
                 questionsAnswered={interviewSession?.totalQuestionsAnswered || 0}
-                totalQuestions={interviewSession?.totalQuestions || 475}
+                totalQuestions={100}
               />
             </div>
           </div>

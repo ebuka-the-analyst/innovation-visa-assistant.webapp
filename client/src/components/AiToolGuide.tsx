@@ -167,10 +167,10 @@ function DefaultSidePanel({ answers, progress, currentQuestionIndex, totalQuesti
         </h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Questions Completed</span>
-            <span className="font-medium">{currentQuestionIndex}/{totalQuestions}</span>
+            <span className="text-muted-foreground">Your Progress</span>
+            <span className="font-medium text-emerald-600">{progress}% Complete</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-3" />
           
           <div className="grid grid-cols-2 gap-3 mt-4">
             <div className="bg-muted/50 rounded-lg p-3 text-center">
@@ -625,9 +625,9 @@ export function AiToolGuide({ config, onComplete, onSwitchToTraditional, sidePan
         <div className="mt-4">
           <div className="flex justify-between text-sm mb-1">
             <span>Progress</span>
-            <span>{currentQuestionIndex}/{config.questions.length}</span>
+            <span>{progress}% Complete</span>
           </div>
-          <Progress value={progress} className="h-2 bg-white/30" />
+          <Progress value={progress} className="h-3 bg-white/30" />
         </div>
       </div>
       
