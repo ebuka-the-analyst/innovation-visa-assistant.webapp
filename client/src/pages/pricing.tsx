@@ -7,21 +7,32 @@ import { AppSidebar } from "@/components/app-sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart, Tag, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { TIER_CREDITS, ADDON_PRICING, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
 import logoLight from "@assets/official_logo.png";
 import logoDark from "@assets/logo_dark.png";
+
+interface PromoValidation {
+  valid: boolean;
+  message?: string;
+  discount?: number;
+  discountType?: 'percentage' | 'fixed';
+  grantsTier?: string;
+  tierUpgraded?: boolean;
+}
 
 const tiers = [
   {
     id: "free",
     name: "Free Plan",
     price: "Free",
+    priceInPence: 0,
     credits: 0,
     description: "Start your Innovator Founder Visa journey",
     pages: "10-15 pages",
@@ -39,7 +50,8 @@ const tiers = [
   {
     id: "basic",
     name: "Basic Plan",
-    price: "£9",
+    price: "£29",
+    priceInPence: 2900,
     credits: 1,
     description: "Perfect for straightforward businesses",
     pages: "25-35 pages",
@@ -58,7 +70,8 @@ const tiers = [
   {
     id: "premium",
     name: "Premium Plan",
-    price: "£19",
+    price: "£49",
+    priceInPence: 4900,
     credits: 3,
     description: "Most popular - comprehensive coverage",
     pages: "40-60 pages",
@@ -80,7 +93,8 @@ const tiers = [
   {
     id: "enterprise",
     name: "Enterprise Plan",
-    price: "£29",
+    price: "£89",
+    priceInPence: 8900,
     credits: 6,
     description: "Maximum detail for complex ventures",
     pages: "50-80 pages",
@@ -102,7 +116,8 @@ const tiers = [
   {
     id: "ultimate",
     name: "Ultimate Plan",
-    price: "£39",
+    price: "£129",
+    priceInPence: 12900,
     credits: "unlimited",
     description: "Everything you need for guaranteed approval",
     pages: "80+ pages",
@@ -171,6 +186,9 @@ export default function Pricing() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [processingTier, setProcessingTier] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoValidation, setPromoValidation] = useState<PromoValidation | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   
   const { data: user } = useQuery<{ 
     id: string; 
@@ -199,6 +217,101 @@ export default function Pricing() {
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )[0];
 
+  // Promo code validation
+  const validatePromoCode = async () => {
+    if (!promoCode.trim()) {
+      setPromoValidation(null);
+      return;
+    }
+    
+    setIsValidatingPromo(true);
+    try {
+      const validateResponse = await fetch(`/api/promos/validate/${encodeURIComponent(promoCode.trim())}`);
+      const validateData = await validateResponse.json();
+      
+      if (!validateData.valid) {
+        setPromoValidation({
+          valid: false,
+          message: validateData.message,
+        });
+        return;
+      }
+      
+      // If this is a tier-granting promo code, redeem it immediately
+      if (validateData.grantsTier && user) {
+        try {
+          const redeemResponse = await apiRequest('POST', '/api/promos/redeem', {
+            code: promoCode.trim(),
+          });
+          const redeemData = await redeemResponse.json();
+          
+          if (redeemData.success && redeemData.tierUpgrade) {
+            queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+            
+            setPromoValidation({
+              valid: true,
+              message: redeemData.message,
+              grantsTier: redeemData.newTier,
+              tierUpgraded: true,
+            });
+            
+            toast({
+              title: "Tier Upgraded!",
+              description: `You now have ${redeemData.newTier.charAt(0).toUpperCase() + redeemData.newTier.slice(1)} tier access!`,
+            });
+            setPromoCode('');
+            
+            setTimeout(() => {
+              setLocation('/dashboard');
+            }, 2000);
+            return;
+          }
+        } catch (redeemError) {
+          console.error('Error redeeming tier promo:', redeemError);
+        }
+      }
+      
+      // Regular discount code
+      setPromoValidation({
+        valid: validateData.valid,
+        message: validateData.message,
+        discount: validateData.discountValue,
+        discountType: validateData.discountType,
+        grantsTier: validateData.grantsTier,
+      });
+      
+      if (validateData.valid && validateData.discountValue) {
+        toast({
+          title: "Promo code applied!",
+          description: validateData.discountType === 'percentage' 
+            ? `${validateData.discountValue}% discount will be applied`
+            : `£${(validateData.discountValue / 100).toFixed(2)} discount will be applied`,
+        });
+      }
+    } catch (error) {
+      setPromoValidation({ valid: false, message: 'Failed to validate promo code' });
+    } finally {
+      setIsValidatingPromo(false);
+    }
+  };
+
+  const clearPromoCode = () => {
+    setPromoCode('');
+    setPromoValidation(null);
+  };
+
+  // Calculate discounted price for a tier
+  const getDiscountedPrice = (priceInPence: number) => {
+    if (!promoValidation?.valid || !promoValidation.discount || priceInPence === 0) {
+      return priceInPence;
+    }
+    
+    if (promoValidation.discountType === 'percentage') {
+      return Math.round(priceInPence * (1 - promoValidation.discount / 100));
+    }
+    return Math.max(0, priceInPence - promoValidation.discount);
+  };
+
   const checkoutMutation = useMutation({
     mutationFn: async ({ planId, newTier }: { planId: string; newTier: string }) => {
       const response = await apiRequest('POST', '/api/payment/create-checkout', { planId });
@@ -215,6 +328,35 @@ export default function Pricing() {
       toast({
         title: "Error",
         description: error.message || "Failed to start checkout",
+        variant: "destructive",
+      });
+      setProcessingTier(null);
+    },
+  });
+
+  // Direct subscribe mutation with promo code
+  const directSubscribeMutation = useMutation({
+    mutationFn: async (tierId: string) => {
+      const payload: { tier: string; promoCode?: string } = { tier: tierId };
+      if (promoValidation?.valid && promoCode.trim()) {
+        payload.promoCode = promoCode.trim();
+      }
+      const response = await apiRequest('POST', '/api/payment/direct-subscribe', payload);
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: any) => {
+      if (error.promoError) {
+        setPromoValidation({ valid: false, message: error.message });
+        setPromoCode('');
+      }
+      toast({
+        title: "Error",
+        description: error.message || "Failed to proceed to payment",
         variant: "destructive",
       });
       setProcessingTier(null);
@@ -251,13 +393,14 @@ export default function Pricing() {
     addonMutation.mutate(addonId);
   };
 
-  // Direct subscribe - go to checkout page with promo code support
+  // Direct subscribe - now processes payment directly with promo code
   const handleDirectSubscribe = (tierId: string) => {
     if (!user) {
       setLocation(`/signup?tier=${tierId}&direct=true`);
       return;
     }
-    setLocation(`/checkout?tier=${tierId}`);
+    setProcessingTier(tierId);
+    directSubscribeMutation.mutate(tierId);
   };
 
   // Full flow with questionnaire
@@ -329,11 +472,82 @@ export default function Pricing() {
             />
             
             <main className="responsive-container py-10 md:py-12">
-              <div className="text-center mb-10 md:mb-12">
+              <div className="text-center mb-8 md:mb-10">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Choose Your Plan</h1>
                 <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
                   Select the tier that best matches your business complexity for your Innovator Founder Visa application
                 </p>
+              </div>
+
+              {/* Promo Code Section */}
+              <div className="max-w-md mx-auto mb-8">
+                <Card className="p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Tag className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Have a promo code?</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <Input
+                        placeholder="Enter promo code"
+                        value={promoCode}
+                        onChange={(e) => {
+                          setPromoCode(e.target.value.toUpperCase());
+                          if (promoValidation) setPromoValidation(null);
+                        }}
+                        className="uppercase"
+                        disabled={promoValidation?.valid}
+                        data-testid="input-pricing-promo-code"
+                      />
+                      {promoValidation?.valid && (
+                        <button
+                          onClick={clearPromoCode}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          data-testid="button-clear-promo"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={validatePromoCode}
+                      disabled={isValidatingPromo || !promoCode.trim() || promoValidation?.valid}
+                      data-testid="button-apply-promo"
+                    >
+                      {isValidatingPromo ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        "Apply"
+                      )}
+                    </Button>
+                  </div>
+                  {promoValidation && (
+                    <div className="mt-3">
+                      {promoValidation.valid ? (
+                        promoValidation.tierUpgraded ? (
+                          <Badge className="bg-emerald-600 text-white">
+                            <Gift className="w-3 h-3 mr-1" />
+                            {promoValidation.grantsTier?.charAt(0).toUpperCase()}{promoValidation.grantsTier?.slice(1)} tier unlocked! Redirecting...
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-green-500 text-white">
+                            <Check className="w-3 h-3 mr-1" />
+                            {promoValidation.discountType === 'percentage' 
+                              ? `${promoValidation.discount}% discount applied`
+                              : `£${((promoValidation.discount || 0) / 100).toFixed(2)} off applied`}
+                          </Badge>
+                        )
+                      ) : (
+                        <Badge variant="destructive">
+                          <X className="w-3 h-3 mr-1" />
+                          {promoValidation.message || 'Invalid code'}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </Card>
               </div>
 
         {/* Horizontal scrollable container on mobile/tablet, grid on larger screens */}
@@ -366,7 +580,16 @@ export default function Pricing() {
                     <CardTitle className="text-lg lg:text-xl">{tier.name}</CardTitle>
                     <CardDescription className="text-xs lg:text-sm line-clamp-2">{tier.description}</CardDescription>
                     <div className="mt-3">
-                      <span className="text-3xl lg:text-4xl font-bold">{tier.price}</span>
+                      {tier.priceInPence > 0 && promoValidation?.valid && promoValidation.discount ? (
+                        <>
+                          <span className="text-xl lg:text-2xl text-muted-foreground line-through mr-2">{tier.price}</span>
+                          <span className="text-3xl lg:text-4xl font-bold text-green-600">
+                            £{(getDiscountedPrice(tier.priceInPence) / 100).toFixed(0)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-3xl lg:text-4xl font-bold">{tier.price}</span>
+                      )}
                       <span className="text-muted-foreground text-xs ml-1">one-time</span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
@@ -398,11 +621,20 @@ export default function Pricing() {
                         variant={tier.popular ? "default" : "outline"}
                         size="default"
                         onClick={() => handleDirectSubscribe(tier.id)}
-                        disabled={processingTier === tier.id || checkoutMutation.isPending}
+                        disabled={processingTier === tier.id || directSubscribeMutation.isPending}
                         data-testid={`button-subscribe-${tier.id}`}
                       >
-                        <Zap className="mr-2 h-4 w-4" />
-                        Subscribe
+                        {processingTier === tier.id && directSubscribeMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="mr-2 h-4 w-4" />
+                            Subscribe
+                          </>
+                        )}
                       </Button>
                     )}
                     
