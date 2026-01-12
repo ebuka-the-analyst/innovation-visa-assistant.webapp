@@ -813,9 +813,13 @@ export function PromoCodeGenerator() {
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Tag className="h-5 w-5 text-purple-500" />
                   Generated Codes
+                  <Badge variant="secondary" className="text-amber-600 bg-amber-100">Not Saved</Badge>
                 </CardTitle>
                 <Badge>{generatedCodes.length}</Badge>
               </div>
+              <CardDescription className="text-amber-600">
+                Click "Save" on each code or "Save All to Database" below to activate them
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {generatedCodes.length > 0 ? (
@@ -857,12 +861,14 @@ export function PromoCodeGenerator() {
                               <Copy className="h-4 w-4" />
                             </Button>
                             <Button
-                              size="icon"
-                              variant="ghost"
+                              size="sm"
+                              variant="outline"
                               onClick={() => createPromoCodeMutation.mutate(code)}
                               disabled={createPromoCodeMutation.isPending}
+                              className="text-green-600 border-green-300 hover:bg-green-50"
                             >
-                              <Check className="h-4 w-4 text-green-500" />
+                              <Check className="h-4 w-4 mr-1" />
+                              Save
                             </Button>
                             <Button
                               size="icon"
