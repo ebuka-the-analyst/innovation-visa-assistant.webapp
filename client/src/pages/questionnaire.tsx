@@ -168,9 +168,9 @@ export default function Questionnaire() {
                             Recommended
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">
+                          <Badge variant="destructive">
                             <Lock className="h-3 w-3 mr-1" />
-                            Basic+
+                            Paid Feature
                           </Badge>
                         )}
                       </div>
@@ -206,7 +206,7 @@ export default function Questionnaire() {
                         <Link href="/pricing">
                           <Button variant="outline" className="w-full mt-6" data-testid="button-upgrade-ai-interview">
                             <Lock className="h-4 w-4 mr-2" />
-                            Upgrade to Basic
+                            Upgrade to Unlock
                           </Button>
                         </Link>
                       )}
@@ -283,11 +283,11 @@ export default function Questionnaire() {
             <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h2 className="text-xl font-bold mb-2">Paid Feature</h2>
             <p className="text-muted-foreground mb-6">
-              The AI-Guided Interview requires Basic tier or higher.
+              The AI-Guided Interview requires a paid subscription.
             </p>
             <div className="flex flex-col gap-3">
               <Link href="/pricing">
-                <Button className="w-full" data-testid="button-upgrade">Upgrade to Basic</Button>
+                <Button className="w-full" data-testid="button-upgrade">Upgrade to Unlock</Button>
               </Link>
               <Button variant="outline" onClick={() => setMode('select')} data-testid="button-go-back">
                 Go Back
