@@ -421,8 +421,7 @@ export default function Pricing() {
                     {/* Direct Subscribe Button - Primary action for paid tiers */}
                     {tier.id !== 'free' && !isCurrentTier && (
                       <Button
-                        className="w-full"
-                        variant={tier.popular ? "default" : "outline"}
+                        className={`w-full ${tier.popular ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
                         size="default"
                         onClick={() => handleDirectSubscribe(tier.id)}
                         disabled={processingTier === tier.id || directSubscribeMutation.isPending}
@@ -541,8 +540,7 @@ export default function Pricing() {
                     
                     <CardFooter className="pt-1 px-3 lg:px-4 pb-3">
                       <Button
-                        className="w-full"
-                        variant={addon.highlight ? "default" : "outline"}
+                        className={`w-full ${addon.highlight ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
                         size="sm"
                         onClick={() => handlePurchaseAddon(addon.id)}
                         disabled={processingTier === addon.id || addonMutation.isPending}
