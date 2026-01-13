@@ -145,12 +145,12 @@ export default function DocumentsPage() {
   return (
     <>
       <div className="container mx-auto py-8 px-4 md:px-6 max-w-6xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2" data-testid="heading-documents">
+            <h1 className="text-xl font-bold mb-1" data-testid="heading-documents">
               Document Storage
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Securely store and manage your visa application documents
             </p>
           </div>

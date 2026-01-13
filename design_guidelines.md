@@ -46,21 +46,25 @@ The UK Innovator Founder Visa Assistant uses a professional NHS Blue-inspired co
 **Display Font**: Fraunces, Georgia, serif (headlines only)
 **Monospace Font**: ui-monospace, SFMono-Regular, Menlo, monospace
 
-**Type Scale** (Perfect Fourth - 1.333 ratio):
-- h1: 87px (display headlines)
-- h2: 65px (section headers)
-- h3: 49px (subsection headers)
-- h4: 37px (card titles)
-- h5: 28px (component headers)
-- h6: 21px (labels)
-- body: 16px (mobile 14px, desktop 18px)
-- caption: 12px
+**Compact Type Scale** (Optimized for first-viewport content):
+- Page headings: text-xl (20px) - Keep content visible without scrolling
+- Section headings: text-lg (18px) - Card section titles
+- Stat values: text-xl (20px) - Dashboard numbers, percentages
+- Card titles: text-base (16px) - Component headers
+- Labels: text-xs (12px) - Field labels, category names
+- Body text: text-sm (14px) - Descriptions, paragraphs
+- Caption: text-xs (12px) - Helper text, timestamps
+
+**ADHD-Friendly Design Rules**:
+- Never use text-3xl or larger for dashboard content
+- Keep stat cards compact with text-xl for numbers
+- Reduce visual overwhelm with smaller, consistent sizing
+- Content should fit in user's first viewport when possible
 
 **Settings**:
 - Line-height: 1.5 (body), 1.2 (headings)
 - Letter-spacing: -0.02em (large headings)
 - Use `tabular-nums` for financial tables
-- Responsive sizing with clamp(): `clamp(2rem, 5vw, 5.4rem)`
 
 ### C. Layout System
 

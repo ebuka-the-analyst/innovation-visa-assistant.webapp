@@ -301,12 +301,12 @@ export default function Dashboard() {
           />
         )}
 
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold mb-2">
+            <h2 className="text-xl font-bold mb-1">
               Welcome back{user.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}
             </h2>
-            <p className="text-muted-foreground">Track your UK Innovator Founder Visa applications</p>
+            <p className="text-sm text-muted-foreground">Track your UK Innovator Founder Visa applications</p>
           </div>
           <div className="flex gap-2 flex-wrap">
             {hiddenDemoPlansCount > 0 && (
@@ -373,47 +373,47 @@ export default function Dashboard() {
           <div className="space-y-6 md:space-y-8">
             {/* Insights Cards - Only show if there's a completed plan */}
             {completedPlan && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                 <Card data-testid="card-insight-approval">
-                  <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Approval Probability</CardTitle>
+                  <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-1">
+                    <CardTitle className="text-xs font-medium">Approval Probability</CardTitle>
                     <Target className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-chart-3">
+                  <CardContent className="pt-0">
+                    <div className="text-xl font-bold text-chart-3">
                       {calculateApprovalProbability(completedPlan)}%
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Based on {completedPlan.tier} tier completeness
+                    <p className="text-xs text-muted-foreground">
+                      Based on {completedPlan.tier} tier
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card data-testid="card-insight-completeness">
-                  <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Completeness Score</CardTitle>
+                  <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-1">
+                    <CardTitle className="text-xs font-medium">Completeness Score</CardTitle>
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-primary">
+                  <CardContent className="pt-0">
+                    <div className="text-xl font-bold text-primary">
                       {calculateCompleteness(completedPlan)}%
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs text-muted-foreground">
                       All critical fields answered
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card data-testid="card-insight-time-saved">
-                  <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Time Saved</CardTitle>
+                  <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-1">
+                    <CardTitle className="text-xs font-medium">Time Saved</CardTitle>
                     <Zap className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-orange-500">
+                  <CardContent className="pt-0">
+                    <div className="text-xl font-bold text-orange-500">
                       {completedPlan.tier === 'enterprise' ? '120+' : completedPlan.tier === 'premium' ? '80+' : '40+'} hrs
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs text-muted-foreground">
                       vs traditional consultant
                     </p>
                   </CardContent>

@@ -135,67 +135,67 @@ export default function ProgressPage() {
   return (
     <>
       <div className="container mx-auto py-8 px-4 md:px-6 max-w-5xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" data-testid="heading-progress">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold mb-1" data-testid="heading-progress">
             Your Visa Journey
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Track your progress through the UK Innovator Founder Visa application process
           </p>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <Card className="bg-gradient-to-br from-[#005EB8]/10 to-[#41B6E6]/10">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">Overall Progress</span>
-                <Target className="w-5 h-5 text-primary" />
+            <CardContent className="pt-4 pb-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-muted-foreground">Overall Progress</span>
+                <Target className="w-4 h-4 text-primary" />
               </div>
-              <div className="text-3xl font-bold mb-2" data-testid="text-overall-progress">
+              <div className="text-xl font-bold mb-1" data-testid="text-overall-progress">
                 {overallProgress}%
               </div>
-              <Progress value={overallProgress} className="h-2" />
+              <Progress value={overallProgress} className="h-1.5" />
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">Steps Completed</span>
-                <CheckCircle2 className="w-5 h-5 text-green-500" />
+            <CardContent className="pt-4 pb-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-muted-foreground">Steps Completed</span>
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
               </div>
-              <div className="text-3xl font-bold" data-testid="text-completed-steps">
+              <div className="text-xl font-bold" data-testid="text-completed-steps">
                 {completedSteps}/{totalSteps}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">tasks finished</p>
+              <p className="text-xs text-muted-foreground">tasks finished</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">Current Phase</span>
-                <TrendingUp className="w-5 h-5 text-blue-500" />
+            <CardContent className="pt-4 pb-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-muted-foreground">Current Phase</span>
+                <TrendingUp className="w-4 h-4 text-blue-500" />
               </div>
-              <div className="text-lg font-bold" data-testid="text-current-phase">
+              <div className="text-base font-bold" data-testid="text-current-phase">
                 {JOURNEY_PHASES.find(p => getPhaseProgress(p) < 100)?.name || "Complete!"}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">in progress</p>
+              <p className="text-xs text-muted-foreground">in progress</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">Readiness</span>
-                <Award className="w-5 h-5 text-yellow-500" />
+            <CardContent className="pt-4 pb-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-muted-foreground">Readiness</span>
+                <Award className="w-4 h-4 text-yellow-500" />
               </div>
-              <div className="text-lg font-bold" data-testid="text-readiness">
+              <div className="text-base font-bold" data-testid="text-readiness">
                 {overallProgress >= 80 ? "Ready" : overallProgress >= 50 ? "Almost" : "Building"}
               </div>
               <Badge 
                 variant={overallProgress >= 80 ? "default" : "secondary"}
-                className="mt-1"
+                className="text-xs"
               >
                 {overallProgress >= 80 ? "Application Ready" : "Keep Going"}
               </Badge>
