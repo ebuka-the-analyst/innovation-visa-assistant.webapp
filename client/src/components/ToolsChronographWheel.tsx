@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
@@ -311,27 +312,65 @@ export default function ToolsChronographWheel() {
     };
   }, [isHoveringDown]);
 
-  // When dismissed, show minimized version in corner
+  // When dismissed, show minimized version in middle-left
   if (isDismissed) {
-    return (
-      <div className="fixed bottom-4 left-4 z-40">
+    return createPortal(
+      <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[9998]">
         <button
           onClick={() => setIsDismissed(false)}
-          className="w-8 h-8 rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center text-white opacity-60 hover:opacity-100 hover:scale-110"
+          className="w-[60px] h-[40px] rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-center text-white hover-elevate"
           style={{ background: "#005EB8" }}
           data-testid="button-restore-tools"
           aria-label="Restore Tools Hub"
         >
-          <Icons.Wrench className="w-4 h-4" />
+          <Icons.Wrench className="w-3.5 h-3.5" />
+          <span className="text-[7px] font-bold mt-0.5">100+ Tools</span>
         </button>
-      </div>
+      </div>,
+      document.body
     );
   }
 
-  return (
+  // Minimized state - show 60x40px button in middle-left of screen
+  if (isMinimized) {
+    return createPortal(
+      <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[9998]">
+        <div className="relative">
+          {/* Close/dismiss X button */}
+          <button
+            onClick={() => setIsDismissed(true)}
+            className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center shadow-sm z-50"
+            data-testid="button-dismiss-tools"
+          >
+            <Icons.X className="w-2.5 h-2.5 text-muted-foreground" />
+          </button>
+          {/* Main 100+ Tools button */}
+          <button
+            onClick={() => {
+              recordActivity();
+              setIsMinimized(false);
+            }}
+            className="w-[60px] h-[40px] rounded-lg shadow-lg hover-elevate transition-all duration-300 flex flex-col items-center justify-center"
+            data-testid="button-toggle-text-label"
+            aria-label="Expand Tools Hub"
+            style={{ 
+              color: "#ffffff", 
+              backgroundColor: "#005EB8",
+            }}
+          >
+            <Icons.Wrench className="w-3.5 h-3.5" />
+            <span className="text-[7px] font-bold mt-0.5">100+ Tools</span>
+          </button>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  return createPortal(
     <div
       ref={widgetRef}
-      className="fixed bottom-8 left-8 z-40"
+      className="fixed bottom-8 left-8 z-[9998]"
       data-testid="chronograph-wheel-container"
       style={{ 
         scale: window.innerWidth < 768 ? "0.55" : window.innerWidth < 1024 ? "0.45" : window.innerWidth < 1440 ? "0.55" : "0.65",
@@ -348,48 +387,6 @@ export default function ToolsChronographWheel() {
         setIsHoveringWidget(false);
       }}
     >
-      {/* Minimized state - small icon with dismiss X on left side */}
-      {isMinimized && (
-        <div className={`absolute -top-16 left-0 flex items-center gap-0.5 transition-all duration-300 ${
-          isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : ""
-        }`}>
-          {/* Dismiss X button - on the LEFT (minimizes to left) */}
-          {!isDismissed && (
-            <button
-              onClick={() => setIsDismissed(true)}
-              className="w-5 h-6 bg-muted hover:bg-muted/80 rounded-l-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm border border-r-0 border-border"
-              data-testid="button-dismiss-tools"
-              aria-label="Minimize tools button"
-            >
-              <Icons.X className="w-3 h-3" />
-            </button>
-          )}
-          
-          {/* Main toggle button */}
-          <button
-            onClick={() => {
-              if (isDismissed) {
-                setIsDismissed(false);
-              } else {
-                recordActivity();
-                setIsMinimized(false);
-              }
-            }}
-            className="font-semibold text-center px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
-            data-testid="button-toggle-text-label"
-            aria-label={isDismissed ? "Restore Tools Hub" : "Expand Tools Hub"}
-            style={{ 
-              color: "#ffffff", 
-              backgroundColor: "#005EB8",
-              fontSize: "0.75rem", 
-              lineHeight: "1.3",
-              border: "none"
-            }}
-          >
-            100+ Tools
-          </button>
-        </div>
-      )}
 
       {/* Expand/Collapse Indicator - Only shown when expanded */}
       {!isMinimized && (
@@ -637,6 +634,7 @@ export default function ToolsChronographWheel() {
           }}
         />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
