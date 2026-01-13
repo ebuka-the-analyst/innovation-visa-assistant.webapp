@@ -779,6 +779,28 @@ export const insertUserDocumentSchema = createInsertSchema(userDocuments).omit({
 export type InsertUserDocument = z.infer<typeof insertUserDocumentSchema>;
 export type UserDocument = typeof userDocuments.$inferSelect;
 
+// Document Extraction Table (for AI-powered auto-fill)
+export const documentExtractions = pgTable("document_extractions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  documentIds: jsonb("document_ids").notNull(), // Array of document IDs used
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // pending, processing, completed, failed
+  extractedData: jsonb("extracted_data"), // Extracted field values
+  confidence: jsonb("confidence"), // Confidence scores per field
+  error: text("error"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_extraction_user").on(table.userId),
+]);
+
+export const insertDocumentExtractionSchema = createInsertSchema(documentExtractions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDocumentExtraction = z.infer<typeof insertDocumentExtractionSchema>;
+export type DocumentExtraction = typeof documentExtractions.$inferSelect;
+
 // ============================================
 // PREMIUM VALUE FEATURES - 8 New Systems
 // ============================================
