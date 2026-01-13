@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -45,24 +46,25 @@ export default function ToolsFlywheel() {
   const visibleTools = getVisibleTools();
 
   if (isCollapsed) {
-    return (
-      <div className="fixed left-4 top-1/2 -translate-y-1/2 z-40">
+    return createPortal(
+      <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[9998]">
         <button
           onClick={() => setIsCollapsed(false)}
-          className="rounded-lg bg-primary shadow-lg hover-elevate transition-all flex items-center justify-center w-16 h-11"
+          className="rounded-lg bg-primary shadow-lg hover-elevate transition-all flex items-center justify-center w-[60px] h-[40px]"
           data-testid="flywheel-toggle"
         >
           <div className="flex flex-col items-center leading-none">
-            <Icons.Wrench className="w-4 h-4 text-white" />
-            <span className="text-[8px] font-bold text-white mt-0.5">100+ Tools</span>
+            <Icons.Wrench className="w-3.5 h-3.5 text-white" />
+            <span className="text-[7px] font-bold text-white mt-0.5">100+ Tools</span>
           </div>
         </button>
-      </div>
+      </div>,
+      document.body
     );
   }
 
-  return (
-    <div className="fixed left-4 top-1/2 -translate-y-1/2 z-40">
+  return createPortal(
+    <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[9998]">
       <button
         onClick={() => setIsCollapsed(true)}
         className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center shadow-sm z-50"
@@ -132,6 +134,7 @@ export default function ToolsFlywheel() {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

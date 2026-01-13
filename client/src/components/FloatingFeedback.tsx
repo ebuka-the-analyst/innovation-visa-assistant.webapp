@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -125,28 +126,31 @@ export default function FloatingFeedback() {
       `}</style>
 
       {/* Small compact button matching 100+ Tools style - bottom left */}
-      <div className="fixed left-4 bottom-4 z-[9999]">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="relative rounded-lg bg-primary shadow-lg hover-elevate transition-all duration-300 flex items-center justify-center w-16 h-11"
-          data-testid="button-feedback-toggle"
-          aria-label={isOpen ? "Close feedback" : "Send feedback"}
-        >
-          <div className="flex flex-col items-center leading-none">
-            <MessageSquareWarning className="w-4 h-4 text-white" />
-            <span className="text-[8px] font-bold text-white mt-0.5">Feedback</span>
-          </div>
-        </button>
-        {isOpen && (
+      {createPortal(
+        <div className="fixed left-4 bottom-4 z-[9999]">
           <button
-            onClick={() => setIsOpen(false)}
-            className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center shadow-sm"
-            data-testid="button-feedback-close"
+            onClick={() => setIsOpen(!isOpen)}
+            className="relative rounded-lg bg-primary shadow-lg hover-elevate transition-all duration-300 flex items-center justify-center w-[60px] h-[40px]"
+            data-testid="button-feedback-toggle"
+            aria-label={isOpen ? "Close feedback" : "Send feedback"}
           >
-            <X className="w-2.5 h-2.5 text-muted-foreground" />
+            <div className="flex flex-col items-center leading-none">
+              <MessageSquareWarning className="w-3.5 h-3.5 text-white" />
+              <span className="text-[7px] font-bold text-white mt-0.5">Feedback</span>
+            </div>
           </button>
-        )}
-      </div>
+          {isOpen && (
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center shadow-sm"
+              data-testid="button-feedback-close"
+            >
+              <X className="w-2.5 h-2.5 text-muted-foreground" />
+            </button>
+          )}
+        </div>,
+        document.body
+      )}
 
       {isOpen && (
         <div
