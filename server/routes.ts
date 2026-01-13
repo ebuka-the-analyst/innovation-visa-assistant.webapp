@@ -19,6 +19,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
+import { registerObjectStorageRoutes, ObjectStorageService } from "./replit_integrations/object_storage";
 
 const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -141,6 +142,12 @@ function formatEmailType(type: string): string {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth authentication (must be before routes)
   await setupAuth(app);
+  
+  // Register object storage routes for cloud file uploads
+  registerObjectStorageRoutes(app);
+  
+  // Initialize object storage service for document uploads
+  const objectStorageService = new ObjectStorageService();
 
   // Auth endpoint - user object already includes all fields from Google OAuth
   // No need to fetch from database again since it's already in req.user
@@ -6549,7 +6556,7 @@ EXAMPLES OF GOOD RESPONSES:
     }
   });
 
-  // Upload document (placeholder - would need object storage integration)
+  // Upload document - uses cloud object storage for permanent storage
   app.post("/api/documents/upload", isAuthenticated, documentUpload.single("file"), async (req, res) => {
     try {
       const user = req.user as any;
@@ -6567,7 +6574,35 @@ EXAMPLES OF GOOD RESPONSES:
         return res.status(400).json({ error: "File is required" });
       }
       
-      const fileUrl = `/uploads/${file.filename}`;
+      let fileUrl = `/uploads/${file.filename}`;
+      let isCloudStored = false;
+      
+      // Try to upload to cloud storage if available
+      try {
+        const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+        const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+        
+        // Read file and upload to cloud storage
+        const fileBuffer = fs.readFileSync(file.path);
+        const cloudResponse = await fetch(uploadURL, {
+          method: "PUT",
+          body: fileBuffer,
+          headers: { "Content-Type": file.mimetype },
+        });
+        
+        if (cloudResponse.ok) {
+          fileUrl = objectPath; // Use cloud storage path
+          isCloudStored = true;
+          console.log("[Document Upload] Uploaded to cloud storage:", objectPath);
+          
+          // Delete local file after successful cloud upload
+          fs.unlinkSync(file.path);
+        } else {
+          console.log("[Document Upload] Cloud upload failed, using local storage");
+        }
+      } catch (cloudError) {
+        console.log("[Document Upload] Cloud storage not available, using local storage:", cloudError);
+      }
       
       const document = await storage.createUserDocument({
         userId: user.id,
@@ -6580,6 +6615,7 @@ EXAMPLES OF GOOD RESPONSES:
         status: 'pending',
       });
       
+      console.log(`[Document Upload] Document saved: ${name} (cloud: ${isCloudStored})`);
       res.json(document);
     } catch (error) {
       console.error("Upload document error:", error);
@@ -6630,38 +6666,62 @@ EXAMPLES OF GOOD RESPONSES:
         documents.push(doc);
       }
       
-      console.log("[Document Extract] Found documents:", documents.map(d => ({ name: d.name, category: d.category })));
+      console.log("[Document Extract] Found documents:", documents.map(d => ({ name: d.name, category: d.category, fileUrl: d.fileUrl })));
       
-      // Try to read file contents, but also work with metadata if files aren't accessible
+      // Try to read file contents from cloud storage or local filesystem
       const documentContents = [];
       const documentMetadata = [];
       
       for (const doc of documents) {
-        // Try multiple path resolutions
-        const possiblePaths = [
-          path.join(process.cwd(), doc.fileUrl),
-          path.join(process.cwd(), doc.fileUrl.replace(/^\//, '')),
-          doc.fileUrl,
-        ];
-        
         let fileFound = false;
-        for (const filePath of possiblePaths) {
-          if (fs.existsSync(filePath)) {
-            try {
-              const fileBuffer = fs.readFileSync(filePath);
-              const base64Content = fileBuffer.toString('base64');
-              documentContents.push({
-                id: doc.id,
-                name: doc.name,
-                category: doc.category,
-                mimeType: doc.fileType,
-                content: base64Content,
-              });
-              fileFound = true;
-              console.log("[Document Extract] File found at:", filePath);
-              break;
-            } catch (readError) {
-              console.error("[Document Extract] Error reading file:", filePath, readError);
+        let base64Content = '';
+        
+        // Check if document is in cloud storage (path starts with /objects/)
+        if (doc.fileUrl.startsWith('/objects/')) {
+          try {
+            const objectFile = await objectStorageService.getObjectEntityFile(doc.fileUrl);
+            const [fileBuffer] = await objectFile.download();
+            base64Content = fileBuffer.toString('base64');
+            documentContents.push({
+              id: doc.id,
+              name: doc.name,
+              category: doc.category,
+              mimeType: doc.fileType,
+              content: base64Content,
+            });
+            fileFound = true;
+            console.log("[Document Extract] File found in cloud storage:", doc.fileUrl);
+          } catch (cloudError) {
+            console.log("[Document Extract] Cloud storage read failed:", cloudError);
+          }
+        }
+        
+        // Fallback to local filesystem
+        if (!fileFound) {
+          const possiblePaths = [
+            path.join(process.cwd(), doc.fileUrl),
+            path.join(process.cwd(), doc.fileUrl.replace(/^\//, '')),
+            doc.fileUrl,
+          ];
+          
+          for (const filePath of possiblePaths) {
+            if (fs.existsSync(filePath)) {
+              try {
+                const fileBuffer = fs.readFileSync(filePath);
+                base64Content = fileBuffer.toString('base64');
+                documentContents.push({
+                  id: doc.id,
+                  name: doc.name,
+                  category: doc.category,
+                  mimeType: doc.fileType,
+                  content: base64Content,
+                });
+                fileFound = true;
+                console.log("[Document Extract] File found locally at:", filePath);
+                break;
+              } catch (readError) {
+                console.error("[Document Extract] Error reading file:", filePath, readError);
+              }
             }
           }
         }
