@@ -198,7 +198,7 @@ export default function Questionnaire() {
                       </div>
 
                       {canAccessAiInterview ? (
-                        <Button className="w-full mt-6" data-testid="button-start-ai-interview">
+                        <Button className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white" data-testid="button-start-ai-interview">
                           <MessageSquare className="h-4 w-4 mr-2" />
                           Start AI Interview
                         </Button>
