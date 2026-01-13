@@ -33,7 +33,6 @@ const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 const ForgotPassword = lazy(() => import("@/pages/forgot-password"));
 const ResetPassword = lazy(() => import("@/pages/reset-password"));
 const Pricing = lazy(() => import("@/pages/pricing"));
-const Checkout = lazy(() => import("@/pages/checkout"));
 const FAQ = lazy(() => import("@/pages/faq"));
 const Guide = lazy(() => import("@/pages/guide"));
 const Privacy = lazy(() => import("@/pages/privacy"));
@@ -116,7 +115,7 @@ const AITransparency = lazy(() => import("@/pages/ai-transparency"));
 const TestingValidation = lazy(() => import("@/pages/testing-validation"));
 const ComplianceDashboard = lazy(() => import("@/pages/compliance-dashboard"));
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features"];
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
 
 // Optimized loading skeleton
@@ -207,7 +206,6 @@ function Router() {
       <Route path="/reset-password" component={ResetPassword} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/pricing" component={Pricing} />
-      <Route path="/checkout" component={Checkout} />
       <Route path="/questionnaire" component={Questionnaire} />
       <Route path="/adaptive-intake" component={AdaptiveIntake} />
       <Route path="/generation" component={Generation} />
