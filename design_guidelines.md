@@ -46,25 +46,40 @@ The UK Innovator Founder Visa Assistant uses a professional NHS Blue-inspired co
 **Display Font**: Fraunces, Georgia, serif (headlines only)
 **Monospace Font**: ui-monospace, SFMono-Regular, Menlo, monospace
 
-**Compact Type Scale** (Optimized for first-viewport content):
-- Page headings: text-xl (20px) - Keep content visible without scrolling
-- Section headings: text-lg (18px) - Card section titles
-- Stat values: text-xl (20px) - Dashboard numbers, percentages
-- Card titles: text-base (16px) - Component headers
-- Labels: text-xs (12px) - Field labels, category names
-- Body text: text-sm (14px) - Descriptions, paragraphs
-- Caption: text-xs (12px) - Helper text, timestamps
+**PHD-LEVEL FLUID TYPOGRAPHY SYSTEM** (ADHD-Friendly, Device-Perfect):
+
+| Token | CSS Variable | Clamp Formula | Usage |
+|-------|--------------|---------------|-------|
+| --fs-xs | text-fluid-xs | clamp(0.75rem, 0.7rem + 0.2vw, 0.9rem) | Captions, timestamps |
+| --fs-sm | text-fluid-sm | clamp(0.9rem, 0.85rem + 0.3vw, 1.05rem) | Labels, descriptions |
+| --fs-md | text-fluid-md | clamp(1rem, 0.95rem + 0.4vw, 1.2rem) | Body text, buttons |
+| --fs-lg | text-fluid-lg | clamp(1.3rem, 1.1rem + 0.8vw, 1.8rem) | Section headings |
+| --fs-xl | text-fluid-xl | clamp(1.8rem, 1.5rem + 1.5vw, 2.8rem) | Page titles |
+| --fs-xxl | text-fluid-xxl | clamp(2.4rem, 2rem + 2vw, 3.6rem) | Hero text only |
+
+**PHD-LEVEL FLUID SPACING SYSTEM**:
+
+| Token | CSS Variable | Clamp Formula | Usage |
+|-------|--------------|---------------|-------|
+| --space-xs | gap-fluid-xs, p-fluid-xs | clamp(0.4rem, 0.3rem + 0.5vw, 0.8rem) | Tight spacing |
+| --space-sm | gap-fluid-sm, p-fluid-sm | clamp(0.6rem, 0.5rem + 0.8vw, 1.2rem) | Small gaps |
+| --space-md | gap-fluid-md, p-fluid-md | clamp(1rem, 0.8rem + 1vw, 2rem) | Default padding |
+| --space-lg | gap-fluid-lg, p-fluid-lg | clamp(1.5rem, 1.2rem + 2vw, 3rem) | Section spacing |
+| --space-xl | gap-fluid-xl, p-fluid-xl | clamp(2.5rem, 2rem + 3vw, 5rem) | Page margins |
 
 **ADHD-Friendly Design Rules**:
-- Never use text-3xl or larger for dashboard content
-- Keep stat cards compact with text-xl for numbers
-- Reduce visual overwhelm with smaller, consistent sizing
-- Content should fit in user's first viewport when possible
+- NEVER use text-3xl, text-4xl, text-5xl or larger on any page
+- All text scales fluidly with viewport - no jarring size changes
+- Use fluid-panel class for cards with perfect responsive padding
+- Use fluid-grid class for auto-fit responsive layouts
+- Content MUST fit in user's first viewport when possible
+- Strong contrast, generous spacing, predictable layout rhythm
 
 **Settings**:
-- Line-height: 1.5 (body), 1.2 (headings)
+- Line-height: 1.6 (body), 1.2 (headings)
 - Letter-spacing: -0.02em (large headings)
 - Use `tabular-nums` for financial tables
+- Fluid radius: clamp(10px, 1vw, 18px)
 
 ### C. Layout System
 

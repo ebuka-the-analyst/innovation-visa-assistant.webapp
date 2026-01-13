@@ -1,0 +1,201 @@
+/* ============================================================
+   PHD-LEVEL FLUID UI SYSTEM — SINGLE FILE
+   ADHD-FRIENDLY • LAPTOP-OPTIMISED • DEVICE-PERFECT
+   DROP INTO src/App.js AND RUN
+   ============================================================ */
+
+import React from "react";
+
+/* =========================
+   GLOBAL STYLE INJECTION
+   ========================= */
+const GlobalStyles = () => (
+  <style>{`
+    :root {
+      /* ===== FLUID TYPOGRAPHY ===== */
+      --fs-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.9rem);
+      --fs-sm: clamp(0.9rem, 0.85rem + 0.3vw, 1.05rem);
+      --fs-md: clamp(1rem, 0.95rem + 0.4vw, 1.2rem);
+      --fs-lg: clamp(1.3rem, 1.1rem + 0.8vw, 1.8rem);
+      --fs-xl: clamp(1.8rem, 1.5rem + 1.5vw, 2.8rem);
+      --fs-xxl: clamp(2.4rem, 2rem + 2vw, 3.6rem);
+
+      /* ===== FLUID SPACING ===== */
+      --space-xs: clamp(0.4rem, 0.3rem + 0.5vw, 0.8rem);
+      --space-sm: clamp(0.6rem, 0.5rem + 0.8vw, 1.2rem);
+      --space-md: clamp(1rem, 0.8rem + 1vw, 2rem);
+      --space-lg: clamp(1.5rem, 1.2rem + 2vw, 3rem);
+      --space-xl: clamp(2.5rem, 2rem + 3vw, 5rem);
+
+      /* ===== COLORS (ADHD SAFE) ===== */
+      --bg: #0f172a;
+      --panel: #111827;
+      --text: #f8fafc;
+      --muted: #cbd5f5;
+      --accent: #38bdf8;
+
+      /* ===== UI ===== */
+      --radius: clamp(10px, 1vw, 18px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: var(--fs-md);
+      line-height: 1.6;
+    }
+
+    input, button, textarea {
+      font-family: inherit;
+    }
+  `}</style>
+);
+
+/* =========================
+   MAIN APP
+   ========================= */
+export default function App() {
+  return (
+    <>
+      <GlobalStyles />
+
+      <main style={styles.page}>
+        {/* HEADER */}
+        <header style={styles.header}>
+          <h1 style={styles.h1}>Perfect Fluid UI System</h1>
+          <p style={styles.subtitle}>
+            Every text, box, form, and section scales perfectly on your laptop and all devices.
+          </p>
+        </header>
+
+        {/* GRID / BOXES */}
+        <section style={styles.grid}>
+          <Card title="Typography">
+            All text uses mathematical clamp scaling. No tiny text. No oversized headings.
+          </Card>
+
+          <Card title="Boxes & Sections">
+            Padding, margins, radius, grids — all fluid. No breakpoints needed.
+          </Card>
+
+          <Card title="ADHD Friendly">
+            Strong contrast, generous spacing, predictable layout rhythm.
+          </Card>
+        </section>
+
+        {/* FORM */}
+        <section style={styles.panel}>
+          <h2 style={styles.h2}>Form Example</h2>
+          <input style={styles.input} placeholder="Your name" />
+          <input style={styles.input} placeholder="Email address" />
+          <button style={styles.button}>Submit</button>
+        </section>
+
+        {/* FOOTER */}
+        <footer style={styles.footer}>
+          <p>100% Responsive • Laptop-First • Enterprise-Grade</p>
+        </footer>
+      </main>
+    </>
+  );
+}
+
+/* =========================
+   REUSABLE CARD
+   ========================= */
+function Card({ title, children }) {
+  return (
+    <div style={styles.card}>
+      <h3 style={styles.h3}>{title}</h3>
+      <p>{children}</p>
+    </div>
+  );
+}
+
+/* =========================
+   STYLE OBJECT (SINGLE SOURCE)
+   ========================= */
+const styles = {
+  page: {
+    padding: "var(--space-lg)",
+    maxWidth: "1440px",
+    margin: "0 auto",
+  },
+
+  header: {
+    marginBottom: "var(--space-xl)",
+  },
+
+  h1: {
+    fontSize: "var(--fs-xxl)",
+    marginBottom: "var(--space-sm)",
+  },
+
+  h2: {
+    fontSize: "var(--fs-xl)",
+    marginBottom: "var(--space-sm)",
+  },
+
+  h3: {
+    fontSize: "var(--fs-lg)",
+    marginBottom: "var(--space-xs)",
+  },
+
+  subtitle: {
+    fontSize: "var(--fs-lg)",
+    color: "var(--muted)",
+    maxWidth: "900px",
+  },
+
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+    gap: "var(--space-md)",
+    marginBottom: "var(--space-xl)",
+  },
+
+  card: {
+    background: "var(--panel)",
+    padding: "var(--space-md)",
+    borderRadius: "var(--radius)",
+  },
+
+  panel: {
+    background: "var(--panel)",
+    padding: "var(--space-lg)",
+    borderRadius: "var(--radius)",
+    maxWidth: "600px",
+  },
+
+  input: {
+    width: "100%",
+    padding: "var(--space-sm)",
+    fontSize: "var(--fs-md)",
+    borderRadius: "var(--radius)",
+    border: "none",
+    marginBottom: "var(--space-sm)",
+  },
+
+  button: {
+    width: "100%",
+    padding: "var(--space-sm)",
+    fontSize: "var(--fs-md)",
+    borderRadius: "var(--radius)",
+    background: "var(--accent)",
+    border: "none",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+
+  footer: {
+    marginTop: "var(--space-xl)",
+    fontSize: "var(--fs-sm)",
+    color: "var(--muted)",
+  },
+};

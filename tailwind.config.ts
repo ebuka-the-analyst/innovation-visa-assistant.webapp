@@ -96,6 +96,21 @@ export default {
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
       },
+      fontSize: {
+        'fluid-xs': 'var(--fs-xs)',
+        'fluid-sm': 'var(--fs-sm)',
+        'fluid-md': 'var(--fs-md)',
+        'fluid-lg': 'var(--fs-lg)',
+        'fluid-xl': 'var(--fs-xl)',
+        'fluid-xxl': 'var(--fs-xxl)',
+      },
+      spacing: {
+        'fluid-xs': 'var(--space-xs)',
+        'fluid-sm': 'var(--space-sm)',
+        'fluid-md': 'var(--space-md)',
+        'fluid-lg': 'var(--space-lg)',
+        'fluid-xl': 'var(--space-xl)',
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

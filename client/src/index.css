@@ -40,13 +40,31 @@ body { overflow-x: hidden; }
   /* Section spacing */
   --section-pad-y: clamp(48px, 8vw, 120px);
 
-  /* Fluid Typography scale */
-  --fs-body: clamp(0.95rem, 0.4vw + 0.9rem, 1.1rem);
-  --fs-small: clamp(0.85rem, 0.3vw + 0.8rem, 1rem);
-  --fs-h1: clamp(2rem, 2vw + 1.6rem, 3.5rem);
-  --fs-h2: clamp(1.75rem, 1.5vw + 1.4rem, 2.75rem);
-  --fs-h3: clamp(1.4rem, 1vw + 1.2rem, 2rem);
-  --fs-h4: clamp(1.15rem, 0.6vw + 1.05rem, 1.5rem);
+  /* ===== PHD-LEVEL FLUID TYPOGRAPHY (ADHD-FRIENDLY) ===== */
+  --fs-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.9rem);
+  --fs-sm: clamp(0.9rem, 0.85rem + 0.3vw, 1.05rem);
+  --fs-md: clamp(1rem, 0.95rem + 0.4vw, 1.2rem);
+  --fs-lg: clamp(1.3rem, 1.1rem + 0.8vw, 1.8rem);
+  --fs-xl: clamp(1.8rem, 1.5rem + 1.5vw, 2.8rem);
+  --fs-xxl: clamp(2.4rem, 2rem + 2vw, 3.6rem);
+
+  /* Legacy mapping for backwards compatibility */
+  --fs-body: var(--fs-md);
+  --fs-small: var(--fs-sm);
+  --fs-h1: var(--fs-xl);
+  --fs-h2: var(--fs-lg);
+  --fs-h3: clamp(1.1rem, 1rem + 0.5vw, 1.4rem);
+  --fs-h4: clamp(1rem, 0.95rem + 0.3vw, 1.2rem);
+
+  /* ===== PHD-LEVEL FLUID SPACING (ADHD-FRIENDLY) ===== */
+  --space-xs: clamp(0.4rem, 0.3rem + 0.5vw, 0.8rem);
+  --space-sm: clamp(0.6rem, 0.5rem + 0.8vw, 1.2rem);
+  --space-md: clamp(1rem, 0.8rem + 1vw, 2rem);
+  --space-lg: clamp(1.5rem, 1.2rem + 2vw, 3rem);
+  --space-xl: clamp(2.5rem, 2rem + 3vw, 5rem);
+
+  /* ===== FLUID RADIUS ===== */
+  --radius-fluid: clamp(10px, 1vw, 18px);
 
   /* Component sizing */
   --tap: 44px; /* minimum touch target height */
@@ -219,6 +237,48 @@ input, textarea, select {
   overflow-wrap: anywhere;
   word-break: break-word;
   hyphens: auto;
+}
+
+/* ===== PHD-LEVEL FLUID UTILITIES (ADHD-FRIENDLY) ===== */
+/* Fluid text sizes - use these for consistent responsive typography */
+.text-fluid-xs { font-size: var(--fs-xs); }
+.text-fluid-sm { font-size: var(--fs-sm); }
+.text-fluid-md { font-size: var(--fs-md); }
+.text-fluid-lg { font-size: var(--fs-lg); }
+.text-fluid-xl { font-size: var(--fs-xl); }
+.text-fluid-xxl { font-size: var(--fs-xxl); }
+
+/* Fluid spacing utilities */
+.p-fluid-xs { padding: var(--space-xs); }
+.p-fluid-sm { padding: var(--space-sm); }
+.p-fluid-md { padding: var(--space-md); }
+.p-fluid-lg { padding: var(--space-lg); }
+.p-fluid-xl { padding: var(--space-xl); }
+
+.gap-fluid-xs { gap: var(--space-xs); }
+.gap-fluid-sm { gap: var(--space-sm); }
+.gap-fluid-md { gap: var(--space-md); }
+.gap-fluid-lg { gap: var(--space-lg); }
+.gap-fluid-xl { gap: var(--space-xl); }
+
+.mb-fluid-xs { margin-bottom: var(--space-xs); }
+.mb-fluid-sm { margin-bottom: var(--space-sm); }
+.mb-fluid-md { margin-bottom: var(--space-md); }
+.mb-fluid-lg { margin-bottom: var(--space-lg); }
+.mb-fluid-xl { margin-bottom: var(--space-xl); }
+
+/* Fluid panel/card with ADHD-friendly styling */
+.fluid-panel {
+  background: hsl(var(--card));
+  padding: var(--space-md);
+  border-radius: var(--radius-fluid);
+}
+
+/* Fluid grid that adapts to any screen */
+.fluid-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-md);
 }
 
 /* Custom ping animation - flashes 2 times, waits 5 seconds, repeats */
