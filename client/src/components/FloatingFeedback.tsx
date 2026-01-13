@@ -167,6 +167,15 @@ export default function FloatingFeedback() {
         document.body
       )}
 
+      {/* Backdrop for click-outside to close */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-[9997] bg-transparent"
+          onClick={() => setIsOpen(false)}
+          data-testid="feedback-backdrop"
+        />
+      )}
+
       {isOpen && (
         <div
           className="fixed z-[9998] flex flex-col rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-border overflow-hidden bg-background

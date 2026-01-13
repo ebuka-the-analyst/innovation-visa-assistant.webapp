@@ -364,25 +364,32 @@ export default function ToolsChronographWheel() {
   }
 
   return createPortal(
-    <div
-      ref={widgetRef}
-      className="fixed bottom-8 left-8 z-[9998]"
-      data-testid="chronograph-wheel-container"
-      style={{ 
-        scale: window.innerWidth < 768 ? "0.55" : window.innerWidth < 1024 ? "0.45" : window.innerWidth < 1440 ? "0.55" : "0.65",
-        transformOrigin: "bottom left",
-        animation: "widget-swipe-pulse 8s ease-in-out infinite"
-      }}
-      onMouseEnter={() => {
-        isMouseOverWidgetRef.current = true;
-        setIsHoveringWidget(true);
-        recordActivity();
-      }}
-      onMouseLeave={() => {
-        isMouseOverWidgetRef.current = false;
-        setIsHoveringWidget(false);
-      }}
-    >
+    <>
+      {/* Backdrop for click-outside to close */}
+      <div 
+        className="fixed inset-0 z-[9997] bg-transparent"
+        onClick={() => setIsMinimized(true)}
+        data-testid="tools-backdrop"
+      />
+      <div
+        ref={widgetRef}
+        className="fixed bottom-8 left-8 z-[9998]"
+        data-testid="chronograph-wheel-container"
+        style={{ 
+          scale: window.innerWidth < 768 ? "0.55" : window.innerWidth < 1024 ? "0.45" : window.innerWidth < 1440 ? "0.55" : "0.65",
+          transformOrigin: "bottom left",
+          animation: "widget-swipe-pulse 8s ease-in-out infinite"
+        }}
+        onMouseEnter={() => {
+          isMouseOverWidgetRef.current = true;
+          setIsHoveringWidget(true);
+          recordActivity();
+        }}
+        onMouseLeave={() => {
+          isMouseOverWidgetRef.current = false;
+          setIsHoveringWidget(false);
+        }}
+      >
 
       {/* Expand/Collapse Indicator - Only shown when expanded */}
       {!isMinimized && (
@@ -630,7 +637,8 @@ export default function ToolsChronographWheel() {
           }}
         />
       </div>
-    </div>,
+    </div>
+    </>,
     document.body
   );
 }

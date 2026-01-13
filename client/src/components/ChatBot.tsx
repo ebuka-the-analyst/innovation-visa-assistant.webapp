@@ -122,6 +122,15 @@ export default function ChatBot() {
         </div>
       </div>
 
+      {/* Backdrop for click-outside to close */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-[58] bg-transparent"
+          onClick={() => setIsOpen(false)}
+          data-testid="chatbot-backdrop"
+        />
+      )}
+
       {/* Chat Window - Fully responsive */}
       {isOpen && (
         <div
