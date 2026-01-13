@@ -321,6 +321,7 @@ export default function Dashboard() {
             )}
             <Button 
               size="lg"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={() => {
                 // Users with unlocked tiers go directly to questionnaire
                 const tier = user?.subscriptionTier;
@@ -732,6 +733,7 @@ export default function Dashboard() {
             </p>
             <Button 
               size="lg"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={() => {
                 // Users with unlocked tiers go directly to questionnaire
                 const tier = user?.subscriptionTier;
