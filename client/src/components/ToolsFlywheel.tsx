@@ -46,15 +46,15 @@ export default function ToolsFlywheel() {
 
   if (isCollapsed) {
     return (
-      <div className="fixed left-4 bottom-16 z-40">
+      <div className="fixed left-4 top-1/2 -translate-y-1/2 z-40">
         <button
           onClick={() => setIsCollapsed(false)}
-          className="rounded-lg bg-primary shadow-lg hover-elevate transition-all flex items-center justify-center w-[72px] h-[44px]"
+          className="rounded-lg bg-primary shadow-lg hover-elevate transition-all flex items-center justify-center w-16 h-11"
           data-testid="flywheel-toggle"
         >
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center leading-none">
             <Icons.Wrench className="w-4 h-4 text-white" />
-            <span className="text-[10px] font-bold text-white">100+ Tools</span>
+            <span className="text-[8px] font-bold text-white mt-0.5">100+ Tools</span>
           </div>
         </button>
       </div>
@@ -62,7 +62,7 @@ export default function ToolsFlywheel() {
   }
 
   return (
-    <div className="fixed left-4 bottom-16 z-40">
+    <div className="fixed left-4 top-1/2 -translate-y-1/2 z-40">
       <button
         onClick={() => setIsCollapsed(true)}
         className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center shadow-sm z-50"

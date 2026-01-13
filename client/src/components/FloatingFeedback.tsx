@@ -128,13 +128,13 @@ export default function FloatingFeedback() {
       <div className="fixed left-4 bottom-4 z-[9999]">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="relative rounded-lg bg-primary shadow-lg hover-elevate transition-all duration-300 flex items-center justify-center w-[72px] h-[44px]"
+          className="relative rounded-lg bg-primary shadow-lg hover-elevate transition-all duration-300 flex items-center justify-center w-16 h-11"
           data-testid="button-feedback-toggle"
           aria-label={isOpen ? "Close feedback" : "Send feedback"}
         >
-          <div className="flex flex-col items-center leading-tight">
+          <div className="flex flex-col items-center leading-none">
             <MessageSquareWarning className="w-4 h-4 text-white" />
-            <span className="text-[9px] font-bold text-white">Feedback</span>
+            <span className="text-[8px] font-bold text-white mt-0.5">Feedback</span>
           </div>
         </button>
         {isOpen && (
