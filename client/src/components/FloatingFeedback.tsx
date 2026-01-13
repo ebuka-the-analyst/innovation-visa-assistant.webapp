@@ -124,17 +124,29 @@ export default function FloatingFeedback() {
         }
       `}</style>
 
-      {/* Small compact button like 100+ Tools - bottom left */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed left-4 bottom-4 rounded-lg border border-primary/30 bg-background/95 backdrop-blur-sm shadow-lg hover-elevate transition-all duration-300 flex items-center gap-1.5 px-2.5 py-1.5 z-[9999]"
-        data-testid="button-feedback-toggle"
-        aria-label={isOpen ? "Close feedback" : "Send feedback"}
-      >
-        <MessageSquareWarning className="w-3 h-3 text-primary" />
-        <span className="text-xs font-bold text-primary">Feedback</span>
-        {isOpen && <X className="w-3 h-3 text-muted-foreground ml-1" />}
-      </button>
+      {/* Small compact button matching 100+ Tools style - bottom left */}
+      <div className="fixed left-4 bottom-4 z-[9999]">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative rounded-lg bg-primary shadow-lg hover-elevate transition-all duration-300 flex items-center justify-center gap-1 w-[72px] h-[44px]"
+          data-testid="button-feedback-toggle"
+          aria-label={isOpen ? "Close feedback" : "Send feedback"}
+        >
+          <div className="flex flex-col items-center">
+            <MessageSquareWarning className="w-4 h-4 text-white" />
+            <span className="text-[10px] font-bold text-white">Feedback</span>
+          </div>
+        </button>
+        {isOpen && (
+          <button
+            onClick={() => setIsOpen(false)}
+            className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center shadow-sm"
+            data-testid="button-feedback-close"
+          >
+            <X className="w-2.5 h-2.5 text-muted-foreground" />
+          </button>
+        )}
+      </div>
 
       {isOpen && (
         <div
