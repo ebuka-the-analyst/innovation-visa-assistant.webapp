@@ -12,7 +12,7 @@ export default function HeroSection() {
   
   // Check if user has a paid subscription (anything other than 'free' or no subscription)
   const hasPaidPlan = isAuthenticated && user?.subscriptionTier && user.subscriptionTier !== 'free';
-  const generatePlanHref = hasPaidPlan ? "/business-plans" : "/pricing";
+  const generatePlanHref = hasPaidPlan ? "/questionnaire" : "/pricing";
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8 md:py-12">
       {/* Animated gradient mesh background */}
