@@ -916,7 +916,7 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-4" data-testid="chat-messages">
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5" data-testid="chat-messages">
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
@@ -934,42 +934,42 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
               )}
               
               {message.role === 'agent' && (
-                <div className="flex gap-3 max-w-[85%]">
-                  <Avatar className="h-9 w-9 flex-shrink-0 ring-1" style={{ '--tw-ring-color': AGENTS[message.agent || 'nova']?.primaryColor } as React.CSSProperties}>
+                <div className="flex gap-3 max-w-[80%]">
+                  <Avatar className="h-8 w-8 flex-shrink-0 ring-1 ring-offset-1 ring-offset-background" style={{ '--tw-ring-color': AGENTS[message.agent || 'nova']?.primaryColor } as React.CSSProperties}>
                     <AvatarImage src={AGENTS[message.agent || 'nova']?.avatar} />
                     <AvatarFallback>{AGENTS[message.agent || 'nova']?.name?.[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     {message.isTyping ? (
-                      <Card className="p-3 bg-muted/50 backdrop-blur-sm">
+                      <div className="px-4 py-3 rounded-2xl rounded-bl-md bg-muted/80 inline-block">
                         <div className="flex gap-1.5">
                           <motion.div
-                            animate={{ y: [0, -8, 0] }}
+                            animate={{ y: [0, -6, 0] }}
                             transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
-                            className="w-2.5 h-2.5 rounded-full"
+                            className="w-2 h-2 rounded-full"
                             style={{ background: AGENTS[message.agent || 'nova']?.primaryColor }}
                           />
                           <motion.div
-                            animate={{ y: [0, -8, 0] }}
+                            animate={{ y: [0, -6, 0] }}
                             transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
-                            className="w-2.5 h-2.5 rounded-full"
+                            className="w-2 h-2 rounded-full"
                             style={{ background: AGENTS[message.agent || 'nova']?.primaryColor }}
                           />
                           <motion.div
-                            animate={{ y: [0, -8, 0] }}
+                            animate={{ y: [0, -6, 0] }}
                             transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
-                            className="w-2.5 h-2.5 rounded-full"
+                            className="w-2 h-2 rounded-full"
                             style={{ background: AGENTS[message.agent || 'nova']?.primaryColor }}
                           />
                         </div>
-                      </Card>
+                      </div>
                     ) : (
-                      <Card 
-                        className="p-4 bg-muted/50 backdrop-blur-sm border-l-4"
+                      <div 
+                        className="px-4 py-3 rounded-2xl rounded-bl-md bg-muted/80 border-l-3"
                         style={{ borderLeftColor: AGENTS[message.agent || 'nova']?.primaryColor }}
                       >
                         {message.questionData && message.questionData.difficulty && (
-                          <div className="flex items-center gap-2 mb-3 flex-wrap">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <Badge className={`text-xs ${getDifficultyColor(message.questionData.difficulty)}`}>
                               {message.questionData.difficulty}
                             </Badge>
@@ -1020,9 +1020,9 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                             </div>
                           </motion.div>
                         )}
-                      </Card>
+                      </div>
                     )}
-                    <span className="text-xs text-muted-foreground mt-1 block">
+                    <span className="text-xs text-muted-foreground mt-1.5 block">
                       {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -1030,16 +1030,16 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
               )}
               
               {message.role === 'user' && (
-                <div className="max-w-[75%]">
-                  <Card 
-                    className="p-4 text-primary-foreground"
+                <div className="max-w-[70%]">
+                  <div 
+                    className="px-4 py-3 rounded-2xl rounded-br-md text-white shadow-md"
                     style={{ 
                       background: `linear-gradient(135deg, ${agent?.gradientFrom}, ${agent?.gradientTo})`
                     }}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                  </Card>
-                  <span className="text-xs text-muted-foreground mt-1 block text-right">
+                  </div>
+                  <span className="text-xs text-muted-foreground mt-1.5 block text-right">
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
