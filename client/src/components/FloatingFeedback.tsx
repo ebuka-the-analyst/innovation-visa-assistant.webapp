@@ -124,30 +124,25 @@ export default function FloatingFeedback() {
         }
       `}</style>
 
+      {/* Small compact button like 100+ Tools - bottom left */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center text-white z-[9999]"
-        style={{
-          background: "linear-gradient(135deg, #41B6E6 0%, #005EB8 100%)",
-          animation: isOpen ? "none" : "feedback-pulse 3s ease-in-out infinite"
-        }}
+        className="fixed left-4 bottom-4 rounded-lg border border-primary/30 bg-background/95 backdrop-blur-sm shadow-lg hover-elevate transition-all duration-300 flex items-center gap-1.5 px-2.5 py-1.5 z-[9999]"
         data-testid="button-feedback-toggle"
         aria-label={isOpen ? "Close feedback" : "Send feedback"}
       >
-        {isOpen ? (
-          <X className="w-4 h-4 sm:w-5 sm:h-5" />
-        ) : (
-          <MessageSquareWarning className="w-4 h-4 sm:w-5 sm:h-5" />
-        )}
+        <MessageSquareWarning className="w-3 h-3 text-primary" />
+        <span className="text-xs font-bold text-primary">Feedback</span>
+        {isOpen && <X className="w-3 h-3 text-muted-foreground ml-1" />}
       </button>
 
       {isOpen && (
         <div
           className="fixed z-[9998] flex flex-col rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-border overflow-hidden bg-background
             inset-0 sm:inset-auto
-            sm:left-16 sm:top-1/2 sm:-translate-y-1/2
+            sm:left-4 sm:bottom-16
             sm:w-[340px] md:w-[380px]
-            sm:h-auto sm:max-h-[80vh]"
+            sm:h-auto sm:max-h-[60vh]"
           data-testid="feedback-window"
         >
           <div 

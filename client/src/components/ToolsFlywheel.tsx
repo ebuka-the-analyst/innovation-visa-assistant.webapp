@@ -7,8 +7,8 @@ type IconName = keyof typeof Icons;
 
 export default function ToolsFlywheel() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
-  // Show 3 tools at a time (compact)
   const displayCount = 3;
   const tools = ALL_TOOLS;
 
@@ -44,15 +44,38 @@ export default function ToolsFlywheel() {
 
   const visibleTools = getVisibleTools();
 
+  if (isCollapsed) {
+    return (
+      <button
+        onClick={() => setIsCollapsed(false)}
+        className="fixed left-4 top-1/2 -translate-y-1/2 rounded-lg border border-primary/30 bg-background/95 backdrop-blur-sm shadow-lg hover-elevate transition-all flex items-center gap-1.5 px-2.5 py-1.5 z-40"
+        data-testid="flywheel-toggle"
+      >
+        <Icons.Wrench className="w-3 h-3 text-primary" />
+        <span className="text-xs font-bold text-primary">100+ Tools</span>
+      </button>
+    );
+  }
+
   return (
     <div
-      className="fixed bottom-8 left-8 w-64 rounded-lg border border-primary/30 bg-background/95 backdrop-blur-sm shadow-lg hover-elevate transition-all z-40"
+      className="fixed left-4 top-1/2 -translate-y-1/2 w-56 rounded-lg border border-primary/30 bg-background/95 backdrop-blur-sm shadow-lg hover-elevate transition-all z-40"
       onWheel={handleWheel}
       data-testid="flywheel-container"
     >
-      {/* Header - Compact */}
-      <div className="text-center border-b border-primary/20 py-2 px-3">
-        <h3 className="font-bold text-xs text-primary">100+ Tools</h3>
+      {/* Header - Compact with close button */}
+      <div className="flex items-center justify-between border-b border-primary/20 py-1.5 px-2.5">
+        <div className="flex items-center gap-1.5">
+          <Icons.Wrench className="w-3 h-3 text-primary" />
+          <h3 className="font-bold text-xs text-primary">100+ Tools</h3>
+        </div>
+        <button
+          onClick={() => setIsCollapsed(true)}
+          className="p-0.5 rounded hover:bg-primary/15 transition-colors"
+          data-testid="button-collapse-tools"
+        >
+          <Icons.X className="w-3 h-3 text-muted-foreground" />
+        </button>
       </div>
 
       {/* Tools List - Compact */}
