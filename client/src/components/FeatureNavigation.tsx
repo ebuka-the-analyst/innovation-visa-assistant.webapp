@@ -34,26 +34,28 @@ export default function FeatureNavigation({ currentPage }: FeatureNavProps) {
         <span className="text-muted-foreground">{featureFlow[currentIndex]?.label}</span>
       </div>
 
-      {/* Progress Steps */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        {featureFlow.map((feature, idx) => (
-          <div key={feature.key} className="flex items-center gap-2 flex-shrink-0">
-            <Link href={feature.route}>
-              <Button
-                variant={idx === currentIndex ? "default" : idx < currentIndex ? "outline" : "ghost"}
-                size="sm"
-                className="whitespace-nowrap"
-                data-testid={`button-nav-${feature.key}`}
-              >
-                {idx < currentIndex && "✓ "}
-                {feature.label}
-              </Button>
-            </Link>
-            {idx < featureFlow.length - 1 && (
-              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            )}
-          </div>
-        ))}
+      {/* Progress Steps - Scrollable container with visible scrollbar */}
+      <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-thin">
+        <div className="flex items-center gap-2 min-w-max">
+          {featureFlow.map((feature, idx) => (
+            <div key={feature.key} className="flex items-center gap-2 flex-shrink-0">
+              <Link href={feature.route}>
+                <Button
+                  variant={idx === currentIndex ? "default" : idx < currentIndex ? "outline" : "ghost"}
+                  size="sm"
+                  className="whitespace-nowrap text-xs"
+                  data-testid={`button-nav-${feature.key}`}
+                >
+                  {idx < currentIndex && "✓ "}
+                  {feature.label}
+                </Button>
+              </Link>
+              {idx < featureFlow.length - 1 && (
+                <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Phase Indicator */}
