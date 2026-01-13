@@ -4,9 +4,15 @@ import { Link } from "wouter";
 import { useState } from "react";
 import SamplePlansModal from "./SamplePlansModal";
 import ReadinessScoreWidget from "./ReadinessScoreWidget";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function HeroSection() {
   const [sampleModalOpen, setSampleModalOpen] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+  
+  // Check if user has a paid subscription (anything other than 'free' or no subscription)
+  const hasPaidPlan = isAuthenticated && user?.subscriptionTier && user.subscriptionTier !== 'free';
+  const generatePlanHref = hasPaidPlan ? "/business-plans" : "/pricing";
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8 md:py-12">
       {/* Animated gradient mesh background */}
@@ -53,7 +59,7 @@ export default function HeroSection() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/pricing">
+              <Link href={generatePlanHref}>
                 <Button 
                   size="lg" 
                   className="group"
