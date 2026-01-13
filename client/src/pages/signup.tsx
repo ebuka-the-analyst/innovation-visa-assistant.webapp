@@ -219,29 +219,46 @@ export default function Signup() {
         description="Create your free account and start your UK Innovator Founder Visa application journey. Access 100+ professional-level tools, business plan generator, and expert guidance."
         path="/signup"
       />
-      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 overflow-hidden">
-        <Card className="w-full max-w-sm mx-2">
-        <div className="flex justify-center pt-2 pb-1">
-          <div className="isolate z-[9999] mix-blend-normal bg-transparent">
-            <div className="logo-container overflow-hidden">
-              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
-            </div>
-          </div>
-        </div>
-        <CardHeader className="py-1 px-4">
-          <CardTitle className="text-sm font-bold text-center">Create your account</CardTitle>
-          <CardDescription className="text-center text-xs">Start your visa journey</CardDescription>
-          {referralCode && referralDiscount && (
-            <div className="mt-1 p-1.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-xs">
-              <div className="flex items-center gap-1 text-green-700 dark:text-green-400">
-                <Gift className="h-3 w-3" />
-                <span className="font-medium">Referral: {referralDiscount}% OFF</span>
+      <div className="h-screen flex flex-col md:flex-row overflow-hidden">
+        {/* Left Side - Branding */}
+        <div className="hidden md:flex md:w-[45%] bg-gradient-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-6">
+          <div className="text-center space-y-4">
+            <div className="isolate z-[9999] mix-blend-normal bg-transparent flex justify-center">
+              <div className="logo-container overflow-hidden">
+                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
+                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
               </div>
             </div>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-1.5 pt-0 px-4">
+            <h1 className="text-lg font-bold text-foreground">Create your account</h1>
+            <p className="text-sm text-muted-foreground">Start your visa journey</p>
+            {referralCode && referralDiscount && (
+              <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs">
+                <Gift className="h-3 w-3" />
+                <span className="font-medium">{referralDiscount}% OFF with referral</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Side - Form */}
+        <div className="flex-1 flex items-center justify-center bg-background p-4">
+          <div className="w-full max-w-xs space-y-2">
+            {/* Mobile only header */}
+            <div className="md:hidden text-center space-y-1 mb-2">
+              <div className="isolate z-[9999] mix-blend-normal bg-transparent flex justify-center">
+                <div className="logo-container overflow-hidden">
+                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain" />
+                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain" />
+                </div>
+              </div>
+              <h1 className="text-sm font-bold">Create your account</h1>
+              {referralCode && referralDiscount && (
+                <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs">
+                  <Gift className="h-3 w-3" />
+                  <span>{referralDiscount}% OFF</span>
+                </div>
+              )}
+            </div>
           <form onSubmit={handleEmailSignup} className="space-y-1.5">
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-0.5">
@@ -310,12 +327,12 @@ export default function Signup() {
             </Button>
           </form>
 
-          <div className="relative">
+          <div className="relative py-2">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground text-[10px]">or</span>
+              <span className="bg-background px-2 text-muted-foreground text-[10px]">or</span>
             </div>
           </div>
 
@@ -329,15 +346,16 @@ export default function Signup() {
             <LogIn className="mr-1.5 h-3.5 w-3.5" />
             Sign up with Google
           </Button>
-        </CardContent>
-        <div className="px-4 pb-2 pt-1 text-center">
-          <p className="text-xs text-muted-foreground">
-            Have an account? <Link href="/login" className="text-primary hover:underline font-medium" data-testid="link-login">Sign in</Link>
-            {" · "}
-            <Link href="/" className="text-primary hover:underline" data-testid="link-home">Home</Link>
-          </p>
+
+          <div className="pt-2 text-center">
+            <p className="text-xs text-muted-foreground">
+              Have an account? <Link href="/login" className="text-primary hover:underline font-medium" data-testid="link-login">Sign in</Link>
+              {" · "}
+              <Link href="/" className="text-primary hover:underline" data-testid="link-home">Home</Link>
+            </p>
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
     </>
   );

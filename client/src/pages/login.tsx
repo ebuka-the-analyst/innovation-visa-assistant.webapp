@@ -145,21 +145,34 @@ export default function Login() {
         description="Sign in to your UK Innovator Founder Visa Assistant account. Continue working on your business plan, innovation assessment, and visa application tools."
         path="/login"
       />
-      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 overflow-hidden">
-        <Card className="w-full max-w-sm mx-2">
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="isolate z-[9999] mix-blend-normal bg-transparent">
-            <div className="logo-container overflow-hidden">
-              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+      <div className="h-screen flex flex-col md:flex-row overflow-hidden">
+        {/* Left Side - Branding */}
+        <div className="hidden md:flex md:w-[45%] bg-gradient-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-6">
+          <div className="text-center space-y-4">
+            <div className="isolate z-[9999] mix-blend-normal bg-transparent flex justify-center">
+              <div className="logo-container overflow-hidden">
+                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
+                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+              </div>
             </div>
+            <h1 className="text-lg font-bold text-foreground">Welcome back</h1>
+            <p className="text-sm text-muted-foreground">Continue your visa journey</p>
           </div>
         </div>
-        <CardHeader className="py-1 px-4">
-          <CardTitle className="text-sm font-bold text-center">Welcome back</CardTitle>
-          <CardDescription className="text-center text-xs">Sign in to continue</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2 pt-0 px-4">
+
+        {/* Right Side - Form */}
+        <div className="flex-1 flex items-center justify-center bg-background p-4">
+          <div className="w-full max-w-xs space-y-3">
+            {/* Mobile only header */}
+            <div className="md:hidden text-center space-y-1 mb-2">
+              <div className="isolate z-[9999] mix-blend-normal bg-transparent flex justify-center">
+                <div className="logo-container overflow-hidden">
+                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain" />
+                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain" />
+                </div>
+              </div>
+              <h1 className="text-sm font-bold">Welcome back</h1>
+            </div>
           {verificationRequired && (
             <Alert className="border-amber-500/50 bg-amber-500/10">
               <Mail className="h-4 w-4 text-amber-600" />
@@ -231,12 +244,12 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="relative">
+          <div className="relative py-2">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground text-[10px]">or</span>
+              <span className="bg-background px-2 text-muted-foreground text-[10px]">or</span>
             </div>
           </div>
 
@@ -250,15 +263,16 @@ export default function Login() {
             <LogIn className="mr-1.5 h-3.5 w-3.5" />
             Continue with Google
           </Button>
-        </CardContent>
-        <div className="px-4 pb-3 pt-1 text-center space-y-0.5">
-          <p className="text-xs text-muted-foreground">
-            No account? <Link href="/signup" className="text-primary hover:underline font-medium" data-testid="link-signup">Create one</Link>
-            {" · "}
-            <Link href="/" className="text-primary hover:underline" data-testid="link-home">Home</Link>
-          </p>
+
+          <div className="pt-2 text-center">
+            <p className="text-xs text-muted-foreground">
+              No account? <Link href="/signup" className="text-primary hover:underline font-medium" data-testid="link-signup">Create one</Link>
+              {" · "}
+              <Link href="/" className="text-primary hover:underline" data-testid="link-home">Home</Link>
+            </p>
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
     </>
   );
