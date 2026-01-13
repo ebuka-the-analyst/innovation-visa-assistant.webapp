@@ -350,7 +350,7 @@ export default function ToolsChronographWheel() {
           {!isDismissed && (
             <button
               onClick={() => setIsDismissed(true)}
-              className="w-5 h-6 bg-muted hover:bg-muted/80 rounded-r-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm border border-l-0 border-border"
+              className="w-5 h-6 bg-red-500 hover:bg-red-600 rounded-r-full flex items-center justify-center text-white transition-colors shadow-sm"
               data-testid="button-dismiss-tools"
               aria-label="Minimize tools button"
             >
