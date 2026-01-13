@@ -240,21 +240,21 @@ export default function DocumentsPage() {
           </Dialog>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
           {documentsByCategory.slice(0, 4).map((cat) => (
             <Card 
               key={cat.value}
               className={`cursor-pointer hover-elevate ${selectedCategory === cat.value ? 'ring-2 ring-primary' : ''}`}
               onClick={() => setSelectedCategory(selectedCategory === cat.value ? "all" : cat.value)}
             >
-              <CardContent className="pt-4">
+              <CardContent className="pt-4 pb-3">
                 <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <cat.icon className="w-5 h-5 text-primary" />
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <cat.icon className="w-4 h-4 text-primary" />
                   </div>
-                  <Badge variant="secondary">{cat.count}</Badge>
+                  <Badge variant="secondary" className="text-xs">{cat.count}</Badge>
                 </div>
-                <h3 className="font-medium mt-3">{cat.label}</h3>
+                <h3 className="text-sm font-medium mt-2">{cat.label}</h3>
                 <p className="text-xs text-muted-foreground">{cat.description}</p>
               </CardContent>
             </Card>
