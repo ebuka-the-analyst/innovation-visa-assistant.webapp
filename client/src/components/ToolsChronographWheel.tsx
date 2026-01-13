@@ -337,14 +337,13 @@ export default function ToolsChronographWheel() {
               }
             }}
             className={`rounded-lg shadow-lg hover-elevate transition-all duration-300 flex flex-col items-center justify-center text-white ${
-              isDismissed ? "w-8 h-8 rounded-full" : "w-[60px] h-[40px]"
+              isDismissed ? "w-8 h-8 rounded-full" : "w-[37px] h-[35px]"
             }`}
             data-testid="button-toggle-text-label"
             aria-label={isDismissed ? "Restore Tools Hub" : "Expand Tools Hub"}
             style={{ backgroundColor: "#005EB8" }}
           >
-            <Icons.Wrench className={isDismissed ? "w-4 h-4" : "w-3.5 h-3.5"} />
-            {!isDismissed && <span className="text-[7px] font-bold mt-0.5">100+ Tools</span>}
+            <Icons.Wrench className="w-4 h-4" />
           </button>
           
           {/* Dismiss X button - attached to the right, like chat icon */}

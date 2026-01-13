@@ -142,14 +142,13 @@ export default function FloatingFeedback() {
                 }
               }}
               className={`rounded-lg shadow-lg hover-elevate transition-all duration-300 flex flex-col items-center justify-center text-white ${
-                isDismissed ? "w-8 h-8 rounded-full" : "w-[60px] h-[40px]"
+                isDismissed ? "w-8 h-8 rounded-full" : "w-[37px] h-[35px]"
               }`}
               style={{ background: "#005EB8" }}
               data-testid="button-feedback-toggle"
               aria-label={isDismissed ? "Restore feedback" : isOpen ? "Close feedback" : "Send feedback"}
             >
-              <MessageSquareWarning className={isDismissed ? "w-4 h-4" : "w-3.5 h-3.5"} />
-              {!isDismissed && <span className="text-[7px] font-bold mt-0.5">Feedback</span>}
+              <MessageSquareWarning className="w-4 h-4" />
             </button>
             
             {/* Dismiss X button - attached to the right, like chat icon */}

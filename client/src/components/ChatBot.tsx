@@ -90,10 +90,10 @@ export default function ChatBot() {
                 setIsOpen(!isOpen);
               }
             }}
-            className={`rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center text-white ${
+            className={`rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center text-white ${
               isDismissed 
-                ? "w-8 h-8" 
-                : "w-11 h-11 sm:w-12 sm:h-12 hover:scale-105"
+                ? "w-8 h-8 rounded-full" 
+                : "w-[37px] h-[35px] hover:scale-105"
             }`}
             style={{
               background: "#005EB8",
@@ -102,9 +102,9 @@ export default function ChatBot() {
             aria-label={isDismissed ? "Restore chat button" : isOpen ? "Close chat" : "Open AI Assistant"}
           >
             {isOpen ? (
-              <X className="w-5 h-5 sm:w-6 sm:h-6" />
+              <X className="w-4 h-4" />
             ) : (
-              <MessageCircle className={isDismissed ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
+              <MessageCircle className="w-4 h-4" />
             )}
           </button>
           
