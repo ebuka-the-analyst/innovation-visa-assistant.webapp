@@ -147,7 +147,7 @@ export default function FAQ() {
           <div className="max-w-4xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
             <div className="text-center">
               <HelpCircle className="w-16 h-16 mx-auto mb-6 text-primary" />
-              <h1 className="text-4xl font-bold mb-4">
+              <h1 className="text-xl font-bold mb-4">
                 UK Innovator Founder Visa
                 <span className="block text-primary mt-2">Frequently Asked Questions</span>
               </h1>
@@ -190,7 +190,7 @@ export default function FAQ() {
           {/* CTA Section */}
           <Card className="mt-12 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
             <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-bold mb-4">Still Have Questions?</h2>
+              <h2 className="text-lg font-bold mb-4">Still Have Questions?</h2>
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                 Get started with our 100+ professional-level tools designed to guide you through every step of your UK Innovator Founder Visa application.
               </p>

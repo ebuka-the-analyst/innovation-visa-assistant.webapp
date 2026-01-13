@@ -156,7 +156,7 @@ export default function Login() {
           </div>
         </div>
         <CardHeader className="space-y-1 pt-4">
-          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+          <CardTitle className="text-lg font-bold text-center">Welcome back</CardTitle>
           <CardDescription className="text-center">Sign in to your account to continue</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

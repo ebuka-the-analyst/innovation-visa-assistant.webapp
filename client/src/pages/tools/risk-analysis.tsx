@@ -173,7 +173,7 @@ export default function RiskAnalysis() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold" data-testid="heading-risk-analysis">Risk Analysis & Auto-Remediation</h1>
+            <h1 className="text-xl font-bold" data-testid="heading-risk-analysis">Risk Analysis & Auto-Remediation</h1>
             <p className="text-lg text-muted-foreground">Real-time risk scoring with AI-powered mitigation strategies</p>
           </div>
           <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -189,7 +189,7 @@ export default function RiskAnalysis() {
               <Card className={overallRiskScore <= 8 ? "border-green-500" : overallRiskScore <= 12 ? "border-yellow-500" : "border-red-500"}>
                 <CardContent className="pt-6 text-center">
                   <p className="text-sm text-muted-foreground mb-1">Overall Risk Score</p>
-                  <p className="text-4xl font-bold" data-testid="text-overall-risk">{overallRiskScore}</p>
+                  <p className="text-xl font-bold" data-testid="text-overall-risk">{overallRiskScore}</p>
                   <Badge className={`mt-2 ${overallRiskScore <= 8 ? 'bg-green-500' : overallRiskScore <= 12 ? 'bg-yellow-500' : 'bg-red-500'}`}>
                     {overallRiskScore <= 8 ? 'Low' : overallRiskScore <= 12 ? 'Medium' : 'High'}
                   </Badge>
@@ -198,21 +198,21 @@ export default function RiskAnalysis() {
               <Card className={criticalRisks === 0 ? "border-green-500" : "border-red-500"}>
                 <CardContent className="pt-6 text-center">
                   <p className="text-sm text-muted-foreground mb-1">Critical Risks</p>
-                  <p className="text-4xl font-bold text-red-500" data-testid="text-critical-risks">{criticalRisks}</p>
+                  <p className="text-xl font-bold text-red-500" data-testid="text-critical-risks">{criticalRisks}</p>
                   {criticalRisks > 0 && <AlertTriangle className="w-5 h-5 text-red-500 mx-auto mt-2" />}
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6 text-center">
                   <p className="text-sm text-muted-foreground mb-1">High Risks</p>
-                  <p className="text-4xl font-bold text-orange-500" data-testid="text-high-risks">{highRisks}</p>
+                  <p className="text-xl font-bold text-orange-500" data-testid="text-high-risks">{highRisks}</p>
                   <TrendingDown className="w-5 h-5 text-orange-500 mx-auto mt-2" />
                 </CardContent>
               </Card>
               <Card className="border-green-500">
                 <CardContent className="pt-6 text-center">
                   <p className="text-sm text-muted-foreground mb-1">Mitigated</p>
-                  <p className="text-4xl font-bold text-green-500" data-testid="text-mitigated">{mitigatedRisks}</p>
+                  <p className="text-xl font-bold text-green-500" data-testid="text-mitigated">{mitigatedRisks}</p>
                   <Shield className="w-5 h-5 text-green-500 mx-auto mt-2" />
                 </CardContent>
               </Card>

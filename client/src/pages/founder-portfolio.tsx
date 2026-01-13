@@ -242,7 +242,7 @@ export default function FounderPortfolio() {
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Founder Capability Portfolio</h1>
+        <h1 className="text-xl font-bold mb-2">Founder Capability Portfolio</h1>
         <p className="text-muted-foreground">
           Build evidence that proves you can actually deliver what you promise
         </p>
@@ -257,7 +257,7 @@ export default function FounderPortfolio() {
                 {founderScore >= 70 ? "Strong" : founderScore >= 40 ? "Moderate" : "Weak"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2">{founderScore}/100</div>
+            <div className="text-xl font-bold mb-2">{founderScore}/100</div>
             <Progress value={founderScore} className="h-2" />
           </CardContent>
         </Card>
@@ -268,7 +268,7 @@ export default function FounderPortfolio() {
               <Github className="h-4 w-4 text-gray-700" />
               <span className="text-sm font-medium">Code</span>
             </div>
-            <div className="text-2xl font-bold">{githubProjects.length}</div>
+            <div className="text-lg font-bold">{githubProjects.length}</div>
             <p className="text-xs text-muted-foreground">repositories</p>
           </CardContent>
         </Card>
@@ -279,7 +279,7 @@ export default function FounderPortfolio() {
               <Video className="h-4 w-4 text-red-500" />
               <span className="text-sm font-medium">Demos</span>
             </div>
-            <div className="text-2xl font-bold">{demos.length}</div>
+            <div className="text-lg font-bold">{demos.length}</div>
             <p className="text-xs text-muted-foreground">videos</p>
           </CardContent>
         </Card>
@@ -290,7 +290,7 @@ export default function FounderPortfolio() {
               <Briefcase className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Projects</span>
             </div>
-            <div className="text-2xl font-bold">{projects.length}</div>
+            <div className="text-lg font-bold">{projects.length}</div>
             <p className="text-xs text-muted-foreground">completed</p>
           </CardContent>
         </Card>
@@ -301,7 +301,7 @@ export default function FounderPortfolio() {
               <Users className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">References</span>
             </div>
-            <div className="text-2xl font-bold">{references.length}</div>
+            <div className="text-lg font-bold">{references.length}</div>
             <p className="text-xs text-muted-foreground">available</p>
           </CardContent>
         </Card>

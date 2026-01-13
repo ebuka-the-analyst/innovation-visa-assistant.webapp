@@ -169,7 +169,7 @@ export default function TeamBios() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Team Bios</h1>
+              <h1 className="text-xl font-bold mb-2">Team Bios</h1>
               <p className="text-muted-foreground">Create team member profiles and biographies</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />

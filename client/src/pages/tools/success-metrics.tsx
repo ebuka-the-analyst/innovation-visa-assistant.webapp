@@ -243,7 +243,7 @@ export default function SuccessMetrics() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="responsive-container max-w-6xl">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Success Metrics Planner</h1>
+            <h1 className="text-xl font-bold mb-2">Success Metrics Planner</h1>
             <p className="text-muted-foreground">Define and track your key success metrics and targets</p>
           </div>
 
@@ -273,21 +273,21 @@ export default function SuccessMetrics() {
               <Card>
                 <CardContent className="pt-6 text-center">
                   <Target className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{metrics.length}</div>
+                  <div className="text-lg font-bold">{metrics.length}</div>
                   <div className="text-sm text-muted-foreground">Total Metrics</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6 text-center">
                   <TrendingUp className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{avgProgress}%</div>
+                  <div className="text-lg font-bold">{avgProgress}%</div>
                   <div className="text-sm text-muted-foreground">Avg Progress</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6 text-center">
                   <CheckCircle2 className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{highPriorityMetrics.length}</div>
+                  <div className="text-lg font-bold">{highPriorityMetrics.length}</div>
                   <div className="text-sm text-muted-foreground">High Priority</div>
                 </CardContent>
               </Card>
@@ -315,7 +315,7 @@ export default function SuccessMetrics() {
                             <p className="text-sm text-muted-foreground">{metric.description}</p>
                           </div>
                           <div className="text-right">
-                            <div className="text-2xl font-bold">
+                            <div className="text-lg font-bold">
                               {metric.unit}{metric.currentValue.toLocaleString()}
                             </div>
                             <div className="text-sm text-muted-foreground">

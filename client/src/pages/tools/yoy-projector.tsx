@@ -554,7 +554,7 @@ ensure all assumptions are defensible with market evidence.
           <div className="mb-8">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-yoy-projector">Year-over-Year Growth Projector</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-yoy-projector">Year-over-Year Growth Projector</h1>
                 <p className="text-lg text-muted-foreground">Multi-year compound growth modeling with milestone predictions</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -591,7 +591,7 @@ ensure all assumptions are defensible with market evidence.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Revenue CAGR</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-revenue-cagr">{revenueCAGR}%</p>
+                      <p className="text-xl font-bold text-primary" data-testid="text-revenue-cagr">{revenueCAGR}%</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {isHighGrowth ? (
                           <TrendingUp className="h-4 w-4 text-green-500" />
@@ -608,7 +608,7 @@ ensure all assumptions are defensible with market evidence.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Customer CAGR</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-customer-cagr">{customerCAGR}%</p>
+                      <p className="text-xl font-bold text-primary" data-testid="text-customer-cagr">{customerCAGR}%</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {isScalable ? (
                           <TrendingUp className="h-4 w-4 text-green-500" />
@@ -625,7 +625,7 @@ ensure all assumptions are defensible with market evidence.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">ARR CAGR</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-arr-cagr">{arrCAGR}%</p>
+                      <p className="text-xl font-bold text-primary" data-testid="text-arr-cagr">{arrCAGR}%</p>
                       <p className="text-xs text-muted-foreground mt-2">{inputs.projectionYears} years</p>
                     </div>
                   </CardContent>
@@ -635,7 +635,7 @@ ensure all assumptions are defensible with market evidence.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Milestones</p>
-                      <p className="text-3xl font-bold text-green-600" data-testid="text-milestones-count">{milestones.length}</p>
+                      <p className="text-xl font-bold text-green-600" data-testid="text-milestones-count">{milestones.length}</p>
                       <p className="text-xs text-muted-foreground mt-2">Achieved</p>
                     </div>
                   </CardContent>
@@ -938,7 +938,7 @@ ensure all assumptions are defensible with market evidence.
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="font-semibold">{milestone.metric}</span>
-                              <span className="text-2xl font-bold text-primary">
+                              <span className="text-lg font-bold text-primary">
                                 {milestone.metric === 'Revenue' || milestone.metric === 'ARR' ? '£' : ''}{milestone.targetValue.toLocaleString()}
                               </span>
                             </div>
@@ -972,19 +972,19 @@ ensure all assumptions are defensible with market evidence.
                   <div className="grid md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                       <h4 className="font-semibold text-sm text-muted-foreground">Revenue</h4>
-                      <p className="text-2xl font-bold">£{finalProjection.revenue.toLocaleString()}</p>
+                      <p className="text-lg font-bold">£{finalProjection.revenue.toLocaleString()}</p>
                       <p className="text-sm text-green-600">+£{totalRevenueGrowth.toLocaleString()} ({Math.round((totalRevenueGrowth / inputs.currentRevenue) * 100)}%)</p>
                       <p className="text-xs text-muted-foreground">CAGR: {revenueCAGR}%</p>
                     </div>
                     <div className="space-y-2">
                       <h4 className="font-semibold text-sm text-muted-foreground">Customers</h4>
-                      <p className="text-2xl font-bold">{finalProjection.customers.toLocaleString()}</p>
+                      <p className="text-lg font-bold">{finalProjection.customers.toLocaleString()}</p>
                       <p className="text-sm text-green-600">+{totalCustomerGrowth.toLocaleString()} ({Math.round((totalCustomerGrowth / inputs.currentCustomers) * 100)}%)</p>
                       <p className="text-xs text-muted-foreground">CAGR: {customerCAGR}%</p>
                     </div>
                     <div className="space-y-2">
                       <h4 className="font-semibold text-sm text-muted-foreground">ARR</h4>
-                      <p className="text-2xl font-bold">£{finalProjection.arr.toLocaleString()}</p>
+                      <p className="text-lg font-bold">£{finalProjection.arr.toLocaleString()}</p>
                       <p className="text-sm text-green-600">+£{totalARRGrowth.toLocaleString()} ({Math.round((totalARRGrowth / inputs.currentARR) * 100)}%)</p>
                       <p className="text-xs text-muted-foreground">CAGR: {arrCAGR}%</p>
                     </div>

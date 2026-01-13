@@ -13,7 +13,7 @@ export default function EndorserInvestmentRequirements() {
             <div className="p-3 bg-primary/10 rounded-lg">
               <DollarSign className="h-6 w-6 text-primary" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold">Innovator Founder Visa - Financial Requirements</h1>
+            <h1 className="text-xl font-bold">Innovator Founder Visa - Financial Requirements</h1>
           </div>
           <p className="text-lg text-muted-foreground">
             Official guidance from Home Office (Version 9.0, November 11, 2025)
@@ -36,7 +36,7 @@ export default function EndorserInvestmentRequirements() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">No Fixed Minimum</div>
+              <div className="text-xl font-bold">No Fixed Minimum</div>
               <p className="text-xs text-muted-foreground mt-1">"Appropriate" for your business</p>
             </CardContent>
           </Card>
@@ -47,7 +47,7 @@ export default function EndorserInvestmentRequirements() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">£50,000</div>
+              <div className="text-xl font-bold">£50,000</div>
               <p className="text-xs text-muted-foreground mt-1">Each co-founder (new business)</p>
             </CardContent>
           </Card>
@@ -58,7 +58,7 @@ export default function EndorserInvestmentRequirements() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">£1,270</div>
+              <div className="text-xl font-bold">£1,270</div>
               <p className="text-xs text-muted-foreground mt-1">28 consecutive days</p>
             </CardContent>
           </Card>
@@ -69,7 +69,7 @@ export default function EndorserInvestmentRequirements() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">3 Years</div>
+              <div className="text-xl font-bold">3 Years</div>
               <p className="text-xs text-muted-foreground mt-1">Then apply for settlement</p>
             </CardContent>
           </Card>
@@ -278,17 +278,17 @@ export default function EndorserInvestmentRequirements() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="border rounded-lg p-4">
-                  <div className="text-2xl font-bold text-primary mb-1">£285</div>
+                  <div className="text-lg font-bold text-primary mb-1">£285</div>
                   <p className="text-sm font-semibold">Per Partner</p>
                   <p className="text-xs text-muted-foreground">On top of £1,270</p>
                 </div>
                 <div className="border rounded-lg p-4">
-                  <div className="text-2xl font-bold text-primary mb-1">£315</div>
+                  <div className="text-lg font-bold text-primary mb-1">£315</div>
                   <p className="text-sm font-semibold">First Child</p>
                   <p className="text-xs text-muted-foreground">On top of £1,270</p>
                 </div>
                 <div className="border rounded-lg p-4">
-                  <div className="text-2xl font-bold text-primary mb-1">£200</div>
+                  <div className="text-lg font-bold text-primary mb-1">£200</div>
                   <p className="text-sm font-semibold">Each Additional Child</p>
                   <p className="text-xs text-muted-foreground">On top of £1,270</p>
                 </div>

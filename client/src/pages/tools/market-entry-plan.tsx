@@ -305,7 +305,7 @@ Market Entry Methodology: International expansion framework
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Market Entry Plan</h1>
+              <h1 className="text-xl font-bold mb-2">Market Entry Plan</h1>
               <p className="text-muted-foreground">Plan international expansion (Innovator Founder Visa)</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -330,7 +330,7 @@ Market Entry Methodology: International expansion framework
                 <Award className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Entry Readiness</span>
               </div>
-              <p className="text-3xl font-bold">{readinessScore}%</p>
+              <p className="text-xl font-bold">{readinessScore}%</p>
               <p className="text-xs text-muted-foreground mt-1">{grade}</p>
             </Card>
 
@@ -348,7 +348,7 @@ Market Entry Methodology: International expansion framework
                 <Target className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Market Fit</span>
               </div>
-              <p className="text-3xl font-bold">{scores.marketFit}</p>
+              <p className="text-xl font-bold">{scores.marketFit}</p>
               <p className="text-xs text-muted-foreground mt-1">Product-market</p>
             </Card>
 
@@ -357,7 +357,7 @@ Market Entry Methodology: International expansion framework
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Investment</span>
               </div>
-              <p className="text-3xl font-bold">£{Math.round(investmentRequired / 1000)}k</p>
+              <p className="text-xl font-bold">£{Math.round(investmentRequired / 1000)}k</p>
               <p className="text-xs text-muted-foreground mt-1">Required</p>
             </Card>
           </div>

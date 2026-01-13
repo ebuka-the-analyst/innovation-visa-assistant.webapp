@@ -772,7 +772,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
           <div className="mb-8">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-research">Market Research Planner</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-market-research">Market Research Planner</h1>
                 <p className="text-lg text-muted-foreground">Comprehensive market research planning and evidence tracker</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -822,7 +822,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Completeness Score</p>
-                          <p className="text-3xl font-bold" data-testid="text-completeness-score">{completenessScore}%</p>
+                          <p className="text-xl font-bold" data-testid="text-completeness-score">{completenessScore}%</p>
                           <Progress value={completenessScore} className="mt-2" />
                           <p className="text-xs text-muted-foreground mt-2">
                             {completenessScore >= 70 ? 'Comprehensive' : completenessScore >= 50 ? 'Moderate' : 'Needs Expansion'}
@@ -835,7 +835,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Activities</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-total-activities">{completedActivities}/{totalActivities}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-total-activities">{completedActivities}/{totalActivities}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {completedActivities >= 5 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -852,7 +852,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Sample Size</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-sample-size">{totalSampleSize}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-sample-size">{totalSampleSize}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {totalSampleSize >= 50 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -869,7 +869,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Verified</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-verified-activities">{verifiedActivities}/{totalActivities}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-verified-activities">{verifiedActivities}/{totalActivities}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {verifiedActivities / totalActivities >= 0.6 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -1386,7 +1386,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Competitors Tracked</p>
-                          <p className="text-3xl font-bold text-primary">{competitors.length}</p>
+                          <p className="text-xl font-bold text-primary">{competitors.length}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -1394,7 +1394,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Analyzed</p>
-                          <p className="text-3xl font-bold text-primary">{analyzedCompetitors}</p>
+                          <p className="text-xl font-bold text-primary">{analyzedCompetitors}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {analyzedCompetitors >= 3 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -1410,7 +1410,7 @@ Endorsing bodies may request raw data, transcripts, and source documentation.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Market Share</p>
-                          <p className="text-3xl font-bold text-primary">{competitors.reduce((sum, c) => sum + c.marketShare, 0).toFixed(1)}%</p>
+                          <p className="text-xl font-bold text-primary">{competitors.reduce((sum, c) => sum + c.marketShare, 0).toFixed(1)}%</p>
                         </div>
                       </CardContent>
                     </Card>

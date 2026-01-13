@@ -46,7 +46,7 @@ export default function AIAgents() {
     <section className="py-20 md:py-32 bg-gradient-to-b from-accent/5 to-background">
       <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="font-serif text-xl font-bold mb-6">
             Meet Your AI <span className="bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">Expert Team</span>
           </h2>
           <p className="text-lg text-muted-foreground">
@@ -122,7 +122,7 @@ export default function AIAgents() {
         {/* Active agent description */}
         <div className="max-w-2xl mx-auto text-center">
           <div className="p-8 rounded-2xl bg-gradient-to-br from-card to-accent/10 border border-border backdrop-blur-sm">
-            <h3 className="text-2xl font-bold mb-3">{agents[activeAgent].name}</h3>
+            <h3 className="text-lg font-bold mb-3">{agents[activeAgent].name}</h3>
             <p className="text-lg text-muted-foreground mb-4">{agents[activeAgent].role}</p>
             <p className="text-foreground">{agents[activeAgent].description}</p>
           </div>

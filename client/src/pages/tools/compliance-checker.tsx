@@ -328,10 +328,10 @@ export default function ComplianceChecker() {
                       <div className="grid md:grid-cols-3 gap-4">
                         <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
                           <p className="text-xs text-muted-foreground">Score</p>
-                          <p className="text-3xl font-bold mt-2">{score}%</p>
+                          <p className="text-xl font-bold mt-2">{score}%</p>
                         </Card>
                         <Card className="p-4"><p className="text-xs text-muted-foreground">Items</p>
-                          <p className="text-3xl font-bold mt-2">{done}/8</p></Card>
+                          <p className="text-xl font-bold mt-2">{done}/8</p></Card>
                         <Card className="p-4"><p className="text-xs text-muted-foreground">Status</p>
                           <p className="text-lg font-bold mt-2">{score>=80?"Compliant":"Review Needed"}</p></Card>
                       </div>

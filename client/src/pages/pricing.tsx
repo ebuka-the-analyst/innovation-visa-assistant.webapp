@@ -357,7 +357,7 @@ export default function Pricing() {
             
             <main className="responsive-container py-10 md:py-12">
               <div className="text-center mb-8 md:mb-10">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Choose Your Plan</h1>
+                <h1 className="text-xl md:text-2xl font-bold mb-4">Choose Your Plan</h1>
                 <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
                   Select the tier that best matches your business complexity for your Innovator Founder Visa application
                 </p>
@@ -393,7 +393,7 @@ export default function Pricing() {
                     <CardTitle className="text-lg lg:text-xl">{tier.name}</CardTitle>
                     <CardDescription className="text-xs lg:text-sm line-clamp-2">{tier.description}</CardDescription>
                     <div className="mt-3">
-                      <span className="text-3xl lg:text-4xl font-bold">{tier.price}</span>
+                      <span className="text-xl font-bold">{tier.price}</span>
                       <span className="text-muted-foreground text-xs ml-1">one-time</span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
@@ -475,7 +475,7 @@ export default function Pricing() {
         {user && (
           <div className="mt-12 lg:mt-16 max-w-5xl mx-auto">
             <div className="text-center mb-6 lg:mb-8">
-              <h2 className="text-2xl lg:text-3xl font-bold mb-2 lg:mb-3">Need More Business Plans?</h2>
+              <h2 className="text-2xl lg:text-xl font-bold mb-2 lg:mb-3">Need More Business Plans?</h2>
               <p className="text-sm lg:text-base text-muted-foreground">
                 Purchase additional credits or get unlimited generations
               </p>
@@ -503,7 +503,7 @@ export default function Pricing() {
                         <Icon className="h-4 w-4 text-primary flex-shrink-0" />
                         <CardTitle className="text-sm lg:text-base truncate">{addon.name}</CardTitle>
                       </div>
-                      <div className="text-xl lg:text-2xl font-bold">{addon.price}</div>
+                      <div className="text-xl lg:text-lg font-bold">{addon.price}</div>
                     </CardHeader>
                     
                     <CardContent className="pb-2 px-3 lg:px-4">

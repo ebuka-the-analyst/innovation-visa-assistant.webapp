@@ -221,7 +221,7 @@ export default function SiteStrategy() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2" data-testid="text-tool-title">
+                <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-tool-title">
                   <MapPin className="w-8 h-8 text-primary" />
                   Site/Location Strategy
                 </h1>
@@ -256,7 +256,7 @@ export default function SiteStrategy() {
                     <MapPin className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">Top Location</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-top-location">{rankedLocations[0]?.location}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-top-location">{rankedLocations[0]?.location}</p>
                   <p className="text-sm text-muted-foreground">Score: {rankedLocations[0]?.score}/100</p>
                 </CardContent>
               </Card>
@@ -266,7 +266,7 @@ export default function SiteStrategy() {
                     <Building className="w-5 h-5 text-green-500" />
                     <span className="text-sm text-muted-foreground">Selected</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{selectedLocation}</p>
+                  <p className="text-lg font-bold mt-1">{selectedLocation}</p>
                   <p className="text-sm text-muted-foreground">
                     Rank: #{rankedLocations.findIndex((l) => l.location === selectedLocation) + 1}
                   </p>
@@ -278,7 +278,7 @@ export default function SiteStrategy() {
                     <TrendingUp className="w-5 h-5 text-orange-500" />
                     <span className="text-sm text-muted-foreground">Locations Analyzed</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{UK_LOCATIONS.length}</p>
+                  <p className="text-lg font-bold mt-1">{UK_LOCATIONS.length}</p>
                 </CardContent>
               </Card>
             </div>

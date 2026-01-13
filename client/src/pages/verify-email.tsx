@@ -92,7 +92,7 @@ export default function VerifyEmail() {
               <div className="flex justify-center mb-4">
                 <Loader2 className="h-16 w-16 text-primary animate-spin" data-testid="icon-loading" />
               </div>
-              <CardTitle className="text-2xl font-bold">Verifying your email</CardTitle>
+              <CardTitle className="text-lg font-bold">Verifying your email</CardTitle>
               <CardDescription>Please wait while we verify your account...</CardDescription>
             </>
           )}
@@ -102,7 +102,7 @@ export default function VerifyEmail() {
               <div className="flex justify-center mb-4">
                 <CheckCircle2 className="h-16 w-16 text-green-500" data-testid="icon-success" />
               </div>
-              <CardTitle className="text-2xl font-bold">Email verified!</CardTitle>
+              <CardTitle className="text-lg font-bold">Email verified!</CardTitle>
               <CardDescription>{message}</CardDescription>
             </>
           )}
@@ -112,7 +112,7 @@ export default function VerifyEmail() {
               <div className="flex justify-center mb-4">
                 <AlertCircle className="h-16 w-16 text-destructive" data-testid="icon-error" />
               </div>
-              <CardTitle className="text-2xl font-bold">Verification failed</CardTitle>
+              <CardTitle className="text-lg font-bold">Verification failed</CardTitle>
               <CardDescription>{message}</CardDescription>
             </>
           )}

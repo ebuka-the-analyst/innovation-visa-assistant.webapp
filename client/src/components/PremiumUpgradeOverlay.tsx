@@ -94,7 +94,7 @@ export function PremiumUpgradeOverlay({
                       <Badge className="bg-white/20 text-white border-white/30 mb-2">
                         {requiredTierName} Required
                       </Badge>
-                      <h2 className="text-2xl font-bold">Unlock {toolName}</h2>
+                      <h2 className="text-lg font-bold">Unlock {toolName}</h2>
                     </div>
                   </div>
                   <p className="text-white/90">
@@ -106,7 +106,7 @@ export function PremiumUpgradeOverlay({
                 <div className="p-8">
                   {/* Price */}
                   <div className="text-center mb-8">
-                    <div className="text-5xl font-bold text-foreground mb-2">
+                    <div className="text-2xl font-bold text-foreground mb-2">
                       {requiredTierPrice}
                     </div>
                     <div className="text-sm text-muted-foreground">one-time payment</div>

@@ -138,7 +138,7 @@ export default function SettlementPlanning() {
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
             <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">POST-VISA ROADMAP</span>
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Settlement Planning & ILR Strategy</h1>
+            <h1 className="font-serif text-xl font-bold mb-4 mt-3">Settlement Planning & ILR Strategy</h1>
             <p className="text-lg text-muted-foreground">
               Long-term planning from Innovator Founder Visa through ILR (Indefinite Leave to Remain) and British Citizenship. Includes tax optimization, international expansion strategy, and post-settlement pathways.
             </p>

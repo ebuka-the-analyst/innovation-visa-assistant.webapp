@@ -768,8 +768,8 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
               >
                 <Crown className="h-16 w-16 mx-auto text-primary mb-4" />
               </motion.div>
-              <h3 className="text-2xl font-bold mb-2">Level Up!</h3>
-              <p className="text-4xl font-black mb-2" style={{ color: showLevelUp.color }}>
+              <h3 className="text-lg font-bold mb-2">Level Up!</h3>
+              <p className="text-xl font-bold mb-2" style={{ color: showLevelUp.color }}>
                 Level {showLevelUp.level}
               </p>
               <p className="text-xl font-semibold text-muted-foreground">{showLevelUp.title}</p>

@@ -268,7 +268,7 @@ export default function VisaStatusTracker() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2" data-testid="text-tool-title">
+                <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-tool-title">
                   <Clock className="w-8 h-8 text-primary" />
                   Visa Status Tracker
                 </h1>
@@ -317,7 +317,7 @@ export default function VisaStatusTracker() {
                     <Calendar className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">Days Tracking</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{daysSinceSubmission ?? "-"}</p>
+                  <p className="text-lg font-bold mt-1">{daysSinceSubmission ?? "-"}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -326,7 +326,7 @@ export default function VisaStatusTracker() {
                     <FileText className="w-5 h-5 text-orange-500" />
                     <span className="text-sm text-muted-foreground">Updates</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{data.updates.length}</p>
+                  <p className="text-lg font-bold mt-1">{data.updates.length}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -335,7 +335,7 @@ export default function VisaStatusTracker() {
                     <Timer className="w-5 h-5 text-purple-500" />
                     <span className="text-sm text-muted-foreground">Progress</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{Math.round(getProgress())}%</p>
+                  <p className="text-lg font-bold mt-1">{Math.round(getProgress())}%</p>
                 </CardContent>
               </Card>
             </div>
@@ -380,7 +380,7 @@ export default function VisaStatusTracker() {
                           <StatusIcon className="w-8 h-8 text-white" />
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold">{statusInfo.label}</h3>
+                          <h3 className="text-lg font-bold">{statusInfo.label}</h3>
                           <p className="text-muted-foreground">{statusInfo.description}</p>
                           {data.lastUpdated && (
                             <p className="text-sm text-muted-foreground mt-1">

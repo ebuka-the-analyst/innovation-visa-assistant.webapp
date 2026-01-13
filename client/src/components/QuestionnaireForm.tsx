@@ -1655,7 +1655,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
         <Card className="p-8 md:p-12">
           <div className="mb-6">
             <div className="text-sm font-semibold text-primary mb-2">Section {currentStep + 1} of {steps.length}</div>
-            <h2 className="font-serif text-3xl font-bold mb-2">{currentStepData.title}</h2>
+            <h2 className="font-serif text-xl font-bold mb-2">{currentStepData.title}</h2>
             <p className="text-sm text-amber-600 font-medium">
               {currentStepData.description}
             </p>

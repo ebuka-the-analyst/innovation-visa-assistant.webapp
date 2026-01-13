@@ -23,7 +23,7 @@ function ToolNotFound({ toolId }: { toolId: string }) {
       <div className="responsive-container max-w-2xl">
         <Card className="p-8 text-center">
           <AlertCircle className="w-16 h-16 mx-auto mb-4 text-orange-500" />
-          <h1 className="text-2xl font-bold mb-2">Tool Not Found</h1>
+          <h1 className="text-lg font-bold mb-2">Tool Not Found</h1>
           <p className="text-muted-foreground mb-6">
             The tool "{toolId}" could not be found. It may have been moved or is no longer available.
           </p>

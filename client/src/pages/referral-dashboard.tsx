@@ -90,7 +90,7 @@ function ReferralStats({ stats }: { stats: ReferralDashboardData['stats'] }) {
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold" data-testid="text-total-clicks">{stats.totalClicks}</div>
+          <div className="text-lg font-bold" data-testid="text-total-clicks">{stats.totalClicks}</div>
           <p className="text-xs text-muted-foreground">People who clicked your link</p>
         </CardContent>
       </Card>
@@ -101,7 +101,7 @@ function ReferralStats({ stats }: { stats: ReferralDashboardData['stats'] }) {
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold" data-testid="text-signups">{stats.signups}</div>
+          <div className="text-lg font-bold" data-testid="text-signups">{stats.signups}</div>
           <p className="text-xs text-muted-foreground">People who registered</p>
         </CardContent>
       </Card>
@@ -112,7 +112,7 @@ function ReferralStats({ stats }: { stats: ReferralDashboardData['stats'] }) {
           <CheckCircle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold" data-testid="text-qualified">{stats.qualified}</div>
+          <div className="text-lg font-bold" data-testid="text-qualified">{stats.qualified}</div>
           <p className="text-xs text-muted-foreground">Made a purchase</p>
         </CardContent>
       </Card>
@@ -123,7 +123,7 @@ function ReferralStats({ stats }: { stats: ReferralDashboardData['stats'] }) {
           <PoundSterling className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold" data-testid="text-earnings">
+          <div className="text-lg font-bold" data-testid="text-earnings">
             {stats.pendingEarnings > 0 && (
               <span className="text-orange-500">£{stats.pendingEarnings.toFixed(2)} pending</span>
             )}
@@ -197,7 +197,7 @@ function ReferralJourneyFunnel({ stats }: { stats: ReferralDashboardData['stats'
                   <div className={`${step.color} p-3 rounded-full mb-2`}>
                     <Icon className="h-5 w-5 text-white" />
                   </div>
-                  <div className="text-2xl font-bold">{step.value}</div>
+                  <div className="text-lg font-bold">{step.value}</div>
                   <div className="text-sm font-medium">{step.label}</div>
                   <div className="text-xs text-muted-foreground">{step.description}</div>
                 </div>
@@ -213,14 +213,14 @@ function ReferralJourneyFunnel({ stats }: { stats: ReferralDashboardData['stats'
         
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center p-4 bg-muted/50 rounded-lg">
-            <div className="text-2xl font-bold text-primary">{conversionRate}%</div>
+            <div className="text-lg font-bold text-primary">{conversionRate}%</div>
             <div className="text-sm text-muted-foreground">Conversion Rate</div>
             <div className="text-xs text-muted-foreground mt-1">
               (Clicks to Purchases)
             </div>
           </div>
           <div className="text-center p-4 bg-muted/50 rounded-lg">
-            <div className="text-2xl font-bold">
+            <div className="text-lg font-bold">
               {stats.pendingEarnings > 0 ? (
                 <span className="text-orange-500">£{stats.pendingEarnings.toFixed(2)}</span>
               ) : (
@@ -577,19 +577,19 @@ function PayoutRequestSection({ availableBalance }: { availableBalance: number }
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground">Available Balance</p>
-            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <p className="text-lg font-bold text-green-600 dark:text-green-400">
               £{(effectiveBalance / 100).toFixed(2)}
             </p>
           </div>
           <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground">Pending Payouts</p>
-            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+            <p className="text-lg font-bold text-orange-600 dark:text-orange-400">
               £{(pendingAmount / 100).toFixed(2)}
             </p>
           </div>
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground">Minimum Payout</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">£20.00</p>
+            <p className="text-lg font-bold text-blue-600 dark:text-blue-400">£20.00</p>
           </div>
         </div>
 
@@ -863,7 +863,7 @@ export default function ReferralDashboard() {
     <div className="container max-w-6xl mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight" data-testid="text-page-title">
+          <h1 className="text-xl font-bold tracking-tight" data-testid="text-page-title">
             Referral Programme
           </h1>
           <p className="text-muted-foreground">

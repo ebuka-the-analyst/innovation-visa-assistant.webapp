@@ -258,7 +258,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Diversity & Inclusion</h1>
+              <h1 className="text-xl font-bold mb-2">Diversity & Inclusion</h1>
               <p className="text-muted-foreground">Build diverse teams for innovation and talent acquisition (Innovator Founder Visa)</p>
             </div>
             <AiTraditionalToggle
@@ -298,7 +298,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
                       <Award className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">D&I Score</span>
                     </div>
-                    <p className="text-2xl font-bold">{diversityScore}%</p>
+                    <p className="text-lg font-bold">{diversityScore}%</p>
                     <p className="text-xs text-muted-foreground">{grade}</p>
                   </Card>
                   <Card className="p-4">
@@ -306,7 +306,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
                       <TrendingUp className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Innovation Bonus</span>
                     </div>
-                    <p className="text-2xl font-bold">+{diversityBonus}%</p>
+                    <p className="text-lg font-bold">+{diversityBonus}%</p>
                     <p className="text-xs text-muted-foreground">Research-backed</p>
                   </Card>
                 </div>
@@ -324,7 +324,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
                     <Award className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Diversity Score</span>
                   </div>
-                  <p className="text-3xl font-bold">{diversityScore}%</p>
+                  <p className="text-xl font-bold">{diversityScore}%</p>
                   <p className="text-xs text-muted-foreground mt-1">{grade}</p>
                 </Card>
                 
@@ -333,7 +333,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
                     <Users className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Female Rep</span>
                   </div>
-                  <p className="text-3xl font-bold">{demographics.female}%</p>
+                  <p className="text-xl font-bold">{demographics.female}%</p>
                   <p className="text-xs text-muted-foreground mt-1">Team composition</p>
                 </Card>
                 
@@ -342,7 +342,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
                     <Target className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Innovation Bonus</span>
                   </div>
-                  <p className="text-3xl font-bold">+{diversityBonus}%</p>
+                  <p className="text-xl font-bold">+{diversityBonus}%</p>
                   <p className="text-xs text-muted-foreground mt-1">Research-backed</p>
                 </Card>
                 
@@ -351,7 +351,7 @@ GOV.UK: Innovator Founder Visa criteria (November 2025)
                     <DollarSign className={`w-5 h-5 ${parseFloat(genderGap) > 5 ? 'text-red-600' : 'text-green-600'}`} />
                     <span className="text-sm font-medium">Pay Gap</span>
                   </div>
-                  <p className="text-3xl font-bold">{genderGap}%</p>
+                  <p className="text-xl font-bold">{genderGap}%</p>
                   <p className="text-xs text-muted-foreground mt-1">{parseFloat(genderGap) <= 5 ? 'Within threshold' : 'Above threshold'}</p>
                 </Card>
               </div>

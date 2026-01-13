@@ -307,7 +307,7 @@ export default function AIAssistant() {
                 <MessageCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-page-title">Innovator Founder Visa Assistant</h1>
+                <h1 className="text-2xl md:text-xl font-bold" data-testid="text-page-title">Innovator Founder Visa Assistant</h1>
                 <p className="text-sm text-muted-foreground">
                   Official GOV.UK Guidance (November 2025)
                   {isAuthenticated && <Badge variant="outline" className="ml-2">Action-Enabled</Badge>}

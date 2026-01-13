@@ -747,7 +747,7 @@ executing expansion plans or submitting visa applications.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-geographic-expansion">Geographic Expansion Planner</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-geographic-expansion">Geographic Expansion Planner</h1>
             <p className="text-lg text-muted-foreground">International market entry strategy and scalability evidence for UK visa compliance</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -787,7 +787,7 @@ executing expansion plans or submitting visa applications.
                     <p className="text-sm text-muted-foreground">Complete all sections for comprehensive international expansion strategy</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold" data-testid="text-readiness-score">{readinessScore}%</p>
+                    <p className="text-xl font-bold" data-testid="text-readiness-score">{readinessScore}%</p>
                   </div>
                 </div>
                 <Progress value={readinessScore} className="h-3" data-testid="progress-readiness" />
@@ -1568,7 +1568,7 @@ executing expansion plans or submitting visa applications.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Markets</p>
-                          <p className="text-3xl font-bold" data-testid="text-total-markets">
+                          <p className="text-xl font-bold" data-testid="text-total-markets">
                             {targetMarkets.filter(m => m.country.length > 0).length}
                           </p>
                         </div>
@@ -1579,7 +1579,7 @@ executing expansion plans or submitting visa applications.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Investment</p>
-                          <p className="text-3xl font-bold" data-testid="text-total-investment">
+                          <p className="text-xl font-bold" data-testid="text-total-investment">
                             £{investmentRequirements.reduce((sum, r) => sum + r.amount, 0).toLocaleString()}
                           </p>
                         </div>
@@ -1590,7 +1590,7 @@ executing expansion plans or submitting visa applications.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Expected Revenue</p>
-                          <p className="text-3xl font-bold text-green-600" data-testid="text-expected-revenue">
+                          <p className="text-xl font-bold text-green-600" data-testid="text-expected-revenue">
                             £{entryStrategies.reduce((sum, s) => sum + s.expectedRevenue, 0).toLocaleString()}
                           </p>
                         </div>
@@ -1601,7 +1601,7 @@ executing expansion plans or submitting visa applications.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">UK Jobs Created</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-uk-jobs-created">
+                          <p className="text-xl font-bold text-primary" data-testid="text-uk-jobs-created">
                             {entryStrategies.reduce((sum, s) => sum + s.ukJobsCreated, 0)}
                           </p>
                         </div>

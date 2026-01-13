@@ -259,7 +259,7 @@ export default function ComplianceXRay() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Compliance X-Ray</h1>
+              <h1 className="text-xl font-bold mb-2">Compliance X-Ray</h1>
               <p className="text-muted-foreground">Deep compliance analysis with business scoring</p>
             </div>
             <AiTraditionalToggle
@@ -296,7 +296,7 @@ export default function ComplianceXRay() {
                 <Card className="p-6">
                   <h3 className="font-bold mb-4">Current Score</h3>
                   <div className="text-center">
-                    <p className="text-5xl font-bold text-primary">{analysisScore}%</p>
+                    <p className="text-2xl font-bold text-primary">{analysisScore}%</p>
                     <p className="text-muted-foreground">{completedItems}/{totalItems} items complete</p>
                     <p className={`font-semibold mt-2 ${analysisScore >= 80 ? 'text-green-600' : analysisScore >= 60 ? 'text-yellow-600' : 'text-orange-600'}`}>
                       {strategicStrength} Position
@@ -352,24 +352,24 @@ export default function ComplianceXRay() {
                   <div className="grid md:grid-cols-4 gap-4">
                     <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
                       <p className="text-xs text-muted-foreground">Analysis Score</p>
-                      <p className="text-4xl font-bold mt-2">{analysisScore}%</p>
+                      <p className="text-xl font-bold mt-2">{analysisScore}%</p>
                       <p className="text-xs mt-2">{completedItems}/{totalItems} complete</p>
                     </Card>
                     <Card className="p-4">
                       <p className="text-xs text-muted-foreground">Strategic Strength</p>
-                      <p className={`text-2xl font-bold ${analysisScore>=80?"text-green-600":analysisScore>=60?"text-yellow-600":"text-orange-600"}`}>
+                      <p className={`text-lg font-bold ${analysisScore>=80?"text-green-600":analysisScore>=60?"text-yellow-600":"text-orange-600"}`}>
                         {strategicStrength}
                       </p>
                     </Card>
                     <Card className="p-4">
                       <p className="text-xs text-muted-foreground">Risk Level</p>
-                      <p className={`text-2xl font-bold ${analysisScore>=80?"text-green-600":"text-red-600"}`}>
+                      <p className={`text-lg font-bold ${analysisScore>=80?"text-green-600":"text-red-600"}`}>
                         {analysisScore>=80?"Low":"High"}
                       </p>
                     </Card>
                     <Card className="p-4">
                       <p className="text-xs text-muted-foreground">Readiness</p>
-                      <p className="text-2xl font-bold">{analysisScore>=70?"Ready":"Developing"}</p>
+                      <p className="text-lg font-bold">{analysisScore>=70?"Ready":"Developing"}</p>
                     </Card>
                   </div>
 

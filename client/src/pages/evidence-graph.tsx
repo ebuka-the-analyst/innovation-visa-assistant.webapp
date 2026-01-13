@@ -62,7 +62,7 @@ export default function EvidenceGraph() {
           <FeatureNavigation currentPage="document-organizer" />
           <div className="mb-12">
             <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">EVIDENCE GRAPH</span>
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Claim-to-Proof Evidence Mapping</h1>
+            <h1 className="font-serif text-xl font-bold mb-4 mt-3">Claim-to-Proof Evidence Mapping</h1>
             <p className="text-lg text-muted-foreground">
               Every claim in your business plan mapped to supporting evidence. Spot gaps and strengthen weak points before submission.
             </p>

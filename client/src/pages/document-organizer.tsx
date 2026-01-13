@@ -282,7 +282,7 @@ IMPORTANT NOTES
         <div className="max-w-4xl mx-auto">
           <FeatureNavigation currentPage="document-organizer" />
           <div className="mb-12">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Document Manager & Evidence Organizer</h1>
+            <h1 className="font-serif text-xl font-bold mb-4">Document Manager & Evidence Organizer</h1>
             <p className="text-lg text-muted-foreground">
               Intelligent document tracking and submission management. Captures all required evidence, identifies gaps, and prepares lawyer-ready packages—preventing costly rejections before they happen.
             </p>
@@ -291,7 +291,7 @@ IMPORTANT NOTES
           <div className="mb-8 p-6 bg-primary/10 rounded-lg border border-primary/20">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-lg">Application Completeness</h3>
-              <span className="text-2xl font-bold text-primary">{completionPercentage}%</span>
+              <span className="text-lg font-bold text-primary">{completionPercentage}%</span>
             </div>
             <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
               <div

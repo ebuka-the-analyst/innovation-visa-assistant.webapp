@@ -605,7 +605,7 @@ filing and protection matters. UK IPO requirements and fees subject to change.
           
 
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-ip-roadmap">IP Development Roadmap</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-ip-roadmap">IP Development Roadmap</h1>
             <p className="text-lg text-muted-foreground">Strategic intellectual property filing and protection timeline for UK Innovator Founder visa</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -654,7 +654,7 @@ filing and protection matters. UK IPO requirements and fees subject to change.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Roadmap Completeness</p>
-                          <p className="text-3xl font-bold" data-testid="text-roadmap-completeness">{roadmapCompleteness}%</p>
+                          <p className="text-xl font-bold" data-testid="text-roadmap-completeness">{roadmapCompleteness}%</p>
                           <Progress value={roadmapCompleteness} className="mt-2" />
                           <p className="text-xs mt-2">
                             {roadmapCompleteness >= 80 ? 'Excellent' : roadmapCompleteness >= 60 ? 'Good' : roadmapCompleteness >= 40 ? 'Developing' : 'Needs Work'}
@@ -667,7 +667,7 @@ filing and protection matters. UK IPO requirements and fees subject to change.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Budget</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-total-budget">£{totalEstimatedCost.toLocaleString()}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-total-budget">£{totalEstimatedCost.toLocaleString()}</p>
                           <p className="text-xs mt-2">Estimated IP costs</p>
                         </div>
                       </CardContent>
@@ -677,7 +677,7 @@ filing and protection matters. UK IPO requirements and fees subject to change.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Completed</p>
-                          <p className="text-3xl font-bold text-green-600" data-testid="text-completed-milestones">{completedMilestones}</p>
+                          <p className="text-xl font-bold text-green-600" data-testid="text-completed-milestones">{completedMilestones}</p>
                           <p className="text-xs mt-2">of {milestones.filter(m => m.name).length} milestones</p>
                         </div>
                       </CardContent>
@@ -687,7 +687,7 @@ filing and protection matters. UK IPO requirements and fees subject to change.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Critical Items</p>
-                          <p className="text-3xl font-bold text-orange-600" data-testid="text-critical-milestones">{criticalMilestones}</p>
+                          <p className="text-xl font-bold text-orange-600" data-testid="text-critical-milestones">{criticalMilestones}</p>
                           <p className="text-xs mt-2">High priority</p>
                         </div>
                       </CardContent>

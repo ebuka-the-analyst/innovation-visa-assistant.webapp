@@ -498,7 +498,7 @@ export default function VoiceBuilder() {
             <Mic className="w-4 h-4 text-violet-500" />
             <span className="text-sm font-medium text-violet-600 dark:text-violet-400">Zero-Input Voice Builder</span>
           </div>
-          <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-xl font-bold mb-3 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
             Speak Your Visa Application
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">

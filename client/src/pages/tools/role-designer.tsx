@@ -616,7 +616,7 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
         
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-4xl font-bold">Organizational Design & Role Framework</h1>
+            <h1 className="text-xl font-bold">Organizational Design & Role Framework</h1>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
           <p className="text-muted-foreground mb-6">Build scalable team structure with clear roles (Innovator Founder Visa)</p>
@@ -647,7 +647,7 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
                 <Target className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Org Clarity</span>
               </div>
-              <p className="text-3xl font-bold">{orgScore}%</p>
+              <p className="text-xl font-bold">{orgScore}%</p>
               <p className="text-xs text-muted-foreground mt-1">{scalabilityGrade}</p>
             </Card>
 
@@ -656,7 +656,7 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
                 <Building2 className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Team Structure</span>
               </div>
-              <p className="text-3xl font-bold">{roles.length}</p>
+              <p className="text-xl font-bold">{roles.length}</p>
               <p className="text-xs text-muted-foreground mt-1">{departmentCount} departments</p>
             </Card>
 
@@ -665,7 +665,7 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
                 <Users className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Hiring Phasing</span>
               </div>
-              <p className="text-3xl font-bold">{phasing.split(' ')[0]}</p>
+              <p className="text-xl font-bold">{phasing.split(' ')[0]}</p>
               <p className="text-xs text-muted-foreground mt-1">{wellDefinedRoles} well-defined</p>
             </Card>
 
@@ -674,7 +674,7 @@ Endorsement: Required from approved body (Envestors, UKES, Innovator Internation
                 <Layers className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Skill Coverage</span>
               </div>
-              <p className="text-3xl font-bold">{totalUniqueSkills}</p>
+              <p className="text-xl font-bold">{totalUniqueSkills}</p>
               <p className="text-xs text-muted-foreground mt-1">Unique skills</p>
             </Card>
           </div>

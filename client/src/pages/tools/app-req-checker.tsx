@@ -255,7 +255,7 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
         <div className="max-w-5xl mx-auto">
           <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Application Requirements Checker</h1>
+              <h1 className="text-xl font-bold mb-2">Application Requirements Checker</h1>
               <p className="text-muted-foreground">Comprehensive assessment of your 70-point application readiness</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -321,22 +321,22 @@ STATUS: ${totalScore>=70?"READY FOR SUBMISSION":"NEEDS DEVELOPMENT"}
               <div className="grid md:grid-cols-4 gap-4">
                 <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
                   <p className="text-xs text-muted-foreground">Total Score</p>
-                  <p className="text-4xl font-bold mt-2">{totalScore}%</p>
+                  <p className="text-xl font-bold mt-2">{totalScore}%</p>
                   <p className="text-xs mt-2">{totalScore>=70?"✓ Ready":totalScore>=50?"⚠ In Progress":"✗ Work needed"}</p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">Business Criteria</p>
-                  <p className="text-3xl font-bold mt-2">{criteriaScore}%</p>
+                  <p className="text-xl font-bold mt-2">{criteriaScore}%</p>
                   <p className="text-xs text-blue-600 mt-2">{criteriaDone}/{criteriaTotal} complete</p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">English Level</p>
-                  <p className="text-3xl font-bold mt-2">20%</p>
+                  <p className="text-xl font-bold mt-2">20%</p>
                   <p className="text-xs mt-2">B2 minimum required</p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">Financial Proof</p>
-                  <p className="text-3xl font-bold mt-2">20%</p>
+                  <p className="text-xl font-bold mt-2">20%</p>
                   <p className="text-xs mt-2">£1,270 for 28 days</p>
                 </Card>
               </div>

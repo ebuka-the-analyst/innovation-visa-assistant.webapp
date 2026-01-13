@@ -261,7 +261,7 @@ ${getSmartRecommendations().join('\n')}
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Team Scaling Strategy</h1>
+              <h1 className="text-xl font-bold mb-2">Team Scaling Strategy</h1>
               <p className="text-muted-foreground">Plan strategic team growth with budget forecasting</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -327,7 +327,7 @@ ${getSmartRecommendations().join('\n')}
                 <Users className="w-5 h-5 text-primary" />
                 <span className="font-semibold">Total New Hires</span>
               </div>
-              <p className="text-3xl font-bold">{totalNewHires}</p>
+              <p className="text-xl font-bold">{totalNewHires}</p>
             </Card>
 
             <Card className="p-4">
@@ -335,7 +335,7 @@ ${getSmartRecommendations().join('\n')}
                 <DollarSign className="w-5 h-5 text-primary" />
                 <span className="font-semibold">Total Budget</span>
               </div>
-              <p className="text-3xl font-bold">£{(totalBudget / 1000).toFixed(0)}k</p>
+              <p className="text-xl font-bold">£{(totalBudget / 1000).toFixed(0)}k</p>
             </Card>
 
             <Card className="p-4">
@@ -343,7 +343,7 @@ ${getSmartRecommendations().join('\n')}
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <span className="font-semibold">Growth Rate</span>
               </div>
-              <p className="text-3xl font-bold">
+              <p className="text-xl font-bold">
                 {(((targetHeadcount - currentHeadcount) / currentHeadcount) * 100).toFixed(0)}%
               </p>
             </Card>

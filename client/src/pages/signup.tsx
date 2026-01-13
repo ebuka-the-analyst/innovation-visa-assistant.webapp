@@ -175,7 +175,7 @@ export default function Signup() {
               </div>
             </div>
             <CardHeader className="space-y-1 pt-2">
-              <CardTitle className="text-2xl font-bold text-center">Check your email</CardTitle>
+              <CardTitle className="text-lg font-bold text-center">Check your email</CardTitle>
               <CardDescription className="text-center">
                 We've sent a verification link to
               </CardDescription>
@@ -243,7 +243,7 @@ export default function Signup() {
           </div>
         </div>
         <CardHeader className="space-y-1 pt-4">
-          <CardTitle className="text-2xl font-bold text-center">Create your account</CardTitle>
+          <CardTitle className="text-lg font-bold text-center">Create your account</CardTitle>
           <CardDescription className="text-center">Get started with your visa application journey</CardDescription>
           {referralCode && referralDiscount && (
             <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">

@@ -600,7 +600,7 @@ Ensure all claims are accurate and can be verified.
           
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-pitch-deck">Pitch Deck Builder</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-pitch-deck">Pitch Deck Builder</h1>
               <p className="text-lg text-muted-foreground">Create a compelling investor pitch deck aligned with endorsing body requirements</p>
               {savedDate && (
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -630,7 +630,7 @@ Ensure all claims are accurate and can be verified.
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">Overall Completion</p>
-                  <p className="text-3xl font-bold" data-testid="text-overall-completion">{overallCompletion}%</p>
+                  <p className="text-xl font-bold" data-testid="text-overall-completion">{overallCompletion}%</p>
                   <Progress value={overallCompletion} className="mt-2" data-testid="progress-overall" />
                 </div>
               </CardContent>
@@ -640,7 +640,7 @@ Ensure all claims are accurate and can be verified.
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">Deck Strength</p>
-                  <p className="text-3xl font-bold" data-testid="text-deck-strength">{deckStrength}%</p>
+                  <p className="text-xl font-bold" data-testid="text-deck-strength">{deckStrength}%</p>
                   <Progress value={deckStrength} className="mt-2" data-testid="progress-strength" />
                   <p className="text-xs text-muted-foreground mt-2">Weighted by slide importance</p>
                 </div>
@@ -651,7 +651,7 @@ Ensure all claims are accurate and can be verified.
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">Slides Complete</p>
-                  <p className="text-3xl font-bold" data-testid="text-slides-complete">
+                  <p className="text-xl font-bold" data-testid="text-slides-complete">
                     {slides.filter(s => calculateSlideCompletion(s) === 100).length}/{slides.length}
                   </p>
                   <div className="flex items-center justify-center gap-2 mt-2">
@@ -859,23 +859,23 @@ Ensure all claims are accurate and can be verified.
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground">Total Slides</p>
-                        <p className="text-2xl font-bold">{slides.length}</p>
+                        <p className="text-lg font-bold">{slides.length}</p>
                       </div>
                       <div className="p-4 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground">Complete Slides</p>
-                        <p className="text-2xl font-bold text-green-600">
+                        <p className="text-lg font-bold text-green-600">
                           {slides.filter(s => calculateSlideCompletion(s) === 100).length}
                         </p>
                       </div>
                       <div className="p-4 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground">High Priority</p>
-                        <p className="text-2xl font-bold text-orange-500">
+                        <p className="text-lg font-bold text-orange-500">
                           {slides.filter(s => s.weight >= 15).length}
                         </p>
                       </div>
                       <div className="p-4 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground">Total Fields</p>
-                        <p className="text-2xl font-bold">
+                        <p className="text-lg font-bold">
                           {slides.reduce((sum, s) => sum + s.fields.length, 0)}
                         </p>
                       </div>

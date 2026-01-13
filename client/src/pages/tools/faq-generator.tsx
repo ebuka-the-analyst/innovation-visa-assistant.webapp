@@ -712,7 +712,7 @@ physical evidence folders organized by category.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-faq-generator">
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-faq-generator">
               Visa Application FAQ Generator
             </h1>
             <p className="text-lg text-muted-foreground">
@@ -807,7 +807,7 @@ physical evidence folders organized by category.
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">Completeness Score</p>
-                  <p className="text-3xl font-bold text-primary" data-testid="text-completeness-score">{completenessScore}%</p>
+                  <p className="text-xl font-bold text-primary" data-testid="text-completeness-score">{completenessScore}%</p>
                   <Progress value={completenessScore} className="mt-2" />
                   <p className={`text-sm mt-2 font-semibold ${readinessLevel.color}`} data-testid="text-readiness-level">
                     {readinessLevel.label}
@@ -820,7 +820,7 @@ physical evidence folders organized by category.
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">Questions Completed</p>
-                  <p className="text-3xl font-bold text-green-600" data-testid="text-completed-count">
+                  <p className="text-xl font-bold text-green-600" data-testid="text-completed-count">
                     {completedCount}/{totalCount}
                   </p>
                   <p className="text-sm text-muted-foreground mt-2">
@@ -834,7 +834,7 @@ physical evidence folders organized by category.
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">Questions Answered</p>
-                  <p className="text-3xl font-bold text-blue-600" data-testid="text-answered-count">
+                  <p className="text-xl font-bold text-blue-600" data-testid="text-answered-count">
                     {answeredCount}/{totalCount}
                   </p>
                   <p className="text-sm text-muted-foreground mt-2">
@@ -848,7 +848,7 @@ physical evidence folders organized by category.
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">Avg Preparedness</p>
-                  <p className="text-3xl font-bold text-orange-600" data-testid="text-avg-preparedness">{avgPreparedness}%</p>
+                  <p className="text-xl font-bold text-orange-600" data-testid="text-avg-preparedness">{avgPreparedness}%</p>
                   <Progress value={avgPreparedness} className="mt-2" />
                 </div>
               </CardContent>
@@ -943,7 +943,7 @@ physical evidence folders organized by category.
                                 <CardTitle className="text-lg">{faq.question}</CardTitle>
                               </div>
                               <div className="text-center min-w-[80px]">
-                                <p className="text-2xl font-bold text-primary" data-testid={`text-score-${index}`}>
+                                <p className="text-lg font-bold text-primary" data-testid={`text-score-${index}`}>
                                   {faq.preparednessScore}%
                                 </p>
                                 <p className="text-xs text-muted-foreground">preparedness</p>

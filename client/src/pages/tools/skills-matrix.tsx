@@ -318,7 +318,7 @@ GOV.UK: Innovator Founder Visa scalability criterion
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Skills Matrix</h1>
+          <h1 className="text-xl font-bold mb-2">Skills Matrix</h1>
           <p className="text-muted-foreground mb-6">Map team skills for scalability and continuity (Innovator Founder Visa)</p>
 
           <ToolUtilityBar toolId="skills-matrix" toolName="Skills Matrix" onSave={saveProgress} onExport={exportMatrix} getSerializedState={getSerializedState} />
@@ -339,7 +339,7 @@ GOV.UK: Innovator Founder Visa scalability criterion
                 <Award className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Skill Coverage</span>
               </div>
-              <p className="text-3xl font-bold">{coverageScore}%</p>
+              <p className="text-xl font-bold">{coverageScore}%</p>
               <p className="text-xs text-muted-foreground mt-1">{grade}</p>
             </Card>
 
@@ -348,7 +348,7 @@ GOV.UK: Innovator Founder Visa scalability criterion
                 <Users className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Team Members</span>
               </div>
-              <p className="text-3xl font-bold">{skillEntries.length}</p>
+              <p className="text-xl font-bold">{skillEntries.length}</p>
               <p className="text-xs text-muted-foreground mt-1">Tracked employees</p>
             </Card>
 
@@ -357,7 +357,7 @@ GOV.UK: Innovator Founder Visa scalability criterion
                 <AlertCircle className={`w-5 h-5 ${criticalGaps > 0 ? 'text-red-600' : 'text-green-600'}`} />
                 <span className="text-sm font-medium">Critical Gaps</span>
               </div>
-              <p className="text-3xl font-bold">{criticalGaps}</p>
+              <p className="text-xl font-bold">{criticalGaps}</p>
               <p className="text-xs text-muted-foreground mt-1">of {SKILL_CATEGORIES.length} skills</p>
             </Card>
 
@@ -366,7 +366,7 @@ GOV.UK: Innovator Founder Visa scalability criterion
                 <Target className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Avg Skill Depth</span>
               </div>
-              <p className="text-3xl font-bold">{avgDepth}</p>
+              <p className="text-xl font-bold">{avgDepth}</p>
               <p className="text-xs text-muted-foreground mt-1">People per skill</p>
             </Card>
           </div>

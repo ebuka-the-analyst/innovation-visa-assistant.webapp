@@ -124,7 +124,7 @@ export default function Questionnaire() {
             <FeatureNavigation currentPage="questionnaire" />
             
             <div className="text-center mb-12">
-              <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
+              <h1 className="font-serif text-xl font-bold mb-4">
                 Generate Your Business Plan
               </h1>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -368,7 +368,7 @@ export default function Questionnaire() {
           
           <FeatureNavigation currentPage="questionnaire" />
           <div className="mb-6">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-3">
+            <h1 className="font-serif text-xl font-bold mb-3">
               Generate Your Business Plan
             </h1>
             <p className="text-lg text-muted-foreground">

@@ -358,7 +358,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Culture Framework</h1>
+              <h1 className="text-xl font-bold mb-2">Culture Framework</h1>
               <p className="text-muted-foreground">Build strong culture for scaling and retention (Innovator Founder Visa)</p>
             </div>
             <AiTraditionalToggle
@@ -397,7 +397,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
                       <Heart className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Culture Strength</span>
                     </div>
-                    <p className="text-2xl font-bold">{cultureScore}%</p>
+                    <p className="text-lg font-bold">{cultureScore}%</p>
                     <p className="text-xs text-muted-foreground">{grade}</p>
                   </Card>
                   <Card className="p-4">
@@ -405,7 +405,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
                       <Award className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Retention Boost</span>
                     </div>
-                    <p className="text-2xl font-bold">+{estimatedRetentionBoost}%</p>
+                    <p className="text-lg font-bold">+{estimatedRetentionBoost}%</p>
                     <p className="text-xs text-muted-foreground">{values.length} values</p>
                   </Card>
                 </div>
@@ -434,7 +434,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
                     <Heart className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Culture Strength</span>
                   </div>
-                  <p className="text-3xl font-bold">{cultureScore}%</p>
+                  <p className="text-xl font-bold">{cultureScore}%</p>
                   <p className="text-xs text-muted-foreground mt-1">{grade}</p>
                 </Card>
 
@@ -443,7 +443,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
                     <Target className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Core Values</span>
                   </div>
-                  <p className="text-3xl font-bold">{values.length}</p>
+                  <p className="text-xl font-bold">{values.length}</p>
                   <p className="text-xs text-muted-foreground mt-1">Defined</p>
                 </Card>
 
@@ -452,7 +452,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
                     <Award className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Retention Boost</span>
                   </div>
-                  <p className="text-3xl font-bold">+{estimatedRetentionBoost}%</p>
+                  <p className="text-xl font-bold">+{estimatedRetentionBoost}%</p>
                   <p className="text-xs text-muted-foreground mt-1">{avgImpact}% avg impact</p>
                 </Card>
 
@@ -461,7 +461,7 @@ Behaviors: ${v.behaviors.filter(b => b).join(', ')}
                     <TrendingUp className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Cost Savings</span>
                   </div>
-                  <p className="text-3xl font-bold">£{Math.round(costSavings / 1000)}k</p>
+                  <p className="text-xl font-bold">£{Math.round(costSavings / 1000)}k</p>
                   <p className="text-xs text-muted-foreground mt-1">Annual savings</p>
                 </Card>
               </div>

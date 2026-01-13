@@ -278,7 +278,7 @@ STATUS: ${complianceScore >= 80 ? 'GDPR Ready' : complianceScore >= 60 ? 'At Ris
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Data Security Compliance</h1>
+              <h1 className="text-xl font-bold mb-2">Data Security Compliance</h1>
               <p className="text-muted-foreground">GDPR and UK data protection assessment</p>
             </div>
             <AiTraditionalToggle
@@ -318,7 +318,7 @@ STATUS: ${complianceScore >= 80 ? 'GDPR Ready' : complianceScore >= 60 ? 'At Ris
                       <Shield className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Compliance Score</span>
                     </div>
-                    <p className="text-2xl font-bold">{complianceScore}%</p>
+                    <p className="text-lg font-bold">{complianceScore}%</p>
                     <p className="text-xs text-muted-foreground">{completedItems}/{totalItems} controls</p>
                   </Card>
                   <Card className="p-4">
@@ -374,12 +374,12 @@ STATUS: ${complianceScore >= 80 ? 'GDPR Ready' : complianceScore >= 60 ? 'At Ris
                   <div className="grid md:grid-cols-3 gap-4">
                     <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
                       <p className="text-xs text-muted-foreground">Data Security Score</p>
-                      <p className="text-4xl font-bold mt-2">{complianceScore}%</p>
+                      <p className="text-xl font-bold mt-2">{complianceScore}%</p>
                       <p className="text-xs mt-2">{completedItems}/{totalItems} controls</p>
                     </Card>
                     <Card className="p-4">
                       <p className="text-xs text-muted-foreground">Compliance Status</p>
-                      <p className={`text-2xl font-bold mt-2 ${complianceScore>=80?"text-green-600":complianceScore>=60?"text-yellow-600":"text-red-600"}`}>
+                      <p className={`text-lg font-bold mt-2 ${complianceScore>=80?"text-green-600":complianceScore>=60?"text-yellow-600":"text-red-600"}`}>
                         {complianceScore>=80?"GDPR Ready":complianceScore>=60?"At Risk":"Non-Compliant"}
                       </p>
                     </Card>

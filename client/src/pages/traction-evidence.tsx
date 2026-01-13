@@ -305,7 +305,7 @@ Best regards,
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Traction Evidence Builder</h1>
+        <h1 className="text-xl font-bold mb-2">Traction Evidence Builder</h1>
         <p className="text-muted-foreground">
           Build compelling proof of market demand - the #1 factor endorsers evaluate
         </p>
@@ -320,7 +320,7 @@ Best regards,
                 {tractionScore >= 70 ? "Strong" : tractionScore >= 40 ? "Moderate" : "Weak"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2">{tractionScore}/100</div>
+            <div className="text-xl font-bold mb-2">{tractionScore}/100</div>
             <Progress value={tractionScore} className="h-2" />
           </CardContent>
         </Card>
@@ -331,7 +331,7 @@ Best regards,
               <Users className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Waitlist</span>
             </div>
-            <div className="text-2xl font-bold">{waitlist.length}</div>
+            <div className="text-lg font-bold">{waitlist.length}</div>
             <p className="text-xs text-muted-foreground">signups collected</p>
           </CardContent>
         </Card>
@@ -342,7 +342,7 @@ Best regards,
               <Mail className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Letters of Interest</span>
             </div>
-            <div className="text-2xl font-bold">{letters.filter(l => l.status === "received" || l.status === "confirmed").length}/{letters.length}</div>
+            <div className="text-lg font-bold">{letters.filter(l => l.status === "received" || l.status === "confirmed").length}/{letters.length}</div>
             <p className="text-xs text-muted-foreground">confirmed / total</p>
           </CardContent>
         </Card>
@@ -353,7 +353,7 @@ Best regards,
               <Handshake className="h-4 w-4 text-purple-500" />
               <span className="text-sm font-medium">Partnerships</span>
             </div>
-            <div className="text-2xl font-bold">{partnerships.filter(p => p.status === "agreed" || p.status === "active").length}/{partnerships.length}</div>
+            <div className="text-lg font-bold">{partnerships.filter(p => p.status === "agreed" || p.status === "active").length}/{partnerships.length}</div>
             <p className="text-xs text-muted-foreground">active / total</p>
           </CardContent>
         </Card>

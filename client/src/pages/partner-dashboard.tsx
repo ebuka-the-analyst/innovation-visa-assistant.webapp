@@ -222,7 +222,7 @@ export default function PartnerDashboard() {
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-amber-400 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-amber-400 bg-clip-text text-transparent">
                 Partner Dashboard
               </h1>
               <p className="text-muted-foreground mt-1">
@@ -271,7 +271,7 @@ export default function PartnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold" data-testid="text-promo-code-count">
+              <div className="text-xl font-bold" data-testid="text-promo-code-count">
                 {analytics?.promoCodes.length || 0}
               </div>
               <p className="text-xs text-muted-foreground mt-1">Active promotion codes</p>
@@ -287,7 +287,7 @@ export default function PartnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold" data-testid="text-total-users">
+              <div className="text-xl font-bold" data-testid="text-total-users">
                 {analytics?.totalRedemptions || 0}
               </div>
               <p className="text-xs text-muted-foreground mt-1">Users using your codes</p>
@@ -303,7 +303,7 @@ export default function PartnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold" data-testid="text-total-discounts">
+              <div className="text-xl font-bold" data-testid="text-total-discounts">
                 £{((analytics?.totalDiscountGiven || 0) / 100).toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">Total savings for users</p>
@@ -319,7 +319,7 @@ export default function PartnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold" data-testid="text-conversion-rate">
+              <div className="text-xl font-bold" data-testid="text-conversion-rate">
                 {(analytics?.conversionRate || 0).toFixed(1)}%
               </div>
               <p className="text-xs text-muted-foreground mt-1">Visits to signups</p>
@@ -361,11 +361,11 @@ export default function PartnerDashboard() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-muted/50 rounded-lg">
                           <div className="text-sm text-muted-foreground">Total Visits</div>
-                          <div className="text-2xl font-bold">{analytics?.totalVisits || 0}</div>
+                          <div className="text-lg font-bold">{analytics?.totalVisits || 0}</div>
                         </div>
                         <div className="p-4 bg-muted/50 rounded-lg">
                           <div className="text-sm text-muted-foreground">Conversions</div>
-                          <div className="text-2xl font-bold">{analytics?.conversions || 0}</div>
+                          <div className="text-lg font-bold">{analytics?.conversions || 0}</div>
                         </div>
                       </div>
                       <div className="space-y-2">

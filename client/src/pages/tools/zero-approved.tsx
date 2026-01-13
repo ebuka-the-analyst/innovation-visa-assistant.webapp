@@ -298,7 +298,7 @@ export default function ZeroApproved() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2" data-testid="text-tool-title">
+                <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-tool-title">
                   <Map className="w-8 h-8 text-primary" />
                   Zero-to-Approved Roadmap
                 </h1>
@@ -347,7 +347,7 @@ export default function ZeroApproved() {
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
                     <span className="text-sm text-muted-foreground">Tasks Done</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{completedTasks} / {totalTasks}</p>
+                  <p className="text-lg font-bold mt-1">{completedTasks} / {totalTasks}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -356,7 +356,7 @@ export default function ZeroApproved() {
                     <Shield className="w-5 h-5 text-orange-500" />
                     <span className="text-sm text-muted-foreground">Critical Left</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-critical-left">{criticalTasks.length}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-critical-left">{criticalTasks.length}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -365,7 +365,7 @@ export default function ZeroApproved() {
                     <Clock className="w-5 h-5 text-purple-500" />
                     <span className="text-sm text-muted-foreground">Progress</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{Math.round(progress)}%</p>
+                  <p className="text-lg font-bold mt-1">{Math.round(progress)}%</p>
                 </CardContent>
               </Card>
             </div>

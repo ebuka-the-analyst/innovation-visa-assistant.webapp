@@ -329,7 +329,7 @@ Consult with a qualified immigration lawyer before submitting your application.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-savings-validator">Personal Savings Validator</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-savings-validator">Personal Savings Validator</h1>
             <p className="text-lg text-muted-foreground">Verify your personal savings meet the £1,270 maintenance requirement with proper documentation</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -372,7 +372,7 @@ Consult with a qualified immigration lawyer before submitting your application.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Savings</p>
-                          <p className="text-3xl font-bold" data-testid="text-total-savings">£{totalSavings.toLocaleString()}</p>
+                          <p className="text-xl font-bold" data-testid="text-total-savings">£{totalSavings.toLocaleString()}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {meetsMinimum ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -389,7 +389,7 @@ Consult with a qualified immigration lawyer before submitting your application.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Verified Savings</p>
-                          <p className="text-3xl font-bold text-green-600" data-testid="text-verified-savings">£{verifiedSavings.toLocaleString()}</p>
+                          <p className="text-xl font-bold text-green-600" data-testid="text-verified-savings">£{verifiedSavings.toLocaleString()}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {verifiedMeetsMinimum ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -406,7 +406,7 @@ Consult with a qualified immigration lawyer before submitting your application.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Documentation Score</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-documentation-score">{documentationScore}%</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-documentation-score">{documentationScore}%</p>
                           <Progress value={documentationScore} className="mt-2" />
                         </div>
                       </CardContent>

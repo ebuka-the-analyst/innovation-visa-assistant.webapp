@@ -52,7 +52,7 @@ export default function Guide() {
           <div className="max-w-5xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
             <div className="text-center">
               <GraduationCap className="w-20 h-20 mx-auto mb-6 text-primary" />
-              <h1 className="text-5xl font-bold mb-6">
+              <h1 className="text-2xl font-bold mb-6">
                 UK Innovator Founder Visa
                 <span className="block text-primary mt-2">Complete Guide 2025</span>
               </h1>
@@ -108,7 +108,7 @@ export default function Guide() {
           
           {/* Section 1: Overview */}
           <section id="overview">
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <BookOpen className="w-8 h-8 text-primary" />
               What is the UK Innovator Founder Visa?
             </h2>
@@ -145,7 +145,7 @@ export default function Guide() {
 
           {/* Section 2: Requirements */}
           <section id="requirements">
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <CheckCircle2 className="w-8 h-8 text-primary" />
               Key Requirements at a Glance
             </h2>
@@ -241,7 +241,7 @@ export default function Guide() {
 
           {/* Section 3: Endorsement Process */}
           <section id="endorsement">
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <Award className="w-8 h-8 text-primary" />
               Understanding the Endorsement Process
             </h2>
@@ -321,7 +321,7 @@ export default function Guide() {
 
           {/* Sections 4-6: Innovation, Viability, Scalability */}
           <section id="innovation">
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <Lightbulb className="w-8 h-8 text-primary" />
               Innovation: What Makes Your Business Innovative?
             </h2>
@@ -372,7 +372,7 @@ export default function Guide() {
           </section>
 
           <section id="viability">
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <TrendingUp className="w-8 h-8 text-primary" />
               Viability: Proving Your Business Can Succeed
             </h2>
@@ -447,7 +447,7 @@ export default function Guide() {
           </section>
 
           <section id="scalability">
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <Users className="w-8 h-8 text-primary" />
               Scalability: Demonstrating Growth Potential
             </h2>
@@ -502,7 +502,7 @@ export default function Guide() {
 
           {/* Remaining sections 7-10 */}
           <section id="financial">
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <DollarSign className="w-8 h-8 text-primary" />
               Financial Requirements & Planning
             </h2>
@@ -545,7 +545,7 @@ export default function Guide() {
           </section>
 
           <section id="timeline">
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <Calendar className="w-8 h-8 text-primary" />
               Complete Application Timeline
             </h2>
@@ -580,7 +580,7 @@ export default function Guide() {
           </section>
 
           <section id="settlement">
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <Shield className="w-8 h-8 text-primary" />
               Path to Settlement (ILR)
             </h2>
@@ -628,7 +628,7 @@ export default function Guide() {
           </section>
 
           <section id="tips">
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
               <Target className="w-8 h-8 text-primary" />
               Expert Success Tips
             </h2>
@@ -662,7 +662,7 @@ export default function Guide() {
                 </div>
 
                 <div className="bg-accent/20 p-6 rounded mt-6">
-                  <h3 className="text-2xl font-bold mb-4 text-center">Ready to Start Your Journey?</h3>
+                  <h3 className="text-lg font-bold mb-4 text-center">Ready to Start Your Journey?</h3>
                   <p className="text-center mb-4">
                     Access our 100+ professional-level tools designed specifically for UK Innovator Founder Visa applicants.
                   </p>

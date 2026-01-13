@@ -531,7 +531,7 @@ professional immigration advice for your specific situation.
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-verification-checklist">Document Verification Checklist</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-verification-checklist">Document Verification Checklist</h1>
                 <p className="text-lg text-muted-foreground">Complete document verification for UK Innovator Founder Visa application</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -575,7 +575,7 @@ professional immigration advice for your specific situation.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Verification Score</p>
-                      <p className="text-4xl font-bold" data-testid="text-verification-score">{verificationScore}%</p>
+                      <p className="text-xl font-bold" data-testid="text-verification-score">{verificationScore}%</p>
                       <Progress value={verificationScore} className="mt-2" />
                       <p className="text-xs text-muted-foreground mt-2">{verified}/{totalDocs} documents</p>
                     </div>
@@ -586,7 +586,7 @@ professional immigration advice for your specific situation.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Critical Documents</p>
-                      <p className="text-3xl font-bold" data-testid="text-critical-verified">{criticalVerified}/{criticalDocs.length}</p>
+                      <p className="text-xl font-bold" data-testid="text-critical-verified">{criticalVerified}/{criticalDocs.length}</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {criticalComplete ? (
                           <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -603,7 +603,7 @@ professional immigration advice for your specific situation.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">In Progress</p>
-                      <p className="text-3xl font-bold text-orange-600" data-testid="text-in-progress">{inProgress}</p>
+                      <p className="text-xl font-bold text-orange-600" data-testid="text-in-progress">{inProgress}</p>
                       <p className="text-xs text-muted-foreground mt-2">Active documents</p>
                     </div>
                   </CardContent>
@@ -613,7 +613,7 @@ professional immigration advice for your specific situation.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Submission Status</p>
-                      <p className={`text-2xl font-bold ${readyForSubmission ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`} data-testid="text-submission-ready">
+                      <p className={`text-lg font-bold ${readyForSubmission ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`} data-testid="text-submission-ready">
                         {readyForSubmission ? 'READY' : 'PENDING'}
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">

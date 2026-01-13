@@ -240,7 +240,7 @@ export default function YearTracker() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2" data-testid="text-tool-title">
+                <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-tool-title">
                   <Calendar className="w-8 h-8 text-primary" />
                   Year-by-Year Progress Tracker
                 </h1>
@@ -280,7 +280,7 @@ export default function YearTracker() {
                     <Calendar className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">Current Year</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-current-year">{currentYear?.year || "-"}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-current-year">{currentYear?.year || "-"}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -289,7 +289,7 @@ export default function YearTracker() {
                     <TrendingUp className="w-5 h-5 text-green-500" />
                     <span className="text-sm text-muted-foreground">Target Revenue</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">£{currentYear?.revenue.toLocaleString() || 0}</p>
+                  <p className="text-lg font-bold mt-1">£{currentYear?.revenue.toLocaleString() || 0}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -298,7 +298,7 @@ export default function YearTracker() {
                     <Target className="w-5 h-5 text-orange-500" />
                     <span className="text-sm text-muted-foreground">Target Employees</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{currentYear?.employees || 0}</p>
+                  <p className="text-lg font-bold mt-1">{currentYear?.employees || 0}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -307,7 +307,7 @@ export default function YearTracker() {
                     <BarChart3 className="w-5 h-5 text-purple-500" />
                     <span className="text-sm text-muted-foreground">Years Tracked</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{years.length}</p>
+                  <p className="text-lg font-bold mt-1">{years.length}</p>
                 </CardContent>
               </Card>
             </div>
@@ -329,7 +329,7 @@ export default function YearTracker() {
                     >
                       <CardContent className="pt-6">
                         <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-2xl font-bold">{year.year}</h3>
+                          <h3 className="text-lg font-bold">{year.year}</h3>
                           <Badge className={STATUS_COLORS[year.status]}>{year.status}</Badge>
                         </div>
                         <div className="space-y-2 text-sm">

@@ -135,7 +135,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background border-b border-border/40 px-6 py-4 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold">Choose Your Plan</h2>
+            <h2 className="text-lg font-bold">Choose Your Plan</h2>
             <p className="text-sm text-muted-foreground mt-1">
               Select the tier that best matches your business complexity
             </p>
@@ -172,7 +172,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                   <CardTitle className="text-xl">{tier.name}</CardTitle>
                   <CardDescription className="text-xs">{tier.description}</CardDescription>
                   <div className="mt-3">
-                    <span className="text-3xl font-bold">{tier.price}</span>
+                    <span className="text-xl font-bold">{tier.price}</span>
                     <span className="text-muted-foreground text-xs ml-2">one-time</span>
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">{tier.pages}</div>

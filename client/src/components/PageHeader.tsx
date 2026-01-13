@@ -29,7 +29,7 @@ export default function PageHeader({ title, description, breadcrumbs }: PageHead
           <div className="flex items-center justify-between mb-4">
             {/* Logo */}
             <Link href="/">
-              <a className="font-serif text-2xl font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
+              <a className="font-serif text-lg font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
                 Innovator Founder Visa Assistant
               </a>
             </Link>
@@ -110,11 +110,11 @@ export default function PageHeader({ title, description, breadcrumbs }: PageHead
       )}
 
       {/* Page Title */}
-      <div className="bg-gradient-to-b from-primary/5 to-transparent py-8 border-b border-border/50">
+      <div className="bg-gradient-to-b from-primary/5 to-transparent py-4 border-b border-border/50">
         <div className="container mx-auto px-4 md:px-6">
-          <h1 className="font-serif text-4xl md:text-5xl font-bold mb-2">{title}</h1>
+          <h1 className="font-serif text-xl md:text-lg font-bold mb-1">{title}</h1>
           {description && (
-            <p className="text-lg text-muted-foreground max-w-2xl">{description}</p>
+            <p className="text-sm text-muted-foreground max-w-2xl">{description}</p>
           )}
         </div>
       </div>

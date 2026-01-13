@@ -790,7 +790,7 @@ solicitor or HR professional for specific compliance matters.
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-hr-compliance">HR Compliance Tracker</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-hr-compliance">HR Compliance Tracker</h1>
                 <p className="text-lg text-muted-foreground">UK Employment Law 2025 - Track PAYE/NI, contracts, right to work, policies compliance</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
@@ -857,7 +857,7 @@ solicitor or HR professional for specific compliance matters.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Overall Compliance</p>
-                      <p className="text-3xl font-bold" data-testid="text-compliance-score">{complianceScore}%</p>
+                      <p className="text-xl font-bold" data-testid="text-compliance-score">{complianceScore}%</p>
                       <Progress value={complianceScore} className="mt-2" data-testid="progress-compliance" />
                       <p className="text-xs text-muted-foreground mt-2">{completedCount}/{totalItems} items</p>
                     </div>
@@ -868,7 +868,7 @@ solicitor or HR professional for specific compliance matters.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Critical Items</p>
-                      <p className="text-3xl font-bold text-red-600 dark:text-red-400" data-testid="text-critical-score">{criticalScore}%</p>
+                      <p className="text-xl font-bold text-red-600 dark:text-red-400" data-testid="text-critical-score">{criticalScore}%</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {criticalScore === 100 ? (
                           <CheckCircle2 className="h-5 w-5 text-green-500" data-testid="icon-critical-complete" />
@@ -885,7 +885,7 @@ solicitor or HR professional for specific compliance matters.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">High Priority</p>
-                      <p className="text-3xl font-bold text-orange-600 dark:text-orange-400" data-testid="text-high-count">{highCompleted}/{highItems.length}</p>
+                      <p className="text-xl font-bold text-orange-600 dark:text-orange-400" data-testid="text-high-count">{highCompleted}/{highItems.length}</p>
                       <p className="text-sm text-muted-foreground mt-2">
                         {Math.round((highCompleted / highItems.length) * 100)}% complete
                       </p>
@@ -897,7 +897,7 @@ solicitor or HR professional for specific compliance matters.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Medium Priority</p>
-                      <p className="text-3xl font-bold text-blue-600 dark:text-blue-400" data-testid="text-medium-count">{mediumCompleted}/{mediumItems.length}</p>
+                      <p className="text-xl font-bold text-blue-600 dark:text-blue-400" data-testid="text-medium-count">{mediumCompleted}/{mediumItems.length}</p>
                       <p className="text-sm text-muted-foreground mt-2">
                         {Math.round((mediumCompleted / mediumItems.length) * 100)}% complete
                       </p>

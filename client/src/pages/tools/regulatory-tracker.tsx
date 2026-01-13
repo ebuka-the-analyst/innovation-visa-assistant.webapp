@@ -201,7 +201,7 @@ export default function RegulatoryTracker() {
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold" data-testid="heading-regulatory-tracker">Regulatory Tracker</h1>
+              <h1 className="text-xl font-bold" data-testid="heading-regulatory-tracker">Regulatory Tracker</h1>
               <p className="text-muted-foreground">Monitor UK regulatory changes affecting visa applications</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -255,12 +255,12 @@ export default function RegulatoryTracker() {
               <div className="grid md:grid-cols-3 gap-4">
                 <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
                   <p className="text-xs text-muted-foreground">Changes Tracked</p>
-                  <p className="text-4xl font-bold mt-2">{monitoring}</p>
+                  <p className="text-xl font-bold mt-2">{monitoring}</p>
                   <p className="text-xs mt-2">of {REGULATORY_CHANGES.length} key changes</p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">High Impact</p>
-                  <p className="text-3xl font-bold mt-2 text-red-600">5</p>
+                  <p className="text-xl font-bold mt-2 text-red-600">5</p>
                   <p className="text-xs mt-2">Require action</p>
                 </Card>
                 <Card className="p-4">

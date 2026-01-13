@@ -139,7 +139,7 @@ export default function MVPDemoGuide() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">MVP & Demo Builder Guide</h1>
+        <h1 className="text-xl font-bold mb-2">MVP & Demo Builder Guide</h1>
         <p className="text-muted-foreground">
           Create compelling prototypes and demo videos that endorsers want to see
         </p>
@@ -154,7 +154,7 @@ export default function MVPDemoGuide() {
                 {mvpReadiness >= 70 ? "Ready" : mvpReadiness >= 40 ? "Almost" : "Not Ready"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2" data-testid="text-mvp-readiness">{mvpReadiness}%</div>
+            <div className="text-xl font-bold mb-2" data-testid="text-mvp-readiness">{mvpReadiness}%</div>
             <Progress value={mvpReadiness} className="h-2" data-testid="progress-mvp-readiness" />
           </CardContent>
         </Card>
@@ -165,7 +165,7 @@ export default function MVPDemoGuide() {
               <CheckCircle2 className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Checklist</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-checklist-count">{completedChecks.length}/{mvpChecklist.length}</div>
+            <div className="text-lg font-bold" data-testid="text-checklist-count">{completedChecks.length}/{mvpChecklist.length}</div>
             <p className="text-xs text-muted-foreground">items complete</p>
           </CardContent>
         </Card>
@@ -176,7 +176,7 @@ export default function MVPDemoGuide() {
               <Zap className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Features</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-features-count">{features.filter(f => f.demoable).length}/{features.length}</div>
+            <div className="text-lg font-bold" data-testid="text-features-count">{features.filter(f => f.demoable).length}/{features.length}</div>
             <p className="text-xs text-muted-foreground">demoable</p>
           </CardContent>
         </Card>
@@ -187,7 +187,7 @@ export default function MVPDemoGuide() {
               <Video className="h-4 w-4 text-purple-500" />
               <span className="text-sm font-medium">Assets</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-assets-count">{assets.filter(a => a.quality === "polished").length}</div>
+            <div className="text-lg font-bold" data-testid="text-assets-count">{assets.filter(a => a.quality === "polished").length}</div>
             <p className="text-xs text-muted-foreground">polished</p>
           </CardContent>
         </Card>

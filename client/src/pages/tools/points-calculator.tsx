@@ -194,7 +194,7 @@ export default function PointsCalculator() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold" data-testid="heading-points-calculator">Points Calculator</h1>
+              <h1 className="text-xl font-bold" data-testid="heading-points-calculator">Points Calculator</h1>
               <p className="text-lg text-muted-foreground">Calculate your UK Innovator Founder visa eligibility score</p>
               {savedDate && <p className="text-sm text-muted-foreground mt-1">Last saved: {savedDate}</p>}
             </div>
@@ -217,14 +217,14 @@ export default function PointsCalculator() {
                 <Card className="p-6">
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground mb-2">Total Points</p>
-                    <p className="text-4xl font-bold" data-testid="text-total-points">{totalPoints}</p>
+                    <p className="text-xl font-bold" data-testid="text-total-points">{totalPoints}</p>
                     <p className="text-sm text-muted-foreground">of {maxPoints} possible</p>
                   </div>
                 </Card>
                 <Card className="p-6">
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground mb-2">Eligibility Score</p>
-                    <p className="text-4xl font-bold">{eligibilityPercent}%</p>
+                    <p className="text-xl font-bold">{eligibilityPercent}%</p>
                     <Progress value={eligibilityPercent} className="mt-2" />
                   </div>
                 </Card>

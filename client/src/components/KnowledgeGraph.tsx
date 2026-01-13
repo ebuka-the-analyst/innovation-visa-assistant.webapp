@@ -299,7 +299,7 @@ export function KnowledgeGraph() {
             <Network className="h-7 w-7 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">Immigration Knowledge Graph</h2>
+            <h2 className="text-lg font-bold">Immigration Knowledge Graph</h2>
             <p className="text-muted-foreground">
               Visual map of UK Innovator Founder visa requirements and connections
             </p>

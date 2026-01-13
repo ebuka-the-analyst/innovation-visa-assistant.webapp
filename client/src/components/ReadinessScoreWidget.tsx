@@ -90,7 +90,7 @@ export default function ReadinessScoreWidget({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
               Readiness
             </p>
-            <p className="text-4xl font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
+            <p className="text-xl font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
               {animatedScore}%
             </p>
           </div>

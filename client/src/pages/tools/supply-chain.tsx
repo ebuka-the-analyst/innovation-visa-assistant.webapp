@@ -1101,7 +1101,7 @@ supply chain documentation as part of your business viability assessment.
           
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-supply-chain">Supply Chain Management</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-supply-chain">Supply Chain Management</h1>
               <p className="text-lg text-muted-foreground">Map suppliers, assess risks, plan contingencies, and track performance for UK visa compliance</p>
               {savedDate && (
                 <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
@@ -1140,7 +1140,7 @@ supply chain documentation as part of your business viability assessment.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Resilience Score</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-resilience-score">{resilienceScore}%</p>
+                      <p className="text-xl font-bold text-primary" data-testid="text-resilience-score">{resilienceScore}%</p>
                       <Progress value={resilienceScore} className="mt-2" data-testid="progress-resilience" />
                     </div>
                   </CardContent>
@@ -1150,7 +1150,7 @@ supply chain documentation as part of your business viability assessment.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Total Suppliers</p>
-                      <p className="text-3xl font-bold" data-testid="text-total-suppliers">{suppliers.length}</p>
+                      <p className="text-xl font-bold" data-testid="text-total-suppliers">{suppliers.length}</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         <Badge variant="secondary" data-testid="badge-uk-suppliers">
                           <MapPin className="h-3 w-3 mr-1" />
@@ -1165,7 +1165,7 @@ supply chain documentation as part of your business viability assessment.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">High Risk</p>
-                      <p className="text-3xl font-bold" data-testid="text-high-risk-suppliers">{highRiskSuppliers}</p>
+                      <p className="text-xl font-bold" data-testid="text-high-risk-suppliers">{highRiskSuppliers}</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {highRiskSuppliers === 0 ? (
                           <CheckCircle2 className="h-5 w-5 text-green-500" data-testid="icon-low-risk" />
@@ -1181,7 +1181,7 @@ supply chain documentation as part of your business viability assessment.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Avg Lead Time</p>
-                      <p className="text-3xl font-bold" data-testid="text-avg-lead-time">{avgLeadTime}</p>
+                      <p className="text-xl font-bold" data-testid="text-avg-lead-time">{avgLeadTime}</p>
                       <p className="text-sm text-muted-foreground mt-2">days</p>
                     </div>
                   </CardContent>

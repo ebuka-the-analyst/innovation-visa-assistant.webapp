@@ -337,7 +337,7 @@ Productivity = (Avg Leadership Score / 100) × 25%
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Leadership Development</h1>
+              <h1 className="text-xl font-bold mb-2">Leadership Development</h1>
               <p className="text-muted-foreground">Build leadership bench for scaling (Innovator Founder Visa)</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -368,7 +368,7 @@ Productivity = (Avg Leadership Score / 100) × 25%
                 <Award className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Bench Strength</span>
               </div>
-              <p className="text-3xl font-bold">{benchScore}%</p>
+              <p className="text-xl font-bold">{benchScore}%</p>
               <p className="text-xs text-muted-foreground mt-1">{grade}</p>
             </Card>
 
@@ -377,7 +377,7 @@ Productivity = (Avg Leadership Score / 100) × 25%
                 <Users className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Ready Leaders</span>
               </div>
-              <p className="text-3xl font-bold">{readyLeaders}</p>
+              <p className="text-xl font-bold">{readyLeaders}</p>
               <p className="text-xs text-muted-foreground mt-1">of {leaders.length} total</p>
             </Card>
 
@@ -386,7 +386,7 @@ Productivity = (Avg Leadership Score / 100) × 25%
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Productivity Gain</span>
               </div>
-              <p className="text-3xl font-bold">+{productivityGain}%</p>
+              <p className="text-xl font-bold">+{productivityGain}%</p>
               <p className="text-xs text-muted-foreground mt-1">Team output boost</p>
             </Card>
 
@@ -395,7 +395,7 @@ Productivity = (Avg Leadership Score / 100) × 25%
                 <Target className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Dev ROI</span>
               </div>
-              <p className="text-3xl font-bold">£{Math.round(estimatedROI / 1000)}k</p>
+              <p className="text-xl font-bold">£{Math.round(estimatedROI / 1000)}k</p>
               <p className="text-xs text-muted-foreground mt-1">£{Math.round(totalInvestment / 1000)}k invested</p>
             </Card>
           </div>

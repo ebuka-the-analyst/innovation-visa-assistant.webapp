@@ -92,7 +92,7 @@ ${blueprint.diagrams.map(d => `- ${d.name}: ${d.description}`).join('\n')}
             <Shield className="w-4 h-4 text-amber-500" />
             <span className="text-sm font-medium text-amber-600 dark:text-amber-400">AI Patent Generator</span>
           </div>
-          <h1 className="text-4xl font-bold mb-3" data-testid="heading-patent-generator">AI Patent Blueprint Generator</h1>
+          <h1 className="text-xl font-bold mb-3" data-testid="heading-patent-generator">AI Patent Blueprint Generator</h1>
           <p className="text-muted-foreground">Generate comprehensive patent claims and technical diagrams for your innovation</p>
         </div>
 

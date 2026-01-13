@@ -93,7 +93,7 @@ export default function NewsPage() {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3" data-testid="text-page-title">
+              <h1 className="text-xl font-bold tracking-tight flex items-center gap-3" data-testid="text-page-title">
                 <Newspaper className="h-8 w-8 text-primary" />
                 UK Immigration News
               </h1>

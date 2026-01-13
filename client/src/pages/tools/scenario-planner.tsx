@@ -358,7 +358,7 @@ export default function ScenarioPlanner() {
         <div className="responsive-container max-w-6xl">
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <h1 className="text-3xl font-bold">Scenario Planner</h1>
+              <h1 className="text-xl font-bold">Scenario Planner</h1>
               <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
             <p className="text-muted-foreground">Plan for best, expected, and worst case scenarios</p>
@@ -399,7 +399,7 @@ export default function ScenarioPlanner() {
                       {getScenarioIcon(scenario.type)}
                       <span className="font-medium">{scenario.title}</span>
                     </div>
-                    <div className="text-3xl font-bold mb-2">{scenario.probability}%</div>
+                    <div className="text-xl font-bold mb-2">{scenario.probability}%</div>
                     <p className="text-sm text-muted-foreground">Probability</p>
                   </CardContent>
                 </Card>

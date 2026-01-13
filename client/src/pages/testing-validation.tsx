@@ -70,7 +70,7 @@ export default function TestingValidationPage() {
               <TestTube className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold" data-testid="text-page-title">Testing & Validation</h1>
+              <h1 className="text-xl font-bold" data-testid="text-page-title">Testing & Validation</h1>
               <p className="text-muted-foreground">How we validated our platform before launch</p>
             </div>
           </div>
@@ -101,19 +101,19 @@ export default function TestingValidationPage() {
             <CardContent>
               <div className="grid md:grid-cols-4 gap-4 mb-6">
                 <div className="text-center p-4 border rounded-lg">
-                  <p className="text-3xl font-bold text-primary">290+</p>
+                  <p className="text-xl font-bold text-primary">290+</p>
                   <p className="text-sm text-muted-foreground">Total Tests</p>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
-                  <p className="text-3xl font-bold text-green-600">100%</p>
+                  <p className="text-xl font-bold text-green-600">100%</p>
                   <p className="text-sm text-muted-foreground">Pass Rate</p>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
-                  <p className="text-3xl font-bold text-amber-600">40</p>
+                  <p className="text-xl font-bold text-amber-600">40</p>
                   <p className="text-sm text-muted-foreground">Bugs Found & Fixed</p>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
-                  <p className="text-3xl font-bold text-blue-600">109</p>
+                  <p className="text-xl font-bold text-blue-600">109</p>
                   <p className="text-sm text-muted-foreground">Tools Validated</p>
                 </div>
               </div>

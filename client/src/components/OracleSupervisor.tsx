@@ -704,7 +704,7 @@ What would you like to explore today?`,
               <Cpu className="w-4 h-4 text-primary animate-pulse" />
               <span className="text-sm font-medium">Neural Command Center</span>
             </div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3">
+            <h1 className="text-xl md:text-2xl lg:text-2xl font-bold mb-3">
               <span className="bg-gradient-to-r from-primary via-secondary to-purple-500 bg-clip-text text-transparent">
                 ORACLE
               </span>

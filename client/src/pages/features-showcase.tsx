@@ -124,7 +124,7 @@ export default function FeaturesShowcase() {
             {/* Hero - Clean, spacious, ADHD-friendly */}
             <div className="border-b bg-muted/30">
               <div className="responsive-container py-10 md:py-14 lg:py-16">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight" data-testid="heading-features">
+                <h1 className="text-xl md:text-2xl font-bold mb-4 leading-tight" data-testid="heading-features">
                   Everything You Need for UK Innovator Founder Visa Success
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
@@ -136,7 +136,7 @@ export default function FeaturesShowcase() {
             <div className="responsive-container py-10 md:py-14 lg:py-16">
               {/* Main Features Grid - Increased spacing */}
               <section className="mb-12 md:mb-16 lg:mb-20">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8">Core Features</h2>
+                <h2 className="text-xl sm:text-2xl md:text-xl font-bold mb-6 md:mb-8">Core Features</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
                   {MAIN_FEATURES.map((feature, idx) => (
                     <Card key={idx} className="p-6 hover-elevate" data-testid={`card-feature-${idx}`}>
@@ -149,7 +149,7 @@ export default function FeaturesShowcase() {
 
               {/* Tool Categories */}
               <section className="mb-12 md:mb-16 lg:mb-20">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8">100+ Professional-Level Tools</h2>
+                <h2 className="text-xl sm:text-2xl md:text-xl font-bold mb-6 md:mb-8">100+ Professional-Level Tools</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 lg:gap-8">
                   {FEATURE_CATEGORIES.map((category, idx) => (
                     <Card key={idx} className="p-6 hover-elevate border-l-4 border-l-primary" data-testid={`card-category-${idx}`}>
@@ -184,7 +184,7 @@ export default function FeaturesShowcase() {
 
               {/* Pricing Tiers Comparison */}
               <section className="mb-12 md:mb-16 lg:mb-20">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8">Simple, Transparent Pricing</h2>
+                <h2 className="text-xl sm:text-2xl md:text-xl font-bold mb-6 md:mb-8">Simple, Transparent Pricing</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
                   {PRICING_TIERS.map((tier, idx) => (
                     <Card 
@@ -195,7 +195,7 @@ export default function FeaturesShowcase() {
                       {tier.popular && <div className="mb-3 text-xs font-bold text-purple-600 dark:text-purple-400">MOST POPULAR</div>}
                       {tier.premium && <div className="mb-3 text-xs font-bold text-amber-600 dark:text-amber-400">EVERYTHING</div>}
                       <h3 className="font-bold text-lg mb-1">{tier.name}</h3>
-                      <div className="text-2xl font-bold mb-4">{tier.price}</div>
+                      <div className="text-lg font-bold mb-4">{tier.price}</div>
                       <div className="space-y-2 text-sm mb-4">
                         <div><span className="font-semibold">{tier.access}</span> access</div>
                         <div><span className="font-semibold">{tier.pages}</span> plan</div>
@@ -212,7 +212,7 @@ export default function FeaturesShowcase() {
 
               {/* Quick Links */}
               <section className="mb-12 md:mb-16 lg:mb-20">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8">Explore Our Platform</h2>
+                <h2 className="text-xl sm:text-2xl md:text-xl font-bold mb-6 md:mb-8">Explore Our Platform</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
                   <Link href="/tools-hub">
                     <Card className="p-6 hover-elevate cursor-pointer text-center" data-testid="card-link-tools">
@@ -258,7 +258,7 @@ export default function FeaturesShowcase() {
 
               {/* CTA */}
               <section className="text-center py-12 border-t">
-                <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+                <h2 className="text-xl font-bold mb-4">Ready to Get Started?</h2>
                 <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
                   Choose your plan and start building your visa-approved business plan today
                 </p>

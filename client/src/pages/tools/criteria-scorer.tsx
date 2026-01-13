@@ -421,7 +421,7 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
           
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-criteria-scorer">UK Innovator Founder Visa Criteria Scorer</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-criteria-scorer">UK Innovator Founder Visa Criteria Scorer</h1>
               <p className="text-lg text-muted-foreground">Comprehensive assessment of Innovation, Viability, and Scalability criteria</p>
               {savedDate && (
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -473,17 +473,17 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
                   <div className="grid grid-cols-3 gap-4">
                     <Card className="p-4 text-center">
                       <Sparkles className="w-5 h-5 text-primary mx-auto mb-2" />
-                      <p className="text-2xl font-bold">{scores.innovation}%</p>
+                      <p className="text-lg font-bold">{scores.innovation}%</p>
                       <p className="text-xs text-muted-foreground">Innovation</p>
                     </Card>
                     <Card className="p-4 text-center">
                       <Shield className="w-5 h-5 text-primary mx-auto mb-2" />
-                      <p className="text-2xl font-bold">{scores.viability}%</p>
+                      <p className="text-lg font-bold">{scores.viability}%</p>
                       <p className="text-xs text-muted-foreground">Viability</p>
                     </Card>
                     <Card className="p-4 text-center">
                       <TrendingUp className="w-5 h-5 text-primary mx-auto mb-2" />
-                      <p className="text-2xl font-bold">{scores.scalability}%</p>
+                      <p className="text-lg font-bold">{scores.scalability}%</p>
                       <p className="text-xs text-muted-foreground">Scalability</p>
                     </Card>
                   </div>
@@ -522,7 +522,7 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
                           <CardContent className="pt-6">
                             <div className="text-center">
                               <p className="text-sm text-muted-foreground mb-2">Overall Score</p>
-                              <p className="text-4xl font-bold" data-testid="text-overall-score">{overallScore}%</p>
+                              <p className="text-xl font-bold" data-testid="text-overall-score">{overallScore}%</p>
                               <div className="flex items-center justify-center gap-2 mt-2">
                                 {isStrongCandidate ? (
                                   <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -544,7 +544,7 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
                           <CardContent className="pt-6">
                             <div className="text-center">
                               <p className="text-sm text-muted-foreground mb-2">Innovation</p>
-                              <p className="text-4xl font-bold text-blue-600 dark:text-blue-400" data-testid="text-innovation-score">{scores.innovation}%</p>
+                              <p className="text-xl font-bold text-blue-600 dark:text-blue-400" data-testid="text-innovation-score">{scores.innovation}%</p>
                               <div className="flex items-center justify-center gap-2 mt-2">
                                 {scores.innovation >= 65 ? (
                                   <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -562,7 +562,7 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
                           <CardContent className="pt-6">
                             <div className="text-center">
                               <p className="text-sm text-muted-foreground mb-2">Viability</p>
-                              <p className="text-4xl font-bold text-green-600 dark:text-green-400" data-testid="text-viability-score">{scores.viability}%</p>
+                              <p className="text-xl font-bold text-green-600 dark:text-green-400" data-testid="text-viability-score">{scores.viability}%</p>
                               <div className="flex items-center justify-center gap-2 mt-2">
                                 {scores.viability >= 65 ? (
                                   <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -582,7 +582,7 @@ ${endorserComparison.map(e => `${e.name}: ${e.yourScore}/${e.required} - ${e.mee
                           <CardContent className="pt-6">
                             <div className="text-center">
                               <p className="text-sm text-muted-foreground mb-2">Scalability</p>
-                              <p className="text-4xl font-bold text-purple-600 dark:text-purple-400" data-testid="text-scalability-score">{scores.scalability}%</p>
+                              <p className="text-xl font-bold text-purple-600 dark:text-purple-400" data-testid="text-scalability-score">{scores.scalability}%</p>
                               <div className="flex items-center justify-center gap-2 mt-2">
                                 {scores.scalability >= 65 ? (
                                   <CheckCircle2 className="h-5 w-5 text-green-500" />

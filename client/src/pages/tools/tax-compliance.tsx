@@ -179,7 +179,7 @@ export default function TaxCompliance() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Tax Compliance Checker</h1>
+              <h1 className="text-xl font-bold mb-2">Tax Compliance Checker</h1>
               <p className="text-muted-foreground">Corporation tax, VAT, PAYE and personal tax verification</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -233,15 +233,15 @@ export default function TaxCompliance() {
               <div className="grid md:grid-cols-4 gap-4">
                 <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
                   <p className="text-xs text-muted-foreground">Tax Compliance</p>
-                  <p className="text-4xl font-bold mt-2">{complianceScore}%</p>
+                  <p className="text-xl font-bold mt-2">{complianceScore}%</p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">Items Complete</p>
-                  <p className="text-3xl font-bold mt-2">{completedItems}/{totalItems}</p>
+                  <p className="text-xl font-bold mt-2">{completedItems}/{totalItems}</p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">Status</p>
-                  <p className={`text-2xl font-bold ${complianceScore>=80?"text-green-600":"text-yellow-600"}`}>
+                  <p className={`text-lg font-bold ${complianceScore>=80?"text-green-600":"text-yellow-600"}`}>
                     {complianceScore>=80?"✓ Compliant":"Review"}
                   </p>
                 </Card>

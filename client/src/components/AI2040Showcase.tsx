@@ -144,7 +144,7 @@ export default function AI2040Showcase() {
             <span className="text-sm font-medium">OMNI AI Technology</span>
           </div>
           
-          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+          <h2 className="font-serif text-xl lg:text-xl font-bold mb-6">
             The Future of{" "}
             <span className="bg-gradient-to-r from-primary via-secondary to-purple-500 bg-clip-text text-transparent">
               Visa Intelligence
@@ -193,7 +193,7 @@ export default function AI2040Showcase() {
           </motion.div>
           
           <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold mb-2">ORACLE AI Brain</h3>
+            <h3 className="text-lg font-bold mb-2">ORACLE AI Brain</h3>
             <p className="text-muted-foreground">Central intelligence coordinating all AI agents</p>
           </div>
         </div>

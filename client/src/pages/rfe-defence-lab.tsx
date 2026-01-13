@@ -79,7 +79,7 @@ export default function RFEDefenceLab() {
           <FeatureNavigation currentPage="rejection-analysis" />
           <div className="mb-12">
             <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">RFE DEFENCE LAB</span>
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Refusal Defence & Risk Mitigation</h1>
+            <h1 className="font-serif text-xl font-bold mb-4 mt-3">Refusal Defence & Risk Mitigation</h1>
             <p className="text-lg text-muted-foreground">
               Predict likely grounds for refusal. Practice responding to criticism and build a proactive risk mitigation plan.
             </p>
@@ -88,15 +88,15 @@ export default function RFEDefenceLab() {
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             <div className="p-6 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
               <p className="text-sm text-red-900 dark:text-red-100 mb-1">High-Risk Issues</p>
-              <p className="text-3xl font-bold text-red-600">2</p>
+              <p className="text-xl font-bold text-red-600">2</p>
             </div>
             <div className="p-6 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
               <p className="text-sm text-amber-900 dark:text-amber-100 mb-1">Medium-Risk Issues</p>
-              <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">2</p>
+              <p className="text-xl font-bold text-amber-600 dark:text-amber-400">2</p>
             </div>
             <div className="p-6 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
               <p className="text-sm text-green-900 dark:text-green-100 mb-1">Mitigated Issues</p>
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400">1</p>
+              <p className="text-xl font-bold text-green-600 dark:text-green-400">1</p>
             </div>
           </div>
 

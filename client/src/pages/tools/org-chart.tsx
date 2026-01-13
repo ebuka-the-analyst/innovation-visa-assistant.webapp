@@ -694,7 +694,7 @@ This organizational chart demonstrates your commitment to UK job creation and st
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-org-chart">Organizational Chart Builder</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-org-chart">Organizational Chart Builder</h1>
             <p className="text-lg text-muted-foreground">Design your team structure and demonstrate UK job creation commitment</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
@@ -742,7 +742,7 @@ This organizational chart demonstrates your commitment to UK job creation and st
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Maturity Score</p>
-                          <p className="text-4xl font-bold" data-testid="text-maturity-score">{orgScore}%</p>
+                          <p className="text-xl font-bold" data-testid="text-maturity-score">{orgScore}%</p>
                           <Progress value={orgScore} className="mt-3" data-testid="progress-maturity-score" />
                           <p className="text-sm mt-2">
                             {orgScore >= 70 ? 'Strong Plan' : orgScore >= 40 ? 'Needs Improvement' : 'Critical Gaps'}
@@ -755,7 +755,7 @@ This organizational chart demonstrates your commitment to UK job creation and st
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Year 3 UK FTE</p>
-                          <p className="text-4xl font-bold text-primary" data-testid="text-year3-fte">
+                          <p className="text-xl font-bold text-primary" data-testid="text-year3-fte">
                             {(orgStructure.year3UkJobs || totalUkFTE).toFixed(1)}
                           </p>
                           <div className="flex items-center justify-center gap-2 mt-2">
@@ -774,7 +774,7 @@ This organizational chart demonstrates your commitment to UK job creation and st
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Team Size</p>
-                          <p className="text-4xl font-bold" data-testid="text-total-headcount">{totalHeadcount}</p>
+                          <p className="text-xl font-bold" data-testid="text-total-headcount">{totalHeadcount}</p>
                           <p className="text-sm text-muted-foreground mt-2">UK: {ukHeadcount} ({totalUkFTE.toFixed(1)} FTE)</p>
                         </div>
                       </CardContent>
@@ -951,19 +951,19 @@ This organizational chart demonstrates your commitment to UK job creation and st
                   <div className="grid md:grid-cols-3 gap-4 mb-6">
                     <div className="text-center p-4 bg-muted/50 rounded-lg">
                       <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
-                      <p className="text-2xl font-bold" data-testid="text-positions-count">{positions.length}</p>
+                      <p className="text-lg font-bold" data-testid="text-positions-count">{positions.length}</p>
                       <p className="text-sm text-muted-foreground">Total Positions</p>
                     </div>
                     <div className="text-center p-4 bg-muted/50 rounded-lg">
                       <Building2 className="h-8 w-8 mx-auto mb-2 text-primary" />
-                      <p className="text-2xl font-bold" data-testid="text-departments-count">
+                      <p className="text-lg font-bold" data-testid="text-departments-count">
                         {new Set(positions.filter(p => p.department).map(p => p.department)).size}
                       </p>
                       <p className="text-sm text-muted-foreground">Departments</p>
                     </div>
                     <div className="text-center p-4 bg-muted/50 rounded-lg">
                       <DollarSign className="h-8 w-8 mx-auto mb-2 text-primary" />
-                      <p className="text-2xl font-bold" data-testid="text-total-salary">£{Math.round(totalSalaryCost / 1000)}k</p>
+                      <p className="text-lg font-bold" data-testid="text-total-salary">£{Math.round(totalSalaryCost / 1000)}k</p>
                       <p className="text-sm text-muted-foreground">Annual Salary Budget</p>
                     </div>
                   </div>

@@ -482,7 +482,7 @@ and actual results may vary significantly based on market conditions and executi
           
           <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-budget-cost-analyzer">Budget & Cost Analyzer</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-budget-cost-analyzer">Budget & Cost Analyzer</h1>
               <p className="text-lg text-muted-foreground">Comprehensive budget tracking, variance analysis, and cost optimization</p>
               {savedDate && (
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -523,7 +523,7 @@ and actual results may vary significantly based on market conditions and executi
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Total Budgeted</p>
-                      <p className="text-3xl font-bold" data-testid="text-total-budgeted">£{totalBudgeted.toLocaleString()}</p>
+                      <p className="text-xl font-bold" data-testid="text-total-budgeted">£{totalBudgeted.toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground mt-2">Monthly</p>
                     </div>
                   </CardContent>
@@ -533,7 +533,7 @@ and actual results may vary significantly based on market conditions and executi
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Total Actual</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-total-actual">£{totalActual.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-primary" data-testid="text-total-actual">£{totalActual.toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground mt-2">Monthly</p>
                     </div>
                   </CardContent>
@@ -549,7 +549,7 @@ and actual results may vary significantly based on market conditions and executi
                         ) : totalVariance < 0 ? (
                           <TrendingDown className="h-5 w-5 text-green-500" />
                         ) : null}
-                        <p className={`text-3xl font-bold ${totalVariance > 0 ? 'text-destructive' : totalVariance < 0 ? 'text-green-600' : ''}`} data-testid="text-variance">
+                        <p className={`text-xl font-bold ${totalVariance > 0 ? 'text-destructive' : totalVariance < 0 ? 'text-green-600' : ''}`} data-testid="text-variance">
                           {totalVariance >= 0 ? '+' : ''}£{totalVariance.toLocaleString()}
                         </p>
                       </div>
@@ -562,7 +562,7 @@ and actual results may vary significantly based on market conditions and executi
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Runway</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-runway">
+                      <p className="text-xl font-bold text-primary" data-testid="text-runway">
                         {runway === Infinity ? 'Positive' : `${runway}mo`}
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">At current burn</p>
@@ -609,7 +609,7 @@ and actual results may vary significantly based on market conditions and executi
                     </div>
                     <div>
                       <Label>Net Monthly Cash Flow</Label>
-                      <div className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-green-600' : 'text-destructive'}`} data-testid="text-net-cash-flow">
+                      <div className={`text-lg font-bold ${netCashFlow >= 0 ? 'text-green-600' : 'text-destructive'}`} data-testid="text-net-cash-flow">
                         {netCashFlow >= 0 ? '+' : ''}£{netCashFlow.toLocaleString()}
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">Revenue minus costs</p>
@@ -813,13 +813,13 @@ and actual results may vary significantly based on market conditions and executi
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="p-3 border rounded-md">
                         <p className="text-sm text-muted-foreground">Categories Over Budget</p>
-                        <p className="text-2xl font-bold text-destructive" data-testid="text-over-budget-count">
+                        <p className="text-lg font-bold text-destructive" data-testid="text-over-budget-count">
                           {categories.filter(c => c.actual > c.budgeted).length}
                         </p>
                       </div>
                       <div className="p-3 border rounded-md">
                         <p className="text-sm text-muted-foreground">Categories Under Budget</p>
-                        <p className="text-2xl font-bold text-green-600" data-testid="text-under-budget-count">
+                        <p className="text-lg font-bold text-green-600" data-testid="text-under-budget-count">
                           {categories.filter(c => c.actual < c.budgeted).length}
                         </p>
                       </div>

@@ -567,7 +567,7 @@ Scalability Criterion: Significant growth potential in UK market
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-uvp-generator">Unique Value Proposition Generator</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-uvp-generator">Unique Value Proposition Generator</h1>
                 <p className="text-lg text-muted-foreground">Create compelling value proposition demonstrating innovation and viability</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -611,7 +611,7 @@ Scalability Criterion: Significant growth potential in UK market
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">UVP Strength</p>
-                      <p className="text-3xl font-bold" data-testid="text-uvp-strength">{uvpStrength}%</p>
+                      <p className="text-xl font-bold" data-testid="text-uvp-strength">{uvpStrength}%</p>
                       <p className="text-sm mt-1">{grade}</p>
                       <Progress value={uvpStrength} className="mt-2" />
                     </div>
@@ -623,7 +623,7 @@ Scalability Criterion: Significant growth potential in UK market
                     <div className="text-center">
                       <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
                       <p className="text-sm text-muted-foreground mb-1">Pain Severity</p>
-                      <p className="text-2xl font-bold" data-testid="text-pain-severity">{scores.painSeverity}</p>
+                      <p className="text-lg font-bold" data-testid="text-pain-severity">{scores.painSeverity}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -633,7 +633,7 @@ Scalability Criterion: Significant growth potential in UK market
                     <div className="text-center">
                       <Lightbulb className="h-6 w-6 mx-auto mb-2 text-primary" />
                       <p className="text-sm text-muted-foreground mb-1">Solution Fit</p>
-                      <p className="text-2xl font-bold" data-testid="text-solution-fit">{scores.solutionFit}</p>
+                      <p className="text-lg font-bold" data-testid="text-solution-fit">{scores.solutionFit}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -643,7 +643,7 @@ Scalability Criterion: Significant growth potential in UK market
                     <div className="text-center">
                       <TrendingUp className="h-6 w-6 mx-auto mb-2 text-primary" />
                       <p className="text-sm text-muted-foreground mb-1">Quantifiable</p>
-                      <p className="text-2xl font-bold" data-testid="text-quantifiable">{scores.quantifiableBenefit}</p>
+                      <p className="text-lg font-bold" data-testid="text-quantifiable">{scores.quantifiableBenefit}</p>
                     </div>
                   </CardContent>
                 </Card>

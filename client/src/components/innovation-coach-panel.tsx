@@ -234,7 +234,7 @@ export function InnovationCoachPanel({
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Live Score</span>
                   <div className="flex items-center gap-1">
-                    <span className={cn("text-2xl font-bold", getScoreColor(liveScore.overall))}>
+                    <span className={cn("text-lg font-bold", getScoreColor(liveScore.overall))}>
                       {liveScore.overall}
                     </span>
                     <span className="text-muted-foreground text-sm">/100</span>

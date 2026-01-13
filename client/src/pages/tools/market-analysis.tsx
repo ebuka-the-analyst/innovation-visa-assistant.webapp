@@ -715,7 +715,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-analysis">Market Analysis</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-market-analysis">Market Analysis</h1>
                 <p className="text-lg text-muted-foreground">Comprehensive TAM/SAM/SOM analysis for UK Innovator Founder visa scalability assessment</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
@@ -782,7 +782,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Market Opportunity</p>
-                      <p className="text-3xl font-bold" data-testid="text-opportunity-score">{opportunityScore}%</p>
+                      <p className="text-xl font-bold" data-testid="text-opportunity-score">{opportunityScore}%</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {opportunityScore >= 75 ? (
                           <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -801,7 +801,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Total Addressable Market</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-tam">£{(tam / 1000000).toFixed(0)}M</p>
+                      <p className="text-xl font-bold text-primary" data-testid="text-tam">£{(tam / 1000000).toFixed(0)}M</p>
                       <p className="text-xs text-muted-foreground mt-2">Global/regional demand</p>
                     </div>
                   </CardContent>
@@ -811,7 +811,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Market Growth Rate</p>
-                      <p className="text-3xl font-bold text-green-600" data-testid="text-growth-rate">{marketGrowth}%</p>
+                      <p className="text-xl font-bold text-green-600" data-testid="text-growth-rate">{marketGrowth}%</p>
                       <p className="text-xs text-muted-foreground mt-2">Annual CAGR</p>
                     </div>
                   </CardContent>
@@ -821,7 +821,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Sizing Validation</p>
-                      <p className="text-3xl font-bold" data-testid="text-sizing-valid">{isValid ? 'VALID' : 'REVIEW'}</p>
+                      <p className="text-xl font-bold" data-testid="text-sizing-valid">{isValid ? 'VALID' : 'REVIEW'}</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {isValid ? (
                           <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -1121,13 +1121,13 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                       <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                         <div>
                           <p className="text-sm font-medium">Competition Level</p>
-                          <p className="text-2xl font-bold mt-1" data-testid="text-competition-level">
+                          <p className="text-lg font-bold mt-1" data-testid="text-competition-level">
                             {getCompetitiveData()[0].category}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-muted-foreground">Competitors</p>
-                          <p className="text-2xl font-bold mt-1" data-testid="text-competitor-count">{competitorCount}</p>
+                          <p className="text-lg font-bold mt-1" data-testid="text-competitor-count">{competitorCount}</p>
                         </div>
                       </div>
 

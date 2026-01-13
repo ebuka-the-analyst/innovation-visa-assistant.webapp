@@ -289,7 +289,7 @@ export default function ZonePlanning() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2" data-testid="text-tool-title">
+                <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-tool-title">
                   <MapPin className="w-8 h-8 text-primary" />
                   Zone Planning
                 </h1>
@@ -338,7 +338,7 @@ export default function ZonePlanning() {
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
                     <span className="text-sm text-muted-foreground">Selected</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{selectedZones.length}</p>
+                  <p className="text-lg font-bold mt-1">{selectedZones.length}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -347,7 +347,7 @@ export default function ZonePlanning() {
                     <Globe className="w-5 h-5 text-orange-500" />
                     <span className="text-sm text-muted-foreground">Zones Analyzed</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{zones.length}</p>
+                  <p className="text-lg font-bold mt-1">{zones.length}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -356,7 +356,7 @@ export default function ZonePlanning() {
                     <TrendingUp className="w-5 h-5 text-purple-500" />
                     <span className="text-sm text-muted-foreground">Avg Suitability</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">
+                  <p className="text-lg font-bold mt-1">
                     {Math.round(zones.reduce((sum, z) => sum + z.suitability, 0) / zones.length)}%
                   </p>
                 </CardContent>

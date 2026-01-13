@@ -476,7 +476,7 @@ IP attorney or patent agent for professional advice on specific IP matters.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-ip-strategy">IP Protection Strategy</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-ip-strategy">IP Protection Strategy</h1>
             <p className="text-lg text-muted-foreground">Comprehensive intellectual property portfolio planner for UK Innovator Founder visa</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -524,7 +524,7 @@ IP attorney or patent agent for professional advice on specific IP matters.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">IP Protection Score</p>
-                          <p className="text-3xl font-bold" data-testid="text-ip-score">{ipScore}%</p>
+                          <p className="text-xl font-bold" data-testid="text-ip-score">{ipScore}%</p>
                           <Progress value={ipScore} className="mt-2" />
                           <p className="text-xs mt-2">
                             {ipScore >= 80 ? 'Excellent' : ipScore >= 60 ? 'Good' : ipScore >= 40 ? 'Developing' : 'Needs Work'}
@@ -537,7 +537,7 @@ IP attorney or patent agent for professional advice on specific IP matters.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Assets</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-total-assets">{assets.filter(a => a.name).length}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-total-assets">{assets.filter(a => a.name).length}</p>
                           <p className="text-xs mt-2">IP items registered</p>
                         </div>
                       </CardContent>
@@ -547,7 +547,7 @@ IP attorney or patent agent for professional advice on specific IP matters.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Cost</p>
-                          <p className="text-3xl font-bold" data-testid="text-total-cost">£{totalCost.toLocaleString()}</p>
+                          <p className="text-xl font-bold" data-testid="text-total-cost">£{totalCost.toLocaleString()}</p>
                           <p className="text-xs mt-2">Investment in IP</p>
                         </div>
                       </CardContent>
@@ -557,7 +557,7 @@ IP attorney or patent agent for professional advice on specific IP matters.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Critical Assets</p>
-                          <p className="text-3xl font-bold text-orange-600" data-testid="text-critical-assets">{criticalAssets}</p>
+                          <p className="text-xl font-bold text-orange-600" data-testid="text-critical-assets">{criticalAssets}</p>
                           <p className="text-xs mt-2">High priority items</p>
                         </div>
                       </CardContent>

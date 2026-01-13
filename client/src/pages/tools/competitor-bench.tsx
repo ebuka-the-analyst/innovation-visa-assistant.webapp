@@ -414,7 +414,7 @@ ${c.name}:
           
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-competitor-bench">Competitive Benchmarking</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-competitor-bench">Competitive Benchmarking</h1>
               <p className="text-lg text-muted-foreground">Analyze and compare your competitive position in the market</p>
               {savedDate && <p className="text-sm text-muted-foreground mt-1">Last saved: {savedDate}</p>}
             </div>
@@ -454,7 +454,7 @@ ${c.name}:
                       <Target className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Competitive Score</span>
                     </div>
-                    <p className="text-2xl font-bold">{competitiveScore}%</p>
+                    <p className="text-lg font-bold">{competitiveScore}%</p>
                     <p className="text-xs text-muted-foreground">{competitiveGrade}</p>
                   </Card>
                   <Card className="p-4">
@@ -462,7 +462,7 @@ ${c.name}:
                       <Award className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Advantages</span>
                     </div>
-                    <p className="text-2xl font-bold">{competitiveAdvantages}/4</p>
+                    <p className="text-lg font-bold">{competitiveAdvantages}/4</p>
                     <p className="text-xs text-muted-foreground">Dimensions ahead</p>
                   </Card>
                 </div>
@@ -485,7 +485,7 @@ ${c.name}:
                     <Target className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Competitive Score</span>
                   </div>
-                  <p className="text-3xl font-bold">{competitiveScore}%</p>
+                  <p className="text-xl font-bold">{competitiveScore}%</p>
                   <p className="text-xs text-muted-foreground mt-1">{competitiveGrade}</p>
                 </Card>
 
@@ -494,7 +494,7 @@ ${c.name}:
                     <Award className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Advantages</span>
                   </div>
-                  <p className="text-3xl font-bold">{competitiveAdvantages}/4</p>
+                  <p className="text-xl font-bold">{competitiveAdvantages}/4</p>
                   <p className="text-xs text-muted-foreground mt-1">Dimensions ahead</p>
                 </Card>
 
@@ -503,7 +503,7 @@ ${c.name}:
                     <TrendingUp className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Your Innovation</span>
                   </div>
-                  <p className="text-3xl font-bold">{yourBusiness.innovation}%</p>
+                  <p className="text-xl font-bold">{yourBusiness.innovation}%</p>
                   <p className="text-xs text-muted-foreground mt-1">vs {avgCompetitor ? Math.round(avgCompetitor.innovation) : 0}% avg</p>
                 </Card>
 
@@ -512,7 +512,7 @@ ${c.name}:
                     <Shield className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Competitors</span>
                   </div>
-                  <p className="text-3xl font-bold">{competitors.length}</p>
+                  <p className="text-xl font-bold">{competitors.length}</p>
                   <p className="text-xs text-muted-foreground mt-1">Analyzed</p>
                 </Card>
               </div>

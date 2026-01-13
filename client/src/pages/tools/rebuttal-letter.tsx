@@ -671,7 +671,7 @@ each case individually based on specific circumstances and evidence provided.
           
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-rebuttal-letter">
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-rebuttal-letter">
                 RFE Rebuttal Letter Generator
               </h1>
               <p className="text-lg text-muted-foreground">
@@ -720,7 +720,7 @@ each case individually based on specific circumstances and evidence provided.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Letter Strength</p>
-                          <p className="text-3xl font-bold" data-testid="text-strength-score">
+                          <p className="text-xl font-bold" data-testid="text-strength-score">
                             {strengthScore}%
                           </p>
                           <Progress value={strengthScore} className="mt-2" />
@@ -742,7 +742,7 @@ each case individually based on specific circumstances and evidence provided.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Concerns Addressed</p>
-                          <p className="text-3xl font-bold" data-testid="text-concerns-count">
+                          <p className="text-xl font-bold" data-testid="text-concerns-count">
                             {letterData.concerns.length}
                           </p>
                           <div className="flex items-center justify-center gap-2 mt-2">
@@ -757,7 +757,7 @@ each case individually based on specific circumstances and evidence provided.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Evidence Coverage</p>
-                          <p className="text-3xl font-bold text-green-600" data-testid="text-evidence-count">
+                          <p className="text-xl font-bold text-green-600" data-testid="text-evidence-count">
                             {letterData.concerns.filter(c => c.evidenceProvided.length > 10).length}/{letterData.concerns.length}
                           </p>
                           <Progress 

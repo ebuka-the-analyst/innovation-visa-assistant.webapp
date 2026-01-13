@@ -194,7 +194,7 @@ export default function PersonalStatement() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Personal Statement Builder</h1>
+          <h1 className="text-xl font-bold mb-2">Personal Statement Builder</h1>
           <p className="text-muted-foreground mb-6">Create a compelling personal profile and statement</p>
 
           <ToolUtilityBar

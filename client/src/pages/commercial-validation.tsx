@@ -195,7 +195,7 @@ export default function CommercialValidation() {
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Commercial Validation Suite</h1>
+        <h1 className="text-xl font-bold mb-2">Commercial Validation Suite</h1>
         <p className="text-muted-foreground">
           Build evidence that your business solves a real problem with real demand
         </p>
@@ -210,7 +210,7 @@ export default function CommercialValidation() {
                 {validationScore >= 70 ? "Strong" : validationScore >= 40 ? "Moderate" : "Weak"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2" data-testid="text-validation-score">{validationScore}/100</div>
+            <div className="text-xl font-bold mb-2" data-testid="text-validation-score">{validationScore}/100</div>
             <Progress value={validationScore} className="h-2" data-testid="progress-validation-score" />
           </CardContent>
         </Card>
@@ -221,7 +221,7 @@ export default function CommercialValidation() {
               <Scale className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Competitors</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-competitors-count">{competitors.length}</div>
+            <div className="text-lg font-bold" data-testid="text-competitors-count">{competitors.length}</div>
             <p className="text-xs text-muted-foreground">analyzed</p>
           </CardContent>
         </Card>
@@ -232,7 +232,7 @@ export default function CommercialValidation() {
               <MessageSquare className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Interviews</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-interviews-count">{interviews.length}</div>
+            <div className="text-lg font-bold" data-testid="text-interviews-count">{interviews.length}</div>
             <p className="text-xs text-muted-foreground">conducted</p>
           </CardContent>
         </Card>
@@ -243,7 +243,7 @@ export default function CommercialValidation() {
               <FileText className="h-4 w-4 text-purple-500" />
               <span className="text-sm font-medium">Case Studies</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-case-studies-count">{caseStudies.length}</div>
+            <div className="text-lg font-bold" data-testid="text-case-studies-count">{caseStudies.length}</div>
             <p className="text-xs text-muted-foreground">documented</p>
           </CardContent>
         </Card>

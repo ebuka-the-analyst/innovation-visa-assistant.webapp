@@ -426,7 +426,7 @@ current fees on official government websites before making financial commitments
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-fee-estimator">UK Visa Fee Estimator</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-fee-estimator">UK Visa Fee Estimator</h1>
             <p className="text-lg text-muted-foreground">Comprehensive cost calculator for Innovator Founder Visa</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -463,7 +463,7 @@ current fees on official government websites before making financial commitments
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Total Estimated Cost</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-grand-total">£{grandTotal.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-primary" data-testid="text-grand-total">£{grandTotal.toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground mt-2">+ 20% buffer: £{Math.round(grandTotal * 1.2).toLocaleString()}</p>
                     </div>
                   </CardContent>
@@ -473,7 +473,7 @@ current fees on official government websites before making financial commitments
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Government Fees</p>
-                      <p className="text-3xl font-bold text-blue-600" data-testid="text-gov-fees">£{totalGovFees.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-blue-600" data-testid="text-gov-fees">£{totalGovFees.toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground mt-2">{Math.round(totalGovFees/grandTotal*100)}% of total</p>
                     </div>
                   </CardContent>
@@ -483,7 +483,7 @@ current fees on official government websites before making financial commitments
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Professional & Relocation</p>
-                      <p className="text-3xl font-bold text-purple-600" data-testid="text-other-fees">£{Math.round(totalProfessionalFees + totalRelocationCosts).toLocaleString()}</p>
+                      <p className="text-xl font-bold text-purple-600" data-testid="text-other-fees">£{Math.round(totalProfessionalFees + totalRelocationCosts).toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground mt-2">{Math.round((totalProfessionalFees + totalRelocationCosts)/grandTotal*100)}% of total</p>
                     </div>
                   </CardContent>

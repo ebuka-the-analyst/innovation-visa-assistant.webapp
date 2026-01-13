@@ -792,7 +792,7 @@ qualified business advisors and immigration specialists before submitting visa a
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-growth-strategy">Growth Strategy Planner</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-growth-strategy">Growth Strategy Planner</h1>
                 <p className="text-lg text-muted-foreground">UK-focused scalability and growth strategy for visa compliance</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -856,7 +856,7 @@ qualified business advisors and immigration specialists before submitting visa a
                     <p className="text-sm text-muted-foreground">Complete all sections for comprehensive growth strategy</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold" data-testid="text-completeness-score">{completenessScore}%</p>
+                    <p className="text-xl font-bold" data-testid="text-completeness-score">{completenessScore}%</p>
                   </div>
                 </div>
                 <Progress value={completenessScore} className="h-3" data-testid="progress-completeness" />
@@ -1532,7 +1532,7 @@ qualified business advisors and immigration specialists before submitting visa a
                     <div className="text-center">
                       <TrendingUp className="h-8 w-8 mx-auto mb-2 text-primary" />
                       <p className="text-sm text-muted-foreground mb-1">Total Acquisition Budget</p>
-                      <p className="text-2xl font-bold" data-testid="text-total-budget">
+                      <p className="text-lg font-bold" data-testid="text-total-budget">
                         £{acquisitionChannels.reduce((sum, c) => sum + c.budget, 0).toLocaleString()}
                       </p>
                     </div>
@@ -1544,7 +1544,7 @@ qualified business advisors and immigration specialists before submitting visa a
                     <div className="text-center">
                       <Target className="h-8 w-8 mx-auto mb-2 text-green-500" />
                       <p className="text-sm text-muted-foreground mb-1">Active Growth Goals</p>
-                      <p className="text-2xl font-bold" data-testid="text-active-goals">
+                      <p className="text-lg font-bold" data-testid="text-active-goals">
                         {growthGoals.filter(g => g.goal.length > 0).length}
                       </p>
                     </div>
@@ -1556,7 +1556,7 @@ qualified business advisors and immigration specialists before submitting visa a
                     <div className="text-center">
                       <Users className="h-8 w-8 mx-auto mb-2 text-orange-500" />
                       <p className="text-sm text-muted-foreground mb-1">Target Market Segments</p>
-                      <p className="text-2xl font-bold" data-testid="text-market-segments">
+                      <p className="text-lg font-bold" data-testid="text-market-segments">
                         {targetMarkets.filter(m => m.segment.length > 0).length}
                       </p>
                     </div>

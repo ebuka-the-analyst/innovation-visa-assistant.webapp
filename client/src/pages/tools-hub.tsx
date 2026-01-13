@@ -248,11 +248,11 @@ export default function ToolsHub() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="w-full px-4 md:px-8 lg:px-12">
           {/* Header */}
-          <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3" data-testid="heading-tools-hub">
+          <div className="mb-6">
+          <h1 className="text-xl md:text-lg font-bold mb-2" data-testid="heading-tools-hub">
             UK Innovator Founder Visa Tools
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             100+ powerful tools to help you from application to approval and beyond
           </p>
         </div>
@@ -419,11 +419,11 @@ export default function ToolsHub() {
 
         {/* Tools Grid */}
         <div>
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-bold">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-bold">
               {filteredTools.length} {filteredTools.length === 1 ? "Tool" : "Tools"}
             </h2>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Filter className="w-4 h-4" />
               Showing {filteredTools.length} of {ALL_TOOLS.length}
             </div>
@@ -510,34 +510,34 @@ export default function ToolsHub() {
         </div>
 
         {/* Summary Stats */}
-        <div className="mt-12 md:mt-16 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-          <Card className="p-6 text-center">
-            <div className="text-3xl font-bold text-primary">{ALL_TOOLS.length}</div>
-            <p className="text-sm text-muted-foreground mt-2">Total Tools</p>
+        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <Card className="p-4 text-center">
+            <div className="text-xl font-bold text-primary">{ALL_TOOLS.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total Tools</p>
           </Card>
-          <Card className="p-6 text-center">
-            <div className="text-3xl font-bold text-gray-600">
+          <Card className="p-4 text-center">
+            <div className="text-xl font-bold text-gray-600">
               {ALL_TOOLS.filter((t) => t.tier === "free").length}
             </div>
-            <p className="text-sm text-muted-foreground mt-2">Free Tools</p>
+            <p className="text-xs text-muted-foreground mt-1">Free Tools</p>
           </Card>
-          <Card className="p-6 text-center">
-            <div className="text-3xl font-bold text-purple-600">
+          <Card className="p-4 text-center">
+            <div className="text-xl font-bold text-purple-600">
               {ALL_TOOLS.filter((t) => t.stage === "before").length}
             </div>
-            <p className="text-sm text-muted-foreground mt-2">Before Applying</p>
+            <p className="text-xs text-muted-foreground mt-1">Before Applying</p>
           </Card>
-          <Card className="p-6 text-center">
-            <div className="text-3xl font-bold text-orange-600">
+          <Card className="p-4 text-center">
+            <div className="text-xl font-bold text-orange-600">
               {ALL_TOOLS.filter((t) => t.stage === "during").length}
             </div>
-            <p className="text-sm text-muted-foreground mt-2">During Application</p>
+            <p className="text-xs text-muted-foreground mt-1">During Application</p>
           </Card>
-          <Card className="p-6 text-center">
-            <div className="text-3xl font-bold text-green-600">
+          <Card className="p-4 text-center">
+            <div className="text-xl font-bold text-green-600">
               {ALL_TOOLS.filter((t) => t.stage === "after").length}
             </div>
-            <p className="text-sm text-muted-foreground mt-2">After Approval</p>
+            <p className="text-xs text-muted-foreground mt-1">After Approval</p>
           </Card>
         </div>
         </div>

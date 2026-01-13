@@ -380,7 +380,7 @@ export default function CalendarSync() {
         />
         <div className="container mx-auto py-8 px-4 max-w-2xl text-center">
           <CalendarDays className="w-16 h-16 mx-auto text-primary mb-4" />
-          <h1 className="text-2xl font-bold mb-4">Sign In for Calendar Integration</h1>
+          <h1 className="text-lg font-bold mb-4">Sign In for Calendar Integration</h1>
           <p className="text-muted-foreground mb-6">
             Track your visa deadlines, milestones, and checkpoints with smart reminders.
           </p>
@@ -415,7 +415,7 @@ export default function CalendarSync() {
       <div className="container mx-auto py-8 px-4 max-w-4xl">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2 flex items-center gap-3" data-testid="heading-calendar">
+            <h1 className="text-xl font-bold mb-2 flex items-center gap-3" data-testid="heading-calendar">
               <CalendarDays className="w-8 h-8 text-primary" />
               Calendar & Deadlines
             </h1>
@@ -435,19 +435,19 @@ export default function CalendarSync() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-primary" data-testid="text-total-events">{allEvents.length}</div>
+              <div className="text-xl font-bold text-primary" data-testid="text-total-events">{allEvents.length}</div>
               <p className="text-sm text-muted-foreground">Total Events</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-amber-500" data-testid="text-upcoming">{upcomingEvents.length}</div>
+              <div className="text-xl font-bold text-amber-500" data-testid="text-upcoming">{upcomingEvents.length}</div>
               <p className="text-sm text-muted-foreground">Upcoming</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-red-500" data-testid="text-overdue">{overdueEvents.length}</div>
+              <div className="text-xl font-bold text-red-500" data-testid="text-overdue">{overdueEvents.length}</div>
               <p className="text-sm text-muted-foreground">Past Due</p>
             </CardContent>
           </Card>

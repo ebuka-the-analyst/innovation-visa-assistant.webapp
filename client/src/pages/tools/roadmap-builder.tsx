@@ -511,7 +511,7 @@ for personalized guidance on your UK Innovator Founder visa application.
           
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
-              <h1 className="text-4xl font-bold" data-testid="heading-roadmap-builder">Business Roadmap Builder</h1>
+              <h1 className="text-xl font-bold" data-testid="heading-roadmap-builder">Business Roadmap Builder</h1>
               <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
             <p className="text-lg text-muted-foreground">Strategic quarterly planning demonstrating innovation and scalability for UK visa endorsement</p>
@@ -538,7 +538,7 @@ for personalized guidance on your UK Innovator Founder visa application.
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">Completeness</p>
-                  <p className="text-3xl font-bold" data-testid="text-completeness-score">{completenessScore}%</p>
+                  <p className="text-xl font-bold" data-testid="text-completeness-score">{completenessScore}%</p>
                   <Progress value={completenessScore} className="mt-2" />
                 </div>
               </CardContent>
@@ -549,7 +549,7 @@ for personalized guidance on your UK Innovator Founder visa application.
                 <div className="text-center">
                   <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
                   <p className="text-sm text-muted-foreground mb-2">Milestones</p>
-                  <p className="text-3xl font-bold" data-testid="text-total-milestones">{milestones.length}</p>
+                  <p className="text-xl font-bold" data-testid="text-total-milestones">{milestones.length}</p>
                 </div>
               </CardContent>
             </Card>
@@ -559,7 +559,7 @@ for personalized guidance on your UK Innovator Founder visa application.
                 <div className="text-center">
                   <DollarSign className="h-6 w-6 mx-auto mb-2 text-primary" />
                   <p className="text-sm text-muted-foreground mb-2">Total Budget</p>
-                  <p className="text-3xl font-bold" data-testid="text-total-budget">£{milestones.reduce((sum, m) => sum + m.budget, 0).toLocaleString()}</p>
+                  <p className="text-xl font-bold" data-testid="text-total-budget">£{milestones.reduce((sum, m) => sum + m.budget, 0).toLocaleString()}</p>
                 </div>
               </CardContent>
             </Card>
@@ -569,7 +569,7 @@ for personalized guidance on your UK Innovator Founder visa application.
                 <div className="text-center">
                   <Zap className="h-6 w-6 mx-auto mb-2 text-primary" />
                   <p className="text-sm text-muted-foreground mb-2">Avg Innovation</p>
-                  <p className="text-3xl font-bold" data-testid="text-avg-innovation">{(quarterlyMetrics.reduce((sum, q) => sum + q.innovation, 0) / 4).toFixed(1)}</p>
+                  <p className="text-xl font-bold" data-testid="text-avg-innovation">{(quarterlyMetrics.reduce((sum, q) => sum + q.innovation, 0) / 4).toFixed(1)}</p>
                 </div>
               </CardContent>
             </Card>

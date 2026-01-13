@@ -238,7 +238,7 @@ function ReviewCard({ review, onViewResults }: { review: DocumentReview; onViewR
 
           {review.status === 'completed' && review.overallScore !== null && (
             <div className="text-right shrink-0">
-              <div className={`text-2xl font-bold ${
+              <div className={`text-lg font-bold ${
                 review.overallScore >= 80 ? 'text-green-500' :
                 review.overallScore >= 60 ? 'text-amber-500' : 'text-red-500'
               }`}>
@@ -357,7 +357,7 @@ export default function DocumentReview() {
         />
         <div className="container mx-auto py-8 px-4 max-w-2xl text-center">
           <Sparkles className="w-16 h-16 mx-auto text-primary mb-4" />
-          <h1 className="text-2xl font-bold mb-4">Sign In for AI Document Review</h1>
+          <h1 className="text-lg font-bold mb-4">Sign In for AI Document Review</h1>
           <p className="text-muted-foreground mb-6">
             Get expert AI feedback on your visa application documents.
           </p>
@@ -395,7 +395,7 @@ export default function DocumentReview() {
 
       <div className="container mx-auto py-8 px-4 max-w-5xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-3" data-testid="heading-document-review">
+          <h1 className="text-xl font-bold mb-2 flex items-center gap-3" data-testid="heading-document-review">
             <Sparkles className="w-8 h-8 text-primary" />
             AI Document Review
           </h1>
@@ -407,25 +407,25 @@ export default function DocumentReview() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-primary" data-testid="text-total-reviews">{stats.totalReviews}</div>
+              <div className="text-xl font-bold text-primary" data-testid="text-total-reviews">{stats.totalReviews}</div>
               <p className="text-sm text-muted-foreground">Total Reviews</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-green-500" data-testid="text-avg-score">{stats.averageScore || '-'}</div>
+              <div className="text-xl font-bold text-green-500" data-testid="text-avg-score">{stats.averageScore || '-'}</div>
               <p className="text-sm text-muted-foreground">Avg Score</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-blue-500" data-testid="text-avg-innovation">{stats.averageInnovation || '-'}</div>
+              <div className="text-xl font-bold text-blue-500" data-testid="text-avg-innovation">{stats.averageInnovation || '-'}</div>
               <p className="text-sm text-muted-foreground">Avg Innovation</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-purple-500" data-testid="text-avg-viability">{stats.averageViability || '-'}</div>
+              <div className="text-xl font-bold text-purple-500" data-testid="text-avg-viability">{stats.averageViability || '-'}</div>
               <p className="text-sm text-muted-foreground">Avg Viability</p>
             </CardContent>
           </Card>

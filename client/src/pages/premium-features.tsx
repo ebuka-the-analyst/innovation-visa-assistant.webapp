@@ -167,7 +167,7 @@ export default function PremiumFeatures() {
     <div className="container max-w-6xl mx-auto py-6 px-4 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl md:text-xl font-bold flex items-center gap-2">
             <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-primary" />
             Premium Features
           </h1>
@@ -263,7 +263,7 @@ export default function PremiumFeatures() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold" data-testid="text-earned-count">{earnedCount} / {totalAchievements}</div>
+                <div className="text-xl font-bold" data-testid="text-earned-count">{earnedCount} / {totalAchievements}</div>
                 <Progress value={achievementProgress} className="mt-2" />
               </CardContent>
             </Card>
@@ -275,7 +275,7 @@ export default function PremiumFeatures() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold" data-testid="text-points">{totalPoints}</div>
+                <div className="text-xl font-bold" data-testid="text-points">{totalPoints}</div>
                 <p className="text-sm text-muted-foreground mt-1">Keep earning to unlock rewards</p>
               </CardContent>
             </Card>
@@ -550,11 +550,11 @@ export default function PremiumFeatures() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="p-4 border rounded-lg">
                     <p className="text-sm text-muted-foreground">First Response Time</p>
-                    <p className="text-2xl font-bold">{slaInfo.firstResponseTime}h</p>
+                    <p className="text-lg font-bold">{slaInfo.firstResponseTime}h</p>
                   </div>
                   <div className="p-4 border rounded-lg">
                     <p className="text-sm text-muted-foreground">Resolution Time</p>
-                    <p className="text-2xl font-bold">{slaInfo.resolutionTime}h</p>
+                    <p className="text-lg font-bold">{slaInfo.resolutionTime}h</p>
                   </div>
                   <div className="p-4 border rounded-lg">
                     <p className="text-sm text-muted-foreground">Priority Level</p>

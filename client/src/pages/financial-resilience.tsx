@@ -162,7 +162,7 @@ export default function FinancialResilience() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Financial Resilience Evidence</h1>
+        <h1 className="text-xl font-bold mb-2">Financial Resilience Evidence</h1>
         <p className="text-muted-foreground">
           Document your runway, funding sources, and financial readiness
         </p>
@@ -177,7 +177,7 @@ export default function FinancialResilience() {
                 {resilienceScore >= 70 ? "Strong" : resilienceScore >= 40 ? "Moderate" : "Weak"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2" data-testid="text-resilience-score">{resilienceScore}%</div>
+            <div className="text-xl font-bold mb-2" data-testid="text-resilience-score">{resilienceScore}%</div>
             <Progress value={resilienceScore} className="h-2" data-testid="progress-resilience-score" />
           </CardContent>
         </Card>
@@ -188,7 +188,7 @@ export default function FinancialResilience() {
               <Clock className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Runway</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-runway-months">{runwayMonths} months</div>
+            <div className="text-lg font-bold" data-testid="text-runway-months">{runwayMonths} months</div>
             <p className="text-xs text-muted-foreground" data-testid="text-runway-status">
               {runwayMonths >= 12 ? "Excellent" : runwayMonths >= 6 ? "Acceptable" : "Too short"}
             </p>
@@ -201,7 +201,7 @@ export default function FinancialResilience() {
               <PoundSterling className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Total Funding</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-total-funding">£{calculateTotalFunding().toLocaleString()}</div>
+            <div className="text-lg font-bold" data-testid="text-total-funding">£{calculateTotalFunding().toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">secured</p>
           </CardContent>
         </Card>
@@ -212,7 +212,7 @@ export default function FinancialResilience() {
               <TrendingUp className="h-4 w-4 text-red-500" />
               <span className="text-sm font-medium">Monthly Burn</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-monthly-burn">£{calculateMonthlyBurn().toLocaleString()}</div>
+            <div className="text-lg font-bold" data-testid="text-monthly-burn">£{calculateMonthlyBurn().toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">expenses</p>
           </CardContent>
         </Card>

@@ -60,7 +60,7 @@ export default function PricingSection() {
     <section className="py-20 md:py-32 bg-gradient-to-b from-background to-accent/5" id="pricing">
       <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="font-serif text-xl font-bold mb-6">
             Simple, Transparent Pricing
           </h2>
           <p className="text-lg text-muted-foreground">
@@ -92,10 +92,10 @@ export default function PricingSection() {
               )}
 
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
+                <h3 className="text-lg font-bold mb-2">{tier.name}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{tier.description}</p>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-5xl font-bold">{tier.price}</span>
+                  <span className="text-2xl font-bold">{tier.price}</span>
                   <span className="text-muted-foreground">/plan</span>
                 </div>
               </div>

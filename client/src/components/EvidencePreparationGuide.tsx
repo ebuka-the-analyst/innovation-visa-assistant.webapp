@@ -302,7 +302,7 @@ export default function EvidencePreparationGuide() {
           <FileText className="w-8 h-8 text-primary" />
         </div>
         <div className="flex-1">
-          <h2 className="text-2xl font-bold mb-2" data-testid="text-evidence-guide-title">
+          <h2 className="text-lg font-bold mb-2" data-testid="text-evidence-guide-title">
             Evidence Preparation Guide
           </h2>
           <p className="text-muted-foreground text-lg">

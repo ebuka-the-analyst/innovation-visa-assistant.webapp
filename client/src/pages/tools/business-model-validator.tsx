@@ -490,7 +490,7 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
           
           <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-business-model-validator">Business Model Canvas Validator</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-business-model-validator">Business Model Canvas Validator</h1>
               <p className="text-lg text-muted-foreground">Validate 9 building blocks for UK Innovator Founder Visa criteria</p>
               {savedDate && (
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -531,7 +531,7 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Overall Score</p>
-                      <p className="text-3xl font-bold" data-testid="text-overall-score">{overallScore}%</p>
+                      <p className="text-xl font-bold" data-testid="text-overall-score">{overallScore}%</p>
                       <p className="text-xs text-muted-foreground mt-1">{getGrade(overallScore)}</p>
                     </div>
                   </CardContent>
@@ -541,7 +541,7 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Innovation</p>
-                      <p className="text-3xl font-bold" data-testid="text-innovation-score">{innovationScore}%</p>
+                      <p className="text-xl font-bold" data-testid="text-innovation-score">{innovationScore}%</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {innovationScore >= 70 ? (
                           <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -558,7 +558,7 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Viability</p>
-                      <p className="text-3xl font-bold" data-testid="text-viability-score">{viabilityScore}%</p>
+                      <p className="text-xl font-bold" data-testid="text-viability-score">{viabilityScore}%</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {viabilityScore >= 70 ? (
                           <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -575,7 +575,7 @@ Endorsing Bodies: Envestors, UKES, Innovator International, GEP
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Scalability</p>
-                      <p className="text-3xl font-bold" data-testid="text-scalability-score">{scalabilityScore}%</p>
+                      <p className="text-xl font-bold" data-testid="text-scalability-score">{scalabilityScore}%</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {scalabilityScore >= 70 ? (
                           <CheckCircle2 className="h-5 w-5 text-green-500" />

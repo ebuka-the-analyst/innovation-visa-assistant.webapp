@@ -264,7 +264,7 @@ export default function TeamAssessment() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Team Talent Assessment</h1>
+              <h1 className="text-xl font-bold mb-2">Team Talent Assessment</h1>
               <p className="text-muted-foreground">Evaluate team capabilities across multiple dimensions</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -290,8 +290,8 @@ export default function TeamAssessment() {
           {savedDate && <Alert className="mb-4"><AlertDescription>Last saved: {savedDate}</AlertDescription></Alert>}
 
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <Card className="p-4 bg-blue-50"><p className="text-sm text-muted-foreground">Team Size</p><p className="text-3xl font-bold text-primary">{members.length}</p></Card>
-            <Card className="p-4 bg-green-50"><p className="text-sm text-muted-foreground">Health Score</p><p className="text-3xl font-bold text-green-600">{teamScore}/100</p></Card>
+            <Card className="p-4 bg-blue-50"><p className="text-sm text-muted-foreground">Team Size</p><p className="text-xl font-bold text-primary">{members.length}</p></Card>
+            <Card className="p-4 bg-green-50"><p className="text-sm text-muted-foreground">Health Score</p><p className="text-xl font-bold text-green-600">{teamScore}/100</p></Card>
           </div>
 
           {getRadarData().length > 0 && (

@@ -742,7 +742,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
           <div className="mb-8">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-gap">Market Gap Analysis</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-market-gap">Market Gap Analysis</h1>
                 <p className="text-lg text-muted-foreground">Identify unmet needs, underserved segments, and white space opportunities for UK Innovator Founder visa innovation criterion</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
@@ -791,7 +791,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Gap Opportunity Score</p>
-                          <p className="text-3xl font-bold" data-testid="text-opportunity-score">{opportunityScore}%</p>
+                          <p className="text-xl font-bold" data-testid="text-opportunity-score">{opportunityScore}%</p>
                           <p className="text-sm mt-2">{grade}</p>
                           <Progress value={opportunityScore} className="mt-3" />
                         </div>
@@ -802,7 +802,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Opportunity</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-total-opportunity">£{totalOpportunity.toFixed(0)}M</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-total-opportunity">£{totalOpportunity.toFixed(0)}M</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {totalOpportunity >= 50 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -819,7 +819,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Innovation Alignment</p>
-                          <p className="text-3xl font-bold text-green-600" data-testid="text-innovation-aligned">{aligned ? 'STRONG' : 'MODERATE'}</p>
+                          <p className="text-xl font-bold text-green-600" data-testid="text-innovation-aligned">{aligned ? 'STRONG' : 'MODERATE'}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {aligned ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />

@@ -179,7 +179,7 @@ export function EconomicImpactSimulator() {
             <TrendingUp className="h-7 w-7 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">UK Economic Impact Simulator</h2>
+            <h2 className="text-lg font-bold">UK Economic Impact Simulator</h2>
             <p className="text-muted-foreground">
               Calculate your business's contribution to the UK economy
             </p>
@@ -346,7 +346,7 @@ export function EconomicImpactSimulator() {
                   <Users className="h-5 w-5 text-blue-500" />
                   <span className="text-sm font-medium">Total UK Jobs Created</span>
                 </div>
-                <p className="text-3xl font-bold">{metrics.totalJobs}</p>
+                <p className="text-xl font-bold">{metrics.totalJobs}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {metrics.directJobs} direct + {metrics.indirectJobs} indirect
                 </p>
@@ -363,7 +363,7 @@ export function EconomicImpactSimulator() {
                   <TrendingUp className="h-5 w-5 text-green-500" />
                   <span className="text-sm font-medium">GDP Contribution</span>
                 </div>
-                <p className="text-3xl font-bold">{formatCurrency(metrics.gdpContribution)}</p>
+                <p className="text-xl font-bold">{formatCurrency(metrics.gdpContribution)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Projected 5-year impact
                 </p>
@@ -380,7 +380,7 @@ export function EconomicImpactSimulator() {
                   <PoundSterling className="h-5 w-5 text-purple-500" />
                   <span className="text-sm font-medium">Annual Tax Revenue</span>
                 </div>
-                <p className="text-3xl font-bold">{formatCurrency(metrics.taxRevenue)}</p>
+                <p className="text-xl font-bold">{formatCurrency(metrics.taxRevenue)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Corp tax + NI + PAYE + VAT
                 </p>

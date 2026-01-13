@@ -63,7 +63,7 @@ export default function Handoff() {
           {status === 'loading' && (
             <>
               <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-primary" />
-              <h1 className="text-2xl font-bold mb-2">Loading Session...</h1>
+              <h1 className="text-lg font-bold mb-2">Loading Session...</h1>
               <p className="text-muted-foreground">
                 Please wait while we restore your progress
               </p>
@@ -73,7 +73,7 @@ export default function Handoff() {
           {status === 'success' && (
             <>
               <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-green-600" />
-              <h1 className="text-2xl font-bold mb-2">Session Loaded!</h1>
+              <h1 className="text-lg font-bold mb-2">Session Loaded!</h1>
               <p className="text-muted-foreground mb-4">
                 Redirecting you to the tool...
               </p>
@@ -87,7 +87,7 @@ export default function Handoff() {
           {status === 'error' && (
             <>
               <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive" />
-              <h1 className="text-2xl font-bold mb-2">Session Error</h1>
+              <h1 className="text-lg font-bold mb-2">Session Error</h1>
               <p className="text-muted-foreground mb-4">{error}</p>
               <Button 
                 onClick={() => setLocation('/')}

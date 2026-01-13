@@ -229,7 +229,7 @@ export default function VisaTimeline() {
           <div className="mb-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold mb-2">Visa Journey Timeline Planner</h1>
+                <h1 className="text-xl font-bold mb-2">Visa Journey Timeline Planner</h1>
                 <p className="text-muted-foreground">Plan and track your UK Innovator Founder Visa application milestones</p>
               </div>
               <AiTraditionalToggle

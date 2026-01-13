@@ -50,7 +50,7 @@ export function ToolAccessGuard({ children, requiredTier, toolName }: ToolAccess
                   <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                     <Lock className="w-10 h-10 text-primary" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-3">{toolName}</h2>
+                  <h2 className="text-xl font-bold mb-3">{toolName}</h2>
                   <p className="text-lg text-muted-foreground mb-2">
                     This tool requires the <strong>{getRequiredTierName(requiredTier)} Plan</strong>
                   </p>

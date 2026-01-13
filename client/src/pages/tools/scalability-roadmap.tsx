@@ -805,7 +805,7 @@ submitting visa applications.
           
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
-              <h1 className="text-4xl font-bold" data-testid="heading-scalability-roadmap">Scalability Roadmap</h1>
+              <h1 className="text-xl font-bold" data-testid="heading-scalability-roadmap">Scalability Roadmap</h1>
               <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
             <p className="text-lg text-muted-foreground">Infrastructure, team, and technology scaling plan for UK visa compliance</p>
@@ -839,7 +839,7 @@ submitting visa applications.
                     <p className="text-sm text-muted-foreground">Complete all sections for comprehensive roadmap</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold" data-testid="text-readiness-score">{scalabilityReadiness}%</p>
+                    <p className="text-xl font-bold" data-testid="text-readiness-score">{scalabilityReadiness}%</p>
                   </div>
                 </div>
                 <Progress value={scalabilityReadiness} className="h-3" data-testid="progress-readiness" />
@@ -1594,23 +1594,23 @@ submitting visa applications.
                   <div className="grid md:grid-cols-4 gap-4">
                     <div className="text-center p-4 border rounded-lg">
                       <p className="text-sm text-muted-foreground mb-1">User Growth</p>
-                      <p className="text-2xl font-bold" data-testid="text-user-growth">
+                      <p className="text-lg font-bold" data-testid="text-user-growth">
                         {capacityPlan.currentUsers > 0 ? `${Math.round(((capacityPlan.targetUsers - capacityPlan.currentUsers) / capacityPlan.currentUsers) * 100)}%` : 'N/A'}
                       </p>
                     </div>
                     <div className="text-center p-4 border rounded-lg">
                       <p className="text-sm text-muted-foreground mb-1">Team Growth</p>
-                      <p className="text-2xl font-bold" data-testid="text-team-growth">
+                      <p className="text-lg font-bold" data-testid="text-team-growth">
                         {teamGrowth.currentHeadcount > 0 ? `${Math.round(((teamGrowth.targetHeadcount - teamGrowth.currentHeadcount) / teamGrowth.currentHeadcount) * 100)}%` : 'N/A'}
                       </p>
                     </div>
                     <div className="text-center p-4 border rounded-lg">
                       <p className="text-sm text-muted-foreground mb-1">UK Jobs</p>
-                      <p className="text-2xl font-bold text-green-600" data-testid="text-uk-jobs">{teamGrowth.ukJobsCreated}</p>
+                      <p className="text-lg font-bold text-green-600" data-testid="text-uk-jobs">{teamGrowth.ukJobsCreated}</p>
                     </div>
                     <div className="text-center p-4 border rounded-lg">
                       <p className="text-sm text-muted-foreground mb-1">Infrastructure Spend</p>
-                      <p className="text-2xl font-bold" data-testid="text-infra-spend">£{(infrastructure.estimatedCost || 0).toLocaleString()}</p>
+                      <p className="text-lg font-bold" data-testid="text-infra-spend">£{(infrastructure.estimatedCost || 0).toLocaleString()}</p>
                     </div>
                   </div>
                 </CardContent>

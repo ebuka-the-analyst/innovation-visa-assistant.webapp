@@ -37,7 +37,7 @@ export default function StatsSection() {
     <section className="py-20 md:py-32 bg-gradient-to-b from-accent/5 to-background">
       <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="font-serif text-xl font-bold mb-6">
             UK Innovator Founder Visa by the Numbers
           </h2>
           <p className="text-lg text-muted-foreground">
@@ -56,7 +56,7 @@ export default function StatsSection() {
                   </div>
                 </div>
                 <div className="mb-2">
-                  <p className="font-serif text-3xl md:text-4xl font-bold text-primary">{stat.value}</p>
+                  <p className="font-serif text-xl font-bold text-primary">{stat.value}</p>
                   <p className="text-sm font-semibold text-foreground">{stat.label}</p>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">{stat.subtext}</p>

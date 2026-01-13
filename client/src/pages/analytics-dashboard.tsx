@@ -66,7 +66,7 @@ export default function AnalyticsDashboard() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Platform Analytics Dashboard</h1>
+          <h1 className="text-xl font-bold mb-2">Platform Analytics Dashboard</h1>
           <p className="text-muted-foreground mb-6">Track tool usage and user engagement across the platform</p>
 
           <div className="flex gap-4 mb-6">
@@ -80,23 +80,23 @@ export default function AnalyticsDashboard() {
           <div className="grid grid-cols-5 gap-4 mb-6">
             <Card className="p-4 bg-blue-50">
               <p className="text-sm text-muted-foreground flex gap-2"><Users className="w-4 h-4" />Active Users</p>
-              <p className="text-3xl font-bold text-primary">{analytics.activeUsers}</p>
+              <p className="text-xl font-bold text-primary">{analytics.activeUsers}</p>
             </Card>
             <Card className="p-4 bg-green-50">
               <p className="text-sm text-muted-foreground flex gap-2"><TrendingUp className="w-4 h-4" />Sessions</p>
-              <p className="text-3xl font-bold text-green-600">{analytics.totalSessions}</p>
+              <p className="text-xl font-bold text-green-600">{analytics.totalSessions}</p>
             </Card>
             <Card className="p-4 bg-purple-50 dark:bg-purple-950">
               <p className="text-sm text-muted-foreground flex gap-2"><Clock className="w-4 h-4" />Avg Time</p>
-              <p className="text-3xl font-bold text-purple-600">{analytics.averageSessionTime}</p>
+              <p className="text-xl font-bold text-purple-600">{analytics.averageSessionTime}</p>
             </Card>
             <Card className="p-4 bg-orange-50 dark:bg-orange-950">
               <p className="text-sm text-muted-foreground flex gap-2"><Target className="w-4 h-4" />Completion</p>
-              <p className="text-3xl font-bold text-primary">{analytics.completionRate}</p>
+              <p className="text-xl font-bold text-primary">{analytics.completionRate}</p>
             </Card>
             <Card className="p-4 bg-pink-50">
               <p className="text-sm text-muted-foreground">Satisfaction</p>
-              <p className="text-3xl font-bold text-pink-600">{analytics.userSatisfaction}</p>
+              <p className="text-xl font-bold text-pink-600">{analytics.userSatisfaction}</p>
             </Card>
           </div>
 

@@ -445,7 +445,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Team Compensation Planning</h1>
+              <h1 className="text-xl font-bold mb-2">Team Compensation Planning</h1>
               <p className="text-muted-foreground">Job creation for scalability & budget planning for viability (Innovator Founder Visa)</p>
             </div>
             <AiTraditionalToggle
@@ -483,7 +483,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
                       <Target className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Scalability</span>
                     </div>
-                    <p className="text-2xl font-bold">{scalabilityScore}%</p>
+                    <p className="text-lg font-bold">{scalabilityScore}%</p>
                     <p className="text-xs text-muted-foreground">{jobsCreated} jobs planned</p>
                   </Card>
                   <Card className="p-4">
@@ -491,7 +491,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
                       <DollarSign className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Viability</span>
                     </div>
-                    <p className="text-2xl font-bold">{viabilityScore}%</p>
+                    <p className="text-lg font-bold">{viabilityScore}%</p>
                     <p className="text-xs text-muted-foreground">Budget health</p>
                   </Card>
                 </div>
@@ -520,7 +520,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
                     <Target className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Scalability Score</span>
                   </div>
-                  <p className="text-3xl font-bold">{scalabilityScore}%</p>
+                  <p className="text-xl font-bold">{scalabilityScore}%</p>
                   <p className="text-xs text-muted-foreground mt-1">{jobsCreated} jobs created</p>
                 </Card>
 
@@ -529,7 +529,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
                     <Award className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">ILR Criterion</span>
                   </div>
-                  <p className="text-3xl font-bold">{meetsILRCriterion ? '✓' : '✗'}</p>
+                  <p className="text-xl font-bold">{meetsILRCriterion ? '✓' : '✗'}</p>
                   <p className="text-xs text-muted-foreground mt-1">{meetsILRCriterion ? 'Ready for settlement' : 'Not yet met'}</p>
                 </Card>
 
@@ -538,7 +538,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
                     <DollarSign className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">Budget Viability</span>
                   </div>
-                  <p className="text-3xl font-bold">{viabilityScore}%</p>
+                  <p className="text-xl font-bold">{viabilityScore}%</p>
                   <p className="text-xs text-muted-foreground mt-1">£{Math.round(monthlyBurnRate / 1000)}k/month burn</p>
                 </Card>
 
@@ -547,7 +547,7 @@ Avg Cost Per Hire: £${Math.round(avgCostPerHire).toLocaleString()}
                     <Briefcase className="w-5 h-5 text-primary" />
                     <span className="text-sm font-medium">36-Mo Cost</span>
                   </div>
-                  <p className="text-3xl font-bold">£{Math.round(totalCost36Mo / 1000)}k</p>
+                  <p className="text-xl font-bold">£{Math.round(totalCost36Mo / 1000)}k</p>
                   <p className="text-xs text-muted-foreground mt-1">+£{Math.round(totalRecruitmentCost / 1000)}k recruitment</p>
                 </Card>
               </div>

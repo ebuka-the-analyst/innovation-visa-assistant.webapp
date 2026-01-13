@@ -127,7 +127,7 @@ export default function DiagnosticsPage() {
       <div className="container mx-auto max-w-7xl space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Business Plan Diagnostics</h1>
+          <h1 className="text-xl font-bold">Business Plan Diagnostics</h1>
           <p className="text-lg text-muted-foreground">
             Comprehensive analysis of your visa prospects across all key metrics
           </p>
@@ -167,7 +167,7 @@ export default function DiagnosticsPage() {
               <Card className="p-6 col-span-1 lg:col-span-2">
                 <div className="flex items-center gap-3 mb-6">
                   <Zap className="w-6 h-6 text-primary" />
-                  <h2 className="text-2xl font-bold">Compliance Status</h2>
+                  <h2 className="text-lg font-bold">Compliance Status</h2>
                 </div>
 
                 <div className="space-y-4">
@@ -200,7 +200,7 @@ export default function DiagnosticsPage() {
               <Card className="p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <Target className="w-6 h-6 text-primary" />
-                  <h2 className="text-2xl font-bold">Endorser Fit Analysis</h2>
+                  <h2 className="text-lg font-bold">Endorser Fit Analysis</h2>
                 </div>
 
                 <div className="space-y-3">
@@ -245,7 +245,7 @@ export default function DiagnosticsPage() {
               <Card className="p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <TrendingUp className="w-6 h-6 text-primary" />
-                  <h2 className="text-2xl font-bold">Visa Routes</h2>
+                  <h2 className="text-lg font-bold">Visa Routes</h2>
                 </div>
 
                 <div className="space-y-3">
@@ -273,13 +273,13 @@ export default function DiagnosticsPage() {
               <Card className="p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <Users className="w-6 h-6 text-primary" />
-                  <h2 className="text-2xl font-bold">Team Model</h2>
+                  <h2 className="text-lg font-bold">Team Model</h2>
                 </div>
 
                 <div className="space-y-4">
                   <div className="p-4 bg-primary/10 rounded-lg">
                     <div className="text-sm text-muted-foreground">Recommended Team Size</div>
-                    <div className="text-3xl font-bold text-primary">{teamData.teamPlan.recommendedTeamSize}</div>
+                    <div className="text-xl font-bold text-primary">{teamData.teamPlan.recommendedTeamSize}</div>
                   </div>
 
                   <div>
@@ -320,7 +320,7 @@ export default function DiagnosticsPage() {
               <Card className="p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <TrendingUp className="w-6 h-6 text-primary" />
-                  <h2 className="text-2xl font-bold">12-Month Forecast</h2>
+                  <h2 className="text-lg font-bold">12-Month Forecast</h2>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">

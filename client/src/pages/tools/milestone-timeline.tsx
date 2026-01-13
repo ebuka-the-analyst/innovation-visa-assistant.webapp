@@ -308,7 +308,7 @@ export default function MilestoneTimeline() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2" data-testid="text-tool-title">
+                <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-tool-title">
                   <Calendar className="w-8 h-8 text-primary" />
                   Milestone Timeline Planner
                 </h1>
@@ -345,7 +345,7 @@ export default function MilestoneTimeline() {
                     <Target className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">Total Milestones</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-total-milestones">{milestones.length}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-total-milestones">{milestones.length}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -354,7 +354,7 @@ export default function MilestoneTimeline() {
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
                     <span className="text-sm text-muted-foreground">Completed</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-completed-count">{completedCount}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-completed-count">{completedCount}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -363,7 +363,7 @@ export default function MilestoneTimeline() {
                     <Clock className="w-5 h-5 text-orange-500" />
                     <span className="text-sm text-muted-foreground">In Progress</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{milestones.filter((m) => m.status === "in-progress").length}</p>
+                  <p className="text-lg font-bold mt-1">{milestones.filter((m) => m.status === "in-progress").length}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -372,7 +372,7 @@ export default function MilestoneTimeline() {
                     <AlertTriangle className="w-5 h-5 text-red-500" />
                     <span className="text-sm text-muted-foreground">Delayed</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-delayed-count">{delayedCount}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-delayed-count">{delayedCount}</p>
                 </CardContent>
               </Card>
             </div>

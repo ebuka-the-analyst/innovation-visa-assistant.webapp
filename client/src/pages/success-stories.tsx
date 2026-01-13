@@ -290,7 +290,7 @@ export default function SuccessStories() {
 
       <div className="container mx-auto py-8 px-4 max-w-5xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-3" data-testid="heading-success-stories">
+          <h1 className="text-xl font-bold mb-2 flex items-center gap-3" data-testid="heading-success-stories">
             <Trophy className="w-8 h-8 text-amber-500" />
             Success Stories
           </h1>
@@ -302,25 +302,25 @@ export default function SuccessStories() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-amber-500" data-testid="text-total-stories">{allStories.length}</div>
+              <div className="text-xl font-bold text-amber-500" data-testid="text-total-stories">{allStories.length}</div>
               <p className="text-sm text-muted-foreground">Success Stories</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-green-500" data-testid="text-accessible-stories">{accessibleCount}</div>
+              <div className="text-xl font-bold text-green-500" data-testid="text-accessible-stories">{accessibleCount}</div>
               <p className="text-sm text-muted-foreground">Available to You</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-blue-500" data-testid="text-industries">{industries.length}</div>
+              <div className="text-xl font-bold text-blue-500" data-testid="text-industries">{industries.length}</div>
               <p className="text-sm text-muted-foreground">Industries</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-purple-500">100%</div>
+              <div className="text-xl font-bold text-purple-500">100%</div>
               <p className="text-sm text-muted-foreground">Approved</p>
             </CardContent>
           </Card>

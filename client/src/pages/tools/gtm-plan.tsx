@@ -593,7 +593,7 @@ https://www.gov.uk/innovator-founder-visa
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-gtm-plan">Go-to-Market Strategy</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-gtm-plan">Go-to-Market Strategy</h1>
                 <p className="text-lg text-muted-foreground">Build scalable market entry plan for UK Innovator Founder Visa</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
@@ -653,7 +653,7 @@ https://www.gov.uk/innovator-founder-visa
                   <Target className="h-5 w-5 text-primary" />
                   <span className="text-sm font-medium">GTM Readiness</span>
                 </div>
-                <p className="text-3xl font-bold" data-testid="text-gtm-readiness">{gtmReadiness}%</p>
+                <p className="text-xl font-bold" data-testid="text-gtm-readiness">{gtmReadiness}%</p>
                 <p className="text-xs text-muted-foreground mt-1">{readinessGrade}</p>
                 <Progress value={gtmReadiness} className="mt-2" />
               </CardContent>
@@ -665,7 +665,7 @@ https://www.gov.uk/innovator-founder-visa
                   <Rocket className="h-5 w-5 text-primary" />
                   <span className="text-sm font-medium">Scalability</span>
                 </div>
-                <p className="text-3xl font-bold" data-testid="text-scalability-score">{scalabilityPotential}</p>
+                <p className="text-xl font-bold" data-testid="text-scalability-score">{scalabilityPotential}</p>
                 <p className="text-xs text-muted-foreground mt-1">Visa criterion</p>
               </CardContent>
             </Card>
@@ -676,7 +676,7 @@ https://www.gov.uk/innovator-founder-visa
                   <TrendingUp className="h-5 w-5 text-primary" />
                   <span className="text-sm font-medium">Execution</span>
                 </div>
-                <p className="text-3xl font-bold" data-testid="text-execution-score">{executionReadiness}</p>
+                <p className="text-xl font-bold" data-testid="text-execution-score">{executionReadiness}</p>
                 <p className="text-xs text-muted-foreground mt-1">Implementation readiness</p>
               </CardContent>
             </Card>
@@ -687,7 +687,7 @@ https://www.gov.uk/innovator-founder-visa
                   <BarChart3 className="h-5 w-5 text-primary" />
                   <span className="text-sm font-medium">Positioning</span>
                 </div>
-                <p className="text-3xl font-bold" data-testid="text-positioning-score">{marketPositioning}</p>
+                <p className="text-xl font-bold" data-testid="text-positioning-score">{marketPositioning}</p>
                 <p className="text-xs text-muted-foreground mt-1">Market clarity</p>
               </CardContent>
             </Card>

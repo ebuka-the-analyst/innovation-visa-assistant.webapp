@@ -352,7 +352,7 @@ GOV.UK: Innovator Founder Visa viability criterion
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Performance Management</h1>
+          <h1 className="text-xl font-bold mb-2">Performance Management</h1>
           <p className="text-muted-foreground mb-6">Manage team performance for execution and scaling (Innovator Founder Visa)</p>
 
           <ToolUtilityBar toolId="performance-management" toolName="Performance Management" onSave={saveProgress} onExport={exportReviews} getSerializedState={getSerializedState} />
@@ -375,7 +375,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                 <Award className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Team Performance</span>
               </div>
-              <p className="text-3xl font-bold">{performanceScore}%</p>
+              <p className="text-xl font-bold">{performanceScore}%</p>
               <p className="text-xs text-muted-foreground mt-1">{grade}</p>
             </Card>
 
@@ -384,7 +384,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                 <Users className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Total Reviews</span>
               </div>
-              <p className="text-3xl font-bold">{reviews.length}</p>
+              <p className="text-xl font-bold">{reviews.length}</p>
               <p className="text-xs text-muted-foreground mt-1">Employees tracked</p>
             </Card>
 
@@ -393,7 +393,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Top Performers</span>
               </div>
-              <p className="text-3xl font-bold">{reviews.filter(r => r.rating === "exceeds").length}</p>
+              <p className="text-xl font-bold">{reviews.filter(r => r.rating === "exceeds").length}</p>
               <p className="text-xs text-muted-foreground mt-1">{Math.round((reviews.filter(r => r.rating === "exceeds").length / (reviews.length || 1)) * 100)}% of team</p>
             </Card>
 
@@ -402,7 +402,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                 <Target className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Pay Alignment</span>
               </div>
-              <p className="text-3xl font-bold">{alignmentScore}%</p>
+              <p className="text-xl font-bold">{alignmentScore}%</p>
               <p className="text-xs text-muted-foreground mt-1">{performersUnderpaid} underpaid</p>
             </Card>
           </div>

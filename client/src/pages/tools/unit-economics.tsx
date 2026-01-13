@@ -622,7 +622,7 @@ business decisions or visa applications.
           
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-unit-economics">Unit Economics</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-unit-economics">Unit Economics</h1>
               <p className="text-lg text-muted-foreground">SaaS subscription business metrics: CAC, LTV, churn, and profitability analysis</p>
               {savedDate && (
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -659,7 +659,7 @@ business decisions or visa applications.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">LTV:CAC Ratio</p>
-                      <p className="text-3xl font-bold" data-testid="text-ltv-cac-ratio">
+                      <p className="text-xl font-bold" data-testid="text-ltv-cac-ratio">
                         {ltvCacRatio.toFixed(1)}:1
                       </p>
                       <div className="flex items-center justify-center gap-2 mt-2">
@@ -678,7 +678,7 @@ business decisions or visa applications.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">CAC Payback</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-payback-period">
+                      <p className="text-xl font-bold text-primary" data-testid="text-payback-period">
                         {monthsToRecoverCAC.toFixed(1)}mo
                       </p>
                       <div className="flex items-center justify-center gap-2 mt-2">
@@ -697,7 +697,7 @@ business decisions or visa applications.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Gross Margin</p>
-                      <p className="text-3xl font-bold text-green-600" data-testid="text-gross-margin">
+                      <p className="text-xl font-bold text-green-600" data-testid="text-gross-margin">
                         {grossMarginPercent.toFixed(0)}%
                       </p>
                       <div className="flex items-center justify-center gap-2 mt-2">
@@ -716,7 +716,7 @@ business decisions or visa applications.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Annual Churn</p>
-                      <p className="text-3xl font-bold" data-testid="text-churn-rate">
+                      <p className="text-xl font-bold" data-testid="text-churn-rate">
                         {annualChurnRate.toFixed(1)}%
                       </p>
                       <div className="flex items-center justify-center gap-2 mt-2">
@@ -735,7 +735,7 @@ business decisions or visa applications.
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Health Score</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-health-score">
+                      <p className="text-xl font-bold text-primary" data-testid="text-health-score">
                         {healthScore}%
                       </p>
                       <Progress value={healthScore} className="mt-2" />

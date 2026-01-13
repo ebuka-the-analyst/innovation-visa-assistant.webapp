@@ -596,7 +596,7 @@ industry-specific requirements.
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-contingency-plan">Business Contingency Plan</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-contingency-plan">Business Contingency Plan</h1>
                 <p className="text-lg text-muted-foreground">Comprehensive risk management and business continuity planning</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -672,7 +672,7 @@ industry-specific requirements.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Risks</p>
-                          <p className="text-3xl font-bold" data-testid="text-total-risks">{totalRisks}</p>
+                          <p className="text-xl font-bold" data-testid="text-total-risks">{totalRisks}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -681,7 +681,7 @@ industry-specific requirements.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Critical Risks</p>
-                          <p className="text-3xl font-bold text-destructive" data-testid="text-critical-risks">{criticalRisks}</p>
+                          <p className="text-xl font-bold text-destructive" data-testid="text-critical-risks">{criticalRisks}</p>
                           {criticalRisks > 0 && (
                             <AlertTriangle className="h-5 w-5 text-destructive mx-auto mt-2" />
                           )}
@@ -693,7 +693,7 @@ industry-specific requirements.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Mitigated</p>
-                          <p className="text-3xl font-bold text-green-600" data-testid="text-mitigated-risks">{mitigatedRisks}</p>
+                          <p className="text-xl font-bold text-green-600" data-testid="text-mitigated-risks">{mitigatedRisks}</p>
                           <p className="text-sm text-muted-foreground mt-1">of {totalRisks}</p>
                         </div>
                       </CardContent>
@@ -703,7 +703,7 @@ industry-specific requirements.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Readiness Score</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-readiness-score">{readinessScore}%</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-readiness-score">{readinessScore}%</p>
                           <Progress value={readinessScore} className="mt-2" />
                         </div>
                       </CardContent>

@@ -34,7 +34,7 @@ export default function AITransparencyPage() {
               <Brain className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold" data-testid="text-page-title">AI Transparency & Data Practices</h1>
+              <h1 className="text-xl font-bold" data-testid="text-page-title">AI Transparency & Data Practices</h1>
               <p className="text-muted-foreground">How our AI system works and how we handle your data</p>
             </div>
           </div>

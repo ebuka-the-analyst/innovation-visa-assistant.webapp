@@ -132,7 +132,7 @@ export default function MarketDataVerifier() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Market Data Verifier</h1>
+        <h1 className="text-xl font-bold mb-2">Market Data Verifier</h1>
         <p className="text-muted-foreground">
           Verify and cite market statistics to build credible business plans
         </p>
@@ -147,7 +147,7 @@ export default function MarketDataVerifier() {
                 {dataQuality >= 70 ? "High" : dataQuality >= 40 ? "Medium" : "Low"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2" data-testid="text-data-quality">{dataQuality}%</div>
+            <div className="text-xl font-bold mb-2" data-testid="text-data-quality">{dataQuality}%</div>
             <Progress value={dataQuality} className="h-2" data-testid="progress-data-quality" />
           </CardContent>
         </Card>
@@ -158,7 +158,7 @@ export default function MarketDataVerifier() {
               <CheckCircle2 className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Verified</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-verified-count">{statistics.filter(s => s.verified).length}</div>
+            <div className="text-lg font-bold" data-testid="text-verified-count">{statistics.filter(s => s.verified).length}</div>
             <p className="text-xs text-muted-foreground">statistics</p>
           </CardContent>
         </Card>
@@ -169,7 +169,7 @@ export default function MarketDataVerifier() {
               <BookOpen className="h-4 w-4 text-blue-500" />
               <span className="text-sm font-medium">Official</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-official-count">{statistics.filter(s => s.sourceType === "official").length}</div>
+            <div className="text-lg font-bold" data-testid="text-official-count">{statistics.filter(s => s.sourceType === "official").length}</div>
             <p className="text-xs text-muted-foreground">sources</p>
           </CardContent>
         </Card>
@@ -180,7 +180,7 @@ export default function MarketDataVerifier() {
               <AlertTriangle className="h-4 w-4 text-yellow-500" />
               <span className="text-sm font-medium">Unverified</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-unverified-count">{unverifiedCount}</div>
+            <div className="text-lg font-bold" data-testid="text-unverified-count">{unverifiedCount}</div>
             <p className="text-xs text-muted-foreground">need review</p>
           </CardContent>
         </Card>

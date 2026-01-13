@@ -414,7 +414,7 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Financial Projections</h1>
+              <h1 className="text-xl font-bold mb-2">Financial Projections</h1>
               <p className="text-muted-foreground">12-month financial projections for UK visa compliance</p>
             </div>
             <AiTraditionalToggle
@@ -555,19 +555,19 @@ ${generateActionPlan().map(a => `${a.week}: ${a.action} [${a.priority}]`).join('
           <div className="grid md:grid-cols-4 gap-4 mb-6">
             <Card className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Runway</p>
-              <p className="text-3xl font-bold" data-testid="text-runway">
+              <p className="text-xl font-bold" data-testid="text-runway">
                 {runway > 99 ? "∞" : runway}mo
               </p>
             </Card>
             <Card className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Net Monthly</p>
-              <p className={`text-3xl font-bold ${netMonthly >= 0 ? 'text-green-600' : 'text-red-600'}`} data-testid="text-net-monthly">
+              <p className={`text-xl font-bold ${netMonthly >= 0 ? 'text-green-600' : 'text-red-600'}`} data-testid="text-net-monthly">
                 £{Math.abs(netMonthly).toLocaleString()}
               </p>
             </Card>
             <Card className={finalCash > 0 ? "p-4 bg-green-50 dark:bg-green-950/30" : "p-4 bg-red-50 dark:bg-red-950/30"}>
               <p className="text-xs text-muted-foreground mb-1">Year-End Cash</p>
-              <p className={`text-3xl font-bold ${finalCash > 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`} data-testid="text-year-end-cash">
+              <p className={`text-xl font-bold ${finalCash > 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`} data-testid="text-year-end-cash">
                 £{Math.abs(finalCash).toLocaleString()}
               </p>
             </Card>

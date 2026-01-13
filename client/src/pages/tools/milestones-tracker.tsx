@@ -284,7 +284,7 @@ export default function MilestonesTracker() {
           <div className="mb-6">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
               <div>
-                <h1 className="text-3xl font-bold mb-2">Key Milestones Tracker</h1>
+                <h1 className="text-xl font-bold mb-2">Key Milestones Tracker</h1>
                 <p className="text-muted-foreground">Track and document your business achievements and progress</p>
               </div>
               <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -319,21 +319,21 @@ export default function MilestonesTracker() {
               <Card>
                 <CardContent className="pt-6 text-center">
                   <Trophy className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{completedCount}</div>
+                  <div className="text-lg font-bold">{completedCount}</div>
                   <div className="text-sm text-muted-foreground">Completed</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6 text-center">
                   <Clock className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{milestones.filter(m => m.status === "in-progress").length}</div>
+                  <div className="text-lg font-bold">{milestones.filter(m => m.status === "in-progress").length}</div>
                   <div className="text-sm text-muted-foreground">In Progress</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6 text-center">
                   <Flag className="w-8 h-8 text-red-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">{milestones.filter(m => m.status === "at-risk").length}</div>
+                  <div className="text-lg font-bold">{milestones.filter(m => m.status === "at-risk").length}</div>
                   <div className="text-sm text-muted-foreground">At Risk</div>
                 </CardContent>
               </Card>

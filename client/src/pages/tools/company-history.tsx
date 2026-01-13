@@ -196,7 +196,7 @@ export default function CompanyHistory() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Company History</h1>
+              <h1 className="text-xl font-bold mb-2">Company History</h1>
               <p className="text-muted-foreground">Document your company's founding story and milestones</p>
             </div>
             <AiTraditionalToggle

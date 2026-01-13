@@ -446,7 +446,7 @@ Endorsing bodies require evidence-backed projections. Consult qualified advisors
           
           <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-breakeven-calculator">Breakeven Calculator</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-breakeven-calculator">Breakeven Calculator</h1>
               <p className="text-lg text-muted-foreground">Comprehensive unit economics and path to profitability analysis</p>
               {savedDate && (
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -487,7 +487,7 @@ Endorsing bodies require evidence-backed projections. Consult qualified advisors
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Breakeven Units</p>
-                      <p className="text-3xl font-bold" data-testid="text-breakeven-units">{breakevenUnits}</p>
+                      <p className="text-xl font-bold" data-testid="text-breakeven-units">{breakevenUnits}</p>
                       <p className="text-xs text-muted-foreground mt-2">per month</p>
                     </div>
                   </CardContent>
@@ -497,7 +497,7 @@ Endorsing bodies require evidence-backed projections. Consult qualified advisors
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Breakeven Revenue</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-breakeven-revenue">£{breakevenRevenue.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-primary" data-testid="text-breakeven-revenue">£{breakevenRevenue.toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground mt-2">monthly target</p>
                     </div>
                   </CardContent>
@@ -507,7 +507,7 @@ Endorsing bodies require evidence-backed projections. Consult qualified advisors
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Breakeven Month</p>
-                      <p className="text-3xl font-bold" data-testid="text-breakeven-month">
+                      <p className="text-xl font-bold" data-testid="text-breakeven-month">
                         {breakevenMonth === -1 ? 'N/A' : `M${breakevenMonth}`}
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">time to profitability</p>
@@ -519,7 +519,7 @@ Endorsing bodies require evidence-backed projections. Consult qualified advisors
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Contribution Margin</p>
-                      <p className={`text-3xl font-bold ${contributionMarginPercent >= 40 ? 'text-green-600' : 'text-orange-500'}`} data-testid="text-contribution-margin">
+                      <p className={`text-xl font-bold ${contributionMarginPercent >= 40 ? 'text-green-600' : 'text-orange-500'}`} data-testid="text-contribution-margin">
                         {contributionMarginPercent.toFixed(1)}%
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">per unit sold</p>

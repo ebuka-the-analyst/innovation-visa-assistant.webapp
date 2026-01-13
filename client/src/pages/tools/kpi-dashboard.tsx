@@ -261,7 +261,7 @@ export default function KPIDashboard() {
           <div className="mb-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold mb-2">KPI Dashboard</h1>
+                <h1 className="text-xl font-bold mb-2">KPI Dashboard</h1>
                 <p className="text-muted-foreground">Monitor and track your key business performance indicators</p>
               </div>
               <AiTraditionalToggle
@@ -328,7 +328,7 @@ export default function KPIDashboard() {
                         <ArrowDownRight className="w-4 h-4 text-red-500" />
                       )}
                     </div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-lg font-bold">
                       {kpi.unit === "£" ? "£" : ""}{kpi.value.toLocaleString()}{kpi.unit === "%" ? "%" : ""}
                     </div>
                     <Progress value={getProgressPercent(kpi)} className={`h-2 mt-2 ${getProgressColor(kpi)}`} />

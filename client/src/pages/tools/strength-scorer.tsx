@@ -580,7 +580,7 @@ application-specific advice. Endorser criteria and requirements may change.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-strength-scorer">Application Strength Scorer</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-strength-scorer">Application Strength Scorer</h1>
             <p className="text-lg text-muted-foreground">Comprehensive assessment of visa application readiness across five critical strength areas</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -624,7 +624,7 @@ application-specific advice. Endorser criteria and requirements may change.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Overall Strength</p>
-                          <p className="text-4xl font-bold" data-testid="text-overall-score">{overallScore}%</p>
+                          <p className="text-xl font-bold" data-testid="text-overall-score">{overallScore}%</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {isStrong ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -646,7 +646,7 @@ application-specific advice. Endorser criteria and requirements may change.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Pass Threshold</p>
-                          <p className="text-4xl font-bold text-orange-600 dark:text-orange-400">{passThreshold}%</p>
+                          <p className="text-xl font-bold text-orange-600 dark:text-orange-400">{passThreshold}%</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             <Info className="h-5 w-5 text-muted-foreground" />
                             <span className="text-sm">Minimum Required</span>
@@ -659,7 +659,7 @@ application-specific advice. Endorser criteria and requirements may change.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Strong Threshold</p>
-                          <p className="text-4xl font-bold text-green-600 dark:text-green-400">{strongThreshold}%</p>
+                          <p className="text-xl font-bold text-green-600 dark:text-green-400">{strongThreshold}%</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             <TrendingUp className="h-5 w-5 text-green-500" />
                             <span className="text-sm">Competitive Target</span>
@@ -764,7 +764,7 @@ application-specific advice. Endorser criteria and requirements may change.
                         <Label htmlFor="innovation-slider" className="text-base font-semibold">
                           Innovation Strength (30% weight)
                         </Label>
-                        <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" data-testid="text-innovation-score">
+                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400" data-testid="text-innovation-score">
                           {scores.innovation}/100
                         </span>
                       </div>
@@ -791,7 +791,7 @@ application-specific advice. Endorser criteria and requirements may change.
                         <Label htmlFor="viability-slider" className="text-base font-semibold">
                           Viability Strength (25% weight)
                         </Label>
-                        <span className="text-2xl font-bold text-green-600 dark:text-green-400" data-testid="text-viability-score">
+                        <span className="text-lg font-bold text-green-600 dark:text-green-400" data-testid="text-viability-score">
                           {scores.viability}/100
                         </span>
                       </div>
@@ -818,7 +818,7 @@ application-specific advice. Endorser criteria and requirements may change.
                         <Label htmlFor="scalability-slider" className="text-base font-semibold">
                           Scalability Strength (20% weight)
                         </Label>
-                        <span className="text-2xl font-bold text-purple-600 dark:text-purple-400" data-testid="text-scalability-score">
+                        <span className="text-lg font-bold text-purple-600 dark:text-purple-400" data-testid="text-scalability-score">
                           {scores.scalability}/100
                         </span>
                       </div>
@@ -845,7 +845,7 @@ application-specific advice. Endorser criteria and requirements may change.
                         <Label htmlFor="evidence-slider" className="text-base font-semibold">
                           Evidence Quality (15% weight)
                         </Label>
-                        <span className="text-2xl font-bold text-orange-600 dark:text-orange-400" data-testid="text-evidence-score">
+                        <span className="text-lg font-bold text-orange-600 dark:text-orange-400" data-testid="text-evidence-score">
                           {scores.evidence}/100
                         </span>
                       </div>
@@ -872,7 +872,7 @@ application-specific advice. Endorser criteria and requirements may change.
                         <Label htmlFor="presentation-slider" className="text-base font-semibold">
                           Presentation Quality (10% weight)
                         </Label>
-                        <span className="text-2xl font-bold text-pink-600 dark:text-pink-400" data-testid="text-presentation-score">
+                        <span className="text-lg font-bold text-pink-600 dark:text-pink-400" data-testid="text-presentation-score">
                           {scores.presentation}/100
                         </span>
                       </div>
@@ -978,7 +978,7 @@ application-specific advice. Endorser criteria and requirements may change.
                               ) : (
                                 <AlertTriangle className="h-5 w-5 text-orange-500" />
                               )}
-                              <span className={`text-2xl font-bold ${endorser.likely ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                              <span className={`text-lg font-bold ${endorser.likely ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
                                 {endorser.probability}%
                               </span>
                             </div>

@@ -73,7 +73,7 @@ export default function ILRTracker() {
             <Target className="w-4 h-4 text-green-500" />
             <span className="text-sm font-medium text-green-600 dark:text-green-400">ILR Progress Tracker</span>
           </div>
-          <h1 className="text-4xl font-bold mb-3" data-testid="heading-ilr-tracker">Path to Indefinite Leave to Remain</h1>
+          <h1 className="text-xl font-bold mb-3" data-testid="heading-ilr-tracker">Path to Indefinite Leave to Remain</h1>
           <p className="text-muted-foreground">Track your 5-year journey from Innovator Founder visa to permanent residence</p>
         </div>
 
@@ -84,7 +84,7 @@ export default function ILRTracker() {
             <CardContent className="pt-6 text-center">
               <Award className="w-8 h-8 mx-auto mb-2 text-green-500" />
               <p className="text-sm text-muted-foreground">Overall Progress</p>
-              <p className="text-3xl font-bold text-green-600">{progress}%</p>
+              <p className="text-xl font-bold text-green-600">{progress}%</p>
               <Progress value={progress} className="mt-2" />
             </CardContent>
           </Card>
@@ -92,21 +92,21 @@ export default function ILRTracker() {
             <CardContent className="pt-6 text-center">
               <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-blue-500" />
               <p className="text-sm text-muted-foreground">Completed</p>
-              <p className="text-3xl font-bold">{completedCount}/{milestones.length}</p>
+              <p className="text-xl font-bold">{completedCount}/{milestones.length}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
               <Calendar className="w-8 h-8 mx-auto mb-2 text-purple-500" />
               <p className="text-sm text-muted-foreground">Current Year</p>
-              <p className="text-3xl font-bold">Year {currentYear}</p>
+              <p className="text-xl font-bold">Year {currentYear}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
               <Clock className="w-8 h-8 mx-auto mb-2 text-orange-500" />
               <p className="text-sm text-muted-foreground">Years to ILR</p>
-              <p className="text-3xl font-bold">{Math.max(0, 5 - currentYear)}</p>
+              <p className="text-xl font-bold">{Math.max(0, 5 - currentYear)}</p>
             </CardContent>
           </Card>
         </div>

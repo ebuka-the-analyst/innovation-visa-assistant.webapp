@@ -163,7 +163,7 @@ export default function SupportPage() {
     <>
       <div className="container mx-auto py-8 px-4 md:px-6 max-w-5xl">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2" data-testid="heading-support">
+          <h1 className="text-xl font-bold mb-2" data-testid="heading-support">
             Help & Support
           </h1>
           <p className="text-muted-foreground">

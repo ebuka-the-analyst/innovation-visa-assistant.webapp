@@ -891,7 +891,7 @@ Do not submit application until risk score is below 30 and all critical flags ar
           
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-red-flag-fixer">Red Flag Fixer</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-red-flag-fixer">Red Flag Fixer</h1>
               <p className="text-lg text-muted-foreground">Identify and fix common application red flags before submission</p>
               {savedDate && (
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -934,7 +934,7 @@ Do not submit application until risk score is below 30 and all critical flags ar
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Risk Score</p>
-                          <p className="text-4xl font-bold" data-testid="text-risk-score">{riskScore}/100</p>
+                          <p className="text-xl font-bold" data-testid="text-risk-score">{riskScore}/100</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {riskScore < 30 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -955,7 +955,7 @@ Do not submit application until risk score is below 30 and all critical flags ar
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Critical Flags</p>
-                          <p className="text-4xl font-bold text-destructive" data-testid="text-critical-flags">{criticalFlags}</p>
+                          <p className="text-xl font-bold text-destructive" data-testid="text-critical-flags">{criticalFlags}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {criticalFlags === 0 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -972,7 +972,7 @@ Do not submit application until risk score is below 30 and all critical flags ar
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Fix Progress</p>
-                          <p className="text-4xl font-bold text-primary" data-testid="text-fix-progress">{fixProgress}%</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-fix-progress">{fixProgress}%</p>
                           <Progress value={fixProgress} className="mt-2" />
                           <p className="text-xs text-muted-foreground mt-1">{fixedFlags} of {totalFlags} fixed</p>
                         </div>

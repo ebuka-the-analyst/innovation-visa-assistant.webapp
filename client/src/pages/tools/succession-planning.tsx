@@ -521,7 +521,7 @@ Assessment: Innovation, Viability, Scalability criteria
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 p-6">
         
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-2">Leadership Succession & Business Continuity</h1>
+          <h1 className="text-xl font-bold mb-2">Leadership Succession & Business Continuity</h1>
           <p className="text-muted-foreground mb-6">Build resilient leadership pipeline (Innovator Founder Visa viability criterion)</p>
 
           <ToolUtilityBar
@@ -553,7 +553,7 @@ Assessment: Innovation, Viability, Scalability criteria
                 <ShieldCheck className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Continuity Score</span>
               </div>
-              <p className="text-3xl font-bold">{continuityScore}%</p>
+              <p className="text-xl font-bold">{continuityScore}%</p>
               <p className="text-xs text-muted-foreground mt-1">{grade}</p>
             </Card>
 
@@ -562,7 +562,7 @@ Assessment: Innovation, Viability, Scalability criteria
                 <Users className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Pipeline Health</span>
               </div>
-              <p className="text-3xl font-bold">{readyNow}</p>
+              <p className="text-xl font-bold">{readyNow}</p>
               <p className="text-xs text-muted-foreground mt-1">Ready now / {atRisk} at risk</p>
             </Card>
 
@@ -571,7 +571,7 @@ Assessment: Innovation, Viability, Scalability criteria
                 <Award className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Development ROI</span>
               </div>
-              <p className="text-3xl font-bold">{roi > 0 ? '+' : ''}{roi}%</p>
+              <p className="text-xl font-bold">{roi > 0 ? '+' : ''}{roi}%</p>
               <p className="text-xs text-muted-foreground mt-1">£{Math.round(totalInvestment / 1000)}k invested</p>
             </Card>
 
@@ -580,7 +580,7 @@ Assessment: Innovation, Viability, Scalability criteria
                 <Target className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Avg Readiness</span>
               </div>
-              <p className="text-3xl font-bold">{avgReadiness}%</p>
+              <p className="text-xl font-bold">{avgReadiness}%</p>
               <p className="text-xs text-muted-foreground mt-1">{criticalRisks} critical risks</p>
             </Card>
           </div>

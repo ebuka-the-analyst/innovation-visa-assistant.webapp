@@ -433,7 +433,7 @@ Consult a qualified UK accountant or tax advisor for personalized advice.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-salary-threshold">Salary Threshold Calculator</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-salary-threshold">Salary Threshold Calculator</h1>
             <p className="text-lg text-muted-foreground">UK Innovator Founder visa salary compliance and cost of living analysis</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -476,7 +476,7 @@ Consult a qualified UK accountant or tax advisor for personalized advice.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Annual Salary</p>
-                          <p className="text-3xl font-bold" data-testid="text-annual-salary">£{annualSalary.toLocaleString()}</p>
+                          <p className="text-xl font-bold" data-testid="text-annual-salary">£{annualSalary.toLocaleString()}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {meetsMinimum ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -493,7 +493,7 @@ Consult a qualified UK accountant or tax advisor for personalized advice.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Monthly Disposable</p>
-                          <p className={`text-3xl font-bold ${hasPositiveDisposable ? 'text-green-600' : 'text-destructive'}`} data-testid="text-monthly-disposable">
+                          <p className={`text-xl font-bold ${hasPositiveDisposable ? 'text-green-600' : 'text-destructive'}`} data-testid="text-monthly-disposable">
                             £{monthlyDisposable.toLocaleString()}
                           </p>
                           <div className="flex items-center justify-center gap-2 mt-2">
@@ -512,7 +512,7 @@ Consult a qualified UK accountant or tax advisor for personalized advice.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Compliance Score</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-compliance-score">{complianceScore}%</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-compliance-score">{complianceScore}%</p>
                           <Progress value={complianceScore} className="mt-2" />
                         </div>
                       </CardContent>

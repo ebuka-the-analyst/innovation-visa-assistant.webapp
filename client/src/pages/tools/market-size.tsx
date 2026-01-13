@@ -697,7 +697,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
           <div className="mb-8">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-market-sizing">Market Sizing</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-market-sizing">Market Sizing</h1>
                 <p className="text-lg text-muted-foreground">Calculate TAM/SAM/SOM with UK evidence (Innovator Founder Visa)</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -740,7 +740,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Market Opportunity</p>
-                      <p className="text-3xl font-bold" data-testid="text-health-score">{healthScore}%</p>
+                      <p className="text-xl font-bold" data-testid="text-health-score">{healthScore}%</p>
                       <p className="text-xs text-muted-foreground mt-1">{healthGrade}</p>
                       <Progress value={healthScore} className="mt-2" />
                     </div>
@@ -754,7 +754,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                         <Globe className="h-4 w-4 text-primary" />
                         <p className="text-sm text-muted-foreground">TAM</p>
                       </div>
-                      <p className="text-3xl font-bold" data-testid="text-tam">£{(tam / 1000000000).toFixed(1)}B</p>
+                      <p className="text-xl font-bold" data-testid="text-tam">£{(tam / 1000000000).toFixed(1)}B</p>
                       <p className="text-xs text-muted-foreground mt-1">Total Market</p>
                     </div>
                   </CardContent>
@@ -767,7 +767,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                         <Target className="h-4 w-4 text-primary" />
                         <p className="text-sm text-muted-foreground">SAM</p>
                       </div>
-                      <p className="text-3xl font-bold" data-testid="text-sam">£{(sam / 1000000).toFixed(0)}M</p>
+                      <p className="text-xl font-bold" data-testid="text-sam">£{(sam / 1000000).toFixed(0)}M</p>
                       <p className="text-xs text-muted-foreground mt-1">Addressable</p>
                     </div>
                   </CardContent>
@@ -780,7 +780,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                         <TrendingUp className="h-4 w-4 text-primary" />
                         <p className="text-sm text-muted-foreground">SOM</p>
                       </div>
-                      <p className="text-3xl font-bold" data-testid="text-som">£{(som / 1000000).toFixed(0)}M</p>
+                      <p className="text-xl font-bold" data-testid="text-som">£{(som / 1000000).toFixed(0)}M</p>
                       <p className="text-xs text-muted-foreground mt-1">Obtainable</p>
                     </div>
                   </CardContent>
@@ -975,7 +975,7 @@ Report generated: ${new Date().toLocaleString('en-GB')}
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Sizing Confidence</p>
-                          <p className="text-3xl font-bold" data-testid="text-confidence-score">{confidenceScore}%</p>
+                          <p className="text-xl font-bold" data-testid="text-confidence-score">{confidenceScore}%</p>
                           <p className="text-xs text-muted-foreground mt-1">{confidenceGrade}</p>
                           <Progress value={confidenceScore} className="mt-2" />
                         </div>

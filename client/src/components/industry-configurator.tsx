@@ -192,7 +192,7 @@ export function IndustryConfigurator({ selectedIndustry, onSelect, compact = fal
   return (
     <div className="space-y-6" data-testid="industry-configurator">
       <div className="text-center max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold mb-2">Select Your Industry</h2>
+        <h2 className="text-lg font-bold mb-2">Select Your Industry</h2>
         <p className="text-muted-foreground">
           Choose the sector that best matches your business. This helps us tailor the questionnaire and provide industry-specific guidance.
         </p>

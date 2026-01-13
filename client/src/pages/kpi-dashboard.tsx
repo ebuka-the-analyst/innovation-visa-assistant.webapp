@@ -24,7 +24,7 @@ export default function KPIDashboard() {
           <FeatureNavigation currentPage="questionnaire" />
           <div className="mb-12">
             <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">REAL-TIME KPI TRACKING</span>
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 mt-3">Visa Compliance Dashboard</h1>
+            <h1 className="font-serif text-xl font-bold mb-4 mt-3">Visa Compliance Dashboard</h1>
             <p className="text-lg text-muted-foreground">
               Monitor your business performance against visa commitments. Real-time KPI tracking ensures you stay aligned with endorser expectations and spot issues early.
             </p>
@@ -34,7 +34,7 @@ export default function KPIDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Visa Health Score</p>
-                <h2 className="text-5xl font-bold text-green-600">{visaHealthScore}/100</h2>
+                <h2 className="text-2xl font-bold text-green-600">{visaHealthScore}/100</h2>
                 <p className="text-sm text-muted-foreground mt-2">Excellent compliance trajectory</p>
               </div>
               <BarChart3 className="w-24 h-24 text-green-500 opacity-20" />
@@ -55,7 +55,7 @@ export default function KPIDashboard() {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-2xl font-bold">{kpi.value}</p>
+                      <p className="text-lg font-bold">{kpi.value}</p>
                       <p className="text-sm text-muted-foreground">Target: {kpi.target}</p>
                     </div>
                     <div className="flex items-center gap-2">

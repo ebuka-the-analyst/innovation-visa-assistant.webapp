@@ -468,7 +468,7 @@ export default function Dashboard() {
                     {radarData.map((item) => (
                       <div key={item.criterion} className="space-y-1">
                         <p className="text-sm font-medium">{item.criterion}</p>
-                        <p className="text-2xl font-bold text-primary">{item.score}/100</p>
+                        <p className="text-lg font-bold text-primary">{item.score}/100</p>
                         <p className="text-xs text-muted-foreground">
                           {item.score >= 80 ? 'Excellent' : item.score >= 60 ? 'Good' : item.score >= 40 ? 'Fair' : 'Needs Work'}
                         </p>

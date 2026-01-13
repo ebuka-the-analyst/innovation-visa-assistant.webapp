@@ -273,7 +273,7 @@ export default function DocVerification() {
         
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-2 gap-4 flex-wrap">
-            <h1 className="text-4xl font-bold">Document Verification</h1>
+            <h1 className="text-xl font-bold">Document Verification</h1>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
           <p className="text-muted-foreground mb-6">Critical and supporting documents checklist</p>
@@ -337,19 +337,19 @@ export default function DocVerification() {
               <div className="grid md:grid-cols-4 gap-4">
                 <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
                   <p className="text-xs text-muted-foreground">Verification Score</p>
-                  <p className="text-4xl font-bold mt-2">{verificationScore}%</p>
+                  <p className="text-xl font-bold mt-2">{verificationScore}%</p>
                   <p className="text-xs mt-2">{completedDocs}/{totalDocs} docs</p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">Critical Items</p>
-                  <p className="text-3xl font-bold mt-2">{criticalDone}/{criticalItems}</p>
+                  <p className="text-xl font-bold mt-2">{criticalDone}/{criticalItems}</p>
                   <p className={`text-xs mt-2 ${criticalDone===criticalItems?"text-green-600":"text-red-600"}`}>
                     {criticalDone===criticalItems?"✓ Complete":"⚠ Missing"}
                   </p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">Submission Ready</p>
-                  <p className={`text-2xl font-bold ${submissionReady?"text-green-600":"text-orange-600"}`}>
+                  <p className={`text-lg font-bold ${submissionReady?"text-green-600":"text-orange-600"}`}>
                     {submissionReady?"✓ YES":"In Progress"}
                   </p>
                 </Card>

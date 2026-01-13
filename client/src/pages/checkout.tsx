@@ -217,7 +217,7 @@ export default function Checkout() {
 
       <main className="max-w-2xl mx-auto py-10 px-4">
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Complete Your Order</h1>
+          <h1 className="text-2xl sm:text-xl font-bold mb-2">Complete Your Order</h1>
           <p className="text-muted-foreground">Review your order and apply any promo codes</p>
         </div>
 

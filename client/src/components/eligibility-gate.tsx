@@ -162,7 +162,7 @@ export function EligibilityGate({ onComplete, onSkip }: EligibilityGateProps) {
                 <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-4">
                   <Shield className="h-10 w-10 text-primary-foreground" />
                 </div>
-                <CardTitle className="text-3xl font-bold">
+                <CardTitle className="text-xl font-bold">
                   UK Innovator Founder Visa
                 </CardTitle>
                 <CardTitle className="text-2xl bg-gradient-to-r from-primary to-amber-500 bg-clip-text text-transparent">
@@ -517,21 +517,21 @@ export function EligibilityGate({ onComplete, onSkip }: EligibilityGateProps) {
                 <div className="grid grid-cols-3 gap-4">
                   <div className={`p-4 rounded-lg text-center ${getScoreBackground(result.innovationScore)}`}>
                     <Lightbulb className={`h-6 w-6 mx-auto mb-2 ${getScoreColor(result.innovationScore)}`} />
-                    <div className={`text-2xl font-bold ${getScoreColor(result.innovationScore)}`}>
+                    <div className={`text-lg font-bold ${getScoreColor(result.innovationScore)}`}>
                       {result.innovationScore}
                     </div>
                     <div className="text-xs text-muted-foreground">Innovation</div>
                   </div>
                   <div className={`p-4 rounded-lg text-center ${getScoreBackground(result.scalabilityScore)}`}>
                     <TrendingUp className={`h-6 w-6 mx-auto mb-2 ${getScoreColor(result.scalabilityScore)}`} />
-                    <div className={`text-2xl font-bold ${getScoreColor(result.scalabilityScore)}`}>
+                    <div className={`text-lg font-bold ${getScoreColor(result.scalabilityScore)}`}>
                       {result.scalabilityScore}
                     </div>
                     <div className="text-xs text-muted-foreground">Scalability</div>
                   </div>
                   <div className={`p-4 rounded-lg text-center ${getScoreBackground(result.viabilityScore)}`}>
                     <Rocket className={`h-6 w-6 mx-auto mb-2 ${getScoreColor(result.viabilityScore)}`} />
-                    <div className={`text-2xl font-bold ${getScoreColor(result.viabilityScore)}`}>
+                    <div className={`text-lg font-bold ${getScoreColor(result.viabilityScore)}`}>
                       {result.viabilityScore}
                     </div>
                     <div className="text-xs text-muted-foreground">Viability</div>
@@ -544,7 +544,7 @@ export function EligibilityGate({ onComplete, onSkip }: EligibilityGateProps) {
                       <BarChart3 className={`h-6 w-6 ${getScoreColor(result.overallScore)}`} />
                       <div>
                         <div className="text-sm text-muted-foreground">Overall Score</div>
-                        <div className={`text-3xl font-bold ${getScoreColor(result.overallScore)}`}>
+                        <div className={`text-xl font-bold ${getScoreColor(result.overallScore)}`}>
                           {result.overallScore}/100
                         </div>
                       </div>

@@ -71,7 +71,7 @@ export default function RejectionAnalysis() {
       <div className="responsive-container py-16">
         <div className="max-w-4xl mx-auto">
           <div className="mb-12">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Rejection Analysis & Reapplication Strategy</h1>
+            <h1 className="font-serif text-xl font-bold mb-4">Rejection Analysis & Reapplication Strategy</h1>
             <p className="text-lg text-muted-foreground">
               AI-powered analysis of rejection reasons with specific recommendations to address gaps. Our Advanced diagnostic engine identifies exactly what to fix for your next application and predicts success probability.
             </p>

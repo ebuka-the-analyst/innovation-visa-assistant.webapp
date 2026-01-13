@@ -585,7 +585,7 @@ IP attorney or patent agent for professional advice on IP protection strategy.
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-ip-audit">IP Portfolio Audit</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-ip-audit">IP Portfolio Audit</h1>
             <p className="text-lg text-muted-foreground">Comprehensive intellectual property assessment for UK Innovator Founder visa</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -633,7 +633,7 @@ IP attorney or patent agent for professional advice on IP protection strategy.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Portfolio Strength</p>
-                          <p className="text-3xl font-bold" data-testid="text-ip-score">{ipScore}%</p>
+                          <p className="text-xl font-bold" data-testid="text-ip-score">{ipScore}%</p>
                           <Progress value={ipScore} className="mt-2" />
                           <p className="text-xs mt-2">
                             {ipScore >= 80 ? 'Excellent' : ipScore >= 60 ? 'Good' : ipScore >= 40 ? 'Developing' : 'Needs Work'}
@@ -646,7 +646,7 @@ IP attorney or patent agent for professional advice on IP protection strategy.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Assets</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-total-assets">{validAssets.length}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-total-assets">{validAssets.length}</p>
                           <p className="text-xs mt-2">IP items documented</p>
                         </div>
                       </CardContent>
@@ -656,7 +656,7 @@ IP attorney or patent agent for professional advice on IP protection strategy.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Strong Protection</p>
-                          <p className="text-3xl font-bold text-green-600" data-testid="text-strong-protection">{strongProtectionCount}</p>
+                          <p className="text-xl font-bold text-green-600" data-testid="text-strong-protection">{strongProtectionCount}</p>
                           <p className="text-xs mt-2">Well-protected assets</p>
                         </div>
                       </CardContent>
@@ -666,7 +666,7 @@ IP attorney or patent agent for professional advice on IP protection strategy.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Portfolio Value</p>
-                          <p className="text-3xl font-bold" data-testid="text-portfolio-value">£{totalValuation.toLocaleString()}</p>
+                          <p className="text-xl font-bold" data-testid="text-portfolio-value">£{totalValuation.toLocaleString()}</p>
                           <p className="text-xs mt-2">Estimated valuation</p>
                         </div>
                       </CardContent>

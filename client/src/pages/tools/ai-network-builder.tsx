@@ -76,7 +76,7 @@ export default function AINetworkBuilder() {
             <Users className="w-4 h-4 text-blue-500" />
             <span className="text-sm font-medium text-blue-600 dark:text-blue-400">AI Network Builder</span>
           </div>
-          <h1 className="text-4xl font-bold mb-3" data-testid="heading-network-builder">UK Network Builder AI</h1>
+          <h1 className="text-xl font-bold mb-3" data-testid="heading-network-builder">UK Network Builder AI</h1>
           <p className="text-muted-foreground">AI-powered matching with UK investors, advisors, partners, and mentors</p>
         </div>
 

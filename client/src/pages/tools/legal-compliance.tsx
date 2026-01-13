@@ -249,7 +249,7 @@ export default function LegalCompliance() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Legal Compliance Checker</h1>
+              <h1 className="text-xl font-bold mb-2">Legal Compliance Checker</h1>
               <p className="text-muted-foreground">UK company law requirements validation</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -309,15 +309,15 @@ export default function LegalCompliance() {
               <div className="grid md:grid-cols-3 gap-4">
                 <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
                   <p className="text-xs text-muted-foreground">Legal Compliance</p>
-                  <p className="text-4xl font-bold mt-2">{complianceScore}%</p>
+                  <p className="text-xl font-bold mt-2">{complianceScore}%</p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">Items Checked</p>
-                  <p className="text-3xl font-bold mt-2">{completedItems}/{totalItems}</p>
+                  <p className="text-xl font-bold mt-2">{completedItems}/{totalItems}</p>
                 </Card>
                 <Card className="p-4">
                   <p className="text-xs text-muted-foreground">Status</p>
-                  <p className={`text-2xl font-bold ${complianceScore===100?"text-green-600":"text-orange-600"}`}>
+                  <p className={`text-lg font-bold ${complianceScore===100?"text-green-600":"text-orange-600"}`}>
                     {complianceScore===100?"✓ Complete":"In Progress"}
                   </p>
                 </Card>

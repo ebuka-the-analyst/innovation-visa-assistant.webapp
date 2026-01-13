@@ -216,7 +216,7 @@ export default function Achievements() {
         />
         <div className="container mx-auto py-8 px-4 max-w-2xl text-center">
           <Trophy className="w-16 h-16 mx-auto text-amber-500 mb-4" />
-          <h1 className="text-2xl font-bold mb-4">Sign In to View Achievements</h1>
+          <h1 className="text-lg font-bold mb-4">Sign In to View Achievements</h1>
           <p className="text-muted-foreground mb-6">
             Create an account to track your progress and earn achievements.
           </p>
@@ -260,7 +260,7 @@ export default function Achievements() {
       
       <div className="container mx-auto py-8 px-4 max-w-5xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-3" data-testid="heading-achievements">
+          <h1 className="text-xl font-bold mb-2 flex items-center gap-3" data-testid="heading-achievements">
             <Trophy className="w-8 h-8 text-amber-500" />
             Your Achievements
           </h1>
@@ -272,25 +272,25 @@ export default function Achievements() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-amber-500" data-testid="text-total-points">{totalPoints}</div>
+              <div className="text-xl font-bold text-amber-500" data-testid="text-total-points">{totalPoints}</div>
               <p className="text-sm text-muted-foreground">Total Points</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-green-500" data-testid="text-earned-count">{earnedAchievements.length}</div>
+              <div className="text-xl font-bold text-green-500" data-testid="text-earned-count">{earnedAchievements.length}</div>
               <p className="text-sm text-muted-foreground">Earned</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-blue-500" data-testid="text-in-progress-count">{inProgressAchievements.length}</div>
+              <div className="text-xl font-bold text-blue-500" data-testid="text-in-progress-count">{inProgressAchievements.length}</div>
               <p className="text-sm text-muted-foreground">In Progress</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-muted-foreground" data-testid="text-locked-count">{lockedAchievements.length}</div>
+              <div className="text-xl font-bold text-muted-foreground" data-testid="text-locked-count">{lockedAchievements.length}</div>
               <p className="text-sm text-muted-foreground">Locked</p>
             </CardContent>
           </Card>

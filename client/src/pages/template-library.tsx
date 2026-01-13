@@ -439,7 +439,7 @@ export default function TemplateLibrary() {
         />
         <div className="container mx-auto py-8 px-4 max-w-2xl text-center">
           <FileText className="w-16 h-16 mx-auto text-primary mb-4" />
-          <h1 className="text-2xl font-bold mb-4">Sign In to Access Templates</h1>
+          <h1 className="text-lg font-bold mb-4">Sign In to Access Templates</h1>
           <p className="text-muted-foreground mb-6">
             Create an account to access our library of professional document templates.
           </p>
@@ -478,7 +478,7 @@ export default function TemplateLibrary() {
       
       <div className="container mx-auto py-8 px-4 max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-3" data-testid="heading-templates">
+          <h1 className="text-xl font-bold mb-2 flex items-center gap-3" data-testid="heading-templates">
             <FileText className="w-8 h-8 text-primary" />
             Document Template Library
           </h1>
@@ -490,25 +490,25 @@ export default function TemplateLibrary() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-primary" data-testid="text-total-templates">{allTemplates.length}</div>
+              <div className="text-xl font-bold text-primary" data-testid="text-total-templates">{allTemplates.length}</div>
               <p className="text-sm text-muted-foreground">Total Templates</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-green-500" data-testid="text-accessible-count">{accessibleCount}</div>
+              <div className="text-xl font-bold text-green-500" data-testid="text-accessible-count">{accessibleCount}</div>
               <p className="text-sm text-muted-foreground">Available to You</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-amber-500" data-testid="text-locked-count">{lockedCount}</div>
+              <div className="text-xl font-bold text-amber-500" data-testid="text-locked-count">{lockedCount}</div>
               <p className="text-sm text-muted-foreground">Locked</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-blue-500" data-testid="text-categories-count">{categories.length}</div>
+              <div className="text-xl font-bold text-blue-500" data-testid="text-categories-count">{categories.length}</div>
               <p className="text-sm text-muted-foreground">Categories</p>
             </CardContent>
           </Card>

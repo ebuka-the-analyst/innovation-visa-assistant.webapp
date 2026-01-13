@@ -292,7 +292,7 @@ export default function RFEDefense() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2" data-testid="text-tool-title">
+                <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-tool-title">
                   <Shield className="w-8 h-8 text-primary" />
                   RFE Defence Lab
                 </h1>
@@ -326,7 +326,7 @@ export default function RFEDefense() {
                     <FileText className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">Total Issues</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-total-issues">{issues.length}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-total-issues">{issues.length}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -335,7 +335,7 @@ export default function RFEDefense() {
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
                     <span className="text-sm text-muted-foreground">Resolved</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-resolved-count">{resolvedCount}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-resolved-count">{resolvedCount}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -344,7 +344,7 @@ export default function RFEDefense() {
                     <Target className="w-5 h-5 text-orange-500" />
                     <span className="text-sm text-muted-foreground">Addressed</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{addressedCount}</p>
+                  <p className="text-lg font-bold mt-1">{addressedCount}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -353,7 +353,7 @@ export default function RFEDefense() {
                     <AlertTriangle className="w-5 h-5 text-red-500" />
                     <span className="text-sm text-muted-foreground">Critical</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-critical-count">{criticalCount}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-critical-count">{criticalCount}</p>
                 </CardContent>
               </Card>
             </div>

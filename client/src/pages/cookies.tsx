@@ -20,7 +20,7 @@ export default function CookiePolicy() {
                 <Cookie className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold" data-testid="heading-cookies">Cookie Policy</h1>
+                <h1 className="text-xl font-bold" data-testid="heading-cookies">Cookie Policy</h1>
                 <p className="text-muted-foreground">Last Updated: November 24, 2025</p>
               </div>
             </div>

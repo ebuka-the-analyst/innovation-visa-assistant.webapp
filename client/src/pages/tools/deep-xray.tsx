@@ -235,7 +235,7 @@ export default function DeepXRay() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Deep X-Ray</h1>
+              <h1 className="text-xl font-bold mb-2">Deep X-Ray</h1>
               <p className="text-muted-foreground">Complete business health analysis and benchmarking</p>
             </div>
             <AiTraditionalToggle
@@ -275,7 +275,7 @@ export default function DeepXRay() {
                       <Target className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Business Score</span>
                     </div>
-                    <p className="text-2xl font-bold">{businessScore}%</p>
+                    <p className="text-lg font-bold">{businessScore}%</p>
                     <p className="text-xs text-muted-foreground">{completedItems}/{totalItems} complete</p>
                   </Card>
                   <Card className="p-4">
@@ -283,7 +283,7 @@ export default function DeepXRay() {
                       <TrendingUp className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">vs Approved</span>
                     </div>
-                    <p className={`text-2xl font-bold ${vsApprovedAvg >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <p className={`text-lg font-bold ${vsApprovedAvg >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {vsApprovedAvg > 0 ? '+' : ''}{vsApprovedAvg}%
                     </p>
                   </Card>
@@ -337,24 +337,24 @@ export default function DeepXRay() {
                   <div className="grid md:grid-cols-4 gap-4">
                     <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
                       <p className="text-xs text-muted-foreground">Business Score</p>
-                      <p className="text-4xl font-bold mt-2">{businessScore}%</p>
+                      <p className="text-xl font-bold mt-2">{businessScore}%</p>
                       <p className="text-xs mt-2">{completedItems}/{totalItems} complete</p>
                     </Card>
                     <Card className="p-4">
                       <p className="text-xs text-muted-foreground">Readiness</p>
-                      <p className={`text-2xl font-bold ${businessScore>=70?"text-green-600":"text-orange-600"}`}>
+                      <p className={`text-lg font-bold ${businessScore>=70?"text-green-600":"text-orange-600"}`}>
                         {businessScore>=70?"Strong":"Developing"}
                       </p>
                     </Card>
                     <Card className="p-4">
                       <p className="text-xs text-muted-foreground">vs Approved Avg</p>
-                      <p className={`text-2xl font-bold ${vsApprovedAvg>0?"text-green-600":"text-red-600"}`}>
+                      <p className={`text-lg font-bold ${vsApprovedAvg>0?"text-green-600":"text-red-600"}`}>
                         {vsApprovedAvg>0?"+":""}{vsApprovedAvg}%
                       </p>
                     </Card>
                     <Card className="p-4">
                       <p className="text-xs text-muted-foreground">Approval Likelihood</p>
-                      <p className="text-2xl font-bold text-primary">{Math.max(20, businessScore)}%</p>
+                      <p className="text-lg font-bold text-primary">{Math.max(20, businessScore)}%</p>
                     </Card>
                   </div>
 

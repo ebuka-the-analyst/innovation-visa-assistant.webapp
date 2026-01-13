@@ -213,7 +213,7 @@ ATTACHMENTS:
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">OISC Compliance Guide</h1>
+        <h1 className="text-xl font-bold mb-2">OISC Compliance Guide</h1>
         <p className="text-muted-foreground">
           Ensure your visa-related business stays within legal boundaries
         </p>
@@ -228,7 +228,7 @@ ATTACHMENTS:
                 {complianceScore >= 80 ? "Good" : complianceScore >= 50 ? "At Risk" : "Critical"}
               </Badge>
             </div>
-            <div className="text-3xl font-bold mb-2" data-testid="text-compliance-score">{complianceScore}%</div>
+            <div className="text-xl font-bold mb-2" data-testid="text-compliance-score">{complianceScore}%</div>
             <Progress value={complianceScore} className="h-2" data-testid="progress-compliance-score" />
           </CardContent>
         </Card>
@@ -239,7 +239,7 @@ ATTACHMENTS:
               <AlertTriangle className="h-4 w-4 text-red-500" />
               <span className="text-sm font-medium">High Risk Issues</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-high-risk-count">{highRiskIssues.length}</div>
+            <div className="text-lg font-bold" data-testid="text-high-risk-count">{highRiskIssues.length}</div>
             <p className="text-xs text-muted-foreground">require attention</p>
           </CardContent>
         </Card>
@@ -250,7 +250,7 @@ ATTACHMENTS:
               <CheckCircle2 className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Compliant Areas</span>
             </div>
-            <div className="text-2xl font-bold" data-testid="text-compliant-count">{checks.length - highRiskIssues.length}</div>
+            <div className="text-lg font-bold" data-testid="text-compliant-count">{checks.length - highRiskIssues.length}</div>
             <p className="text-xs text-muted-foreground">of {checks.length} checks</p>
           </CardContent>
         </Card>

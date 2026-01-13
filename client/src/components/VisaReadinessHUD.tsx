@@ -154,7 +154,7 @@ export default function VisaReadinessHUD({
                   key={overallReadiness}
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="text-4xl font-bold"
+                  className="text-xl font-bold"
                 >
                   {overallReadiness}%
                 </motion.span>
@@ -217,7 +217,7 @@ export default function VisaReadinessHUD({
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold">{criterion.score}%</span>
+                  <span className="text-lg font-bold">{criterion.score}%</span>
                   <Badge variant="outline" className={level.color}>
                     {level.label}
                   </Badge>

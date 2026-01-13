@@ -664,7 +664,7 @@ This tool provides educational guidance only and does not constitute legal advic
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-weakness-analysis">Application Weakness Analysis</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-weakness-analysis">Application Weakness Analysis</h1>
                 <p className="text-lg text-muted-foreground">Comprehensive pre-submission gap analysis and risk assessment</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -718,7 +718,7 @@ This tool provides educational guidance only and does not constitute legal advic
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Overall Strength</p>
-                          <p className="text-4xl font-bold" data-testid="text-overall-score">{overallScore}%</p>
+                          <p className="text-xl font-bold" data-testid="text-overall-score">{overallScore}%</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {applicationReadiness ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -736,7 +736,7 @@ This tool provides educational guidance only and does not constitute legal advic
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Risk Score</p>
-                          <p className="text-4xl font-bold text-destructive" data-testid="text-risk-score">{riskScore}</p>
+                          <p className="text-xl font-bold text-destructive" data-testid="text-risk-score">{riskScore}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             <TrendingDown className="h-5 w-5 text-destructive" />
                             <span className="text-sm">{riskScore >= 70 ? 'High Risk' : riskScore >= 40 ? 'Medium' : 'Low Risk'}</span>
@@ -750,7 +750,7 @@ This tool provides educational guidance only and does not constitute legal advic
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Critical Issues</p>
-                          <p className="text-4xl font-bold text-destructive" data-testid="text-critical-count">{criticalCount}</p>
+                          <p className="text-xl font-bold text-destructive" data-testid="text-critical-count">{criticalCount}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {criticalCount === 0 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -767,7 +767,7 @@ This tool provides educational guidance only and does not constitute legal advic
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">High-Risk Areas</p>
-                          <p className="text-4xl font-bold text-orange-600" data-testid="text-high-count">{highCount}</p>
+                          <p className="text-xl font-bold text-orange-600" data-testid="text-high-count">{highCount}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {highCount <= 2 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -994,7 +994,7 @@ This tool provides educational guidance only and does not constitute legal advic
                             <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
                           </div>
                           <div className="text-right ml-4">
-                            <p className="text-3xl font-bold" data-testid={`text-category-score-${index}`}>{category.score}%</p>
+                            <p className="text-xl font-bold" data-testid={`text-category-score-${index}`}>{category.score}%</p>
                             <p className="text-xs text-muted-foreground">Gap: {100 - category.score} pts</p>
                           </div>
                         </div>
@@ -1140,19 +1140,19 @@ This tool provides educational guidance only and does not constitute legal advic
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 bg-muted/50 rounded">
                       <span className="font-medium">Base Weakness Factor</span>
-                      <span className="text-2xl font-bold">{100 - overallScore} pts</span>
+                      <span className="text-lg font-bold">{100 - overallScore} pts</span>
                     </div>
                     <div className="flex items-center justify-between p-4 bg-destructive/10 rounded">
                       <span className="font-medium">Critical Weakness Penalty</span>
-                      <span className="text-2xl font-bold text-destructive">+{criticalCount * 10} pts</span>
+                      <span className="text-lg font-bold text-destructive">+{criticalCount * 10} pts</span>
                     </div>
                     <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-9500/10 rounded">
                       <span className="font-medium">High-Risk Weakness Penalty</span>
-                      <span className="text-2xl font-bold text-orange-600">+{highCount * 5} pts</span>
+                      <span className="text-lg font-bold text-orange-600">+{highCount * 5} pts</span>
                     </div>
                     <div className="flex items-center justify-between p-4 bg-primary/10 rounded border-2 border-primary">
                       <span className="font-bold">Total Risk Score</span>
-                      <span className="text-3xl font-bold text-primary">{riskScore}/100</span>
+                      <span className="text-xl font-bold text-primary">{riskScore}/100</span>
                     </div>
                     <Alert>
                       <AlertTriangle className="h-4 w-4" />

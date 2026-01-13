@@ -791,7 +791,7 @@ for official assessment and application preparation.
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-innovation-score">Innovation Score Assessment</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-innovation-score">Innovation Score Assessment</h1>
                 <p className="text-lg text-muted-foreground">Comprehensive evaluation of UK Innovator Founder Visa innovation criterion</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -865,7 +865,7 @@ for official assessment and application preparation.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Innovation Score</p>
-                          <p className="text-5xl font-bold" data-testid="text-innovation-score">{innovationScore}%</p>
+                          <p className="text-2xl font-bold" data-testid="text-innovation-score">{innovationScore}%</p>
                           <div className="flex items-center justify-center gap-2 mt-3">
                             {isStrongCandidate ? (
                               <CheckCircle2 className="h-6 w-6 text-green-500" />
@@ -887,10 +887,10 @@ for official assessment and application preparation.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Strongest Factor</p>
-                          <p className="text-2xl font-bold text-green-600 dark:text-green-400" data-testid="text-strongest-factor">
+                          <p className="text-lg font-bold text-green-600 dark:text-green-400" data-testid="text-strongest-factor">
                             {Object.entries(factors).reduce((max, [key, val]) => val > max[1] ? [key, val] : max, ['', 0])[0].replace(/([A-Z])/g, ' $1').trim()}
                           </p>
-                          <p className="text-4xl font-bold mt-2">{Object.entries(factors).reduce((max, [key, val]) => val > max[1] ? [key, val] : max, ['', 0])[1]}%</p>
+                          <p className="text-xl font-bold mt-2">{Object.entries(factors).reduce((max, [key, val]) => val > max[1] ? [key, val] : max, ['', 0])[1]}%</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             <TrendingUp className="h-5 w-5 text-green-500" />
                             <span className="text-sm">Leading Advantage</span>
@@ -903,10 +903,10 @@ for official assessment and application preparation.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Weakest Factor</p>
-                          <p className="text-2xl font-bold text-orange-600 dark:text-orange-400" data-testid="text-weakest-factor">
+                          <p className="text-lg font-bold text-orange-600 dark:text-orange-400" data-testid="text-weakest-factor">
                             {Object.entries(factors).reduce((min, [key, val]) => val < min[1] ? [key, val] : min, ['', 100])[0].replace(/([A-Z])/g, ' $1').trim()}
                           </p>
-                          <p className="text-4xl font-bold mt-2">{Object.entries(factors).reduce((min, [key, val]) => val < min[1] ? [key, val] : min, ['', 100])[1]}%</p>
+                          <p className="text-xl font-bold mt-2">{Object.entries(factors).reduce((min, [key, val]) => val < min[1] ? [key, val] : min, ['', 100])[1]}%</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             <AlertTriangle className="h-5 w-5 text-orange-500" />
                             <span className="text-sm">Priority Focus</span>
@@ -1100,7 +1100,7 @@ for official assessment and application preparation.
                           <Zap className="h-5 w-5 text-blue-500" />
                           Novelty (25% weight)
                         </Label>
-                        <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" data-testid="text-novelty-value">{factors.novelty}%</span>
+                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400" data-testid="text-novelty-value">{factors.novelty}%</span>
                       </div>
                       <Slider
                         id="novelty-slider"
@@ -1123,7 +1123,7 @@ for official assessment and application preparation.
                           <TrendingUp className="h-5 w-5 text-green-500" />
                           Technical Advancement (20% weight)
                         </Label>
-                        <span className="text-2xl font-bold text-green-600 dark:text-green-400" data-testid="text-technical-value">{factors.technicalAdvancement}%</span>
+                        <span className="text-lg font-bold text-green-600 dark:text-green-400" data-testid="text-technical-value">{factors.technicalAdvancement}%</span>
                       </div>
                       <Slider
                         id="technical-slider"
@@ -1146,7 +1146,7 @@ for official assessment and application preparation.
                           <Globe className="h-5 w-5 text-purple-500" />
                           Market Disruption (20% weight)
                         </Label>
-                        <span className="text-2xl font-bold text-purple-600 dark:text-purple-400" data-testid="text-disruption-value">{factors.marketDisruption}%</span>
+                        <span className="text-lg font-bold text-purple-600 dark:text-purple-400" data-testid="text-disruption-value">{factors.marketDisruption}%</span>
                       </div>
                       <Slider
                         id="disruption-slider"
@@ -1169,7 +1169,7 @@ for official assessment and application preparation.
                           <Shield className="h-5 w-5 text-orange-500" />
                           IP Protection (20% weight)
                         </Label>
-                        <span className="text-2xl font-bold text-orange-600 dark:text-orange-400" data-testid="text-ip-value">{factors.ipProtection}%</span>
+                        <span className="text-lg font-bold text-orange-600 dark:text-orange-400" data-testid="text-ip-value">{factors.ipProtection}%</span>
                       </div>
                       <Slider
                         id="ip-slider"
@@ -1192,7 +1192,7 @@ for official assessment and application preparation.
                           <Lightbulb className="h-5 w-5 text-yellow-500" />
                           R&D Investment (15% weight)
                         </Label>
-                        <span className="text-2xl font-bold text-yellow-600 dark:text-yellow-400" data-testid="text-rd-value">{factors.rdInvestment}%</span>
+                        <span className="text-lg font-bold text-yellow-600 dark:text-yellow-400" data-testid="text-rd-value">{factors.rdInvestment}%</span>
                       </div>
                       <Slider
                         id="rd-slider"
@@ -1214,7 +1214,7 @@ for official assessment and application preparation.
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold">Calculated Innovation Score</h3>
                       <div className="text-right">
-                        <p className="text-4xl font-bold text-primary" data-testid="text-calculated-score">{innovationScore}%</p>
+                        <p className="text-xl font-bold text-primary" data-testid="text-calculated-score">{innovationScore}%</p>
                         <p className="text-sm text-muted-foreground">Weighted average</p>
                       </div>
                     </div>

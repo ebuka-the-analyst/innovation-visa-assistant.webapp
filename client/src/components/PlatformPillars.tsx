@@ -65,7 +65,7 @@ export default function PlatformPillars() {
     <section className="py-24 md:py-32 bg-muted/50">
       <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="font-serif text-xl font-bold mb-4">
             One Platform. Three Power Tools.
           </h2>
           <p className="text-lg text-muted-foreground">
@@ -87,7 +87,7 @@ export default function PlatformPillars() {
                   <pillar.icon className="w-full h-full" />
                 </div>
 
-                <h3 className="text-2xl font-bold mb-1">{pillar.name}</h3>
+                <h3 className="text-lg font-bold mb-1">{pillar.name}</h3>
                 <p className="text-sm font-semibold text-primary mb-3">{pillar.subtitle}</p>
                 <p className="text-muted-foreground text-sm mb-6">{pillar.description}</p>
 

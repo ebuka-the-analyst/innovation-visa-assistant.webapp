@@ -462,7 +462,7 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Customer Acquisition Cost (CAC)</h1>
+              <h1 className="text-xl font-bold mb-2">Customer Acquisition Cost (CAC)</h1>
               <p className="text-muted-foreground">Analyze unit economics for viability (Innovator Founder Visa)</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
@@ -487,7 +487,7 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
                 <Award className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Unit Economics</span>
               </div>
-              <p className="text-3xl font-bold">{healthScore}%</p>
+              <p className="text-xl font-bold">{healthScore}%</p>
               <p className="text-xs text-muted-foreground mt-1">{grade}</p>
             </Card>
 
@@ -496,7 +496,7 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
                 <DollarSign className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">CAC</span>
               </div>
-              <p className="text-3xl font-bold">£{Math.round(cac)}</p>
+              <p className="text-xl font-bold">£{Math.round(cac)}</p>
               <p className="text-xs text-muted-foreground mt-1">Per customer</p>
             </Card>
 
@@ -505,7 +505,7 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">LTV:CAC Ratio</span>
               </div>
-              <p className="text-3xl font-bold">{ltvCacRatio.toFixed(1)}x</p>
+              <p className="text-xl font-bold">{ltvCacRatio.toFixed(1)}x</p>
               <p className="text-xs text-muted-foreground mt-1">Target: 3x</p>
             </Card>
 
@@ -514,7 +514,7 @@ Industry Benchmarks: LTV:CAC >3x, Payback <12 months (David Skok, SaaS Metrics)
                 <Target className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Payback</span>
               </div>
-              <p className="text-3xl font-bold">{Math.round(paybackMonths)}mo</p>
+              <p className="text-xl font-bold">{Math.round(paybackMonths)}mo</p>
               <p className="text-xs text-muted-foreground mt-1">Target: {'<'}12mo</p>
             </Card>
           </div>

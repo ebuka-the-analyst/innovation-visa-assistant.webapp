@@ -333,7 +333,7 @@ GOV.UK: Innovator Founder Visa viability criterion
         
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-4xl font-bold">Retention Strategy</h1>
+            <h1 className="text-xl font-bold">Retention Strategy</h1>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
           </div>
           <p className="text-muted-foreground mb-6">Reduce turnover for viability and scalability (Innovator Founder Visa)</p>
@@ -352,7 +352,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                 <Award className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Retention Health</span>
               </div>
-              <p className="text-3xl font-bold">{retentionScore}%</p>
+              <p className="text-xl font-bold">{retentionScore}%</p>
               <p className="text-xs text-muted-foreground mt-1">{grade}</p>
             </Card>
 
@@ -361,7 +361,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                 <TrendingDown className="w-5 h-5 text-red-600" />
                 <span className="text-sm font-medium">Current Turnover</span>
               </div>
-              <p className="text-3xl font-bold">{currentTurnoverRate}%</p>
+              <p className="text-xl font-bold">{currentTurnoverRate}%</p>
               <p className="text-xs text-muted-foreground mt-1">Target: {targetTurnoverRate}%</p>
             </Card>
 
@@ -370,7 +370,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                 <DollarSign className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium">Potential Savings</span>
               </div>
-              <p className="text-3xl font-bold">£{Math.round(potentialSavings / 1000)}k</p>
+              <p className="text-xl font-bold">£{Math.round(potentialSavings / 1000)}k</p>
               <p className="text-xs text-muted-foreground mt-1">Annual opportunity</p>
             </Card>
 
@@ -379,7 +379,7 @@ GOV.UK: Innovator Founder Visa viability criterion
                 <AlertTriangle className="w-5 h-5 text-red-600" />
                 <span className="text-sm font-medium">At-Risk Cost</span>
               </div>
-              <p className="text-3xl font-bold">£{Math.round(atRiskCost / 1000)}k</p>
+              <p className="text-xl font-bold">£{Math.round(atRiskCost / 1000)}k</p>
               <p className="text-xs text-muted-foreground mt-1">{risks.filter(r => r.turnoverLikelihood >= 60).length} employees</p>
             </Card>
           </div>

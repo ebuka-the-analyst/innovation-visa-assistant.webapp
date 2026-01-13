@@ -55,7 +55,7 @@ export default function DataModal() {
       
       <div className="container mx-auto py-8 px-4 md:px-6 max-w-4xl">
         <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2" data-testid="heading-data-modal">Data Manager</h1>
+        <h1 className="text-xl font-bold mb-2" data-testid="heading-data-modal">Data Manager</h1>
         <p className="text-muted-foreground">Store and manage your data entries</p>
       </div>
 

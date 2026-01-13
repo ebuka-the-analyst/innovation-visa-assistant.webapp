@@ -102,7 +102,7 @@ ${safeTerms.riskFactors.map(r => `- ${r}`).join('\n')}
             <DollarSign className="w-4 h-4 text-emerald-500" />
             <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">AI Funding Negotiator</span>
           </div>
-          <h1 className="text-4xl font-bold mb-3" data-testid="heading-funding-negotiator">AI Funding Negotiator</h1>
+          <h1 className="text-xl font-bold mb-3" data-testid="heading-funding-negotiator">AI Funding Negotiator</h1>
           <p className="text-muted-foreground">Generate SAFE agreements, valuations, and term sheet drafts for UK investors</p>
         </div>
 
@@ -209,11 +209,11 @@ ${safeTerms.riskFactors.map(r => `- ${r}`).join('\n')}
                     <div className="grid grid-cols-2 gap-4">
                       <Card className="p-4 bg-emerald-500/10">
                         <p className="text-sm text-muted-foreground">Valuation Cap</p>
-                        <p className="text-2xl font-bold text-emerald-600">{safeTerms.valuationCap}</p>
+                        <p className="text-lg font-bold text-emerald-600">{safeTerms.valuationCap}</p>
                       </Card>
                       <Card className="p-4 bg-teal-500/10">
                         <p className="text-sm text-muted-foreground">Discount Rate</p>
-                        <p className="text-2xl font-bold text-teal-600">{safeTerms.discountRate}</p>
+                        <p className="text-lg font-bold text-teal-600">{safeTerms.discountRate}</p>
                       </Card>
                     </div>
                     <div className="flex gap-2">
@@ -241,7 +241,7 @@ ${safeTerms.riskFactors.map(r => `- ${r}`).join('\n')}
                       <>
                         <Card className="p-4 bg-gradient-to-r from-emerald-500/10 to-teal-500/10">
                           <p className="text-sm text-muted-foreground">Suggested Valuation</p>
-                          <p className="text-3xl font-bold">{valuation.suggestedValuation}</p>
+                          <p className="text-xl font-bold">{valuation.suggestedValuation}</p>
                           <p className="text-sm text-muted-foreground mt-1">Methodology: {valuation.methodology}</p>
                         </Card>
                         <div>

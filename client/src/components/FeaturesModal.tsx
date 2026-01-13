@@ -191,7 +191,7 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
             <div className="flex items-center justify-between p-6 border-b border-border bg-gradient-to-r from-primary/5 to-chart-3/5 dark:from-slate-800 dark:to-slate-800">
               <div className="flex items-center gap-3">
                 <Sparkles className="w-6 h-6 text-primary animate-spin" style={{ animationDuration: "3s" }} />
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
+                <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
                   Feature Details
                 </h2>
               </div>
@@ -230,7 +230,7 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
                 <div className="lg:col-span-3 lg:pl-4 space-y-6">
                   {/* Title and description */}
                   <div>
-                    <h3 className="text-3xl font-bold mb-2 flex items-center gap-3">
+                    <h3 className="text-xl font-bold mb-2 flex items-center gap-3">
                       <span className="text-4xl">{feature.icon}</span>
                       {feature.title}
                     </h3>

@@ -38,7 +38,7 @@ export default function EverythingWeOfferSection() {
       <div className="responsive-container md:px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Everything You Need</h2>
+          <h2 className="text-xl font-bold mb-4">Everything You Need</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             A complete platform with 100+ powerful AI tools, expert guidance, and everything required to get your UK Innovator Founder Visa approved
           </p>
@@ -57,7 +57,7 @@ export default function EverythingWeOfferSection() {
         {/* Tool Categories */}
         <div className="mb-16">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl font-bold">100+ Tools Across 8 Categories</h3>
+            <h3 className="text-lg font-bold">100+ Tools Across 8 Categories</h3>
             <Link href="/tools-hub">
               <Button variant="outline" size="sm" className="gap-2" data-testid="button-view-all-tools">
                 View All <ChevronRight className="w-4 h-4" />
@@ -84,7 +84,7 @@ export default function EverythingWeOfferSection() {
 
         {/* Key Features Showcase */}
         <div className="mb-16">
-          <h3 className="text-2xl font-bold mb-8">Core Features</h3>
+          <h3 className="text-lg font-bold mb-8">Core Features</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { icon: "FileText", title: "Business Plan Generator", desc: "AI-powered plans covering Innovation, Viability, and Scalability" },
@@ -114,7 +114,7 @@ export default function EverythingWeOfferSection() {
 
         {/* Pricing Tiers */}
         <div className="mb-16">
-          <h3 className="text-2xl font-bold mb-8">5 Pricing Tiers</h3>
+          <h3 className="text-lg font-bold mb-8">5 Pricing Tiers</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
             {[
               { name: "Free", price: "£0", color: "bg-gray-50", access: "Essential" },
@@ -138,19 +138,19 @@ export default function EverythingWeOfferSection() {
         <div className="mb-16 bg-primary/5 rounded-lg p-8 border">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
-              <div className="text-3xl font-bold text-primary">{ALL_TOOLS.length}</div>
+              <div className="text-xl font-bold text-primary">{ALL_TOOLS.length}</div>
               <p className="text-sm text-muted-foreground mt-2">AI-Powered Tools</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-purple-600">{ALL_TOOLS.filter(t => t.stage === 'before').length}</div>
+              <div className="text-xl font-bold text-purple-600">{ALL_TOOLS.filter(t => t.stage === 'before').length}</div>
               <p className="text-sm text-muted-foreground mt-2">Pre-Application</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-orange-600">{ALL_TOOLS.filter(t => t.stage === 'during').length}</div>
+              <div className="text-xl font-bold text-orange-600">{ALL_TOOLS.filter(t => t.stage === 'during').length}</div>
               <p className="text-sm text-muted-foreground mt-2">During Application</p>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600">{ALL_TOOLS.filter(t => t.stage === 'after').length}</div>
+              <div className="text-xl font-bold text-green-600">{ALL_TOOLS.filter(t => t.stage === 'after').length}</div>
               <p className="text-sm text-muted-foreground mt-2">Post-Approval</p>
             </div>
           </div>
@@ -158,7 +158,7 @@ export default function EverythingWeOfferSection() {
 
         {/* CTA */}
         <div className="text-center">
-          <h3 className="text-2xl font-bold mb-4">Explore Everything</h3>
+          <h3 className="text-lg font-bold mb-4">Explore Everything</h3>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/tools-hub">
               <Button size="lg" data-testid="button-explore-tools">

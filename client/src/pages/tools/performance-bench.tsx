@@ -339,7 +339,7 @@ export default function PerformanceBench() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="responsive-container max-w-6xl">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Performance Benchmarking</h1>
+            <h1 className="text-xl font-bold mb-2">Performance Benchmarking</h1>
             <p className="text-muted-foreground">Compare your business metrics against industry standards</p>
           </div>
 
@@ -398,21 +398,21 @@ export default function PerformanceBench() {
               <Card className="bg-green-500/10 border-green-500/30">
                 <CardContent className="pt-6 text-center">
                   <TrendingUp className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-green-500">{excellentCount}</div>
+                  <div className="text-lg font-bold text-green-500">{excellentCount}</div>
                   <div className="text-sm text-muted-foreground">Top Performer Metrics</div>
                 </CardContent>
               </Card>
               <Card className="bg-amber-500/10 border-amber-500/30">
                 <CardContent className="pt-6 text-center">
                   <Target className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-amber-500">{metrics.length - excellentCount - belowCount}</div>
+                  <div className="text-lg font-bold text-amber-500">{metrics.length - excellentCount - belowCount}</div>
                   <div className="text-sm text-muted-foreground">Above Average</div>
                 </CardContent>
               </Card>
               <Card className="bg-red-500/10 border-red-500/30">
                 <CardContent className="pt-6 text-center">
                   <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-red-500">{belowCount}</div>
+                  <div className="text-lg font-bold text-red-500">{belowCount}</div>
                   <div className="text-sm text-muted-foreground">Need Improvement</div>
                 </CardContent>
               </Card>

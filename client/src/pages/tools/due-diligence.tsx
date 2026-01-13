@@ -404,7 +404,7 @@ endorsing body and individual circumstances.
           
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2 gap-4 flex-wrap">
-              <h1 className="text-4xl font-bold" data-testid="heading-due-diligence">Due Diligence Checklist</h1>
+              <h1 className="text-xl font-bold" data-testid="heading-due-diligence">Due Diligence Checklist</h1>
               <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
             <p className="text-lg text-muted-foreground">Comprehensive visa application compliance audit</p>
@@ -497,7 +497,7 @@ endorsing body and individual circumstances.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Overall Progress</p>
-                          <p className="text-3xl font-bold" data-testid="text-overall-score">{overallScore}%</p>
+                          <p className="text-xl font-bold" data-testid="text-overall-score">{overallScore}%</p>
                           <p className="text-sm mt-2">{completedItems}/{totalItems} items</p>
                           <Progress value={overallScore} className="mt-2" />
                         </div>
@@ -508,7 +508,7 @@ endorsing body and individual circumstances.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Critical Items</p>
-                          <p className="text-3xl font-bold text-red-600 dark:text-red-400" data-testid="text-critical-score">{criticalScore}%</p>
+                          <p className="text-xl font-bold text-red-600 dark:text-red-400" data-testid="text-critical-score">{criticalScore}%</p>
                           <p className="text-sm mt-2">{criticalCompleted}/{criticalTotal} complete</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {criticalScore === 100 ? (

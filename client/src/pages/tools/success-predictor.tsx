@@ -222,7 +222,7 @@ export default function SuccessPredictor() {
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
         <div className="responsive-container max-w-6xl">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Success Probability Predictor</h1>
+            <h1 className="text-xl font-bold mb-2">Success Probability Predictor</h1>
             <p className="text-muted-foreground">AI-powered prediction of your visa application success</p>
           </div>
 
@@ -273,7 +273,7 @@ export default function SuccessPredictor() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-4xl font-bold">{prediction}%</span>
+                      <span className="text-xl font-bold">{prediction}%</span>
                       <span className="text-sm text-muted-foreground">Success</span>
                     </div>
                   </div>
@@ -302,7 +302,7 @@ export default function SuccessPredictor() {
               {radarData.map((d) => (
                 <Card key={d.category}>
                   <CardContent className="pt-6 text-center">
-                    <div className="text-2xl font-bold">{d.score}%</div>
+                    <div className="text-lg font-bold">{d.score}%</div>
                     <div className="text-sm text-muted-foreground">{d.category}</div>
                     <Progress value={d.score} className="h-2 mt-2" />
                   </CardContent>
@@ -333,7 +333,7 @@ export default function SuccessPredictor() {
                               {getCategoryBadge(factor.category)}
                               <Badge variant="outline">{Math.round(factor.weight * 100)}% weight</Badge>
                             </div>
-                            <span className="text-2xl font-bold">{factor.score}%</span>
+                            <span className="text-lg font-bold">{factor.score}%</span>
                           </div>
                           <p className="text-sm text-muted-foreground">{factor.description}</p>
                           <Slider

@@ -208,7 +208,7 @@ export default function FounderBio() {
         
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold">Founder Biography</h1>
+            <h1 className="text-xl font-bold">Founder Biography</h1>
             {isPrefilled && (
               <Badge variant="secondary" className="gap-1" data-testid="badge-prefilled">
                 <Sparkles className="w-3 h-3" />

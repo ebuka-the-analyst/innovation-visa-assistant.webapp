@@ -617,7 +617,7 @@ for personalized guidance and HMRC compliance verification.
           
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-tax-planning">UK Tax Planning</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-tax-planning">UK Tax Planning</h1>
               <p className="text-lg text-muted-foreground">Calculate annual tax liability, quarterly estimates, and tax-efficient structures for UK startups</p>
               {savedDate && (
                 <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -660,7 +660,7 @@ for personalized guidance and HMRC compliance verification.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Tax Liability</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-total-tax">£{taxes.totalTax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-total-tax">£{taxes.totalTax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -669,7 +669,7 @@ for personalized guidance and HMRC compliance verification.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Effective Tax Rate</p>
-                          <p className="text-3xl font-bold" data-testid="text-effective-rate">{taxes.effectiveRate.toFixed(2)}%</p>
+                          <p className="text-xl font-bold" data-testid="text-effective-rate">{taxes.effectiveRate.toFixed(2)}%</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -678,7 +678,7 @@ for personalized guidance and HMRC compliance verification.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Net Profit</p>
-                          <p className="text-3xl font-bold text-green-600 dark:text-green-400" data-testid="text-net-profit">£{taxes.netProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                          <p className="text-xl font-bold text-green-600 dark:text-green-400" data-testid="text-net-profit">£{taxes.netProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -687,7 +687,7 @@ for personalized guidance and HMRC compliance verification.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Tax Relief</p>
-                          <p className="text-3xl font-bold text-green-600 dark:text-green-400" data-testid="text-tax-relief">£{taxes.totalTaxRelief.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                          <p className="text-xl font-bold text-green-600 dark:text-green-400" data-testid="text-tax-relief">£{taxes.totalTaxRelief.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                         </div>
                       </CardContent>
                     </Card>

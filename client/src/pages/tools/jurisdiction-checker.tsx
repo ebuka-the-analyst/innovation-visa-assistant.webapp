@@ -283,7 +283,7 @@ export default function JurisdictionChecker() {
           <div className="mb-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold mb-2">UK Jurisdiction & Eligibility Checker</h1>
+                <h1 className="text-xl font-bold mb-2">UK Jurisdiction & Eligibility Checker</h1>
                 <p className="text-muted-foreground">Verify your eligibility for the UK Innovator Founder Visa</p>
               </div>
               <AiTraditionalToggle
@@ -492,19 +492,19 @@ export default function JurisdictionChecker() {
                     <div className="grid grid-cols-3 gap-4">
                       <Card className="bg-green-500/10 border-green-500/30">
                         <CardContent className="pt-4 text-center">
-                          <div className="text-3xl font-bold text-green-500">{passCount}</div>
+                          <div className="text-xl font-bold text-green-500">{passCount}</div>
                           <div className="text-sm text-muted-foreground">Passed</div>
                         </CardContent>
                       </Card>
                       <Card className="bg-amber-500/10 border-amber-500/30">
                         <CardContent className="pt-4 text-center">
-                          <div className="text-3xl font-bold text-amber-500">{warningCount}</div>
+                          <div className="text-xl font-bold text-amber-500">{warningCount}</div>
                           <div className="text-sm text-muted-foreground">Warnings</div>
                         </CardContent>
                       </Card>
                       <Card className="bg-red-500/10 border-red-500/30">
                         <CardContent className="pt-4 text-center">
-                          <div className="text-3xl font-bold text-red-500">{failCount}</div>
+                          <div className="text-xl font-bold text-red-500">{failCount}</div>
                           <div className="text-sm text-muted-foreground">Failed</div>
                         </CardContent>
                       </Card>

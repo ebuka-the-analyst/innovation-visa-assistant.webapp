@@ -740,7 +740,7 @@ innovatorfoundervisaassistant.co.uk
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-operations-plan">Operations Plan</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-operations-plan">Operations Plan</h1>
             <p className="text-lg text-muted-foreground" data-testid="text-subtitle">Define operational processes, resources, and KPIs to demonstrate business scalability</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
@@ -787,7 +787,7 @@ innovatorfoundervisaassistant.co.uk
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2" data-testid="label-readiness-score">Readiness Score</p>
-                          <p className="text-3xl font-bold" data-testid="text-readiness-score">{operationalReadinessScore}/100</p>
+                          <p className="text-xl font-bold" data-testid="text-readiness-score">{operationalReadinessScore}/100</p>
                           <Progress value={operationalReadinessScore} className="mt-2" data-testid="progress-readiness" />
                           <p className="text-xs text-muted-foreground mt-2" data-testid="text-readiness-status">
                             {operationalReadinessScore >= 80 ? 'Visa-Ready' : operationalReadinessScore >= 60 ? 'Good Progress' : 'More Work Needed'}
@@ -801,7 +801,7 @@ innovatorfoundervisaassistant.co.uk
                         <div className="text-center">
                           <Target className="h-6 w-6 mx-auto mb-2 text-primary" data-testid="icon-documentation" />
                           <p className="text-sm text-muted-foreground mb-2" data-testid="label-documentation">Documentation</p>
-                          <p className="text-2xl font-bold" data-testid="text-documentation-rate">{documentedProcesses}/{totalProcesses}</p>
+                          <p className="text-lg font-bold" data-testid="text-documentation-rate">{documentedProcesses}/{totalProcesses}</p>
                           <p className="text-xs text-muted-foreground" data-testid="text-documentation-percent">{Math.round((documentedProcesses/totalProcesses)*100)}% Documented</p>
                         </div>
                       </CardContent>
@@ -812,7 +812,7 @@ innovatorfoundervisaassistant.co.uk
                         <div className="text-center">
                           <Zap className="h-6 w-6 mx-auto mb-2 text-primary" data-testid="icon-efficiency" />
                           <p className="text-sm text-muted-foreground mb-2" data-testid="label-efficiency">Avg Efficiency</p>
-                          <p className="text-2xl font-bold text-primary" data-testid="text-avg-efficiency">{avgEfficiency}%</p>
+                          <p className="text-lg font-bold text-primary" data-testid="text-avg-efficiency">{avgEfficiency}%</p>
                           <Progress value={avgEfficiency} className="mt-2" data-testid="progress-efficiency" />
                         </div>
                       </CardContent>
@@ -823,7 +823,7 @@ innovatorfoundervisaassistant.co.uk
                         <div className="text-center">
                           <BarChart3 className="h-6 w-6 mx-auto mb-2 text-primary" data-testid="icon-kpi" />
                           <p className="text-sm text-muted-foreground mb-2" data-testid="label-kpi-achievement">KPI Achievement</p>
-                          <p className="text-2xl font-bold text-green-600 dark:text-green-400" data-testid="text-kpi-achievement">{kpiAchievementRate}%</p>
+                          <p className="text-lg font-bold text-green-600 dark:text-green-400" data-testid="text-kpi-achievement">{kpiAchievementRate}%</p>
                           <p className="text-xs text-muted-foreground" data-testid="text-kpi-count">{kpisOnTarget}/{kpis.length} on target</p>
                         </div>
                       </CardContent>
@@ -985,7 +985,7 @@ innovatorfoundervisaassistant.co.uk
                         <div className="text-center">
                           <Users className="h-6 w-6 mx-auto mb-2 text-primary" data-testid="icon-resources" />
                           <p className="text-sm text-muted-foreground mb-2" data-testid="label-total-resources">Total Resources</p>
-                          <p className="text-3xl font-bold" data-testid="text-total-resources">{resources.length}</p>
+                          <p className="text-xl font-bold" data-testid="text-total-resources">{resources.length}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -994,7 +994,7 @@ innovatorfoundervisaassistant.co.uk
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2" data-testid="label-resource-cost">Total Investment</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-total-resource-cost">£{totalResourceCost.toLocaleString()}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-total-resource-cost">£{totalResourceCost.toLocaleString()}</p>
                           <p className="text-xs text-muted-foreground mt-1" data-testid="text-cost-note">Annual cost estimate</p>
                         </div>
                       </CardContent>
@@ -1107,7 +1107,7 @@ innovatorfoundervisaassistant.co.uk
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2" data-testid="label-kpi-total">Total KPIs</p>
-                          <p className="text-3xl font-bold" data-testid="text-total-kpis">{kpis.length}</p>
+                          <p className="text-xl font-bold" data-testid="text-total-kpis">{kpis.length}</p>
                           <p className="text-xs text-muted-foreground" data-testid="text-critical-kpis">{criticalKPIs.length} critical</p>
                         </div>
                       </CardContent>
@@ -1117,7 +1117,7 @@ innovatorfoundervisaassistant.co.uk
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2" data-testid="label-kpi-on-target">On Target</p>
-                          <p className="text-3xl font-bold text-green-600 dark:text-green-400" data-testid="text-kpis-on-target">{kpisOnTarget}</p>
+                          <p className="text-xl font-bold text-green-600 dark:text-green-400" data-testid="text-kpis-on-target">{kpisOnTarget}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -1126,7 +1126,7 @@ innovatorfoundervisaassistant.co.uk
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2" data-testid="label-kpi-rate">Achievement Rate</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-kpi-rate">{kpiAchievementRate}%</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-kpi-rate">{kpiAchievementRate}%</p>
                           <Progress value={kpiAchievementRate} className="mt-2" data-testid="progress-kpi-rate" />
                         </div>
                       </CardContent>

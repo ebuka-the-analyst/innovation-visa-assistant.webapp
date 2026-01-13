@@ -174,11 +174,11 @@ function DefaultSidePanel({ answers, progress, currentQuestionIndex, totalQuesti
           
           <div className="grid grid-cols-2 gap-3 mt-4">
             <div className="bg-muted/50 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold" style={{ color: agent.primaryColor }}>{xp}</div>
+              <div className="text-lg font-bold" style={{ color: agent.primaryColor }}>{xp}</div>
               <div className="text-xs text-muted-foreground">XP Earned</div>
             </div>
             <div className="bg-muted/50 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold" style={{ color: agent.primaryColor }}>{streak}x</div>
+              <div className="text-lg font-bold" style={{ color: agent.primaryColor }}>{streak}x</div>
               <div className="text-xs text-muted-foreground">Streak</div>
             </div>
           </div>

@@ -357,7 +357,7 @@ export function NeuralTwin({ founderProfile: initialProfile, mode = 'interview',
             <Brain className="h-7 w-7 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">Neural Twin Founder Model</h2>
+            <h2 className="text-lg font-bold">Neural Twin Founder Model</h2>
             <p className="text-muted-foreground">
               AI simulation of your founder personality for interview practice
             </p>

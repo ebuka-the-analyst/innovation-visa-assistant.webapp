@@ -789,7 +789,7 @@ All statutory references and penalty amounts are current as of 2025 but may chan
           <div className="mb-8">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-legal-templates">Legal Templates</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-legal-templates">Legal Templates</h1>
                 <p className="text-lg text-muted-foreground">Professional legal documents for UK Innovator Founder visa compliance</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2" data-testid="text-last-saved">Last saved: {savedDate}</p>
@@ -832,7 +832,7 @@ All statutory references and penalty amounts are current as of 2025 but may chan
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Legal Readiness Score</p>
-                      <p className="text-3xl font-bold" data-testid="text-readiness-score">{legalReadinessScore}%</p>
+                      <p className="text-xl font-bold" data-testid="text-readiness-score">{legalReadinessScore}%</p>
                       <Progress value={legalReadinessScore} className="mt-2" data-testid="progress-readiness" />
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {legalReadinessScore >= 90 ? (
@@ -854,7 +854,7 @@ All statutory references and penalty amounts are current as of 2025 but may chan
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Completed Templates</p>
-                      <p className="text-3xl font-bold text-green-600" data-testid="text-completed-count">{completedTemplates}/{totalTemplates}</p>
+                      <p className="text-xl font-bold text-green-600" data-testid="text-completed-count">{completedTemplates}/{totalTemplates}</p>
                       <p className="text-sm text-muted-foreground mt-2" data-testid="text-remaining-count">
                         {totalTemplates - completedTemplates} remaining
                       </p>
@@ -866,7 +866,7 @@ All statutory references and penalty amounts are current as of 2025 but may chan
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Critical Documents</p>
-                      <p className="text-3xl font-bold" data-testid="text-critical-score">{criticalScore}%</p>
+                      <p className="text-xl font-bold" data-testid="text-critical-score">{criticalScore}%</p>
                       <p className="text-sm text-muted-foreground mt-2" data-testid="text-critical-count">
                         {criticalCompleted}/{criticalTemplates.length} completed
                       </p>

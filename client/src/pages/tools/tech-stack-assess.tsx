@@ -705,7 +705,7 @@ and technical architecture review for official assessment and application prepar
           
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2" data-testid="heading-tech-stack-assess">Technology Stack Assessment</h1>
+              <h1 className="text-xl font-bold mb-2" data-testid="heading-tech-stack-assess">Technology Stack Assessment</h1>
               <p className="text-lg text-muted-foreground">Evaluate technical architecture for innovation visa compliance</p>
               {savedDate && (
                 <p className="text-sm text-muted-foreground mt-2" data-testid="text-saved-date">Last saved: {savedDate}</p>
@@ -748,7 +748,7 @@ and technical architecture review for official assessment and application prepar
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Overall Score</p>
-                          <p className="text-3xl font-bold" data-testid="text-overall-score">{overallScore}/100</p>
+                          <p className="text-xl font-bold" data-testid="text-overall-score">{overallScore}/100</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {meetsMinimum ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -765,7 +765,7 @@ and technical architecture review for official assessment and application prepar
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Tech Categories</p>
-                          <p className="text-3xl font-bold text-blue-600" data-testid="text-tech-score">{techStackScore}/100</p>
+                          <p className="text-xl font-bold text-blue-600" data-testid="text-tech-score">{techStackScore}/100</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             <Code className="h-5 w-5 text-blue-600" />
                             <span className="text-sm">Stack Rating</span>
@@ -778,7 +778,7 @@ and technical architecture review for official assessment and application prepar
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Quality Factors</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-quality-score">{qualityScore}/100</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-quality-score">{qualityScore}/100</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             <Shield className="h-5 w-5 text-primary" />
                             <span className="text-sm">Quality Rating</span>
@@ -1151,7 +1151,7 @@ and technical architecture review for official assessment and application prepar
                     <Card>
                       <CardContent className="pt-6">
                         <p className="text-sm text-muted-foreground mb-2">Your Score vs {selectedSector}</p>
-                        <p className="text-2xl font-bold" data-testid="text-sector-comparison">
+                        <p className="text-lg font-bold" data-testid="text-sector-comparison">
                           {benchmarkData.find(b => b.sector === selectedSector)?.gap ?? 0 >= 0 ? '+' : ''}
                           {benchmarkData.find(b => b.sector === selectedSector)?.gap ?? 0}%
                         </p>
@@ -1164,7 +1164,7 @@ and technical architecture review for official assessment and application prepar
                     <Card>
                       <CardContent className="pt-6">
                         <p className="text-sm text-muted-foreground mb-2">Estimated Percentile</p>
-                        <p className="text-2xl font-bold" data-testid="text-percentile">
+                        <p className="text-lg font-bold" data-testid="text-percentile">
                           {overallScore > (benchmarkData.find(b => b.sector === selectedSector)?.industryAvg ?? 0) + 10 ? 'Top 25%' : 
                            overallScore > (benchmarkData.find(b => b.sector === selectedSector)?.industryAvg ?? 0) ? 'Top 50%' : 'Bottom 50%'}
                         </p>

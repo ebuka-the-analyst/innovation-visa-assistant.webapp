@@ -611,7 +611,7 @@ export default function ToolsChronographWheel() {
                 <p className="text-sm sm:text-base md:text-2xl text-black font-black">
                   {String(selectedToolIdx + 1).padStart(3, "0")}
                 </p>
-                <h2 className="text-2xl sm:text-4xl md:text-6xl font-black text-black leading-tight w-full">
+                <h2 className="text-2xl sm:text-xl font-black text-black leading-tight w-full">
                   {selectedTool.name.toUpperCase()}
                 </h2>
                 <p className="text-xs sm:text-sm md:text-lg text-black font-black w-full line-clamp-2">

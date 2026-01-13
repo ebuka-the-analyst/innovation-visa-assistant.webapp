@@ -444,7 +444,7 @@ export function FounderAutopilot({ onComplete, businessIdea }: FounderAutopilotP
             <Rocket className="h-7 w-7 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">Founder Autopilot</h2>
+            <h2 className="text-lg font-bold">Founder Autopilot</h2>
             <p className="text-muted-foreground">
               Say "Build my visa" and let AI handle everything
             </p>
@@ -622,7 +622,7 @@ export function FounderAutopilot({ onComplete, businessIdea }: FounderAutopilotP
         <Card className="p-6 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/20">
           <div className="text-center space-y-4">
             <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
-            <h3 className="text-2xl font-bold">Visa Application Package Complete!</h3>
+            <h3 className="text-lg font-bold">Visa Application Package Complete!</h3>
             <p className="text-muted-foreground max-w-lg mx-auto">
               All AI agents have completed their analysis. Your visa application materials are ready for review.
             </p>

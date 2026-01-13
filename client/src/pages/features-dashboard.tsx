@@ -123,7 +123,7 @@ export default function FeaturesDashboard() {
       <div className="responsive-container py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">Your Visa Journey</h1>
+            <h1 className="font-serif text-xl font-bold mb-4">Your Visa Journey</h1>
             <p className="text-lg text-muted-foreground">
               Navigate through all features in the optimal order for UK Innovator Founder Visa success
             </p>
@@ -136,7 +136,7 @@ export default function FeaturesDashboard() {
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                     <span className="font-bold text-primary text-sm">{phase.phase}</span>
                   </div>
-                  <h2 className="text-2xl font-bold">{phase.phaseTitle}</h2>
+                  <h2 className="text-lg font-bold">{phase.phaseTitle}</h2>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -180,7 +180,7 @@ export default function FeaturesDashboard() {
           </div>
 
           <div className="mb-16">
-            <h2 className="text-2xl font-bold mb-6">Advanced Features</h2>
+            <h2 className="text-lg font-bold mb-6">Advanced Features</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {advancedFeatures.map((feature) => (
                 <Link key={feature.route} href={feature.route}>

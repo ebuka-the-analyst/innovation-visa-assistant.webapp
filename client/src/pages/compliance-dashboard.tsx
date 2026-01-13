@@ -219,7 +219,7 @@ export default function ComplianceDashboardPage() {
               <Shield className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold" data-testid="text-page-title">Compliance Dashboard</h1>
+              <h1 className="text-xl font-bold" data-testid="text-page-title">Compliance Dashboard</h1>
               <p className="text-muted-foreground">Track regulatory compliance across ICO, GDPR, OISC, and Security</p>
             </div>
           </div>
@@ -246,7 +246,7 @@ export default function ComplianceDashboardPage() {
                   <Shield className="h-4 w-4 text-blue-600" />
                   <span className="text-sm font-medium">ICO</span>
                 </div>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-lg font-bold text-blue-600">
                   {icoItems.filter(i => i.status === 'completed').length}/{icoItems.length}
                 </p>
               </div>
@@ -255,7 +255,7 @@ export default function ComplianceDashboardPage() {
                   <Lock className="h-4 w-4 text-green-600" />
                   <span className="text-sm font-medium">GDPR</span>
                 </div>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-lg font-bold text-green-600">
                   {gdprItems.filter(i => i.status === 'completed').length}/{gdprItems.length}
                 </p>
               </div>
@@ -264,7 +264,7 @@ export default function ComplianceDashboardPage() {
                   <FileText className="h-4 w-4 text-amber-600" />
                   <span className="text-sm font-medium">OISC</span>
                 </div>
-                <p className="text-2xl font-bold text-amber-600">
+                <p className="text-lg font-bold text-amber-600">
                   {oiscItems.filter(i => i.status === 'completed').length}/{oiscItems.length}
                 </p>
               </div>
@@ -273,7 +273,7 @@ export default function ComplianceDashboardPage() {
                   <Database className="h-4 w-4 text-purple-600" />
                   <span className="text-sm font-medium">Security</span>
                 </div>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-lg font-bold text-purple-600">
                   {securityItems.filter(i => i.status === 'completed').length}/{securityItems.length}
                 </p>
               </div>

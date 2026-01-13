@@ -189,7 +189,7 @@ export default function ProductOverview() {
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold" data-testid="heading-product-overview">Product Overview</h1>
+              <h1 className="text-xl font-bold" data-testid="heading-product-overview">Product Overview</h1>
               <p className="text-muted-foreground">Create a comprehensive overview of your product offering</p>
             </div>
             <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />

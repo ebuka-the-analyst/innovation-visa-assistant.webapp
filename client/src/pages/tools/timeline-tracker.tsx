@@ -211,7 +211,7 @@ export default function TimelineTracker() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2" data-testid="text-tool-title">
+                <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-tool-title">
                   <Calendar className="w-8 h-8 text-primary" />
                   Timeline Tracker
                 </h1>
@@ -245,7 +245,7 @@ export default function TimelineTracker() {
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
                     <span className="text-sm text-muted-foreground">Completed</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-completed-stages">{completedCount}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-completed-stages">{completedCount}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -254,7 +254,7 @@ export default function TimelineTracker() {
                     <Clock className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">In Progress</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{inProgressCount}</p>
+                  <p className="text-lg font-bold mt-1">{inProgressCount}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -263,7 +263,7 @@ export default function TimelineTracker() {
                     <Circle className="w-5 h-5 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">Pending</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{stages.length - completedCount - inProgressCount}</p>
+                  <p className="text-lg font-bold mt-1">{stages.length - completedCount - inProgressCount}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -272,7 +272,7 @@ export default function TimelineTracker() {
                     <Calendar className="w-5 h-5 text-orange-500" />
                     <span className="text-sm text-muted-foreground">Est. Days</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{totalEstimatedDays}</p>
+                  <p className="text-lg font-bold mt-1">{totalEstimatedDays}</p>
                 </CardContent>
               </Card>
             </div>

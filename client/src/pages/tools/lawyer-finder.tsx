@@ -376,7 +376,7 @@ export default function LawyerFinder() {
           <div className="mb-6">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
               <div>
-                <h1 className="text-3xl font-bold mb-2">Lawyer Finder & Booking</h1>
+                <h1 className="text-xl font-bold mb-2">Lawyer Finder & Booking</h1>
                 <p className="text-muted-foreground">Find and connect with experienced immigration lawyers</p>
               </div>
               <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />

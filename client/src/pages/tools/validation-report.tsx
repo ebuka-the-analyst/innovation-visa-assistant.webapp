@@ -574,7 +574,7 @@ can be substantiated with documentary evidence before submission to endorsers.
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-2" data-testid="heading-validation-report">Validation Report</h1>
+                <h1 className="text-xl font-bold mb-2" data-testid="heading-validation-report">Validation Report</h1>
                 <p className="text-lg text-muted-foreground">Comprehensive market validation and traction evidence generator</p>
                 {savedDate && (
                   <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -624,7 +624,7 @@ can be substantiated with documentary evidence before submission to endorsers.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Validation Score</p>
-                          <p className="text-3xl font-bold" data-testid="text-validation-score">{validationScore}%</p>
+                          <p className="text-xl font-bold" data-testid="text-validation-score">{validationScore}%</p>
                           <Progress value={validationScore} className="mt-2" />
                           <p className="text-xs text-muted-foreground mt-2">
                             {validationScore >= 70 ? 'Strong' : validationScore >= 50 ? 'Moderate' : 'Needs Work'}
@@ -637,7 +637,7 @@ can be substantiated with documentary evidence before submission to endorsers.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Total Participants</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-total-participants">{totalParticipants}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-total-participants">{totalParticipants}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {totalParticipants >= 50 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -654,7 +654,7 @@ can be substantiated with documentary evidence before submission to endorsers.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Methods Used</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-methods-used">{methodsUsed}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-methods-used">{methodsUsed}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {methodsUsed >= 3 ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -671,7 +671,7 @@ can be substantiated with documentary evidence before submission to endorsers.
                       <CardContent className="pt-6">
                         <div className="text-center">
                           <p className="text-sm text-muted-foreground mb-2">Documented</p>
-                          <p className="text-3xl font-bold text-primary" data-testid="text-documented-evidence">{documentedEvidence}/{evidence.length}</p>
+                          <p className="text-xl font-bold text-primary" data-testid="text-documented-evidence">{documentedEvidence}/{evidence.length}</p>
                           <div className="flex items-center justify-center gap-2 mt-2">
                             {documentedEvidence === evidence.length ? (
                               <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -1095,15 +1095,15 @@ can be substantiated with documentary evidence before submission to endorsers.
                   <div className="grid md:grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-accent/10 rounded-lg">
                       <p className="text-sm text-muted-foreground mb-1">Total Metrics Tracked</p>
-                      <p className="text-2xl font-bold" data-testid="text-total-metrics">{traction.length}</p>
+                      <p className="text-lg font-bold" data-testid="text-total-metrics">{traction.length}</p>
                     </div>
                     <div className="text-center p-4 bg-accent/10 rounded-lg">
                       <p className="text-sm text-muted-foreground mb-1">Verified Metrics</p>
-                      <p className="text-2xl font-bold" data-testid="text-verified-metrics">{verifiedMetrics}</p>
+                      <p className="text-lg font-bold" data-testid="text-verified-metrics">{verifiedMetrics}</p>
                     </div>
                     <div className="text-center p-4 bg-accent/10 rounded-lg">
                       <p className="text-sm text-muted-foreground mb-1">Verification Rate</p>
-                      <p className="text-2xl font-bold" data-testid="text-verification-rate">
+                      <p className="text-lg font-bold" data-testid="text-verification-rate">
                         {Math.round((verifiedMetrics / traction.length) * 100)}%
                       </p>
                     </div>

@@ -764,7 +764,7 @@ www.innovatorfoundervisaassistant.co.uk
           
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
-              <h1 className="text-4xl font-bold" data-testid="heading-revenue-forecast">Revenue Forecast</h1>
+              <h1 className="text-xl font-bold" data-testid="heading-revenue-forecast">Revenue Forecast</h1>
               <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
             </div>
             <p className="text-lg text-muted-foreground">Multi-stream revenue projections with growth scenarios and unit economics</p>
@@ -801,7 +801,7 @@ www.innovatorfoundervisaassistant.co.uk
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Viability Score</p>
-                      <p className="text-3xl font-bold" data-testid="text-viability-score">{score}%</p>
+                      <p className="text-xl font-bold" data-testid="text-viability-score">{score}%</p>
                       <p className="text-sm mt-2">{grade}</p>
                       <Progress value={score} className="mt-2" />
                     </div>
@@ -812,7 +812,7 @@ www.innovatorfoundervisaassistant.co.uk
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Current ARR</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-current-arr">£{(metrics.currentARR/1000).toFixed(0)}k</p>
+                      <p className="text-xl font-bold text-primary" data-testid="text-current-arr">£{(metrics.currentARR/1000).toFixed(0)}k</p>
                       <p className="text-sm mt-2">MRR: £{(metrics.currentMRR/1000).toFixed(1)}k</p>
                     </div>
                   </CardContent>
@@ -822,7 +822,7 @@ www.innovatorfoundervisaassistant.co.uk
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Year 3 ARR</p>
-                      <p className="text-3xl font-bold text-green-600" data-testid="text-year3-arr">£{(metrics.year3ARR/1000).toFixed(0)}k</p>
+                      <p className="text-xl font-bold text-green-600" data-testid="text-year3-arr">£{(metrics.year3ARR/1000).toFixed(0)}k</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {metrics.year3ARR >= 1000000 ? (
                           <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -839,7 +839,7 @@ www.innovatorfoundervisaassistant.co.uk
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">3-Year CAGR</p>
-                      <p className="text-3xl font-bold" data-testid="text-cagr">{metrics.cagr.toFixed(1)}%</p>
+                      <p className="text-xl font-bold" data-testid="text-cagr">{metrics.cagr.toFixed(1)}%</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         <TrendingUp className="h-4 w-4 text-green-500" />
                         <span className="text-sm">{metrics.revenueMultiple.toFixed(1)}x Multiple</span>

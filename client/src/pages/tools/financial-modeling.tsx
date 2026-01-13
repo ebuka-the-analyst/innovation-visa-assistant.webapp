@@ -518,7 +518,7 @@ Consult with qualified accountants and financial advisors before making business
           
           
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2" data-testid="heading-financial-modeling">Financial Modeling</h1>
+            <h1 className="text-xl font-bold mb-2" data-testid="heading-financial-modeling">Financial Modeling</h1>
             <p className="text-lg text-muted-foreground">Comprehensive 3-statement model, projections, and scenario analysis</p>
             {savedDate && (
               <p className="text-sm text-muted-foreground mt-2">Last saved: {savedDate}</p>
@@ -555,7 +555,7 @@ Consult with qualified accountants and financial advisors before making business
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Final Cash</p>
-                      <p className="text-3xl font-bold" data-testid="text-final-cash">£{finalCash.toLocaleString()}</p>
+                      <p className="text-xl font-bold" data-testid="text-final-cash">£{finalCash.toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground mt-2">{inputs.projectionMonths} months</p>
                     </div>
                   </CardContent>
@@ -565,7 +565,7 @@ Consult with qualified accountants and financial advisors before making business
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Total Revenue</p>
-                      <p className="text-3xl font-bold text-green-600" data-testid="text-total-revenue">£{totalRevenue.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-green-600" data-testid="text-total-revenue">£{totalRevenue.toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground mt-2">Cumulative</p>
                     </div>
                   </CardContent>
@@ -575,7 +575,7 @@ Consult with qualified accountants and financial advisors before making business
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Profit Margin</p>
-                      <p className={`text-3xl font-bold ${profitMargin > 0 ? 'text-green-600' : 'text-destructive'}`} data-testid="text-profit-margin">
+                      <p className={`text-xl font-bold ${profitMargin > 0 ? 'text-green-600' : 'text-destructive'}`} data-testid="text-profit-margin">
                         {profitMargin.toFixed(1)}%
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">Net margin</p>
@@ -587,7 +587,7 @@ Consult with qualified accountants and financial advisors before making business
                   <CardContent className="pt-6">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-2">Breakeven</p>
-                      <p className="text-3xl font-bold text-primary" data-testid="text-breakeven">
+                      <p className="text-xl font-bold text-primary" data-testid="text-breakeven">
                         {monthsToBreakeven === -1 ? 'N/A' : `M${monthsToBreakeven}`}
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">Months</p>

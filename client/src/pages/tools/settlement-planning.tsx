@@ -202,7 +202,7 @@ export default function SettlementPlanning() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2" data-testid="text-tool-title">
+                <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-tool-title">
                   <Home className="w-8 h-8 text-primary" />
                   Settlement Planning
                 </h1>
@@ -237,7 +237,7 @@ export default function SettlementPlanning() {
                     <MapPin className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">Target City</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-target-city">{targetCity}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-target-city">{targetCity}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -246,7 +246,7 @@ export default function SettlementPlanning() {
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
                     <span className="text-sm text-muted-foreground">Completed</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-completed-tasks">{completedCount} / {tasks.length}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-completed-tasks">{completedCount} / {tasks.length}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -255,7 +255,7 @@ export default function SettlementPlanning() {
                     <Building className="w-5 h-5 text-orange-500" />
                     <span className="text-sm text-muted-foreground">Categories</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{tasksByCategory.filter((c) => c.total > 0).length}</p>
+                  <p className="text-lg font-bold mt-1">{tasksByCategory.filter((c) => c.total > 0).length}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -264,7 +264,7 @@ export default function SettlementPlanning() {
                     <Briefcase className="w-5 h-5 text-purple-500" />
                     <span className="text-sm text-muted-foreground">Progress</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{Math.round(progress)}%</p>
+                  <p className="text-lg font-bold mt-1">{Math.round(progress)}%</p>
                 </CardContent>
               </Card>
             </div>

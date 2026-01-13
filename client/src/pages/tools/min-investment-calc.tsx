@@ -269,7 +269,7 @@ export default function MinInvestmentCalc() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold flex items-center gap-2" data-testid="text-tool-title">
+                <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-tool-title">
                   <Calculator className="w-8 h-8 text-primary" />
                   Investment Calculator
                 </h1>
@@ -306,7 +306,7 @@ export default function MinInvestmentCalc() {
                     <PoundSterling className="w-5 h-5 text-primary" />
                     <span className="text-sm text-muted-foreground">Total Investment</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-total-investment">£{totalInvestment.toLocaleString()}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-total-investment">£{totalInvestment.toLocaleString()}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -315,7 +315,7 @@ export default function MinInvestmentCalc() {
                     <TrendingUp className="w-5 h-5 text-orange-500" />
                     <span className="text-sm text-muted-foreground">Monthly Burn</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1" data-testid="text-monthly-burn">£{Math.round(monthlyBurn).toLocaleString()}</p>
+                  <p className="text-lg font-bold mt-1" data-testid="text-monthly-burn">£{Math.round(monthlyBurn).toLocaleString()}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -324,7 +324,7 @@ export default function MinInvestmentCalc() {
                     <Target className="w-5 h-5 text-green-500" />
                     <span className="text-sm text-muted-foreground">Runway</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{runwayMonths} months</p>
+                  <p className="text-lg font-bold mt-1">{runwayMonths} months</p>
                 </CardContent>
               </Card>
               <Card>
@@ -333,7 +333,7 @@ export default function MinInvestmentCalc() {
                     <Wallet className="w-5 h-5 text-purple-500" />
                     <span className="text-sm text-muted-foreground">Contingency</span>
                   </div>
-                  <p className="text-2xl font-bold mt-1">{contingencyPercent.toFixed(1)}%</p>
+                  <p className="text-lg font-bold mt-1">{contingencyPercent.toFixed(1)}%</p>
                 </CardContent>
               </Card>
             </div>

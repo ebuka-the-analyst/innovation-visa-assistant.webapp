@@ -580,7 +580,7 @@ export default function VisaPrefillDashboard() {
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Visa Application Prefill Dashboard</h1>
+            <h1 className="text-2xl md:text-xl font-bold">Visa Application Prefill Dashboard</h1>
             <p className="text-muted-foreground mt-1">
               Complete your founder profile to prefill all visa application tools
             </p>
@@ -614,7 +614,7 @@ export default function VisaPrefillDashboard() {
             <CardContent>
               <div className="space-y-4">
                 <div className="text-center">
-                  <span className="text-4xl font-bold">{overallCompletion}%</span>
+                  <span className="text-xl font-bold">{overallCompletion}%</span>
                   <Progress value={overallCompletion} className="mt-2" />
                 </div>
                 
