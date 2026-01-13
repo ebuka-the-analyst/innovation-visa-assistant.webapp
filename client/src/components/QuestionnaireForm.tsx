@@ -19,13 +19,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw, Building2, Stethoscope, ShoppingBag, Laptop, Lightbulb } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw, Building2, Stethoscope, ShoppingBag, Laptop, Lightbulb, FileText, Upload, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useAutoSave } from "@/hooks/useAutoSave";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 // Industry template definitions - Tech AND Non-Tech sectors
 const INDUSTRY_TEMPLATES = {
@@ -338,6 +346,19 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   
+  // Auto-fill from documents states
+  const [showAutoFillDrawer, setShowAutoFillDrawer] = useState(false);
+  const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
+  const [extractedData, setExtractedData] = useState<Record<string, any> | null>(null);
+  const [extractionConfidence, setExtractionConfidence] = useState<Record<string, number>>({});
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [showExtractedFields, setShowExtractedFields] = useState(false);
+  
+  // Fetch user's uploaded documents
+  const { data: userDocuments = [] } = useQuery<any[]>({
+    queryKey: ['/api/documents'],
+  });
+  
   // Check if current user is Ebuka (founder) - only they get access to their personal data
   const isFounderAccount = user?.email?.toLowerCase() === 'ebuka.umeh40@outlook.com';
 
@@ -365,6 +386,97 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
       title: "Form Cleared",
       description: "All saved data has been cleared. You can start fresh.",
     });
+  };
+
+  // Handle document extraction for auto-fill
+  const handleExtractFromDocuments = async () => {
+    if (selectedDocIds.length === 0) {
+      toast({
+        title: "No Documents Selected",
+        description: "Please select at least one document to extract data from.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsExtracting(true);
+    try {
+      const response = await apiRequest('/api/documents/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentIds: selectedDocIds }),
+      });
+      
+      if (response.extractedData && Object.keys(response.extractedData).length > 0) {
+        setExtractedData(response.extractedData);
+        setExtractionConfidence(response.confidence || {});
+        setShowExtractedFields(true);
+        toast({
+          title: "Data Extracted",
+          description: `Found ${Object.keys(response.extractedData).length} fields to auto-fill. Review and apply below.`,
+        });
+      } else {
+        toast({
+          title: "No Data Found",
+          description: "Could not extract any relevant information from the selected documents. Try uploading clearer documents.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Extraction error:", error);
+      toast({
+        title: "Extraction Failed",
+        description: "Failed to extract data from documents. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  // Apply extracted data to form
+  const handleApplyExtractedData = () => {
+    if (!extractedData) return;
+    
+    const updatedData = { ...formData };
+    let appliedCount = 0;
+    
+    for (const [field, value] of Object.entries(extractedData)) {
+      if (value && typeof value === 'string' && value.trim()) {
+        updatedData[field] = value;
+        saveField(field, value);
+        appliedCount++;
+      }
+    }
+    
+    setFormData(updatedData);
+    setShowAutoFillDrawer(false);
+    setExtractedData(null);
+    setSelectedDocIds([]);
+    setShowExtractedFields(false);
+    
+    toast({
+      title: "Fields Updated",
+      description: `Applied ${appliedCount} field${appliedCount !== 1 ? 's' : ''} from your documents.`,
+    });
+  };
+
+  // Toggle document selection
+  const handleToggleDocument = (docId: string) => {
+    setSelectedDocIds(prev => 
+      prev.includes(docId) 
+        ? prev.filter(id => id !== docId)
+        : [...prev, docId]
+    );
+  };
+
+  // Get field label by name
+  const getFieldLabel = (fieldName: string): string => {
+    for (const step of steps) {
+      const field = step.fields.find(f => f.name === fieldName);
+      if (field) return field.label;
+    }
+    return fieldName.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -1610,6 +1722,180 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Auto-fill from Documents Sheet */}
+        <Sheet open={showAutoFillDrawer} onOpenChange={setShowAutoFillDrawer}>
+          <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Auto-fill from Documents
+              </SheetTitle>
+              <SheetDescription>
+                Select documents to extract data and auto-fill the form fields.
+              </SheetDescription>
+            </SheetHeader>
+
+            <div className="mt-6 space-y-6">
+              {/* Document selection */}
+              {!showExtractedFields && (
+                <>
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm">Select Documents</h4>
+                    {userDocuments.length === 0 ? (
+                      <Card className="p-4 text-center">
+                        <FileText className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          No documents uploaded yet
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Upload documents in the Document Vault first
+                        </p>
+                      </Card>
+                    ) : (
+                      <div className="space-y-2">
+                        {userDocuments.map((doc: any) => (
+                          <Card 
+                            key={doc.id} 
+                            className={`p-3 cursor-pointer transition-all ${selectedDocIds.includes(doc.id) ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
+                            onClick={() => handleToggleDocument(doc.id)}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Checkbox 
+                                checked={selectedDocIds.includes(doc.id)}
+                                onCheckedChange={() => handleToggleDocument(doc.id)}
+                              />
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{doc.name}</p>
+                                <p className="text-xs text-muted-foreground capitalize">{doc.category?.replace('_', ' ')}</p>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <Button 
+                    onClick={handleExtractFromDocuments}
+                    disabled={selectedDocIds.length === 0 || isExtracting}
+                    className="w-full"
+                    data-testid="button-extract-documents"
+                  >
+                    {isExtracting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Extracting...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Extract Data ({selectedDocIds.length} selected)
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
+
+              {/* Extracted data review */}
+              {showExtractedFields && extractedData && (
+                <>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm">Extracted Fields</h4>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          setShowExtractedFields(false);
+                          setExtractedData(null);
+                        }}
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-1" />
+                        Back
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                      {Object.entries(extractedData).map(([field, value]) => (
+                        <Card key={field} className="p-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {getFieldLabel(field)}
+                              </span>
+                              {extractionConfidence[field] && (
+                                <Badge 
+                                  variant={extractionConfidence[field] >= 80 ? 'default' : 'secondary'}
+                                  className="text-xs"
+                                >
+                                  {extractionConfidence[field]}% confident
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm truncate">
+                              {String(value).slice(0, 100)}{String(value).length > 100 ? '...' : ''}
+                            </p>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => {
+                        setShowAutoFillDrawer(false);
+                        setExtractedData(null);
+                        setShowExtractedFields(false);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      className="flex-1"
+                      onClick={handleApplyExtractedData}
+                      data-testid="button-apply-extracted"
+                    >
+                      <Check className="h-4 w-4 mr-2" />
+                      Apply All
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* Auto-fill button */}
+        {userDocuments.length > 0 && (
+          <Card className="p-4 mb-6 border-primary/30 bg-primary/5">
+            <div className="flex gap-4 items-center justify-between flex-wrap">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <div>
+                  <h3 className="font-bold text-sm">Auto-fill Available</h3>
+                  <p className="text-xs text-muted-foreground">
+                    You have {userDocuments.length} document{userDocuments.length !== 1 ? 's' : ''} that can be used to auto-fill this form
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowAutoFillDrawer(true)}
+                variant="outline"
+                size="sm"
+                className="border-primary text-primary hover:bg-primary/10"
+                data-testid="button-open-autofill"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Auto-fill from Documents
+              </Button>
+            </div>
+          </Card>
+        )}
 
         {/* Auto-save status indicator */}
         {hasUnsavedData && (
