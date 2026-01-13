@@ -81,6 +81,18 @@ export default function ChatBot() {
         <div className={`flex items-center gap-0.5 transition-all duration-300 ${
           isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : ""
         }`}>
+          {/* Dismiss X button - attached to the left */}
+          {!isDismissed && !isOpen && (
+            <button
+              onClick={() => setIsDismissed(true)}
+              className="w-5 h-6 bg-muted hover:bg-muted/80 rounded-l-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm border border-r-0 border-border"
+              data-testid="button-dismiss-chat"
+              aria-label="Minimize chat button"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+          
           {/* Main chat button */}
           <button
             onClick={() => {
@@ -107,18 +119,6 @@ export default function ChatBot() {
               <MessageCircle className="w-4 h-4" />
             )}
           </button>
-          
-          {/* Dismiss X button - attached to the right, reduced height (50%) */}
-          {!isDismissed && !isOpen && (
-            <button
-              onClick={() => setIsDismissed(true)}
-              className="w-5 h-6 bg-muted hover:bg-muted/80 rounded-r-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm border border-l-0 border-border"
-              data-testid="button-dismiss-chat"
-              aria-label="Minimize chat button"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          )}
         </div>
       </div>
 
