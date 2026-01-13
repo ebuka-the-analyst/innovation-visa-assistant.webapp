@@ -312,55 +312,52 @@ export default function ToolsChronographWheel() {
     };
   }, [isHoveringDown]);
 
-  // When dismissed, show minimized version in middle-left
-  if (isDismissed) {
-    return createPortal(
-      <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[9998]">
-        <button
-          onClick={() => setIsDismissed(false)}
-          className="w-[60px] h-[40px] rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-center text-white hover-elevate"
-          style={{ background: "#005EB8" }}
-          data-testid="button-restore-tools"
-          aria-label="Restore Tools Hub"
-        >
-          <Icons.Wrench className="w-3.5 h-3.5" />
-          <span className="text-[7px] font-bold mt-0.5">100+ Tools</span>
-        </button>
-      </div>,
-      document.body
-    );
-  }
+  // When dismissed, ensure we're in minimized state (which handles dismissed styling)
+  useEffect(() => {
+    if (isDismissed && !isMinimized) {
+      setIsMinimized(true);
+    }
+  }, [isDismissed, isMinimized]);
 
-  // Minimized state - show 60x40px button in middle-left of screen
+  // Minimized state - show 60x40px button in middle-left of screen with dismiss like chat icon
   if (isMinimized) {
     return createPortal(
       <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[9998]">
-        <div className="relative">
-          {/* Close/dismiss X button */}
-          <button
-            onClick={() => setIsDismissed(true)}
-            className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center shadow-sm z-50"
-            data-testid="button-dismiss-tools"
-          >
-            <Icons.X className="w-2.5 h-2.5 text-muted-foreground" />
-          </button>
+        <div className={`flex items-center gap-0.5 transition-all duration-300 ${
+          isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : ""
+        }`}>
           {/* Main 100+ Tools button */}
           <button
             onClick={() => {
-              recordActivity();
-              setIsMinimized(false);
+              if (isDismissed) {
+                setIsDismissed(false);
+              } else {
+                recordActivity();
+                setIsMinimized(false);
+              }
             }}
-            className="w-[60px] h-[40px] rounded-lg shadow-lg hover-elevate transition-all duration-300 flex flex-col items-center justify-center"
+            className={`rounded-lg shadow-lg hover-elevate transition-all duration-300 flex flex-col items-center justify-center text-white ${
+              isDismissed ? "w-8 h-8 rounded-full" : "w-[60px] h-[40px]"
+            }`}
             data-testid="button-toggle-text-label"
-            aria-label="Expand Tools Hub"
-            style={{ 
-              color: "#ffffff", 
-              backgroundColor: "#005EB8",
-            }}
+            aria-label={isDismissed ? "Restore Tools Hub" : "Expand Tools Hub"}
+            style={{ backgroundColor: "#005EB8" }}
           >
-            <Icons.Wrench className="w-3.5 h-3.5" />
-            <span className="text-[7px] font-bold mt-0.5">100+ Tools</span>
+            <Icons.Wrench className={isDismissed ? "w-4 h-4" : "w-3.5 h-3.5"} />
+            {!isDismissed && <span className="text-[7px] font-bold mt-0.5">100+ Tools</span>}
           </button>
+          
+          {/* Dismiss X button - attached to the right, like chat icon */}
+          {!isDismissed && (
+            <button
+              onClick={() => setIsDismissed(true)}
+              className="w-5 h-6 bg-muted hover:bg-muted/80 rounded-r-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm border border-l-0 border-border"
+              data-testid="button-dismiss-tools"
+              aria-label="Minimize tools button"
+            >
+              <Icons.X className="w-3 h-3" />
+            </button>
+          )}
         </div>
       </div>,
       document.body

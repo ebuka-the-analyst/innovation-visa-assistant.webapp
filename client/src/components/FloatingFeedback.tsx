@@ -27,6 +27,7 @@ const feedbackOptions: FeedbackOption[] = [
 
 export default function FloatingFeedback() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
   const [feedbackType, setFeedbackType] = useState<FeedbackType | null>(null);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -125,29 +126,44 @@ export default function FloatingFeedback() {
         }
       `}</style>
 
-      {/* Small compact button matching 100+ Tools style - bottom left */}
+      {/* Floating Feedback Button - bottom left with dismiss like chat icon */}
       {createPortal(
         <div className="fixed left-4 bottom-4 z-[9999]">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="relative rounded-lg bg-primary shadow-lg hover-elevate transition-all duration-300 flex items-center justify-center w-[60px] h-[40px]"
-            data-testid="button-feedback-toggle"
-            aria-label={isOpen ? "Close feedback" : "Send feedback"}
-          >
-            <div className="flex flex-col items-center leading-none">
-              <MessageSquareWarning className="w-3.5 h-3.5 text-white" />
-              <span className="text-[7px] font-bold text-white mt-0.5">Feedback</span>
-            </div>
-          </button>
-          {isOpen && (
+          <div className={`flex items-center gap-0.5 transition-all duration-300 ${
+            isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : ""
+          }`}>
+            {/* Main feedback button */}
             <button
-              onClick={() => setIsOpen(false)}
-              className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center shadow-sm"
-              data-testid="button-feedback-close"
+              onClick={() => {
+                if (isDismissed) {
+                  setIsDismissed(false);
+                } else {
+                  setIsOpen(!isOpen);
+                }
+              }}
+              className={`rounded-lg shadow-lg hover-elevate transition-all duration-300 flex flex-col items-center justify-center text-white ${
+                isDismissed ? "w-8 h-8 rounded-full" : "w-[60px] h-[40px]"
+              }`}
+              style={{ background: "#005EB8" }}
+              data-testid="button-feedback-toggle"
+              aria-label={isDismissed ? "Restore feedback" : isOpen ? "Close feedback" : "Send feedback"}
             >
-              <X className="w-2.5 h-2.5 text-muted-foreground" />
+              <MessageSquareWarning className={isDismissed ? "w-4 h-4" : "w-3.5 h-3.5"} />
+              {!isDismissed && <span className="text-[7px] font-bold mt-0.5">Feedback</span>}
             </button>
-          )}
+            
+            {/* Dismiss X button - attached to the right, like chat icon */}
+            {!isDismissed && !isOpen && (
+              <button
+                onClick={() => setIsDismissed(true)}
+                className="w-5 h-6 bg-muted hover:bg-muted/80 rounded-r-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm border border-l-0 border-border"
+                data-testid="button-dismiss-feedback"
+                aria-label="Minimize feedback button"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
         </div>,
         document.body
       )}
