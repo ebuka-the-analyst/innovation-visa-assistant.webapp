@@ -145,21 +145,21 @@ export default function Login() {
         description="Sign in to your UK Innovator Founder Visa Assistant account. Continue working on your business plan, innovation assessment, and visa application tools."
         path="/login"
       />
-      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-2 overflow-hidden">
-        <Card className="w-full max-w-md">
-        <div className="flex justify-center pt-4 pb-2">
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 overflow-hidden">
+        <Card className="w-full max-w-sm mx-2">
+        <div className="flex justify-center pt-3 pb-1">
           <div className="isolate z-[9999] mix-blend-normal bg-transparent">
             <div className="logo-container overflow-hidden">
-              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-16 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-16 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
+              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
             </div>
           </div>
         </div>
-        <CardHeader className="space-y-0.5 pt-2 pb-2">
-          <CardTitle className="text-base font-bold text-center">Welcome back</CardTitle>
-          <CardDescription className="text-center text-xs">Sign in to your account to continue</CardDescription>
+        <CardHeader className="py-1 px-4">
+          <CardTitle className="text-sm font-bold text-center">Welcome back</CardTitle>
+          <CardDescription className="text-center text-xs">Sign in to continue</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 pt-0">
+        <CardContent className="space-y-2 pt-0 px-4">
           {verificationRequired && (
             <Alert className="border-amber-500/50 bg-amber-500/10">
               <Mail className="h-4 w-4 text-amber-600" />
@@ -182,8 +182,8 @@ export default function Login() {
             </Alert>
           )}
           
-          <form onSubmit={handleEmailLogin} className="space-y-2">
-            <div className="space-y-1">
+          <form onSubmit={handleEmailLogin} className="space-y-1.5">
+            <div className="space-y-0.5">
               <Label htmlFor="email" className="text-xs">Email</Label>
               <Input
                 id="email"
@@ -192,11 +192,12 @@ export default function Login() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+                className="h-8 text-sm"
                 data-testid="input-email"
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="text-xs">Password</Label>
                 <Link
@@ -204,7 +205,7 @@ export default function Login() {
                   className="text-xs text-primary hover:underline"
                   data-testid="link-forgot-password"
                 >
-                  Forgot password?
+                  Forgot?
                 </Link>
               </div>
               <Input
@@ -214,13 +215,14 @@ export default function Login() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
+                className="h-8 text-sm"
                 data-testid="input-password"
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-8"
               size="sm"
               disabled={isSubmitting}
               data-testid="button-login"
@@ -229,45 +231,31 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="relative py-1">
+          <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or</span>
+              <span className="bg-card px-2 text-muted-foreground text-[10px]">or</span>
             </div>
           </div>
 
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full h-8"
             size="sm"
             onClick={handleGoogleLogin}
             data-testid="button-google-login"
           >
-            <LogIn className="mr-2 h-4 w-4" />
+            <LogIn className="mr-1.5 h-3.5 w-3.5" />
             Continue with Google
           </Button>
         </CardContent>
-        <div className="px-4 pb-4 flex flex-col space-y-1">
-          <p className="text-xs text-muted-foreground text-center">
-            Don't have an account?{" "}
-            <Link
-              href="/signup"
-              className="text-primary hover:underline font-medium"
-              data-testid="link-signup"
-            >
-              Create account
-            </Link>
-          </p>
-          <p className="text-xs text-muted-foreground text-center">
-            <Link
-              href="/"
-              className="text-primary hover:underline"
-              data-testid="link-home"
-            >
-              Back to home
-            </Link>
+        <div className="px-4 pb-3 pt-1 text-center space-y-0.5">
+          <p className="text-xs text-muted-foreground">
+            No account? <Link href="/signup" className="text-primary hover:underline font-medium" data-testid="link-signup">Create one</Link>
+            {" · "}
+            <Link href="/" className="text-primary hover:underline" data-testid="link-home">Home</Link>
           </p>
         </div>
       </Card>
