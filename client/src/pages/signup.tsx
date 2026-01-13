@@ -167,55 +167,42 @@ export default function Signup() {
           description="Please verify your email to complete your registration."
           path="/signup"
         />
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
-          <Card className="w-full max-w-md">
-            <div className="flex justify-center pt-8 pb-4">
-              <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <Mail className="h-8 w-8 text-green-600 dark:text-green-400" />
+        <div className="h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 overflow-hidden">
+          <Card className="w-full max-w-sm mx-2">
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <Mail className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <CardHeader className="space-y-1 pt-2">
-              <CardTitle className="text-lg font-bold text-center">Check your email</CardTitle>
-              <CardDescription className="text-center">
-                We've sent a verification link to
+            <CardHeader className="py-1 px-4">
+              <CardTitle className="text-sm font-bold text-center">Check your email</CardTitle>
+              <CardDescription className="text-center text-xs">
+                Verification link sent to:
               </CardDescription>
-              <p className="text-center font-medium text-primary">{registrationSuccess.email}</p>
+              <p className="text-center font-medium text-primary text-xs">{registrationSuccess.email}</p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Click the link in the email to verify your account and start using all features.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Don't see the email? Check your spam folder.
-                </p>
+            <CardContent className="space-y-2 pt-0 px-4">
+              <div className="bg-muted/50 rounded p-2 text-xs text-muted-foreground">
+                Click the link in email to verify. Check spam if not found.
               </div>
               
               <Button
                 variant="outline"
-                className="w-full"
+                className="w-full h-8"
+                size="sm"
                 onClick={handleResendVerification}
                 disabled={isResendingVerification}
                 data-testid="button-resend-verification"
               >
-                {isResendingVerification ? "Sending..." : "Resend verification email"}
+                {isResendingVerification ? "Sending..." : "Resend email"}
               </Button>
               
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Already verified?</span>
-                </div>
-              </div>
-              
               <Button
-                className="w-full"
+                className="w-full h-8"
+                size="sm"
                 onClick={() => setLocation("/login")}
                 data-testid="button-go-to-login"
               >
-                <ArrowRight className="mr-2 h-4 w-4" />
                 Go to Sign In
               </Button>
             </CardContent>
@@ -232,63 +219,59 @@ export default function Signup() {
         description="Create your free account and start your UK Innovator Founder Visa application journey. Access 100+ professional-level tools, business plan generator, and expert guidance."
         path="/signup"
       />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
-        <Card className="w-full max-w-md">
-        <div className="flex justify-center pt-8 pb-4">
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 overflow-hidden">
+        <Card className="w-full max-w-sm mx-2">
+        <div className="flex justify-center pt-2 pb-1">
           <div className="isolate z-[9999] mix-blend-normal bg-transparent">
             <div className="logo-container overflow-hidden">
-              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-32 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-32 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
+              <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-8 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
+              <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-8 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
             </div>
           </div>
         </div>
-        <CardHeader className="space-y-1 pt-4">
-          <CardTitle className="text-lg font-bold text-center">Create your account</CardTitle>
-          <CardDescription className="text-center">Get started with your visa application journey</CardDescription>
+        <CardHeader className="py-1 px-4">
+          <CardTitle className="text-sm font-bold text-center">Create your account</CardTitle>
+          <CardDescription className="text-center text-xs">Start your visa journey</CardDescription>
           {referralCode && referralDiscount && (
-            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-              <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
-                <Gift className="h-4 w-4" />
-                <span className="font-medium">Referral Applied!</span>
-                <Badge variant="secondary" className="bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300">
-                  {referralDiscount}% OFF
-                </Badge>
+            <div className="mt-1 p-1.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-xs">
+              <div className="flex items-center gap-1 text-green-700 dark:text-green-400">
+                <Gift className="h-3 w-3" />
+                <span className="font-medium">Referral: {referralDiscount}% OFF</span>
               </div>
-              <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                You'll get {referralDiscount}% off your first purchase!
-              </p>
             </div>
           )}
         </CardHeader>
-        <CardContent className="space-y-4">
-          <form onSubmit={handleEmailSignup} className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
+        <CardContent className="space-y-1.5 pt-0 px-4">
+          <form onSubmit={handleEmailSignup} className="space-y-1.5">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-0.5">
+                <Label htmlFor="firstName" className="text-xs">First Name</Label>
                 <Input
                   id="firstName"
                   type="text"
                   placeholder="John"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  className="h-8 text-sm"
                   data-testid="input-first-name"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
+              <div className="space-y-0.5">
+                <Label htmlFor="lastName" className="text-xs">Last Name</Label>
                 <Input
                   id="lastName"
                   type="text"
                   placeholder="Doe"
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  className="h-8 text-sm"
                   data-testid="input-last-name"
                 />
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-0.5">
+              <Label htmlFor="email" className="text-xs">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -296,12 +279,13 @@ export default function Signup() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+                className="h-8 text-sm"
                 data-testid="input-email"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-0.5">
+              <Label htmlFor="password" className="text-xs">Password (min 6 chars)</Label>
               <Input
                 id="password"
                 type="password"
@@ -310,25 +294,19 @@ export default function Signup() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 minLength={6}
+                className="h-8 text-sm"
                 data-testid="input-password"
               />
-              <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
             </div>
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-8"
+              size="sm"
               disabled={isLoading}
               data-testid="button-signup"
             >
-              {isLoading ? (
-                "Creating account..."
-              ) : (
-                <>
-                  <UserPlus className="mr-2 h-5 w-5" />
-                  Create Account
-                </>
-              )}
+              {isLoading ? "Creating..." : "Create Account"}
             </Button>
           </form>
 
@@ -337,39 +315,26 @@ export default function Signup() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or</span>
+              <span className="bg-card px-2 text-muted-foreground text-[10px]">or</span>
             </div>
           </div>
 
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full h-8"
+            size="sm"
             onClick={handleGoogleSignup}
             data-testid="button-google-signup"
           >
-            <LogIn className="mr-2 h-5 w-5" />
+            <LogIn className="mr-1.5 h-3.5 w-3.5" />
             Sign up with Google
           </Button>
         </CardContent>
-        <div className="px-6 pb-6 flex flex-col space-y-2">
-          <p className="text-sm text-muted-foreground text-center">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="text-primary hover:underline font-medium"
-              data-testid="link-login"
-            >
-              Sign in
-            </Link>
-          </p>
-          <p className="text-sm text-muted-foreground text-center">
-            <Link
-              href="/"
-              className="text-primary hover:underline"
-              data-testid="link-home"
-            >
-              Back to home
-            </Link>
+        <div className="px-4 pb-2 pt-1 text-center">
+          <p className="text-xs text-muted-foreground">
+            Have an account? <Link href="/login" className="text-primary hover:underline font-medium" data-testid="link-login">Sign in</Link>
+            {" · "}
+            <Link href="/" className="text-primary hover:underline" data-testid="link-home">Home</Link>
           </p>
         </div>
       </Card>
