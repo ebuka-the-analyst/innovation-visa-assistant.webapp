@@ -6866,32 +6866,94 @@ Return ONLY valid JSON in this format:
         }
       } catch (parseError) {
         console.error("[Document Extract] AI extraction error:", parseError);
+      }
+      
+      // If AI extraction failed or returned empty, provide intelligent placeholders
+      if (Object.keys(extractedData).length === 0) {
+        console.log("[Document Extract] Using intelligent placeholders based on document metadata");
         
-        // Provide basic fields based on document categories even if AI fails
         for (const doc of documentMetadata) {
-          if (doc.category === 'passport') {
-            extractedData.fullLegalName = `[From ${doc.name}]`;
-            extractedData.nationality = `[From ${doc.name}]`;
-            confidence.fullLegalName = 50;
-            confidence.nationality = 50;
-          } else if (doc.category === 'employment' || doc.name.toLowerCase().includes('cv')) {
-            extractedData.founderWorkHistory = `[From ${doc.name}]`;
-            extractedData.totalProfessionalExperience = `[From ${doc.name}]`;
-            confidence.founderWorkHistory = 50;
-            confidence.totalProfessionalExperience = 50;
-          } else if (doc.category === 'business_plan' || doc.name.toLowerCase().includes('business')) {
-            extractedData.businessName = `[From ${doc.name}]`;
-            extractedData.industry = `[From ${doc.name}]`;
-            confidence.businessName = 50;
-            confidence.industry = 50;
+          const category = doc.category?.toLowerCase() || '';
+          const name = doc.name?.toLowerCase() || '';
+          
+          // Passport/ID documents
+          if (category === 'passport' || category.includes('id') || name.includes('passport') || name.includes('id card')) {
+            if (!extractedData.fullLegalName) {
+              extractedData.fullLegalName = `[Review ${doc.name} to fill]`;
+              confidence.fullLegalName = 40;
+            }
+            if (!extractedData.nationality) {
+              extractedData.nationality = `[Review ${doc.name} to fill]`;
+              confidence.nationality = 40;
+            }
+          }
+          
+          // CV/Employment documents
+          if (category === 'employment' || category === 'cv' || name.includes('cv') || name.includes('resume')) {
+            if (!extractedData.founderWorkHistory) {
+              extractedData.founderWorkHistory = `[Review ${doc.name} to fill]`;
+              confidence.founderWorkHistory = 40;
+            }
+            if (!extractedData.totalProfessionalExperience) {
+              extractedData.totalProfessionalExperience = `[Review ${doc.name} to fill]`;
+              confidence.totalProfessionalExperience = 40;
+            }
+            if (!extractedData.technicalSkillsProficiency) {
+              extractedData.technicalSkillsProficiency = `[Review ${doc.name} to fill]`;
+              confidence.technicalSkillsProficiency = 40;
+            }
+          }
+          
+          // Business Plan documents
+          if (category === 'business_plan' || category.includes('business') || name.includes('business') || name.includes('plan')) {
+            if (!extractedData.businessName) {
+              extractedData.businessName = `[Review ${doc.name} to fill]`;
+              confidence.businessName = 40;
+            }
+            if (!extractedData.industry) {
+              extractedData.industry = `[Review ${doc.name} to fill]`;
+              confidence.industry = 40;
+            }
+            if (!extractedData.problem) {
+              extractedData.problem = `[Review ${doc.name} to fill]`;
+              confidence.problem = 40;
+            }
+            if (!extractedData.uniqueness) {
+              extractedData.uniqueness = `[Review ${doc.name} to fill]`;
+              confidence.uniqueness = 40;
+            }
+          }
+          
+          // Bank Statement documents
+          if (category === 'bank_statement' || category.includes('bank') || name.includes('bank')) {
+            if (!extractedData.financialCapacity) {
+              extractedData.financialCapacity = `[Review ${doc.name} to fill]`;
+              confidence.financialCapacity = 40;
+            }
+          }
+          
+          // Education documents
+          if (category === 'education' || name.includes('degree') || name.includes('certificate') || name.includes('diploma')) {
+            if (!extractedData.educationBackground) {
+              extractedData.educationBackground = `[Review ${doc.name} to fill]`;
+              confidence.educationBackground = 40;
+            }
+            if (!extractedData.professionalCertifications) {
+              extractedData.professionalCertifications = `[Review ${doc.name} to fill]`;
+              confidence.professionalCertifications = 40;
+            }
           }
         }
       }
       
-      // Only proceed if we have some extracted data
+      // If still no extracted data, provide generic placeholders as last resort
       if (Object.keys(extractedData).length === 0) {
-        console.log("[Document Extract] No data could be extracted");
-        return res.status(400).json({ error: "Could not extract any data from the selected documents. Please ensure documents are clear and readable." });
+        console.log("[Document Extract] Using generic placeholders as last resort");
+        // Provide generic placeholders so user can at least edit them
+        extractedData.fullLegalName = "[Please enter your full legal name]";
+        extractedData.nationality = "[Please enter your nationality]";
+        confidence.fullLegalName = 20;
+        confidence.nationality = 20;
       }
       
       console.log("[Document Extract] Extracted fields:", Object.keys(extractedData));
