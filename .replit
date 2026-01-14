@@ -49,6 +49,7 @@ GOOGLE_CALLBACK_URL = "https://innovatorfoundervisaassistant.co.uk/api/auth/call
 VITE_TURNSTILE_SITE_KEY = "placeholder_site_key_pending_user_input"
 BASE_URL = "https://innovatorfoundervisaassistant.co.uk"
 AWS_SES_REGION = "eu-north-1"
+AWS_REGION = "eu-north-1"
 
 [userenv.production]
 APP_URL = "https://innovatorfoundervisaassistant.co.uk"
