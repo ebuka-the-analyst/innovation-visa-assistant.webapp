@@ -1,0 +1,155 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+1
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+b68729ed
+Crashed
+
+Jan 14, 2026, 7:49 PM
+innovatorfoundervisaassistant.co.uk
+Get Help
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+    at file:///app/dist/index.js:21296:24
+    at file:///app/dist/index.js:21357:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+Connecting to database...
+Found 273 SQL statements to execute
+Connected successfully
+Migration complete: 0 executed, 273 skipped (already exist)
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+/app/node_modules/passport-oauth2/lib/strategy.js:87
+  if (!options.clientID) { throw new TypeError('OAuth2Strategy requires a clientID option'); }
+                                 ^
+TypeError: OAuth2Strategy requires a clientID option
+    at Strategy.OAuth2Strategy (/app/node_modules/passport-oauth2/lib/strategy.js:87:34)
+    at new Strategy (/app/node_modules/passport-google-oauth20/lib/strategy.js:52:18)
+    at setupAuth (file:///app/dist/index.js:10105:5)
+    at registerRoutes (file:///app/dist/index.js:11738:9)
+    at file:///app/dist/index.js:21296:24
+    at file:///app/dist/index.js:21357:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+    at async loadESM (node:internal/process/esm_loader:34:7)
+    at async handleMainPromise (node:internal/modules/run_main:106:12)
+Node.js v18.20.5
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+Migration complete: 0 executed, 273 skipped (already exist)
+npm warn config production Use `--omit=dev` instead.
+Node.js v18.20.5
+    at new Strategy (/app/node_modules/passport-google-oauth20/lib/strategy.js:52:18)
+    at registerRoutes (file:///app/dist/index.js:11738:9)
+    at file:///app/dist/index.js:21296:24
+    at setupAuth (file:///app/dist/index.js:10105:5)
+    at file:///app/dist/index.js:21357:3
+[Email Service] Using Resend HTTP API (recommended)
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+[Email Service] Resend configured and ready (HTTP API - recommended)
+/app/node_modules/passport-oauth2/lib/strategy.js:87
+                                 ^
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+  if (!options.clientID) { throw new TypeError('OAuth2Strategy requires a clientID option'); }
+    at Strategy.OAuth2Strategy (/app/node_modules/passport-oauth2/lib/strategy.js:87:34)
+    at async loadESM (node:internal/process/esm_loader:34:7)
+    at async handleMainPromise (node:internal/modules/run_main:106:12)
+TypeError: OAuth2Strategy requires a clientID option
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+    at async loadESM (node:internal/process/esm_loader:34:7)
+    at async handleMainPromise (node:internal/modules/run_main:106:12)
+Node.js v18.20.5
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+/app/node_modules/passport-oauth2/lib/strategy.js:87
+  if (!options.clientID) { throw new TypeError('OAuth2Strategy requires a clientID option'); }
+                                 ^
+TypeError: OAuth2Strategy requires a clientID option
+    at Strategy.OAuth2Strategy (/app/node_modules/passport-oauth2/lib/strategy.js:87:34)
+    at new Strategy (/app/node_modules/passport-google-oauth20/lib/strategy.js:52:18)
+    at setupAuth (file:///app/dist/index.js:10105:5)
+    at registerRoutes (file:///app/dist/index.js:11738:9)
+    at file:///app/dist/index.js:21296:24
+    at file:///app/dist/index.js:21357:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+Connected successfully
+Found 273 SQL statements to execute
+Connecting to database...
+Migration complete: 0 executed, 273 skipped (already exist)
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+    at setupAuth (file:///app/dist/index.js:10105:5)
+    at Strategy.OAuth2Strategy (/app/node_modules/passport-oauth2/lib/strategy.js:87:34)
+                                 ^
+    at new Strategy (/app/node_modules/passport-google-oauth20/lib/strategy.js:52:18)
+[Email Service] Using Resend HTTP API (recommended)
+/app/node_modules/passport-oauth2/lib/strategy.js:87
+  if (!options.clientID) { throw new TypeError('OAuth2Strategy requires a clientID option'); }
+TypeError: OAuth2Strategy requires a clientID option
+[Email Service] Resend configured and ready (HTTP API - recommended)
+    at registerRoutes (file:///app/dist/index.js:11738:9)
+    at file:///app/dist/index.js:21296:24
+    at file:///app/dist/index.js:21357:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+    at async loadESM (node:internal/process/esm_loader:34:7)
+    at async handleMainPromise (node:internal/modules/run_main:106:12)
+Node.js v18.20.5
+You reached the end of the range
+Jan 14, 2026, 7:54 PM
+
+
+innovation-visa-assistant.webapp | Railway
