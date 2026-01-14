@@ -6841,6 +6841,19 @@ Return a JSON object with this exact structure:
 Return ONLY valid JSON, no markdown or explanation.`;
 
       try {
+        // Check if we have any AI capability
+        const hasGeminiKeys = [
+          process.env.GEMINI_API_KEY,
+          process.env.GEMINI_API_KEY_2,
+          process.env.GEMINI_API_KEY_3,
+          process.env.GEMINI_API_KEY_4,
+        ].filter(Boolean).length > 0;
+        
+        if (!hasGeminiKeys) {
+          console.log("[Document Extract] No Gemini API keys configured - using placeholders");
+          throw new Error("No AI keys configured");
+        }
+        
         // If we have actual file contents, use Gemini multimodal
         if (documentContents.length > 0) {
           // Use Gemini with file content for real extraction
@@ -7031,7 +7044,22 @@ Return ONLY valid JSON in this format:
       }
     } catch (error) {
       console.error("[Document Extract] Error:", error);
-      res.status(500).json({ error: "Failed to extract data from documents. Please try again." });
+      // Return placeholder data even on error so user can proceed
+      const fallbackData = {
+        fullLegalName: "[Please enter your full legal name]",
+        nationality: "[Please enter your nationality]",
+      };
+      const fallbackConfidence = {
+        fullLegalName: 10,
+        nationality: 10,
+      };
+      console.log("[Document Extract] Returning fallback data due to error");
+      res.json({
+        extractedData: fallbackData,
+        confidence: fallbackConfidence,
+        documentsUsed: [],
+        warning: "Could not extract data from documents. Please fill in the fields manually.",
+      });
     }
   });
 
