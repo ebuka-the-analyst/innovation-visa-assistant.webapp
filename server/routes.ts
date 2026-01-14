@@ -20,6 +20,7 @@ import path from "path";
 import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
 import { registerObjectStorageRoutes, ObjectStorageService } from "./replit_integrations/object_storage";
+import { s3Storage } from "./services/s3Storage";
 
 const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -148,6 +149,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Initialize object storage service for document uploads
   const objectStorageService = new ObjectStorageService();
+  
+  // Initialize S3 storage for cross-platform file storage
+  s3Storage.initialize();
 
   // Auth endpoint - user object already includes all fields from Google OAuth
   // No need to fetch from database again since it's already in req.user
@@ -6556,7 +6560,7 @@ EXAMPLES OF GOOD RESPONSES:
     }
   });
 
-  // Upload document - uses cloud object storage for permanent storage
+  // Upload document - uses S3 for production, Replit Object Storage for dev, local fallback
   app.post("/api/documents/upload", isAuthenticated, documentUpload.single("file"), async (req, res) => {
     try {
       const user = req.user as any;
@@ -6575,33 +6579,53 @@ EXAMPLES OF GOOD RESPONSES:
       }
       
       let fileUrl = `/uploads/${file.filename}`;
-      let isCloudStored = false;
+      let storageType = 'local';
+      const fileBuffer = fs.readFileSync(file.path);
       
-      // Try to upload to cloud storage if available
-      try {
-        const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-        const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
-        
-        // Read file and upload to cloud storage
-        const fileBuffer = fs.readFileSync(file.path);
-        const cloudResponse = await fetch(uploadURL, {
-          method: "PUT",
-          body: fileBuffer,
-          headers: { "Content-Type": file.mimetype },
-        });
-        
-        if (cloudResponse.ok) {
-          fileUrl = objectPath; // Use cloud storage path
-          isCloudStored = true;
-          console.log("[Document Upload] Uploaded to cloud storage:", objectPath);
-          
-          // Delete local file after successful cloud upload
+      // Priority 1: Try AWS S3 (works on Railway and Replit)
+      if (s3Storage.isAvailable()) {
+        try {
+          const s3Key = s3Storage.generateKey(user.id, file.originalname);
+          const s3Url = await s3Storage.uploadFile(s3Key, fileBuffer, file.mimetype, {
+            originalName: file.originalname,
+            category: category,
+            userId: String(user.id),
+          });
+          fileUrl = s3Url;
+          storageType = 's3';
+          console.log("[Document Upload] Uploaded to S3:", s3Key);
           fs.unlinkSync(file.path);
-        } else {
-          console.log("[Document Upload] Cloud upload failed, using local storage");
+        } catch (s3Error) {
+          console.log("[Document Upload] S3 upload failed:", s3Error);
         }
-      } catch (cloudError) {
-        console.log("[Document Upload] Cloud storage not available, using local storage:", cloudError);
+      }
+      
+      // Priority 2: Try Replit Object Storage (only works in Replit environment)
+      if (storageType === 'local') {
+        try {
+          const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+          const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+          
+          const cloudResponse = await fetch(uploadURL, {
+            method: "PUT",
+            body: fileBuffer,
+            headers: { "Content-Type": file.mimetype },
+          });
+          
+          if (cloudResponse.ok) {
+            fileUrl = objectPath;
+            storageType = 'replit';
+            console.log("[Document Upload] Uploaded to Replit storage:", objectPath);
+            fs.unlinkSync(file.path);
+          }
+        } catch (cloudError) {
+          console.log("[Document Upload] Replit storage not available");
+        }
+      }
+      
+      // Priority 3: Keep in local storage (fallback, not persistent on Railway)
+      if (storageType === 'local') {
+        console.log("[Document Upload] Using local storage (not persistent on Railway)");
       }
       
       const document = await storage.createUserDocument({
@@ -6615,7 +6639,7 @@ EXAMPLES OF GOOD RESPONSES:
         status: 'pending',
       });
       
-      console.log(`[Document Upload] Document saved: ${name} (cloud: ${isCloudStored})`);
+      console.log(`[Document Upload] Document saved: ${name} (storage: ${storageType})`);
       res.json(document);
     } catch (error) {
       console.error("Upload document error:", error);
@@ -6668,7 +6692,7 @@ EXAMPLES OF GOOD RESPONSES:
       
       console.log("[Document Extract] Found documents:", documents.map(d => ({ name: d.name, category: d.category, fileUrl: d.fileUrl })));
       
-      // Try to read file contents from cloud storage or local filesystem
+      // Try to read file contents from S3, Replit storage, or local filesystem
       const documentContents = [];
       const documentMetadata = [];
       
@@ -6676,8 +6700,30 @@ EXAMPLES OF GOOD RESPONSES:
         let fileFound = false;
         let base64Content = '';
         
-        // Check if document is in cloud storage (path starts with /objects/)
-        if (doc.fileUrl.startsWith('/objects/')) {
+        // Priority 1: Check if document is in S3 (s3:// prefix)
+        if (doc.fileUrl.startsWith('s3://')) {
+          try {
+            const s3Key = s3Storage.getKeyFromUrl(doc.fileUrl);
+            if (s3Key) {
+              const fileBuffer = await s3Storage.downloadFile(s3Key);
+              base64Content = fileBuffer.toString('base64');
+              documentContents.push({
+                id: doc.id,
+                name: doc.name,
+                category: doc.category,
+                mimeType: doc.fileType,
+                content: base64Content,
+              });
+              fileFound = true;
+              console.log("[Document Extract] File found in S3:", s3Key);
+            }
+          } catch (s3Error) {
+            console.log("[Document Extract] S3 read failed:", s3Error);
+          }
+        }
+        
+        // Priority 2: Check if document is in Replit storage (/objects/ prefix)
+        if (!fileFound && doc.fileUrl.startsWith('/objects/')) {
           try {
             const objectFile = await objectStorageService.getObjectEntityFile(doc.fileUrl);
             const [fileBuffer] = await objectFile.download();
@@ -6690,13 +6736,13 @@ EXAMPLES OF GOOD RESPONSES:
               content: base64Content,
             });
             fileFound = true;
-            console.log("[Document Extract] File found in cloud storage:", doc.fileUrl);
+            console.log("[Document Extract] File found in Replit storage:", doc.fileUrl);
           } catch (cloudError) {
-            console.log("[Document Extract] Cloud storage read failed:", cloudError);
+            console.log("[Document Extract] Replit storage read failed:", cloudError);
           }
         }
         
-        // Fallback to local filesystem
+        // Priority 3: Fallback to local filesystem
         if (!fileFound) {
           const possiblePaths = [
             path.join(process.cwd(), doc.fileUrl),
