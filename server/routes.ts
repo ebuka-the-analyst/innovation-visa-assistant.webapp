@@ -6548,6 +6548,33 @@ EXAMPLES OF GOOD RESPONSES:
   // DOCUMENT STORAGE
   // ============================================
 
+  // Storage status diagnostic endpoint
+  app.get("/api/storage/status", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const documents = await storage.getUserDocuments(user.id);
+      
+      const storageStats = {
+        s3Available: s3Storage.isAvailable(),
+        replitStorageAvailable: !!process.env.PUBLIC_OBJECT_SEARCH_PATHS,
+        documents: documents.map(d => ({
+          id: d.id,
+          name: d.name,
+          category: d.category,
+          storageType: d.fileUrl.startsWith('s3://') ? 's3' : 
+                       d.fileUrl.startsWith('/objects/') ? 'replit' : 'local',
+          fileUrl: d.fileUrl,
+        }))
+      };
+      
+      console.log("[Storage Status]", JSON.stringify(storageStats, null, 2));
+      res.json(storageStats);
+    } catch (error) {
+      console.error("Storage status error:", error);
+      res.status(500).json({ error: "Failed to get storage status" });
+    }
+  });
+
   // Get user's documents
   app.get("/api/documents", isAuthenticated, async (req, res) => {
     try {
@@ -6639,8 +6666,8 @@ EXAMPLES OF GOOD RESPONSES:
         status: 'pending',
       });
       
-      console.log(`[Document Upload] Document saved: ${name} (storage: ${storageType})`);
-      res.json(document);
+      console.log(`[Document Upload] Document saved: ${name} (storage: ${storageType}, url: ${fileUrl})`);
+      res.json({ ...document, storageType });
     } catch (error) {
       console.error("Upload document error:", error);
       res.status(500).json({ error: "Failed to upload document" });
@@ -6691,6 +6718,7 @@ EXAMPLES OF GOOD RESPONSES:
       }
       
       console.log("[Document Extract] Found documents:", documents.map(d => ({ name: d.name, category: d.category, fileUrl: d.fileUrl })));
+      console.log("[Document Extract] S3 available:", s3Storage.isAvailable());
       
       // Try to read file contents from S3, Replit storage, or local filesystem
       const documentContents = [];
@@ -6700,8 +6728,11 @@ EXAMPLES OF GOOD RESPONSES:
         let fileFound = false;
         let base64Content = '';
         
+        console.log(`[Document Extract] Processing ${doc.name} - URL: ${doc.fileUrl}`);
+        
         // Priority 1: Check if document is in S3 (s3:// prefix)
         if (doc.fileUrl.startsWith('s3://')) {
+          console.log(`[Document Extract] Attempting S3 download for: ${doc.fileUrl}`);
           try {
             const s3Key = s3Storage.getKeyFromUrl(doc.fileUrl);
             if (s3Key) {
