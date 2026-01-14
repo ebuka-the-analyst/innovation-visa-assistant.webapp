@@ -401,19 +401,39 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     
     setIsExtracting(true);
     try {
-      const response = await apiRequest('/api/documents/extract', {
+      const response = await fetch('/api/documents/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ documentIds: selectedDocIds }),
       });
       
-      if (response.extractedData && Object.keys(response.extractedData).length > 0) {
-        setExtractedData(response.extractedData);
-        setExtractionConfidence(response.confidence || {});
+      const data = await response.json();
+      
+      // Handle response - even if there's an error, try to use any extractedData provided
+      if (data.extractedData && Object.keys(data.extractedData).length > 0) {
+        setExtractedData(data.extractedData);
+        setExtractionConfidence(data.confidence || {});
         setShowExtractedFields(true);
+        
+        // Show warning if there was an issue but we still have data
+        if (data.warning) {
+          toast({
+            title: "Partial Data Available",
+            description: data.warning,
+          });
+        } else {
+          toast({
+            title: "Data Extracted",
+            description: `Found ${Object.keys(data.extractedData).length} fields to auto-fill. Review and apply below.`,
+          });
+        }
+      } else if (data.error) {
+        // Real error with no fallback data
         toast({
-          title: "Data Extracted",
-          description: `Found ${Object.keys(response.extractedData).length} fields to auto-fill. Review and apply below.`,
+          title: "Extraction Issue",
+          description: "Your documents are being processed. Please re-upload them to enable auto-fill extraction.",
+          variant: "destructive",
         });
       } else {
         toast({
@@ -425,8 +445,8 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     } catch (error) {
       console.error("Extraction error:", error);
       toast({
-        title: "Extraction Failed",
-        description: "Failed to extract data from documents. Please try again.",
+        title: "Extraction Issue",
+        description: "Please re-upload your documents to enable auto-fill. Legacy documents need to be refreshed.",
         variant: "destructive",
       });
     } finally {
