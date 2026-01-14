@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+88fa6194
+Active
+
+Jan 14, 2026, 10:21 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-14T22:26:18.793Z] POST /api/activity/session
+10:26:18 PM [express] POST /api/activity/session 200 in 203ms :: {"sessionId":"8532c75a-e560-4b55-8d8…
+[2026-01-14T22:26:30.387Z] POST /api/documents/upload
+[Document Upload] S3 upload failed: AccessDenied: User: arn:aws:iam::199056706843:user/s3-app-user is not authorized to perform: s3:PutObject on resource: "arn:aws:s3:::innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768429591160-Business_Plan.pdf" because no identity-based policy allows the s3:PutObject action
+    at ProtocolLib.getErrorSchemaOrThrowBaseException (/app/node_modules/@aws-sdk/client-s3/node_modules/@aws-sdk/core/dist-cjs/submodules/protocols/index.js:69:67)
+    at AwsRestXmlProtocol.handleError (/app/node_modules/@aws-sdk/client-s3/node_modules/@aws-sdk/core/dist-cjs/submodules/protocols/index.js:1795:65)
+    at AwsRestXmlProtocol.deserializeResponse (/app/node_modules/@smithy/core/dist-cjs/submodules/protocols/index.js:304:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /app/node_modules/@smithy/core/dist-cjs/submodules/schema/index.js:26:24
+    at async /app/node_modules/@aws-sdk/client-s3/node_modules/@aws-sdk/middleware-sdk-s3/dist-cjs/index.js:386:20
+    at async /app/node_modules/@smithy/middleware-retry/dist-cjs/index.js:254:46
+    at async /app/node_modules/@aws-sdk/middleware-flexible-checksums/dist-cjs/index.js:241:24
+    at async /app/node_modules/@aws-sdk/client-s3/node_modules/@aws-sdk/middleware-sdk-s3/dist-cjs/index.js:63:28
+    at async /app/node_modules/@aws-sdk/client-s3/node_modules/@aws-sdk/middleware-sdk-s3/dist-cjs/index.js:90:20 {
+[Document Upload] Replit storage not available
+  '$fault': 'client',
+[Document Upload] Using local storage (not persistent on Railway)
+  '$retryable': undefined,
+[Document Upload] Document saved: BUSINESS PLAN (storage: local, url: /uploads/doc-1768429590595-486189142.pdf)
+  '$metadata': {
+10:26:32 PM [express] POST /api/documents/upload 200 in 2344ms :: {"id":"83beeff8-f40f-4568-9c30-adef…
+    httpStatusCode: 403,
+[2026-01-14T22:26:32.920Z] GET /api/documents
+    requestId: 'AS7F814VB4X7GTQW',
+10:26:32 PM [express] GET /api/documents 200 in 12ms :: [{"id":"83beeff8-f40f-4568-9c30-adef2e85da20"…
+    extendedRequestId: 'eBeDfVieyYiEp16NA8z75HXA0wHER/GwU184+OVRO+XBNKOL1jeNkc0xsAskas4LRJlCaPgT1B0=',
+    cfId: undefined,
+    attempts: 1,
+    totalRetryDelay: 0
+  },
+  Code: 'AccessDenied',
+  RequestId: 'AS7F814VB4X7GTQW',
+  HostId: 'eBeDfVieyYiEp16NA8z75HXA0wHER/GwU184+OVRO+XBNKOL1jeNkc0xsAskas4LRJlCaPgT1B0='
+}
+[2026-01-14T22:26:48.779Z] POST /api/activity/session
+10:26:48 PM [express] POST /api/activity/session 200 in 200ms :: {"sessionId":"8532c75a-e560-4b55-8d8…
+[2026-01-14T22:27:02.265Z] POST /api/activity/page-view
+[2026-01-14T22:27:02.268Z] GET /api/dashboard/plans
+[2026-01-14T22:27:02.272Z] GET /api/promos/my-redemptions
+10:27:02 PM [express] GET /api/promos/my-redemptions 304 in 203ms :: {"redemptions":[]}
+10:27:02 PM [express] POST /api/activity/page-view 200 in 214ms :: {"pageViewId":"71efa195-f6d3-4761-…
+10:27:02 PM [express] GET /api/dashboard/plans 304 in 218ms :: []
+[2026-01-14T22:27:02.960Z] POST /api/activity/page-view
+10:27:02 PM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"b1f60aca-5912-4885-8…
+[2026-01-14T22:27:02.989Z] GET /api/credits/balance
+10:27:03 PM [express] GET /api/credits/balance 304 in 13ms :: {"planCredits":0,"bonusCredits":0,"tota…
+[2026-01-14T22:27:18.768Z] POST /api/activity/session
+10:27:18 PM [express] POST /api/activity/session 200 in 198ms :: {"sessionId":"8532c75a-e560-4b55-8d8…
+[2026-01-14T22:27:21.896Z] POST /api/documents/extract
+[Document Extract] Starting extraction for user: 6783e1ea-78f5-49c9-b67d-97dce58d193c documents: [
+  '83beeff8-f40f-4568-9c30-adef2e85da20',
+  'ad73d1dd-2c80-4be0-b950-82aed3a8aed3'
+]
+]
+[Document Extract] S3 available: true
+[Document Extract] Processing BUSINESS PLAN - URL: /uploads/doc-1768429590595-486189142.pdf
+[Document Extract] File found locally at: /app/uploads/doc-1768429590595-486189142.pdf
+[Document Extract] Processing CV - URL: /uploads/doc-1768429556908-75000899.pdf
+[Document Extract] File found locally at: /app/uploads/doc-1768429556908-75000899.pdf
+[Document Extract] Files with content: 2 Total docs: 2
+[Document Extract] Found documents: [
+  {
+    name: 'BUSINESS PLAN',
+    category: 'business_plan',
+    fileUrl: '/uploads/doc-1768429590595-486189142.pdf'
+  },
+  {
+    name: 'CV',
+    category: 'education',
+    fileUrl: '/uploads/doc-1768429556908-75000899.pdf'
+  }
+[Document Extract] AI extraction error: ApiError: {"error":{"code":429,"message":"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\nPlease retry in 37.980650746s.","status":"RESOURCE_EXHAUSTED","details":[{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Learn more about Gemini API quotas","url":"https://ai.google.dev/gemini-api/docs/rate-limits"}]},{"@type":"type.googleapis.com/google.rpc.QuotaFailure","violations":[{"quotaMetric":"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count","quotaId":"GenerateContentInputTokensPerModelPerMinute-FreeTier","quotaDimensions":{"model":"gemini-2.0-flash","location":"global"}},{"quotaMetric":"generativelanguage.googleapis.com/generate_content_free_tier_requests","quotaId":"GenerateRequestsPerMinutePerProjectPerModel-FreeTier","quotaDimensions":{"location":"global","model":"gemini-2.0-flash"}},{"quotaMetric":"generativelanguage.googleapis.com/generate_content_free_tier_requests","quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier","quotaDimensions":{"location":"global","model":"gemini-2.0-flash"}}]},{"@type":"type.googleapis.com/google.rpc.RetryInfo","retryDelay":"37s"}]}}
+    at throwErrorIfNotOK (file:///app/node_modules/@google/genai/dist/node/index.mjs:11716:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/@google/genai/dist/node/index.mjs:11454:13
+    at async Models.generateContent (file:///app/node_modules/@google/genai/dist/node/index.mjs:12766:24)
+    at async file:///app/dist/index.js:17017:28 {
+  status: 429
+}
+[Document Extract] Using intelligent placeholders based on document metadata
+[Document Extract] Extracted fields: [
+  'businessName',
+  'industry',
+  'problem',
+  'uniqueness',
+  'founderWorkHistory',
+  'totalProfessionalExperience',
+  'technicalSkillsProficiency',
+  'educationBackground',
+  'professionalCertifications'
+]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17121:28 {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  line: '1449',
+  routine: 'parserOpenTable'
+  hint: undefined,
+}
+  position: '13',
+10:27:22 PM [express] POST /api/documents/extract 200 in 145ms :: {"extractedData":{"businessName":"[…
+  internalPosition: undefined,
+  schema: undefined,
+  internalQuery: undefined,
+  table: undefined,
+  where: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+[2026-01-14T22:27:30.634Z] POST /api/activity/session/end
+10:27:30 PM [express] POST /api/activity/session/end 200 in 186ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway

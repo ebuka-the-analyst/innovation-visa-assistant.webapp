@@ -6920,13 +6920,13 @@ Return ONLY valid JSON, no markdown or explanation.`;
             process.env.GEMINI_API_KEY_2,
             process.env.GEMINI_API_KEY_3,
             process.env.GEMINI_API_KEY_4,
-          ].filter(Boolean);
+          ].filter(Boolean) as string[];
           
           if (geminiKeys.length > 0) {
-            const apiKey = geminiKeys[Math.floor(Math.random() * geminiKeys.length)];
-            const genAI = new GoogleGenAI({ apiKey: apiKey! });
+            let lastError: any = null;
+            let success = false;
             
-            // Build parts for multimodal request
+            // Build parts for multimodal request (same for all keys)
             const parts: any[] = [{
               text: `Extract information from the following document(s) for a UK Innovator Founder Visa application. 
               
@@ -6949,21 +6949,40 @@ Return ONLY valid JSON in this format:
               }
             }
             
-            const result = await genAI.models.generateContent({
-              model: "gemini-2.0-flash",
-              contents: [{ role: "user", parts }],
-            });
-            
-            const aiResponse = result.text || '';
-            const cleanedResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            const parsed = JSON.parse(cleanedResponse);
-            
-            if (parsed.extractedFields) {
-              for (const [field, data] of Object.entries(parsed.extractedFields)) {
-                const fieldData = data as any;
-                extractedData[field] = fieldData.value;
-                confidence[field] = fieldData.confidence || 75;
+            // Try each key until one works
+            for (let keyIndex = 0; keyIndex < geminiKeys.length && !success; keyIndex++) {
+              const apiKey = geminiKeys[keyIndex];
+              console.log(`[Document Extract] Trying Gemini key ${keyIndex + 1}/${geminiKeys.length}`);
+              
+              try {
+                const genAI = new GoogleGenAI({ apiKey });
+                const result = await genAI.models.generateContent({
+                  model: "gemini-2.0-flash",
+                  contents: [{ role: "user", parts }],
+                });
+                
+                const aiResponse = result.text || '';
+                const cleanedResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                const parsed = JSON.parse(cleanedResponse);
+                
+                if (parsed.extractedFields) {
+                  for (const [field, data] of Object.entries(parsed.extractedFields)) {
+                    const fieldData = data as any;
+                    extractedData[field] = fieldData.value;
+                    confidence[field] = fieldData.confidence || 75;
+                  }
+                  success = true;
+                  console.log(`[Document Extract] Success with Gemini key ${keyIndex + 1}`);
+                }
+              } catch (keyError: any) {
+                lastError = keyError;
+                console.log(`[Document Extract] Key ${keyIndex + 1} failed: ${keyError.message?.substring(0, 100)}`);
+                // Continue to next key
               }
+            }
+            
+            if (!success && lastError) {
+              throw lastError;
             }
           }
         } else {
