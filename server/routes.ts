@@ -6686,7 +6686,33 @@ EXAMPLES OF GOOD RESPONSES:
         return res.status(404).json({ error: "Document not found" });
       }
       
+      // Try to delete the actual file (but don't fail if it doesn't exist)
+      try {
+        if (doc.fileUrl.startsWith('s3://')) {
+          const s3Key = s3Storage.getKeyFromUrl(doc.fileUrl);
+          if (s3Key && s3Storage.isAvailable()) {
+            await s3Storage.deleteFile(s3Key);
+            console.log("[Document Delete] Deleted from S3:", s3Key);
+          }
+        } else if (doc.fileUrl.startsWith('/objects/')) {
+          // Replit Object Storage - just log, can't delete easily
+          console.log("[Document Delete] Replit storage file:", doc.fileUrl);
+        } else {
+          // Local file
+          const localPath = path.join(process.cwd(), doc.fileUrl.replace(/^\//, ''));
+          if (fs.existsSync(localPath)) {
+            fs.unlinkSync(localPath);
+            console.log("[Document Delete] Deleted local file:", localPath);
+          }
+        }
+      } catch (storageError) {
+        // File deletion failed but we still delete the DB record
+        console.log("[Document Delete] Storage deletion failed (continuing):", storageError);
+      }
+      
+      // Always delete the database record
       await storage.deleteUserDocument(id);
+      console.log("[Document Delete] Database record deleted:", id);
       res.json({ success: true });
     } catch (error) {
       console.error("Delete document error:", error);
