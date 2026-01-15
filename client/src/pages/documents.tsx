@@ -100,6 +100,8 @@ export default function DocumentsPage() {
     },
   });
 
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/documents/${id}`, {
@@ -113,21 +115,40 @@ export default function DocumentsPage() {
       return { id };
     },
     onMutate: async (id: string) => {
+      // Track this ID as being deleted
+      setDeletingIds(prev => new Set(prev).add(id));
+      
       await queryClient.cancelQueries({ queryKey: ["/api/documents"] });
       const previousDocuments = queryClient.getQueryData<UserDocument[]>(["/api/documents"]);
+      
+      // Optimistically remove from cache
       queryClient.setQueryData<UserDocument[]>(["/api/documents"], (old) => 
         old ? old.filter((doc) => doc.id !== id) : []
       );
-      return { previousDocuments };
+      return { previousDocuments, id };
     },
     onError: (error: Error, _id, context) => {
+      // Restore on error
       if (context?.previousDocuments) {
         queryClient.setQueryData(["/api/documents"], context.previousDocuments);
+      }
+      if (context?.id) {
+        setDeletingIds(prev => {
+          const next = new Set(prev);
+          next.delete(context.id);
+          return next;
+        });
       }
       console.error("[Delete Error]", error);
       toast({ title: "Delete failed", description: error.message, variant: "destructive" });
     },
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
+      // Permanently remove from tracking
+      setDeletingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
       toast({ title: "Document deleted successfully" });
     },
     onSettled: () => {
@@ -153,16 +174,21 @@ export default function DocumentsPage() {
     setTimeout(() => setUploadProgress(100), 1000);
   };
 
+  // Filter out documents that are being deleted (double insurance alongside optimistic cache update)
   const filteredDocuments = documents.filter((doc) => {
+    // Hide documents being deleted
+    if (deletingIds.has(doc.id)) return false;
+    
     const matchesCategory = selectedCategory === "all" || doc.category === selectedCategory;
     const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          doc.description?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
+  // Exclude documents being deleted from counts
   const documentsByCategory = DOCUMENT_CATEGORIES.map((cat) => ({
     ...cat,
-    count: documents.filter((d) => d.category === cat.value).length,
+    count: documents.filter((d) => d.category === cat.value && !deletingIds.has(d.id)).length,
   }));
 
   return (
