@@ -6851,37 +6851,74 @@ EXAMPLES OF GOOD RESPONSES:
           if (isPdf) {
             // Extract text from PDF using pdf-parse
             console.log("[Document Extract] Extracting text from PDF:", doc.name, "Buffer size:", fileBuffer.length);
+            let pdfTextExtracted = false;
             try {
               const pdfData = await pdfParse(fileBuffer);
               const extractedText = pdfData.text?.trim() || '';
               console.log("[Document Extract] PDF parsed, text length:", extractedText.length, "Preview:", extractedText.substring(0, 200));
               
-              if (extractedText.length > 50) {
+              if (extractedText.length > 100) {
                 documentContents.push({
                   id: doc.id,
                   name: doc.name,
                   category: doc.category,
                   mimeType: doc.fileType,
-                  content: extractedText.substring(0, 15000), // Limit text length for API
+                  content: extractedText.substring(0, 15000),
                   isText: true,
                 });
                 console.log("[Document Extract] PDF text extracted successfully, length:", extractedText.length);
-              } else {
-                // Even short text is better than nothing - add it anyway
-                console.log("[Document Extract] PDF text short, adding anyway:", extractedText.length);
-                if (extractedText.length > 0) {
-                  documentContents.push({
-                    id: doc.id,
-                    name: doc.name,
-                    category: doc.category,
-                    mimeType: doc.fileType,
-                    content: extractedText,
-                    isText: true,
-                  });
-                }
+                pdfTextExtracted = true;
               }
             } catch (pdfError: any) {
               console.error("[Document Extract] PDF text extraction FAILED:", pdfError?.message || pdfError);
+            }
+            
+            // If PDF has no text (scanned/image-based), convert to image for Vision API
+            if (!pdfTextExtracted) {
+              console.log("[Document Extract] PDF has no extractable text, converting to image for Vision API...");
+              try {
+                const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+                const { createCanvas } = await import('canvas');
+                
+                // Load PDF document
+                const pdfDoc = await pdfjs.getDocument({
+                  data: new Uint8Array(fileBuffer),
+                  useSystemFonts: true,
+                }).promise;
+                
+                console.log("[Document Extract] PDF loaded, pages:", pdfDoc.numPages);
+                
+                // Render first page (or first few pages) as image
+                const maxPages = Math.min(pdfDoc.numPages, 3); // Max 3 pages
+                for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
+                  const page = await pdfDoc.getPage(pageNum);
+                  const viewport = page.getViewport({ scale: 2.0 }); // 2x resolution
+                  
+                  const canvas = createCanvas(viewport.width, viewport.height);
+                  const context = canvas.getContext('2d');
+                  
+                  await page.render({
+                    canvasContext: context as any,
+                    viewport: viewport,
+                  }).promise;
+                  
+                  // Convert to base64 JPEG
+                  const imageBuffer = canvas.toBuffer('image/jpeg', { quality: 0.85 });
+                  const base64Image = imageBuffer.toString('base64');
+                  
+                  documentContents.push({
+                    id: `${doc.id}-page${pageNum}`,
+                    name: `${doc.name} (Page ${pageNum})`,
+                    category: doc.category,
+                    mimeType: 'image/jpeg',
+                    content: base64Image,
+                    isText: false, // Will use Vision API
+                  });
+                  console.log("[Document Extract] PDF page", pageNum, "converted to image, size:", imageBuffer.length);
+                }
+              } catch (pdfImageError: any) {
+                console.error("[Document Extract] PDF to image conversion FAILED:", pdfImageError?.message || pdfImageError);
+              }
             }
           } else if (isImage) {
             // Keep as base64 for image processing
