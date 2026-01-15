@@ -6873,52 +6873,20 @@ EXAMPLES OF GOOD RESPONSES:
               console.error("[Document Extract] PDF text extraction FAILED:", pdfError?.message || pdfError);
             }
             
-            // If PDF has no text (scanned/image-based), convert to image for Vision API
+            // If PDF has no text (scanned/image-based), send PDF directly to GPT-4o Vision
+            // GPT-4o now supports direct PDF input via base64!
             if (!pdfTextExtracted) {
-              console.log("[Document Extract] PDF has no extractable text, converting to image for Vision API...");
-              try {
-                const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-                const { createCanvas } = await import('canvas');
-                
-                // Load PDF document
-                const pdfDoc = await pdfjs.getDocument({
-                  data: new Uint8Array(fileBuffer),
-                  useSystemFonts: true,
-                }).promise;
-                
-                console.log("[Document Extract] PDF loaded, pages:", pdfDoc.numPages);
-                
-                // Render first page (or first few pages) as image
-                const maxPages = Math.min(pdfDoc.numPages, 3); // Max 3 pages
-                for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
-                  const page = await pdfDoc.getPage(pageNum);
-                  const viewport = page.getViewport({ scale: 2.0 }); // 2x resolution
-                  
-                  const canvas = createCanvas(viewport.width, viewport.height);
-                  const context = canvas.getContext('2d');
-                  
-                  await page.render({
-                    canvasContext: context as any,
-                    viewport: viewport,
-                  }).promise;
-                  
-                  // Convert to base64 JPEG
-                  const imageBuffer = canvas.toBuffer('image/jpeg', { quality: 0.85 });
-                  const base64Image = imageBuffer.toString('base64');
-                  
-                  documentContents.push({
-                    id: `${doc.id}-page${pageNum}`,
-                    name: `${doc.name} (Page ${pageNum})`,
-                    category: doc.category,
-                    mimeType: 'image/jpeg',
-                    content: base64Image,
-                    isText: false, // Will use Vision API
-                  });
-                  console.log("[Document Extract] PDF page", pageNum, "converted to image, size:", imageBuffer.length);
-                }
-              } catch (pdfImageError: any) {
-                console.error("[Document Extract] PDF to image conversion FAILED:", pdfImageError?.message || pdfImageError);
-              }
+              console.log("[Document Extract] PDF has no extractable text, sending PDF directly to Vision API...");
+              const base64Pdf = fileBuffer.toString('base64');
+              documentContents.push({
+                id: doc.id,
+                name: doc.name,
+                category: doc.category,
+                mimeType: 'application/pdf',
+                content: base64Pdf,
+                isText: false, // Will use Vision API with PDF
+              });
+              console.log("[Document Extract] PDF prepared for Vision API, base64 size:", base64Pdf.length);
             }
           } else if (isImage) {
             // Keep as base64 for image processing
