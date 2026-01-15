@@ -264,18 +264,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// PhD-level optimization: Add caching headers for API responses
+// Disable caching for ALL API responses to ensure fresh data
 app.use((req, res, next) => {
-  // Only cache GET API responses, and be conservative about what's cacheable
-  if (req.method === 'GET' && req.path.startsWith('/api/')) {
-    // Auth endpoints - never cache (sensitive user data)
-    if (req.path.includes('/api/auth/') || req.path.includes('/api/user') || req.path.includes('/api/admin') || req.path.includes('/api/partner')) {
-      res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-    }
-    // All other API endpoints - private cache only (user-specific data)
-    else {
-      res.setHeader('Cache-Control', 'private, max-age=60, stale-while-revalidate=30');
-    }
+  if (req.path.startsWith('/api/')) {
+    // Never cache API responses - ensures mutations immediately reflect in UI
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
   }
   next();
 });

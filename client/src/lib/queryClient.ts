@@ -70,6 +70,7 @@ export const getQueryFn: <T>(options: {
     
     const res = await fetch(url, {
       credentials: "include",
+      cache: "no-store", // Prevent browser/CDN caching of API responses
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
