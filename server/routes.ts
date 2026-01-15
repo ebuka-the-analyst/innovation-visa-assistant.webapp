@@ -6850,10 +6850,12 @@ EXAMPLES OF GOOD RESPONSES:
           
           if (isPdf) {
             // Extract text from PDF using pdf-parse
-            console.log("[Document Extract] Extracting text from PDF:", doc.name);
+            console.log("[Document Extract] Extracting text from PDF:", doc.name, "Buffer size:", fileBuffer.length);
             try {
               const pdfData = await pdfParse(fileBuffer);
-              const extractedText = pdfData.text.trim();
+              const extractedText = pdfData.text?.trim() || '';
+              console.log("[Document Extract] PDF parsed, text length:", extractedText.length, "Preview:", extractedText.substring(0, 200));
+              
               if (extractedText.length > 50) {
                 documentContents.push({
                   id: doc.id,
@@ -6863,12 +6865,23 @@ EXAMPLES OF GOOD RESPONSES:
                   content: extractedText.substring(0, 15000), // Limit text length for API
                   isText: true,
                 });
-                console.log("[Document Extract] PDF text extracted, length:", extractedText.length);
+                console.log("[Document Extract] PDF text extracted successfully, length:", extractedText.length);
               } else {
-                console.log("[Document Extract] PDF text too short, might be image-based PDF");
+                // Even short text is better than nothing - add it anyway
+                console.log("[Document Extract] PDF text short, adding anyway:", extractedText.length);
+                if (extractedText.length > 0) {
+                  documentContents.push({
+                    id: doc.id,
+                    name: doc.name,
+                    category: doc.category,
+                    mimeType: doc.fileType,
+                    content: extractedText,
+                    isText: true,
+                  });
+                }
               }
-            } catch (pdfError) {
-              console.log("[Document Extract] PDF text extraction failed:", pdfError);
+            } catch (pdfError: any) {
+              console.error("[Document Extract] PDF text extraction FAILED:", pdfError?.message || pdfError);
             }
           } else if (isImage) {
             // Keep as base64 for image processing
@@ -7115,8 +7128,12 @@ Return ONLY valid JSON:
           if (parsed.extractedFields) {
             for (const [field, data] of Object.entries(parsed.extractedFields)) {
               const fieldData = data as any;
-              extractedData[field] = fieldData.value;
-              confidence[field] = fieldData.confidence || 60;
+              // Filter out placeholder values in fallback path too
+              const value = fieldData.value?.toString() || '';
+              if (value && !value.includes('[') && !value.toLowerCase().includes('placeholder')) {
+                extractedData[field] = fieldData.value;
+                confidence[field] = fieldData.confidence || 60;
+              }
             }
           }
         }
