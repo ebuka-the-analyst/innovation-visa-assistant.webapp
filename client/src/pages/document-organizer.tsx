@@ -106,7 +106,8 @@ export default function DocumentOrganizer() {
       return response.json();
     },
     onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['/api/documents'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/documents'], type: 'active' });
       toast({
         title: "Document uploaded",
         description: "Your document has been saved successfully.",
@@ -138,7 +139,8 @@ export default function DocumentOrganizer() {
       return response.json();
     },
     onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['/api/documents'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/documents'], type: 'active' });
       toast({
         title: "Document deleted",
         description: "The document has been removed.",

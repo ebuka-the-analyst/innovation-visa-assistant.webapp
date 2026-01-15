@@ -86,14 +86,12 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 1000 * 60, // Data is stale after 1 minute
       retry: false,
-      // Advanced optimizations for better performance
       gcTime: 1000 * 60 * 60 * 24, // Keep unused data in cache for 24 hours
-      refetchOnMount: false, // Don't refetch on component mount if data exists
+      refetchOnMount: true, // Refetch on mount if data is stale
       refetchOnReconnect: false, // Don't refetch on network reconnect
       networkMode: "online", // Only run queries when online
-      // Enable structural sharing for better React performance
       structuralSharing: true,
     },
     mutations: {
