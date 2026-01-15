@@ -110,16 +110,28 @@ export default function DocumentsPage() {
         const error = await response.json().catch(() => ({}));
         throw new Error(error.error || "Delete failed");
       }
-      return response.json();
+      return { id };
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
-      await queryClient.refetchQueries({ queryKey: ["/api/documents"], type: 'active' });
-      toast({ title: "Document deleted successfully" });
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/documents"] });
+      const previousDocuments = queryClient.getQueryData<UserDocument[]>(["/api/documents"]);
+      queryClient.setQueryData<UserDocument[]>(["/api/documents"], (old) => 
+        old ? old.filter((doc) => doc.id !== id) : []
+      );
+      return { previousDocuments };
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _id, context) => {
+      if (context?.previousDocuments) {
+        queryClient.setQueryData(["/api/documents"], context.previousDocuments);
+      }
       console.error("[Delete Error]", error);
       toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    },
+    onSuccess: () => {
+      toast({ title: "Document deleted successfully" });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
     },
   });
 
