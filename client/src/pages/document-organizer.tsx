@@ -105,8 +105,8 @@ export default function DocumentOrganizer() {
 
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['/api/documents'] });
       toast({
         title: "Document uploaded",
         description: "Your document has been saved successfully.",
@@ -127,19 +127,27 @@ export default function DocumentOrganizer() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (docId: string) => {
-      return apiRequest('DELETE', `/api/documents/${docId}`);
+      const response = await fetch(`/api/documents/${docId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Delete failed");
+      }
+      return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['/api/documents'] });
       toast({
         title: "Document deleted",
         description: "The document has been removed.",
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Delete failed",
-        description: "Failed to delete the document.",
+        description: error.message,
         variant: "destructive",
       });
     },

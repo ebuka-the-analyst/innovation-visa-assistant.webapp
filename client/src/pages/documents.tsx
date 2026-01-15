@@ -87,8 +87,8 @@ export default function DocumentsPage() {
       }
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/documents"] });
       setUploadDialogOpen(false);
       setUploadForm({ name: "", category: "", description: "", file: null });
       setUploadProgress(0);
@@ -111,8 +111,8 @@ export default function DocumentsPage() {
       }
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/documents"] });
       toast({ title: "Document deleted successfully" });
     },
     onError: (error: Error) => {
