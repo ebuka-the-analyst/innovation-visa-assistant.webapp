@@ -6747,12 +6747,29 @@ EXAMPLES OF GOOD RESPONSES:
       console.log("[Document Extract] S3 available:", s3Storage.isAvailable());
       
       // Try to read file contents from S3, Replit storage, or local filesystem
-      const documentContents = [];
-      const documentMetadata = [];
+      const documentContents: Array<{
+        id: string;
+        name: string;
+        category: string;
+        mimeType: string;
+        content: string; // base64 for images, text for PDFs
+        isText: boolean; // true if content is extracted text (PDF), false if base64 image
+      }> = [];
+      const documentMetadata: Array<{
+        id: string;
+        name: string;
+        category: string;
+        fileType: string;
+        notes: string;
+        hasContent: boolean;
+      }> = [];
+      
+      // Import pdf-parse for PDF text extraction
+      const pdfParse = (await import('pdf-parse')).default;
       
       for (const doc of documents) {
         let fileFound = false;
-        let base64Content = '';
+        let fileBuffer: Buffer | null = null;
         
         console.log(`[Document Extract] Processing ${doc.name} - URL: ${doc.fileUrl}`);
         
@@ -6762,17 +6779,9 @@ EXAMPLES OF GOOD RESPONSES:
           try {
             const s3Key = s3Storage.getKeyFromUrl(doc.fileUrl);
             if (s3Key) {
-              const fileBuffer = await s3Storage.downloadFile(s3Key);
-              base64Content = fileBuffer.toString('base64');
-              documentContents.push({
-                id: doc.id,
-                name: doc.name,
-                category: doc.category,
-                mimeType: doc.fileType,
-                content: base64Content,
-              });
+              fileBuffer = await s3Storage.downloadFile(s3Key);
               fileFound = true;
-              console.log("[Document Extract] File found in S3:", s3Key);
+              console.log("[Document Extract] File found in S3:", s3Key, "Size:", fileBuffer.length);
             }
           } catch (s3Error) {
             console.log("[Document Extract] S3 read failed:", s3Error);
@@ -6783,15 +6792,8 @@ EXAMPLES OF GOOD RESPONSES:
         if (!fileFound && doc.fileUrl.startsWith('/objects/')) {
           try {
             const objectFile = await objectStorageService.getObjectEntityFile(doc.fileUrl);
-            const [fileBuffer] = await objectFile.download();
-            base64Content = fileBuffer.toString('base64');
-            documentContents.push({
-              id: doc.id,
-              name: doc.name,
-              category: doc.category,
-              mimeType: doc.fileType,
-              content: base64Content,
-            });
+            const [buffer] = await objectFile.download();
+            fileBuffer = buffer;
             fileFound = true;
             console.log("[Document Extract] File found in Replit storage:", doc.fileUrl);
           } catch (cloudError) {
@@ -6810,15 +6812,7 @@ EXAMPLES OF GOOD RESPONSES:
           for (const filePath of possiblePaths) {
             if (fs.existsSync(filePath)) {
               try {
-                const fileBuffer = fs.readFileSync(filePath);
-                base64Content = fileBuffer.toString('base64');
-                documentContents.push({
-                  id: doc.id,
-                  name: doc.name,
-                  category: doc.category,
-                  mimeType: doc.fileType,
-                  content: base64Content,
-                });
+                fileBuffer = fs.readFileSync(filePath);
                 fileFound = true;
                 console.log("[Document Extract] File found locally at:", filePath);
                 break;
@@ -6826,6 +6820,47 @@ EXAMPLES OF GOOD RESPONSES:
                 console.error("[Document Extract] Error reading file:", filePath, readError);
               }
             }
+          }
+        }
+        
+        // Process the file based on type
+        if (fileFound && fileBuffer) {
+          const isPdf = doc.fileType === 'application/pdf' || doc.name.toLowerCase().endsWith('.pdf');
+          const isImage = doc.fileType.startsWith('image/');
+          
+          if (isPdf) {
+            // Extract text from PDF using pdf-parse
+            console.log("[Document Extract] Extracting text from PDF:", doc.name);
+            try {
+              const pdfData = await pdfParse(fileBuffer);
+              const extractedText = pdfData.text.trim();
+              if (extractedText.length > 50) {
+                documentContents.push({
+                  id: doc.id,
+                  name: doc.name,
+                  category: doc.category,
+                  mimeType: doc.fileType,
+                  content: extractedText.substring(0, 15000), // Limit text length for API
+                  isText: true,
+                });
+                console.log("[Document Extract] PDF text extracted, length:", extractedText.length);
+              } else {
+                console.log("[Document Extract] PDF text too short, might be image-based PDF");
+              }
+            } catch (pdfError) {
+              console.log("[Document Extract] PDF text extraction failed:", pdfError);
+            }
+          } else if (isImage) {
+            // Keep as base64 for image processing
+            documentContents.push({
+              id: doc.id,
+              name: doc.name,
+              category: doc.category,
+              mimeType: doc.fileType,
+              content: fileBuffer.toString('base64'),
+              isText: false,
+            });
+            console.log("[Document Extract] Image prepared for Vision API:", doc.name);
           }
         }
         
@@ -6904,62 +6939,132 @@ Return ONLY valid JSON, no markdown or explanation.`;
           throw new Error("No AI keys configured");
         }
         
-        // Use OpenAI GPT-4 Vision for document extraction
+        // Use OpenAI GPT-4 for document extraction
         if (documentContents.length > 0 && process.env.OPENAI_API_KEY) {
-          console.log("[Document Extract] Using OpenAI GPT-4o Vision for extraction...");
+          console.log("[Document Extract] Using OpenAI GPT-4o for extraction...");
           
           try {
             const OpenAI = (await import("openai")).default;
             const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
             
-            // Build messages with images for OpenAI
-            const imageContents: any[] = [];
-            for (const doc of documentContents) {
-              if (doc.mimeType.includes('image') || doc.mimeType === 'application/pdf') {
-                imageContents.push({
-                  type: "image_url",
-                  image_url: {
-                    url: `data:${doc.mimeType};base64,${doc.content}`,
-                    detail: "high"
-                  }
-                });
-              }
+            // Separate text content (from PDFs) and image content
+            const textDocuments = documentContents.filter(d => d.isText);
+            const imageDocuments = documentContents.filter(d => !d.isText);
+            
+            console.log("[Document Extract] Text documents:", textDocuments.length, "Image documents:", imageDocuments.length);
+            
+            // Build combined prompt with extracted text
+            let documentTextContent = '';
+            if (textDocuments.length > 0) {
+              documentTextContent = textDocuments.map(d => `
+--- DOCUMENT: ${d.name} (${d.category}) ---
+${d.content}
+--- END ${d.name} ---
+`).join('\n');
+            }
+            
+            // Build messages based on content type
+            let messages: any[];
+            
+            if (imageDocuments.length > 0) {
+              // Use Vision API for images
+              const imageContents: any[] = imageDocuments.map(doc => ({
+                type: "image_url",
+                image_url: {
+                  url: `data:${doc.mimeType};base64,${doc.content}`,
+                  detail: "high"
+                }
+              }));
+              
+              messages = [{
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: `Extract information from the following document(s) for a UK Innovator Founder Visa application.
+
+${documentTextContent ? `EXTRACTED TEXT FROM DOCUMENTS:\n${documentTextContent}\n\n` : ''}
+Analyze the images and text above. Extract actual values you can see in the documents.
+
+Fields to extract (only include fields you can actually find data for):
+- fullLegalName: Full legal name from passport/ID
+- nationality: Country of citizenship
+- educationBackground: Educational degrees with institutions and years
+- professionalCertifications: Professional certifications (AWS, Microsoft, etc.)
+- totalProfessionalExperience: Total years of work experience (as a number)
+- industryExperience: Industry-specific experience details
+- technicalSkillsProficiency: Technical skills with proficiency levels
+- founderWorkHistory: Work history summary with companies, roles, years
+- businessName: Name of the business
+- industry: Industry/sector
+- problem: Problem the business solves
+- uniqueness: Unique innovation aspects
+- technology: Technology used
+- marketSize: Target market size
+
+Return ONLY valid JSON:
+{"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`
+                  },
+                  ...imageContents
+                ]
+              }];
+            } else if (textDocuments.length > 0) {
+              // Text-only extraction (from PDFs)
+              messages = [{
+                role: "user",
+                content: `Extract information from the following document text for a UK Innovator Founder Visa application.
+
+DOCUMENT CONTENT:
+${documentTextContent}
+
+Analyze the text above carefully. Extract actual values you can see in the documents.
+
+Fields to extract (only include fields you can actually find data for):
+- fullLegalName: Full legal name
+- nationality: Country of citizenship
+- educationBackground: Educational degrees with institutions and years
+- professionalCertifications: Professional certifications (AWS, Microsoft, etc.)
+- totalProfessionalExperience: Total years of work experience (as a number)
+- industryExperience: Industry-specific experience details  
+- technicalSkillsProficiency: Technical skills with proficiency levels
+- founderWorkHistory: Work history summary with companies, roles, years
+- businessName: Name of the business
+- industry: Industry/sector
+- problem: Problem the business solves
+- uniqueness: Unique innovation aspects
+- technology: Technology used
+- marketSize: Target market size
+
+IMPORTANT: Only return fields where you can extract ACTUAL data from the documents. Do NOT make up placeholder values.
+
+Return ONLY valid JSON:
+{"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`
+              }];
+            } else {
+              throw new Error("No document content to process");
             }
             
             const response = await openai.chat.completions.create({
               model: "gpt-4o",
-              messages: [
-                {
-                  role: "user",
-                  content: [
-                    {
-                      type: "text",
-                      text: `Extract information from the following document(s) for a UK Innovator Founder Visa application.
-
-Return a JSON object with extracted fields, confidence scores, and source document names.
-Fields to extract: fullLegalName, nationality, educationBackground, professionalCertifications, totalProfessionalExperience, industryExperience, technicalSkillsProficiency, founderWorkHistory, businessName, industry, problem, uniqueness, technology, marketSize.
-
-Return ONLY valid JSON in this format:
-{"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`
-                    },
-                    ...imageContents
-                  ]
-                }
-              ],
+              messages,
               max_tokens: 4096
             });
             
             const aiResponse = response.choices[0]?.message?.content || '';
+            console.log("[Document Extract] AI Response length:", aiResponse.length);
             const cleanedResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
             const parsed = JSON.parse(cleanedResponse);
             
             if (parsed.extractedFields) {
               for (const [field, data] of Object.entries(parsed.extractedFields)) {
                 const fieldData = data as any;
-                extractedData[field] = fieldData.value;
-                confidence[field] = fieldData.confidence || 75;
+                // Skip placeholder values
+                if (fieldData.value && !fieldData.value.includes('[') && !fieldData.value.includes('placeholder')) {
+                  extractedData[field] = fieldData.value;
+                  confidence[field] = fieldData.confidence || 75;
+                }
               }
-              console.log("[Document Extract] Success with OpenAI GPT-4o Vision");
+              console.log("[Document Extract] Success with OpenAI GPT-4o, extracted fields:", Object.keys(extractedData).length);
             }
           } catch (openaiError: any) {
             console.error(`[Document Extract] OpenAI failed: ${openaiError.message}`);
