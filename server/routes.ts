@@ -6855,9 +6855,10 @@ EXAMPLES OF GOOD RESPONSES:
             try {
               const pdfData = await pdfParse(fileBuffer);
               const extractedText = pdfData.text?.trim() || '';
-              console.log("[Document Extract] PDF parsed, text length:", extractedText.length, "Preview:", extractedText.substring(0, 200));
+              console.log("[Document Extract] PDF parsed, text length:", extractedText.length, "Preview:", extractedText.substring(0, 500));
               
-              if (extractedText.length > 100) {
+              // Accept ANY text content (lowered threshold from 100 to 10)
+              if (extractedText.length > 10) {
                 documentContents.push({
                   id: doc.id,
                   name: doc.name,
@@ -6868,25 +6869,44 @@ EXAMPLES OF GOOD RESPONSES:
                 });
                 console.log("[Document Extract] PDF text extracted successfully, length:", extractedText.length);
                 pdfTextExtracted = true;
+              } else {
+                console.log("[Document Extract] PDF text too short:", extractedText.length, "chars");
               }
             } catch (pdfError: any) {
               console.error("[Document Extract] PDF text extraction FAILED:", pdfError?.message || pdfError);
             }
             
-            // If PDF has no text (scanned/image-based), send PDF directly to GPT-4o Vision
-            // GPT-4o now supports direct PDF input via base64!
+            // If PDF has no text (scanned/image-based), upload to OpenAI Files API
             if (!pdfTextExtracted) {
-              console.log("[Document Extract] PDF has no extractable text, sending PDF directly to Vision API...");
-              const base64Pdf = fileBuffer.toString('base64');
-              documentContents.push({
-                id: doc.id,
-                name: doc.name,
-                category: doc.category,
-                mimeType: 'application/pdf',
-                content: base64Pdf,
-                isText: false, // Will use Vision API with PDF
-              });
-              console.log("[Document Extract] PDF prepared for Vision API, base64 size:", base64Pdf.length);
+              console.log("[Document Extract] PDF has no extractable text, uploading to OpenAI Files API...");
+              try {
+                const OpenAI = (await import("openai")).default;
+                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+                
+                // Create a File object from the buffer for upload
+                const blob = new Blob([fileBuffer], { type: 'application/pdf' });
+                const file = new File([blob], doc.name, { type: 'application/pdf' });
+                
+                const uploadedFile = await openai.files.create({
+                  file: file,
+                  purpose: 'assistants'
+                });
+                
+                console.log("[Document Extract] PDF uploaded to OpenAI, file_id:", uploadedFile.id);
+                
+                // Store file_id for later use with Assistants API
+                documentContents.push({
+                  id: doc.id,
+                  name: doc.name,
+                  category: doc.category,
+                  mimeType: 'openai/file',
+                  content: uploadedFile.id, // Store file_id instead of content
+                  isText: false,
+                });
+                pdfTextExtracted = true;
+              } catch (uploadError: any) {
+                console.error("[Document Extract] OpenAI file upload FAILED:", uploadError?.message || uploadError);
+              }
             }
           } else if (isImage) {
             // Keep as base64 for image processing
@@ -6985,11 +7005,13 @@ Return ONLY valid JSON, no markdown or explanation.`;
             const OpenAI = (await import("openai")).default;
             const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
             
-            // Separate text content (from PDFs) and image content
+            // Separate content types
             const textDocuments = documentContents.filter(d => d.isText);
-            const imageDocuments = documentContents.filter(d => !d.isText);
+            const imageDocuments = documentContents.filter(d => !d.isText && d.mimeType.startsWith('image/'));
+            const fileDocuments = documentContents.filter(d => d.mimeType === 'openai/file');
             
-            console.log("[Document Extract] Text documents:", textDocuments.length, "Image documents:", imageDocuments.length);
+            console.log("[Document Extract] Text docs:", textDocuments.length, "Image docs:", imageDocuments.length, "File docs:", fileDocuments.length);
+            console.log("[Document Extract] Document details:", documentContents.map(d => ({ name: d.name, isText: d.isText, mimeType: d.mimeType, contentLen: d.content?.length || 0 })));
             
             // Build combined prompt with extracted text
             let documentTextContent = '';
@@ -6999,13 +7021,14 @@ Return ONLY valid JSON, no markdown or explanation.`;
 ${d.content}
 --- END ${d.name} ---
 `).join('\n');
+              console.log("[Document Extract] Text content preview:", documentTextContent.substring(0, 300));
             }
             
             // Build messages based on content type
             let messages: any[];
             
             if (imageDocuments.length > 0) {
-              // Use Vision API for images
+              // Use Vision API for images only (not PDFs!)
               const imageContents: any[] = imageDocuments.map(doc => ({
                 type: "image_url",
                 image_url: {
