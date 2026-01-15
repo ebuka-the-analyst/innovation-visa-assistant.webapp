@@ -101,14 +101,23 @@ export default function DocumentsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest("DELETE", `/api/documents/${id}`);
+      const response = await fetch(`/api/documents/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Delete failed");
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
-      toast({ title: "Document deleted" });
+      toast({ title: "Document deleted successfully" });
     },
-    onError: () => {
-      toast({ title: "Delete failed", variant: "destructive" });
+    onError: (error: Error) => {
+      console.error("[Delete Error]", error);
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
     },
   });
 
