@@ -6981,6 +6981,68 @@ Return ONLY valid JSON in this format:
               }
             }
             
+            // If Gemini failed, try OpenAI as fallback
+            if (!success && process.env.OPENAI_API_KEY) {
+              console.log("[Document Extract] Gemini failed, trying OpenAI GPT-4 Vision...");
+              try {
+                const OpenAI = (await import("openai")).default;
+                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+                
+                // Build messages with images for OpenAI
+                const imageContents: any[] = [];
+                for (const doc of documentContents) {
+                  if (doc.mimeType.includes('image') || doc.mimeType === 'application/pdf') {
+                    imageContents.push({
+                      type: "image_url",
+                      image_url: {
+                        url: `data:${doc.mimeType};base64,${doc.content}`,
+                        detail: "high"
+                      }
+                    });
+                  }
+                }
+                
+                const response = await openai.chat.completions.create({
+                  model: "gpt-4o",
+                  messages: [
+                    {
+                      role: "user",
+                      content: [
+                        {
+                          type: "text",
+                          text: `Extract information from the following document(s) for a UK Innovator Founder Visa application.
+
+Return a JSON object with extracted fields, confidence scores, and source document names.
+Fields to extract: fullLegalName, nationality, educationBackground, professionalCertifications, totalProfessionalExperience, industryExperience, technicalSkillsProficiency, founderWorkHistory, businessName, industry, problem, uniqueness, technology, marketSize.
+
+Return ONLY valid JSON in this format:
+{"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`
+                        },
+                        ...imageContents
+                      ]
+                    }
+                  ],
+                  max_tokens: 4096
+                });
+                
+                const aiResponse = response.choices[0]?.message?.content || '';
+                const cleanedResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                const parsed = JSON.parse(cleanedResponse);
+                
+                if (parsed.extractedFields) {
+                  for (const [field, data] of Object.entries(parsed.extractedFields)) {
+                    const fieldData = data as any;
+                    extractedData[field] = fieldData.value;
+                    confidence[field] = fieldData.confidence || 75;
+                  }
+                  success = true;
+                  console.log("[Document Extract] Success with OpenAI GPT-4 Vision");
+                }
+              } catch (openaiError: any) {
+                console.log(`[Document Extract] OpenAI failed: ${openaiError.message?.substring(0, 100)}`);
+              }
+            }
+            
             if (!success && lastError) {
               throw lastError;
             }
