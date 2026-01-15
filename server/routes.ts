@@ -7220,8 +7220,10 @@ Return ONLY valid JSON:
           documentsUsed: documents.map(d => ({ id: d.id, name: d.name, category: d.category })),
         });
       }
-    } catch (error) {
-      console.error("[Document Extract] Error:", error);
+    } catch (error: any) {
+      console.error("[Document Extract] CRITICAL ERROR:", error?.message || error);
+      console.error("[Document Extract] Error stack:", error?.stack);
+      console.error("[Document Extract] Error type:", typeof error);
       // Return placeholder data even on error so user can proceed
       const fallbackData = {
         fullLegalName: "[Please enter your full legal name]",
@@ -7236,7 +7238,7 @@ Return ONLY valid JSON:
         extractedData: fallbackData,
         confidence: fallbackConfidence,
         documentsUsed: [],
-        warning: "Could not extract data from documents. Please fill in the fields manually.",
+        warning: `Could not extract data: ${error?.message || 'Unknown error'}. Please fill in the fields manually.`,
       });
     }
   });
