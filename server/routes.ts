@@ -6765,7 +6765,8 @@ EXAMPLES OF GOOD RESPONSES:
       }> = [];
       
       // Import pdf-parse for PDF text extraction
-      const pdfParse = (await import('pdf-parse')).default;
+      const pdfParseModule = await import('pdf-parse');
+      const pdfParse = (pdfParseModule as any).default || pdfParseModule;
       
       for (const doc of documents) {
         let fileFound = false;
