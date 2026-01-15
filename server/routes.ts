@@ -6898,158 +6898,92 @@ Return a JSON object with this exact structure:
 Return ONLY valid JSON, no markdown or explanation.`;
 
       try {
-        // Check if we have any AI capability
-        const hasGeminiKeys = [
-          process.env.GEMINI_API_KEY,
-          process.env.GEMINI_API_KEY_2,
-          process.env.GEMINI_API_KEY_3,
-          process.env.GEMINI_API_KEY_4,
-        ].filter(Boolean).length > 0;
-        
-        if (!hasGeminiKeys) {
-          console.log("[Document Extract] No Gemini API keys configured - using placeholders");
+        // Check if we have OpenAI API key
+        if (!process.env.OPENAI_API_KEY) {
+          console.log("[Document Extract] No OpenAI API key configured - using placeholders");
           throw new Error("No AI keys configured");
         }
         
-        // If we have actual file contents, use Gemini multimodal
-        if (documentContents.length > 0) {
-          // Use Gemini with file content for real extraction
-          const { GoogleGenAI } = await import("@google/genai");
-          const geminiKeys = [
-            process.env.GEMINI_API_KEY,
-            process.env.GEMINI_API_KEY_2,
-            process.env.GEMINI_API_KEY_3,
-            process.env.GEMINI_API_KEY_4,
-          ].filter(Boolean) as string[];
+        // Use OpenAI GPT-4 Vision for document extraction
+        if (documentContents.length > 0 && process.env.OPENAI_API_KEY) {
+          console.log("[Document Extract] Using OpenAI GPT-4o Vision for extraction...");
           
-          if (geminiKeys.length > 0) {
-            let lastError: any = null;
-            let success = false;
+          try {
+            const OpenAI = (await import("openai")).default;
+            const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
             
-            // Build parts for multimodal request (same for all keys)
-            const parts: any[] = [{
-              text: `Extract information from the following document(s) for a UK Innovator Founder Visa application. 
-              
-Return a JSON object with extracted fields, confidence scores, and source document names.
-Fields to extract: fullLegalName, nationality, educationBackground, professionalCertifications, totalProfessionalExperience, industryExperience, technicalSkillsProficiency, founderWorkHistory, businessName, industry, problem, uniqueness, technology, marketSize.
-
-Return ONLY valid JSON in this format:
-{"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`
-            }];
-            
-            // Add document contents as inline data
+            // Build messages with images for OpenAI
+            const imageContents: any[] = [];
             for (const doc of documentContents) {
               if (doc.mimeType.includes('image') || doc.mimeType === 'application/pdf') {
-                parts.push({
-                  inlineData: {
-                    mimeType: doc.mimeType,
-                    data: doc.content
+                imageContents.push({
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${doc.mimeType};base64,${doc.content}`,
+                    detail: "high"
                   }
                 });
               }
             }
             
-            // Try each key until one works
-            for (let keyIndex = 0; keyIndex < geminiKeys.length && !success; keyIndex++) {
-              const apiKey = geminiKeys[keyIndex];
-              console.log(`[Document Extract] Trying Gemini key ${keyIndex + 1}/${geminiKeys.length}`);
-              
-              try {
-                const genAI = new GoogleGenAI({ apiKey });
-                const result = await genAI.models.generateContent({
-                  model: "gemini-2.0-flash",
-                  contents: [{ role: "user", parts }],
-                });
-                
-                const aiResponse = result.text || '';
-                const cleanedResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-                const parsed = JSON.parse(cleanedResponse);
-                
-                if (parsed.extractedFields) {
-                  for (const [field, data] of Object.entries(parsed.extractedFields)) {
-                    const fieldData = data as any;
-                    extractedData[field] = fieldData.value;
-                    confidence[field] = fieldData.confidence || 75;
-                  }
-                  success = true;
-                  console.log(`[Document Extract] Success with Gemini key ${keyIndex + 1}`);
-                }
-              } catch (keyError: any) {
-                lastError = keyError;
-                console.log(`[Document Extract] Key ${keyIndex + 1} failed: ${keyError.message?.substring(0, 100)}`);
-                // Continue to next key
-              }
-            }
-            
-            // If Gemini failed, try OpenAI as fallback
-            if (!success && process.env.OPENAI_API_KEY) {
-              console.log("[Document Extract] Gemini failed, trying OpenAI GPT-4 Vision...");
-              try {
-                const OpenAI = (await import("openai")).default;
-                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-                
-                // Build messages with images for OpenAI
-                const imageContents: any[] = [];
-                for (const doc of documentContents) {
-                  if (doc.mimeType.includes('image') || doc.mimeType === 'application/pdf') {
-                    imageContents.push({
-                      type: "image_url",
-                      image_url: {
-                        url: `data:${doc.mimeType};base64,${doc.content}`,
-                        detail: "high"
-                      }
-                    });
-                  }
-                }
-                
-                const response = await openai.chat.completions.create({
-                  model: "gpt-4o",
-                  messages: [
+            const response = await openai.chat.completions.create({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "user",
+                  content: [
                     {
-                      role: "user",
-                      content: [
-                        {
-                          type: "text",
-                          text: `Extract information from the following document(s) for a UK Innovator Founder Visa application.
+                      type: "text",
+                      text: `Extract information from the following document(s) for a UK Innovator Founder Visa application.
 
 Return a JSON object with extracted fields, confidence scores, and source document names.
 Fields to extract: fullLegalName, nationality, educationBackground, professionalCertifications, totalProfessionalExperience, industryExperience, technicalSkillsProficiency, founderWorkHistory, businessName, industry, problem, uniqueness, technology, marketSize.
 
 Return ONLY valid JSON in this format:
 {"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`
-                        },
-                        ...imageContents
-                      ]
-                    }
-                  ],
-                  max_tokens: 4096
-                });
-                
-                const aiResponse = response.choices[0]?.message?.content || '';
-                const cleanedResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-                const parsed = JSON.parse(cleanedResponse);
-                
-                if (parsed.extractedFields) {
-                  for (const [field, data] of Object.entries(parsed.extractedFields)) {
-                    const fieldData = data as any;
-                    extractedData[field] = fieldData.value;
-                    confidence[field] = fieldData.confidence || 75;
-                  }
-                  success = true;
-                  console.log("[Document Extract] Success with OpenAI GPT-4 Vision");
+                    },
+                    ...imageContents
+                  ]
                 }
-              } catch (openaiError: any) {
-                console.log(`[Document Extract] OpenAI failed: ${openaiError.message?.substring(0, 100)}`);
-              }
-            }
+              ],
+              max_tokens: 4096
+            });
             
-            if (!success && lastError) {
-              throw lastError;
+            const aiResponse = response.choices[0]?.message?.content || '';
+            const cleanedResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            const parsed = JSON.parse(cleanedResponse);
+            
+            if (parsed.extractedFields) {
+              for (const [field, data] of Object.entries(parsed.extractedFields)) {
+                const fieldData = data as any;
+                extractedData[field] = fieldData.value;
+                confidence[field] = fieldData.confidence || 75;
+              }
+              console.log("[Document Extract] Success with OpenAI GPT-4o Vision");
             }
+          } catch (openaiError: any) {
+            console.error(`[Document Extract] OpenAI failed: ${openaiError.message}`);
+            throw openaiError;
           }
         } else {
-          // Fallback: use text-based prompt with metadata only
-          const aiResponse = await callGeminiWithRotation(prompt);
+          // No document contents - use OpenAI text-based extraction with metadata only
+          console.log("[Document Extract] No document contents, using text-based extraction...");
+          
+          const OpenAI = (await import("openai")).default;
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+          
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "user",
+                content: prompt
+              }
+            ],
+            max_tokens: 2048
+          });
+          
+          const aiResponse = response.choices[0]?.message?.content || '';
           const cleanedResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
           const parsed = JSON.parse(cleanedResponse);
           
