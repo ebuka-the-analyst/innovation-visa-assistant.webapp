@@ -1,0 +1,168 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+8585a4df
+Active
+
+Jan 15, 2026, 4:20 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[Email Service] Using Resend HTTP API (recommended)
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+4:23:38 PM [express] serving on port 8080
+4:23:38 PM [express] [STRIPE WARNING] STRIPE_SECRET_KEY not configured!
+[2026-01-15T16:23:52.197Z] POST /api/activity/session
+[2026-01-15T16:23:52.208Z] GET /api/auth/user
+4:23:52 PM [express] POST /api/activity/session 200 in 234ms :: {"sessionId":"82098f23-8923-4256-b71…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+4:23:52 PM [express] GET /api/auth/user 200 in 241ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+[2026-01-15T16:23:52.642Z] POST /api/activity/page-view
+4:23:52 PM [express] POST /api/activity/page-view 200 in 25ms :: {"pageViewId":"bf9f2d9b-646b-4b5d-b…
+[2026-01-15T16:23:53.835Z] POST /api/activity/session/end
+[2026-01-15T16:23:53.838Z] GET /questionnaire
+4:23:53 PM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+[2026-01-15T16:23:54.132Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+4:23:54 PM [express] GET /api/auth/user 200 in 13ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-15T16:23:54.358Z] GET /api/partner/status
+[2026-01-15T16:23:54.360Z] POST /api/activity/session
+4:23:54 PM [express] GET /api/partner/status 200 in 15ms :: {"isPartner":false,"promoCodeCount":0}
+4:23:54 PM [express] POST /api/activity/session 200 in 19ms :: {"sessionId":"e990a1d8-4796-4f4a-80f5…
+[2026-01-15T16:23:54.522Z] POST /api/activity/session
+[2026-01-15T16:23:54.529Z] GET /api/credits/balance
+4:23:54 PM [express] POST /api/activity/session 200 in 19ms :: {"sessionId":"5d79dbae-5af0-485a-8176…
+4:23:54 PM [express] GET /api/credits/balance 304 in 14ms :: {"planCredits":0,"bonusCredits":0,"tota…
+4:23:57 PM [express] GET /api/auth/user 200 in 12ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-15T16:23:54.592Z] POST /api/activity/page-view
+[2026-01-15T16:23:57.852Z] GET /api/partner/status
+4:23:54 PM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"63b0e54e-0790-43ad-8…
+[2026-01-15T16:23:57.853Z] POST /api/activity/session
+[2026-01-15T16:23:57.182Z] GET /questionnaire
+[2026-01-15T16:23:57.856Z] POST /api/activity/session
+[2026-01-15T16:23:57.184Z] POST /api/activity/session/end
+4:23:57 PM [express] GET /api/partner/status 200 in 24ms :: {"isPartner":false,"promoCodeCount":0}
+4:23:57 PM [express] POST /api/activity/session/end 200 in 35ms :: {"success":true}
+4:23:57 PM [express] POST /api/activity/session 200 in 28ms :: {"sessionId":"8289d5f5-d67c-46e6-90d1…
+[2026-01-15T16:23:57.503Z] GET /api/auth/user
+4:23:58 PM [express] POST /api/activity/session 200 in 211ms :: {"sessionId":"78d6ecc5-c064-465f-8fc…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+[2026-01-15T16:23:58.115Z] POST /api/activity/page-view
+4:23:58 PM [express] POST /api/activity/page-view 200 in 17ms :: {"pageViewId":"83f56a43-12bb-4635-b…
+[2026-01-15T16:24:03.269Z] GET /api/documents
+4:24:03 PM [express] GET /api/documents 304 in 16ms :: [{"id":"83beeff8-f40f-4568-9c30-adef2e85da20"…
+[2026-01-15T16:24:10.295Z] POST /api/documents/extract
+  'ad73d1dd-2c80-4be0-b950-82aed3a8aed3'
+]
+[Document Extract] Found documents: [
+  {
+    name: 'BUSINESS PLAN',
+    category: 'business_plan',
+[Document Extract] Starting extraction for user: 6783e1ea-78f5-49c9-b67d-97dce58d193c documents: [
+  '83beeff8-f40f-4568-9c30-adef2e85da20',
+    fileUrl: '/uploads/doc-1768429590595-486189142.pdf'
+  },
+  {
+    name: 'CV',
+    category: 'education',
+    fileUrl: '/uploads/doc-1768429556908-75000899.pdf'
+  }
+]
+[Document Extract] S3 available: true
+[Document Extract] Processing BUSINESS PLAN - URL: /uploads/doc-1768429590595-486189142.pdf
+[Document Extract] Processing CV - URL: /uploads/doc-1768429556908-75000899.pdf
+[Document Extract] Files with content: 0 Total docs: 2
+[Document Extract] No document contents, using text-based extraction...
+[Document Extract] Extracted fields: [
+  'founderWorkHistory',
+  'totalProfessionalExperience',
+  'technicalSkillsProficiency',
+  'businessName',
+  'industry',
+  'problem',
+  'uniqueness'
+]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17137:28 {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+4:24:14 PM [express] POST /api/documents/extract 200 in 3998ms :: {"extractedData":{"founderWorkHist…
+[2026-01-15T16:24:28.308Z] POST /api/activity/session
+4:24:28 PM [express] POST /api/activity/session 200 in 235ms :: {"sessionId":"78d6ecc5-c064-465f-8fc…
+[2026-01-15T16:24:30.090Z] POST /api/activity/session/end
+4:24:30 PM [express] POST /api/activity/session/end 200 in 14ms :: {"success":true}
+[2026-01-15T16:26:36.863Z] POST /api/activity/page-view
+[2026-01-15T16:26:36.360Z] GET /api/auth/user
+4:26:36 PM [express] POST /api/activity/page-view 200 in 37ms :: {"pageViewId":"89b7abaf-b428-461d-9…
+[2026-01-15T16:26:36.362Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+4:26:36 PM [express] GET /api/auth/user 200 in 223ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+4:26:36 PM [express] POST /api/activity/session 200 in 236ms :: {"sessionId":"6822d1f9-13f3-40f2-bee…
+
+
+innovation-visa-assistant.webapp | Railway
