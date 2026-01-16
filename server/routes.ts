@@ -7039,103 +7039,124 @@ Return ONLY valid JSON:
                 ]
               }];
             } else if (textDocuments.length > 0) {
-              // Text-only extraction (from PDFs) - COMPREHENSIVE BUSINESS PLAN EXTRACTION
-              messages = [{
-                role: "user",
-                content: `You are an expert at extracting structured data from UK Innovator Founder Visa business plans.
+              // CHUNKED EXTRACTION - Split large documents to stay within rate limits
+              const CHUNK_SIZE = 50000; // ~12K tokens per chunk, safe for 30K limit
+              const allChunks: string[] = [];
+              
+              // Split content into chunks
+              for (let i = 0; i < documentTextContent.length; i += CHUNK_SIZE) {
+                allChunks.push(documentTextContent.substring(i, i + CHUNK_SIZE));
+              }
+              
+              console.log(`[Document Extract] Processing ${allChunks.length} chunks of ~${CHUNK_SIZE} chars each`);
+              
+              const extractionPrompt = `You are an expert at extracting structured data from UK Innovator Founder Visa business plans.
 
-DOCUMENT CONTENT:
-${documentTextContent}
+DOCUMENT CONTENT (SECTION):
+{CHUNK_CONTENT}
 
-Extract ALL relevant data for the fields below. Be thorough and extract as much detail as possible.
+Extract ALL relevant data for the fields below. Be thorough.
 
 FOUNDER FIELDS:
-- fullLegalName: Full legal name
-- nationality: Country of citizenship
-- educationBackground: All educational degrees with institutions and years
-- professionalCertifications: Professional certifications (AWS, Microsoft, Google, etc.)
-- totalProfessionalExperience: Total years of work experience (number)
-- industryExperience: Industry-specific experience with details
-- technicalSkillsProficiency: Technical skills and proficiency levels
-- founderWorkHistory: Work history with companies, roles, years
+- fullLegalName, nationality, educationBackground, professionalCertifications
+- totalProfessionalExperience, industryExperience, technicalSkillsProficiency, founderWorkHistory
 
 BUSINESS OVERVIEW:
-- businessName: Name of the business
-- industry: Industry/sector
-- problem: Problem the business solves
-- uniqueness: What makes the solution unique/innovative
-- technology: Technology stack and innovations
-- marketSize: Target market size (TAM/SAM/SOM)
-- targetCustomers: Target customer segments
+- businessName, industry, problem, uniqueness, technology, marketSize, targetCustomers
 
 FINANCIAL:
-- monthlyProjections: Revenue/cost projections
-- fundingSources: Sources of funding (personal savings, grants, investors)
-- detailedCosts: Startup and operational costs breakdown
-- revenueModel: How the business generates revenue
-- year1Revenue: Projected Year 1 revenue
-- year3Revenue: Projected Year 3 revenue
+- monthlyProjections, fundingSources, detailedCosts, revenueModel, year1Revenue, year3Revenue
 
 MARKET & COMPETITION:
-- competitors: Main competitors
-- competitiveDifferentiation: Competitive advantages
-- customerInterviews: Customer validation evidence
-- willingnessToPay: Evidence of willingness to pay
+- competitors, competitiveDifferentiation, customerInterviews, willingnessToPay
 
 REGULATORY & COMPLIANCE:
-- regulatoryRequirements: Regulatory requirements
-- complianceTimeline: Timeline for compliance
-- complianceBudget: Budget for compliance
+- regulatoryRequirements, complianceTimeline, complianceBudget
 
 GROWTH & TEAM:
-- hiringPlan: Hiring plan with roles and timeline
-- ukJobCreation: UK job creation plans (number of jobs)
-- specificRegions: UK regions for operations
-- internationalPlan: International expansion plans
+- hiringPlan, ukJobCreation, specificRegions, internationalPlan
 
 ENDORSEMENT:
-- targetEndorser: Target endorsing body
-- contactPointsStrategy: Engagement strategy
-- evidenceOfProgress: Evidence of traction/progress
+- targetEndorser, contactPointsStrategy, evidenceOfProgress
 
-Extract actual data only. Return ONLY valid JSON:
-{"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`
-              }];
+Return ONLY valid JSON:
+{"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`;
+              
+              // Process each chunk and merge results
+              const chunkResults: Record<string, { value: string; confidence: number }>[] = [];
+              
+              for (let i = 0; i < allChunks.length; i++) {
+                console.log(`[Document Extract] Processing chunk ${i + 1}/${allChunks.length}`);
+                
+                // Add delay between chunks to respect rate limits
+                if (i > 0) {
+                  await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+                
+                try {
+                  const chunkResponse = await openai.chat.completions.create({
+                    model: "gpt-4o",
+                    messages: [{
+                      role: "user",
+                      content: extractionPrompt.replace('{CHUNK_CONTENT}', allChunks[i])
+                    }],
+                    max_tokens: 4096
+                  });
+                  
+                  const chunkAiResponse = chunkResponse.choices[0]?.message?.content || '';
+                  const cleanedChunk = chunkAiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                  
+                  try {
+                    const parsedChunk = JSON.parse(cleanedChunk);
+                    if (parsedChunk.extractedFields) {
+                      chunkResults.push(parsedChunk.extractedFields);
+                      console.log(`[Document Extract] Chunk ${i + 1} extracted ${Object.keys(parsedChunk.extractedFields).length} fields`);
+                    }
+                  } catch (parseErr) {
+                    console.error(`[Document Extract] Chunk ${i + 1} parse error:`, parseErr);
+                  }
+                } catch (chunkError: any) {
+                  console.error(`[Document Extract] Chunk ${i + 1} failed:`, chunkError.message);
+                  // Continue with other chunks
+                }
+              }
+              
+              // Merge all chunk results - prefer higher confidence values
+              console.log(`[Document Extract] Merging ${chunkResults.length} chunk results`);
+              
+              for (const chunkData of chunkResults) {
+                for (const [field, data] of Object.entries(chunkData)) {
+                  const fieldData = data as any;
+                  const valueStr = Array.isArray(fieldData.value) 
+                    ? fieldData.value.join(', ')
+                    : typeof fieldData.value === 'object' && fieldData.value !== null
+                      ? JSON.stringify(fieldData.value)
+                      : String(fieldData.value || '');
+                  
+                  // Skip placeholder values
+                  if (!valueStr || valueStr.includes('[') || valueStr.toLowerCase().includes('placeholder')) {
+                    continue;
+                  }
+                  
+                  const newConfidence = fieldData.confidence || 75;
+                  const existingConfidence = confidence[field] || 0;
+                  
+                  // Keep higher confidence value, or longer value if same confidence
+                  if (newConfidence > existingConfidence || 
+                      (newConfidence === existingConfidence && valueStr.length > (extractedData[field]?.length || 0))) {
+                    extractedData[field] = valueStr;
+                    confidence[field] = newConfidence;
+                  }
+                }
+              }
+              
+              console.log("[Document Extract] Merged extraction complete, total fields:", Object.keys(extractedData).length);
             } else {
               throw new Error("No document content to process");
             }
-            
-            const response = await openai.chat.completions.create({
-              model: "gpt-4o",
-              messages,
-              max_tokens: 16384
-            });
-            
-            const aiResponse = response.choices[0]?.message?.content || '';
-            console.log("[Document Extract] AI Response length:", aiResponse.length);
-            const cleanedResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            const parsed = JSON.parse(cleanedResponse);
-            
-            if (parsed.extractedFields) {
-              for (const [field, data] of Object.entries(parsed.extractedFields)) {
-                const fieldData = data as any;
-                // Convert value to string safely (handles arrays, objects, primitives)
-                const valueStr = Array.isArray(fieldData.value) 
-                  ? fieldData.value.join(', ')
-                  : typeof fieldData.value === 'object' && fieldData.value !== null
-                    ? JSON.stringify(fieldData.value)
-                    : String(fieldData.value || '');
-                // Skip placeholder values
-                if (valueStr && !valueStr.includes('[') && !valueStr.toLowerCase().includes('placeholder')) {
-                  extractedData[field] = valueStr;
-                  confidence[field] = fieldData.confidence || 75;
-                }
-              }
-              console.log("[Document Extract] Success with OpenAI GPT-4o, extracted fields:", Object.keys(extractedData).length);
-            }
           } catch (openaiError: any) {
             console.error(`[Document Extract] OpenAI failed: ${openaiError.message}`);
-            throw openaiError;
+            // Don't throw - let it fall through to intelligent placeholders
           }
         } else {
           // No document contents - use OpenAI text-based extraction with metadata only

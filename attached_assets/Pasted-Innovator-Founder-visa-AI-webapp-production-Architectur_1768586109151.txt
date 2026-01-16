@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+d5a2bec8
+Active
+
+Jan 16, 2026, 5:41 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+  }
+]
+[Document Extract] S3 available: true
+[Document Extract] Processing BUSINESS PLAN - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768585882310-Business_Plan.pdf
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768585882310-Business_Plan.pdf
+[Document Extract] === PDF PROCESSING START ===
+[Document Extract] PDF Name: BUSINESS PLAN Buffer size: 474911 bytes
+[PDF Extract] Starting extraction with unpdf, buffer size: 474911
+[PDF Extract] Document loaded, pages: 80
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768585882310-Business_Plan.pdf Size: 474911
+[PDF Extract] Extraction complete, charCount: 188281
+[Document Extract] PDF Pages: 80
+[Document Extract] CharCount: 188281
+[Document Extract] ScannedLikely: false
+[Document Extract] PDF text extracted successfully, chars: 188281
+[Document Extract] First 1000 chars: UK Innovator Founder Visa Assistant UK Innovation Visa Business Plan Industry: LegalTech / Immigration Technology / AI-powered SaaS Generated: 29 November 2025 Tier: Ultimate BUSINESS PLAN: UK Innovator Founder Visa Assistant Industry: LegalTech / Immigration Technology / AI-powered SaaS Tier: ULTIMATE Generated: 29/11/2025 --- 1. EXECUTIVE SUMMARY UK Innovator Founder Visa Assistant (innovatorfoundervisaassistant.co.uk) is a revolutionary LegalTech platform poised to disrupt the UK immigration landscape. Launching in November 2025, our AI-powered SaaS solution empowers global entrepreneurs to navigate the complex UK Innovator Founder Visa process with unprecedented efficiency and affordability. With a comprehensive suite of 109 professional-grade tools, meticulously organized across eight specialized categories, we offer a complete self-service solution, dramatically reducing the reliance on expensive immigration lawyers. This platform is not merely a document repository or a generic 
+[Document Extract] === PDF PROCESSING END ===
+[Document Extract] Files with content: 1 Total docs: 1
+[Document Extract] Using OpenAI GPT-4o for extraction...
+[Document Extract] Text docs: 1 Image docs: 0 File docs: 0
+[Document Extract] Document details: [
+  {
+    name: 'BUSINESS PLAN',
+    isText: true,
+    mimeType: 'application/pdf',
+    contentLen: 200000
+  }
+]
+[Document Extract] Text content preview: 
+--- DOCUMENT: BUSINESS PLAN (business_plan) ---
+UK Innovator Founder Visa Assistant UK Innovation Visa Business Plan Industry: LegalTech / Immigration Technology / AI-powered SaaS Generated: 29 November 2025 Tier: Ultimate BUSINESS PLAN: UK Innovator Founder Visa Assistant Industry: LegalTech / Imm
+[Document Extract] OpenAI failed: 429 Request too large for gpt-4o in organization org-iIuxcPlBlnydQPT7p0jdxot3 on tokens per min (TPM): Limit 30000, Requested 50664. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.
+[Document Extract] AI extraction error: RateLimitError: 429 Request too large for gpt-4o in organization org-iIuxcPlBlnydQPT7p0jdxot3 on tokens per min (TPM): Limit 30000, Requested 50664. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.
+    at APIError.generate (file:///app/node_modules/openai/core/error.mjs:59:20)
+    at OpenAI.makeStatusError (file:///app/node_modules/openai/client.mjs:162:32)
+    at OpenAI.makeRequest (file:///app/node_modules/openai/client.mjs:330:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/dist/index.js:17205:30 {
+  status: 429,
+  headers: HeadersList {
+    cookies: [
+      '__cf_bm=X1j4exFB563RzUJgg7wKAfL4GKgaR3MfC0evfYV5J1A-1768585920-1.0.1.1-M7RRi7NksbJS5Rky180_X65rKYxZ7RrbMmPCIp7qHmwYy1HDlYDNNA1FPQZiKTFpF7uI.Rg9cE6jF8pqT.dC6kX3yzupxAykoEk7I6LYMVk; path=/; expires=Fri, 16-Jan-26 18:22:00 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+      '_cfuvid=Nvw1A_aWCi.iJfvL.KFeQlJXLGKRsUHeRYLYS9xzmrA-1768585920187-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'
+    ],
+    [Symbol(headers map)]: Map(21) {
+      'date' => [Object],
+      'content-type' => [Object],
+      'content-length' => [Object],
+      'connection' => [Object],
+      'vary' => [Object],
+      'x-ratelimit-limit-requests' => [Object],
+      'x-ratelimit-limit-tokens' => [Object],
+      'x-ratelimit-remaining-requests' => [Object],
+      'x-ratelimit-remaining-tokens' => [Object],
+      'x-ratelimit-reset-requests' => [Object],
+      'x-ratelimit-reset-tokens' => [Object],
+      'x-request-id' => [Object],
+      'x-envoy-upstream-service-time' => [Object],
+      'x-openai-proxy-wasm' => [Object],
+      'cf-cache-status' => [Object],
+      'set-cookie' => [Object],
+      'strict-transport-security' => [Object],
+      'x-content-type-options' => [Object],
+      'server' => [Object],
+      'cf-ray' => [Object],
+      'alt-svc' => [Object]
+    },
+    [Symbol(headers map sorted)]: [
+      [Array], [Array], [Array],
+      [Array], [Array], [Array],
+    message: 'Request too large for gpt-4o in organization org-iIuxcPlBlnydQPT7p0jdxot3 on tokens per min (TPM): Limit 30000, Requested 50664. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.',
+    type: 'tokens',
+    param: null,
+    code: 'rate_limit_exceeded'
+  },
+  code: 'rate_limit_exceeded',
+  param: null,
+  type: 'tokens'
+}
+[Document Extract] Using intelligent placeholders based on document metadata
+[Document Extract] Extracted fields: [ 'businessName', 'industry', 'problem', 'uniqueness' ]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      [Array], [Array], [Array],
+      [Array], [Array], [Array],
+      [Array], [Array], [Array],
+      [Array], [Array], [Array],
+      [Array], [Array], [Array],
+      [Array]
+    ]
+  },
+  requestID: 'req_1c076f2a2de644de8da58bc0ed8ec5a0',
+  error: {
+5:52:00 PM [express] POST /api/documents/extract 200 in 7883ms :: {"extractedData":{"businessName":"…
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+  column: undefined,
+    at async file:///app/dist/index.js:17334:28 {
+  dataType: undefined,
+  constraint: undefined,
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+5:52:12 PM [express] POST /api/activity/session/end 200 in 211ms :: {"success":true}
+[2026-01-16T17:52:12.244Z] POST /api/activity/session/end
+
+
+innovation-visa-assistant.webapp | Railway
