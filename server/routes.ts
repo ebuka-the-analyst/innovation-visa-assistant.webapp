@@ -7050,64 +7050,109 @@ Return ONLY valid JSON:
               
               console.log(`[Document Extract] Processing ${allChunks.length} chunks of ~${CHUNK_SIZE} chars each`);
               
-              const extractionPrompt = `You are an expert at extracting structured data from UK Innovator Founder Visa business plans.
+              const extractionPrompt = `You are a PhD-level expert at extracting comprehensive structured data from UK Innovator Founder Visa application documents.
 
 DOCUMENT CONTENT (SECTION):
 {CHUNK_CONTENT}
 
-CRITICAL FORMATTING RULES:
-1. ALWAYS include dates/years for education: "MSc Data Science, Leeds Beckett University, UK, 2023, Distinction"
-2. ALWAYS include dates/years for work history: "Lead Developer at Company X (2019-2022)"
-3. Structure lists with bullet points: "• Item 1 • Item 2 • Item 3"
-4. For timelines, use clear date ranges: "Q1 2025 - Q2 2026"
-5. For financial figures, include currency: "£69,890 Year 1"
-6. For job creation, be specific: "8 UK jobs: 2 developers (Year 1), 3 support (Year 2), 3 marketing (Year 3)"
+=== CRITICAL FORMATTING RULES (MANDATORY) ===
+1. DATES ARE MANDATORY: ALWAYS include day/month/year or month/year for ALL temporal fields
+2. Education format: "Degree Name, Institution, City/Country, Month Year - Month Year, Grade/Classification"
+3. Employment format: "Job Title at Company Name, City/Country (Month Year - Month Year): Key achievement 1; Key achievement 2"
+4. Certifications format: "Certification Name (Issuing Body) - Obtained Month Year, Valid until Month Year"
+5. Financial format: "£Amount (Year)" or "£Amount per month/year"
+6. Timelines format: "Phase: Month Year - Month Year"
+7. Lists use bullet points: "• Item 1 • Item 2 • Item 3"
+8. If exact dates not found, use approximate years: "(circa 2020)" or "(2019-2021 approx.)"
 
-FOUNDER FIELDS (include dates/years):
-- fullLegalName: Full legal name
+=== PASSPORT & ID DOCUMENTS ===
+- fullLegalName: "First Middle Last" exactly as shown on passport
+- dateOfBirth: "DD Month YYYY" (e.g., "15 March 1990")
 - nationality: Country of citizenship
-- educationBackground: Format as "Degree, Institution, Location, Year, Grade" for each degree
-- professionalCertifications: Include certification dates or "pursuing" status
-- totalProfessionalExperience: "X years (2015-present)"
-- industryExperience: "X years in [Industry] (dates)"
-- technicalSkillsProficiency: "Skill (proficiency level)"
-- founderWorkHistory: "Role at Company (Start Year - End Year): key achievements"
+- passportNumber: Passport number (last 4 digits only for security: "****1234")
+- passportExpiry: "DD Month YYYY" - passport expiry date
+- placeOfBirth: City, Country of birth
 
-BUSINESS OVERVIEW:
-- businessName, industry, problem, uniqueness, technology, marketSize, targetCustomers
+=== EDUCATION DOCUMENTS ===
+- educationBackground: "• Degree, Institution, Location, Start Year - End Year, Grade/Classification • Next degree..."
+- degreeClassification: "First Class Honours / 2:1 / Distinction / Merit / Pass"
+- educationDates: "Institution (Month Year - Month Year)"
+- thesis: "Thesis/Dissertation title if applicable"
 
-FINANCIAL (include £ amounts and years):
-- monthlyProjections: Structured monthly breakdown
-- fundingSources: Amount and source with dates
-- detailedCosts: Category and £amount breakdown
-- revenueModel: Clear revenue tiers with pricing
-- year1Revenue: £amount with year
-- year3Revenue: £amount with year
+=== EMPLOYMENT DOCUMENTS ===
+- founderWorkHistory: "• Role at Company (Month Year - Month Year): Achievement 1; Achievement 2 • Next role..."
+- totalProfessionalExperience: "X years (Month Year - Present)"
+- industryExperience: "X years in Industry Name (Year - Year)"
+- employerReferences: "Name, Title at Company - Contact available"
+- keyAchievements: "• Achievement with measurable impact (Year) • Next..."
 
-MARKET & COMPETITION:
-- competitors: Named competitors with brief description
-- competitiveDifferentiation: Measurable advantages
-- customerInterviews: Number and key insights
-- willingnessToPay: Specific price points tested
+=== PROFESSIONAL CERTIFICATIONS ===
+- professionalCertifications: "• Certification (Issuer) - Month Year, Valid until Month Year • Next..."
+- technicalSkillsProficiency: "• Skill: Expert/Advanced/Intermediate (Years of experience) • Next..."
 
-REGULATORY (include timelines):
-- regulatoryRequirements: Requirement and compliance deadline
-- complianceTimeline: "Month Year - Month Year: milestone"
-- complianceBudget: £amount with breakdown
+=== ENGLISH TEST DOCUMENTS ===
+- englishTestType: "IELTS Academic / PTE Academic / TOEFL iBT / Trinity SELT"
+- englishTestScore: "Overall: X.X | Listening: X.X | Reading: X.X | Writing: X.X | Speaking: X.X"
+- englishTestDate: "DD Month YYYY"
+- englishTestExpiry: "DD Month YYYY (Valid for 2 years from test date)"
+- englishTestReferenceNumber: "Test reference/TRF number"
 
-GROWTH & TEAM (include job numbers and timeline):
-- hiringPlan: "Role (Year X): number of hires"
-- ukJobCreation: "X total UK jobs: breakdown by role and year"
-- specificRegions: UK regions with rationale
-- internationalPlan: Countries with target years
+=== BANK STATEMENTS ===
+- bankAccountBalance: "£Amount as of DD Month YYYY"
+- bankAccountHolder: "Account holder name exactly as shown"
+- bankName: "Bank name and branch"
+- fundingEvidence: "£Amount available funds demonstrated over X months"
+- transactionSummary: "Regular income: £X/month | Major deposits: £X (Date) | Average balance: £X"
 
-ENDORSEMENT:
-- targetEndorser: Endorsing body name
-- contactPointsStrategy: Numbered strategy steps with timeline
-- evidenceOfProgress: Specific evidence with dates
+=== ENDORSEMENT DOCUMENTS ===
+- targetEndorser: "Endorsing Body Name (e.g., Tech Nation, Innovator International)"
+- endorsementStatus: "Pending / Approved / Conditional"
+- endorsementDate: "DD Month YYYY (if approved)"
+- endorsementConditions: "• Condition 1 • Condition 2 (if conditional)"
+- contactPointsStrategy: "1. Action (Date) 2. Action (Date) 3. Action (Date)..."
+
+=== BUSINESS PLAN FIELDS ===
+- businessName: Exact registered or proposed business name
+- industry: "Primary Industry / Secondary Industry"
+- problem: Problem statement with market impact
+- uniqueness: "• Innovation 1: Description • Innovation 2: Description"
+- technology: "• Technology 1 (Purpose) • Technology 2 (Purpose)"
+- marketSize: "TAM: £X (Year) | SAM: £X | SOM: £X"
+- targetCustomers: "• Segment 1: Description • Segment 2: Description"
+
+=== FINANCIAL PROJECTIONS ===
+- monthlyProjections: "Month Year: £Revenue | £Costs | £Profit for each month"
+- fundingSources: "• Source: £Amount (Date secured/expected) • Next..."
+- detailedCosts: "• Category: £Amount (Frequency) • Next..."
+- revenueModel: "• Tier/Product: £Price (Billing frequency) • Next..."
+- year1Revenue: "£Amount (Year 1: Month Year - Month Year)"
+- year3Revenue: "£Amount (Year 3: Month Year - Month Year)"
+- breakEvenDate: "Expected Month Year"
+
+=== MARKET & COMPETITION ===
+- competitors: "• Competitor Name: Brief description, weakness • Next..."
+- competitiveDifferentiation: "• Advantage 1: Measurable claim • Next..."
+- customerInterviews: "X interviews conducted (Month Year - Month Year): Key insight 1; Key insight 2"
+- willingnessToPay: "• Price point tested: £X - X% acceptance rate • Next..."
+
+=== REGULATORY & COMPLIANCE ===
+- regulatoryRequirements: "• Requirement: Deadline Month Year • Next..."
+- complianceTimeline: "• Milestone: Month Year • Next..."
+- complianceBudget: "£Total: • Item 1: £X • Item 2: £X"
+
+=== GROWTH & TEAM ===
+- hiringPlan: "• Role (Year X): X hires at £salary • Next..."
+- ukJobCreation: "X total UK jobs: • Year 1: X jobs (Roles) • Year 2: X jobs • Year 3: X jobs"
+- specificRegions: "• Region: Rationale • Next..."
+- internationalPlan: "• Country (Target Year): Strategy • Next..."
+
+=== EVIDENCE OF PROGRESS ===
+- evidenceOfProgress: "• Evidence type: Description (Date) • Next..."
+- lettersOfIntent: "• Company Name: Intent description (Date) • Next..."
+- partnerships: "• Partner: Agreement type (Date) • Next..."
 
 Return ONLY valid JSON:
-{"extractedFields": {"fieldName": {"value": "structured value with dates/years", "confidence": 85, "source": "document name"}}}`;
+{"extractedFields": {"fieldName": {"value": "structured value with dates", "confidence": 85, "source": "document name"}}}`;
               
               // Process each chunk and merge results
               const chunkResults: Record<string, { value: string; confidence: number }>[] = [];
@@ -7178,6 +7223,34 @@ Return ONLY valid JSON:
               }
               
               console.log("[Document Extract] Merged extraction complete, total fields:", Object.keys(extractedData).length);
+              
+              // POST-PROCESSING: Validate and normalize date formatting
+              const dateFields = ['dateOfBirth', 'passportExpiry', 'englishTestDate', 'englishTestExpiry', 'endorsementDate'];
+              const dateRangeFields = ['educationBackground', 'founderWorkHistory', 'educationDates', 'complianceTimeline', 'hiringPlan'];
+              const currencyFields = ['bankAccountBalance', 'fundingEvidence', 'year1Revenue', 'year3Revenue', 'complianceBudget', 'detailedCosts'];
+              
+              for (const field of Object.keys(extractedData)) {
+                let value = extractedData[field];
+                if (!value || typeof value !== 'string') continue;
+                
+                // Normalize bullet points
+                value = value.replace(/[-•·]/g, '•').replace(/\s+•\s+/g, ' • ');
+                
+                // Ensure currency has £ symbol
+                if (currencyFields.includes(field) && !value.includes('£')) {
+                  value = value.replace(/(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g, '£$1');
+                }
+                
+                // Add year approximation if dates missing in date-required fields
+                if (dateRangeFields.includes(field) && !value.match(/\d{4}/) && !value.includes('circa')) {
+                  // Field requires dates but none found - flag in value
+                  value = value + ' (dates to be confirmed)';
+                }
+                
+                extractedData[field] = value.trim();
+              }
+              
+              console.log("[Document Extract] Post-processing complete");
             } else {
               throw new Error("No document content to process");
             }

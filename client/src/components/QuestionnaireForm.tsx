@@ -508,13 +508,104 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     );
   };
 
-  // Get field label by name
+  // Get field label by name - comprehensive mapping for all document types
   const getFieldLabel = (fieldName: string): string => {
+    // First check steps
     for (const step of steps) {
       const field = step.fields.find(f => f.name === fieldName);
       if (field) return field.label;
     }
-    return fieldName.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+    
+    // Comprehensive field labels for all document types
+    const fieldLabels: Record<string, string> = {
+      // Passport & ID
+      fullLegalName: 'Full Legal Name',
+      dateOfBirth: 'Date of Birth',
+      nationality: 'Nationality',
+      passportNumber: 'Passport Number',
+      passportExpiry: 'Passport Expiry Date',
+      placeOfBirth: 'Place of Birth',
+      
+      // Education
+      educationBackground: 'Educational Background (All Degrees)',
+      degreeClassification: 'Degree Classification',
+      educationDates: 'Education Dates',
+      thesis: 'Thesis/Dissertation',
+      
+      // Employment
+      founderWorkHistory: 'Relevant Work History',
+      totalProfessionalExperience: 'Total Years of Professional Experience',
+      industryExperience: 'Industry-Specific Experience (years and details)',
+      employerReferences: 'Employer References',
+      keyAchievements: 'Key Career Achievements',
+      
+      // Certifications
+      professionalCertifications: 'Professional Certifications & Accreditations',
+      technicalSkillsProficiency: 'Core Skills & Proficiency Levels',
+      
+      // English Test
+      englishTestType: 'English Test Type',
+      englishTestScore: 'English Test Score (All Components)',
+      englishTestDate: 'English Test Date',
+      englishTestExpiry: 'English Test Expiry',
+      englishTestReferenceNumber: 'Test Reference Number',
+      
+      // Bank Statements
+      bankAccountBalance: 'Bank Account Balance',
+      bankAccountHolder: 'Account Holder Name',
+      bankName: 'Bank Name',
+      fundingEvidence: 'Funding Evidence',
+      transactionSummary: 'Transaction Summary',
+      
+      // Endorsement
+      targetEndorser: 'Target Endorsing Body',
+      endorsementStatus: 'Endorsement Status',
+      endorsementDate: 'Endorsement Date',
+      endorsementConditions: 'Endorsement Conditions',
+      contactPointsStrategy: '6 Contact Points Strategy',
+      
+      // Business Overview
+      businessName: 'Business Name',
+      industry: 'Industry',
+      problem: 'What problem does your business solve?',
+      uniqueness: 'What makes your solution different? (Be specific with measurable claims)',
+      technology: 'Technology',
+      marketSize: 'Market Size Calculation (TAM/SAM/SOM)',
+      targetCustomers: 'Target Customers',
+      
+      // Financial
+      monthlyProjections: '36-Month Monthly Cashflow',
+      fundingSources: 'Detailed Funding Sources',
+      detailedCosts: 'Detailed Cost Breakdown',
+      revenueModel: 'Revenue Model',
+      year1Revenue: 'Year1 Revenue',
+      year3Revenue: 'Year3 Revenue',
+      breakEvenDate: 'Break-Even Date',
+      
+      // Market & Competition
+      competitors: 'List 5+ Named Competitors',
+      competitiveDifferentiation: 'Your Measurable Competitive Advantage',
+      customerInterviews: 'Customer Discovery Interviews (20-30 minimum)',
+      willingnessToPay: 'Willingness to Pay Evidence',
+      
+      // Regulatory
+      regulatoryRequirements: 'All Regulatory Requirements',
+      complianceTimeline: 'Compliance Timeline',
+      complianceBudget: 'Total Compliance Budget (£)',
+      
+      // Growth & Team
+      hiringPlan: 'Detailed Hiring Plan',
+      ukJobCreation: 'Uk Job Creation',
+      specificRegions: 'Specific Geographic Targets',
+      internationalPlan: 'International Expansion (optional)',
+      
+      // Evidence
+      evidenceOfProgress: 'Evidence Of Progress',
+      lettersOfIntent: 'Letters of Intent',
+      partnerships: 'Partnerships',
+    };
+    
+    return fieldLabels[fieldName] || fieldName.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
