@@ -84,17 +84,20 @@ export function useAutoSave<T extends Record<string, any>>(
   }, [saveToStorage]);
 
   const saveAllFields = useCallback((data: Partial<T>) => {
+    // Clear any pending debounced save
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
 
-    debounceTimerRef.current = setTimeout(() => {
-      setSavedData(prev => {
-        const newData = { ...prev, ...data };
-        saveToStorage(newData);
-        return newData;
-      });
-    }, AUTO_SAVE_DEBOUNCE_MS);
+    // Update savedData IMMEDIATELY (no debounce) for batch saves like Apply All
+    // This prevents race conditions with useEffect syncing stale data back to form
+    setSavedData(prev => {
+      const newData = { ...prev, ...data };
+      saveToStorage(newData);
+      console.log('[Auto-save] Batch saved', Object.keys(data).length, 'fields immediately');
+      return newData;
+    });
   }, [saveToStorage]);
 
   const clearField = useCallback((fieldName: keyof T | string) => {

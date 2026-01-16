@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+bc6fbebf
+Active
+
+Jan 16, 2026, 7:57 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+]
+[Document Extract] Text content preview: 
+--- DOCUMENT: CV (other) ---
+BENEDICT E. UMEH Full Stack WordPress Developer • AI Integration • Data-Driven UX Leeds, United Kingdom +44 7493 363351 ebuka.umeh40@outlook.com LinkedIn: linkedin.com/in/ebukaumeh Portfolio: bhenmedia.com PROFESSIONAL SUMMARY Data-driven Full Stack WordPress Developer 
+[Document Extract] STEP 1: Processing TEXT documents with chunked extraction...
+[Document Extract] Processing 5 chunks of ~50000 chars each
+[Document Extract] Processing chunk 1/5
+[Document Extract] Chunk 1 extracted 7 fields
+[Document Extract] Processing chunk 2/5
+[Document Extract] Chunk 2 parse error: SyntaxError: Unexpected token I in JSON at position 0
+    at JSON.parse (<anonymous>)
+    at file:///app/dist/index.js:17225:46
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[Document Extract] Processing chunk 3/5
+[2026-01-16T20:49:51.750Z] POST /api/activity/session
+8:49:51 PM [express] POST /api/activity/session 200 in 207ms :: {"sessionId":"9884ed44-1538-4b94-904…
+[Document Extract] Chunk 3 extracted 9 fields
+[Document Extract] Processing chunk 4/5
+[2026-01-16T20:50:21.762Z] POST /api/activity/session
+8:50:21 PM [express] POST /api/activity/session 200 in 207ms :: {"sessionId":"9884ed44-1538-4b94-904…
+[Document Extract] Chunk 4 extracted 14 fields
+[Document Extract] Processing chunk 5/5
+[Document Extract] Chunk 5 extracted 3 fields
+[Document Extract] Merging 4 chunk results
+[Document Extract] Merged extraction complete, total fields: 25
+[Document Extract] Post-processing complete
+[Document Extract] STEP 2: Processing IMAGE documents with Vision API...
+  'internationalPlan',
+  'evidenceOfProgress',
+  'partnerships',
+  'year1Revenue',
+  'year3Revenue',
+  'breakEvenDate',
+  'targetEndorser',
+  'endorsementStatus',
+  'contactPointsStrategy',
+  'technicalSkillsProficiency',
+  'customerInterviews',
+  'lettersOfIntent',
+  'partners',
+[Document Extract] Vision API extracted 6 fields from images
+  'fullLegalName',
+[Document Extract] Extracted fields: [
+  'dateOfBirth',
+  'educationBackground',
+  'nationality',
+  'professionalCertifications',
+  'passportNumber',
+  'founderWorkHistory',
+  'businessName',
+  'industry',
+  'problem',
+  'regulatoryRequirements',
+  'complianceTimeline',
+  'complianceBudget',
+  'hiringPlan',
+  'ukJobCreation',
+  'specificRegions',
+8:50:42 PM [express] POST /api/documents/extract 200 in 79922ms :: {"extractedData":{"educationBackg…
+  'passportExpiry',
+  'placeOfBirth'
+]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17444:28 {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+[2026-01-16T20:50:51.754Z] POST /api/activity/session
+8:50:51 PM [express] POST /api/activity/session 200 in 190ms :: {"sessionId":"9884ed44-1538-4b94-904…
+[2026-01-16T20:51:21.748Z] POST /api/activity/session
+8:51:21 PM [express] POST /api/activity/session 200 in 196ms :: {"sessionId":"9884ed44-1538-4b94-904…
+[2026-01-16T20:51:51.758Z] POST /api/activity/session
+8:51:51 PM [express] POST /api/activity/session 200 in 212ms :: {"sessionId":"9884ed44-1538-4b94-904…
+[2026-01-16T20:52:21.742Z] POST /api/activity/session
+8:52:21 PM [express] POST /api/activity/session 200 in 210ms :: {"sessionId":"9884ed44-1538-4b94-904…
+[2026-01-16T20:52:51.749Z] POST /api/activity/session
+8:52:51 PM [express] POST /api/activity/session 200 in 208ms :: {"sessionId":"9884ed44-1538-4b94-904…
+[2026-01-16T20:53:05.058Z] POST /api/activity/session/end
+8:53:05 PM [express] POST /api/activity/session/end 200 in 208ms :: {"success":true}
+[2026-01-16T20:58:21.201Z] POST /api/activity/session
+[2026-01-16T20:58:21.202Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+8:58:21 PM [express] GET /api/auth/user 200 in 204ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+8:58:21 PM [express] POST /api/activity/session 200 in 212ms :: {"sessionId":"73c6c9c7-d55b-445f-9d1…
+[2026-01-16T20:58:21.664Z] POST /api/activity/page-view
+8:58:21 PM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"97101918-c888-46ce-8…
+[2026-01-16T20:58:51.825Z] POST /api/activity/session
+8:58:52 PM [express] POST /api/activity/session 200 in 208ms :: {"sessionId":"73c6c9c7-d55b-445f-9d1…
+[2026-01-16T20:59:06.038Z] POST /api/activity/session/end
+8:59:06 PM [express] POST /api/activity/session/end 200 in 208ms :: {"success":true}
+[2026-01-16T20:59:21.307Z] POST /api/activity/session
+[2026-01-16T20:59:21.309Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+8:59:21 PM [express] GET /api/auth/user 200 in 203ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+8:59:21 PM [express] POST /api/activity/session 200 in 211ms :: {"sessionId":"9717251a-90d2-4d76-8d8…
+[2026-01-16T20:59:21.699Z] POST /api/activity/page-view
+8:59:21 PM [express] POST /api/activity/page-view 200 in 18ms :: {"pageViewId":"25ee55d2-ed12-48dc-8…
+8:59:22 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+[2026-01-16T20:59:22.672Z] POST /api/activity/session/end
+
+
+innovation-visa-assistant.webapp | Railway
