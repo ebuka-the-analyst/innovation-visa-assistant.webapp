@@ -364,15 +364,45 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   // Check if current user is Ebuka (founder) - only they get access to their personal data
   const isFounderAccount = user?.email?.toLowerCase() === 'ebuka.umeh40@outlook.com';
 
+  // Sync formData with savedData when it changes (fixes auto-save on tab switch)
   useEffect(() => {
     if (savedData && Object.keys(savedData).length > 0) {
-      setFormData(prev => ({ ...prev, ...savedData }));
+      setFormData(prev => {
+        // Merge savedData with current formData, preserving any unsaved changes
+        const merged = { ...defaultFormData, tier, ...savedData };
+        // Only update if there are actual differences
+        const hasChanges = Object.keys(merged).some(key => prev[key] !== merged[key]);
+        return hasChanges ? merged : prev;
+      });
     }
-  }, []);
+  }, [savedData, tier]);
 
   useEffect(() => {
     localStorage.setItem('autosave_questionnaire-step', currentStep.toString());
   }, [currentStep]);
+
+  // Reload data when tab regains focus (fixes data loss on tab switch)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Reload saved data from localStorage when tab becomes visible again
+        const storageKey = 'autosave_questionnaire-form';
+        try {
+          const saved = localStorage.getItem(storageKey);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            setFormData(prev => ({ ...prev, ...parsed }));
+            console.log('[Auto-save] Restored form data on tab focus');
+          }
+        } catch (e) {
+          console.error('[Auto-save] Error restoring data on focus:', e);
+        }
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   // Live extraction timer
   useEffect(() => {
@@ -472,22 +502,37 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     }
   };
 
-  // Apply extracted data to form
+  // Apply extracted data to form - robust version with immediate save
   const handleApplyExtractedData = () => {
     if (!extractedData) return;
     
     const updatedData = { ...formData };
     let appliedCount = 0;
+    const appliedFields: string[] = [];
     
     for (const [field, value] of Object.entries(extractedData)) {
       if (value && typeof value === 'string' && value.trim()) {
         updatedData[field] = value;
-        saveField(field, value);
+        appliedFields.push(field);
         appliedCount++;
       }
     }
     
+    // Update form state immediately
     setFormData(updatedData);
+    
+    // Save all fields to localStorage in one batch (more reliable)
+    saveAllFields(updatedData);
+    
+    // Also save each field individually for redundancy
+    for (const field of appliedFields) {
+      saveField(field, updatedData[field]);
+    }
+    
+    // Debug log for troubleshooting
+    console.log('[Auto-fill] Applied fields:', appliedFields);
+    console.log('[Auto-fill] Sample values:', appliedFields.slice(0, 3).map(f => `${f}: ${updatedData[f]?.substring(0, 50)}...`));
+    
     setShowAutoFillDrawer(false);
     setExtractedData(null);
     setSelectedDocIds([]);
@@ -495,7 +540,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     
     toast({
       title: "Fields Updated",
-      description: `Applied ${appliedCount} field${appliedCount !== 1 ? 's' : ''} from your documents.`,
+      description: `Applied ${appliedCount} field${appliedCount !== 1 ? 's' : ''} from your documents. Data saved automatically.`,
     });
   };
 
