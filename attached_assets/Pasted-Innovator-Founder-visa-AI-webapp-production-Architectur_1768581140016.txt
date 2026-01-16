@@ -1,0 +1,186 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+15f8c91f
+Active
+
+Jan 16, 2026, 4:25 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-16T16:28:55.877Z] POST /api/activity/session
+[2026-01-16T16:28:55.889Z] GET /api/credits/balance
+4:28:55 PM [express] POST /api/activity/session 200 in 30ms :: {"sessionId":"8f3717b6-b5c2-4a85-aa17…
+4:28:55 PM [express] GET /api/credits/balance 200 in 20ms :: {"planCredits":0,"bonusCredits":0,"tota…
+[2026-01-16T16:28:55.999Z] POST /api/activity/page-view
+4:28:56 PM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"96bd7fad-04ff-4a39-9…
+[2026-01-16T16:28:57.916Z] POST /api/activity/page-view
+[2026-01-16T16:28:57.926Z] GET /api/documents
+4:28:57 PM [express] POST /api/activity/page-view 200 in 22ms :: {"pageViewId":"2d557470-dbac-4fb9-b…
+4:28:57 PM [express] GET /api/documents 200 in 16ms :: [{"id":"31448c0e-dc4b-4117-87a1-1f6aee7f2795"…
+[2026-01-16T16:29:01.385Z] DELETE /api/documents/31448c0e-dc4b-4117-87a1-1f6aee7f2795
+[2026-01-16T16:29:02.344Z] GET /api/documents
+4:29:02 PM [express] GET /api/documents 200 in 17ms :: []
+[S3Storage] Deleted: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768574218309-Business_Plan.pdf
+[Document Delete] Deleted from S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768574218309-Business_Plan.pdf
+[Document Delete] Database record deleted: 31448c0e-dc4b-4117-87a1-1f6aee7f2795
+4:29:02 PM [express] DELETE /api/documents/31448c0e-dc4b-4117-87a1-1f6aee7f2795 200 in 721ms :: {"su…
+[2026-01-16T16:29:26.166Z] POST /api/activity/session
+4:29:26 PM [express] POST /api/activity/session 200 in 209ms :: {"sessionId":"8f3717b6-b5c2-4a85-aa1…
+[2026-01-16T16:29:30.990Z] POST /api/activity/session/end
+4:29:31 PM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+4:29:52 PM [express] POST /api/documents/upload 200 in 2443ms :: {"id":"4c454518-024b-41e3-bcaf-91e4…
+[2026-01-16T16:29:52.320Z] GET /api/documents
+[2026-01-16T16:29:48.172Z] POST /api/activity/session
+4:29:52 PM [express] GET /api/documents 200 in 15ms :: [{"id":"4c454518-024b-41e3-bcaf-91e48abb7a3f"…
+[2026-01-16T16:29:48.175Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+4:29:48 PM [express] GET /api/auth/user 200 in 224ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+4:29:48 PM [express] POST /api/activity/session 200 in 230ms :: {"sessionId":"7d7fc0a9-c333-4294-b74…
+[2026-01-16T16:29:48.632Z] POST /api/activity/page-view
+4:29:48 PM [express] POST /api/activity/page-view 200 in 31ms :: {"pageViewId":"8238ca5c-0329-4c51-a…
+[2026-01-16T16:29:49.595Z] POST /api/documents/upload
+[S3Storage] Uploaded: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768580990383-Business_Plan.pdf
+[Document Upload] Uploaded to S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768580990383-Business_Plan.pdf
+[Document Upload] Document saved: BUSINESS PLAN (storage: s3, url: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768580990383-Business_Plan.pdf)
+[2026-01-16T16:29:52.522Z] GET /api/documents
+4:29:52 PM [express] GET /api/documents 200 in 10ms :: [{"id":"4c454518-024b-41e3-bcaf-91e48abb7a3f"…
+4:29:59 PM [express] GET /api/credits/balance 200 in 15ms :: {"planCredits":0,"bonusCredits":0,"tota…
+4:30:00 PM [express] POST /api/activity/page-view 200 in 239ms :: {"pageViewId":"518e3c57-4e70-4054-…
+[2026-01-16T16:29:59.832Z] GET /api/credits/balance
+[2026-01-16T16:29:59.833Z] POST /api/activity/page-view
+  {
+    name: 'BUSINESS PLAN',
+]
+    category: 'business_plan',
+    fileUrl: 's3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768580990383-Business_Plan.pdf'
+[Document Extract] S3 available: true
+  }
+[Document Extract] Processing BUSINESS PLAN - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768580990383-Business_Plan.pdf
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768580990383-Business_Plan.pdf
+[2026-01-16T16:30:09.214Z] POST /api/documents/extract
+[Document Extract] Starting extraction for user: 6783e1ea-78f5-49c9-b67d-97dce58d193c documents: [ '4c454518-024b-41e3-bcaf-91e48abb7a3f' ]
+[Document Extract] Found documents: [
+[Document Extract] PDF Name: BUSINESS PLAN Buffer size: 474911 bytes
+[PDF Extract] Starting extraction with unpdf, buffer size: 474911
+[PDF Extract] Document loaded, pages: 80
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768580990383-Business_Plan.pdf Size: 474911
+[Document Extract] === PDF PROCESSING START ===
+[Document Extract] ScannedLikely: false
+  {
+[Document Extract] PDF text extracted successfully, chars: 188281
+[Document Extract] First 1000 chars: UK Innovator Founder Visa Assistant UK Innovation Visa Business Plan Industry: LegalTech / Immigration Technology / AI-powered SaaS Generated: 29 November 2025 Tier: Ultimate BUSINESS PLAN: UK Innovator Founder Visa Assistant Industry: LegalTech / Immigration Technology / AI-powered SaaS Tier: ULTIMATE Generated: 29/11/2025 --- 1. EXECUTIVE SUMMARY UK Innovator Founder Visa Assistant (innovatorfoundervisaassistant.co.uk) is a revolutionary LegalTech platform poised to disrupt the UK immigration landscape. Launching in November 2025, our AI-powered SaaS solution empowers global entrepreneurs to navigate the complex UK Innovator Founder Visa process with unprecedented efficiency and affordability. With a comprehensive suite of 109 professional-grade tools, meticulously organized across eight specialized categories, we offer a complete self-service solution, dramatically reducing the reliance on expensive immigration lawyers. This platform is not merely a document repository or a generic 
+[Document Extract] === PDF PROCESSING END ===
+[Document Extract] Files with content: 1 Total docs: 1
+[Document Extract] Using OpenAI GPT-4o for extraction...
+[Document Extract] Text docs: 1 Image docs: 0 File docs: 0
+[Document Extract] Document details: [
+[PDF Extract] Extraction complete, charCount: 188281
+[Document Extract] PDF Pages: 80
+[Document Extract] CharCount: 188281
+    name: 'BUSINESS PLAN',
+    isText: true,
+    mimeType: 'application/pdf',
+    contentLen: 15000
+  }
+]
+[Document Extract] Text content preview: 
+--- DOCUMENT: BUSINESS PLAN (business_plan) ---
+UK Innovator Founder Visa Assistant UK Innovation Visa Business Plan Industry: LegalTech / Immigration Technology / AI-powered SaaS Generated: 29 November 2025 Tier: Ultimate BUSINESS PLAN: UK Innovator Founder Visa Assistant Industry: LegalTech / Imm
+[Document Extract] AI Response length: 1851
+[Document Extract] OpenAI failed: fieldData.value.includes is not a function
+[Document Extract] AI extraction error: TypeError: fieldData.value.includes is not a function
+    at file:///app/dist/index.js:17186:57
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[Document Extract] Extracted fields: [ 'educationBackground', 'professionalCertifications' ]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17302:28 {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  line: '1449',
+  dataType: undefined,
+  routine: 'parserOpenTable'
+}
+  constraint: undefined,
+4:30:18 PM [express] POST /api/documents/extract 200 in 9293ms :: {"extractedData":{"educationBackgr…
+[2026-01-16T16:30:18.664Z] POST /api/activity/session
+4:30:18 PM [express] POST /api/activity/session 200 in 200ms :: {"sessionId":"7d7fc0a9-c333-4294-b74…
+  file: 'parse_relation.c',
+[2026-01-16T16:30:48.806Z] POST /api/activity/session
+4:30:49 PM [express] POST /api/activity/session 200 in 221ms :: {"sessionId":"7d7fc0a9-c333-4294-b74…
+[2026-01-16T16:30:54.873Z] POST /api/activity/session/end
+4:30:54 PM [express] POST /api/activity/session/end 200 in 21ms :: {"success":true}
+[2026-01-16T16:31:22.285Z] GET /api/auth/user
+[2026-01-16T16:31:22.290Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+4:31:22 PM [express] GET /api/auth/user 200 in 228ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+4:31:22 PM [express] POST /api/activity/session 200 in 229ms :: {"sessionId":"05cd53de-cb5a-4f96-967…
+[2026-01-16T16:31:22.709Z] POST /api/activity/page-view
+4:31:22 PM [express] POST /api/activity/page-view 200 in 19ms :: {"pageViewId":"e1e64951-437d-4b27-a…
+4:31:34 PM [express] POST /api/activity/session/end 200 in 233ms :: {"success":true}
+[2026-01-16T16:31:34.095Z] POST /api/activity/session/end
+[2026-01-16T16:31:54.476Z] POST /api/activity/session
+[2026-01-16T16:31:54.478Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+4:31:54 PM [express] GET /api/auth/user 200 in 223ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+4:31:54 PM [express] POST /api/activity/session 200 in 242ms :: {"sessionId":"1a59a447-70ef-458f-961…
+[2026-01-16T16:31:55.000Z] POST /api/activity/page-view
+4:31:55 PM [express] POST /api/activity/page-view 200 in 25ms :: {"pageViewId":"5aabd92b-bc4f-4c58-9…
+[2026-01-16T16:31:55.637Z] POST /api/activity/session/end
+4:31:55 PM [express] POST /api/activity/session/end 200 in 20ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway

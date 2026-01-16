@@ -7088,9 +7088,15 @@ Return ONLY valid JSON:
             if (parsed.extractedFields) {
               for (const [field, data] of Object.entries(parsed.extractedFields)) {
                 const fieldData = data as any;
+                // Convert value to string safely (handles arrays, objects, primitives)
+                const valueStr = Array.isArray(fieldData.value) 
+                  ? fieldData.value.join(', ')
+                  : typeof fieldData.value === 'object' && fieldData.value !== null
+                    ? JSON.stringify(fieldData.value)
+                    : String(fieldData.value || '');
                 // Skip placeholder values
-                if (fieldData.value && !fieldData.value.includes('[') && !fieldData.value.includes('placeholder')) {
-                  extractedData[field] = fieldData.value;
+                if (valueStr && !valueStr.includes('[') && !valueStr.toLowerCase().includes('placeholder')) {
+                  extractedData[field] = valueStr;
                   confidence[field] = fieldData.confidence || 75;
                 }
               }
