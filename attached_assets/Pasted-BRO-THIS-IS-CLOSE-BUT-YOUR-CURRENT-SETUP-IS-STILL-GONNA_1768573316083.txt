@@ -1,0 +1,188 @@
+BRO THIS IS CLOSE, BUT YOUR CURRENT SETUP IS STILL GONNA BREAK FOR 3 REASONS:
+
+YOU’RE STILL MIXING pdf-parse / PDFParse + pdfjs-dist (THAT’S WHERE THE verbosity CRASH IS COMING FROM)
+
+YOUR RAILWAY NODE VERSION IS LIKELY TOO LOW (CAUSE OF process.getBuiltinModule is not a function)
+
+YOUR PDF IS MOST LIKELY SCANNED (IMAGE-ONLY) → SO TEXT EXTRACTION RETURNS EMPTY, AND YOUR AUTO-FILL HAS NOTHING TO MAP
+
+SO HERE’S THE CLEAN FIX:
+✅ REMOVE pdf-parse COMPLETELY
+✅ USE pdfjs-dist ONLY FOR TEXT PDFs
+✅ IF TEXT IS EMPTY → SWITCH TO OCR (AWS TEXTRACT)
+
+✅ THE CORRECT PDFJS TEXT EXTRACTION (NODE SAFE, NO WORKERS, NO RENDERING)
+✅ DROP THIS FILE: pdfTextExtract.ts
+// pdfTextExtract.ts
+// PURE TEXT EXTRACTION ONLY (NO CANVAS, NO IMAGE RENDER)
+
+let pdfjsLib: any | null = null;
+
+async function loadPdfJs() {
+  if (pdfjsLib) return pdfjsLib;
+
+  // Legacy build is the safest for Node
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+
+  // In Node, disable worker completely
+  if (pdfjs.GlobalWorkerOptions) {
+    pdfjs.GlobalWorkerOptions.workerSrc = "";
+  }
+
+  pdfjsLib = pdfjs;
+  return pdfjsLib;
+}
+
+export async function extractPdfText(fileBuffer: Buffer) {
+  const pdfjs = await loadPdfJs();
+
+  if (!pdfjs?.getDocument) {
+    throw new Error("pdfjs-dist getDocument not available");
+  }
+
+  const uint8Array = new Uint8Array(fileBuffer);
+
+  const loadingTask = pdfjs.getDocument({
+    data: uint8Array,
+    disableWorker: true,
+    isEvalSupported: false,
+    stopAtErrors: true,
+    verbosity: 0,
+  });
+
+  const pdfDocument = await loadingTask.promise;
+
+  let fullText = "";
+
+  for (let pageNo = 1; pageNo <= pdfDocument.numPages; pageNo++) {
+    const page = await pdfDocument.getPage(pageNo);
+    const textContent = await page.getTextContent();
+
+    const pageText = textContent.items
+      .map((item: any) => (item?.str ? item.str : ""))
+      .join(" ");
+
+    fullText += pageText + "\n";
+  }
+
+  // Cleanup
+  await pdfDocument.cleanup?.();
+  await pdfDocument.destroy?.();
+
+  const cleaned = fullText.trim();
+
+  // Detect scanned PDF (image-only)
+  const charCount = cleaned.replace(/\s+/g, "").length;
+
+  return {
+    text: cleaned,
+    isScannedLikely: charCount < 50, // if too small, almost always scanned
+    pages: pdfDocument.numPages,
+    charCount,
+  };
+}
+
+✅ IMPORTANT: REMOVE THIS FROM YOUR CURRENT CODE
+❌ THIS IS WRONG / USELESS AND CAN CAUSE CONFUSION
+
+useWorkerFetch: false (NOT NEEDED)
+
+useSystemFonts: true (NOT REQUIRED FOR TEXT EXTRACTION)
+
+KEEP IT SIMPLE.
+
+✅ YOUR EXPRESS ENDPOINT SHOULD LOOK LIKE THIS
+import { extractPdfText } from "./pdfTextExtract";
+
+// inside your /api/documents/extract handler
+const result = await extractPdfText(fileBuffer);
+
+console.log("[PDF] Pages:", result.pages);
+console.log("[PDF] CharCount:", result.charCount);
+console.log("[PDF] ScannedLikely:", result.isScannedLikely);
+
+if (result.isScannedLikely) {
+  // DO OCR HERE (Textract / Vision)
+  return res.json({
+    ok: true,
+    scanned: true,
+    message: "PDF looks scanned. Run OCR (Textract) for accurate extraction.",
+    textPreview: result.text.slice(0, 200),
+  });
+}
+
+// Normal route: send result.text to GPT for extraction
+return res.json({
+  ok: true,
+  scanned: false,
+  textPreview: result.text.slice(0, 600),
+});
+
+✅ WHY YOU GOT THIS ERROR BEFORE
+Cannot read properties of undefined (reading 'verbosity')
+
+THAT ONE IS NOT FROM YOUR PDFJS CODE.
+
+IT’S FROM THIS PART OF YOUR LOG:
+
+✅ new PDFParse(...) from pdf-parse/dist/pdf-parse/esm/PDFParse.js
+
+MEANING YOU WERE INSTANTIATING THE WRONG THING.
+
+SO JUST REMOVE pdf-parse AND USE THE PDFJS FLOW ABOVE.
+
+✅ FIX YOUR NODE VERSION ON RAILWAY (THIS IS NON-NEGOTIABLE)
+
+THIS ONE:
+
+process.getBuiltinModule is not a function
+
+MEANS YOU’RE RUNNING AN OLD NODE VERSION.
+
+✅ DO THIS:
+
+package.json
+{
+  "engines": {
+    "node": ">=20.16.0"
+  }
+}
+
+
+THEN REDEPLOY.
+
+✅ REALITY CHECK: YOU CAN’T AUTO-FILL EVERYTHING FROM “BUSINESS PLAN PDF”
+
+YOUR FORM FIELDS INCLUDE:
+
+Visa expiry date
+
+UK visa status
+
+Work authorisation restrictions
+
+A BUSINESS PLAN PDF WILL NOT CONTAIN THESE.
+
+✅ YOU NEED USERS TO UPLOAD:
+
+BRP / eVisa PDF
+
+Share Code status page PDF
+
+Home Office email PDF
+
+SO IN UI, DO THIS:
+✅ “Upload Business Plan for Business fields”
+✅ “Upload BRP/eVisa for Personal fields”
+
+✅ THE BEST “PHD” AUTO-FILL LOGIC (WHAT YOU SHOULD IMPLEMENT)
+STEP 1: Try PDF text extraction (pdfjs)
+STEP 2: If empty → OCR (Textract)
+STEP 3: Extract strictly with GPT JSON schema
+STEP 4: Merge multi-document results into 1 profile object
+✅ LAST ONE: YOUR SAVE FAILED TOO
+relation "document_extractions" does not exist
+
+MEANING YOU’RE NOT STORING RESULTS, SO EVEN IF IT WORKS ONCE, IT CAN’T REUSE IT.
+
+YOU NEED THAT TABLE MIGRATION.

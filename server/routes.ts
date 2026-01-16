@@ -6764,49 +6764,8 @@ EXAMPLES OF GOOD RESPONSES:
         hasContent: boolean;
       }> = [];
       
-      // Polyfill DOMMatrix for pdf-parse (Node.js doesn't have it)
-      if (typeof (global as any).DOMMatrix === 'undefined') {
-        (global as any).DOMMatrix = class DOMMatrix {
-          a = 1; b = 0; c = 0; d = 1; e = 0; f = 0;
-          m11 = 1; m12 = 0; m13 = 0; m14 = 0;
-          m21 = 0; m22 = 1; m23 = 0; m24 = 0;
-          m31 = 0; m32 = 0; m33 = 1; m34 = 0;
-          m41 = 0; m42 = 0; m43 = 0; m44 = 1;
-          is2D = true; isIdentity = true;
-          constructor() {}
-          multiply() { return this; }
-          translate() { return this; }
-          scale() { return this; }
-          rotate() { return this; }
-          inverse() { return this; }
-          transformPoint(p: any) { return p; }
-        };
-      }
-      
-      // Import pdfjs-dist legacy build for Node.js (no worker required)
-      let pdfjsLib: any = null;
-      try {
-        // Use legacy build which works in Node.js without workers
-        const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-        pdfjsLib = pdfjs;
-        // Disable worker for Node.js environment
-        if (pdfjsLib.GlobalWorkerOptions) {
-          pdfjsLib.GlobalWorkerOptions.workerSrc = '';
-        }
-        console.log("[Document Extract] pdfjs-dist legacy build loaded successfully");
-      } catch (legacyError: any) {
-        console.log("[Document Extract] Legacy build failed, trying main:", legacyError?.message);
-        try {
-          const pdfjs = await import('pdfjs-dist');
-          pdfjsLib = pdfjs.default || pdfjs;
-          if (pdfjsLib.GlobalWorkerOptions) {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = '';
-          }
-          console.log("[Document Extract] pdfjs-dist main build loaded");
-        } catch (mainError: any) {
-          console.error("[Document Extract] All pdfjs-dist imports failed:", mainError?.message);
-        }
-      }
+      // Import clean PDF text extraction service
+      const { extractPdfText } = await import('./services/pdfTextExtract');
       
       for (const doc of documents) {
         let fileFound = false;
@@ -6870,82 +6829,52 @@ EXAMPLES OF GOOD RESPONSES:
           const isImage = doc.fileType.startsWith('image/');
           
           if (isPdf) {
-            // Extract text from PDF using pdf-parse
+            // Extract text from PDF using clean pdfjs-dist service
             console.log("[Document Extract] === PDF PROCESSING START ===");
             console.log("[Document Extract] PDF Name:", doc.name, "Buffer size:", fileBuffer.length, "bytes");
-            console.log("[Document Extract] pdfjs-dist available:", !!pdfjsLib);
-            let pdfTextExtracted = false;
-            let extractedText = '';
             
-            // Use pdfjs-dist for text extraction
-            if (pdfjsLib && pdfjsLib.getDocument) {
-              try {
-                // Convert buffer to Uint8Array for pdfjs
-                const uint8Array = new Uint8Array(fileBuffer);
-                
-                // Load the PDF document (disable worker for Node.js)
-                const loadingTask = pdfjsLib.getDocument({ 
-                  data: uint8Array,
-                  useWorkerFetch: false,
-                  isEvalSupported: false,
-                  useSystemFonts: true
-                });
-                const pdfDocument = await loadingTask.promise;
-                console.log("[Document Extract] PDF loaded, pages:", pdfDocument.numPages);
-                
-                // Extract text from all pages
-                const textParts: string[] = [];
-                for (let i = 1; i <= pdfDocument.numPages; i++) {
-                  const page = await pdfDocument.getPage(i);
-                  const textContent = await page.getTextContent();
-                  const pageText = textContent.items
-                    .map((item: any) => item.str)
-                    .join(' ');
-                  textParts.push(pageText);
-                }
-                
-                extractedText = textParts.join('\n').trim();
-                console.log("[Document Extract] pdfjs-dist SUCCESS! Text length:", extractedText.length);
-                if (extractedText.length > 0) {
-                  console.log("[Document Extract] First 1000 chars:", extractedText.substring(0, 1000));
-                }
-              } catch (pdfError: any) {
-                console.error("[Document Extract] pdfjs-dist THREW ERROR:", pdfError?.message || pdfError);
-                console.error("[Document Extract] Error stack:", pdfError?.stack?.substring(0, 500));
-              }
-            } else {
-              console.error("[Document Extract] pdfjs-dist not available!");
-            }
+            try {
+              const pdfResult = await extractPdfText(fileBuffer);
+              console.log("[Document Extract] PDF Pages:", pdfResult.pages);
+              console.log("[Document Extract] CharCount:", pdfResult.charCount);
+              console.log("[Document Extract] ScannedLikely:", pdfResult.isScannedLikely);
               
-            // Accept ANY text content - even just 1 character
-            if (extractedText.length > 0) {
+              if (!pdfResult.isScannedLikely && pdfResult.text.length > 0) {
+                // Text-based PDF - use extracted text
+                documentContents.push({
+                  id: doc.id,
+                  name: doc.name,
+                  category: doc.category,
+                  mimeType: doc.fileType,
+                  content: pdfResult.text.substring(0, 15000),
+                  isText: true,
+                });
+                console.log("[Document Extract] PDF text extracted successfully, chars:", pdfResult.charCount);
+                console.log("[Document Extract] First 1000 chars:", pdfResult.text.substring(0, 1000));
+              } else {
+                // Scanned PDF - needs OCR or Vision API
+                console.log("[Document Extract] PDF appears to be scanned (image-only)");
+                // Add a marker so we know this PDF couldn't be processed
+                documentContents.push({
+                  id: doc.id,
+                  name: doc.name,
+                  category: doc.category,
+                  mimeType: doc.fileType,
+                  content: `[SCANNED PDF - NO TEXT EXTRACTED] Document "${doc.name}" appears to be a scanned image. Please re-upload as a text-based PDF or image file for accurate extraction.`,
+                  isText: true,
+                });
+                console.log("[Document Extract] Added scanned PDF marker to documentContents");
+              }
+            } catch (pdfError: any) {
+              console.error("[Document Extract] PDF extraction error:", pdfError?.message || pdfError);
               documentContents.push({
                 id: doc.id,
                 name: doc.name,
                 category: doc.category,
                 mimeType: doc.fileType,
-                content: extractedText.substring(0, 15000),
+                content: `[PDF ERROR] Failed to extract text from "${doc.name}": ${pdfError?.message || 'Unknown error'}`,
                 isText: true,
               });
-              console.log("[Document Extract] PDF added to documentContents, total docs now:", documentContents.length);
-              pdfTextExtracted = true;
-            } else {
-              console.log("[Document Extract] WARNING: No text extracted from PDF!");
-            }
-            
-            // If PDF has no text (scanned/image-based), add error message as content
-            if (!pdfTextExtracted) {
-              console.log("[Document Extract] PDF has no extractable text - this is a SCANNED PDF");
-              // Add a marker so we know this PDF couldn't be processed
-              documentContents.push({
-                id: doc.id,
-                name: doc.name,
-                category: doc.category,
-                mimeType: doc.fileType,
-                content: `[SCANNED PDF - NO TEXT EXTRACTED] Document "${doc.name}" appears to be a scanned image. Please re-upload as a text-based PDF or image file for accurate extraction.`,
-                isText: true,
-              });
-              console.log("[Document Extract] Added scanned PDF marker to documentContents");
             }
             console.log("[Document Extract] === PDF PROCESSING END ===");
           } else if (isImage) {
