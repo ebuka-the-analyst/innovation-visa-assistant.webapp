@@ -1,0 +1,182 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+
+
+
+
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+eaf6d78d
+Active
+
+Jan 16, 2026, 11:21 AM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+12:09:33 PM [express] DELETE /api/documents/fa0d1596-3b43-4331-b591-086b8ed8b49d 200 in 643ms :: {"su…
+[2026-01-16T12:09:33.168Z] DELETE /api/documents/fa0d1596-3b43-4331-b591-086b8ed8b49d
+[S3Storage] Deleted: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768565219008-Benedict.Ebuka.Umeh.pdf
+[2026-01-16T12:09:34.043Z] GET /api/documents
+12:09:34 PM [express] GET /api/documents 200 in 14ms :: []
+[2026-01-16T12:09:47.066Z] GET /api/credits/balance
+[2026-01-16T12:09:47.072Z] POST /api/activity/page-view
+12:09:47 PM [express] GET /api/credits/balance 200 in 208ms :: {"planCredits":0,"bonusCredits":0,"tot…
+12:09:47 PM [express] POST /api/activity/page-view 200 in 203ms :: {"pageViewId":"96c21e5f-4f56-4be6-…
+[2026-01-16T12:09:55.654Z] GET /api/auth/user
+[2026-01-16T12:09:55.655Z] POST /api/activity/page-view
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+12:09:55 PM [express] GET /api/auth/user 200 in 14ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+12:09:55 PM [express] POST /api/activity/page-view 200 in 19ms :: {"pageViewId":"dea14971-efbf-49b5-8…
+[2026-01-16T12:10:00.412Z] POST /api/activity/session
+12:10:00 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"5bed0274-ffb5-411e-a864…
+[2026-01-16T12:10:18.234Z] POST /api/documents/upload
+[S3Storage] Uploaded: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768565418850-Benedict.Ebuka.Umeh.pdf
+[Document Upload] Uploaded to S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768565418850-Benedict.Ebuka.Umeh.pdf
+[Document Upload] Document saved: CV (storage: s3, url: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768565418850-Benedict.Ebuka.Umeh.pdf)
+12:10:20 PM [express] POST /api/documents/upload 200 in 2272ms :: {"id":"caea3c69-7a85-4760-b531-2ece…
+[2026-01-16T12:10:20.692Z] GET /api/documents
+12:10:20 PM [express] GET /api/documents 200 in 15ms :: [{"id":"caea3c69-7a85-4760-b531-2eceae134f12"…
+[2026-01-16T12:10:20.943Z] GET /api/documents
+12:10:20 PM [express] GET /api/documents 200 in 14ms :: [{"id":"caea3c69-7a85-4760-b531-2eceae134f12"…
+[2026-01-16T12:10:27.059Z] POST /api/activity/page-view
+12:10:27 PM [express] POST /api/activity/page-view 200 in 23ms :: {"pageViewId":"39eaa494-e0e8-4f58-a…
+[2026-01-16T12:10:30.255Z] POST /api/activity/session
+12:10:30 PM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"5bed0274-ffb5-411e-a864…
+    fileUrl: 's3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768565418850-Benedict.Ebuka.Umeh.pdf'
+[2026-01-16T12:10:34.841Z] POST /api/documents/extract
+  }
+[Document Extract] Starting extraction for user: 6783e1ea-78f5-49c9-b67d-97dce58d193c documents: [ 'caea3c69-7a85-4760-b531-2eceae134f12' ]
+]
+[Document Extract] Found documents: [
+[Document Extract] pdf-parse import type: undefined Keys: [
+  'FormatError',
+  {
+[Document Extract] S3 available: true
+  'LineDirection',
+  'AbortException',
+  'InvalidPDFException',
+    name: 'CV',
+  'LineStore',
+  'Line',
+    category: 'education',
+  'PDFParse',
+  'PasswordException',
+  'Point',
+  'Rectangle',
+  'ResponseException',
+  'Shape',
+  'Table',
+  'UnknownErrorException',
+  'VerbosityLevel',
+  'getException'
+]
+[Document Extract] Processing CV - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768565418850-Benedict.Ebuka.Umeh.pdf
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768565418850-Benedict.Ebuka.Umeh.pdf
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768565418850-Benedict.Ebuka.Umeh.pdf Size: 170993
+[Document Extract] === PDF PROCESSING START ===
+[Document Extract] PDF Name: CV Buffer size: 170993 bytes
+[Document Extract] pdfParse available: false
+[Document Extract] pdf-parse is not available! Type: undefined
+[Document Extract] Fallback text extraction found: 77072 chars
+[Document Extract] PDF added to documentContents, total docs now: 1
+[Document Extract] === PDF PROCESSING END ===
+[Document Extract] Files with content: 1 Total docs: 1
+[Document Extract] Using OpenAI GPT-4o for extraction...
+[Document Extract] Text docs: 1 Image docs: 0 File docs: 0
+[Document Extract] Document details: [
+  {
+    name: 'CV',
+    isText: true,
+    mimeType: 'application/pdf',
+    contentLen: 15000
+  }
+]
+[Document Extract] Text content preview: 
+--- DOCUMENT: CV (education) ---
+en ֏N/��eŎ�g�_>
+:��_��z�K���։	�p"=/�qz�=�/���i��qͣ�MU��$�}p�xn+PD�d��?��4KN�a��"�I�D⧥���Ń�uI�����&�y�J*�����7}�dq��0Pg뫄��C��t�Z��@���m@X.���#��@}\�?��dN
+��k���N��_W����F�*
+ю4Ԝ��\����	��`�����5���bc$�Ɩ�>Faύ'Ax��и��"�_�4���!�
+ B�
+[Document Extract] AI Response length: 14
+[Document Extract] Using intelligent placeholders based on document metadata
+[Document Extract] Extracted fields: [
+  'founderWorkHistory',
+  'totalProfessionalExperience',
+  'technicalSkillsProficiency',
+  'educationBackground',
+  'professionalCertifications'
+]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+  schema: undefined,
+    at async file:///app/dist/index.js:17314:28 {
+  length: 119,
+  table: undefined,
+  severity: 'ERROR',
+  column: undefined,
+  code: '42P01',
+  detail: undefined,
+  dataType: undefined,
+  hint: undefined,
+  constraint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  file: 'parse_relation.c',
+  internalQuery: undefined,
+  line: '1449',
+  where: undefined,
+  routine: 'parserOpenTable'
+}
+12:10:38 PM [express] POST /api/documents/extract 200 in 3179ms :: {"extractedData":{"founderWorkHist…
+[2026-01-16T12:10:48.367Z] POST /api/activity/session/end
+12:10:48 PM [express] POST /api/activity/session/end 200 in 194ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
+500MB

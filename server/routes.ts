@@ -6783,28 +6783,37 @@ EXAMPLES OF GOOD RESPONSES:
         };
       }
       
-      // Import pdf-parse for PDF text extraction (CommonJS module)
-      // Use createRequire for proper CommonJS interop in ESM
+      // Import pdf-parse for PDF text extraction
       let pdfParse: any = null;
       try {
-        const { createRequire } = await import('module');
-        const require = createRequire(import.meta.url);
-        pdfParse = require('pdf-parse');
-        console.log("[Document Extract] pdf-parse loaded via createRequire, type:", typeof pdfParse);
-      } catch (requireError: any) {
-        console.log("[Document Extract] createRequire failed:", requireError?.message);
-        // Fallback to dynamic import
-        try {
-          const pdfParseModule = await import('pdf-parse');
-          console.log("[Document Extract] Dynamic import result keys:", Object.keys(pdfParseModule || {}));
-          pdfParse = pdfParseModule.default || pdfParseModule;
-          if (typeof pdfParse !== 'function' && pdfParse?.default) {
-            pdfParse = pdfParse.default;
+        const pdfParseModule = await import('pdf-parse');
+        const moduleKeys = Object.keys(pdfParseModule || {});
+        console.log("[Document Extract] pdf-parse module keys:", moduleKeys);
+        
+        // Try different access patterns - Railway exports PDFParse (capital P)
+        if (typeof pdfParseModule.PDFParse === 'function') {
+          pdfParse = pdfParseModule.PDFParse;
+          console.log("[Document Extract] Using PDFParse (capital P)");
+        } else if (typeof pdfParseModule.default === 'function') {
+          pdfParse = pdfParseModule.default;
+          console.log("[Document Extract] Using default export");
+        } else if (typeof pdfParseModule === 'function') {
+          pdfParse = pdfParseModule;
+          console.log("[Document Extract] Using module directly");
+        } else {
+          // Try createRequire as last resort
+          try {
+            const { createRequire } = await import('module');
+            const require = createRequire(import.meta.url);
+            pdfParse = require('pdf-parse');
+            console.log("[Document Extract] Using createRequire, type:", typeof pdfParse);
+          } catch (reqErr) {
+            console.log("[Document Extract] createRequire also failed");
           }
-          console.log("[Document Extract] pdf-parse via dynamic import, type:", typeof pdfParse);
-        } catch (importError: any) {
-          console.error("[Document Extract] All pdf-parse imports failed:", importError?.message);
         }
+        console.log("[Document Extract] Final pdfParse type:", typeof pdfParse);
+      } catch (importError: any) {
+        console.error("[Document Extract] pdf-parse import failed:", importError?.message);
       }
       
       for (const doc of documents) {
@@ -6879,14 +6888,8 @@ EXAMPLES OF GOOD RESPONSES:
             // Check if pdf-parse is available
             if (typeof pdfParse !== 'function') {
               console.error("[Document Extract] pdf-parse is not available! Type:", typeof pdfParse);
-              // Fall back to basic text extraction attempt
-              const bufferText = fileBuffer.toString('utf8');
-              // Look for readable text patterns in PDF
-              const textMatches = bufferText.match(/\(([^)]+)\)/g);
-              if (textMatches && textMatches.length > 10) {
-                extractedText = textMatches.map(m => m.slice(1, -1)).join(' ').trim();
-                console.log("[Document Extract] Fallback text extraction found:", extractedText.length, "chars");
-              }
+              // No fallback - binary data extraction produces garbage
+              // User will need to upload as image for Vision API processing
             }
             
             // Try pdf-parse if available
