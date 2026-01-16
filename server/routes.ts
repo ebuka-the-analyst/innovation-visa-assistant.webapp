@@ -6846,7 +6846,7 @@ EXAMPLES OF GOOD RESPONSES:
                   name: doc.name,
                   category: doc.category,
                   mimeType: doc.fileType,
-                  content: pdfResult.text.substring(0, 60000),
+                  content: pdfResult.text.substring(0, 200000),
                   isText: true,
                 });
                 console.log("[Document Extract] PDF text extracted successfully, chars:", pdfResult.charCount);
@@ -7108,7 +7108,7 @@ Extract actual data only. Return ONLY valid JSON:
             const response = await openai.chat.completions.create({
               model: "gpt-4o",
               messages,
-              max_tokens: 8192
+              max_tokens: 16384
             });
             
             const aiResponse = response.choices[0]?.message?.content || '';
