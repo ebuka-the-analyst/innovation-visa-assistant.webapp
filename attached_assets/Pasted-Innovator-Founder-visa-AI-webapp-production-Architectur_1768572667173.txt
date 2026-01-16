@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+4009e710
+Removed
+
+Jan 16, 2026, 1:52 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+1:58:11 PM [express] POST /api/activity/session 200 in 18ms :: {"sessionId":"fcf40e61-ea4f-4754-9a10…
+]
+[Document Extract] S3 available: true
+Warning: Cannot access the `require` function: "TypeError: process.getBuiltinModule is not a function".
+Warning: Cannot polyfill `ImageData`, rendering may be broken.
+Warning: Cannot polyfill `Path2D`, rendering may be broken.
+[2026-01-16T13:58:19.360Z] POST /api/documents/extract
+[Document Extract] pdf-parse module keys: [
+[Document Extract] Starting extraction for user: 6783e1ea-78f5-49c9-b67d-97dce58d193c documents: [ 'adc4e462-761f-41c9-8311-4a305156c83b' ]
+  'AbortException',
+  'FormatError',
+[Document Extract] Found documents: [
+  'InvalidPDFException',
+  'Line',
+  'Rectangle',
+  {
+  'LineDirection',
+  'ResponseException',
+  'LineStore',
+  'Shape',
+  'PDFParse',
+    name: 'buisness plan',
+  'PasswordException',
+  'Point',
+    category: 'business_plan',
+    fileUrl: 's3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768571885791-Benedict.Ebuka.Umeh.pdf'
+  }
+  'Table',
+  'UnknownErrorException',
+  'VerbosityLevel',
+  'getException'
+]
+[Document Extract] Using PDFParse (capital P)
+[Document Extract] Final pdfParse type: function
+[Document Extract] Processing buisness plan - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768571885791-Benedict.Ebuka.Umeh.pdf
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768571885791-Benedict.Ebuka.Umeh.pdf
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768571885791-Benedict.Ebuka.Umeh.pdf Size: 170993
+[Document Extract] === PDF PROCESSING START ===
+[Document Extract] PDF Name: buisness plan Buffer size: 170993 bytes
+[Document Extract] pdfParse available: true
+[Document Extract] PDFParse prototype methods: [
+  'constructor',     'destroy',
+  'getInfo',         'getPageLinks',
+  'getText',         'load',
+  'shouldParse',     'getPageText',
+  'getHyperlinks',   'getImage',
+  'convertToRGBA',   'resolveEmbeddedImage',
+  'getScreenshot',   'getTable',
+  'getPathGeometry', 'getPageTables',
+  'fillPageTables'
+]
+[Document Extract] WARNING: No text extracted from PDF!
+[Document Extract] PDF has no extractable text - this is a SCANNED PDF
+[Document Extract] Added scanned PDF marker to documentContents
+[Document Extract] === PDF PROCESSING END ===
+[Document Extract] pdf-parse THREW ERROR: Cannot read properties of undefined (reading 'verbosity')
+[Document Extract] Error stack: TypeError: Cannot read properties of undefined (reading 'verbosity')
+    at new PDFParse (file:///app/node_modules/pdf-parse/dist/pdf-parse/esm/PDFParse.js:25:21)
+]
+[Document Extract] Text content preview: 
+--- DOCUMENT: buisness plan (business_plan) ---
+[SCANNED PDF - NO TEXT EXTRACTED] Document "buisness plan" appears to be a scanned image. Please re-upload as a text-based PDF or image file for accurate extraction.
+--- END buisness plan ---
+    at file:///app/dist/index.js:16986:36
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[Document Extract] Files with content: 1 Total docs: 1
+[Document Extract] Using OpenAI GPT-4o for extraction...
+[Document Extract] Text docs: 1 Image docs: 0 File docs: 0
+[Document Extract] Document details: [
+  {
+    name: 'buisness plan',
+    isText: true,
+    mimeType: 'application/pdf',
+    contentLen: 165
+  }
+1:58:22 PM [express] POST /api/documents/extract 200 in 2864ms :: {"extractedData":{"businessName":"…
+[Document Extract] AI Response length: 14
+[Document Extract] Using intelligent placeholders based on document metadata
+[Document Extract] Extracted fields: [ 'businessName', 'industry', 'problem', 'uniqueness' ]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17340:28 {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+[2026-01-16T13:58:28.371Z] POST /api/activity/session/end
+1:58:28 PM [express] POST /api/activity/session/end 200 in 220ms :: {"success":true}
+[2026-01-16T13:58:42.333Z] GET /api/auth/user
+[2026-01-16T13:58:42.335Z] POST /api/activity/session
+1:58:42 PM [express] GET /api/auth/user 200 in 227ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:58:42 PM [express] POST /api/activity/session 200 in 236ms :: {"sessionId":"3509d850-a292-4908-87e…
+[2026-01-16T13:58:42.768Z] POST /api/activity/page-view
+1:58:42 PM [express] POST /api/activity/page-view 200 in 21ms :: {"pageViewId":"c1f35524-01c8-44b5-9…
+[2026-01-16T13:58:56.259Z] POST /api/activity/session/end
+1:58:56 PM [express] POST /api/activity/session/end 200 in 234ms :: {"success":true}
+sending signal SIGTERM to container
+Stopping Container
+You reached the end of the range
+Jan 16, 2026, 2:07 PM
+
+
+innovation-visa-assistant.webapp | Railway
