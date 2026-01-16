@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+375f90ac
+Active
+
+Jan 16, 2026, 6:37 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+6:45:43 PM [express] POST /api/activity/session 200 in 219ms :: {"sessionId":"7c396489-6598-49c7-888…
+[Document Extract] Chunk 4 extracted 7 fields
+[Document Extract] Processing chunk 5/5
+[Document Extract] Chunk 5 extracted 17 fields
+[Document Extract] Merging 4 chunk results
+[Document Extract] Merged extraction complete, total fields: 44
+[Document Extract] Post-processing complete
+[Document Extract] Extracted fields: [
+  'competitors',
+  'businessName',
+  'industry',
+  'problem',
+  'competitiveDifferentiation',
+  'uniqueness',
+  'customerInterviews',
+  'ukJobCreation',
+  'technology',
+  'lettersOfIntent',
+  'marketSize',
+  'willingnessToPay',
+  'specificRegions',
+  'targetEndorser',
+  'endorsementStatus',
+  'internationalPlan',
+  'endorsementConditions',
+  'year1Revenue',
+  'contactPointsStrategy',
+  'year3Revenue',
+  'regulatoryRequirements',
+  'breakEvenDate',
+  'complianceTimeline',
+  'complianceBudget',
+  'hiringPlan',
+  'targetCustomers',
+  'evidenceOfProgress',
+  'monthlyProjections',
+  'detailedCosts',
+  'fullLegalName',
+  'founderWorkHistory',
+  'dateOfBirth',
+  'nationality',
+  'totalProfessionalExperience',
+  'professionalCertifications',
+  'passportNumber',
+  'englishTestType',
+  'passportExpiry',
+  'englishTestScore',
+  'placeOfBirth',
+  'englishTestDate',
+  'educationBackground',
+  'bankAccountBalance',
+  'financialProjections'
+]
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17424:28 {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+6:45:58 PM [express] POST /api/documents/extract 200 in 77862ms :: {"extractedData":{"businessName":…
+[2026-01-16T18:46:13.364Z] POST /api/activity/session
+6:46:13 PM [express] POST /api/activity/session 200 in 224ms :: {"sessionId":"7c396489-6598-49c7-888…
+[2026-01-16T18:46:43.356Z] POST /api/activity/session
+6:46:43 PM [express] POST /api/activity/session 200 in 216ms :: {"sessionId":"7c396489-6598-49c7-888…
+[2026-01-16T18:46:51.745Z] POST /api/activity/page-view
+[2026-01-16T18:46:51.749Z] GET /api/auth/user
+[2026-01-16T18:46:51.754Z] GET /api/documents
+6:46:51 PM [express] POST /api/activity/page-view 200 in 22ms :: {"pageViewId":"ee5445d4-de29-4381-a…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+6:46:51 PM [express] GET /api/documents 200 in 194ms :: [{"id":"fa09eaec-d292-4402-b738-85d3696f76c6…
+6:46:51 PM [express] GET /api/auth/user 200 in 215ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+[2026-01-16T18:46:53.923Z] POST /api/activity/session/end
+6:46:53 PM [express] POST /api/activity/session/end 200 in 14ms :: {"success":true}
+[2026-01-16T18:46:59.340Z] POST /api/activity/session
+6:46:59 PM [express] POST /api/activity/session 200 in 23ms :: {"sessionId":"3a78b772-8e94-46ed-8680…
+[2026-01-16T18:46:59.550Z] POST /api/activity/page-view
+6:46:59 PM [express] POST /api/activity/page-view 200 in 20ms :: {"pageViewId":"e940e87d-580f-433d-9…
+[2026-01-16T18:47:01.376Z] POST /api/activity/session/end
+6:47:01 PM [express] POST /api/activity/session/end 200 in 15ms :: {"success":true}
+[2026-01-16T18:47:14.073Z] POST /api/activity/session
+6:47:14 PM [express] POST /api/activity/session 200 in 205ms :: {"sessionId":"8be3eb49-2ca7-4302-a12…
+[2026-01-16T18:47:14.491Z] POST /api/activity/page-view
+6:47:14 PM [express] POST /api/activity/page-view 200 in 20ms :: {"pageViewId":"fbce1aa1-b8f5-4ac7-b…
+[2026-01-16T18:47:22.406Z] POST /api/activity/session/end
+6:47:22 PM [express] POST /api/activity/session/end 200 in 13ms :: {"success":true}
+[2026-01-16T18:47:50.450Z] GET /api/auth/user
+[2026-01-16T18:47:50.452Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+6:47:50 PM [express] GET /api/auth/user 200 in 204ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+6:47:50 PM [express] POST /api/activity/session 200 in 206ms :: {"sessionId":"bb5d6f57-dbc2-48d4-882…
+[2026-01-16T18:47:50.843Z] POST /api/activity/page-view
+6:47:50 PM [express] POST /api/activity/page-view 200 in 18ms :: {"pageViewId":"94dc047c-7587-4f11-b…
+[2026-01-16T18:47:51.238Z] POST /api/activity/session/end
+6:47:51 PM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+[2026-01-16T18:47:53.185Z] POST /api/activity/session
+6:47:53 PM [express] POST /api/activity/session 200 in 15ms :: {"sessionId":"c86e31ef-5db8-4c50-af09…
+6:47:53 PM [express] POST /api/activity/page-view 200 in 14ms :: {"pageViewId":"b0bdbaec-d0ad-43d7-a…
+[2026-01-16T18:47:53.390Z] POST /api/activity/page-view
+[2026-01-16T18:47:54.358Z] POST /api/activity/session/end
+6:47:54 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
