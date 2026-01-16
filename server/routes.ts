@@ -6850,15 +6850,19 @@ EXAMPLES OF GOOD RESPONSES:
           
           if (isPdf) {
             // Extract text from PDF using pdf-parse
-            console.log("[Document Extract] Extracting text from PDF:", doc.name, "Buffer size:", fileBuffer.length);
+            console.log("[Document Extract] === PDF PROCESSING START ===");
+            console.log("[Document Extract] PDF Name:", doc.name, "Buffer size:", fileBuffer.length, "bytes");
             let pdfTextExtracted = false;
+            let extractedText = '';
+            
             try {
               const pdfData = await pdfParse(fileBuffer);
-              const extractedText = pdfData.text?.trim() || '';
-              console.log("[Document Extract] PDF parsed, text length:", extractedText.length, "Preview:", extractedText.substring(0, 500));
+              extractedText = pdfData.text?.trim() || '';
+              console.log("[Document Extract] pdf-parse SUCCESS! Text length:", extractedText.length);
+              console.log("[Document Extract] First 1000 chars:", extractedText.substring(0, 1000));
               
-              // Accept ANY text content (lowered threshold from 100 to 10)
-              if (extractedText.length > 10) {
+              // Accept ANY text content - even just 1 character
+              if (extractedText.length > 0) {
                 documentContents.push({
                   id: doc.id,
                   name: doc.name,
@@ -6867,47 +6871,31 @@ EXAMPLES OF GOOD RESPONSES:
                   content: extractedText.substring(0, 15000),
                   isText: true,
                 });
-                console.log("[Document Extract] PDF text extracted successfully, length:", extractedText.length);
+                console.log("[Document Extract] PDF added to documentContents, total docs now:", documentContents.length);
                 pdfTextExtracted = true;
               } else {
-                console.log("[Document Extract] PDF text too short:", extractedText.length, "chars");
+                console.log("[Document Extract] WARNING: pdf-parse returned EMPTY text!");
               }
             } catch (pdfError: any) {
-              console.error("[Document Extract] PDF text extraction FAILED:", pdfError?.message || pdfError);
+              console.error("[Document Extract] pdf-parse THREW ERROR:", pdfError?.message || pdfError);
+              console.error("[Document Extract] Full error:", JSON.stringify(pdfError, null, 2));
             }
             
-            // If PDF has no text (scanned/image-based), upload to OpenAI Files API
+            // If PDF has no text (scanned/image-based), add error message as content
             if (!pdfTextExtracted) {
-              console.log("[Document Extract] PDF has no extractable text, uploading to OpenAI Files API...");
-              try {
-                const OpenAI = (await import("openai")).default;
-                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-                
-                // Create a File object from the buffer for upload
-                const blob = new Blob([fileBuffer], { type: 'application/pdf' });
-                const file = new File([blob], doc.name, { type: 'application/pdf' });
-                
-                const uploadedFile = await openai.files.create({
-                  file: file,
-                  purpose: 'assistants'
-                });
-                
-                console.log("[Document Extract] PDF uploaded to OpenAI, file_id:", uploadedFile.id);
-                
-                // Store file_id for later use with Assistants API
-                documentContents.push({
-                  id: doc.id,
-                  name: doc.name,
-                  category: doc.category,
-                  mimeType: 'openai/file',
-                  content: uploadedFile.id, // Store file_id instead of content
-                  isText: false,
-                });
-                pdfTextExtracted = true;
-              } catch (uploadError: any) {
-                console.error("[Document Extract] OpenAI file upload FAILED:", uploadError?.message || uploadError);
-              }
+              console.log("[Document Extract] PDF has no extractable text - this is a SCANNED PDF");
+              // Add a marker so we know this PDF couldn't be processed
+              documentContents.push({
+                id: doc.id,
+                name: doc.name,
+                category: doc.category,
+                mimeType: doc.fileType,
+                content: `[SCANNED PDF - NO TEXT EXTRACTED] Document "${doc.name}" appears to be a scanned image. Please re-upload as a text-based PDF or image file for accurate extraction.`,
+                isText: true,
+              });
+              console.log("[Document Extract] Added scanned PDF marker to documentContents");
             }
+            console.log("[Document Extract] === PDF PROCESSING END ===");
           } else if (isImage) {
             // Keep as base64 for image processing
             documentContents.push({
