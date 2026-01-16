@@ -1,0 +1,270 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+3b0e620c
+Active
+
+Jan 16, 2026, 12:18 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+[2026-01-16T12:36:35.123Z] POST /api/activity/session
+12:36:35 PM [express] POST /api/activity/session 200 in 197ms :: {"sessionId":"4b9ffb4a-bd4f-4d25-837…
+[2026-01-16T12:37:05.121Z] POST /api/activity/session
+12:37:05 PM [express] POST /api/activity/session 200 in 211ms :: {"sessionId":"4b9ffb4a-bd4f-4d25-837…
+[2026-01-16T12:37:35.119Z] POST /api/activity/session
+12:37:35 PM [express] POST /api/activity/session 200 in 207ms :: {"sessionId":"4b9ffb4a-bd4f-4d25-837…
+[2026-01-16T12:38:05.109Z] POST /api/activity/session
+12:38:05 PM [express] POST /api/activity/session 200 in 209ms :: {"sessionId":"4b9ffb4a-bd4f-4d25-837…
+[2026-01-16T12:38:22.444Z] POST /api/documents/extract
+[Document Extract] Starting extraction for user: 6783e1ea-78f5-49c9-b67d-97dce58d193c documents: [ '82e0ae66-e8ae-4f6e-a129-34f30d6935af' ]
+[Document Extract] Found documents: [
+  {
+    name: 'CV',
+    category: 'education',
+    fileUrl: 's3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768566948222-Benedict.Ebuka.Umeh.pdf'
+  }
+]
+[Document Extract] S3 available: true
+[Document Extract] pdf-parse module keys: [
+  'AbortException',
+  'FormatError',
+  'InvalidPDFException',
+  'Line',
+  'LineDirection',
+  'LineStore',
+  'PDFParse',
+  'PasswordException',
+  'Point',
+  'Rectangle',
+  'ResponseException',
+  'Shape',
+  'Table',
+  'UnknownErrorException',
+  'VerbosityLevel',
+  'getException'
+]
+[Document Extract] Using PDFParse (capital P)
+[Document Extract] Final pdfParse type: function
+[Document Extract] Processing CV - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768566948222-Benedict.Ebuka.Umeh.pdf
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768566948222-Benedict.Ebuka.Umeh.pdf
+[Document Extract] Text docs: 1 Image docs: 0 File docs: 0
+[Document Extract] Document details: [
+  {
+    mimeType: 'application/pdf',
+    contentLen: 154
+  }
+]
+[Document Extract] Text content preview: 
+[Document Extract] pdf-parse THREW ERROR: Class constructor PDFParse cannot be invoked without 'new'
+[Document Extract] Full error: {}
+[Document Extract] WARNING: No text extracted from PDF!
+--- DOCUMENT: CV (education) ---
+[Document Extract] PDF has no extractable text - this is a SCANNED PDF
+[Document Extract] Added scanned PDF marker to documentContents
+[Document Extract] === PDF PROCESSING END ===
+[Document Extract] Files with content: 1 Total docs: 1
+[Document Extract] Using OpenAI GPT-4o for extraction...
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768566948222-Benedict.Ebuka.Umeh.pdf Size: 170993
+[Document Extract] === PDF PROCESSING START ===
+[Document Extract] PDF Name: CV Buffer size: 170993 bytes
+[Document Extract] pdfParse available: true
+    name: 'CV',
+    isText: true,
+[SCANNED PDF - NO TEXT EXTRACTED] Document "CV" appears to be a scanned image. Please re-upload as a text-based PDF or image file for accurate extraction.
+--- END CV ---
+  routine: 'parserOpenTable'
+}
+12:38:25 PM [express] POST /api/documents/extract 200 in 2635ms :: {"extractedData":{"founderWorkHist…
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+[Document Extract] AI Response length: 14
+[Document Extract] Using intelligent placeholders based on document metadata
+[Document Extract] Extracted fields: [
+  'founderWorkHistory',
+  'totalProfessionalExperience',
+  'technicalSkillsProficiency',
+  'educationBackground',
+  'professionalCertifications'
+]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17321:28 {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+[2026-01-16T12:38:32.047Z] GET /questionnaire
+[2026-01-16T12:38:32.049Z] POST /api/activity/session/end
+12:38:32 PM [express] POST /api/activity/session/end 200 in 188ms :: {"success":true}
+[2026-01-16T12:38:32.508Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+12:38:32 PM [express] GET /api/auth/user 200 in 12ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-16T12:38:32.880Z] POST /api/activity/session
+12:38:32 PM [express] POST /api/activity/session 200 in 18ms :: {"sessionId":"2f1b5fa6-715b-4d60-a4b1…
+[2026-01-16T12:38:32.888Z] GET /api/credits/balance
+12:38:32 PM [express] GET /api/credits/balance 200 in 10ms :: {"planCredits":0,"bonusCredits":0,"tota…
+[2026-01-16T12:38:32.945Z] POST /api/activity/page-view
+12:38:32 PM [express] POST /api/activity/page-view 200 in 18ms :: {"pageViewId":"fad5131d-6fcc-4683-a…
+[2026-01-16T12:38:32.713Z] GET /api/partner/status
+[2026-01-16T12:38:32.726Z] POST /api/activity/session
+12:38:32 PM [express] GET /api/partner/status 200 in 19ms :: {"isPartner":false,"promoCodeCount":0}
+12:38:32 PM [express] POST /api/activity/session 200 in 34ms :: {"sessionId":"6018b6dd-e52a-4521-be27…
+[2026-01-16T12:38:34.300Z] POST /api/activity/page-view
+[2026-01-16T12:38:34.312Z] GET /api/documents
+12:38:34 PM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"ae6c45e9-a98f-486e-9…
+12:38:34 PM [express] GET /api/documents 200 in 10ms :: [{"id":"82e0ae66-e8ae-4f6e-a129-34f30d6935af"…
+[2026-01-16T12:38:37.702Z] DELETE /api/documents/82e0ae66-e8ae-4f6e-a129-34f30d6935af
+[S3Storage] Deleted: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768566948222-Benedict.Ebuka.Umeh.pdf
+[Document Delete] Deleted from S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768566948222-Benedict.Ebuka.Umeh.pdf
+[Document Delete] Database record deleted: 82e0ae66-e8ae-4f6e-a129-34f30d6935af
+12:38:38 PM [express] DELETE /api/documents/82e0ae66-e8ae-4f6e-a129-34f30d6935af 200 in 644ms :: {"su…
+[2026-01-16T12:38:38.533Z] GET /api/documents
+12:38:38 PM [express] GET /api/documents 200 in 16ms :: []
+[2026-01-16T12:39:03.120Z] POST /api/activity/session
+12:39:03 PM [express] POST /api/activity/session 200 in 210ms :: {"sessionId":"2f1b5fa6-715b-4d60-a4b…
+[2026-01-16T12:39:19.115Z] POST /api/documents/upload
+[S3Storage] Uploaded: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768567159890-Business_Plan.pdf
+[Document Upload] Uploaded to S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768567159890-Business_Plan.pdf
+[Document Upload] Document saved: BUSINESS PLAN (storage: s3, url: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768567159890-Business_Plan.pdf)
+12:39:21 PM [express] POST /api/documents/upload 200 in 2551ms :: {"id":"2743a1d3-1e75-48e7-ad94-2340…
+[2026-01-16T12:39:21.906Z] GET /api/documents
+12:39:21 PM [express] GET /api/documents 200 in 12ms :: [{"id":"2743a1d3-1e75-48e7-ad94-2340b7926c42"…
+[2026-01-16T12:39:22.110Z] GET /api/documents
+12:39:22 PM [express] GET /api/documents 200 in 12ms :: [{"id":"2743a1d3-1e75-48e7-ad94-2340b7926c42"…
+[2026-01-16T12:39:24.998Z] POST /api/activity/page-view
+12:39:25 PM [express] POST /api/activity/page-view 200 in 28ms :: {"pageViewId":"660bbc4c-45f4-4727-9…
+[2026-01-16T12:39:33.108Z] POST /api/activity/session
+12:39:33 PM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"2f1b5fa6-715b-4d60-a4b1…
+[2026-01-16T12:39:37.626Z] POST /api/documents/extract
+[Document Extract] Starting extraction for user: 6783e1ea-78f5-49c9-b67d-97dce58d193c documents: [ '2743a1d3-1e75-48e7-ad94-2340b7926c42' ]
+[Document Extract] Found documents: [
+  {
+    name: 'BUSINESS PLAN',
+    category: 'business_plan',
+    fileUrl: 's3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768567159890-Business_Plan.pdf'
+  }
+]
+[Document Extract] S3 available: true
+[Document Extract] pdf-parse module keys: [
+  'AbortException',
+  'FormatError',
+  'InvalidPDFException',
+  'Line',
+  'LineDirection',
+  'LineStore',
+  'PDFParse',
+  'PasswordException',
+  'Point',
+  'Rectangle',
+  'ResponseException',
+  'Shape',
+  'Table',
+  'UnknownErrorException',
+  'VerbosityLevel',
+  'getException'
+]
+[Document Extract] Using PDFParse (capital P)
+[Document Extract] Final pdfParse type: function
+[Document Extract] Processing BUSINESS PLAN - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768567159890-Business_Plan.pdf
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768567159890-Business_Plan.pdf
+[Document Extract] Full error: {}
+[Document Extract] WARNING: No text extracted from PDF!
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768567159890-Business_Plan.pdf Size: 474911
+[Document Extract] === PDF PROCESSING START ===
+[Document Extract] PDF Name: BUSINESS PLAN Buffer size: 474911 bytes
+[Document Extract] pdfParse available: true
+[Document Extract] pdf-parse THREW ERROR: Class constructor PDFParse cannot be invoked without 'new'
+[Document Extract] Text docs: 1 Image docs: 0 File docs: 0
+    isText: true,
+[Document Extract] PDF has no extractable text - this is a SCANNED PDF
+[Document Extract] Document details: [
+    mimeType: 'application/pdf',
+[Document Extract] Added scanned PDF marker to documentContents
+  {
+    contentLen: 165
+    name: 'BUSINESS PLAN',
+[Document Extract] === PDF PROCESSING END ===
+[Document Extract] Files with content: 1 Total docs: 1
+[Document Extract] Using OpenAI GPT-4o for extraction...
+  }
+]
+[Document Extract] Text content preview: 
+--- DOCUMENT: BUSINESS PLAN (business_plan) ---
+[SCANNED PDF - NO TEXT EXTRACTED] Document "BUSINESS PLAN" appears to be a scanned image. Please re-upload as a text-based PDF or image file for accurate extraction.
+--- END BUSINESS PLAN ---
+[Document Extract] AI Response length: 14
+12:39:39 PM [express] POST /api/documents/extract 200 in 2351ms :: {"extractedData":{"businessName":"…
+[Document Extract] Using intelligent placeholders based on document metadata
+[Document Extract] Extracted fields: [ 'businessName', 'industry', 'problem', 'uniqueness' ]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17321:28 {
+
+
+innovation-visa-assistant.webapp | Railway
+500MB

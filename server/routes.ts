@@ -6893,15 +6893,40 @@ EXAMPLES OF GOOD RESPONSES:
             }
             
             // Try pdf-parse if available
-            if (typeof pdfParse === 'function') {
+            if (pdfParse) {
               try {
-                const pdfData = await pdfParse(fileBuffer);
-                extractedText = pdfData.text?.trim() || '';
-                console.log("[Document Extract] pdf-parse SUCCESS! Text length:", extractedText.length);
-                console.log("[Document Extract] First 1000 chars:", extractedText.substring(0, 1000));
+                let pdfData: any;
+                // PDFParse might be a class (needs 'new') or a function
+                if (typeof pdfParse === 'function') {
+                  // Check if it's a class constructor by looking for prototype methods
+                  const protoMethods = Object.getOwnPropertyNames(pdfParse.prototype || {});
+                  console.log("[Document Extract] PDFParse prototype methods:", protoMethods);
+                  
+                  if (protoMethods.includes('parse') || protoMethods.includes('parseBuffer')) {
+                    // It's a class - instantiate with new
+                    const parser = new pdfParse();
+                    if (typeof parser.parse === 'function') {
+                      pdfData = await parser.parse(fileBuffer);
+                    } else if (typeof parser.parseBuffer === 'function') {
+                      pdfData = await parser.parseBuffer(fileBuffer);
+                    }
+                    console.log("[Document Extract] Used class instantiation");
+                  } else {
+                    // Try as regular function first
+                    pdfData = await pdfParse(fileBuffer);
+                    console.log("[Document Extract] Used as function");
+                  }
+                }
+                
+                // Extract text from result
+                if (pdfData) {
+                  extractedText = pdfData.text?.trim() || pdfData.getText?.() || '';
+                  console.log("[Document Extract] pdf-parse SUCCESS! Text length:", extractedText.length);
+                  console.log("[Document Extract] First 1000 chars:", extractedText.substring(0, 1000));
+                }
               } catch (pdfError: any) {
                 console.error("[Document Extract] pdf-parse THREW ERROR:", pdfError?.message || pdfError);
-                console.error("[Document Extract] Full error:", JSON.stringify(pdfError, null, 2));
+                console.error("[Document Extract] Error stack:", pdfError?.stack?.substring(0, 500));
               }
             }
               
