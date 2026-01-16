@@ -6895,34 +6895,33 @@ EXAMPLES OF GOOD RESPONSES:
             // Try pdf-parse if available
             if (pdfParse) {
               try {
-                let pdfData: any;
-                // PDFParse might be a class (needs 'new') or a function
+                // PDFParse is a class with load() and getText() methods
                 if (typeof pdfParse === 'function') {
-                  // Check if it's a class constructor by looking for prototype methods
                   const protoMethods = Object.getOwnPropertyNames(pdfParse.prototype || {});
                   console.log("[Document Extract] PDFParse prototype methods:", protoMethods);
                   
-                  if (protoMethods.includes('parse') || protoMethods.includes('parseBuffer')) {
-                    // It's a class - instantiate with new
+                  // It's a class with load/getText - instantiate and use those
+                  if (protoMethods.includes('load') && protoMethods.includes('getText')) {
                     const parser = new pdfParse();
-                    if (typeof parser.parse === 'function') {
-                      pdfData = await parser.parse(fileBuffer);
-                    } else if (typeof parser.parseBuffer === 'function') {
-                      pdfData = await parser.parseBuffer(fileBuffer);
-                    }
-                    console.log("[Document Extract] Used class instantiation");
+                    await parser.load(fileBuffer);
+                    extractedText = parser.getText() || '';
+                    console.log("[Document Extract] Used class load/getText");
+                  } else if (protoMethods.includes('parse')) {
+                    const parser = new pdfParse();
+                    const pdfData = await parser.parse(fileBuffer);
+                    extractedText = pdfData?.text?.trim() || '';
+                    console.log("[Document Extract] Used class parse method");
                   } else {
-                    // Try as regular function first
-                    pdfData = await pdfParse(fileBuffer);
+                    // Try as regular function
+                    const pdfData = await pdfParse(fileBuffer);
+                    extractedText = pdfData?.text?.trim() || '';
                     console.log("[Document Extract] Used as function");
                   }
-                }
-                
-                // Extract text from result
-                if (pdfData) {
-                  extractedText = pdfData.text?.trim() || pdfData.getText?.() || '';
+                  
                   console.log("[Document Extract] pdf-parse SUCCESS! Text length:", extractedText.length);
-                  console.log("[Document Extract] First 1000 chars:", extractedText.substring(0, 1000));
+                  if (extractedText.length > 0) {
+                    console.log("[Document Extract] First 1000 chars:", extractedText.substring(0, 1000));
+                  }
                 }
               } catch (pdfError: any) {
                 console.error("[Document Extract] pdf-parse THREW ERROR:", pdfError?.message || pdfError);
