@@ -6993,52 +6993,10 @@ ${d.content}
               console.log("[Document Extract] Text content preview:", documentTextContent.substring(0, 300));
             }
             
-            // Build messages based on content type
-            let messages: any[];
-            
-            if (imageDocuments.length > 0) {
-              // Use Vision API for images only (not PDFs!)
-              const imageContents: any[] = imageDocuments.map(doc => ({
-                type: "image_url",
-                image_url: {
-                  url: `data:${doc.mimeType};base64,${doc.content}`,
-                  detail: "high"
-                }
-              }));
+            // STEP 1: Process TEXT documents first with PhD-level chunked extraction
+            if (textDocuments.length > 0) {
+              console.log("[Document Extract] STEP 1: Processing TEXT documents with chunked extraction...");
               
-              messages = [{
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: `Extract information from the following document(s) for a UK Innovator Founder Visa application.
-
-${documentTextContent ? `EXTRACTED TEXT FROM DOCUMENTS:\n${documentTextContent}\n\n` : ''}
-Analyze the images and text above. Extract actual values you can see in the documents.
-
-Fields to extract (only include fields you can actually find data for):
-- fullLegalName: Full legal name from passport/ID
-- nationality: Country of citizenship
-- educationBackground: Educational degrees with institutions and years
-- professionalCertifications: Professional certifications (AWS, Microsoft, etc.)
-- totalProfessionalExperience: Total years of work experience (as a number)
-- industryExperience: Industry-specific experience details
-- technicalSkillsProficiency: Technical skills with proficiency levels
-- founderWorkHistory: Work history summary with companies, roles, years
-- businessName: Name of the business
-- industry: Industry/sector
-- problem: Problem the business solves
-- uniqueness: Unique innovation aspects
-- technology: Technology used
-- marketSize: Target market size
-
-Return ONLY valid JSON:
-{"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`
-                  },
-                  ...imageContents
-                ]
-              }];
-            } else if (textDocuments.length > 0) {
               // CHUNKED EXTRACTION - Split large documents to stay within rate limits
               const CHUNK_SIZE = 50000; // ~12K tokens per chunk, safe for 30K limit
               const allChunks: string[] = [];
@@ -7251,7 +7209,82 @@ Return ONLY valid JSON:
               }
               
               console.log("[Document Extract] Post-processing complete");
-            } else {
+            }
+            
+            // STEP 2: Process IMAGE documents with Vision API (passports, IDs)
+            if (imageDocuments.length > 0) {
+              console.log("[Document Extract] STEP 2: Processing IMAGE documents with Vision API...");
+              
+              const imageContents: any[] = imageDocuments.map(doc => ({
+                type: "image_url",
+                image_url: {
+                  url: `data:${doc.mimeType};base64,${doc.content}`,
+                  detail: "high"
+                }
+              }));
+              
+              try {
+                const visionResponse = await openai.chat.completions.create({
+                  model: "gpt-4o",
+                  messages: [{
+                    role: "user",
+                    content: [
+                      {
+                        type: "text",
+                        text: `You are an expert at reading passport and ID documents for UK Innovator Founder Visa applications.
+
+Analyze these images and extract the following fields (return ONLY what you can see):
+
+- fullLegalName: "First Middle Last" exactly as shown on document
+- dateOfBirth: "DD Month YYYY" (e.g., "15 March 1990")
+- nationality: Country of citizenship
+- passportNumber: Last 4 digits only for security: "****1234"
+- passportExpiry: "DD Month YYYY"
+- placeOfBirth: "City, Country"
+
+Return ONLY valid JSON:
+{"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 90, "source": "passport"}}}`
+                      },
+                      ...imageContents
+                    ]
+                  }],
+                  max_tokens: 1024
+                });
+                
+                const visionText = visionResponse.choices[0]?.message?.content || '';
+                const cleanedVision = visionText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                
+                try {
+                  const visionParsed = JSON.parse(cleanedVision);
+                  if (visionParsed.extractedFields) {
+                    for (const [field, data] of Object.entries(visionParsed.extractedFields)) {
+                      const fieldData = data as any;
+                      const valueStr = String(fieldData.value || '');
+                      
+                      // Only add if not already extracted and not a placeholder
+                      if (valueStr && !valueStr.includes('[') && !valueStr.toLowerCase().includes('placeholder')) {
+                        const newConf = fieldData.confidence || 85;
+                        const existingConf = confidence[field] || 0;
+                        
+                        // Prefer Vision API data for passport fields (higher confidence)
+                        if (!extractedData[field] || newConf > existingConf) {
+                          extractedData[field] = valueStr;
+                          confidence[field] = newConf;
+                        }
+                      }
+                    }
+                    console.log("[Document Extract] Vision API extracted", Object.keys(visionParsed.extractedFields).length, "fields from images");
+                  }
+                } catch (visionParseErr) {
+                  console.error("[Document Extract] Vision API parse error:", visionParseErr);
+                }
+              } catch (visionError: any) {
+                console.error("[Document Extract] Vision API error:", visionError.message);
+              }
+            }
+            
+            // Ensure we processed something
+            if (textDocuments.length === 0 && imageDocuments.length === 0) {
               throw new Error("No document content to process");
             }
           } catch (openaiError: any) {

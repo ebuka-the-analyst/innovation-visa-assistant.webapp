@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+e31a7891
+Active
+
+Jan 16, 2026, 6:58 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-16T19:12:40.429Z] POST /api/documents/extract
+[Document Extract] Starting extraction for user: 6783e1ea-78f5-49c9-b67d-97dce58d193c documents: [
+  '3934710d-bee6-425f-ad48-52be00787d33',
+  '680e3bb8-bc0b-4bbd-85c9-deca5d6d0685',
+  'bd971c9b-df64-4cb8-8aae-bd895b6f76c2'
+]
+[Document Extract] Found documents: [
+    category: 'passport',
+    fileUrl: 's3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768590268815-Passport_Page.jpg'
+  }
+]
+[Document Extract] S3 available: true
+[Document Extract] Processing CV - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768590709481-Benedict_E._Umeh.pdf
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768590709481-Benedict_E._Umeh.pdf
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768590709481-Benedict_E._Umeh.pdf Size: 255162
+[Document Extract] === PDF PROCESSING START ===
+[Document Extract] PDF Name: CV Buffer size: 255162 bytes
+[PDF Extract] Starting extraction with unpdf, buffer size: 255162
+[PDF Extract] Document loaded, pages: 5
+[PDF Extract] Extraction complete, charCount: 7994
+[Document Extract] PDF Pages: 5
+[Document Extract] CharCount: 7994
+[Document Extract] ScannedLikely: false
+[Document Extract] PDF text extracted successfully, chars: 7994
+[Document Extract] First 1000 chars: BENEDICT E. UMEH Full Stack WordPress Developer • AI Integration • Data-Driven UX Leeds, United Kingdom +44 7493 363351 ebuka.umeh40@outlook.com LinkedIn: linkedin.com/in/ebukaumeh Portfolio: bhenmedia.com PROFESSIONAL SUMMARY Data-driven Full Stack WordPress Developer with 7+ years of experience building and optimising high-performance websites for hospitality, healthcare, and corporate clients. Founder of bhenmedia.com combining a B.Sc. in IT and an M.Sc. in Data Science to bridge the gap between technical development, AI integration, and user-centric design. Proven ability to identify operational bottlenecks and build custom, AI-augmented solutions (e.g., LLM-powered chatbots, digital assistants) that solve real-world business problems. CORE SKILLS WordPress & Full-Stack • Custom WordPress Themes & Plugins • Elementor, Divi & Page Builders • HTML5, CSS3, JavaScript (ES6), PHP • WooCommerce Setup & Optimisation • Domain, DNS, cPanel/Hosting, SSL • Site Migrations & Security Hardening
+[Document Extract] === PDF PROCESSING END ===
+[Document Extract] Processing Business plan - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768590608511-Business_Plan.pdf
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768590608511-Business_Plan.pdf
+[Document Extract] === PDF PROCESSING START ===
+[Document Extract] PDF Name: Business plan Buffer size: 474911 bytes
+[PDF Extract] Starting extraction with unpdf, buffer size: 474911
+[PDF Extract] Document loaded, pages: 80
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768590608511-Business_Plan.pdf Size: 474911
+[PDF Extract] Extraction complete, charCount: 188281
+[Document Extract] PDF Pages: 80
+[Document Extract] CharCount: 188281
+[Document Extract] ScannedLikely: false
+[Document Extract] PDF text extracted successfully, chars: 188281
+[Document Extract] First 1000 chars: UK Innovator Founder Visa Assistant UK Innovation Visa Business Plan Industry: LegalTech / Immigration Technology / AI-powered SaaS Generated: 29 November 2025 Tier: Ultimate BUSINESS PLAN: UK Innovator Founder Visa Assistant Industry: LegalTech / Immigration Technology / AI-powered SaaS Tier: ULTIMATE Generated: 29/11/2025 --- 1. EXECUTIVE SUMMARY UK Innovator Founder Visa Assistant (innovatorfoundervisaassistant.co.uk) is a revolutionary LegalTech platform poised to disrupt the UK immigration landscape. Launching in November 2025, our AI-powered SaaS solution empowers global entrepreneurs to navigate the complex UK Innovator Founder Visa process with unprecedented efficiency and affordability. With a comprehensive suite of 109 professional-grade tools, meticulously organized across eight specialized categories, we offer a complete self-service solution, dramatically reducing the reliance on expensive immigration lawyers. This platform is not merely a document repository or a generic 
+[Document Extract] === PDF PROCESSING END ===
+[Document Extract] Processing passport - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768590268815-Passport_Page.jpg
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768590268815-Passport_Page.jpg
+    isText: true,
+    mimeType: 'application/pdf',
+    contentLen: 9278
+  },
+  }
+]
+[Document Extract] Text content preview: 
+    name: 'passport',
+--- DOCUMENT: CV (other) ---
+BENEDICT E. UMEH Full Stack WordPress Developer • AI Integration • Data-Driven UX Leeds, United Kingdom +44 7493 363351 ebuka.umeh40@outlook.com LinkedIn: linkedin.com/in/ebukaumeh Portfolio: bhenmedia.com PROFESSIONAL SUMMARY Data-driven Full Stack WordPress Developer 
+    isText: false,
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768590268815-Passport_Page.jpg Size: 1375896
+[Document Extract] Image prepared for Vision API: passport
+    mimeType: 'image/jpeg',
+[Document Extract] Files with content: 3 Total docs: 3
+    contentLen: 1834528
+[Document Extract] Using OpenAI GPT-4o for extraction...
+[Document Extract] Text docs: 2 Image docs: 1 File docs: 0
+  {
+[Document Extract] Document details: [
+    name: 'Business plan',
+    isText: true,
+  {
+    mimeType: 'application/pdf',
+    name: 'CV',
+    contentLen: 200000
+  },
+  {
+7:12:43 PM [express] POST /api/documents/extract 200 in 3345ms :: {"extractedData":{"founderWorkHist…
+[Document Extract] Using intelligent placeholders based on document metadata
+[Document Extract] Extracted fields: [
+  'founderWorkHistory',
+  'totalProfessionalExperience',
+  'technicalSkillsProficiency',
+  'businessName',
+  'industry',
+  'problem',
+  'uniqueness',
+  'fullLegalName',
+  'nationality'
+]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17424:28 {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+[2026-01-16T19:12:52.697Z] POST /api/activity/session/end
+7:12:52 PM [express] POST /api/activity/session/end 200 in 196ms :: {"success":true}
+[2026-01-16T19:13:34.172Z] POST /api/activity/session
+[2026-01-16T19:13:34.174Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+7:13:34 PM [express] GET /api/auth/user 200 in 202ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+7:13:34 PM [express] POST /api/activity/session 200 in 210ms :: {"sessionId":"48c7c08a-cf11-44a5-a33…
+[2026-01-16T19:13:34.670Z] POST /api/activity/page-view
+7:13:34 PM [express] POST /api/activity/page-view 200 in 18ms :: {"pageViewId":"03039498-b0f1-4128-a…
+[2026-01-16T19:13:36.740Z] POST /api/activity/session/end
+7:13:36 PM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
