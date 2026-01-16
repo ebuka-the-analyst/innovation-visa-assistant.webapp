@@ -1,0 +1,137 @@
+Extracted Fields
+Back
+Nationality
+70% confident
+Not explicitly stated
+
+Educational Background (All Degrees)
+95% confident
+MSc in Data Science from Leeds Beckett University, BSc in Information Technology and Business Inform...
+
+Professional Certifications & Accreditations
+90% confident
+AWS Cloud Practitioner certification (pursuing), Google Analytics, HubSpot Inbound Marketing
+
+Total Years of Professional Experience
+90% confident
+Over seven years
+
+Industry-Specific Experience (years and details)
+90% confident
+LegalTech, Immigration Technology, AI-powered SaaS
+
+Core Skills & Proficiency Levels
+90% confident
+Full-stack development, AI/ML integration, database architecture, cloud deployment
+
+Relevant Work History
+95% confident
+Founder and Lead Developer at BhenMedia, AI Solutions Developer at Ibis Styles Leeds, Technical Deve...
+
+Business Name
+95% confident
+UK Innovator Founder Visa Assistant
+
+Industry
+95% confident
+LegalTech / Immigration Technology / AI-powered SaaS
+
+What problem does your business solve?
+90% confident
+High cost of immigration lawyers and the complex UK Innovator Founder Visa process
+
+What makes your solution different? (Be specific with measurable claims)
+95% confident
+AI-powered SaaS solution with a multi-LLM architecture offering affordability, accessibility, and co...
+
+Technology
+95% confident
+AI-powered platform using OpenAI GPT-4, Google Gemini, and four specialized AI agents for visa assis...
+
+Market Size Calculation (TAM/SAM/SOM)
+90% confident
+£2.5 billion for 500,000 global entrepreneurs annually; £250 million for 50,000 Innovator Founder Vi...
+
+Target Customers
+90% confident
+Innovator Founder Visa applicants and related business visa seekers
+
+36-Month Monthly Cashflow
+70% confident
+Not explicitly detailed
+
+Detailed Funding Sources
+85% confident
+Personal savings, revenue reinvestment
+
+Detailed Cost Breakdown
+85% confident
+{"Infrastructure":7200,"Operations":8500,"Marketing":12000,"Development":6000,"Compliance":2800,"Sal...
+
+Revenue Model
+90% confident
+5-tier credit-based revenue structure
+
+Year1 Revenue
+90% confident
+£69,890
+
+Year3 Revenue
+90% confident
+£612,000
+
+List 5+ Named Competitors
+90% confident
+Traditional immigration lawyers; other visa application assistance tools
+
+Your Measurable Competitive Advantage
+95% confident
+Unique multi-LLM architecture, real-time compliance intelligence, comprehensive AI toolset
+
+Customer Discovery Interviews (20-30 minimum)
+90% confident
+28 customer discovery interviews
+
+Willingness to Pay Evidence
+90% confident
+£29/month for Basic, £49/month for Premium, £89-£129 for Ultimate
+
+All Regulatory Requirements
+90% confident
+OISC compliance, GDPR, payment compliance
+
+Compliance Timeline
+80% confident
+Schedule from November 2025 to March 2026
+
+Total Compliance Budget (£)
+85% confident
+8500
+
+Detailed Hiring Plan
+90% confident
+Create 8 jobs in the UK over the next three years
+
+Uk Job Creation
+90% confident
+Creating 8 new UK jobs within three years
+
+Specific Geographic Targets
+85% confident
+Primary focus on the UK, potential future expansion to Australia, Canada, USA
+
+International Expansion (optional)
+85% confident
+Potential future markets: Australia (Year 4), Canada (Year 4)
+
+Target Endorsing Body
+95% confident
+Innovator International
+
+6 Contact Points Strategy
+90% confident
+Proactive engagement plan with regular communication, progress updates, and specific content reviews
+
+Evidence Of Progress
+90% confident
+Customer testimonials, letters of interest, 

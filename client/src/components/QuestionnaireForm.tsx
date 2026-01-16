@@ -353,6 +353,8 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const [extractionConfidence, setExtractionConfidence] = useState<Record<string, number>>({});
   const [isExtracting, setIsExtracting] = useState(false);
   const [showExtractedFields, setShowExtractedFields] = useState(false);
+  const [extractionElapsed, setExtractionElapsed] = useState(0);
+  const extractionEstimate = 120; // Estimated 2 minutes for full extraction
   
   // Fetch user's uploaded documents
   const { data: userDocuments = [] } = useQuery<any[]>({
@@ -371,6 +373,22 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   useEffect(() => {
     localStorage.setItem('autosave_questionnaire-step', currentStep.toString());
   }, [currentStep]);
+
+  // Live extraction timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isExtracting) {
+      setExtractionElapsed(0);
+      interval = setInterval(() => {
+        setExtractionElapsed(prev => prev + 1);
+      }, 1000);
+    } else {
+      setExtractionElapsed(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isExtracting]);
 
   const handleFieldChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -1797,6 +1815,72 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
                     )}
                   </div>
 
+                  {/* Progress display during extraction */}
+                  {isExtracting && (
+                    <Card className="p-4 bg-primary/5 border-primary/20" data-testid="extraction-progress-container">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="relative">
+                          {/* Circular progress indicator */}
+                          <svg className="w-12 h-12 -rotate-90" data-testid="extraction-progress-circle">
+                            <circle
+                              cx="24"
+                              cy="24"
+                              r="20"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              className="text-muted/20"
+                            />
+                            <circle
+                              cx="24"
+                              cy="24"
+                              r="20"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              className="text-primary"
+                              strokeLinecap="round"
+                              strokeDasharray={`${Math.min((extractionElapsed / extractionEstimate) * 125, 125)} 125`}
+                            />
+                          </svg>
+                          <Loader2 className="h-5 w-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm" data-testid="text-extraction-status">Analyzing Document</p>
+                          <p className="text-xs text-muted-foreground" data-testid="text-extraction-stage">
+                            {extractionElapsed < 30 && "Reading pages..."}
+                            {extractionElapsed >= 30 && extractionElapsed < 60 && "Extracting business data..."}
+                            {extractionElapsed >= 60 && extractionElapsed < 90 && "Processing financials..."}
+                            {extractionElapsed >= 90 && extractionElapsed < 120 && "Finalizing extraction..."}
+                            {extractionElapsed >= 120 && "Almost done, processing large document..."}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Timer display */}
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground" data-testid="text-elapsed-time">
+                          Elapsed: {Math.floor(extractionElapsed / 60)}:{(extractionElapsed % 60).toString().padStart(2, '0')}
+                        </span>
+                        <span className="text-muted-foreground" data-testid="text-remaining-time">
+                          {extractionElapsed < extractionEstimate 
+                            ? `Est. ~${Math.max(1, Math.ceil((extractionEstimate - extractionElapsed) / 60))}:${Math.max(0, (extractionEstimate - extractionElapsed) % 60).toString().padStart(2, '0')} remaining`
+                            : "Finishing up..."
+                          }
+                        </span>
+                      </div>
+                      
+                      {/* Progress bar */}
+                      <div className="mt-2 h-1.5 bg-muted/30 rounded-full overflow-hidden" data-testid="extraction-progress-bar">
+                        <div 
+                          className="h-full bg-primary rounded-full transition-all duration-1000"
+                          style={{ width: `${Math.min((extractionElapsed / extractionEstimate) * 100, 95)}%` }}
+                        />
+                      </div>
+                    </Card>
+                  )}
+
+                  {/* Extract button - always visible */}
                   <Button 
                     onClick={handleExtractFromDocuments}
                     disabled={selectedDocIds.length === 0 || isExtracting}

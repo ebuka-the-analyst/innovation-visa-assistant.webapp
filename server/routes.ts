@@ -7055,32 +7055,59 @@ Return ONLY valid JSON:
 DOCUMENT CONTENT (SECTION):
 {CHUNK_CONTENT}
 
-Extract ALL relevant data for the fields below. Be thorough.
+CRITICAL FORMATTING RULES:
+1. ALWAYS include dates/years for education: "MSc Data Science, Leeds Beckett University, UK, 2023, Distinction"
+2. ALWAYS include dates/years for work history: "Lead Developer at Company X (2019-2022)"
+3. Structure lists with bullet points: "• Item 1 • Item 2 • Item 3"
+4. For timelines, use clear date ranges: "Q1 2025 - Q2 2026"
+5. For financial figures, include currency: "£69,890 Year 1"
+6. For job creation, be specific: "8 UK jobs: 2 developers (Year 1), 3 support (Year 2), 3 marketing (Year 3)"
 
-FOUNDER FIELDS:
-- fullLegalName, nationality, educationBackground, professionalCertifications
-- totalProfessionalExperience, industryExperience, technicalSkillsProficiency, founderWorkHistory
+FOUNDER FIELDS (include dates/years):
+- fullLegalName: Full legal name
+- nationality: Country of citizenship
+- educationBackground: Format as "Degree, Institution, Location, Year, Grade" for each degree
+- professionalCertifications: Include certification dates or "pursuing" status
+- totalProfessionalExperience: "X years (2015-present)"
+- industryExperience: "X years in [Industry] (dates)"
+- technicalSkillsProficiency: "Skill (proficiency level)"
+- founderWorkHistory: "Role at Company (Start Year - End Year): key achievements"
 
 BUSINESS OVERVIEW:
 - businessName, industry, problem, uniqueness, technology, marketSize, targetCustomers
 
-FINANCIAL:
-- monthlyProjections, fundingSources, detailedCosts, revenueModel, year1Revenue, year3Revenue
+FINANCIAL (include £ amounts and years):
+- monthlyProjections: Structured monthly breakdown
+- fundingSources: Amount and source with dates
+- detailedCosts: Category and £amount breakdown
+- revenueModel: Clear revenue tiers with pricing
+- year1Revenue: £amount with year
+- year3Revenue: £amount with year
 
 MARKET & COMPETITION:
-- competitors, competitiveDifferentiation, customerInterviews, willingnessToPay
+- competitors: Named competitors with brief description
+- competitiveDifferentiation: Measurable advantages
+- customerInterviews: Number and key insights
+- willingnessToPay: Specific price points tested
 
-REGULATORY & COMPLIANCE:
-- regulatoryRequirements, complianceTimeline, complianceBudget
+REGULATORY (include timelines):
+- regulatoryRequirements: Requirement and compliance deadline
+- complianceTimeline: "Month Year - Month Year: milestone"
+- complianceBudget: £amount with breakdown
 
-GROWTH & TEAM:
-- hiringPlan, ukJobCreation, specificRegions, internationalPlan
+GROWTH & TEAM (include job numbers and timeline):
+- hiringPlan: "Role (Year X): number of hires"
+- ukJobCreation: "X total UK jobs: breakdown by role and year"
+- specificRegions: UK regions with rationale
+- internationalPlan: Countries with target years
 
 ENDORSEMENT:
-- targetEndorser, contactPointsStrategy, evidenceOfProgress
+- targetEndorser: Endorsing body name
+- contactPointsStrategy: Numbered strategy steps with timeline
+- evidenceOfProgress: Specific evidence with dates
 
 Return ONLY valid JSON:
-{"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`;
+{"extractedFields": {"fieldName": {"value": "structured value with dates/years", "confidence": 85, "source": "document name"}}}`;
               
               // Process each chunk and merge results
               const chunkResults: Record<string, { value: string; confidence: number }>[] = [];

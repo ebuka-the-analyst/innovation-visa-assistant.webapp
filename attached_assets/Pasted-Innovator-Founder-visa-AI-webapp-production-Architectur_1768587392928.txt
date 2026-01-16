@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+e6c210fe
+Active
+
+Jan 16, 2026, 6:01 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+  routine: 'parserOpenTable'
+    at async file:///app/dist/index.js:17336:28 {
+}
+  length: 119,
+6:10:21 PM [express] POST /api/documents/extract 200 in 102122ms :: {"extractedData":{"nationality":…
+  position: '13',
+  severity: 'ERROR',
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+  internalPosition: undefined,
+  code: '42P01',
+  internalQuery: undefined,
+  detail: undefined,
+  where: undefined,
+  table: undefined,
+  hint: undefined,
+  column: undefined,
+  schema: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+[2026-01-16T18:10:27.624Z] POST /api/activity/session
+6:10:27 PM [express] POST /api/activity/session 200 in 213ms :: {"sessionId":"a7129df1-4cc2-4ca8-9b6…
+[Document Extract] Chunk 3 extracted 7 fields
+[Document Extract] Processing chunk 4/5
+[2026-01-16T18:10:57.623Z] POST /api/activity/session
+6:10:57 PM [express] POST /api/activity/session 200 in 223ms :: {"sessionId":"a7129df1-4cc2-4ca8-9b6…
+[Document Extract] Chunk 4 extracted 35 fields
+[Document Extract] Processing chunk 5/5
+[Document Extract] Chunk 5 parse error: SyntaxError: Unexpected token I in JSON at position 0
+    at JSON.parse (<anonymous>)
+    at file:///app/dist/index.js:17196:46
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[Document Extract] Merging 4 chunk results
+[Document Extract] Merged extraction complete, total fields: 34
+[Document Extract] Extracted fields: [
+  'nationality',
+  'educationBackground',
+  'professionalCertifications',
+  'totalProfessionalExperience',
+  'industryExperience',
+  'technicalSkillsProficiency',
+  'founderWorkHistory',
+  'businessName',
+  'industry',
+  'problem',
+  'uniqueness',
+  'technology',
+  'marketSize',
+  'targetCustomers',
+  'monthlyProjections',
+  'fundingSources',
+  'detailedCosts',
+  'revenueModel',
+  'year1Revenue',
+  'year3Revenue',
+  'competitors',
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  'competitiveDifferentiation',
+  line: '1449',
+  'customerInterviews',
+  routine: 'parserOpenTable'
+}
+  'willingnessToPay',
+  'regulatoryRequirements',
+  'complianceTimeline',
+  'complianceBudget',
+  'hiringPlan',
+  'ukJobCreation',
+  'specificRegions',
+  'internationalPlan',
+  'targetEndorser',
+  'contactPointsStrategy',
+  'evidenceOfProgress'
+]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17336:28 {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+6:11:10 PM [express] POST /api/documents/extract 200 in 132690ms :: {"extractedData":{"nationality":…
+[2026-01-16T18:11:27.641Z] POST /api/activity/session
+6:11:27 PM [express] POST /api/activity/session 200 in 211ms :: {"sessionId":"a7129df1-4cc2-4ca8-9b6…
+[2026-01-16T18:11:57.620Z] POST /api/activity/session
+6:11:57 PM [express] POST /api/activity/session 200 in 224ms :: {"sessionId":"a7129df1-4cc2-4ca8-9b6…
+[2026-01-16T18:12:06.257Z] POST /api/activity/session/end
+6:12:06 PM [express] POST /api/activity/session/end 200 in 17ms :: {"success":true}
+[2026-01-16T18:12:13.674Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+6:12:13 PM [express] GET /api/auth/user 200 in 18ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-16T18:12:13.669Z] GET /api/auth/user
+6:12:13 PM [express] POST /api/activity/session 200 in 208ms :: {"sessionId":"379bb596-09cb-4e4f-bc7…
+[2026-01-16T18:12:14.091Z] POST /api/activity/page-view
+6:12:14 PM [express] POST /api/activity/page-view 200 in 28ms :: {"pageViewId":"b205767d-0fee-4c7d-9…
+[2026-01-16T18:12:44.251Z] POST /api/activity/session
+6:12:44 PM [express] POST /api/activity/session 200 in 216ms :: {"sessionId":"379bb596-09cb-4e4f-bc7…
+[2026-01-16T18:13:14.557Z] POST /api/activity/session
+6:13:14 PM [express] POST /api/activity/session 200 in 216ms :: {"sessionId":"379bb596-09cb-4e4f-bc7…
+[2026-01-16T18:13:44.255Z] POST /api/activity/session
+6:13:44 PM [express] POST /api/activity/session 200 in 221ms :: {"sessionId":"379bb596-09cb-4e4f-bc7…
+[2026-01-16T18:14:04.641Z] POST /api/activity/session/end
+6:14:04 PM [express] POST /api/activity/session/end 200 in 214ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
