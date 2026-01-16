@@ -6784,23 +6784,27 @@ EXAMPLES OF GOOD RESPONSES:
       }
       
       // Import pdf-parse for PDF text extraction (CommonJS module)
-      let pdfParse: any;
+      // Use createRequire for proper CommonJS interop in ESM
+      let pdfParse: any = null;
       try {
-        const pdfParseModule = await import('pdf-parse');
-        // Handle different module formats
-        pdfParse = pdfParseModule.default || pdfParseModule;
-        // If it's still not a function, try accessing the module directly
-        if (typeof pdfParse !== 'function' && pdfParse.default) {
-          pdfParse = pdfParse.default;
+        const { createRequire } = await import('module');
+        const require = createRequire(import.meta.url);
+        pdfParse = require('pdf-parse');
+        console.log("[Document Extract] pdf-parse loaded via createRequire, type:", typeof pdfParse);
+      } catch (requireError: any) {
+        console.log("[Document Extract] createRequire failed:", requireError?.message);
+        // Fallback to dynamic import
+        try {
+          const pdfParseModule = await import('pdf-parse');
+          console.log("[Document Extract] Dynamic import result keys:", Object.keys(pdfParseModule || {}));
+          pdfParse = pdfParseModule.default || pdfParseModule;
+          if (typeof pdfParse !== 'function' && pdfParse?.default) {
+            pdfParse = pdfParse.default;
+          }
+          console.log("[Document Extract] pdf-parse via dynamic import, type:", typeof pdfParse);
+        } catch (importError: any) {
+          console.error("[Document Extract] All pdf-parse imports failed:", importError?.message);
         }
-        // Last resort: if the module has a named export
-        if (typeof pdfParse !== 'function') {
-          pdfParse = (pdfParseModule as any).parse || (pdfParseModule as any).pdfParse;
-        }
-        console.log("[Document Extract] pdf-parse import type:", typeof pdfParse, "Keys:", Object.keys(pdfParseModule || {}));
-      } catch (importError: any) {
-        console.error("[Document Extract] Failed to import pdf-parse:", importError?.message);
-        pdfParse = null;
       }
       
       for (const doc of documents) {
