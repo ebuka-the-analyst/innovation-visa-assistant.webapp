@@ -1,0 +1,169 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+e448ca1d
+Active
+
+Jan 16, 2026, 11:02 AM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-16T11:08:37.411Z] POST /api/activity/session/end
+11:08:37 AM [express] POST /api/activity/session/end 200 in 17ms :: {"success":true}
+[2026-01-16T11:08:38.983Z] POST /api/activity/session
+[2026-01-16T11:13:40.689Z] POST /api/activity/page-view
+11:13:40 AM [express] POST /api/activity/page-view 200 in 19ms :: {"pageViewId":"84075335-32d0-42b5-a…
+[2026-01-16T11:13:41.433Z] POST /api/activity/session/end
+11:13:41 AM [express] POST /api/activity/session/end 200 in 22ms :: {"success":true}
+[2026-01-16T11:13:40.289Z] POST /api/activity/session
+[2026-01-16T11:13:40.291Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+11:13:40 AM [express] GET /api/auth/user 200 in 207ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+11:13:40 AM [express] POST /api/activity/session 200 in 213ms :: {"sessionId":"5e52ce11-eb0a-41ad-acb…
+[2026-01-16T11:13:47.246Z] POST /api/activity/session
+11:13:47 AM [express] POST /api/activity/session 200 in 30ms :: {"sessionId":"2dd1a78f-7d02-4462-a765…
+[2026-01-16T11:13:47.497Z] POST /api/activity/page-view
+11:13:47 AM [express] POST /api/activity/page-view 200 in 22ms :: {"pageViewId":"382c657a-0323-473d-a…
+11:13:47 AM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+[2026-01-16T11:13:47.898Z] POST /api/activity/session/end
+[2026-01-16T11:18:12.562Z] POST /api/activity/session
+[2026-01-16T11:18:12.563Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+11:18:12 AM [express] GET /api/auth/user 200 in 201ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+11:18:12 AM [express] POST /api/activity/session 200 in 204ms :: {"sessionId":"6a166067-0d3c-4c42-8db…
+[2026-01-16T11:18:13.031Z] POST /api/activity/page-view
+11:18:13 AM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"f5f4c5f2-975c-45fa-9…
+[2026-01-16T11:18:13.500Z] POST /api/activity/session/end
+[2026-01-16T11:18:13.506Z] GET /questionnaire
+11:18:13 AM [express] POST /api/activity/session/end 200 in 22ms :: {"success":true}
+[2026-01-16T11:18:13.780Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+11:18:13 AM [express] GET /api/auth/user 200 in 21ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-16T11:18:14.059Z] POST /api/activity/session
+[2026-01-16T11:18:14.061Z] GET /api/partner/status
+11:18:14 AM [express] GET /api/partner/status 200 in 13ms :: {"isPartner":false,"promoCodeCount":0}
+11:18:14 AM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"f3a12be4-1e53-4ff8-a334…
+[2026-01-16T11:18:14.217Z] POST /api/activity/session
+[2026-01-16T11:18:14.228Z] GET /api/credits/balance
+11:18:14 AM [express] POST /api/activity/session 200 in 20ms :: {"sessionId":"56986e19-acca-4cb0-b08f…
+11:18:14 AM [express] GET /api/credits/balance 200 in 13ms :: {"planCredits":0,"bonusCredits":0,"tota…
+[2026-01-16T11:18:14.261Z] POST /api/activity/page-view
+11:18:14 AM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"3daa9885-1744-4a4f-8…
+[2026-01-16T11:18:18.858Z] GET /api/documents
+11:18:18 AM [express] GET /api/documents 200 in 17ms :: [{"id":"2d6466de-eebc-4cd7-8559-2baa8ee61e9b"…
+[2026-01-16T11:18:29.810Z] POST /api/documents/extract
+[Document Extract] Starting extraction for user: 6783e1ea-78f5-49c9-b67d-97dce58d193c documents: [ '2d6466de-eebc-4cd7-8559-2baa8ee61e9b' ]
+[Document Extract] Found documents: [
+  {
+    name: 'cv',
+    category: 'employment',
+    fileUrl: 's3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768561075307-Benedict.Ebuka.Umeh.pdf'
+  }
+]
+[Document Extract] S3 available: true
+Warning: Cannot access the `require` function: "TypeError: process.getBuiltinModule is not a function".
+Warning: Cannot polyfill `ImageData`, rendering may be broken.
+Warning: Cannot polyfill `Path2D`, rendering may be broken.
+[Document Extract] Processing cv - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768561075307-Benedict.Ebuka.Umeh.pdf
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768561075307-Benedict.Ebuka.Umeh.pdf
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768561075307-Benedict.Ebuka.Umeh.pdf Size: 170993
+[Document Extract] === PDF PROCESSING START ===
+[Document Extract] PDF Name: cv Buffer size: 170993 bytes
+[Document Extract] pdf-parse THREW ERROR: pdfParse is not a function
+[Document Extract] Full error: {}
+[Document Extract] PDF has no extractable text - this is a SCANNED PDF
+[Document Extract] Added scanned PDF marker to documentContents
+[Document Extract] === PDF PROCESSING END ===
+[Document Extract] Files with content: 1 Total docs: 1
+[Document Extract] Using OpenAI GPT-4o for extraction...
+[Document Extract] Text docs: 1 Image docs: 0 File docs: 0
+[Document Extract] Document details: [
+  {
+    name: 'cv',
+    isText: true,
+    mimeType: 'application/pdf',
+    contentLen: 154
+  }
+]
+[Document Extract] Text content preview: 
+--- DOCUMENT: cv (employment) ---
+[SCANNED PDF - NO TEXT EXTRACTED] Document "cv" appears to be a scanned image. Please re-upload as a text-based PDF or image file for accurate extraction.
+--- END cv ---
+[Document Extract] AI Response length: 14
+[Document Extract] Using intelligent placeholders based on document metadata
+[Document Extract] Extracted fields: [
+  'founderWorkHistory',
+  'totalProfessionalExperience',
+}
+  'technicalSkillsProficiency'
+11:18:32 AM [express] POST /api/documents/extract 200 in 2956ms :: {"extractedData":{"founderWorkHist…
+]
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+  internalQuery: undefined,
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+  where: undefined,
+    at async file:///app/dist/index.js:17289:28 {
+  length: 119,
+  schema: undefined,
+  severity: 'ERROR',
+  table: undefined,
+  code: '42P01',
+  detail: undefined,
+  column: undefined,
+  hint: undefined,
+  dataType: undefined,
+  position: '13',
+  constraint: undefined,
+  internalPosition: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+[2026-01-16T11:18:44.727Z] POST /api/activity/session
+11:18:44 AM [express] POST /api/activity/session 200 in 202ms :: {"sessionId":"56986e19-acca-4cb0-b08…
+[2026-01-16T11:18:49.081Z] POST /api/activity/session/end
+11:18:49 AM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway

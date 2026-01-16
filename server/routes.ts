@@ -6783,9 +6783,25 @@ EXAMPLES OF GOOD RESPONSES:
         };
       }
       
-      // Import pdf-parse for PDF text extraction
-      const pdfParseModule = await import('pdf-parse');
-      const pdfParse = (pdfParseModule as any).default || pdfParseModule;
+      // Import pdf-parse for PDF text extraction (CommonJS module)
+      let pdfParse: any;
+      try {
+        const pdfParseModule = await import('pdf-parse');
+        // Handle different module formats
+        pdfParse = pdfParseModule.default || pdfParseModule;
+        // If it's still not a function, try accessing the module directly
+        if (typeof pdfParse !== 'function' && pdfParse.default) {
+          pdfParse = pdfParse.default;
+        }
+        // Last resort: if the module has a named export
+        if (typeof pdfParse !== 'function') {
+          pdfParse = (pdfParseModule as any).parse || (pdfParseModule as any).pdfParse;
+        }
+        console.log("[Document Extract] pdf-parse import type:", typeof pdfParse, "Keys:", Object.keys(pdfParseModule || {}));
+      } catch (importError: any) {
+        console.error("[Document Extract] Failed to import pdf-parse:", importError?.message);
+        pdfParse = null;
+      }
       
       for (const doc of documents) {
         let fileFound = false;
@@ -6852,33 +6868,50 @@ EXAMPLES OF GOOD RESPONSES:
             // Extract text from PDF using pdf-parse
             console.log("[Document Extract] === PDF PROCESSING START ===");
             console.log("[Document Extract] PDF Name:", doc.name, "Buffer size:", fileBuffer.length, "bytes");
+            console.log("[Document Extract] pdfParse available:", typeof pdfParse === 'function');
             let pdfTextExtracted = false;
             let extractedText = '';
             
-            try {
-              const pdfData = await pdfParse(fileBuffer);
-              extractedText = pdfData.text?.trim() || '';
-              console.log("[Document Extract] pdf-parse SUCCESS! Text length:", extractedText.length);
-              console.log("[Document Extract] First 1000 chars:", extractedText.substring(0, 1000));
-              
-              // Accept ANY text content - even just 1 character
-              if (extractedText.length > 0) {
-                documentContents.push({
-                  id: doc.id,
-                  name: doc.name,
-                  category: doc.category,
-                  mimeType: doc.fileType,
-                  content: extractedText.substring(0, 15000),
-                  isText: true,
-                });
-                console.log("[Document Extract] PDF added to documentContents, total docs now:", documentContents.length);
-                pdfTextExtracted = true;
-              } else {
-                console.log("[Document Extract] WARNING: pdf-parse returned EMPTY text!");
+            // Check if pdf-parse is available
+            if (typeof pdfParse !== 'function') {
+              console.error("[Document Extract] pdf-parse is not available! Type:", typeof pdfParse);
+              // Fall back to basic text extraction attempt
+              const bufferText = fileBuffer.toString('utf8');
+              // Look for readable text patterns in PDF
+              const textMatches = bufferText.match(/\(([^)]+)\)/g);
+              if (textMatches && textMatches.length > 10) {
+                extractedText = textMatches.map(m => m.slice(1, -1)).join(' ').trim();
+                console.log("[Document Extract] Fallback text extraction found:", extractedText.length, "chars");
               }
-            } catch (pdfError: any) {
-              console.error("[Document Extract] pdf-parse THREW ERROR:", pdfError?.message || pdfError);
-              console.error("[Document Extract] Full error:", JSON.stringify(pdfError, null, 2));
+            }
+            
+            // Try pdf-parse if available
+            if (typeof pdfParse === 'function') {
+              try {
+                const pdfData = await pdfParse(fileBuffer);
+                extractedText = pdfData.text?.trim() || '';
+                console.log("[Document Extract] pdf-parse SUCCESS! Text length:", extractedText.length);
+                console.log("[Document Extract] First 1000 chars:", extractedText.substring(0, 1000));
+              } catch (pdfError: any) {
+                console.error("[Document Extract] pdf-parse THREW ERROR:", pdfError?.message || pdfError);
+                console.error("[Document Extract] Full error:", JSON.stringify(pdfError, null, 2));
+              }
+            }
+              
+            // Accept ANY text content - even just 1 character
+            if (extractedText.length > 0) {
+              documentContents.push({
+                id: doc.id,
+                name: doc.name,
+                category: doc.category,
+                mimeType: doc.fileType,
+                content: extractedText.substring(0, 15000),
+                isText: true,
+              });
+              console.log("[Document Extract] PDF added to documentContents, total docs now:", documentContents.length);
+              pdfTextExtracted = true;
+            } else {
+              console.log("[Document Extract] WARNING: No text extracted from PDF!");
             }
             
             // If PDF has no text (scanned/image-based), add error message as content
