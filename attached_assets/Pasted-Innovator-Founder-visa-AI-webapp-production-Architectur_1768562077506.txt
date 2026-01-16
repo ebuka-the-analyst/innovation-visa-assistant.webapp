@@ -1,0 +1,104 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+e448ca1d
+Active
+
+Jan 16, 2026, 11:02 AM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+You reached the start of the range
+Jan 16, 2026, 11:02 AM
+Starting Container
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+11:06:02 AM [express] [STRIPE WARNING] STRIPE_SECRET_KEY not configured!
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+11:06:02 AM [express] serving on port 8080
+11:08:39 AM [express] POST /api/activity/session 200 in 18ms :: {"sessionId":"2d2a8628-f872-41b2-9a0b…
+[2026-01-16T11:08:39.275Z] POST /api/activity/page-view
+11:08:39 AM [express] POST /api/activity/page-view 200 in 17ms :: {"pageViewId":"5e025a4a-1c9a-432b-8…
+[2026-01-16T11:08:39.943Z] POST /api/activity/session/end
+11:08:39 AM [express] POST /api/activity/session/end 200 in 13ms :: {"success":true}
+[2026-01-16T11:08:35.275Z] POST /api/activity/session
+[2026-01-16T11:08:35.294Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+11:08:35 AM [express] GET /api/auth/user 200 in 224ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+11:08:35 AM [express] POST /api/activity/session 200 in 236ms :: {"sessionId":"9b86e3ff-9162-45b6-9ff…
+[2026-01-16T11:08:35.710Z] POST /api/activity/page-view
+11:08:35 AM [express] POST /api/activity/page-view 200 in 28ms :: {"pageViewId":"a81effd2-3255-4cbe-b…
+[2026-01-16T11:08:37.411Z] POST /api/activity/session/end
+11:08:37 AM [express] POST /api/activity/session/end 200 in 17ms :: {"success":true}
+[2026-01-16T11:08:38.983Z] POST /api/activity/session
+[2026-01-16T11:13:40.689Z] POST /api/activity/page-view
+11:13:40 AM [express] POST /api/activity/page-view 200 in 19ms :: {"pageViewId":"84075335-32d0-42b5-a…
+[2026-01-16T11:13:41.433Z] POST /api/activity/session/end
+11:13:41 AM [express] POST /api/activity/session/end 200 in 22ms :: {"success":true}
+[2026-01-16T11:13:40.289Z] POST /api/activity/session
+[2026-01-16T11:13:40.291Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+11:13:40 AM [express] GET /api/auth/user 200 in 207ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+11:13:40 AM [express] POST /api/activity/session 200 in 213ms :: {"sessionId":"5e52ce11-eb0a-41ad-acb…
+[2026-01-16T11:13:47.246Z] POST /api/activity/session
+11:13:47 AM [express] POST /api/activity/session 200 in 30ms :: {"sessionId":"2dd1a78f-7d02-4462-a765…
+[2026-01-16T11:13:47.497Z] POST /api/activity/page-view
+11:13:47 AM [express] POST /api/activity/page-view 200 in 22ms :: {"pageViewId":"382c657a-0323-473d-a…
+11:13:47 AM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+[2026-01-16T11:13:47.898Z] POST /api/activity/session/end
+
+
+innovation-visa-assistant.webapp | Railway
