@@ -6783,37 +6783,29 @@ EXAMPLES OF GOOD RESPONSES:
         };
       }
       
-      // Import pdf-parse for PDF text extraction
-      let pdfParse: any = null;
+      // Import pdfjs-dist legacy build for Node.js (no worker required)
+      let pdfjsLib: any = null;
       try {
-        const pdfParseModule = await import('pdf-parse');
-        const moduleKeys = Object.keys(pdfParseModule || {});
-        console.log("[Document Extract] pdf-parse module keys:", moduleKeys);
-        
-        // Try different access patterns - Railway exports PDFParse (capital P)
-        if (typeof pdfParseModule.PDFParse === 'function') {
-          pdfParse = pdfParseModule.PDFParse;
-          console.log("[Document Extract] Using PDFParse (capital P)");
-        } else if (typeof pdfParseModule.default === 'function') {
-          pdfParse = pdfParseModule.default;
-          console.log("[Document Extract] Using default export");
-        } else if (typeof pdfParseModule === 'function') {
-          pdfParse = pdfParseModule;
-          console.log("[Document Extract] Using module directly");
-        } else {
-          // Try createRequire as last resort
-          try {
-            const { createRequire } = await import('module');
-            const require = createRequire(import.meta.url);
-            pdfParse = require('pdf-parse');
-            console.log("[Document Extract] Using createRequire, type:", typeof pdfParse);
-          } catch (reqErr) {
-            console.log("[Document Extract] createRequire also failed");
-          }
+        // Use legacy build which works in Node.js without workers
+        const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+        pdfjsLib = pdfjs;
+        // Disable worker for Node.js environment
+        if (pdfjsLib.GlobalWorkerOptions) {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = '';
         }
-        console.log("[Document Extract] Final pdfParse type:", typeof pdfParse);
-      } catch (importError: any) {
-        console.error("[Document Extract] pdf-parse import failed:", importError?.message);
+        console.log("[Document Extract] pdfjs-dist legacy build loaded successfully");
+      } catch (legacyError: any) {
+        console.log("[Document Extract] Legacy build failed, trying main:", legacyError?.message);
+        try {
+          const pdfjs = await import('pdfjs-dist');
+          pdfjsLib = pdfjs.default || pdfjs;
+          if (pdfjsLib.GlobalWorkerOptions) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+          }
+          console.log("[Document Extract] pdfjs-dist main build loaded");
+        } catch (mainError: any) {
+          console.error("[Document Extract] All pdfjs-dist imports failed:", mainError?.message);
+        }
       }
       
       for (const doc of documents) {
@@ -6881,52 +6873,48 @@ EXAMPLES OF GOOD RESPONSES:
             // Extract text from PDF using pdf-parse
             console.log("[Document Extract] === PDF PROCESSING START ===");
             console.log("[Document Extract] PDF Name:", doc.name, "Buffer size:", fileBuffer.length, "bytes");
-            console.log("[Document Extract] pdfParse available:", typeof pdfParse === 'function');
+            console.log("[Document Extract] pdfjs-dist available:", !!pdfjsLib);
             let pdfTextExtracted = false;
             let extractedText = '';
             
-            // Check if pdf-parse is available
-            if (typeof pdfParse !== 'function') {
-              console.error("[Document Extract] pdf-parse is not available! Type:", typeof pdfParse);
-              // No fallback - binary data extraction produces garbage
-              // User will need to upload as image for Vision API processing
-            }
-            
-            // Try pdf-parse if available
-            if (pdfParse) {
+            // Use pdfjs-dist for text extraction
+            if (pdfjsLib && pdfjsLib.getDocument) {
               try {
-                // PDFParse is a class with load() and getText() methods
-                if (typeof pdfParse === 'function') {
-                  const protoMethods = Object.getOwnPropertyNames(pdfParse.prototype || {});
-                  console.log("[Document Extract] PDFParse prototype methods:", protoMethods);
-                  
-                  // It's a class with load/getText - instantiate and use those
-                  if (protoMethods.includes('load') && protoMethods.includes('getText')) {
-                    const parser = new pdfParse();
-                    await parser.load(fileBuffer);
-                    extractedText = parser.getText() || '';
-                    console.log("[Document Extract] Used class load/getText");
-                  } else if (protoMethods.includes('parse')) {
-                    const parser = new pdfParse();
-                    const pdfData = await parser.parse(fileBuffer);
-                    extractedText = pdfData?.text?.trim() || '';
-                    console.log("[Document Extract] Used class parse method");
-                  } else {
-                    // Try as regular function
-                    const pdfData = await pdfParse(fileBuffer);
-                    extractedText = pdfData?.text?.trim() || '';
-                    console.log("[Document Extract] Used as function");
-                  }
-                  
-                  console.log("[Document Extract] pdf-parse SUCCESS! Text length:", extractedText.length);
-                  if (extractedText.length > 0) {
-                    console.log("[Document Extract] First 1000 chars:", extractedText.substring(0, 1000));
-                  }
+                // Convert buffer to Uint8Array for pdfjs
+                const uint8Array = new Uint8Array(fileBuffer);
+                
+                // Load the PDF document (disable worker for Node.js)
+                const loadingTask = pdfjsLib.getDocument({ 
+                  data: uint8Array,
+                  useWorkerFetch: false,
+                  isEvalSupported: false,
+                  useSystemFonts: true
+                });
+                const pdfDocument = await loadingTask.promise;
+                console.log("[Document Extract] PDF loaded, pages:", pdfDocument.numPages);
+                
+                // Extract text from all pages
+                const textParts: string[] = [];
+                for (let i = 1; i <= pdfDocument.numPages; i++) {
+                  const page = await pdfDocument.getPage(i);
+                  const textContent = await page.getTextContent();
+                  const pageText = textContent.items
+                    .map((item: any) => item.str)
+                    .join(' ');
+                  textParts.push(pageText);
+                }
+                
+                extractedText = textParts.join('\n').trim();
+                console.log("[Document Extract] pdfjs-dist SUCCESS! Text length:", extractedText.length);
+                if (extractedText.length > 0) {
+                  console.log("[Document Extract] First 1000 chars:", extractedText.substring(0, 1000));
                 }
               } catch (pdfError: any) {
-                console.error("[Document Extract] pdf-parse THREW ERROR:", pdfError?.message || pdfError);
+                console.error("[Document Extract] pdfjs-dist THREW ERROR:", pdfError?.message || pdfError);
                 console.error("[Document Extract] Error stack:", pdfError?.stack?.substring(0, 500));
               }
+            } else {
+              console.error("[Document Extract] pdfjs-dist not available!");
             }
               
             // Accept ANY text content - even just 1 character
