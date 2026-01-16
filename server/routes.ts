@@ -6846,7 +6846,7 @@ EXAMPLES OF GOOD RESPONSES:
                   name: doc.name,
                   category: doc.category,
                   mimeType: doc.fileType,
-                  content: pdfResult.text.substring(0, 15000),
+                  content: pdfResult.text.substring(0, 60000),
                   isText: true,
                 });
                 console.log("[Document Extract] PDF text extracted successfully, chars:", pdfResult.charCount);
@@ -7039,35 +7039,66 @@ Return ONLY valid JSON:
                 ]
               }];
             } else if (textDocuments.length > 0) {
-              // Text-only extraction (from PDFs)
+              // Text-only extraction (from PDFs) - COMPREHENSIVE BUSINESS PLAN EXTRACTION
               messages = [{
                 role: "user",
-                content: `Extract information from the following document text for a UK Innovator Founder Visa application.
+                content: `You are an expert at extracting structured data from UK Innovator Founder Visa business plans.
 
 DOCUMENT CONTENT:
 ${documentTextContent}
 
-Analyze the text above carefully. Extract actual values you can see in the documents.
+Extract ALL relevant data for the fields below. Be thorough and extract as much detail as possible.
 
-Fields to extract (only include fields you can actually find data for):
+FOUNDER FIELDS:
 - fullLegalName: Full legal name
 - nationality: Country of citizenship
-- educationBackground: Educational degrees with institutions and years
-- professionalCertifications: Professional certifications (AWS, Microsoft, etc.)
-- totalProfessionalExperience: Total years of work experience (as a number)
-- industryExperience: Industry-specific experience details  
-- technicalSkillsProficiency: Technical skills with proficiency levels
-- founderWorkHistory: Work history summary with companies, roles, years
+- educationBackground: All educational degrees with institutions and years
+- professionalCertifications: Professional certifications (AWS, Microsoft, Google, etc.)
+- totalProfessionalExperience: Total years of work experience (number)
+- industryExperience: Industry-specific experience with details
+- technicalSkillsProficiency: Technical skills and proficiency levels
+- founderWorkHistory: Work history with companies, roles, years
+
+BUSINESS OVERVIEW:
 - businessName: Name of the business
 - industry: Industry/sector
 - problem: Problem the business solves
-- uniqueness: Unique innovation aspects
-- technology: Technology used
-- marketSize: Target market size
+- uniqueness: What makes the solution unique/innovative
+- technology: Technology stack and innovations
+- marketSize: Target market size (TAM/SAM/SOM)
+- targetCustomers: Target customer segments
 
-IMPORTANT: Only return fields where you can extract ACTUAL data from the documents. Do NOT make up placeholder values.
+FINANCIAL:
+- monthlyProjections: Revenue/cost projections
+- fundingSources: Sources of funding (personal savings, grants, investors)
+- detailedCosts: Startup and operational costs breakdown
+- revenueModel: How the business generates revenue
+- year1Revenue: Projected Year 1 revenue
+- year3Revenue: Projected Year 3 revenue
 
-Return ONLY valid JSON:
+MARKET & COMPETITION:
+- competitors: Main competitors
+- competitiveDifferentiation: Competitive advantages
+- customerInterviews: Customer validation evidence
+- willingnessToPay: Evidence of willingness to pay
+
+REGULATORY & COMPLIANCE:
+- regulatoryRequirements: Regulatory requirements
+- complianceTimeline: Timeline for compliance
+- complianceBudget: Budget for compliance
+
+GROWTH & TEAM:
+- hiringPlan: Hiring plan with roles and timeline
+- ukJobCreation: UK job creation plans (number of jobs)
+- specificRegions: UK regions for operations
+- internationalPlan: International expansion plans
+
+ENDORSEMENT:
+- targetEndorser: Target endorsing body
+- contactPointsStrategy: Engagement strategy
+- evidenceOfProgress: Evidence of traction/progress
+
+Extract actual data only. Return ONLY valid JSON:
 {"extractedFields": {"fieldName": {"value": "extracted value", "confidence": 85, "source": "document name"}}}`
               }];
             } else {
@@ -7077,7 +7108,7 @@ Return ONLY valid JSON:
             const response = await openai.chat.completions.create({
               model: "gpt-4o",
               messages,
-              max_tokens: 4096
+              max_tokens: 8192
             });
             
             const aiResponse = response.choices[0]?.message?.content || '';
