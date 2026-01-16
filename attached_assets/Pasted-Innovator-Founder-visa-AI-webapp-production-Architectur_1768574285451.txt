@@ -1,0 +1,184 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+17499be7
+Active
+
+Jan 16, 2026, 2:26 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+2:30:20 PM [express] serving on port 8080
+2:30:20 PM [express] [STRIPE WARNING] STRIPE_SECRET_KEY not configured!
+[2026-01-16T14:36:20.677Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+[2026-01-16T14:36:20.672Z] GET /api/auth/user
+2:36:20 PM [express] GET /api/auth/user 200 in 240ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+[2026-01-16T14:36:21.108Z] POST /api/activity/page-view
+2:36:20 PM [express] POST /api/activity/session 200 in 235ms :: {"sessionId":"f59c318d-e179-4264-995…
+2:36:21 PM [express] POST /api/activity/page-view 200 in 31ms :: {"pageViewId":"f0e423a8-d25c-498f-9…
+[2026-01-16T14:36:21.991Z] POST /api/activity/session/end
+2:36:22 PM [express] POST /api/activity/session/end 200 in 14ms :: {"success":true}
+[2026-01-16T14:36:30.045Z] GET /api/auth/user
+[2026-01-16T14:36:30.047Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:36:30 PM [express] GET /api/auth/user 200 in 19ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+2:36:30 PM [express] POST /api/activity/session 200 in 29ms :: {"sessionId":"6c307d07-5481-441a-96ee…
+[2026-01-16T14:36:30.259Z] POST /api/activity/page-view
+2:36:30 PM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"0e558182-2615-4cd8-b…
+[2026-01-16T14:36:30.961Z] GET /questionnaire
+[2026-01-16T14:36:30.962Z] POST /api/activity/session/end
+2:36:30 PM [express] POST /api/activity/session/end 200 in 14ms :: {"success":true}
+[2026-01-16T14:36:31.221Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:36:31 PM [express] GET /api/auth/user 200 in 11ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-16T14:36:31.429Z] GET /api/partner/status
+[2026-01-16T14:36:31.433Z] POST /api/activity/session
+2:36:31 PM [express] GET /api/partner/status 200 in 13ms :: {"isPartner":false,"promoCodeCount":0}
+2:36:31 PM [express] POST /api/activity/session 200 in 18ms :: {"sessionId":"ce29765b-0491-47ad-ae59…
+[2026-01-16T14:36:31.589Z] POST /api/activity/session
+[2026-01-16T14:36:31.596Z] GET /api/credits/balance
+2:36:31 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"e950f521-096c-4a3a-8d3f…
+2:36:31 PM [express] GET /api/credits/balance 200 in 10ms :: {"planCredits":0,"bonusCredits":0,"tota…
+[2026-01-16T14:36:31.633Z] POST /api/activity/page-view
+2:36:31 PM [express] POST /api/activity/page-view 200 in 14ms :: {"pageViewId":"e683e008-48ba-4514-a…
+[2026-01-16T14:36:33.061Z] POST /api/activity/session/end
+2:36:33 PM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+[2026-01-16T14:36:33.985Z] POST /api/activity/session
+2:36:34 PM [express] POST /api/activity/session 200 in 15ms :: {"sessionId":"ca5b6b65-e29a-492f-80f0…
+[2026-01-16T14:36:34.193Z] POST /api/activity/page-view
+2:36:34 PM [express] POST /api/activity/page-view 200 in 12ms :: {"pageViewId":"2d7c9689-9ec5-460c-b…
+[2026-01-16T14:36:35.898Z] POST /api/activity/page-view
+2:36:35 PM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"1ebcc7e2-4d5c-451d-b…
+[2026-01-16T14:36:36.055Z] GET /api/documents
+2:36:36 PM [express] GET /api/documents 200 in 14ms :: [{"id":"35d1ee5f-c1e4-4090-a66f-52a83e16b3d3"…
+[2026-01-16T14:36:38.405Z] DELETE /api/documents/35d1ee5f-c1e4-4090-a66f-52a83e16b3d3
+[S3Storage] Deleted: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768572430000-Business_Plan.pdf
+[Document Delete] Deleted from S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768572430000-Business_Plan.pdf
+[Document Delete] Database record deleted: 35d1ee5f-c1e4-4090-a66f-52a83e16b3d3
+2:36:39 PM [express] DELETE /api/documents/35d1ee5f-c1e4-4090-a66f-52a83e16b3d3 200 in 711ms :: {"su…
+[2026-01-16T14:36:39.302Z] GET /api/documents
+2:36:39 PM [express] GET /api/documents 200 in 11ms :: []
+[2026-01-16T14:36:57.533Z] POST /api/documents/upload
+[S3Storage] Uploaded: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768574218309-Business_Plan.pdf
+[Document Upload] Uploaded to S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768574218309-Business_Plan.pdf
+[Document Upload] Document saved: BUSINESS PLAN (storage: s3, url: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768574218309-Business_Plan.pdf)
+2:37:00 PM [express] POST /api/documents/upload 200 in 2673ms :: {"id":"31448c0e-dc4b-4117-87a1-1f6a…
+[2026-01-16T14:37:00.390Z] GET /api/documents
+2:37:00 PM [express] GET /api/documents 200 in 13ms :: [{"id":"31448c0e-dc4b-4117-87a1-1f6aee7f2795"…
+[2026-01-16T14:37:00.595Z] GET /api/documents
+2:37:00 PM [express] GET /api/documents 200 in 10ms :: [{"id":"31448c0e-dc4b-4117-87a1-1f6aee7f2795"…
+[2026-01-16T14:37:02.763Z] POST /api/activity/page-view
+2:37:02 PM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"075af44e-5f2f-47c1-9…
+[2026-01-16T14:37:04.191Z] POST /api/activity/session
+2:37:04 PM [express] POST /api/activity/session 200 in 13ms :: {"sessionId":"ca5b6b65-e29a-492f-80f0…
+[2026-01-16T14:37:11.429Z] POST /api/documents/extract
+[Document Extract] Starting extraction for user: 6783e1ea-78f5-49c9-b67d-97dce58d193c documents: [ '31448c0e-dc4b-4117-87a1-1f6aee7f2795' ]
+[Document Extract] Found documents: [
+  {
+    name: 'BUSINESS PLAN',
+    category: 'business_plan',
+    fileUrl: 's3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768574218309-Business_Plan.pdf'
+  }
+]
+[Document Extract] S3 available: true
+[Document Extract] Processing BUSINESS PLAN - URL: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768574218309-Business_Plan.pdf
+[Document Extract] Attempting S3 download for: s3://innovator-visa-documents/documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768574218309-Business_Plan.pdf
+[Document Extract] File found in S3: documents/6783e1ea-78f5-49c9-b67d-97dce58d193c/1768574218309-Business_Plan.pdf Size: 474911
+[Document Extract] === PDF PROCESSING START ===
+[Document Extract] PDF Name: BUSINESS PLAN Buffer size: 474911 bytes
+    contentLen: 81
+Warning: Cannot access the `require` function: "TypeError: process.getBuiltinModule is not a function".
+  }
+Warning: Cannot polyfill `DOMMatrix`, rendering may be broken.
+Warning: Cannot polyfill `ImageData`, rendering may be broken.
+]
+  {
+Warning: Cannot polyfill `Path2D`, rendering may be broken.
+    name: 'BUSINESS PLAN',
+[Document Extract] PDF extraction error: DOMMatrix is not defined
+    isText: true,
+[Document Extract] === PDF PROCESSING END ===
+    mimeType: 'application/pdf',
+[Document Extract] Files with content: 1 Total docs: 1
+[Document Extract] Using OpenAI GPT-4o for extraction...
+[Document Extract] Text docs: 1 Image docs: 0 File docs: 0
+[Document Extract] Document details: [
+[Document Extract] Text content preview: 
+--- DOCUMENT: BUSINESS PLAN (business_plan) ---
+[PDF ERROR] Failed to extract text from "BUSINESS PLAN": DOMMatrix is not defined
+--- END BUSINESS PLAN ---
+[Document Extract] AI Response length: 14
+[Document Extract] Using intelligent placeholders based on document metadata
+[Document Extract] Extracted fields: [ 'businessName', 'industry', 'problem', 'uniqueness' ]
+  constraint: undefined,
+[Document Extract] Database save error: error: relation "document_extractions" does not exist
+  file: 'parse_relation.c',
+    at /app/node_modules/pg-pool/index.js:45:11
+  line: '1449',
+  routine: 'parserOpenTable'
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+}
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:17297:28 {
+  length: 119,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '13',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+2:37:14 PM [express] POST /api/documents/extract 200 in 2750ms :: {"extractedData":{"businessName":"…
+[2026-01-16T14:37:22.424Z] POST /api/activity/session/end
+2:37:22 PM [express] POST /api/activity/session/end 200 in 203ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
