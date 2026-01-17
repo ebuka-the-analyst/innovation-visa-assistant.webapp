@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+a3568845
+Active
+
+Jan 17, 2026, 7:35 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-17T19:39:50.685Z] GET /assets/checkbox-BzDACWUq.js
+[2026-01-17T19:39:50.686Z] GET /assets/avatar-DSwoCOBy.js
+7:39:50 PM [express] POST /api/activity/page-view 200 in 210ms :: {"pageViewId":"745c6f35-d7d2-413b-…
+[2026-01-17T19:39:51.577Z] GET /api/credits/balance
+7:39:51 PM [express] GET /api/credits/balance 200 in 25ms :: {"planCredits":0,"bonusCredits":0,"tota…
+[2026-01-17T19:39:57.983Z] GET /api/dashboard/plans
+[2026-01-17T19:39:57.984Z] POST /api/activity/page-view
+Dashboard plans error: error: column "chart_data" does not exist
+  table: undefined,
+  file: 'parse_relation.c',
+  column: undefined,
+  severity: 'ERROR',
+  dataType: undefined,
+  code: '42703',
+  line: '3716',
+    at async file:///app/dist/index.js:12232:38 {
+  constraint: undefined,
+  detail: undefined,
+    at /app/node_modules/pg-pool/index.js:45:11
+  routine: 'errorMissingColumn'
+  length: 111,
+  hint: undefined,
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+  position: '880',
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+    at async DatabaseStorage.getUserBusinessPlans (file:///app/dist/index.js:2570:24)
+    at async Promise.all (index 0)
+}
+7:39:58 PM [express] GET /api/dashboard/plans 500 in 18ms :: {"error":"Failed to fetch business plan…
+7:39:58 PM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"00f5171a-c7bc-49f2-9…
+[2026-01-17T19:40:00.434Z] POST /api/activity/page-view
+7:40:00 PM [express] POST /api/activity/page-view 200 in 28ms :: {"pageViewId":"8eb48441-66a8-4044-9…
+[2026-01-17T19:40:03.643Z] GET /api/documents
+7:40:03 PM [express] GET /api/documents 200 in 25ms :: [{"id":"3934710d-bee6-425f-ad48-52be00787d33"…
+[2026-01-17T19:40:16.813Z] POST /api/activity/session
+7:40:17 PM [express] POST /api/activity/session 200 in 243ms :: {"sessionId":"9e95051b-8fbd-4841-bb8…
+[2026-01-17T19:40:29.990Z] POST /api/questionnaire/submit
+Questionnaire submission received: {
+  "tier": "premium",
+  "businessName": "PaymentPro",
+  "industry": "FinTech / B2B Payments / Payment Processing",
+  "problem": "UK SMEs lose £2.5 billion annually to late B2B payments. 62% of businesses experience cash flow issues due to slow payment collection. Average B2B invoice takes 47 days to be paid, with 23% paid over 60 days late. Existing solutions charge 2.9%+ fees, have 3-5 day settlement times, and lack integration with UK accounting software.",
+  "uniqueness": "Measurable advantages: (1) Flat 1.5% transaction fee vs 2.9% Stripe/PayPal. (2) Same-day settlement via Open Banking vs 3-5 days competitors. (3) AI payment chasing: 40% improvement in on-time payments. (4) Native UK accounting integration (Xero, Sage, FreeAgent). (5) 18-day average collection vs 47-day industry.",
+  "technology": "Node.js 18, TypeScript 5.0, PostgreSQL 15, Stripe Connect (card fallback), Open Banking (TrueLayer), React 18, AWS (ECS, RDS, S3), Kubernetes, Redis, GitHub Actions CI/CD, Terraform IaC\n\nArchitecture: React SPA → AWS API Gateway → Node.js microservices (Invoice, Payment, Reconciliation, Notification) → PostgreSQL. Open Banking integration via TrueLayer for instant payments. Stripe Connect for card payments. Webhook system for real-time payment status. Xero/Sage/QuickBooks OAuth integrations for invoice sync and reconciliation.",
+  "experience": "Uniquely qualified: 4 years at Wise building B2B payments (£50M volume). Deep understanding of Open Banking, FCA regulations, UK SME needs. Technical: API design, payment rails, accounting integrations. Domain: UK payment regulations, merchant acquiring, B2B invoicing. Network: FinTech founders, payment industry contacts.",
+  "funding": 95000,
+  "revenue": "Hybrid model: SaaS + Transaction. SaaS: Starter £49/month (10 invoices), Professional £99/month (unlimited), Enterprise £299/month (API access, white-label). Transaction: 1.5% flat fee on Open Banking payments, 2.4% on card payments. LTV: £3,564 (36-month retention). CAC: £220. Gross margin: 72% (after payment processing costs).",
+  "jobCreation": 12,
+  "expansion": "Vertical: Industry-specific features (construction payment milestones, agency retainers, legal trust accounting). Horizontal: Multi-currency for exporters, supply chain financing partnerships, embedded payments API for platforms. Integration: Expand to FreeAgent, Zoho, Wave.",
+  "vision": "5-year vision: UK's leading B2B payment platform for SMEs. 10,000 customers, £8M ARR, 50 employees. Processing £5B+ annual transaction volume. Expanded to lending/factoring partnerships. Exit potential: Acquisition by bank (Barclays, Lloyds) or accounting software (Intuit, Sage) at 6-8x revenue.",
+  "innovationStage": "mvp-complete",
+  "productStatus": "MVP launched September 2025 with core features: instant invoice payments via Open Banking, automated reconciliation with Xero/Sage/QuickBooks, and AI-powered payment chasing. Processing £180K monthly transaction volume across 25 pilot customers. Average Days Sales Outstanding reduced from 47 to 18 days for users.",
+  "existingCustomers": "25 pilot customers including: BuildRight Construction (£45K monthly invoices, testimonial: 'Cash flow transformed'), Thompson Legal Services (£22K monthly, 'Best B2B payment tool we've used'), Creative Agency Network (3 agencies, £60K combined). 8 customers now paying £99/month after free pilot.",
+  "betaTesters": "",
+  "tractionEvidence": "Pilot metrics: 25 customers, £180K monthly volume, £792 MRR from 8 paying customers. Payment collection time: 18 days vs 47 days pre-PaymentPro. 96% collection rate on invoices under 30 days. Customer NPS: 72. Churn: 0% in 4 months of paid subscriptions.",
+  "techStack": "Node.js 18, TypeScript 5.0, PostgreSQL 15, Stripe Connect (card fallback), Open Banking (TrueLayer), React 18, AWS (ECS, RDS, S3), Kubernetes, Redis, GitHub Actions CI/CD, Terraform IaC",
+  "dataArchitecture": "Architecture: React SPA → AWS API Gateway → Node.js microservices (Invoice, Payment, Reconciliation, Notification) → PostgreSQL. Open Banking integration via TrueLayer for instant payments. Stripe Connect for card payments. Webhook system for real-time payment status. Xero/Sage/QuickBooks OAuth integrations for invoice sync and reconciliation.",
+  "aiMethodology": "Payment chasing AI: Gradient boosting classifier trained on 50,000 B2B invoices. Features: invoice age, customer payment history, amount, industry, day of week. Predicts optimal chase timing (morning vs afternoon, day of week). Result: 40% improvement in on-time payment when AI timing used vs manual chasing. Model retrained monthly.",
+  "complianceDesign": "FCA registered as Payment Institution (Small PI, application submitted October 2025). PCI DSS Level 1 compliance via Stripe. Open Banking: Registered AISP via TrueLayer. GDPR Article 25 (privacy by design). Data encrypted AES-256 at rest, TLS 1.3 in transit. SOC 2 Type I achieved, Type II in progress.",
+  "patentStatus": "No patents filed - focus on trade secrets and speed to market. Proprietary elements: AI payment chasing algorithm (documented internally), customer payment behavior scoring model. Trademark: 'PaymentPro' UK application TM-2024-00567 (pending).",
+  "fundingSources": "£55,000 personal savings (from Wise salary, bank statements available). £30,000 angel investment (2 angels, SEIS documentation complete). £10,000 LBS Entrepreneurship Fund grant. Total: £95,000 for 16-month runway.",
+  "paybackPeriod": 3,
+  "relevantProjects": "Wise: B2B payment rails, multi-currency invoicing, API payment initiation. Barclaycard: Merchant portal redesign (30% reduction in support tickets). Personal: Open-source invoice parsing library (1,200 GitHub stars). LBS dissertation: 'Open Banking and SME Cash Flow'.",
+  "monthlyProjections": "Year 1: Month 1-4: Pilot phase, £0 revenue, £6K/month costs. Month 5-8: £2K MRR, £8K costs. Month 9-12: £8K MRR, £12K costs. Year 1 total: £45K revenue, £108K costs. Year 2: £35K MRR by month 24, £420K revenue. Year 3: £85K MRR, £1M revenue, profitable month 30.",
+  "customerAcquisitionCost": 220,
+  "lifetimeValue": 3564,
+  "founderEducation": "MBA, London Business School, 2022 (Distinction, specialization in FinTech). BSc Economics, University of Warwick, 2018 (First Class). CFA Level II passed. FCA-approved CF10/CF11 qualifications.",
+  "founderWorkHistory": "Product Manager, Wise (TransferWise) (2020-2024): Led B2B payments product, £50M+ annual volume, launched 12 countries. Business Analyst, Barclaycard (2018-2020): B2B card payments, merchant onboarding optimization. Consultant, McKinsey (Summer 2021): Payments practice, due diligence on 3 FinTech acquisitions.",
+  "founderAchievements": "Wise B2B product: Grew from £12M to £50M annual volume (4x in 2 years). Launched in 12 countries with 99.9% uptime. Reduced merchant onboarding from 5 days to 2 hours. Published: 'Future of B2B Payments' (Finextra, 2023). Speaker: Money20/20 Europe 2023.",
+  "detailedCosts": "Cloud infrastructure (AWS): £18K/year. Payment processing costs: Variable 0.3% (pass-through). Open Banking API fees: £12K/year. Stripe fees: Variable. Compliance/legal: £15K/year. Marketing (content, events): £20K/year. Founder salary (Year 2): £48K. Office: £6K/year coworking. Total Year 1: £108K.",
+  "competitors": "1. GoCardless (£25+/month, Direct Debit focus, 3-5 day settlement). 2. Stripe Invoicing (2.9%+30p, no AI chasing, US-centric). 3. Xero Payments (via Stripe, embedded only). 4. Sage Pay (£25/month, dated UX, card-only). 5. iwoca Pay (credit focus, not pure payments). Our advantage: Only UK-first, Open Banking native, AI-powered, flat-fee B2B solution.",
+  "competitiveDifferentiation": "1.5% flat fee vs 2.9%+ competitors (42% savings on £10K invoice). Same-day settlement vs 3-5 days (25-day cash improvement). 40% faster payment collection via AI chasing. Native UK accounting integrations (not afterthought). Purpose-built for UK B2B vs adapted B2C/US tools.",
+  "customerInterviews": "32 customer discovery interviews (June-August 2025). Key findings: (1) Late payment is #1 pain point for 89% of SMEs. (2) Current tools 'too expensive for what they do'. (3) Accounting integration critical - 'must sync with Xero'. (4) Willing to pay £99-199/month for same-day settlement. (5) AI chasing: 'Would use if it works'.",
+  "lettersOfIntent": "4 LOIs signed: BuildRight Construction (£500K annual volume commitment), Legal Services Network (15-firm network, £1.2M potential volume), Creative Industries Alliance (trade association, 200 member firms), Manchester Chamber of Commerce (referral partnership). Total pipeline: £2.5M annual volume.",
+  "willingnessToPay": "Survey (n=65 B2B businesses): 78% willing to pay £99-149/month for same-day settlement. 85% willing to pay 1.5% transaction fee (vs 2.9% current). Pilot conversions: 8 of 25 pilots converted to paid (32% conversion at £99/month). Zero churn to date.",
+  "marketSize": "TAM: UK B2B payments £1.8 trillion annually, B2B payment software £2.4B. SAM: SME B2B payments (1-250 employees) £180B, software market £480M. SOM: Year 1: £45K (launch). Year 3: £1M (0.2% SAM penetration). Achievable given competitor landscape.",
+  "regulatoryRequirements": "FCA Payment Institution (Small PI): 6-9 months, £15K application + legal fees. PCI DSS Level 1 (via Stripe): Achieved. Open Banking AISP: Via TrueLayer partnership. GDPR: ICO registered. AML compliance: KYC/KYB processes implemented. Total compliance budget: £35K over 18 months.",
+  "complianceTimeline": "Month 1-3: FCA Small PI application preparation with compliance consultant. Month 4-9: FCA application review period. Month 6: SOC 2 Type II audit. Month 12: Annual AML audit. Month 18: Potential upgrade to full PI if volume exceeds £3M/month. Ongoing: Quarterly compliance reviews.",
+  "complianceBudget": 35000,
+  "hiringPlan": "Year 1: Founder + 1 contractor (compliance). Year 2: Senior Engineer (£75K), Customer Success (£45K), Sales (£50K + commission). Year 3: 2 Engineers (£140K), Marketing (£50K), Finance (£55K), Support (£35K), Compliance Officer (£60K). Total: 12 FTE by end Year 3.",
+  "specificRegions": "Year 1: London, Manchester (B2B hub density, accounting firm partnerships). Year 2: Birmingham, Leeds, Bristol, Edinburgh. Year 3: All major UK cities, targeted sector focus (construction, professional services, agencies). Office: London-based with remote team option.",
+  "internationalPlan": "Year 4: Ireland (similar Open Banking, English-speaking, EU gateway). Year 5: Netherlands, Germany (SEPA instant payments). Focus: UK profitability and market leadership before expansion. Partnership model for non-English markets with local compliance partners.",
+  "targetEndorser": "Primary: Envestors (FinTech specialization, strong B2B portfolio). Alternative: UKES (UK Endorsing Service, supports diverse innovators). Rationale: Envestors has deep FinTech expertise, portfolio includes Wise alumni companies, active in payments vertical.",
+  "contactPointsStrategy": "6 engagement points: (1) Month 1: Business plan pitch, FCA pathway discussion. (2) Month 6: Pilot results, volume metrics, compliance progress. (3) Month 12: Annual review, first-year revenue, hiring. (4) Month 18: Growth metrics, geographic expansion. (5) Month 24: Series A preparation, unit economics validation. (6) Month 30: Scale-up strategy, international planning.",
+  "supportingEvidence": ""
+}
+Questionnaire submission error: error: column "chart_data" of relation "business_plans" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.createBusinessPlan (file:///app/dist/index.js:2582:24)
+    at async file:///app/dist/index.js:12249:28 {
+  length: 138,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '903',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+7:40:30 PM [express] POST /api/questionnaire/submit 400 in 227ms :: {"success":false,"error":"column…
+[2026-01-17T19:40:38.733Z] POST /api/activity/session/end
+7:40:38 PM [express] POST /api/activity/session/end 200 in 203ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
