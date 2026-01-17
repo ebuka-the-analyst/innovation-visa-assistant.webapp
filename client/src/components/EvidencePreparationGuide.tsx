@@ -267,7 +267,7 @@ const expertQuestions = {
     description: "Endorsing body requirements and contact point strategy",
     subsections: {
       "A. Endorsing Body": [
-        "Which endorsing body will you apply through (Tech Nation, university, etc.)?",
+        "Which endorsing body will you apply through (Envestors, UKES, Innovator International, GEP)?",
         "Why did you choose this endorsing body?",
         "Do you meet their specific requirements?",
         "Do you have any connections to this endorsing body?"

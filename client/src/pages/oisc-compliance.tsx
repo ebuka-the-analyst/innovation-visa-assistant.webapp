@@ -157,7 +157,7 @@ SPECIFIC QUESTIONS FOR OPINION
 
 4. Do you recommend any specific disclaimers, terms of service, or operational changes?
 
-5. Would you be willing to provide a formal legal opinion letter that we could submit to endorsing bodies (e.g., Tech Nation, Envestors) to demonstrate our compliance awareness?
+5. Would you be willing to provide a formal legal opinion letter that we could submit to endorsing bodies (e.g., Envestors, UKES, Innovator International) to demonstrate our compliance awareness?
 
 MATERIALS PROVIDED
 

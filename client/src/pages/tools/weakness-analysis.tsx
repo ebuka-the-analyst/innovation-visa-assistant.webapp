@@ -519,7 +519,7 @@ Risk Factors Contributing to Score:
 
 ENDORSING BODY COMPATIBILITY ASSESSMENT
 ${'-'.repeat(80)}
-Tech Nation (Innovation-Heavy Focus):
+Envestors (Investment-Ready Focus):
   Compatibility: ${categories.find(c => c.name === 'Innovation Strength')!.score >= 70 && 
                    categories.find(c => c.name === 'IP Protection')!.score >= 65 ? 
                    'HIGH - Strong innovation profile' : 'LOW - Innovation gaps present'}
@@ -1195,14 +1195,14 @@ This tool provides educational guidance only and does not constitute legal advic
                 <CardContent>
                   <div className="space-y-4">
                     <div className="p-4 border rounded">
-                      <h3 className="font-semibold mb-2">Tech Nation (Innovation-Heavy Focus)</h3>
+                      <h3 className="font-semibold mb-2">Envestors (Investment-Ready Focus)</h3>
                       <div className="flex items-center gap-2 mb-2">
                         <Progress value={categories.find(c => c.name === 'Innovation Strength')?.score || 0} className="flex-1" />
                         <span className="text-sm font-medium">{categories.find(c => c.name === 'Innovation Strength')?.score}%</span>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {(categories.find(c => c.name === 'Innovation Strength')?.score || 0) >= 70 ? 
-                          'HIGH compatibility - Your innovation strength aligns well with Tech Nation requirements' :
+                          'HIGH compatibility - Your innovation strength aligns well with Envestors requirements' :
                           'LOW compatibility - Strengthen IP protection and innovation evidence before applying'}
                       </p>
                     </div>

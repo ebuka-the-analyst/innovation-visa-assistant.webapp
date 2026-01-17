@@ -7059,7 +7059,7 @@ DOCUMENT CONTENT (SECTION):
 - transactionSummary: "Regular income: £X/month | Major deposits: £X (Date) | Average balance: £X"
 
 === ENDORSEMENT DOCUMENTS ===
-- targetEndorser: "Endorsing Body Name (e.g., Tech Nation, Innovator International)"
+- targetEndorser: "Endorsing Body Name (e.g., Envestors, UKES, Innovator International, GEP)"
 - endorsementStatus: "Pending / Approved / Conditional"
 - endorsementDate: "DD Month YYYY (if approved)"
 - endorsementConditions: "• Condition 1 • Condition 2 (if conditional)"

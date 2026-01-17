@@ -1,4 +1,4 @@
-import { X, Sparkles } from "lucide-react";
+import { X, Sparkles, Brain, Shield, Rocket, Clock, CheckCircle, TrendingUp, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 
@@ -6,7 +6,7 @@ interface Feature {
   id: string;
   title: string;
   shortDesc: string;
-  icon: string;
+  icon: LucideIcon;
   detailedInstructions: string[];
   benefits: string[];
   color: string;
@@ -17,7 +17,7 @@ const FEATURES: Feature[] = [
     id: "ai-intelligence",
     title: "AI-Powered Intelligence",
     shortDesc: "Advanced GPT-4 technology generates tailored content specific to your business and industry",
-    icon: "🧠",
+    icon: Brain,
     color: "from-orange-400 to-orange-600",
     detailedInstructions: [
       "Our Advanced AI analyzes your business model and innovation",
@@ -37,11 +37,11 @@ const FEATURES: Feature[] = [
   {
     id: "endorsing-ready",
     title: "Endorsing Body Ready",
-    shortDesc: "Formatted specifically for UK endorsing bodies like Tech Nation and Innovate UK",
-    icon: "🛡️",
+    shortDesc: "Formatted specifically for UK endorsing bodies like Envestors, UKES, and Innovator International",
+    icon: Shield,
     color: "from-blue-400 to-blue-600",
     detailedInstructions: [
-      "Aligns with Tech Nation, Innovate UK, and British Business Bank requirements",
+      "Aligns with Envestors, UKES, Innovator International, and GEP requirements",
       "Includes all required compliance sections and criteria coverage",
       "Structured narrative that addresses endorser concerns proactively",
       "Evidence-backed claims with source documentation",
@@ -59,7 +59,7 @@ const FEATURES: Feature[] = [
     id: "scalability-focus",
     title: "Scalability Focus",
     shortDesc: "Demonstrates clear growth potential and job creation plans required for approval",
-    icon: "🚀",
+    icon: Rocket,
     color: "from-yellow-400 to-yellow-600",
     detailedInstructions: [
       "Maps 5-10 year growth trajectory with realistic milestones",
@@ -80,7 +80,7 @@ const FEATURES: Feature[] = [
     id: "five-minute",
     title: "5-Minute Generation",
     shortDesc: "Complete business plans generated in minutes, not weeks of manual work",
-    icon: "⏱️",
+    icon: Clock,
     color: "from-teal-400 to-teal-600",
     detailedInstructions: [
       "Answer our structured questionnaire (15-20 minutes total)",
@@ -101,7 +101,7 @@ const FEATURES: Feature[] = [
     id: "compliance",
     title: "Compliance Guaranteed",
     shortDesc: "Covers all three criteria: Innovation, Viability, and Scalability perfectly",
-    icon: "✅",
+    icon: CheckCircle,
     color: "from-green-400 to-green-600",
     detailedInstructions: [
       "Innovation: Demonstrates unique tech/approach with competitive advantage",
@@ -122,7 +122,7 @@ const FEATURES: Feature[] = [
     id: "financial",
     title: "Financial Projections",
     shortDesc: "Detailed 3-year forecasts with realistic assumptions and market analysis",
-    icon: "📈",
+    icon: TrendingUp,
     color: "from-indigo-400 to-indigo-600",
     detailedInstructions: [
       "3-year P&L projections based on your industry benchmarks",
@@ -219,7 +219,7 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
                     }`}
                     data-testid={`button-feature-${f.id}`}
                   >
-                    <div className="text-xl mb-1">{f.icon}</div>
+                    <div className="text-xl mb-1"><f.icon className="w-6 h-6" /></div>
                     <div className="text-sm font-semibold">{f.title}</div>
                   </button>
                 ))}
@@ -231,7 +231,7 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
                   {/* Title and description */}
                   <div>
                     <h3 className="text-xl font-bold mb-2 flex items-center gap-3">
-                      <span className="text-4xl">{feature.icon}</span>
+                      <feature.icon className="w-10 h-10 text-primary" />
                       {feature.title}
                     </h3>
                     <p className="text-lg text-muted-foreground">{feature.shortDesc}</p>
@@ -240,7 +240,7 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
                   {/* How it works */}
                   <div>
                     <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <span className={`w-8 h-8 rounded-full bg-gradient-to-r ${feature.color} flex items-center justify-center text-white text-sm font-bold`}>✓</span>
+                      <span className={`w-8 h-8 rounded-full bg-gradient-to-r ${feature.color} flex items-center justify-center text-white`}><CheckCircle className="w-4 h-4" /></span>
                       How It Works
                     </h4>
                     <ul className="space-y-2">
@@ -258,7 +258,7 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
                   {/* Benefits */}
                   <div>
                     <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <span className={`w-8 h-8 rounded-full bg-gradient-to-r ${feature.color} flex items-center justify-center text-white text-sm font-bold`}>⭐</span>
+                      <span className={`w-8 h-8 rounded-full bg-gradient-to-r ${feature.color} flex items-center justify-center text-white`}><Sparkles className="w-4 h-4" /></span>
                       Key Benefits
                     </h4>
                     <div className="grid sm:grid-cols-2 gap-3">

@@ -475,7 +475,7 @@ export default function VisaPrefillDashboard() {
             id="endorsingBody"
             value={founderData.visa.endorsingBody}
             onChange={(e) => updateField("visa.endorsingBody", e.target.value)}
-            placeholder="e.g., Tech Nation"
+            placeholder="e.g., Envestors, UKES, Innovator International"
             data-testid="input-endorsing-body"
           />
         </div>

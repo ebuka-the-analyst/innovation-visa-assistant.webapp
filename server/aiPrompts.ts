@@ -815,7 +815,7 @@ OUTPUT STRUCTURE (40-60 pages):
 - Contingency planning
 
 10. ENDORSING BODY SELECTION (3-4 pages)
-- Recommended endorsers (Tech Nation, Innovator International)
+- Recommended endorsers (Envestors, UKES, Innovator International, GEP)
 - Fit assessment
 - Application strategy
 - Contact points plan (6 touchpoints over 3 years)

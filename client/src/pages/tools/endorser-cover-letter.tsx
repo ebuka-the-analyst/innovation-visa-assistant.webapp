@@ -42,7 +42,7 @@ const AI_TOOL_CONFIG: ToolConfig = {
     {
       id: 'q3',
       question: "Which endorsing body are you applying to? This helps me tailor your letter appropriately.",
-      hint: "e.g., Tech Nation, Founders Forum, Entrepreneur First, etc.",
+      hint: "e.g., Envestors, UKES, Innovator International, GEP",
       fieldKey: 'endorsingBody',
       required: true
     },

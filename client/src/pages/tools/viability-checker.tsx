@@ -536,7 +536,7 @@ SOURCES
 ${'-'.repeat(80)}
 - GOV.UK Innovator Founder Visa Guidance (2025)
 - Immigration Rules Appendix Innovator Founder
-- Endorsing Bodies: Tech Nation, Innovator International, UK Endorsing Services
+- Endorsing Bodies: Envestors, UKES, Innovator International, GEP
 - UK Visa & Immigration Policy Guidance
 - Industry benchmarks: Startup Genome, CB Insights
 

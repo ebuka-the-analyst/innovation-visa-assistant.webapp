@@ -770,12 +770,19 @@ ENDORSING BODY SPECIFIC CONSIDERATIONS
 ${'-'.repeat(80)}
 Different endorsing bodies emphasize different criteria:
 
-Tech Nation (Innovation-Focused):
-- Extremely rigorous on technical details and IP protection
+Envestors (Innovation & FinTech Focus):
+- Strong emphasis on innovation, technical details and IP protection
 - Require third-party expert validation letters
 - Emphasize patent filings and proprietary technology
-- Suitable for: Deep tech, AI/ML, biotech, advanced engineering
+- Suitable for: Deep tech, AI/ML, FinTech, advanced engineering
 - Red flag priority: Innovation Claims, IP Protection, Technical Team
+
+UKES - UK Endorsing Service (Diverse Industries):
+- Supports diverse range of industries and business models
+- Focus on viability and market evidence
+- Emphasis on customer validation and realistic projections
+- Suitable for: SaaS, marketplaces, services, manufacturing
+- Red flag priority: Customer Validation, Competitive Analysis, Financials
 
 Innovator International (Balanced Approach):
 - Holistic assessment across Innovation, Viability, Scalability
@@ -783,6 +790,13 @@ Innovator International (Balanced Approach):
 - Strong emphasis on customer validation and market evidence
 - Suitable for: SaaS, marketplaces, consumer tech, services
 - Red flag priority: Customer Validation, Competitive Analysis, Financials
+
+GEP - Global Entrepreneur Programme (High-Growth Focus):
+- Focus on high-growth potential and international scaling
+- Strong emphasis on team capability and track record
+- Priority on market size and growth opportunity
+- Suitable for: High-growth startups, international expansion, enterprise
+- Red flag priority: Team Credentials, Market Size, Scalability Plan
 
 CRITICAL SUCCESS FACTORS FOR APPROVAL
 ${'-'.repeat(80)}

@@ -34,7 +34,7 @@ const CREDIBLE_SOURCES = [
   { name: "McKinsey", credibility: "high", type: "report" },
   { name: "Deloitte", credibility: "high", type: "report" },
   { name: "PwC", credibility: "high", type: "report" },
-  { name: "Tech Nation", credibility: "high", type: "report" },
+  { name: "UK Tech Sector Reports", credibility: "high", type: "report" },
   { name: "Financial Times", credibility: "medium", type: "news" },
   { name: "The Economist", credibility: "medium", type: "news" },
   { name: "Forbes", credibility: "medium", type: "news" },
