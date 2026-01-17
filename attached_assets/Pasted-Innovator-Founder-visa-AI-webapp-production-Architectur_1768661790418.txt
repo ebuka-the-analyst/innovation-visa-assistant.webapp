@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+7dd3a3a6
+Active
+
+Jan 17, 2026, 2:51 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+  "businessName": "FinFlow AI",
+  "industry": "FinTech / AI-powered Financial Technology / B2B SaaS",
+  "problem": "UK SMEs face a critical cash flow crisis: 50,000 businesses fail annually due to poor cash flow management. Current solutions (spreadsheets, basic accounting software) have only 71-76% forecast accuracy, missing seasonal patterns and anomalies.",
+  "uniqueness": "Measurable advantages: (1) 94% forecast accuracy vs 73% industry average. (2) 12-minute setup via Open Banking vs 3-7 day manual entry. (3) 18-day advance shortfall warnings. (4) 40% cheaper than Fluidly (£60 vs £49/month).",
+  "technology": "Python 3.11, TensorFlow 2.x, FastAPI, PostgreSQL, Redis, React/TypeScript, AWS (Lambda, S3, RDS), Open Banking APIs, Docker, GitHub Actions CI/CD\n\nOpen Banking API integration (TrueLayer, Plaid) for real-time bank feeds. PostgreSQL for transaction storage. Redis for caching predictions. ML pipeline: data ingestion → feature engineering → model inference → dashboard rendering. REST API architecture with webhook notifications.",
+  "experience": "Uniquely qualified: 5 years in UK banking data science (HSBC, Monzo). Built production ML systems serving 50K+ users. Deep understanding of SME financial challenges. Technical expertise: Python, ML, cloud architecture. Domain expertise: UK banking regulations, Open Banking APIs.",
+  "funding": 85000,
+  "revenue": "Tiered SaaS: Starter £19/month (basic forecasting), Professional £69/month (AI predictions, alerts), Enterprise £75/month (API access, multi-entity). Add-ons: Custom reports £49/setup, API access £200/month. LTV: £2,160 (36-month retention). CAC: £180. Payback: 3 months. Gross margin: 85%.",
+  "jobCreation": 8,
+  "expansion": "Vertical: Expand from general SME to industry-specific (retail, hospitality, professional services with tailored models). Horizontal: Add invoice financing recommendations, credit score features, multi-currency for exporters.",
+  "vision": "5-year vision: UK's #1 AI cash flow platform for SMEs. 25,000 customers, £15M ARR, 45 employees. Expanded to invoice financing and credit products. Partnership with major banks. Exit potential: acquisition by accounting software (Sage, Intuit) at 8-10x revenue.",
+  "innovationStage": "mvp-complete",
+  "productStatus": "MVP launched October 2025: AI-powered cash flow forecasting platform using machine learning achieving 94% forecast accuracy (vs 73% industry average). Live at finflow-ai.co.uk with 45 beta users.",
+  "existingCustomers": "45 beta users including: ABC Accounting Ltd (testimonial: 'Saved us from a £30K shortfall'), XYZ Retail (pilot since August), 3 accounting firms referring clients. 12 paying customers at £60/month.",
+  "betaTesters": "",
+  "tractionEvidence": "Beta metrics: 45 users, £720 MRR, 94% accuracy validated, 18-day average warning time, 4.7/5 user satisfaction, 85% weekly active usage, 3 case studies documented.",
+  "techStack": "Python 3.11, TensorFlow 2.x, FastAPI, PostgreSQL, Redis, React/TypeScript, AWS (Lambda, S3, RDS), Open Banking APIs, Docker, GitHub Actions CI/CD",
+  "dataArchitecture": "Open Banking API integration (TrueLayer, Plaid) for real-time bank feeds. PostgreSQL for transaction storage. Redis for caching predictions. ML pipeline: data ingestion → feature engineering → model inference → dashboard rendering. REST API architecture with webhook notifications.",
+  "aiMethodology": "Ensemble model: LSTM neural network + XGBoost + ARIMA. Training data: 2.5M anonymized SME transactions. Validation: 80/20 split, backtesting on 12-month historical data. Accuracy: 94.2% (±3% variance). Features: seasonality, payment patterns, invoice aging, industry benchmarks.",
+  "complianceDesign": "FCA-registered (pending). Open Banking compliant (PSD2). GDPR Article 25 (privacy by design). SOC 2 Type II preparation. Data encrypted at rest (AES-256) and in transit (TLS 1.3). Annual penetration testing. ICO registered.",
+  "patentStatus": "UK Patent Application GB2412345.6 filed November 2024: 'Machine learning system for SME cash flow prediction using banking transaction patterns'. Defensive publication for ensemble methodology.",
+  "founderEducation": "MSc Data Science, University of Leeds, 2023 (Distinction). BSc Computer Science, Lagos State University, 2019 (First Class). AWS Solutions Architect certification. Google Cloud Professional Data Engineer.",
+  "founderWorkHistory": "Senior Data Analyst, HSBC UK (2021-2024): Built fraud detection models saving £2.3M annually. Data Scientist, Monzo (2020-2021): Developed customer churn prediction. Junior Analyst, Deloitte (2019-2020): Financial services consulting.",
+  "founderAchievements": "Built fraud detection saving HSBC £2.3M/year. Published paper on ML in banking (Journal of Financial Technology, 2023). Led team of 4 data scientists. Presented at FinTech Week London 2023. Mentored 6 junior analysts.",
+  "relevantProjects": "HSBC Cash Flow Analyzer (internal tool, 50K users). Monzo spending prediction feature. Personal: Open-source cash flow library (2,500 GitHub stars). Leeds dissertation: 'Predictive Analytics for SME Financial Health'.",
+  "monthlyProjections": "Year 1: Month 1-3: £0 revenue, £6K/month costs (MVP). Month 4-6: £1.8K MRR, £7K costs. Month 7-12: £4.8K MRR, £9K costs. Year 1 total: £28K revenue, £92K costs. Year 2: £12K MRR by month 24, £180K revenue. Year 3: £35K MRR, £420K revenue, break-even month 28.",
+  "customerAcquisitionCost": 180,
+  "lifetimeValue": 2160,
+  "paybackPeriod": 3,
+  "fundingSources": "£45,000 personal savings (bank statements available). £25,000 family investment (loan agreement signed). £15,000 Innovate UK SMART Grant (reference: 10054789). Total: £85,000 runway for 14 months.",
+  "detailedCosts": "Development/Cloud: £24K/year. Marketing (content, PPC): £18K/year. Founder salary (Year 2): £36K. Open Banking API fees: £6K/year. Legal/Compliance: £8K. Office/Admin: £4K. Total Year 1: £96K.",
+  "competitors": "1. Fluidly (£49/month, 78% accuracy, acquired by Sage). 2. Float (£29/month, manual data entry, no AI). 3. Futrli (£35/month, basic forecasting). 4. Pulse (US-focused, £79/month). 5. Brixx (£15/month, spreadsheet-based). Our advantage: Only AI-powered solution with Open Banking integration at SME price point.",
+  "competitiveDifferentiation": "94% accuracy vs 73% industry average (validated with 45 businesses). 12-minute setup vs 3-7 days manual. 18-day warning vs 7-day competitors. £60/month vs £49 Fluidly. UK SME-focused vs generic tools. Real-time Open Banking vs CSV uploads.",
+  "customerInterviews": "28 customer discovery interviews (August-October 2024). Key findings: (1) 89% manually forecast in spreadsheets. (2) Average 4 hours/week on cash flow. (3) 67% experienced surprise shortfalls. (4) Willing to pay £50-80/month for accurate forecasting. (5) Trust barrier with AI requires explainability.",
+  "lettersOfIntent": "3 LOIs signed: ABC Accounting (5 client referrals, £3,600/year value), Manchester SME Network (partnership for 50 members), TechStartup Incubator (10 portfolio companies). Total potential: £18,000 Year 1 revenue.",
+  "willingnessToPay": "Survey (n=85 SME owners): 72% willing to pay £50-80/month. Beta conversion: 12 of 45 free users converted to £60/month (27% conversion). Churn: 1 of 12 paying customers (8% monthly churn).",
+  "marketSize": "TAM: 5.9M UK SMEs, £4.1B potential (all financial software). SAM: 890,000 SMEs actively using accounting software, £534M. SOM: Year 1: 500 customers (£360K). Year 3: 5,000 customers (£3.6M). 0.5% SAM penetration realistic.",
+  "regulatoryRequirements": "FCA registration (Consumer Credit, if offering credit features): 6-9 months, £5K. Open Banking TPP registration: Completed via Yapily partnership. GDPR compliance: ICO registered. SOC 2 Type II: £15K, 6 months. Cyber Essentials Plus: £3K, 2 months.",
+  "complianceTimeline": "Month 1-2: Cyber Essentials Plus certification. Month 3-6: SOC 2 Type II audit preparation. Month 6-9: FCA registration submission (if credit features added). Month 12: ISO 27001 assessment. Ongoing: Annual penetration testing, GDPR audits.",
+  "complianceBudget": 28000,
+  "hiringPlan": "Year 1: Founder only + contractors. Year 2: Full-stack Developer (£55K), Customer Success (£35K). Year 3: Sales Manager (£50K + commission), Data Scientist (£60K), Marketing (£40K), Finance (£45K, part-time). Total: 8 employees by end Year 3.",
+  "specificRegions": "Year 1: London, Manchester, Birmingham (SME density, accounting firm partnerships). Year 2: Leeds, Bristol, Edinburgh, Glasgow. Year 3: All major UK cities. Focus: Tech hubs with high SME concentration.",
+  "internationalPlan": "Year 4: Ireland (similar Open Banking standards, English-speaking). Year 5: Netherlands, Germany (PSD2 compliant). Focus on UK validation and profitability before international expansion. Partnership model for non-English markets.",
+  "targetEndorser": "Primary: Envestors (FinTech focus, digital business alignment). Alternative: Innovator International (broader business support). Rationale: Envestors has strong FinTech track record, portfolio includes similar B2B SaaS companies, active mentor network in financial services.",
+  "contactPointsStrategy": "6 engagement points: (1) Month 1: Initial pitch and business plan review. (2) Month 6: MVP progress report, customer metrics. (3) Month 12: Annual review, Year 1 achievements. (4) Month 18: Growth update, hiring progress. (5) Month 24: Series A preparation discussion. (6) Month 30: Exit planning, international expansion.",
+  "supportingEvidence": ""
+}
+2:55:24 PM [express] POST /api/questionnaire/submit 200 in 244ms :: {"success":true,"planId":"1d062c…
+[2026-01-17T14:55:24.429Z] POST /api/payment/create-checkout
+[CHECKOUT] User 6783e1ea-78f5-49c9-b67d-97dce58d193c (ultimate) already has active subscription - skipping payment for premium plan
+2:55:24 PM [express] POST /api/payment/create-checkout 200 in 21ms :: {"skipCheckout":true,"redirect…
+[2026-01-17T14:55:24.646Z] POST /api/activity/session/end
+2:55:24 PM [express] POST /api/activity/session/end 200 in 13ms :: {"success":true}
+[2026-01-17T14:55:24.806Z] GET /generation?plan_id=1d062c21-bb22-4f1e-82dd-c15836cbcfee&already_subscribed=true
+[CREDITS] User 6783e1ea-78f5-49c9-b67d-97dce58d193c has unlimited credits (Ultimate), no credit consumed
+Starting multi-pass generation for 10 sections (premium tier)
+2:55:25 PM [express] POST /api/generate/start 200 in 35ms :: {"success":true,"message":"Generation s…
+Generating section 1/10: 1. EXECUTIVE SUMMARY
+[2026-01-17T14:55:25.633Z] POST /api/activity/page-view
+[2026-01-17T14:55:25.047Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:55:25 PM [express] GET /api/auth/user 200 in 24ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-17T14:55:25.264Z] GET /assets/generation-CdakjKdI.js
+[2026-01-17T14:55:25.270Z] GET /api/partner/status
+2:55:25 PM [express] GET /api/partner/status 200 in 10ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-01-17T14:55:25.424Z] POST /api/activity/session
+[2026-01-17T14:55:25.425Z] POST /api/activity/session
+2:55:25 PM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"9d539cee-1d79-47e4-87df…
+2:55:25 PM [express] POST /api/activity/session 200 in 40ms :: {"sessionId":"390b879e-ccf4-41cf-9765…
+[2026-01-17T14:55:25.479Z] POST /api/generate/start
+2:55:25 PM [express] POST /api/activity/page-view 200 in 20ms :: {"pageViewId":"4e0ef40a-4534-4c32-b…
+[2026-01-17T14:55:27.982Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:27 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 12ms :: {"…
+2:55:29 PM [express] POST /api/activity/session 200 in 13ms :: {"sessionId":"f9f56ee4-db68-4609-a6bf…
+[2026-01-17T14:55:29.188Z] POST /api/activity/session
+[2026-01-17T14:55:30.494Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:30 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 13ms :: {"…
+[2026-01-17T14:55:31.372Z] POST /api/activity/session/end
+2:55:31 PM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+2:55:33 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 13ms :: {"…
+[2026-01-17T14:55:33.620Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+[2026-01-17T14:55:35.623Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:35 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 15ms :: {"…
+[2026-01-17T14:55:38.617Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:38 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 24ms :: {"…
+✓ Section 1 complete (4037 chars)
+Generating section 2/10: 2. FOUNDER CREDENTIALS & VALIDATION
+2:55:40 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 19ms :: {"…
+[2026-01-17T14:55:40.623Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+[2026-01-17T14:55:43.622Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:43 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 18ms :: {"…
+[2026-01-17T14:55:45.635Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:45 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 15ms :: {"…
+[2026-01-17T14:55:48.617Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:48 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 19ms :: {"…
+[2026-01-17T14:55:50.626Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:50 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 16ms :: {"…
+[2026-01-17T14:55:53.628Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:53 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 13ms :: {"…
+[2026-01-17T14:55:55.626Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:55 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 15ms :: {"…
+[2026-01-17T14:55:58.625Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:55:58 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 23ms :: {"…
+[2026-01-17T14:55:59.185Z] POST /api/activity/session
+2:55:59 PM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"f9f56ee4-db68-4609-a6bf…
+✓ Section 2 complete (6424 chars)
+Generating section 3/10: 3. INNOVATION & TECHNICAL DEPTH
+[2026-01-17T14:56:00.616Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:00 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 15ms :: {"…
+[2026-01-17T14:56:03.629Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:03 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 20ms :: {"…
+[2026-01-17T14:56:05.633Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:05 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 19ms :: {"…
+[2026-01-17T14:56:08.617Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:08 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 14ms :: {"…
+[2026-01-17T14:56:10.627Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:10 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 18ms :: {"…
+
+
+innovation-visa-assistant.webapp | Railway
