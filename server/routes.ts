@@ -472,6 +472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           discountApplied: pricing.amount,
           originalAmount: pricing.amount,
           finalAmount: 0,
+          appliedAt: 'checkout',
         });
         
         // Increment promo code usage
