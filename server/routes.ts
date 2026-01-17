@@ -18,7 +18,7 @@ import { allQuestions, getQuestion, getRandomQuestion, getTotalQuestionCount } f
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { GoogleGenAI } from "@google/genai";
+// OpenAI is imported dynamically when needed
 import { registerObjectStorageRoutes, ObjectStorageService } from "./replit_integrations/object_storage";
 import { s3Storage } from "./services/s3Storage";
 
@@ -60,68 +60,23 @@ const documentUpload = multer({
   },
 });
 
-// Gemini 4-key rotation system for guaranteed AI uptime
-const GEMINI_API_KEYS = [
-  process.env.GEMINI_API_KEY,
-  process.env.GEMINI_API_KEY_2,
-  process.env.GEMINI_API_KEY_3,
-  process.env.GEMINI_API_KEY_4,
-].filter(Boolean) as string[];
-
-let currentKeyIndex = 0;
-
-function getNextGeminiKey(): string {
-  if (GEMINI_API_KEYS.length === 0) {
-    throw new Error("No Gemini API keys configured");
-  }
-  const key = GEMINI_API_KEYS[currentKeyIndex];
-  currentKeyIndex = (currentKeyIndex + 1) % GEMINI_API_KEYS.length;
-  return key;
-}
-
-async function callGeminiWithRotation(prompt: string, maxRetries: number = 4): Promise<string> {
-  const errors: Error[] = [];
+// OpenAI-powered AI generation system
+async function callAI(prompt: string): Promise<string> {
+  const OpenAI = (await import("openai")).default;
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   
-  // Try all Gemini keys first
-  for (let attempt = 0; attempt < Math.min(maxRetries, GEMINI_API_KEYS.length); attempt++) {
-    try {
-      const apiKey = getNextGeminiKey();
-      const ai = new GoogleGenAI({ apiKey });
-      const result = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: prompt
-      });
-      return result.text || '';
-    } catch (error: any) {
-      console.error(`Gemini key ${currentKeyIndex} failed:`, error.message);
-      errors.push(error);
-      // Continue to next key
-    }
-  }
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: prompt }],
+    max_tokens: 4000,
+    temperature: 0.7,
+  });
   
-  // Fallback to OpenAI when all Gemini keys fail
-  console.log("[AI Fallback] All Gemini keys exhausted, falling back to OpenAI GPT-4o-mini");
-  try {
-    const OpenAI = (await import("openai")).default;
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 4000,
-      temperature: 0.7,
-    });
-    
-    const content = response.choices[0]?.message?.content;
-    if (content) {
-      console.log("[AI Fallback] OpenAI GPT-4o-mini succeeded");
-      return content;
-    }
+  const content = response.choices[0]?.message?.content;
+  if (!content) {
     throw new Error("OpenAI returned empty response");
-  } catch (openaiError: any) {
-    console.error("[AI Fallback] OpenAI also failed:", openaiError.message);
-    throw new Error(`All AI providers failed. Gemini errors: ${errors.map(e => e.message).join('; ')}. OpenAI error: ${openaiError.message}`);
   }
+  return content;
 }
 
 const PRICING = {
@@ -1646,9 +1601,9 @@ Write the complete narrative for: ${section.title}
 Remember: Write FULL prose content for this section. No outlines or placeholders. Use ALL relevant data above.`;
 
       try {
-        // Use Gemini with 4-key rotation for business plan generation
+        // Use OpenAI for business plan generation
         const fullPrompt = `${sectionSystemPrompt}\n\n${sectionUserPrompt}`;
-        const sectionContent = await callGeminiWithRotation(fullPrompt);
+        const sectionContent = await callAI(fullPrompt);
 
         generatedSections.push(`\n\n## ${section.title}\n\n${sectionContent}`);
         
@@ -2192,7 +2147,7 @@ Respond in JSON format:
   ]
 }`;
 
-      const responseText = await callGeminiWithRotation(prompt + "\n\nRespond ONLY with valid JSON, no markdown formatting.");
+      const responseText = await callAI(prompt + "\n\nRespond ONLY with valid JSON, no markdown formatting.");
       
       // Clean up any markdown formatting from the response
       const cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -2225,7 +2180,7 @@ Provide a more compelling, visa-focused version that:
 
 Keep it concise but impactful. Return only the enhanced text.`;
 
-      const responseText = await callGeminiWithRotation(prompt);
+      const responseText = await callAI(prompt);
 
       res.json({ suggestion: responseText });
     } catch (error) {
@@ -2255,7 +2210,7 @@ Provide a helpful, specific answer focused on:
 
 Keep your response concise (2-3 paragraphs max) but actionable.`;
 
-      const responseText = await callGeminiWithRotation(prompt);
+      const responseText = await callAI(prompt);
 
       res.json({ response: responseText });
     } catch (error) {
@@ -2369,9 +2324,9 @@ EXAMPLES OF GOOD RESPONSES:
 - "I notice you mentioned 3 direct competitors - excellent. Adding HOW you differentiate from each would strengthen your innovation case."
 - "The 18-month breakeven timeline is realistic. However, endorsers will want to see the assumptions behind your £45K/month revenue target."`;
 
-      // Use Gemini with 4-key rotation for guaranteed uptime
+      // Use OpenAI for AI feedback
       try {
-        const feedback = await callGeminiWithRotation(prompt);
+        const feedback = await callAI(prompt);
         res.json({ feedback });
       } catch (error: any) {
         console.error("Tool feedback error:", error);
@@ -4797,12 +4752,9 @@ EXAMPLES OF GOOD RESPONSES:
         stripe: {
           secretKey: process.env.STRIPE_SECRET_KEY ? 'Configured' : 'Not configured',
         },
-        gemini: {
-          apiKey1: process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured',
-          apiKey2: process.env.GEMINI_API_KEY_2 ? 'Configured' : 'Not configured',
-          apiKey3: process.env.GEMINI_API_KEY_3 ? 'Configured' : 'Not configured',
-          apiKey4: process.env.GEMINI_API_KEY_4 ? 'Configured' : 'Not configured',
-          totalKeys: GEMINI_API_KEYS.length,
+        openai: {
+          apiKey: process.env.OPENAI_API_KEY ? 'Configured' : 'Not configured',
+          model: 'gpt-4o-mini',
         },
         google: {
           clientId: process.env.GOOGLE_CLIENT_ID ? 'Configured' : 'Not configured',
@@ -6948,7 +6900,7 @@ EXAMPLES OF GOOD RESPONSES:
       
       console.log("[Document Extract] Files with content:", documentContents.length, "Total docs:", documentMetadata.length);
       
-      // Build the AI prompt using Gemini multimodal if we have content
+      // Build the AI prompt for document extraction
       let extractedData: Record<string, any> = {};
       let confidence: Record<string, number> = {};
       
@@ -8976,14 +8928,14 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
 
       let responseText: string | null = null;
 
-      // Use Gemini with 4-key rotation for guaranteed uptime
+      // Use OpenAI for AI response
       try {
-        responseText = await callGeminiWithRotation(`${systemPrompt}\n\nUser query: ${userPrompt}`);
-      } catch (geminiError: any) {
-        console.log("Gemini rotation failed:", geminiError?.message || geminiError);
+        responseText = await callAI(`${systemPrompt}\n\nUser query: ${userPrompt}`);
+      } catch (openaiError: any) {
+        console.log("OpenAI failed:", openaiError?.message || openaiError);
       }
 
-      // If we got a response from Gemini, return it
+      // If we got a response from OpenAI, return it
       if (responseText) {
         res.json(processAIResponse(responseText));
         return;
@@ -9091,15 +9043,15 @@ Reference actual visa requirements where relevant.`;
       
       let output: string | null = null;
 
-      // Use Gemini with 4-key rotation for guaranteed uptime
+      // Use OpenAI for autopilot step
       try {
-        console.log(`[Autopilot] Attempting Gemini (4-key rotation) for step: ${stepId}`);
-        output = await callGeminiWithRotation(`${systemPrompt}\n\n${userMessage}`);
+        console.log(`[Autopilot] Attempting OpenAI for step: ${stepId}`);
+        output = await callAI(`${systemPrompt}\n\n${userMessage}`);
         if (output) {
-          console.log(`[Autopilot] Gemini success for step: ${stepId}, output length: ${output.length}`);
+          console.log(`[Autopilot] OpenAI success for step: ${stepId}, output length: ${output.length}`);
         }
-      } catch (geminiError: any) {
-        console.error(`[Autopilot] Gemini rotation failed for step ${stepId}:`, geminiError?.message || geminiError);
+      } catch (openaiError: any) {
+        console.error(`[Autopilot] OpenAI failed for step ${stepId}:`, openaiError?.message || openaiError);
       }
 
       // Calculate score based on content quality
@@ -9164,12 +9116,12 @@ Keep responses focused, professional, and relevant to UK visa requirements.`;
 
       // Use Gemini with 4-key rotation for guaranteed uptime
       try {
-        const responseText = await callGeminiWithRotation(`${systemPrompt}\n\nQuestion: ${question}`);
+        const responseText = await callAI(`${systemPrompt}\n\nQuestion: ${question}`);
         res.json({
           response: responseText || "I would approach this by focusing on our unique value proposition and UK market opportunity."
         });
       } catch (error: any) {
-        console.log("Gemini rotation failed for neural twin:", error?.message);
+        console.log("OpenAI failed for neural twin:", error?.message);
         res.json({
           response: `As the founder of ${profile.businessName}, I would highlight our innovative approach in the ${profile.industry} sector and our commitment to creating jobs in the UK economy.`
         });
@@ -9199,10 +9151,10 @@ Keep responses focused, professional, and relevant to UK visa requirements.`;
       }
 
       // Check if AI is available - if not, return error instead of fake scores
-      if (GEMINI_API_KEYS.length === 0) {
+      if (!process.env.OPENAI_API_KEY) {
         return res.json({
           score: 0,
-          feedback: "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this problem persists, please contact support@ukvisaassistant.com for assistance.",
+          feedback: "**Evaluation Unavailable.** OpenAI API key is not configured. Please contact support@ukvisaassistant.com for assistance.",
           error: true
         });
       }
@@ -9253,7 +9205,7 @@ BE HARSH BUT FAIR. This is visa preparation - false confidence could lead to rej
 
       // Use Gemini with 4-key rotation for evaluation
       try {
-        const feedbackText = await callGeminiWithRotation(`${systemPrompt}\n\nQUESTION ASKED: "${question}"\n\nFOUNDER'S RESPONSE (${wordCount} words):\n"${response}"`);
+        const feedbackText = await callAI(`${systemPrompt}\n\nQUESTION ASKED: "${question}"\n\nFOUNDER'S RESPONSE (${wordCount} words):\n"${response}"`);
         
         if (!feedbackText) {
           throw new Error("Empty AI response");
@@ -9364,7 +9316,7 @@ Return a JSON object with:
       // Use Gemini with 4-key rotation
       try {
         const jsonPrompt = `${systemPrompt}\n\nTranscript: ${transcript}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
-        const responseText = await callGeminiWithRotation(jsonPrompt);
+        const responseText = await callAI(jsonPrompt);
         const cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         const result = JSON.parse(cleanedResponse);
         res.json(result);
@@ -9506,7 +9458,7 @@ Return a JSON object with:
       // Use Gemini with 4-key rotation
       try {
         const jsonPrompt = `${systemPrompt}\n\nTitle: ${title}\nDescription: ${description}\nTechnical Details: ${technical || 'Not provided'}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
-        const responseText = await callGeminiWithRotation(jsonPrompt);
+        const responseText = await callAI(jsonPrompt);
         const cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         const result = JSON.parse(cleanedResponse);
         res.json({ blueprint: result });
@@ -9640,7 +9592,7 @@ Return a JSON object with:
       // Use Gemini with 4-key rotation
       try {
         const jsonPrompt = `${systemPrompt}\n\nRisk: ${risk.name}\nCategory: ${risk.category}\nDescription: ${risk.description}\nCurrent Mitigation: ${risk.mitigation}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
-        const responseText = await callGeminiWithRotation(jsonPrompt);
+        const responseText = await callAI(jsonPrompt);
         const cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         const result = JSON.parse(cleanedResponse);
         res.json(result);
@@ -9736,7 +9688,7 @@ Return a JSON object with:
       // Use Gemini with 4-key rotation
       try {
         const jsonPrompt = `${systemPrompt}\n\nDocuments:\n${combinedContent.slice(0, 15000)}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
-        const responseText = await callGeminiWithRotation(jsonPrompt);
+        const responseText = await callAI(jsonPrompt);
         const cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         const result = JSON.parse(cleanedResponse);
         res.json(result);
