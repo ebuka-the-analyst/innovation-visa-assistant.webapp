@@ -1,0 +1,169 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+7dd3a3a6
+Active
+
+Jan 17, 2026, 2:51 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+2:56:00 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 15ms :: {"…
+[2026-01-17T14:56:03.629Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:03 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 20ms :: {"…
+[2026-01-17T14:56:05.633Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:05 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 19ms :: {"…
+[2026-01-17T14:56:08.617Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:08 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 14ms :: {"…
+[2026-01-17T14:56:10.627Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:10 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 18ms :: {"…
+[2026-01-17T14:56:13.630Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:13 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 12ms :: {"…
+[2026-01-17T14:56:15.618Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:15 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 21ms :: {"…
+[2026-01-17T14:56:18.702Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:18 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 18ms :: {"…
+[2026-01-17T14:56:20.626Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:20 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 10ms :: {"…
+[2026-01-17T14:56:23.630Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:23 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 20ms :: {"…
+[2026-01-17T14:56:25.616Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:25 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 12ms :: {"…
+✓ Section 3 complete (8127 chars)
+Generating section 4/10: 4. MARKET ANALYSIS & VALIDATION
+[2026-01-17T14:56:28.618Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:28 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 13ms :: {"…
+[2026-01-17T14:56:29.183Z] POST /api/activity/session
+2:56:29 PM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"f9f56ee4-db68-4609-a6bf…
+[2026-01-17T14:56:30.626Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:30 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 14ms :: {"…
+[2026-01-17T14:56:42.789Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:56:43 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 215ms :: {…
+✓ Section 4 complete (7630 chars)
+Generating section 5/10: 5. FINANCIAL VIABILITY WITH REALISTIC MODELING
+[2026-01-17T14:56:59.185Z] POST /api/activity/session
+2:56:59 PM [express] POST /api/activity/session 200 in 200ms :: {"sessionId":"f9f56ee4-db68-4609-a6b…
+✓ Section 5 complete (6931 chars)
+Generating section 6/10: 6. REGULATORY & COMPLIANCE
+[2026-01-17T14:57:29.189Z] POST /api/activity/session
+2:57:29 PM [express] POST /api/activity/session 200 in 196ms :: {"sessionId":"f9f56ee4-db68-4609-a6b…
+[2026-01-17T14:57:42.775Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:57:42 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 212ms :: {…
+✓ Section 6 complete (7567 chars)
+Generating section 7/10: 7. TEAM & HIRING
+[2026-01-17T14:57:59.185Z] POST /api/activity/session
+2:57:59 PM [express] POST /api/activity/session 200 in 206ms :: {"sessionId":"f9f56ee4-db68-4609-a6b…
+[2026-01-17T14:58:06.619Z] POST /api/activity/session/end
+2:58:06 PM [express] POST /api/activity/session/end 200 in 21ms :: {"success":true}
+✓ Section 7 complete (6158 chars)
+Generating section 8/10: 8. SCALABILITY & GROWTH
+✓ Section 8 complete (6645 chars)
+Generating section 9/10: 9. RISK ANALYSIS
+[2026-01-17T14:58:37.488Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+[2026-01-17T14:58:37.491Z] POST /api/activity/session
+[2026-01-17T14:58:37.492Z] GET /api/auth/user
+2:58:37 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 187ms :: {…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:58:37 PM [express] GET /api/auth/user 200 in 202ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+2:58:37 PM [express] POST /api/activity/session 200 in 216ms :: {"sessionId":"03c30865-1877-4256-89e…
+[2026-01-17T14:58:37.892Z] POST /api/activity/page-view
+2:58:37 PM [express] POST /api/activity/page-view 200 in 20ms :: {"pageViewId":"78f93852-d02a-4a65-9…
+[2026-01-17T14:58:37.978Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:58:37 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 20ms :: {"…
+[2026-01-17T14:58:40.478Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:58:40 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 18ms :: {"…
+[2026-01-17T14:58:42.983Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:58:42 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 16ms :: {"…
+[2026-01-17T14:58:45.481Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:58:45 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 15ms :: {"…
+[2026-01-17T14:58:47.980Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:58:48 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 40ms :: {"…
+[2026-01-17T14:58:50.476Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:58:50 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 16ms :: {"…
+✓ Section 9 complete (5633 chars)
+Generating section 10/10: 10. ENDORSING BODY SELECTION
+[2026-01-17T14:58:52.978Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:58:52 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 13ms :: {"…
+[2026-01-17T14:58:55.478Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:58:55 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 18ms :: {"…
+[2026-01-17T14:58:57.876Z] GET /api/auth/user
+[2026-01-17T14:58:57.877Z] POST /api/activity/session
+[AUTH] Returning user mralexmik@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:58:57 PM [express] GET /api/auth/user 200 in 13ms :: {"id":"51c8fc24-182e-4dfc-92cf-203edb55d533",…
+[2026-01-17T14:58:57.978Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:58:57 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 14ms :: {"…
+2:58:58 PM [express] POST /api/activity/session 200 in 209ms :: {"sessionId":"40b7b18d-e3cc-4b31-811…
+[2026-01-17T14:58:58.273Z] POST /api/activity/page-view
+2:58:58 PM [express] POST /api/activity/page-view 200 in 20ms :: {"pageViewId":"cfce0af2-9baf-4513-8…
+[2026-01-17T14:59:00.486Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:59:00 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 16ms :: {"…
+[2026-01-17T14:59:02.976Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:59:02 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 14ms :: {"…
+[2026-01-17T14:59:05.478Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:59:05 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 21ms :: {"…
+[2026-01-17T14:59:07.892Z] POST /api/activity/session
+2:59:07 PM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"03c30865-1877-4256-89ee…
+[2026-01-17T14:59:08.064Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:59:08 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 17ms :: {"…
+[2026-01-17T14:59:10.496Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:59:10 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 11ms :: {"…
+✓ Section 10 complete (5913 chars)
+[Email Send] Attempting to send email to: benedict9211@gmail.com
+[Email Send] Provider: resend | Resend: true | SMTP: false
+[Email Send] Using Resend HTTP API...
+[2026-01-17T14:59:12.988Z] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+2:59:13 PM [express] GET /api/generate/status/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 18ms :: {"…
+Email send error: Error: The innovatorfoundervisaassistant.co.uk domain is not verified. Please, add and verify your domain on https://resend.com/domains
+    at sendEmail (file:///app/dist/index.js:3558:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async generateBusinessPlan (file:///app/dist/index.js:13008:11)
+[2026-01-17T14:59:23.166Z] GET /api/download/pdf/1d062c21-bb22-4f1e-82dd-c15836cbcfee
+[2026-01-17T14:59:23.168Z] POST /api/activity/session/end
+2:59:23 PM [express] POST /api/activity/session/end 200 in 216ms :: {"success":true}
+2:59:23 PM [express] GET /api/download/pdf/1d062c21-bb22-4f1e-82dd-c15836cbcfee 200 in 220ms
+[2026-01-17T14:59:23.771Z] GET /favicon.ico
+[2026-01-17T14:59:28.433Z] POST /api/activity/session
+2:59:28 PM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"40b7b18d-e3cc-4b31-811b…
+
+
+innovation-visa-assistant.webapp | Railway
