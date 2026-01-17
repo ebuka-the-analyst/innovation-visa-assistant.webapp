@@ -1,7 +1,42 @@
 import type { BusinessPlan } from "@shared/schema";
+import { generateSVGChart, type ChartDataPayload } from "./chartGenerator";
 
 export function generatePDFContent(plan: BusinessPlan): string {
   const content = plan.generatedContent || "Business plan content not yet generated.";
+  
+  let chartHtml = '';
+  if (plan.chartData) {
+    try {
+      const chartData = JSON.parse(plan.chartData) as ChartDataPayload;
+      chartHtml = `
+        <div class="charts-section" style="page-break-before: always; margin-top: 40px;">
+          <h2 style="color: #005EB8; border-bottom: 2px solid #005EB8; padding-bottom: 10px;">Visual Analytics & Charts</h2>
+          
+          <div class="chart-container" style="margin: 30px 0; text-align: center;">
+            <h3>Financial Projections</h3>
+            ${generateSVGChart('financial', chartData)}
+          </div>
+          
+          <div class="chart-container" style="margin: 30px 0; text-align: center; page-break-before: always;">
+            <h3>Market Size Analysis</h3>
+            ${generateSVGChart('market', chartData)}
+          </div>
+          
+          <div class="chart-container" style="margin: 30px 0; text-align: center; page-break-before: always;">
+            <h3>Risk Assessment</h3>
+            ${generateSVGChart('risk', chartData)}
+          </div>
+          
+          <div class="chart-container" style="margin: 30px 0; text-align: center; page-break-before: always;">
+            <h3>Competitive Analysis</h3>
+            ${generateSVGChart('competitor', chartData)}
+          </div>
+        </div>
+      `;
+    } catch (e) {
+      console.error('Failed to parse chart data:', e);
+    }
+  }
   
   const html = `
 <!DOCTYPE html>
@@ -23,14 +58,14 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
     h1 {
       font-size: 28pt;
-      color: #11b6e9;
-      border-bottom: 3px solid #11b6e9;
+      color: #005EB8;
+      border-bottom: 3px solid #005EB8;
       padding-bottom: 10px;
       margin-bottom: 30px;
     }
     h2 {
       font-size: 20pt;
-      color: #0093d9;
+      color: #005EB8;
       margin-top: 40px;
       margin-bottom: 15px;
     }
@@ -53,7 +88,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
     .cover-title {
       font-size: 36pt;
       font-weight: bold;
-      color: #11b6e9;
+      color: #005EB8;
       margin-bottom: 20px;
     }
     .cover-subtitle {
@@ -80,7 +115,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
     th {
       background-color: #f5f5f5;
       font-weight: bold;
-      color: #0093d9;
+      color: #005EB8;
     }
     ul, ol {
       margin: 15px 0;
@@ -99,6 +134,17 @@ export function generatePDFContent(plan: BusinessPlan): string {
       color: #1a1a1a;
       font-weight: 600;
     }
+    .chart-container {
+      background: #fafafa;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .chart-container svg {
+      max-width: 100%;
+      height: auto;
+    }
   </style>
 </head>
 <body>
@@ -115,6 +161,8 @@ export function generatePDFContent(plan: BusinessPlan): string {
   <div class="content">
     ${formatContent(content)}
   </div>
+  
+  ${chartHtml}
 </body>
 </html>
   `;

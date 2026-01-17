@@ -1671,10 +1671,16 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
 ${generatedSections.join('\n\n---\n\n')}`;
 
     const pdfUrl = generatePDFUrl(planId);
+    
+    // Generate chart data for visualizations
+    const { generateChartData } = await import('./chartGenerator');
+    const chartDataObj = generateChartData(plan);
+    const chartData = JSON.stringify(chartDataObj);
 
     await storage.updateBusinessPlan(planId, {
       status: 'completed',
       generatedContent,
+      chartData,
       pdfUrl,
       currentGenerationStage: 'Complete - your business plan is ready!'
     });
@@ -1766,10 +1772,18 @@ ${generatedSections.join('\n\n---\n\n')}`;
         return res.status(500).json({ error: "Business plan content is missing" });
       }
 
-      const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, PageBreak } = await import("docx");
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, PageBreak, ImageRun } = await import("docx");
+      const sharp = await import("sharp");
+      const chartGenerator = await import("./chartGenerator");
       
       const content = businessPlan.generatedContent;
       const children: any[] = [];
+      
+      // Helper to convert SVG to PNG buffer
+      const svgToPng = async (svgString: string, width = 600): Promise<Buffer> => {
+        const buffer = Buffer.from(svgString);
+        return sharp.default(buffer).resize(width).png().toBuffer();
+      };
       
       // Cover page
       children.push(
@@ -1850,6 +1864,59 @@ ${generatedSections.join('\n\n---\n\n')}`;
               spacing: { after: 120 },
             }));
           }
+        }
+      }
+
+      // Add charts section if chart data exists
+      if (businessPlan.chartData) {
+        try {
+          const chartData = JSON.parse(businessPlan.chartData) as chartGenerator.ChartDataPayload;
+          
+          children.push(
+            new Paragraph({ children: [new PageBreak()] }),
+            new Paragraph({
+              text: "Visual Analytics & Charts",
+              heading: HeadingLevel.HEADING_1,
+              spacing: { before: 400, after: 300 },
+            })
+          );
+          
+          const chartTypes: Array<{ title: string; type: 'financial' | 'market' | 'risk' | 'competitor' }> = [
+            { title: "3-Year Financial Projections", type: "financial" },
+            { title: "Market Size Analysis (TAM/SAM/SOM)", type: "market" },
+            { title: "Risk Assessment Matrix", type: "risk" },
+            { title: "Competitive Analysis", type: "competitor" },
+          ];
+          
+          for (const chart of chartTypes) {
+            try {
+              const svgString = chartGenerator.generateSVGChart(chart.type, chartData);
+              const pngBuffer = await svgToPng(svgString, 550);
+              
+              children.push(
+                new Paragraph({
+                  text: chart.title,
+                  heading: HeadingLevel.HEADING_2,
+                  spacing: { before: 300, after: 150 },
+                }),
+                new Paragraph({
+                  children: [
+                    new ImageRun({
+                      data: pngBuffer,
+                      transformation: { width: 550, height: 320 },
+                      type: "png",
+                    }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 200 },
+                })
+              );
+            } catch (chartError) {
+              console.error(`Failed to generate ${chart.type} chart:`, chartError);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse chart data for Word:", e);
         }
       }
 

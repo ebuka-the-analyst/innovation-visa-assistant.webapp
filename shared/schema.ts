@@ -132,6 +132,7 @@ export const businessPlans = pgTable("business_plans", {
   supportingEvidence: text("supporting_evidence"),
   
   generatedContent: text("generated_content"),
+  chartData: text("chart_data"), // JSON string containing structured chart data for visualizations
   pdfUrl: text("pdf_url"),
   status: varchar("status", { length: 20 }).notNull().default('pending'),
   currentGenerationStage: text("current_generation_stage"),
