@@ -296,7 +296,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
 
           <div className="space-y-4 mb-8">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Section {sectionNumber || 1} of {totalSections}</span>
+              <span className="text-muted-foreground">Section {status === 'completed' ? totalSections : (sectionNumber || 1)} of {totalSections}</span>
               <span className="text-muted-foreground">{tierPageTargets[tier]} pages</span>
             </div>
             <Progress value={progress} className="h-3" />
