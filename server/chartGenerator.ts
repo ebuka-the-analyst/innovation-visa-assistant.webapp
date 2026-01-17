@@ -718,7 +718,7 @@ function generateHiringChart(data: { role: string; quarter: string; count: numbe
   const chartWidth = width - padding - 40;
   const barHeight = 28;
   
-  const quarters = [...new Set(data.map(d => d.quarter))];
+  const quarters = Array.from(new Set(data.map(d => d.quarter)));
   const colors = ['#005EB8', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#41B6E6'];
   
   let bars = '';

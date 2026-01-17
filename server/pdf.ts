@@ -224,7 +224,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
     
     if (remainingCharts.length > 0) {
       html += '<div style="page-break-before: always;"><h2 style="color: #005EB8;">Additional Visual Analytics</h2>\n';
-      for (const chartType of remainingCharts.slice(0, 5)) {
+      for (const chartType of remainingCharts) {
         try {
           const svg = generateSVGChart(chartType, chartData);
           if (svg) {

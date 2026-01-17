@@ -1796,6 +1796,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const usedCharts = new Set<string>();
       
       const findChartsForSection = (sectionTitle: string): chartGenerator.ChartType[] => {
+        for (const [key, charts] of Object.entries(chartGenerator.SECTION_CHART_MAP)) {
+          if (sectionTitle.toLowerCase().includes(key.toLowerCase()) || 
+              key.toLowerCase().includes(sectionTitle.toLowerCase().split(' ')[0])) {
+            return charts;
+          }
+        }
         const keywords: Record<string, chartGenerator.ChartType[]> = {
           'executive': ['kpi'],
           'summary': ['kpi'],
@@ -1941,7 +1947,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
         const allChartTypes: chartGenerator.ChartType[] = ['kpi', 'funding', 'financial', 'market', 'revenue_streams', 
           'unit_economics', 'customer_journey', 'competitor', 'gtm_channels', 'growth', 'hiring', 
           'tech_stack', 'risk', 'compliance', 'milestones', 'timeline', 'pricing'];
-        const remaining = allChartTypes.filter(ct => !usedCharts.has(ct)).slice(0, 5);
+        const remaining = allChartTypes.filter(ct => !usedCharts.has(ct));
         if (remaining.length > 0) {
           children.push(
             new Paragraph({ children: [new PageBreak()] }),
