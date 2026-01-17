@@ -411,17 +411,48 @@ export default function BusinessPlan() {
   const scalabilityChartRef = useRef<HTMLDivElement>(null);
   
   const captureChartImage = async (ref: React.RefObject<HTMLDivElement>, fallbackWidth = 800, fallbackHeight = 400): Promise<string | null> => {
-    if (!ref.current) return null;
+    if (!ref.current) {
+      console.log('Chart ref is null');
+      return null;
+    }
+    
+    const hiddenContainer = ref.current.closest('[aria-hidden="true"]') as HTMLElement | null;
+    if (hiddenContainer) {
+      hiddenContainer.style.visibility = 'visible';
+      hiddenContainer.style.left = '0';
+      hiddenContainer.style.position = 'fixed';
+      hiddenContainer.style.zIndex = '-1000';
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
     try {
+      const width = ref.current.offsetWidth || fallbackWidth;
+      const height = ref.current.offsetHeight || fallbackHeight;
+      console.log(`Capturing chart: ${width}x${height}`);
+      
       const dataUrl = await toPng(ref.current, {
         backgroundColor: '#ffffff',
-        width: ref.current.offsetWidth || fallbackWidth,
-        height: ref.current.offsetHeight || fallbackHeight,
+        width,
+        height,
         pixelRatio: 2,
       });
+      
+      if (hiddenContainer) {
+        hiddenContainer.style.visibility = 'hidden';
+        hiddenContainer.style.left = '-9999px';
+        hiddenContainer.style.position = 'absolute';
+        hiddenContainer.style.zIndex = '';
+      }
+      
       return dataUrl;
     } catch (err) {
       console.error('Failed to capture chart:', err);
+      if (hiddenContainer) {
+        hiddenContainer.style.visibility = 'hidden';
+        hiddenContainer.style.left = '-9999px';
+        hiddenContainer.style.position = 'absolute';
+        hiddenContainer.style.zIndex = '';
+      }
       return null;
     }
   };
@@ -821,6 +852,7 @@ export default function BusinessPlan() {
     });
     
     try {
+      console.log('Starting chart capture for PDF export...');
       const [ganttImg, financialImg, riskImg, competitorImg, scalabilityImg] = await Promise.all([
         captureChartImage(ganttChartRef),
         captureChartImage(financialChartRef),
@@ -829,6 +861,14 @@ export default function BusinessPlan() {
         captureChartImage(scalabilityChartRef),
       ]);
       
+      console.log('Chart capture results:', {
+        gantt: ganttImg ? `captured (${ganttImg.length} chars)` : 'FAILED',
+        financial: financialImg ? `captured (${financialImg.length} chars)` : 'FAILED',
+        risk: riskImg ? `captured (${riskImg.length} chars)` : 'FAILED',
+        competitor: competitorImg ? `captured (${competitorImg.length} chars)` : 'FAILED',
+        scalability: scalabilityImg ? `captured (${scalabilityImg.length} chars)` : 'FAILED',
+      });
+      
       const exportData = await getExportSections({
         gantt: ganttImg,
         financial: financialImg,
@@ -836,6 +876,9 @@ export default function BusinessPlan() {
         competitor: competitorImg,
         scalability: scalabilityImg,
       });
+      
+      console.log('Export sections count:', exportData.sections.length);
+      console.log('Image sections:', exportData.sections.filter((s: any) => s.type === 'image').length);
       
       generatePdf(exportData);
       
@@ -863,6 +906,7 @@ export default function BusinessPlan() {
     });
     
     try {
+      console.log('Starting chart capture for Word export...');
       const [ganttImg, financialImg, riskImg, competitorImg, scalabilityImg] = await Promise.all([
         captureChartImage(ganttChartRef),
         captureChartImage(financialChartRef),
@@ -870,6 +914,14 @@ export default function BusinessPlan() {
         captureChartImage(competitorChartRef),
         captureChartImage(scalabilityChartRef),
       ]);
+      
+      console.log('Chart capture results:', {
+        gantt: ganttImg ? `captured (${ganttImg.length} chars)` : 'FAILED',
+        financial: financialImg ? `captured (${financialImg.length} chars)` : 'FAILED',
+        risk: riskImg ? `captured (${riskImg.length} chars)` : 'FAILED',
+        competitor: competitorImg ? `captured (${competitorImg.length} chars)` : 'FAILED',
+        scalability: scalabilityImg ? `captured (${scalabilityImg.length} chars)` : 'FAILED',
+      });
       
       const exportData = await getExportSections({
         gantt: ganttImg,
@@ -1726,6 +1778,148 @@ export default function BusinessPlan() {
               )}
             </CardContent>
           </Card>
+        </div>
+        
+        {/* Hidden container for chart export - always rendered offscreen */}
+        <div 
+          aria-hidden="true" 
+          style={{ 
+            position: 'absolute', 
+            left: '-9999px', 
+            top: 0, 
+            width: '900px',
+            visibility: 'hidden',
+            pointerEvents: 'none'
+          }}
+        >
+          <div ref={ganttChartRef} className="bg-white p-4" style={{ width: '900px', minHeight: '400px' }}>
+            <h4 className="font-semibold mb-4">12-Month Project Timeline (Gantt Chart)</h4>
+            <div className="min-w-[800px]">
+              <div className="grid grid-cols-[200px_repeat(12,1fr)] gap-1 mb-2">
+                <div className="font-medium text-sm p-2">Task</div>
+                {['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'].map(m => (
+                  <div key={m} className="text-center text-xs font-medium p-2 bg-gray-100 rounded">{m}</div>
+                ))}
+              </div>
+              {ganttTasks.map((task) => (
+                <div key={task.id} className="grid grid-cols-[200px_repeat(12,1fr)] gap-1 mb-1 items-center">
+                  <div className="text-sm p-2 truncate">{task.task}</div>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(month => {
+                    const isActive = month >= task.startMonth && month < task.startMonth + task.duration;
+                    return (
+                      <div
+                        key={month}
+                        className={`h-6 rounded ${isActive ? 'bg-blue-500' : 'bg-gray-100'}`}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div ref={financialChartRef} className="bg-white p-4 mt-4" style={{ width: '900px', minHeight: '350px' }}>
+            <h4 className="font-semibold mb-4">12-Month Cash Flow Projection</h4>
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart data={financialData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value) => `£${Number(value).toLocaleString()}`} />
+                <Legend />
+                <Bar dataKey="revenue" name="Revenue" fill="#22c55e" />
+                <Bar dataKey="costs" name="Costs" fill="#ef4444" />
+                <Line type="monotone" dataKey="cumulative" name="Cumulative" stroke="#3b82f6" strokeWidth={2} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+          
+          <div ref={riskMatrixRef} className="bg-white p-4 mt-4" style={{ width: '500px', minHeight: '350px' }}>
+            <h4 className="font-semibold mb-4">Risk Heat Map (Probability vs Impact)</h4>
+            <div className="grid grid-cols-6 gap-1 max-w-md mx-auto">
+              <div></div>
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="text-center text-xs font-medium p-1">{i}</div>
+              ))}
+              {[5, 4, 3, 2, 1].map(prob => (
+                <React.Fragment key={prob}>
+                  <div className="text-xs font-medium p-1 flex items-center">{prob}</div>
+                  {[1, 2, 3, 4, 5].map(imp => {
+                    const score = prob * imp;
+                    const level = score >= 20 ? 'critical' : score >= 10 ? 'high' : score >= 5 ? 'medium' : 'low';
+                    const colors: Record<string, string> = { low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444' };
+                    const risksInCell = risks.filter(r => r.probability === prob && r.impact === imp);
+                    return (
+                      <div
+                        key={`${prob}-${imp}`}
+                        className="h-10 rounded flex items-center justify-center text-white text-xs font-bold"
+                        style={{ backgroundColor: colors[level] }}
+                      >
+                        {risksInCell.length > 0 && risksInCell.length}
+                      </div>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+            </div>
+            <div className="flex justify-center gap-4 mt-4 text-xs">
+              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-green-500" /> Low</span>
+              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-yellow-500" /> Medium</span>
+              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-orange-500" /> High</span>
+              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-red-500" /> Critical</span>
+            </div>
+          </div>
+          
+          <div ref={competitorChartRef} className="bg-white p-4 mt-4" style={{ width: '900px', minHeight: '300px' }}>
+            <h4 className="font-semibold mb-4">Market Share Distribution</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <ResponsiveContainer width="100%" height={250}>
+                <RePieChart>
+                  <Pie
+                    data={competitors.map(c => ({ name: c.name, value: c.marketShare }))}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {competitors.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'][index % 5]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </RePieChart>
+              </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={competitors} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" domain={[0, 10]} />
+                  <YAxis dataKey="name" type="category" width={100} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="innovationScore" name="Innovation" fill="#3b82f6" />
+                  <Bar dataKey="priceScore" name="Price" fill="#22c55e" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          
+          <div ref={scalabilityChartRef} className="bg-white p-4 mt-4" style={{ width: '900px', minHeight: '300px' }}>
+            <h4 className="font-semibold mb-4">Job Creation Timeline</h4>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={jobCreationPlan.map(j => ({ year: j.year, jobs: j.totalJobs, salary: j.salaryBudget / 1000 }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="year" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="jobs" name="Total Jobs" fill="#22c55e" />
+                <Bar dataKey="salary" name="Salary Budget (£K)" fill="#3b82f6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </ToolAccessGuard>
