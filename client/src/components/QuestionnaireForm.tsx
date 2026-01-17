@@ -1056,10 +1056,9 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
         "SUSTAINABILITY ANALYSIS: Unlike competitors relying on high one-time fees, our model generates recurring revenue through: (1) Add-on credit purchases, (2) Ultimate Assurance annual subscriptions, (3) Referral-driven new customers, (4) B2B partnership licensing. This creates predictable revenue streams while maintaining accessible pricing for individual applicants.",
     };
     
+    // Update formData and savedData synchronously to prevent race condition with useEffect
     setFormData(demoData);
-    Object.entries(demoData).forEach(([key, value]) => {
-      saveField(key, value);
-    });
+    saveAllFields(demoData);
     toast({
       title: "Demo Template Loaded",
       description: "All fields filled with example data showing the detail level endorsers expect. Replace each [EXAMPLE] section with your own information.",
@@ -1751,10 +1750,9 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     // Merge base template with industry-specific data
     const finalTemplateData = { ...baseTemplateData, ...selectedTemplateData };
     
+    // Update formData and savedData synchronously to prevent race condition with useEffect
     setFormData(finalTemplateData);
-    Object.entries(finalTemplateData).forEach(([key, value]) => {
-      saveField(key, value);
-    });
+    saveAllFields(finalTemplateData);
     
     const industryName = INDUSTRY_TEMPLATES[industry as keyof typeof INDUSTRY_TEMPLATES]?.name || industry;
     const templateName = INDUSTRY_TEMPLATES[industry as keyof typeof INDUSTRY_TEMPLATES]?.templates[templateIndex] || 'Template';
