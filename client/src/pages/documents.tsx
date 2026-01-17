@@ -22,6 +22,8 @@ import {
 import type { UserDocument, BusinessPlan } from "@shared/schema";
 
 const DOCUMENT_CATEGORIES = [
+  { value: "passport", label: "Passport & ID", icon: Shield, description: "Identity documents" },
+  { value: "bank_statement", label: "Bank Statements", icon: FileSpreadsheet, description: "Financial evidence" },
   { value: "business_plan", label: "Business Plan", icon: FileText, description: "Your visa business plan" },
   { value: "endorsement", label: "Endorsement", icon: CheckCircle2, description: "Endorser letters" },
   { value: "education", label: "Education", icon: FileText, description: "Degrees and certificates" },
