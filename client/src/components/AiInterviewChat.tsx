@@ -316,6 +316,7 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isGeneratingDraft, setIsGeneratingDraft] = useState(false);
   const [isAutofilling, setIsAutofilling] = useState(false);
+  const [documentStatus, setDocumentStatus] = useState<{ documentsCount: number; extractedFieldsCount: number; hasData: boolean } | null>(null);
   const [showQuickResponses, setShowQuickResponses] = useState(true);
   const [answerConfidence, setAnswerConfidence] = useState(0);
   const [complianceWarnings, setComplianceWarnings] = useState<string[]>([]);
@@ -378,6 +379,23 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Fetch document status for premium autofill feature
+  useEffect(() => {
+    const fetchDocumentStatus = async () => {
+      if (!hasPremiumFeatures) return;
+      try {
+        const res = await fetch('/api/ai-interview/document-status', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setDocumentStatus(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch document status:', err);
+      }
+    };
+    fetchDocumentStatus();
+  }, [hasPremiumFeatures]);
 
   const speak = useCallback((text: string) => {
     if (!synthRef.current || !voiceEnabled) return;
@@ -909,29 +927,40 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
     try {
       const lastQuestion = [...messages].reverse().find(m => m.role === 'agent' && m.questionId);
       
+      // Get question text - try multiple sources
+      const questionText = lastQuestion?.content || 
+                          [...messages].reverse().find(m => m.role === 'agent')?.content || 
+                          'General visa application question';
+      
       const res = await apiRequest('POST', '/api/ai-interview/autofill-from-documents', {
-        questionId: lastQuestion?.questionId,
-        question: lastQuestion?.content,
+        questionId: lastQuestion?.questionId || 'general',
+        question: questionText,
         category: lastQuestion?.questionData?.category || 'general'
       });
       
       const data = await res.json();
       if (data.success && data.autofillAnswer) {
         setInputValue(data.autofillAnswer);
-        setAutofillMessage(`Used ${data.dataSourcesUsed?.documents || 0} documents, ${data.dataSourcesUsed?.extractedFields || 0} data points`);
-        setTimeout(() => setAutofillMessage(null), 5000);
-      } else if (!data.success && data.message) {
+        setAutofillMessage(`Filled from ${data.dataSourcesUsed?.documents || 0} docs (${data.dataSourcesUsed?.extractedFields || 0} fields)`);
+        setTimeout(() => setAutofillMessage(null), 6000);
+      } else if (data.message) {
         setAutofillMessage(data.message);
-        setTimeout(() => setAutofillMessage(null), 5000);
+        setTimeout(() => setAutofillMessage(null), 8000);
+      } else {
+        setAutofillMessage('No matching data found in your documents for this question');
+        setTimeout(() => setAutofillMessage(null), 6000);
       }
     } catch (err: any) {
       console.error('Error autofilling from documents:', err);
-      if (err?.message?.includes('403')) {
-        setAutofillMessage('This feature requires a Premium subscription');
+      const errorMessage = err?.message || '';
+      if (errorMessage.includes('403') || errorMessage.includes('Premium')) {
+        setAutofillMessage('Upgrade to Premium to use document autofill');
+      } else if (errorMessage.includes('401')) {
+        setAutofillMessage('Please log in to use this feature');
       } else {
-        setAutofillMessage('Could not autofill - please try again');
+        setAutofillMessage('Failed to autofill. Check your internet connection and try again.');
       }
-      setTimeout(() => setAutofillMessage(null), 5000);
+      setTimeout(() => setAutofillMessage(null), 6000);
     } finally {
       setIsAutofilling(false);
     }
@@ -1643,10 +1672,17 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                     ) : (
                       <FileText className="h-3.5 w-3.5 mr-1.5 text-emerald-500" />
                     )}
-                    {isAutofilling ? 'Loading...' : 'Autofill from Docs'}
-                    <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1 bg-emerald-500/10 text-emerald-500 border-emerald-500/30">
-                      Premium
-                    </Badge>
+                    {isAutofilling ? 'Filling...' : 'Autofill'}
+                    {documentStatus?.hasData && !isAutofilling && (
+                      <Badge variant="secondary" className="ml-1.5 text-xs py-0 px-1.5 bg-emerald-500/20 text-emerald-600 border-0">
+                        {documentStatus.extractedFieldsCount} fields
+                      </Badge>
+                    )}
+                    {!documentStatus?.hasData && !isAutofilling && (
+                      <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1 text-amber-500 border-amber-500/30">
+                        Upload docs
+                      </Badge>
+                    )}
                   </Button>
                 ) : (
                   <Button
@@ -1657,7 +1693,7 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                     data-testid="button-autofill-documents-locked"
                   >
                     <FileText className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                    Autofill from Docs
+                    Autofill
                     <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1">
                       Premium
                     </Badge>

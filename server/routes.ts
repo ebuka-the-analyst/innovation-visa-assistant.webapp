@@ -8944,6 +8944,38 @@ OUTPUT FORMAT:
     }
   });
 
+  // Check document availability for autofill (for UI state)
+  app.get("/api/ai-interview/document-status", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      
+      const documents = await db.select()
+        .from(userDocuments)
+        .where(eq(userDocuments.userId, user.id));
+      
+      const extractions = await db.select()
+        .from(documentExtractions)
+        .where(eq(documentExtractions.userId, user.id));
+      
+      let extractedFieldsCount = 0;
+      for (const extraction of extractions) {
+        if (extraction.extractedData && typeof extraction.extractedData === 'object') {
+          extractedFieldsCount += Object.keys(extraction.extractedData).length;
+        }
+      }
+      
+      res.json({
+        documentsCount: documents.length,
+        extractionsCount: extractions.length,
+        extractedFieldsCount,
+        hasData: extractedFieldsCount > 0
+      });
+    } catch (error) {
+      console.error("Document status check error:", error);
+      res.json({ documentsCount: 0, extractionsCount: 0, extractedFieldsCount: 0, hasData: false });
+    }
+  });
+
   // Premium Feature: Autofill from Documents (Premium+ tiers only)
   app.post("/api/ai-interview/autofill-from-documents", isAuthenticated, async (req, res) => {
     try {
@@ -8952,13 +8984,20 @@ OUTPUT FORMAT:
       const premiumTiers = ['premium', 'enterprise', 'ultimate'];
       
       if (!premiumTiers.includes(userTier)) {
-        return res.status(403).json({ error: "This feature requires a Premium or higher subscription" });
+        return res.status(403).json({ 
+          success: false,
+          error: "Premium required",
+          message: "Upgrade to Premium to autofill answers from your documents"
+        });
       }
       
       const { question, questionId, category } = req.body;
       
       if (!question) {
-        return res.status(400).json({ error: "Question is required" });
+        return res.json({ 
+          success: false, 
+          message: "No question detected. Please wait for the AI to ask a question first."
+        });
       }
 
       // Get user's uploaded documents with extracted data
@@ -8966,12 +9005,20 @@ OUTPUT FORMAT:
         .from(userDocuments)
         .where(eq(userDocuments.userId, user.id));
       
+      if (documents.length === 0) {
+        return res.json({
+          success: false,
+          message: "No documents uploaded. Go to My Documents to upload your business documents first.",
+          documentsCount: 0
+        });
+      }
+      
       // Get user's document extractions
       const extractions = await db.select()
         .from(documentExtractions)
         .where(eq(documentExtractions.userId, user.id))
         .orderBy(desc(documentExtractions.createdAt))
-        .limit(5);
+        .limit(10);
       
       // Collect all extracted data from documents
       let allExtractedData: Record<string, any> = {};
@@ -8984,13 +9031,14 @@ OUTPUT FORMAT:
       // Build document summary for context
       const documentSummary = documents.map(d => `${d.category}: ${d.name}`).join(', ');
       
-      console.log("[Autofill] Documents:", documents.length, "Extractions:", extractions.length);
+      console.log("[Autofill] User:", user.id, "Documents:", documents.length, "Extractions:", extractions.length, "Fields:", Object.keys(allExtractedData).length);
       
       if (Object.keys(allExtractedData).length === 0) {
         return res.json({
           success: false,
-          message: "No document data found. Please upload documents and run extraction first in the Documents section.",
-          hasDocuments: documents.length > 0
+          message: `You have ${documents.length} document(s) but no data extracted yet. Run AI extraction on your documents in My Documents first.`,
+          documentsCount: documents.length,
+          hasDocuments: true
         });
       }
       
