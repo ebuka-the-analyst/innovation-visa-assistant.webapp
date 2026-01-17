@@ -315,9 +315,11 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
   const [showSmartTips, setShowSmartTips] = useState(true);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isGeneratingDraft, setIsGeneratingDraft] = useState(false);
+  const [isAutofilling, setIsAutofilling] = useState(false);
   const [showQuickResponses, setShowQuickResponses] = useState(true);
   const [answerConfidence, setAnswerConfidence] = useState(0);
   const [complianceWarnings, setComplianceWarnings] = useState<string[]>([]);
+  const [autofillMessage, setAutofillMessage] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -895,6 +897,43 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
       console.error('Error generating draft:', err);
     } finally {
       setIsGeneratingDraft(false);
+    }
+  };
+
+  // Premium: Autofill from uploaded documents
+  const autofillFromDocuments = async () => {
+    if (isAutofilling) return;
+    
+    setIsAutofilling(true);
+    setAutofillMessage(null);
+    try {
+      const lastQuestion = [...messages].reverse().find(m => m.role === 'agent' && m.questionId);
+      
+      const res = await apiRequest('POST', '/api/ai-interview/autofill-from-documents', {
+        questionId: lastQuestion?.questionId,
+        question: lastQuestion?.content,
+        category: lastQuestion?.questionData?.category || 'general'
+      });
+      
+      const data = await res.json();
+      if (data.success && data.autofillAnswer) {
+        setInputValue(data.autofillAnswer);
+        setAutofillMessage(`Used ${data.dataSourcesUsed?.documents || 0} documents, ${data.dataSourcesUsed?.extractedFields || 0} data points`);
+        setTimeout(() => setAutofillMessage(null), 5000);
+      } else if (!data.success && data.message) {
+        setAutofillMessage(data.message);
+        setTimeout(() => setAutofillMessage(null), 5000);
+      }
+    } catch (err: any) {
+      console.error('Error autofilling from documents:', err);
+      if (err?.message?.includes('403')) {
+        setAutofillMessage('This feature requires a Premium subscription');
+      } else {
+        setAutofillMessage('Could not autofill - please try again');
+      }
+      setTimeout(() => setAutofillMessage(null), 5000);
+    } finally {
+      setIsAutofilling(false);
     }
   };
 
@@ -1492,9 +1531,24 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
               </div>
             </div>
 
+            {/* Autofill Message Feedback */}
+            {autofillMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="px-3 py-2 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-600"
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="h-3.5 w-3.5" />
+                  {autofillMessage}
+                </div>
+              </motion.div>
+            )}
+
             {/* Premium Action Buttons */}
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {/* Enhance Answer Button - Premium Only */}
                 {hasPremiumFeatures ? (
                   <Button
@@ -1565,6 +1619,44 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                   >
                     <HelpCircle className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
                     Help Me Answer
+                    <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1">
+                      Premium
+                    </Badge>
+                  </Button>
+                )}
+
+                {/* Autofill from Documents Button - Premium Only */}
+                {hasPremiumFeatures ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={autofillFromDocuments}
+                    disabled={inputValue.trim().length > 0 || isAutofilling || isProcessing}
+                    className="text-xs bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-emerald-500/30"
+                    data-testid="button-autofill-documents"
+                  >
+                    {isAutofilling ? (
+                      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
+                        <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                      </motion.div>
+                    ) : (
+                      <FileText className="h-3.5 w-3.5 mr-1.5 text-emerald-500" />
+                    )}
+                    {isAutofilling ? 'Loading...' : 'Autofill from Docs'}
+                    <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1 bg-emerald-500/10 text-emerald-500 border-emerald-500/30">
+                      Premium
+                    </Badge>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="text-xs opacity-60"
+                    data-testid="button-autofill-documents-locked"
+                  >
+                    <FileText className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                    Autofill from Docs
                     <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1">
                       Premium
                     </Badge>

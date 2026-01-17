@@ -8944,6 +8944,129 @@ OUTPUT FORMAT:
     }
   });
 
+  // Premium Feature: Autofill from Documents (Premium+ tiers only)
+  app.post("/api/ai-interview/autofill-from-documents", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const userTier = user?.subscriptionTier?.toLowerCase() || 'free';
+      const premiumTiers = ['premium', 'enterprise', 'ultimate'];
+      
+      if (!premiumTiers.includes(userTier)) {
+        return res.status(403).json({ error: "This feature requires a Premium or higher subscription" });
+      }
+      
+      const { question, questionId, category } = req.body;
+      
+      if (!question) {
+        return res.status(400).json({ error: "Question is required" });
+      }
+
+      // Get user's uploaded documents with extracted data
+      const documents = await db.select()
+        .from(require("@shared/schema").documents)
+        .where(require("drizzle-orm").eq(require("@shared/schema").documents.userId, user.id));
+      
+      // Get user's document extractions
+      const extractions = await db.select()
+        .from(require("@shared/schema").documentExtractions)
+        .where(require("drizzle-orm").eq(require("@shared/schema").documentExtractions.userId, user.id))
+        .orderBy(require("drizzle-orm").desc(require("@shared/schema").documentExtractions.createdAt))
+        .limit(5);
+      
+      // Collect all extracted data from documents
+      let allExtractedData: Record<string, any> = {};
+      for (const extraction of extractions) {
+        if (extraction.extractedData && typeof extraction.extractedData === 'object') {
+          allExtractedData = { ...allExtractedData, ...extraction.extractedData };
+        }
+      }
+      
+      // Get user's questionnaire answers for additional context
+      const answers = await db.select()
+        .from(require("@shared/schema").questionnaireAnswers)
+        .where(require("drizzle-orm").eq(require("@shared/schema").questionnaireAnswers.userId, user.id));
+      
+      let questionnaireContext: Record<string, any> = {};
+      for (const answer of answers) {
+        if (answer.answer) {
+          questionnaireContext[answer.questionId] = answer.answer;
+        }
+      }
+      
+      // Build document summary for context
+      const documentSummary = documents.map(d => `${d.category}: ${d.name}`).join(', ');
+      
+      console.log("[Autofill] Documents:", documents.length, "Extractions:", extractions.length, "Questionnaire answers:", answers.length);
+      
+      if (Object.keys(allExtractedData).length === 0 && Object.keys(questionnaireContext).length === 0) {
+        return res.json({
+          success: false,
+          message: "No document data found. Please upload documents first in the Documents section.",
+          hasDocuments: documents.length > 0
+        });
+      }
+      
+      // Build AI prompt to generate an answer from the extracted data
+      const autofillPrompt = `You are an expert UK Innovator Founder Visa consultant. A premium user is in an AI-guided interview and needs help answering a question using their uploaded document data.
+
+INTERVIEW QUESTION: ${question}
+QUESTION CATEGORY: ${category || 'general'}
+
+USER'S EXTRACTED DOCUMENT DATA:
+${JSON.stringify(allExtractedData, null, 2)}
+
+USER'S PREVIOUS QUESTIONNAIRE ANSWERS:
+${JSON.stringify(questionnaireContext, null, 2)}
+
+UPLOADED DOCUMENTS: ${documentSummary || 'None listed'}
+
+INSTRUCTIONS:
+1. Carefully analyze the question and find relevant information from the extracted document data
+2. Compose a complete, compelling answer that directly answers the interview question
+3. Use SPECIFIC details from their documents (names, dates, numbers, achievements)
+4. If some information is missing, include [PLEASE COMPLETE] placeholders for those parts only
+5. Write in first person as if the applicant is speaking
+6. Keep the answer focused, professional, and between 80-200 words
+7. Include relevant metrics, dates, and evidence where available
+8. Do not reference the documents directly - just use the information naturally
+
+OUTPUT FORMAT:
+- Write only the answer, no explanations
+- Use confident, visa-ready language
+- Include any specific dates, numbers, or achievements found in documents`;
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are an expert UK Innovator Founder Visa consultant. Generate answers using the applicant's own document data to create personalized, evidence-based responses." },
+          { role: "user", content: autofillPrompt }
+        ],
+        temperature: 0.6,
+        max_tokens: 600
+      });
+
+      const autofillAnswer = completion.choices[0]?.message?.content?.trim() || "";
+
+      res.json({ 
+        success: true,
+        autofillAnswer,
+        dataSourcesUsed: {
+          documents: documents.length,
+          extractions: extractions.length,
+          questionnaireAnswers: answers.length,
+          extractedFields: Object.keys(allExtractedData).length
+        },
+        note: "Answer generated from your uploaded documents. Please review and customize as needed."
+      });
+    } catch (error) {
+      console.error("Autofill from documents error:", error);
+      res.status(500).json({ error: "Failed to autofill from documents" });
+    }
+  });
+
   // Get session summary
   app.get("/api/ai-interview/session/:sessionId", isAuthenticated, async (req, res) => {
     try {
