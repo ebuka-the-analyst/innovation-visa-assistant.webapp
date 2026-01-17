@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions } from "@shared/schema";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
@@ -8963,14 +8963,14 @@ OUTPUT FORMAT:
 
       // Get user's uploaded documents with extracted data
       const documents = await db.select()
-        .from(require("@shared/schema").documents)
-        .where(require("drizzle-orm").eq(require("@shared/schema").documents.userId, user.id));
+        .from(userDocuments)
+        .where(eq(userDocuments.userId, user.id));
       
       // Get user's document extractions
       const extractions = await db.select()
-        .from(require("@shared/schema").documentExtractions)
-        .where(require("drizzle-orm").eq(require("@shared/schema").documentExtractions.userId, user.id))
-        .orderBy(require("drizzle-orm").desc(require("@shared/schema").documentExtractions.createdAt))
+        .from(documentExtractions)
+        .where(eq(documentExtractions.userId, user.id))
+        .orderBy(desc(documentExtractions.createdAt))
         .limit(5);
       
       // Collect all extracted data from documents
@@ -8981,27 +8981,15 @@ OUTPUT FORMAT:
         }
       }
       
-      // Get user's questionnaire answers for additional context
-      const answers = await db.select()
-        .from(require("@shared/schema").questionnaireAnswers)
-        .where(require("drizzle-orm").eq(require("@shared/schema").questionnaireAnswers.userId, user.id));
-      
-      let questionnaireContext: Record<string, any> = {};
-      for (const answer of answers) {
-        if (answer.answer) {
-          questionnaireContext[answer.questionId] = answer.answer;
-        }
-      }
-      
       // Build document summary for context
       const documentSummary = documents.map(d => `${d.category}: ${d.name}`).join(', ');
       
-      console.log("[Autofill] Documents:", documents.length, "Extractions:", extractions.length, "Questionnaire answers:", answers.length);
+      console.log("[Autofill] Documents:", documents.length, "Extractions:", extractions.length);
       
-      if (Object.keys(allExtractedData).length === 0 && Object.keys(questionnaireContext).length === 0) {
+      if (Object.keys(allExtractedData).length === 0) {
         return res.json({
           success: false,
-          message: "No document data found. Please upload documents first in the Documents section.",
+          message: "No document data found. Please upload documents and run extraction first in the Documents section.",
           hasDocuments: documents.length > 0
         });
       }
@@ -9014,9 +9002,6 @@ QUESTION CATEGORY: ${category || 'general'}
 
 USER'S EXTRACTED DOCUMENT DATA:
 ${JSON.stringify(allExtractedData, null, 2)}
-
-USER'S PREVIOUS QUESTIONNAIRE ANSWERS:
-${JSON.stringify(questionnaireContext, null, 2)}
 
 UPLOADED DOCUMENTS: ${documentSummary || 'None listed'}
 
@@ -9056,7 +9041,6 @@ OUTPUT FORMAT:
         dataSourcesUsed: {
           documents: documents.length,
           extractions: extractions.length,
-          questionnaireAnswers: answers.length,
           extractedFields: Object.keys(allExtractedData).length
         },
         note: "Answer generated from your uploaded documents. Please review and customize as needed."

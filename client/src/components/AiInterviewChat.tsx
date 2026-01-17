@@ -1538,10 +1538,11 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 className="px-3 py-2 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-600"
+                data-testid="status-autofill-message"
               >
                 <div className="flex items-center gap-2">
                   <FileText className="h-3.5 w-3.5" />
-                  {autofillMessage}
+                  <span data-testid="text-autofill-message">{autofillMessage}</span>
                 </div>
               </motion.div>
             )}
