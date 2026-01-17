@@ -1,0 +1,230 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+12 minutes ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+20 minutes ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+4 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+5 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+6 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+7 hours ago
+
+Scroll to load more
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+1c903f80
+Active
+
+Jan 17, 2026, 1:06 AM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+1:15:31 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 18ms :: {"…
+[2026-01-17T01:15:33.893Z] POST /api/activity/session
+1:15:33 AM [express] POST /api/activity/session 200 in 22ms :: {"sessionId":"9c3acf18-7d92-4b1b-b521…
+[2026-01-17T01:15:34.070Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:34 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 13ms :: {"…
+[2026-01-17T01:15:36.438Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:36 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 15ms :: {"…
+[2026-01-17T01:15:38.939Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:38 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 21ms :: {"…
+[2026-01-17T01:15:41.442Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:41 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 16ms :: {"…
+[2026-01-17T01:15:43.951Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:43 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 17ms :: {"…
+[2026-01-17T01:15:46.439Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:46 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 14ms :: {"…
+[2026-01-17T01:15:48.940Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:48 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 19ms :: {"…
+[2026-01-17T01:15:51.439Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:51 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 13ms :: {"…
+[2026-01-17T01:15:53.950Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:53 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 13ms :: {"…
+[2026-01-17T01:15:56.451Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:56 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 18ms :: {"…
+[2026-01-17T01:15:58.954Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:15:58 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 17ms :: {"…
+[2026-01-17T01:16:01.438Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:01 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 15ms :: {"…
+[2026-01-17T01:16:03.888Z] POST /api/activity/session
+1:16:03 AM [express] POST /api/activity/session 200 in 13ms :: {"sessionId":"9c3acf18-7d92-4b1b-b521…
+1:16:04 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 24ms :: {"…
+[2026-01-17T01:16:04.059Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+[2026-01-17T01:16:06.449Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:06 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 14ms :: {"…
+[2026-01-17T01:16:08.951Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:08 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 21ms :: {"…
+[2026-01-17T01:16:11.444Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:11 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 21ms :: {"…
+[2026-01-17T01:16:13.955Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:13 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 16ms :: {"…
+[2026-01-17T01:16:16.198Z] POST /api/activity/session/end
+1:16:16 AM [express] POST /api/activity/session/end 200 in 20ms :: {"success":true}
+[2026-01-17T01:16:17.042Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:17 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 17ms :: {"…
+[2026-01-17T01:16:19.057Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:19 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 22ms :: {"…
+[2026-01-17T01:16:22.046Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:22 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 19ms :: {"…
+[2026-01-17T01:16:24.050Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:24 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 19ms :: {"…
+[2026-01-17T01:16:27.048Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:27 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 16ms :: {"…
+[2026-01-17T01:16:29.057Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:29 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 26ms :: {"…
+[2026-01-17T01:16:32.056Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:32 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 18ms :: {"…
+[2026-01-17T01:16:34.055Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:34 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 17ms :: {"…
+[2026-01-17T01:16:37.048Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:37 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 12ms :: {"…
+[2026-01-17T01:16:39.054Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:39 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 19ms :: {"…
+[2026-01-17T01:16:42.047Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:42 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 16ms :: {"…
+[2026-01-17T01:16:44.054Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:44 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 15ms :: {"…
+[2026-01-17T01:16:47.052Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:47 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 15ms :: {"…
+[2026-01-17T01:16:49.045Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:49 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 32ms :: {"…
+[2026-01-17T01:16:52.062Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:52 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 15ms :: {"…
+[2026-01-17T01:16:54.044Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:54 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 14ms :: {"…
+[2026-01-17T01:16:57.046Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:57 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 19ms :: {"…
+[2026-01-17T01:16:59.049Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:16:59 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 23ms :: {"…
+[2026-01-17T01:17:02.043Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:02 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 20ms :: {"…
+[2026-01-17T01:17:04.050Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:04 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 25ms :: {"…
+[2026-01-17T01:17:07.051Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:07 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 16ms :: {"…
+[2026-01-17T01:17:09.060Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:09 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 17ms :: {"…
+[2026-01-17T01:17:12.050Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:12 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 15ms :: {"…
+[2026-01-17T01:17:14.052Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:14 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 15ms :: {"…
+[2026-01-17T01:17:31.802Z] POST /api/activity/session
+[2026-01-17T01:17:31.806Z] GET /api/auth/user
+[2026-01-17T01:17:31.814Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:17:32 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 216ms :: {…
+1:17:32 AM [express] GET /api/auth/user 200 in 227ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+1:17:32 AM [express] POST /api/activity/session 200 in 230ms :: {"sessionId":"cea397a2-2b13-445b-876…
+[2026-01-17T01:17:32.219Z] POST /api/activity/page-view
+1:17:32 AM [express] POST /api/activity/page-view 200 in 18ms :: {"pageViewId":"0f785d77-6ad1-49d9-9…
+[2026-01-17T01:17:33.952Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:33 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 17ms :: {"…
+[2026-01-17T01:17:36.444Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:36 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 14ms :: {"…
+[2026-01-17T01:17:38.589Z] POST /api/activity/session/end
+1:17:38 AM [express] POST /api/activity/session/end 200 in 20ms :: {"success":true}
+[2026-01-17T01:17:39.053Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:39 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 22ms :: {"…
+[2026-01-17T01:17:42.042Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:42 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 11ms :: {"…
+[2026-01-17T01:17:44.047Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:44 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 20ms :: {"…
+[2026-01-17T01:17:47.044Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:47 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 14ms :: {"…
+[2026-01-17T01:17:49.054Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:49 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 19ms :: {"…
+[2026-01-17T01:17:52.048Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:52 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 14ms :: {"…
+[2026-01-17T01:17:54.059Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:54 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 18ms :: {"…
+[2026-01-17T01:17:57.044Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:57 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 14ms :: {"…
+[2026-01-17T01:17:59.054Z] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4
+1:17:59 AM [express] GET /api/generate/status/22fcb247-073e-4ef4-aded-c5dc7cb149e4 200 in 16ms :: {"…
+
+
+innovation-visa-assistant.webapp | Railway
