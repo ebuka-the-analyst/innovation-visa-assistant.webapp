@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+0a65c0da
+Active
+
+Jan 17, 2026, 2:29 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-17T14:37:19.085Z] GET /api/auth/user
+[AUTH] Returning user mralexmik@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:37:19 PM [express] GET /api/auth/user 200 in 14ms :: {"id":"51c8fc24-182e-4dfc-92cf-203edb55d533",…
+[2026-01-17T14:37:19.298Z] GET /assets/generation-CShH47SW.js
+[2026-01-17T14:37:19.303Z] GET /api/partner/status
+2:37:19 PM [express] GET /api/partner/status 200 in 12ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-01-17T14:37:19.458Z] POST /api/activity/session
+[2026-01-17T14:37:19.459Z] POST /api/activity/session
+2:37:19 PM [express] POST /api/activity/session 200 in 27ms :: {"sessionId":"b3285cdc-49a8-4bf7-8361…
+2:37:19 PM [express] POST /api/activity/session 200 in 37ms :: {"sessionId":"2e815088-5981-4577-b04d…
+[2026-01-17T14:37:19.511Z] POST /api/generate/start
+[CREDITS] User 51c8fc24-182e-4dfc-92cf-203edb55d533 has unlimited credits (Ultimate), no credit consumed
+2:37:19 PM [express] POST /api/generate/start 200 in 24ms :: {"success":true,"message":"Generation s…
+Starting multi-pass generation for 10 sections (premium tier)
+Generating section 1/10: 1. EXECUTIVE SUMMARY
+[2026-01-17T14:37:19.661Z] POST /api/activity/page-view
+2:37:19 PM [express] POST /api/activity/page-view 200 in 21ms :: {"pageViewId":"724de2f0-4044-4664-9…
+[2026-01-17T14:37:22.015Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:22 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 12ms :: {"…
+[2026-01-17T14:37:23.800Z] POST /api/activity/session/end
+2:37:23 PM [express] POST /api/activity/session/end 200 in 14ms :: {"success":true}
+[2026-01-17T14:37:23.960Z] POST /api/performance/metrics
+2:37:23 PM [express] POST /api/performance/metrics 204 in 15ms
+[2026-01-17T14:37:25.038Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:25 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 16ms :: {"…
+2:37:27 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 21ms :: {"…
+[2026-01-17T14:37:27.036Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+[2026-01-17T14:37:30.037Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:30 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 18ms :: {"…
+[2026-01-17T14:37:32.039Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:32 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 24ms :: {"…
+✓ Section 1 complete (3798 chars)
+Generating section 2/10: 2. FOUNDER CREDENTIALS & VALIDATION
+[2026-01-17T14:37:35.037Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:35 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 25ms :: {"…
+[2026-01-17T14:37:37.037Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:37 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 16ms :: {"…
+[2026-01-17T14:37:40.038Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:40 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 13ms :: {"…
+[2026-01-17T14:37:42.038Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:42 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 18ms :: {"…
+[2026-01-17T14:37:45.036Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:45 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 22ms :: {"…
+[2026-01-17T14:37:47.037Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:47 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 20ms :: {"…
+[2026-01-17T14:37:50.041Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:50 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 25ms :: {"…
+[2026-01-17T14:37:52.038Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:52 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 17ms :: {"…
+[2026-01-17T14:37:55.041Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:55 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 22ms :: {"…
+✓ Section 2 complete (6920 chars)
+Generating section 3/10: 3. INNOVATION & TECHNICAL DEPTH
+[2026-01-17T14:37:57.039Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:37:57 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 16ms :: {"…
+2:38:00 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 34ms :: {"…
+[2026-01-17T14:38:00.040Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+[2026-01-17T14:38:02.037Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:38:02 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 27ms :: {"…
+[2026-01-17T14:38:05.042Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:38:05 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 17ms :: {"…
+[2026-01-17T14:38:07.038Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:38:07 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 44ms :: {"…
+[2026-01-17T14:38:10.119Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:38:10 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 13ms :: {"…
+2:38:12 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 18ms :: {"…
+[2026-01-17T14:38:12.037Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+[2026-01-17T14:38:15.037Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:38:15 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 23ms :: {"…
+[2026-01-17T14:38:17.036Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:38:17 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 27ms :: {"…
+[2026-01-17T14:38:20.042Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:38:20 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 23ms :: {"…
+[2026-01-17T14:38:22.047Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:38:22 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 13ms :: {"…
+Generating section 4/10: 4. MARKET ANALYSIS & VALIDATION
+✓ Section 3 complete (8828 chars)
+✓ Section 4 complete (7382 chars)
+Generating section 5/10: 5. FINANCIAL VIABILITY WITH REALISTIC MODELING
+[2026-01-17T14:39:22.201Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:39:22 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 203ms :: {…
+✓ Section 5 complete (8057 chars)
+Generating section 6/10: 6. REGULATORY & COMPLIANCE
+✓ Section 6 complete (6722 chars)
+Generating section 7/10: 7. TEAM & HIRING
+✓ Section 7 complete (6368 chars)
+Generating section 8/10: 8. SCALABILITY & GROWTH
+[2026-01-17T14:40:22.198Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:40:22 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 29ms :: {"…
+✓ Section 8 complete (7155 chars)
+Generating section 9/10: 9. RISK ANALYSIS
+✓ Section 9 complete (6099 chars)
+Generating section 10/10: 10. ENDORSING BODY SELECTION
+[2026-01-17T14:41:22.199Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:41:22 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 203ms :: {…
+✓ Section 10 complete (6108 chars)
+[Email Send] Attempting to send email to: mralexmik@gmail.com
+[Email Send] Provider: resend | Resend: true | SMTP: false
+[Email Send] Using Resend HTTP API...
+Email send error: Error: The innovatorfoundervisaassistant.co.uk domain is not verified. Please, add and verify your domain on https://resend.com/domains
+    at sendEmail (file:///app/dist/index.js:3558:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async generateBusinessPlan (file:///app/dist/index.js:13008:11)
+2:42:13 PM [express] POST /api/activity/session 200 in 48ms :: {"sessionId":"0f75e599-95dd-4ada-af4c…
+[2026-01-17T14:42:14.117Z] POST /api/activity/page-view
+2:42:14 PM [express] POST /api/activity/page-view 200 in 20ms :: {"pageViewId":"fe839cfa-c337-4278-b…
+[2026-01-17T14:42:19.479Z] POST /api/activity/session/end
+2:42:19 PM [express] POST /api/activity/session/end 200 in 15ms :: {"success":true}
+[2026-01-17T14:42:19.501Z] GET /api/download/pdf/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+[2026-01-17T14:42:13.402Z] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf
+2:42:19 PM [express] GET /api/download/pdf/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 24ms
+[2026-01-17T14:42:20.002Z] GET /favicon.ico
+2:42:13 PM [express] GET /api/generate/status/5f9c1554-3e58-445e-82c0-e6e8979ef9bf 200 in 224ms :: {…
+[2026-01-17T14:42:13.807Z] GET /api/auth/user
+[2026-01-17T14:42:13.812Z] POST /api/activity/session
+[AUTH] Returning user mralexmik@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:42:13 PM [express] GET /api/auth/user 200 in 18ms :: {"id":"51c8fc24-182e-4dfc-92cf-203edb55d533",…
+
+
+innovation-visa-assistant.webapp | Railway

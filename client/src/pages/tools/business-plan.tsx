@@ -404,55 +404,85 @@ export default function BusinessPlan() {
 
   const autoSaveDebounceRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Refs for visible charts (in tabs) - NOT used for export
   const ganttChartRef = useRef<HTMLDivElement>(null);
   const financialChartRef = useRef<HTMLDivElement>(null);
   const riskMatrixRef = useRef<HTMLDivElement>(null);
   const competitorChartRef = useRef<HTMLDivElement>(null);
   const scalabilityChartRef = useRef<HTMLDivElement>(null);
   
+  // SEPARATE refs for export container (fixed-size, always rendered)
+  const ganttExportRef = useRef<HTMLDivElement>(null);
+  const financialExportRef = useRef<HTMLDivElement>(null);
+  const riskExportRef = useRef<HTMLDivElement>(null);
+  const competitorExportRef = useRef<HTMLDivElement>(null);
+  const scalabilityExportRef = useRef<HTMLDivElement>(null);
+  
   const captureChartImage = async (ref: React.RefObject<HTMLDivElement>, fallbackWidth = 800, fallbackHeight = 400): Promise<string | null> => {
+    const container = document.getElementById('export-charts-container');
+    if (!container) {
+      console.error('Export container not found');
+      return null;
+    }
     if (!ref.current) {
-      console.log('Chart ref is null');
+      console.error('Chart ref is null');
       return null;
     }
     
-    const hiddenContainer = ref.current.closest('[aria-hidden="true"]') as HTMLElement | null;
-    if (hiddenContainer) {
-      hiddenContainer.style.visibility = 'visible';
-      hiddenContainer.style.left = '0';
-      hiddenContainer.style.position = 'fixed';
-      hiddenContainer.style.zIndex = '-1000';
-      await new Promise(resolve => setTimeout(resolve, 200));
-    }
+    // Make container visible for capture
+    container.style.visibility = 'visible';
+    container.style.left = '0';
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.zIndex = '-1000';
+    
+    // Wait for Recharts to fully render (SVG needs time)
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    await new Promise(resolve => requestAnimationFrame(resolve));
     
     try {
       const width = ref.current.offsetWidth || fallbackWidth;
       const height = ref.current.offsetHeight || fallbackHeight;
-      console.log(`Capturing chart: ${width}x${height}`);
+      console.log(`[CHART CAPTURE] Dimensions: ${width}x${height}`);
+      
+      if (width < 10 || height < 10) {
+        console.error(`[CHART CAPTURE] Invalid dimensions: ${width}x${height}`);
+        container.style.visibility = 'hidden';
+        container.style.left = '-9999px';
+        container.style.position = 'absolute';
+        return null;
+      }
       
       const dataUrl = await toPng(ref.current, {
         backgroundColor: '#ffffff',
         width,
         height,
         pixelRatio: 2,
+        cacheBust: true,
       });
       
-      if (hiddenContainer) {
-        hiddenContainer.style.visibility = 'hidden';
-        hiddenContainer.style.left = '-9999px';
-        hiddenContainer.style.position = 'absolute';
-        hiddenContainer.style.zIndex = '';
+      console.log(`[CHART CAPTURE] Success! Data length: ${dataUrl.length}`);
+      
+      // Hide container again
+      container.style.visibility = 'hidden';
+      container.style.left = '-9999px';
+      container.style.position = 'absolute';
+      container.style.zIndex = '';
+      
+      // Validate image data
+      if (!dataUrl || dataUrl.length < 1000) {
+        console.error('[CHART CAPTURE] Invalid or empty image data');
+        return null;
       }
       
       return dataUrl;
     } catch (err) {
-      console.error('Failed to capture chart:', err);
-      if (hiddenContainer) {
-        hiddenContainer.style.visibility = 'hidden';
-        hiddenContainer.style.left = '-9999px';
-        hiddenContainer.style.position = 'absolute';
-        hiddenContainer.style.zIndex = '';
-      }
+      console.error('[CHART CAPTURE] Failed:', err);
+      container.style.visibility = 'hidden';
+      container.style.left = '-9999px';
+      container.style.position = 'absolute';
+      container.style.zIndex = '';
       return null;
     }
   };
@@ -852,13 +882,13 @@ export default function BusinessPlan() {
     });
     
     try {
-      console.log('Starting chart capture for PDF export...');
+      console.log('[PDF EXPORT] Starting chart capture using EXPORT refs...');
       const [ganttImg, financialImg, riskImg, competitorImg, scalabilityImg] = await Promise.all([
-        captureChartImage(ganttChartRef),
-        captureChartImage(financialChartRef),
-        captureChartImage(riskMatrixRef),
-        captureChartImage(competitorChartRef),
-        captureChartImage(scalabilityChartRef),
+        captureChartImage(ganttExportRef),
+        captureChartImage(financialExportRef),
+        captureChartImage(riskExportRef),
+        captureChartImage(competitorExportRef),
+        captureChartImage(scalabilityExportRef),
       ]);
       
       console.log('Chart capture results:', {
@@ -906,13 +936,13 @@ export default function BusinessPlan() {
     });
     
     try {
-      console.log('Starting chart capture for Word export...');
+      console.log('[WORD EXPORT] Starting chart capture using EXPORT refs...');
       const [ganttImg, financialImg, riskImg, competitorImg, scalabilityImg] = await Promise.all([
-        captureChartImage(ganttChartRef),
-        captureChartImage(financialChartRef),
-        captureChartImage(riskMatrixRef),
-        captureChartImage(competitorChartRef),
-        captureChartImage(scalabilityChartRef),
+        captureChartImage(ganttExportRef),
+        captureChartImage(financialExportRef),
+        captureChartImage(riskExportRef),
+        captureChartImage(competitorExportRef),
+        captureChartImage(scalabilityExportRef),
       ]);
       
       console.log('Chart capture results:', {
@@ -1780,36 +1810,37 @@ export default function BusinessPlan() {
           </Card>
         </div>
         
-        {/* Hidden container for chart export - always rendered offscreen */}
+        {/* Hidden container for chart export - FIXED SIZE charts (no ResponsiveContainer) */}
         <div 
-          aria-hidden="true" 
+          id="export-charts-container"
           style={{ 
             position: 'absolute', 
             left: '-9999px', 
             top: 0, 
             width: '900px',
             visibility: 'hidden',
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            overflow: 'visible'
           }}
         >
-          <div ref={ganttChartRef} className="bg-white p-4" style={{ width: '900px', minHeight: '400px' }}>
-            <h4 className="font-semibold mb-4">12-Month Project Timeline (Gantt Chart)</h4>
-            <div className="min-w-[800px]">
+          <div ref={ganttExportRef} className="bg-white p-4" style={{ width: '850px', height: '400px' }}>
+            <h4 className="font-semibold mb-4 text-black">12-Month Project Timeline (Gantt Chart)</h4>
+            <div style={{ width: '800px' }}>
               <div className="grid grid-cols-[200px_repeat(12,1fr)] gap-1 mb-2">
-                <div className="font-medium text-sm p-2">Task</div>
+                <div className="font-medium text-sm p-2 text-black">Task</div>
                 {['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'].map(m => (
-                  <div key={m} className="text-center text-xs font-medium p-2 bg-gray-100 rounded">{m}</div>
+                  <div key={m} className="text-center text-xs font-medium p-2 text-black" style={{ backgroundColor: '#f3f4f6' }}>{m}</div>
                 ))}
               </div>
               {ganttTasks.map((task) => (
                 <div key={task.id} className="grid grid-cols-[200px_repeat(12,1fr)] gap-1 mb-1 items-center">
-                  <div className="text-sm p-2 truncate">{task.task}</div>
+                  <div className="text-sm p-2 truncate text-black">{task.task}</div>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(month => {
                     const isActive = month >= task.startMonth && month < task.startMonth + task.duration;
                     return (
                       <div
                         key={month}
-                        className={`h-6 rounded ${isActive ? 'bg-blue-500' : 'bg-gray-100'}`}
+                        style={{ height: '24px', borderRadius: '4px', backgroundColor: isActive ? '#3b82f6' : '#e5e7eb' }}
                       />
                     );
                   })}
@@ -1818,32 +1849,30 @@ export default function BusinessPlan() {
             </div>
           </div>
           
-          <div ref={financialChartRef} className="bg-white p-4 mt-4" style={{ width: '900px', minHeight: '350px' }}>
-            <h4 className="font-semibold mb-4">12-Month Cash Flow Projection</h4>
-            <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={financialData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value) => `£${Number(value).toLocaleString()}`} />
-                <Legend />
-                <Bar dataKey="revenue" name="Revenue" fill="#22c55e" />
-                <Bar dataKey="costs" name="Costs" fill="#ef4444" />
-                <Line type="monotone" dataKey="cumulative" name="Cumulative" stroke="#3b82f6" strokeWidth={2} />
-              </ComposedChart>
-            </ResponsiveContainer>
+          <div ref={financialExportRef} className="bg-white p-4 mt-4" style={{ width: '850px', height: '350px' }}>
+            <h4 className="font-semibold mb-4 text-black">12-Month Cash Flow Projection</h4>
+            <ComposedChart width={800} height={280} data={financialData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip formatter={(value) => `£${Number(value).toLocaleString()}`} />
+              <Legend />
+              <Bar dataKey="revenue" name="Revenue" fill="#22c55e" />
+              <Bar dataKey="costs" name="Costs" fill="#ef4444" />
+              <Line type="monotone" dataKey="cumulative" name="Cumulative" stroke="#3b82f6" strokeWidth={2} />
+            </ComposedChart>
           </div>
           
-          <div ref={riskMatrixRef} className="bg-white p-4 mt-4" style={{ width: '500px', minHeight: '350px' }}>
-            <h4 className="font-semibold mb-4">Risk Heat Map (Probability vs Impact)</h4>
-            <div className="grid grid-cols-6 gap-1 max-w-md mx-auto">
+          <div ref={riskExportRef} className="bg-white p-4 mt-4" style={{ width: '500px', height: '350px' }}>
+            <h4 className="font-semibold mb-4 text-black">Risk Heat Map (Probability vs Impact)</h4>
+            <div className="grid grid-cols-6 gap-1" style={{ maxWidth: '400px', margin: '0 auto' }}>
               <div></div>
               {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="text-center text-xs font-medium p-1">{i}</div>
+                <div key={i} className="text-center text-xs font-medium p-1 text-black">{i}</div>
               ))}
               {[5, 4, 3, 2, 1].map(prob => (
                 <React.Fragment key={prob}>
-                  <div className="text-xs font-medium p-1 flex items-center">{prob}</div>
+                  <div className="text-xs font-medium p-1 flex items-center text-black">{prob}</div>
                   {[1, 2, 3, 4, 5].map(imp => {
                     const score = prob * imp;
                     const level = score >= 20 ? 'critical' : score >= 10 ? 'high' : score >= 5 ? 'medium' : 'low';
@@ -1852,8 +1881,7 @@ export default function BusinessPlan() {
                     return (
                       <div
                         key={`${prob}-${imp}`}
-                        className="h-10 rounded flex items-center justify-center text-white text-xs font-bold"
-                        style={{ backgroundColor: colors[level] }}
+                        style={{ height: '40px', borderRadius: '4px', backgroundColor: colors[level], display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: 'bold' }}
                       >
                         {risksInCell.length > 0 && risksInCell.length}
                       </div>
@@ -1862,63 +1890,55 @@ export default function BusinessPlan() {
                 </React.Fragment>
               ))}
             </div>
-            <div className="flex justify-center gap-4 mt-4 text-xs">
-              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-green-500" /> Low</span>
-              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-yellow-500" /> Medium</span>
-              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-orange-500" /> High</span>
-              <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-red-500" /> Critical</span>
+            <div className="flex justify-center gap-4 mt-4 text-xs text-black">
+              <span className="flex items-center gap-1"><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#22c55e' }} /> Low</span>
+              <span className="flex items-center gap-1"><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#eab308' }} /> Medium</span>
+              <span className="flex items-center gap-1"><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#f97316' }} /> High</span>
+              <span className="flex items-center gap-1"><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#ef4444' }} /> Critical</span>
             </div>
           </div>
           
-          <div ref={competitorChartRef} className="bg-white p-4 mt-4" style={{ width: '900px', minHeight: '300px' }}>
-            <h4 className="font-semibold mb-4">Market Share Distribution</h4>
-            <div className="grid grid-cols-2 gap-4">
-              <ResponsiveContainer width="100%" height={250}>
-                <RePieChart>
-                  <Pie
-                    data={competitors.map(c => ({ name: c.name, value: c.marketShare }))}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {competitors.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'][index % 5]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </RePieChart>
-              </ResponsiveContainer>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={competitors} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" domain={[0, 10]} />
-                  <YAxis dataKey="name" type="category" width={100} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="innovationScore" name="Innovation" fill="#3b82f6" />
-                  <Bar dataKey="priceScore" name="Price" fill="#22c55e" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          
-          <div ref={scalabilityChartRef} className="bg-white p-4 mt-4" style={{ width: '900px', minHeight: '300px' }}>
-            <h4 className="font-semibold mb-4">Job Creation Timeline</h4>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={jobCreationPlan.map(j => ({ year: j.year, jobs: j.totalJobs, salary: j.salaryBudget / 1000 }))}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis />
+          <div ref={competitorExportRef} className="bg-white p-4 mt-4" style={{ width: '850px', height: '320px' }}>
+            <h4 className="font-semibold mb-4 text-black">Market Share Distribution</h4>
+            <div style={{ display: 'flex', gap: '20px' }}>
+              <RePieChart width={380} height={250}>
+                <Pie
+                  data={competitors.map(c => ({ name: c.name, value: c.marketShare }))}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {competitors.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'][index % 5]} />
+                  ))}
+                </Pie>
                 <Tooltip />
-                <Legend />
-                <Bar dataKey="jobs" name="Total Jobs" fill="#22c55e" />
-                <Bar dataKey="salary" name="Salary Budget (£K)" fill="#3b82f6" />
+              </RePieChart>
+              <BarChart width={380} height={250} data={competitors.map(c => ({ name: c.name, share: c.marketShare }))} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" domain={[0, 50]} />
+                <YAxis dataKey="name" type="category" width={100} />
+                <Tooltip />
+                <Bar dataKey="share" name="Market Share %" fill="#3b82f6" />
               </BarChart>
-            </ResponsiveContainer>
+            </div>
+          </div>
+          
+          <div ref={scalabilityExportRef} className="bg-white p-4 mt-4" style={{ width: '850px', height: '320px' }}>
+            <h4 className="font-semibold mb-4 text-black">Job Creation Timeline</h4>
+            <BarChart width={800} height={250} data={jobCreationPlan.map(j => ({ year: j.year, jobs: j.totalJobs, salary: j.salaryBudget / 1000 }))}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="jobs" name="Total Jobs" fill="#22c55e" />
+              <Bar dataKey="salary" name="Salary Budget (£K)" fill="#3b82f6" />
+            </BarChart>
           </div>
         </div>
       </div>
