@@ -1,38 +1,13 @@
 import type { BusinessPlan } from "@shared/schema";
-import { generateSVGChart, type ChartDataPayload } from "./chartGenerator";
+import { generateSVGChart, SECTION_CHART_MAP, type ChartDataPayload, type ChartType } from "./chartGenerator";
 
 export function generatePDFContent(plan: BusinessPlan): string {
   const content = plan.generatedContent || "Business plan content not yet generated.";
   
-  let chartHtml = '';
+  let chartData: ChartDataPayload | null = null;
   if (plan.chartData) {
     try {
-      const chartData = JSON.parse(plan.chartData) as ChartDataPayload;
-      chartHtml = `
-        <div class="charts-section" style="page-break-before: always; margin-top: 40px;">
-          <h2 style="color: #005EB8; border-bottom: 2px solid #005EB8; padding-bottom: 10px;">Visual Analytics & Charts</h2>
-          
-          <div class="chart-container" style="margin: 30px 0; text-align: center;">
-            <h3>Financial Projections</h3>
-            ${generateSVGChart('financial', chartData)}
-          </div>
-          
-          <div class="chart-container" style="margin: 30px 0; text-align: center; page-break-before: always;">
-            <h3>Market Size Analysis</h3>
-            ${generateSVGChart('market', chartData)}
-          </div>
-          
-          <div class="chart-container" style="margin: 30px 0; text-align: center; page-break-before: always;">
-            <h3>Risk Assessment</h3>
-            ${generateSVGChart('risk', chartData)}
-          </div>
-          
-          <div class="chart-container" style="margin: 30px 0; text-align: center; page-break-before: always;">
-            <h3>Competitive Analysis</h3>
-            ${generateSVGChart('competitor', chartData)}
-          </div>
-        </div>
-      `;
+      chartData = JSON.parse(plan.chartData) as ChartDataPayload;
     } catch (e) {
       console.error('Failed to parse chart data:', e);
     }
@@ -139,11 +114,16 @@ export function generatePDFContent(plan: BusinessPlan): string {
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       padding: 20px;
-      margin: 20px 0;
+      margin: 25px 0;
+      text-align: center;
     }
     .chart-container svg {
       max-width: 100%;
       height: auto;
+    }
+    .inline-chart {
+      margin: 20px auto;
+      page-break-inside: avoid;
     }
   </style>
 </head>
@@ -159,10 +139,8 @@ export function generatePDFContent(plan: BusinessPlan): string {
   </div>
   
   <div class="content">
-    ${formatContent(content)}
+    ${formatContentWithCharts(content, chartData)}
   </div>
-  
-  ${chartHtml}
 </body>
 </html>
   `;
@@ -170,21 +148,160 @@ export function generatePDFContent(plan: BusinessPlan): string {
   return html;
 }
 
-function formatContent(markdown: string): string {
-  let html = markdown
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^\d+\.\s(.+)$/gm, '<li>$1</li>');
+function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null): string {
+  const lines = markdown.split('\n');
+  let html = '';
+  let currentSection = '';
+  const usedCharts = new Set<ChartType>();
   
-  html = '<p>' + html + '</p>';
-  html = html.replace(/(<li>[\s\S]*<\/li>)/, '<ol>$1</ol>');
-  html = html.replace(/<\/p>\s*<p>/g, '</p><p>');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    if (line.startsWith('## ')) {
+      const sectionTitle = line.slice(3).trim();
+      currentSection = sectionTitle;
+      html += `<h2>${sectionTitle}</h2>\n`;
+      
+      if (chartData) {
+        const chartsForSection = findChartsForSection(sectionTitle);
+        for (const chartType of chartsForSection) {
+          if (!usedCharts.has(chartType)) {
+            usedCharts.add(chartType);
+            try {
+              const svg = generateSVGChart(chartType, chartData);
+              if (svg) {
+                html += `<div class="chart-container inline-chart">${svg}</div>\n`;
+              }
+            } catch (e) {
+              console.error(`Failed to generate ${chartType} chart:`, e);
+            }
+          }
+        }
+      }
+    } else if (line.startsWith('# ')) {
+      html += `<h1>${line.slice(2)}</h1>\n`;
+    } else if (line.startsWith('### ')) {
+      html += `<h3>${line.slice(4)}</h3>\n`;
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      if (!html.endsWith('</ul>\n') && !html.includes('<ul>') || html.lastIndexOf('</ul>') > html.lastIndexOf('<ul>')) {
+        html += '<ul>\n';
+      }
+      html += `<li>${formatInline(line.slice(2))}</li>\n`;
+      const nextLine = lines[i + 1]?.trim() || '';
+      if (!nextLine.startsWith('- ') && !nextLine.startsWith('* ')) {
+        html += '</ul>\n';
+      }
+    } else if (/^\d+\.\s/.test(line)) {
+      const match = line.match(/^\d+\.\s(.+)$/);
+      if (match) {
+        if (!html.endsWith('</ol>\n') && (!html.includes('<ol>') || html.lastIndexOf('</ol>') > html.lastIndexOf('<ol>'))) {
+          html += '<ol>\n';
+        }
+        html += `<li>${formatInline(match[1])}</li>\n`;
+        const nextLine = lines[i + 1]?.trim() || '';
+        if (!/^\d+\.\s/.test(nextLine)) {
+          html += '</ol>\n';
+        }
+      }
+    } else if (line === '---') {
+      html += '<hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">\n';
+    } else if (line.length > 0) {
+      html += `<p>${formatInline(line)}</p>\n`;
+    }
+  }
+  
+  if (chartData) {
+    const remainingCharts: ChartType[] = [];
+    const allChartTypes: ChartType[] = ['kpi', 'funding', 'financial', 'market', 'revenue_streams', 'unit_economics', 
+      'customer_journey', 'competitor', 'gtm_channels', 'growth', 'hiring', 'tech_stack', 
+      'risk', 'compliance', 'milestones', 'timeline', 'pricing'];
+    
+    for (const chartType of allChartTypes) {
+      if (!usedCharts.has(chartType)) {
+        remainingCharts.push(chartType);
+      }
+    }
+    
+    if (remainingCharts.length > 0) {
+      html += '<div style="page-break-before: always;"><h2 style="color: #005EB8;">Additional Visual Analytics</h2>\n';
+      for (const chartType of remainingCharts.slice(0, 5)) {
+        try {
+          const svg = generateSVGChart(chartType, chartData);
+          if (svg) {
+            html += `<div class="chart-container inline-chart">${svg}</div>\n`;
+          }
+        } catch (e) {
+          console.error(`Failed to generate ${chartType} chart:`, e);
+        }
+      }
+      html += '</div>';
+    }
+  }
   
   return html;
+}
+
+function findChartsForSection(sectionTitle: string): ChartType[] {
+  for (const [key, charts] of Object.entries(SECTION_CHART_MAP)) {
+    if (sectionTitle.toLowerCase().includes(key.toLowerCase()) || 
+        key.toLowerCase().includes(sectionTitle.toLowerCase().split(' ')[0])) {
+      return charts;
+    }
+  }
+  
+  const keywords: Record<string, ChartType[]> = {
+    'executive': ['kpi'],
+    'summary': ['kpi'],
+    'overview': ['funding', 'kpi'],
+    'financial': ['financial', 'unit_economics'],
+    'finance': ['financial', 'unit_economics'],
+    'revenue': ['revenue_streams', 'pricing'],
+    'money': ['financial', 'funding'],
+    'market': ['market', 'customer_journey'],
+    'customer': ['customer_journey'],
+    'target': ['customer_journey', 'market'],
+    'competitor': ['competitor'],
+    'competition': ['competitor'],
+    'pricing': ['pricing'],
+    'business model': ['pricing', 'revenue_streams'],
+    'team': ['hiring'],
+    'hiring': ['hiring'],
+    'people': ['hiring'],
+    'technology': ['tech_stack'],
+    'tech': ['tech_stack'],
+    'innovation': ['tech_stack'],
+    'risk': ['risk'],
+    'compliance': ['compliance'],
+    'regulatory': ['compliance'],
+    'legal': ['compliance'],
+    'growth': ['growth'],
+    'scale': ['growth', 'timeline'],
+    'marketing': ['gtm_channels'],
+    'go-to-market': ['gtm_channels'],
+    'gtm': ['gtm_channels'],
+    'milestone': ['milestones'],
+    'roadmap': ['timeline', 'milestones'],
+    'timeline': ['timeline'],
+    'plan': ['milestones'],
+    'funding': ['funding'],
+    'investment': ['funding'],
+  };
+  
+  const lowerTitle = sectionTitle.toLowerCase();
+  for (const [keyword, charts] of Object.entries(keywords)) {
+    if (lowerTitle.includes(keyword)) {
+      return charts;
+    }
+  }
+  
+  return [];
+}
+
+function formatInline(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px; font-family: monospace;">$1</code>');
 }
 
 export function generatePDFUrl(planId: string): string {

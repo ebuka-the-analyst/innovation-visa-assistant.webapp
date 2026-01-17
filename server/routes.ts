@@ -1779,18 +1779,87 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const content = businessPlan.generatedContent;
       const children: any[] = [];
       
-      // Helper to convert SVG to PNG buffer
-      const svgToPng = async (svgString: string, width = 600): Promise<Buffer> => {
+      const svgToPng = async (svgString: string, width = 550): Promise<Buffer> => {
         const buffer = Buffer.from(svgString);
         return sharp.default(buffer).resize(width).png().toBuffer();
       };
       
-      // Cover page
+      let chartData: chartGenerator.ChartDataPayload | null = null;
+      if (businessPlan.chartData) {
+        try {
+          chartData = JSON.parse(businessPlan.chartData) as chartGenerator.ChartDataPayload;
+        } catch (e) {
+          console.error("Failed to parse chart data:", e);
+        }
+      }
+      
+      const usedCharts = new Set<string>();
+      
+      const findChartsForSection = (sectionTitle: string): chartGenerator.ChartType[] => {
+        const keywords: Record<string, chartGenerator.ChartType[]> = {
+          'executive': ['kpi'],
+          'summary': ['kpi'],
+          'overview': ['funding', 'kpi'],
+          'financial': ['financial', 'unit_economics'],
+          'finance': ['financial'],
+          'revenue': ['revenue_streams', 'pricing'],
+          'market': ['market', 'customer_journey'],
+          'customer': ['customer_journey'],
+          'competitor': ['competitor'],
+          'competition': ['competitor'],
+          'pricing': ['pricing'],
+          'business model': ['pricing', 'revenue_streams'],
+          'team': ['hiring'],
+          'hiring': ['hiring'],
+          'technology': ['tech_stack'],
+          'tech': ['tech_stack'],
+          'innovation': ['tech_stack'],
+          'risk': ['risk'],
+          'compliance': ['compliance'],
+          'regulatory': ['compliance'],
+          'growth': ['growth'],
+          'marketing': ['gtm_channels'],
+          'go-to-market': ['gtm_channels'],
+          'milestone': ['milestones'],
+          'roadmap': ['timeline'],
+          'timeline': ['timeline'],
+          'funding': ['funding'],
+          'investment': ['funding'],
+        };
+        const lowerTitle = sectionTitle.toLowerCase();
+        for (const [keyword, charts] of Object.entries(keywords)) {
+          if (lowerTitle.includes(keyword)) return charts;
+        }
+        return [];
+      };
+      
+      const addChartToDoc = async (chartType: chartGenerator.ChartType) => {
+        if (!chartData || usedCharts.has(chartType)) return;
+        usedCharts.add(chartType);
+        try {
+          const svgString = chartGenerator.generateSVGChart(chartType, chartData);
+          if (!svgString) return;
+          const pngBuffer = await svgToPng(svgString, 520);
+          children.push(
+            new Paragraph({
+              children: [
+                new ImageRun({
+                  data: pngBuffer,
+                  transformation: { width: 520, height: 300 },
+                  type: "png",
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 200, after: 200 },
+            })
+          );
+        } catch (e) {
+          console.error(`Failed to add ${chartType} chart:`, e);
+        }
+      };
+      
       children.push(
-        new Paragraph({
-          children: [new TextRun({ text: "", size: 72 })],
-          spacing: { before: 2000 },
-        }),
+        new Paragraph({ children: [new TextRun({ text: "", size: 72 })], spacing: { before: 2000 } }),
         new Paragraph({
           children: [new TextRun({ text: businessPlan.businessName, bold: true, size: 72, color: "005EB8" })],
           alignment: AlignmentType.CENTER,
@@ -1814,12 +1883,9 @@ ${generatedSections.join('\n\n---\n\n')}`;
           alignment: AlignmentType.CENTER,
           spacing: { after: 400 },
         }),
-        new Paragraph({
-          children: [new PageBreak()],
-        })
+        new Paragraph({ children: [new PageBreak()] })
       );
       
-      // Parse the markdown content into sections
       const lines = content.split('\n');
       for (const line of lines) {
         const trimmedLine = line.trim();
@@ -1831,11 +1897,19 @@ ${generatedSections.join('\n\n---\n\n')}`;
             spacing: { before: 400, after: 200 },
           }));
         } else if (trimmedLine.startsWith('## ')) {
+          const sectionTitle = trimmedLine.slice(3);
           children.push(new Paragraph({
-            text: trimmedLine.slice(3),
+            text: sectionTitle,
             heading: HeadingLevel.HEADING_2,
             spacing: { before: 300, after: 150 },
           }));
+          
+          if (chartData) {
+            const chartsForSection = findChartsForSection(sectionTitle);
+            for (const chartType of chartsForSection) {
+              await addChartToDoc(chartType);
+            }
+          }
         } else if (trimmedLine.startsWith('### ')) {
           children.push(new Paragraph({
             text: trimmedLine.slice(4),
@@ -1857,66 +1931,29 @@ ${generatedSections.join('\n\n---\n\n')}`;
               if (parts[i]) runs.push(new TextRun({ text: parts[i], bold: true, size: 22 }));
             }
           }
-          
           if (runs.length > 0) {
-            children.push(new Paragraph({
-              children: runs,
-              spacing: { after: 120 },
-            }));
+            children.push(new Paragraph({ children: runs, spacing: { after: 120 } }));
           }
         }
       }
-
-      // Add charts section if chart data exists
-      if (businessPlan.chartData) {
-        try {
-          const chartData = JSON.parse(businessPlan.chartData) as chartGenerator.ChartDataPayload;
-          
+      
+      if (chartData) {
+        const allChartTypes: chartGenerator.ChartType[] = ['kpi', 'funding', 'financial', 'market', 'revenue_streams', 
+          'unit_economics', 'customer_journey', 'competitor', 'gtm_channels', 'growth', 'hiring', 
+          'tech_stack', 'risk', 'compliance', 'milestones', 'timeline', 'pricing'];
+        const remaining = allChartTypes.filter(ct => !usedCharts.has(ct)).slice(0, 5);
+        if (remaining.length > 0) {
           children.push(
             new Paragraph({ children: [new PageBreak()] }),
             new Paragraph({
-              text: "Visual Analytics & Charts",
+              text: "Additional Visual Analytics",
               heading: HeadingLevel.HEADING_1,
               spacing: { before: 400, after: 300 },
             })
           );
-          
-          const chartTypes: Array<{ title: string; type: 'financial' | 'market' | 'risk' | 'competitor' }> = [
-            { title: "3-Year Financial Projections", type: "financial" },
-            { title: "Market Size Analysis (TAM/SAM/SOM)", type: "market" },
-            { title: "Risk Assessment Matrix", type: "risk" },
-            { title: "Competitive Analysis", type: "competitor" },
-          ];
-          
-          for (const chart of chartTypes) {
-            try {
-              const svgString = chartGenerator.generateSVGChart(chart.type, chartData);
-              const pngBuffer = await svgToPng(svgString, 550);
-              
-              children.push(
-                new Paragraph({
-                  text: chart.title,
-                  heading: HeadingLevel.HEADING_2,
-                  spacing: { before: 300, after: 150 },
-                }),
-                new Paragraph({
-                  children: [
-                    new ImageRun({
-                      data: pngBuffer,
-                      transformation: { width: 550, height: 320 },
-                      type: "png",
-                    }),
-                  ],
-                  alignment: AlignmentType.CENTER,
-                  spacing: { after: 200 },
-                })
-              );
-            } catch (chartError) {
-              console.error(`Failed to generate ${chart.type} chart:`, chartError);
-            }
+          for (const chartType of remaining) {
+            await addChartToDoc(chartType);
           }
-        } catch (e) {
-          console.error("Failed to parse chart data for Word:", e);
         }
       }
 
