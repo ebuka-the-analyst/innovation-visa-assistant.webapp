@@ -21,7 +21,7 @@ interface ExportOptions {
 }
 
 interface ExportSection {
-  type: 'heading' | 'paragraph' | 'table' | 'list' | 'score' | 'divider';
+  type: 'heading' | 'paragraph' | 'table' | 'list' | 'score' | 'divider' | 'image';
   content?: string;
   level?: 1 | 2 | 3;
   items?: string[];
@@ -33,6 +33,12 @@ interface ExportSection {
     value: number;
     max: number;
     label: string;
+  };
+  imageData?: {
+    dataUrl: string;
+    width?: number;
+    height?: number;
+    caption?: string;
   };
 }
 
@@ -224,6 +230,44 @@ export function usePdfExport() {
           doc.setDrawColor(200, 200, 200);
           doc.line(margin, currentY, pageWidth - margin, currentY);
           currentY += 10;
+          break;
+
+        case 'image':
+          if (section.imageData?.dataUrl) {
+            const imgWidth = section.imageData.width || 170;
+            const imgHeight = section.imageData.height || 100;
+            const scaledWidth = Math.min(imgWidth, pageWidth - margin * 2);
+            const scaledHeight = (imgHeight / imgWidth) * scaledWidth;
+            
+            checkPageBreak(scaledHeight + 20);
+            
+            try {
+              doc.addImage(
+                section.imageData.dataUrl,
+                'PNG',
+                margin,
+                currentY,
+                scaledWidth,
+                scaledHeight
+              );
+              currentY += scaledHeight + 5;
+              
+              if (section.imageData.caption) {
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'italic');
+                doc.setTextColor(102, 102, 102);
+                doc.text(section.imageData.caption, margin, currentY);
+                currentY += 8;
+              }
+              currentY += 5;
+            } catch (err) {
+              console.error('Failed to add image to PDF:', err);
+              doc.setFontSize(10);
+              doc.setTextColor(200, 100, 100);
+              doc.text('[Chart image could not be rendered]', margin, currentY);
+              currentY += 10;
+            }
+          }
           break;
       }
     };

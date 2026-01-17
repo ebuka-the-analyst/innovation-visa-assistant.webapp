@@ -1,4 +1,4 @@
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType, ImageRun } from 'docx';
 import { saveAs } from 'file-saver';
 
 interface TableData {
@@ -12,13 +12,21 @@ interface ScoreData {
   label: string;
 }
 
+interface ImageData {
+  dataUrl: string;
+  width?: number;
+  height?: number;
+  caption?: string;
+}
+
 interface ExportSection {
-  type: 'heading' | 'paragraph' | 'list' | 'table' | 'score' | 'divider';
+  type: 'heading' | 'paragraph' | 'list' | 'table' | 'score' | 'divider' | 'image';
   content?: string;
   level?: 1 | 2 | 3;
   items?: string[];
   tableData?: TableData;
   score?: ScoreData;
+  imageData?: ImageData;
 }
 
 interface WordExportOptions {
@@ -235,6 +243,64 @@ export function useWordExport() {
               spacing: { before: 200, after: 200 },
             })
           );
+          break;
+
+        case 'image':
+          if (section.imageData?.dataUrl) {
+            try {
+              const base64Data = section.imageData.dataUrl.split(',')[1];
+              const imgWidth = section.imageData.width || 600;
+              const imgHeight = section.imageData.height || 350;
+              
+              children.push(
+                new Paragraph({
+                  children: [
+                    new ImageRun({
+                      data: Uint8Array.from(atob(base64Data), c => c.charCodeAt(0)),
+                      transformation: {
+                        width: imgWidth,
+                        height: imgHeight,
+                      },
+                      type: 'png',
+                    }),
+                  ],
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 100 },
+                })
+              );
+              
+              if (section.imageData.caption) {
+                children.push(
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: section.imageData.caption,
+                        size: 18,
+                        italics: true,
+                        color: '666666',
+                      }),
+                    ],
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 200 },
+                  })
+                );
+              }
+            } catch (err) {
+              console.error('Failed to add image to Word:', err);
+              children.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: '[Chart image could not be rendered]',
+                      size: 20,
+                      color: 'CC6666',
+                    }),
+                  ],
+                  spacing: { after: 200 },
+                })
+              );
+            }
+          }
           break;
       }
     }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,11 +17,12 @@ import {
   CheckCircle2, AlertTriangle, TrendingUp, Calendar, Save, FileText, 
   Target, Users, DollarSign, Shield, Lightbulb, BarChart3, PieChart,
   ArrowRight, Clock, Building, Briefcase, GraduationCap, Scale,
-  Plus, Trash2, ChevronDown, ChevronUp, Download
+  Plus, Trash2, ChevronDown, ChevronUp, Download, Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePdfExport } from "@/hooks/usePdfExport";
 import { useWordExport } from "@/hooks/useWordExport";
+import { toPng } from 'html-to-image';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer, PieChart as RePieChart, Pie, Cell,
@@ -399,8 +400,31 @@ export default function BusinessPlan() {
   const [activePlanSection, setActivePlanSection] = useState(0);
   const [savedDate, setSavedDate] = useState('');
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['executive-summary']));
+  const [isExporting, setIsExporting] = useState(false);
 
   const autoSaveDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const ganttChartRef = useRef<HTMLDivElement>(null);
+  const financialChartRef = useRef<HTMLDivElement>(null);
+  const riskMatrixRef = useRef<HTMLDivElement>(null);
+  const competitorChartRef = useRef<HTMLDivElement>(null);
+  const scalabilityChartRef = useRef<HTMLDivElement>(null);
+  
+  const captureChartImage = async (ref: React.RefObject<HTMLDivElement>, fallbackWidth = 800, fallbackHeight = 400): Promise<string | null> => {
+    if (!ref.current) return null;
+    try {
+      const dataUrl = await toPng(ref.current, {
+        backgroundColor: '#ffffff',
+        width: ref.current.offsetWidth || fallbackWidth,
+        height: ref.current.offsetHeight || fallbackHeight,
+        pixelRatio: 2,
+      });
+      return dataUrl;
+    } catch (err) {
+      console.error('Failed to capture chart:', err);
+      return null;
+    }
+  };
 
   const handleAiComplete = (answers: Record<string, any>) => {
     setSections(prevSections => {
@@ -647,82 +671,140 @@ export default function BusinessPlan() {
     setFinancialData(newData);
   };
 
-  const getExportSections = () => {
+  const getExportSections = async (chartImages: { gantt?: string | null; financial?: string | null; risk?: string | null; competitor?: string | null; scalability?: string | null }) => {
     const businessName = sections.find(s => s.id === 'executive-summary')?.fields.find(f => f.id === 'business-name')?.value || 'Business Plan';
+    
+    const exportSections: any[] = [
+      { type: 'score' as const, score: { value: overallCompletion, max: 100, label: 'Overall Completion' } },
+      { type: 'divider' as const },
+    ];
+    
+    sections.forEach(section => {
+      exportSections.push({ type: 'heading' as const, content: section.title, level: 1 as const });
+      exportSections.push({ type: 'paragraph' as const, content: section.description });
+      section.fields.forEach(field => {
+        exportSections.push({
+          type: 'paragraph' as const,
+          content: `${field.label}: ${field.value || '[Not completed]'}`
+        });
+      });
+      exportSections.push({ type: 'paragraph' as const, content: `Section Completion: ${calculateSectionCompletion(section)}%` });
+      exportSections.push({ type: 'divider' as const });
+    });
+    
+    exportSections.push({ type: 'heading' as const, content: '8. Project Plan - Gantt Chart', level: 1 as const });
+    if (chartImages.gantt) {
+      exportSections.push({
+        type: 'image' as const,
+        imageData: { dataUrl: chartImages.gantt, width: 170, height: 80, caption: 'Figure: 12-Month Project Timeline (Gantt Chart)' }
+      });
+    }
+    exportSections.push({
+      type: 'table' as const,
+      tableData: {
+        headers: ['Task', 'Start Month', 'Duration', 'Category', 'Status'],
+        rows: ganttTasks.map(t => [t.task, `Month ${t.startMonth}`, `${t.duration} months`, t.category, t.status])
+      }
+    });
+    exportSections.push({ type: 'divider' as const });
+    
+    exportSections.push({ type: 'heading' as const, content: '11. Financial Planning - 12-Month Cash Flow', level: 1 as const });
+    if (chartImages.financial) {
+      exportSections.push({
+        type: 'image' as const,
+        imageData: { dataUrl: chartImages.financial, width: 170, height: 100, caption: 'Figure: 12-Month Cash Flow Projection Chart' }
+      });
+    }
+    exportSections.push({
+      type: 'table' as const,
+      tableData: {
+        headers: ['Month', 'Revenue (£)', 'Costs (£)', 'Profit (£)', 'Cumulative (£)'],
+        rows: financialData.map(m => [m.month, m.revenue.toLocaleString(), m.costs.toLocaleString(), m.profit.toLocaleString(), m.cumulative.toLocaleString()])
+      }
+    });
+    const totalRevenue = financialData.reduce((sum, m) => sum + m.revenue, 0);
+    const totalCosts = financialData.reduce((sum, m) => sum + m.costs, 0);
+    const totalProfit = totalRevenue - totalCosts;
+    exportSections.push({
+      type: 'paragraph' as const,
+      content: `Financial Summary: Total Revenue £${totalRevenue.toLocaleString()} | Total Costs £${totalCosts.toLocaleString()} | Net Profit £${totalProfit.toLocaleString()}`
+    });
+    exportSections.push({ type: 'divider' as const });
+    
+    exportSections.push({ type: 'heading' as const, content: '12. Risk Management - Risk Matrix', level: 1 as const });
+    if (chartImages.risk) {
+      exportSections.push({
+        type: 'image' as const,
+        imageData: { dataUrl: chartImages.risk, width: 170, height: 100, caption: 'Figure: Risk Assessment Heat Map (Probability x Impact)' }
+      });
+    }
+    exportSections.push({
+      type: 'table' as const,
+      tableData: {
+        headers: ['Risk', 'Probability (1-5)', 'Impact (1-5)', 'Score', 'Level', 'Mitigation'],
+        rows: risks.map(r => [r.risk, r.probability.toString(), r.impact.toString(), (r.probability * r.impact).toString(), getRiskLevel(r.probability, r.impact).toUpperCase(), r.mitigation])
+      }
+    });
+    exportSections.push({ type: 'divider' as const });
+    
+    exportSections.push({ type: 'heading' as const, content: 'Competitor Analysis', level: 1 as const });
+    if (chartImages.competitor) {
+      exportSections.push({
+        type: 'image' as const,
+        imageData: { dataUrl: chartImages.competitor, width: 170, height: 100, caption: 'Figure: Market Share Distribution & Competitive Positioning' }
+      });
+    }
+    exportSections.push({
+      type: 'table' as const,
+      tableData: {
+        headers: ['Competitor', 'Market Share', 'Pricing', 'Strengths', 'Weaknesses', 'Your Advantage'],
+        rows: competitors.map(c => [c.name, `${c.marketShare}%`, c.pricing, c.strengths, c.weaknesses, c.yourAdvantage])
+      }
+    });
+    exportSections.push({ type: 'divider' as const });
+    
+    exportSections.push({ type: 'heading' as const, content: 'Scalability & Job Creation Plan', level: 1 as const });
+    if (chartImages.scalability) {
+      exportSections.push({
+        type: 'image' as const,
+        imageData: { dataUrl: chartImages.scalability, width: 170, height: 100, caption: 'Figure: UK Job Creation Timeline & Salary Budget Growth' }
+      });
+    }
+    exportSections.push({
+      type: 'table' as const,
+      tableData: {
+        headers: ['Period', 'Roles', 'Total Jobs', 'Salary Budget (£)'],
+        rows: jobCreationPlan.map(j => [j.year, j.roles, j.totalJobs.toString(), j.salaryBudget.toLocaleString()])
+      }
+    });
+    exportSections.push({ type: 'divider' as const });
+    
+    exportSections.push({ type: 'heading' as const, content: 'Innovator International Compliance Checklist', level: 1 as const });
+    exportSections.push({
+      type: 'list' as const,
+      items: [
+        'Executive Summary is compelling and concise (max 2 pages)',
+        'Problem/Solution clearly articulates customer pain point',
+        'Market Assessment includes credible TAM/SAM/SOM data',
+        'Marketing Strategy shows clear route to market',
+        'Sales Strategy demonstrates ability to close deals',
+        'Skills Strategy covers both vocational (50%) and commercial (50%)',
+        'Resource Planning identifies all knowledge, equipment, and partners',
+        'Project Plan includes Gantt Chart with realistic timelines',
+        'Scalability Strategy shows path to UK job creation',
+        'Innovation is integral to the business, not added on',
+        'Financial Planning includes 12-month cash flow with contingency',
+        'Risk Management identifies high-priority risks with mitigation',
+      ]
+    });
+    exportSections.push({ type: 'divider' as const });
+    exportSections.push({ type: 'paragraph' as const, content: 'DISCLAIMER: This business plan template follows the Innovator International structure but does not guarantee endorsement. Consult with qualified advisors before submitting applications.' });
     
     return {
       title: 'UK Innovator Founder Visa Business Plan',
       subtitle: businessName,
       filename: `business-plan-${new Date().toISOString().split('T')[0]}`,
-      sections: [
-        { type: 'score' as const, score: { value: overallCompletion, max: 100, label: 'Overall Completion' } },
-        { type: 'divider' as const },
-        
-        ...sections.flatMap(section => [
-          { type: 'heading' as const, content: section.title, level: 1 as const },
-          { type: 'paragraph' as const, content: section.description },
-          ...section.fields.map(field => ({
-            type: 'paragraph' as const,
-            content: `${field.label}: ${field.value || '[Not completed]'}`
-          })),
-          { type: 'paragraph' as const, content: `Section Completion: ${calculateSectionCompletion(section)}%` },
-          { type: 'divider' as const },
-        ]),
-        
-        { type: 'heading' as const, content: '8. Project Plan - Gantt Chart', level: 1 as const },
-        { type: 'table' as const, tableData: {
-          headers: ['Task', 'Start Month', 'Duration', 'Category', 'Status'],
-          rows: ganttTasks.map(t => [t.task, `Month ${t.startMonth}`, `${t.duration} months`, t.category, t.status])
-        }},
-        { type: 'divider' as const },
-        
-        { type: 'heading' as const, content: '11. Financial Planning - 12-Month Cash Flow', level: 1 as const },
-        { type: 'table' as const, tableData: {
-          headers: ['Month', 'Revenue (£)', 'Costs (£)', 'Profit (£)', 'Cumulative (£)'],
-          rows: financialData.map(m => [m.month, m.revenue.toLocaleString(), m.costs.toLocaleString(), m.profit.toLocaleString(), m.cumulative.toLocaleString()])
-        }},
-        { type: 'divider' as const },
-        
-        { type: 'heading' as const, content: '12. Risk Management - Risk Register', level: 1 as const },
-        { type: 'table' as const, tableData: {
-          headers: ['Risk', 'Probability (1-5)', 'Impact (1-5)', 'Score', 'Level', 'Mitigation'],
-          rows: risks.map(r => [r.risk, r.probability.toString(), r.impact.toString(), (r.probability * r.impact).toString(), getRiskLevel(r.probability, r.impact).toUpperCase(), r.mitigation])
-        }},
-        { type: 'divider' as const },
-        
-        { type: 'heading' as const, content: 'Competitor Analysis', level: 1 as const },
-        { type: 'table' as const, tableData: {
-          headers: ['Competitor', 'Market Share', 'Pricing', 'Strengths', 'Weaknesses', 'Your Advantage'],
-          rows: competitors.map(c => [c.name, `${c.marketShare}%`, c.pricing, c.strengths, c.weaknesses, c.yourAdvantage])
-        }},
-        { type: 'divider' as const },
-        
-        { type: 'heading' as const, content: 'Job Creation Plan', level: 1 as const },
-        { type: 'table' as const, tableData: {
-          headers: ['Period', 'Roles', 'Total Jobs', 'Salary Budget (£)'],
-          rows: jobCreationPlan.map(j => [j.year, j.roles, j.totalJobs.toString(), j.salaryBudget.toLocaleString()])
-        }},
-        { type: 'divider' as const },
-        
-        { type: 'heading' as const, content: 'Innovator International Compliance Checklist', level: 1 as const },
-        { type: 'list' as const, items: [
-          'Executive Summary is compelling and concise (max 2 pages)',
-          'Problem/Solution clearly articulates customer pain point',
-          'Market Assessment includes credible TAM/SAM/SOM data',
-          'Marketing Strategy shows clear route to market',
-          'Sales Strategy demonstrates ability to close deals',
-          'Skills Strategy covers both vocational (50%) and commercial (50%)',
-          'Resource Planning identifies all knowledge, equipment, and partners',
-          'Project Plan includes Gantt Chart with realistic timelines',
-          'Scalability Strategy shows path to UK job creation',
-          'Innovation is integral to the business, not added on',
-          'Financial Planning includes 12-month cash flow with contingency',
-          'Risk Management identifies high-priority risks with mitigation',
-        ]},
-        { type: 'divider' as const },
-        
-        { type: 'paragraph' as const, content: 'DISCLAIMER: This business plan template follows the Innovator International structure but does not guarantee endorsement. Consult with qualified advisors before submitting applications.' },
-      ],
+      sections: exportSections,
       metadata: {
         subject: 'UK Innovator Founder Visa Business Plan - Innovator International Format',
         author: 'UK Innovator Founder Visa Assistant',
@@ -731,24 +813,88 @@ export default function BusinessPlan() {
     };
   };
 
-  const handleExportPdf = () => {
-    const exportData = getExportSections();
-    generatePdf(exportData);
-    
+  const handleExportPdf = async () => {
+    setIsExporting(true);
     toast({
-      title: "PDF Exported Successfully",
-      description: "Your business plan has been downloaded as a PDF.",
+      title: "Generating PDF...",
+      description: "Capturing charts and creating your professional business plan PDF.",
     });
+    
+    try {
+      const [ganttImg, financialImg, riskImg, competitorImg, scalabilityImg] = await Promise.all([
+        captureChartImage(ganttChartRef),
+        captureChartImage(financialChartRef),
+        captureChartImage(riskMatrixRef),
+        captureChartImage(competitorChartRef),
+        captureChartImage(scalabilityChartRef),
+      ]);
+      
+      const exportData = await getExportSections({
+        gantt: ganttImg,
+        financial: financialImg,
+        risk: riskImg,
+        competitor: competitorImg,
+        scalability: scalabilityImg,
+      });
+      
+      generatePdf(exportData);
+      
+      toast({
+        title: "PDF Exported Successfully",
+        description: "Your business plan with charts has been downloaded as a PDF.",
+      });
+    } catch (err) {
+      console.error('Export failed:', err);
+      toast({
+        title: "Export Failed",
+        description: "There was an error generating your PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleExportWord = async () => {
-    const exportData = getExportSections();
-    await generateWord(exportData);
-    
+    setIsExporting(true);
     toast({
-      title: "Word Document Exported Successfully",
-      description: "Your business plan has been downloaded as a Word document (.docx).",
+      title: "Generating Word Document...",
+      description: "Capturing charts and creating your professional business plan.",
     });
+    
+    try {
+      const [ganttImg, financialImg, riskImg, competitorImg, scalabilityImg] = await Promise.all([
+        captureChartImage(ganttChartRef),
+        captureChartImage(financialChartRef),
+        captureChartImage(riskMatrixRef),
+        captureChartImage(competitorChartRef),
+        captureChartImage(scalabilityChartRef),
+      ]);
+      
+      const exportData = await getExportSections({
+        gantt: ganttImg,
+        financial: financialImg,
+        risk: riskImg,
+        competitor: competitorImg,
+        scalability: scalabilityImg,
+      });
+      
+      await generateWord(exportData);
+      
+      toast({
+        title: "Word Document Exported Successfully",
+        description: "Your business plan with charts has been downloaded as a Word document.",
+      });
+    } catch (err) {
+      console.error('Export failed:', err);
+      toast({
+        title: "Export Failed",
+        description: "There was an error generating your Word document. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const breadcrumbSchema = createBreadcrumbSchema([
@@ -783,7 +929,7 @@ export default function BusinessPlan() {
           </Button>
         </div>
         
-        <div className="overflow-x-auto">
+        <div ref={ganttChartRef} className="overflow-x-auto bg-white dark:bg-card p-4 rounded-lg">
           <div className="min-w-[900px]">
             <div className="grid grid-cols-[200px_repeat(12,1fr)] gap-1 mb-2">
               <div className="font-medium text-sm p-2">Task</div>
@@ -936,7 +1082,7 @@ export default function BusinessPlan() {
           </Card>
         </div>
         
-        <Card className="p-4">
+        <Card ref={financialChartRef} className="p-4 bg-white dark:bg-card">
           <h4 className="font-semibold mb-4 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
             12-Month Cash Flow Projection
@@ -1034,7 +1180,7 @@ export default function BusinessPlan() {
           </Button>
         </div>
         
-        <Card className="p-4">
+        <Card ref={riskMatrixRef} className="p-4 bg-white dark:bg-card">
           <h4 className="font-semibold mb-4">Risk Heat Map (Probability vs Impact)</h4>
           <div className="grid grid-cols-6 gap-1 max-w-md mx-auto">
             <div></div>
@@ -1042,8 +1188,8 @@ export default function BusinessPlan() {
               <div key={i} className="text-center text-xs font-medium p-1">{i}</div>
             ))}
             {[5, 4, 3, 2, 1].map(prob => (
-              <>
-                <div key={`p${prob}`} className="text-xs font-medium p-1 flex items-center">{prob}</div>
+              <React.Fragment key={prob}>
+                <div className="text-xs font-medium p-1 flex items-center">{prob}</div>
                 {[1, 2, 3, 4, 5].map(imp => {
                   const score = prob * imp;
                   const level = score >= 20 ? 'critical' : score >= 10 ? 'high' : score >= 5 ? 'medium' : 'low';
@@ -1059,7 +1205,7 @@ export default function BusinessPlan() {
                     </div>
                   );
                 })}
-              </>
+              </React.Fragment>
             ))}
           </div>
           <div className="flex justify-center gap-4 mt-4 text-xs">
@@ -1168,7 +1314,7 @@ export default function BusinessPlan() {
           </Button>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div ref={competitorChartRef} className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-white dark:bg-card p-4 rounded-lg">
           <Card className="p-4">
             <h4 className="font-semibold mb-4">Market Share Distribution</h4>
             <ResponsiveContainer width="100%" height={250}>
@@ -1298,7 +1444,7 @@ export default function BusinessPlan() {
           Scalability & Job Creation Visualizations
         </h3>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div ref={scalabilityChartRef} className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-white dark:bg-card p-4 rounded-lg">
           <Card className="p-4">
             <h4 className="font-semibold mb-4">Job Creation Timeline</h4>
             <ResponsiveContainer width="100%" height={250}>
@@ -1443,19 +1589,29 @@ export default function BusinessPlan() {
                   <div className="flex flex-wrap gap-3 mb-6">
                     <Button 
                       onClick={handleExportPdf} 
+                      disabled={isExporting}
                       className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
                       data-testid="button-export-pdf"
                     >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download PDF
+                      {isExporting ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4 mr-2" />
+                      )}
+                      {isExporting ? 'Generating...' : 'Download PDF'}
                     </Button>
                     <Button 
                       onClick={handleExportWord} 
+                      disabled={isExporting}
                       className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
                       data-testid="button-export-word"
                     >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download Word
+                      {isExporting ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4 mr-2" />
+                      )}
+                      {isExporting ? 'Generating...' : 'Download Word'}
                     </Button>
                   </div>
 
