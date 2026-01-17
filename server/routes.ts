@@ -1747,6 +1747,133 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // Word document download endpoint
+  app.get("/api/download/word/:planId", isAuthenticated, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user as any;
+      
+      const businessPlan = await storage.getBusinessPlan(planId);
+      if (!businessPlan || businessPlan.userId !== user.id) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+
+      if (businessPlan.status !== 'completed') {
+        return res.status(400).json({ error: "Business plan not ready yet" });
+      }
+
+      if (!businessPlan.generatedContent) {
+        return res.status(500).json({ error: "Business plan content is missing" });
+      }
+
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, PageBreak } = await import("docx");
+      
+      const content = businessPlan.generatedContent;
+      const children: any[] = [];
+      
+      // Cover page
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: "", size: 72 })],
+          spacing: { before: 2000 },
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: businessPlan.businessName, bold: true, size: 72, color: "005EB8" })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 400 },
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: "UK Innovation Visa Business Plan", size: 36, color: "666666" })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 600 },
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: `Industry: ${businessPlan.industry}`, size: 24 })],
+          alignment: AlignmentType.CENTER,
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: `Generated: ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, size: 24 })],
+          alignment: AlignmentType.CENTER,
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: `Tier: ${businessPlan.tier.charAt(0).toUpperCase() + businessPlan.tier.slice(1)}`, size: 24, bold: true })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 400 },
+        }),
+        new Paragraph({
+          children: [new PageBreak()],
+        })
+      );
+      
+      // Parse the markdown content into sections
+      const lines = content.split('\n');
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        
+        if (trimmedLine.startsWith('# ')) {
+          children.push(new Paragraph({
+            text: trimmedLine.slice(2),
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 200 },
+          }));
+        } else if (trimmedLine.startsWith('## ')) {
+          children.push(new Paragraph({
+            text: trimmedLine.slice(3),
+            heading: HeadingLevel.HEADING_2,
+            spacing: { before: 300, after: 150 },
+          }));
+        } else if (trimmedLine.startsWith('### ')) {
+          children.push(new Paragraph({
+            text: trimmedLine.slice(4),
+            heading: HeadingLevel.HEADING_3,
+            spacing: { before: 200, after: 100 },
+          }));
+        } else if (trimmedLine.startsWith('---')) {
+          children.push(new Paragraph({
+            border: { bottom: { color: "CCCCCC", space: 1, style: BorderStyle.SINGLE, size: 6 } },
+            spacing: { before: 200, after: 200 },
+          }));
+        } else if (trimmedLine.length > 0) {
+          const runs: any[] = [];
+          const parts = trimmedLine.split(/\*\*([^*]+)\*\*/g);
+          for (let i = 0; i < parts.length; i++) {
+            if (i % 2 === 0) {
+              if (parts[i]) runs.push(new TextRun({ text: parts[i], size: 22 }));
+            } else {
+              if (parts[i]) runs.push(new TextRun({ text: parts[i], bold: true, size: 22 }));
+            }
+          }
+          
+          if (runs.length > 0) {
+            children.push(new Paragraph({
+              children: runs,
+              spacing: { after: 120 },
+            }));
+          }
+        }
+      }
+
+      const doc = new Document({
+        title: `${businessPlan.businessName} - Business Plan`,
+        description: "UK Innovation Visa Business Plan",
+        creator: "UK Innovator Founder Visa Assistant",
+        sections: [{
+          properties: {},
+          children: children,
+        }],
+      });
+
+      const buffer = await Packer.toBuffer(doc);
+      
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(businessPlan.businessName)}-business-plan.docx"`);
+      res.send(Buffer.from(buffer));
+    } catch (error) {
+      console.error("Word download error:", error);
+      res.status(500).json({ error: "Failed to generate Word document" });
+    }
+  });
+
   // ============ ADVANCED FEATURES API ENDPOINTS ============
 
   app.get("/api/endorser/simulate/:planId", isAuthenticated, async (req, res) => {

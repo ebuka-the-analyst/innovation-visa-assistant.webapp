@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Download, CheckCircle, Home, FileText, Mail, Send, Linkedin, RefreshCw, LayoutDashboard, Clock, Lightbulb, BookOpen, Shield, TrendingUp } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Download, CheckCircle, Home, FileText, Mail, Send, Linkedin, RefreshCw, LayoutDashboard, Clock, Lightbulb, BookOpen, Shield, TrendingUp, FileSpreadsheet } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -64,7 +65,36 @@ export default function GenerationProgress({ planId }: { planId: string }) {
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [currentTipIndex, setCurrentTipIndex] = useState<number>(0);
   const [sectionNumber, setSectionNumber] = useState<number>(0);
+  const [showFormatDialog, setShowFormatDialog] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
+
+  // Download handler for selected format
+  const handleDownload = async (format: 'pdf' | 'word') => {
+    setIsExporting(true);
+    try {
+      if (format === 'pdf') {
+        // Use the existing PDF endpoint
+        window.open(pdfUrl || `/api/download/pdf/${planId}`, '_blank');
+      } else {
+        // Use Word endpoint
+        window.open(`/api/download/word/${planId}`, '_blank');
+      }
+      setShowFormatDialog(false);
+      toast({
+        title: "Download Started",
+        description: `Your business plan is downloading as ${format.toUpperCase()}.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Please try again or contact support.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   useEffect(() => {
     if (!planId) return;
@@ -327,15 +357,57 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 </p>
               </div>
               
-              <Button
-                size="lg"
-                className="w-full"
-                onClick={() => window.open(pdfUrl, '_blank')}
-                data-testid="button-download-pdf"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                Download Your {tierPageTargets[tier]} Page Business Plan
-              </Button>
+              <Dialog open={showFormatDialog} onOpenChange={setShowFormatDialog}>
+                <DialogTrigger asChild>
+                  <Button
+                    size="lg"
+                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
+                    data-testid="button-download-business-plan"
+                  >
+                    <Download className="w-5 h-5 mr-2" />
+                    Download Your {tierPageTargets[tier]} Page Business Plan
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Choose Download Format</DialogTitle>
+                    <DialogDescription>
+                      Select your preferred format for your business plan document.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid grid-cols-2 gap-4 py-4">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="flex flex-col h-24 gap-2 hover-elevate"
+                      onClick={() => handleDownload('pdf')}
+                      disabled={isExporting}
+                      data-testid="button-download-pdf"
+                    >
+                      <FileText className="w-8 h-8 text-red-500" />
+                      <span className="font-semibold">PDF</span>
+                      <span className="text-xs text-muted-foreground">Best for sharing</span>
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="flex flex-col h-24 gap-2 hover-elevate"
+                      onClick={() => handleDownload('word')}
+                      disabled={isExporting}
+                      data-testid="button-download-word"
+                    >
+                      <FileSpreadsheet className="w-8 h-8 text-blue-500" />
+                      <span className="font-semibold">Word</span>
+                      <span className="text-xs text-muted-foreground">Best for editing</span>
+                    </Button>
+                  </div>
+                  {isExporting && (
+                    <p className="text-sm text-muted-foreground text-center animate-pulse">
+                      Preparing your download...
+                    </p>
+                  )}
+                </DialogContent>
+              </Dialog>
 
               <div className="grid grid-cols-2 gap-3">
                 <Button
