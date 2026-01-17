@@ -57,6 +57,19 @@ async function migrate() {
     
     console.log(`Migration complete: ${successCount} executed, ${skipCount} skipped (already exist)`);
     
+    // Add chart_data column to business_plans if not exists
+    try {
+      await client.query(`
+        ALTER TABLE business_plans 
+        ADD COLUMN IF NOT EXISTS chart_data TEXT
+      `);
+      console.log('chart_data column added or already exists');
+    } catch (err) {
+      if (err.code !== '42701') { // 42701 = column already exists
+        console.error('Error adding chart_data column:', err.message);
+      }
+    }
+    
   } catch (err) {
     console.error('Migration failed:', err.message);
     process.exit(1);
