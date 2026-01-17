@@ -190,7 +190,7 @@ export const questionnaireSchema = z.object({
   
   techStack: z.string().min(20, "Please specify your exact technology stack (frameworks, languages, tools)"),
   dataArchitecture: z.string().min(50, "Describe your data architecture and integration approach in detail"),
-  aiMethodology: z.string().min(50, "Specify AI models, algorithms, training data, and validation metrics"),
+  aiMethodology: z.string().optional().or(z.literal('')), // Optional for non-AI businesses
   complianceDesign: z.string().min(50, "Explain compliance approach (GDPR, DCB0129, DCB0160, etc.)"),
   patentStatus: z.string().min(10, "Patent status: pending, filed, none, or defensive publication"),
   
