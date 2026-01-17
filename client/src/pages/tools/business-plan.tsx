@@ -421,7 +421,7 @@ export default function BusinessPlan() {
   // Chart capture status for UI debug panel
   const [chartCaptureStatus, setChartCaptureStatus] = useState<Record<string, { success: boolean; length: number; error?: string }>>({});
   
-  // Wait for SVG to be fully ready (getBBox validation)
+  // Wait for SVG to be fully ready with comprehensive validation
   const waitForSvgReady = async (container: HTMLElement, maxWait = 2000): Promise<boolean> => {
     const startTime = Date.now();
     
@@ -430,11 +430,19 @@ export default function BusinessPlan() {
       if (svg) {
         try {
           const bbox = svg.getBBox();
-          // Check SVG has valid dimensions and enough elements
-          const elements = svg.querySelectorAll('*').length;
-          if (bbox.width > 10 && bbox.height > 10 && elements > 5) {
-            console.log(`[SVG READY] bbox: ${bbox.width}x${bbox.height}, elements: ${elements}`);
-            return true;
+          // Check SVG has valid dimensions
+          if (bbox.width > 10 && bbox.height > 10) {
+            // Validate chart has sufficient content
+            const rects = svg.querySelectorAll('rect').length;
+            const paths = svg.querySelectorAll('path').length;
+            const texts = svg.querySelectorAll('text').length;
+            const totalElements = rects + paths + texts;
+            
+            // Require at least 3 visual elements (rects, paths, or texts)
+            if (totalElements >= 3) {
+              console.log(`[SVG READY] bbox: ${bbox.width}x${bbox.height}, rects: ${rects}, paths: ${paths}, texts: ${texts}`);
+              return true;
+            }
           }
         } catch (e) {
           // getBBox can throw if not rendered
@@ -444,6 +452,7 @@ export default function BusinessPlan() {
       await new Promise(resolve => requestAnimationFrame(resolve));
       await new Promise(resolve => setTimeout(resolve, 50));
     }
+    console.warn('[SVG READY] Timeout waiting for SVG readiness');
     return false;
   };
   
@@ -512,75 +521,7 @@ export default function BusinessPlan() {
     }
   };
   
-  // Capture entire container as PNG (for non-SVG elements like Gantt)
-  const captureContainerAsCanvas = async (container: HTMLElement, scale = 2): Promise<string | null> => {
-    try {
-      const width = container.offsetWidth;
-      const height = container.offsetHeight;
-      
-      // Use html2canvas-style approach with foreignObject
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('width', String(width));
-      svg.setAttribute('height', String(height));
-      svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      
-      const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-      foreignObject.setAttribute('width', '100%');
-      foreignObject.setAttribute('height', '100%');
-      
-      // Clone container with inline styles
-      const clone = container.cloneNode(true) as HTMLElement;
-      clone.style.margin = '0';
-      clone.style.padding = container.style.padding;
-      clone.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-      
-      // Inline all styles for reliable capture
-      const inlineStyles = (el: Element) => {
-        const computed = window.getComputedStyle(el);
-        const style = Array.from(computed).map(prop => 
-          `${prop}:${computed.getPropertyValue(prop)}`
-        ).join(';');
-        (el as HTMLElement).style.cssText = style;
-        Array.from(el.children).forEach(inlineStyles);
-      };
-      inlineStyles(clone);
-      
-      foreignObject.appendChild(clone);
-      svg.appendChild(foreignObject);
-      
-      const serializer = new XMLSerializer();
-      const svgString = serializer.serializeToString(svg);
-      const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
-      
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error('foreignObject capture failed'));
-        img.src = svgDataUrl;
-      });
-      
-      await img.decode();
-      
-      const canvas = document.createElement('canvas');
-      canvas.width = width * scale;
-      canvas.height = height * scale;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Cannot get canvas context');
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.scale(scale, scale);
-      ctx.drawImage(img, 0, 0, width, height);
-      
-      return canvas.toDataURL('image/png', 1.0);
-    } catch (err) {
-      console.error('[Container→Canvas] Failed:', err);
-      return null;
-    }
-  };
+  // Note: All export charts are now SVG-based, so no foreignObject/HTML capture needed
   
   // Main capture function with retry logic
   const captureChartImage = async (
@@ -595,14 +536,14 @@ export default function BusinessPlan() {
       return null;
     }
     
-    // Make container visible with opacity:0 (NOT visibility:hidden)
+    // Make container render-ready: opacity:1 but keep offscreen to avoid flash
+    // SVG renders correctly with opacity:1 even when offscreen (left:-9999px)
     container.style.opacity = '1';
-    container.style.position = 'fixed';
-    container.style.left = '0';
+    container.style.position = 'absolute';
+    container.style.left = '-9999px'; // Keep offscreen - SVG still renders
     container.style.top = '0';
-    container.style.zIndex = '-9999';
     container.style.pointerEvents = 'none';
-    container.style.background = 'white';
+    container.style.background = '#ffffff';
     
     let dataUrl: string | null = null;
     let attempt = 0;
@@ -621,18 +562,31 @@ export default function BusinessPlan() {
       await new Promise(resolve => requestAnimationFrame(resolve));
       
       try {
-        // Try SVG capture first (for Recharts)
+        // All export charts are now SVG-based - capture via SVG→Canvas
         const svg = ref.current.querySelector('svg');
         if (svg) {
-          const width = ref.current.offsetWidth || 800;
-          const height = ref.current.offsetHeight || 350;
-          dataUrl = await svgToCanvas(svg as SVGSVGElement, width, height, 2);
-        }
-        
-        // If no SVG or SVG capture failed, try container capture (for Gantt/tables)
-        if (!dataUrl) {
-          console.log(`[CAPTURE ${chartName}] Falling back to container capture`);
-          dataUrl = await captureContainerAsCanvas(ref.current, 2);
+          // Use SVG's intrinsic dimensions from getBBox for accurate capture
+          const svgEl = svg as SVGSVGElement;
+          let width = 800;
+          let height = 350;
+          
+          try {
+            const bbox = svgEl.getBBox();
+            // Use bbox dimensions if valid, with padding for safety
+            if (bbox.width > 10 && bbox.height > 10) {
+              width = Math.ceil(bbox.width + bbox.x * 2) || parseInt(svgEl.getAttribute('width') || '800');
+              height = Math.ceil(bbox.height + bbox.y * 2) || parseInt(svgEl.getAttribute('height') || '350');
+            }
+          } catch (e) {
+            // Fallback to SVG attributes if getBBox fails
+            width = parseInt(svgEl.getAttribute('width') || '800');
+            height = parseInt(svgEl.getAttribute('height') || '350');
+          }
+          
+          console.log(`[CAPTURE ${chartName}] SVG dimensions: ${width}x${height}`);
+          dataUrl = await svgToCanvas(svgEl, width, height, 2);
+        } else {
+          console.error(`[CAPTURE ${chartName}] No SVG found in ref`);
         }
         
         // Validate PNG
@@ -653,11 +607,11 @@ export default function BusinessPlan() {
       }
     }
     
-    // Hide container again
+    // Hide container again - reset to offscreen with opacity:0
     container.style.opacity = '0';
     container.style.position = 'absolute';
     container.style.left = '-9999px';
-    container.style.zIndex = '';
+    container.style.top = '0';
     
     // Update status for UI debug
     setChartCaptureStatus(prev => ({
@@ -2015,30 +1969,56 @@ export default function BusinessPlan() {
             overflow: 'visible'
           }}
         >
+          {/* SVG-based Gantt Chart for export (deterministic capture) */}
           <div ref={ganttExportRef} style={{ width: '850px', height: '400px', background: '#ffffff', padding: '16px' }}>
-            <h4 style={{ fontWeight: 600, marginBottom: '16px', color: '#000000' }}>12-Month Project Timeline (Gantt Chart)</h4>
-            <div style={{ width: '800px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '200px repeat(12, 1fr)', gap: '4px', marginBottom: '8px' }}>
-                <div style={{ fontWeight: 500, fontSize: '14px', padding: '8px', color: '#000000' }}>Task</div>
-                {['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'].map(m => (
-                  <div key={m} style={{ textAlign: 'center', fontSize: '12px', fontWeight: 500, padding: '8px', backgroundColor: '#f3f4f6', color: '#000000' }}>{m}</div>
-                ))}
-              </div>
-              {ganttTasks.map((task) => (
-                <div key={task.id} style={{ display: 'grid', gridTemplateColumns: '200px repeat(12, 1fr)', gap: '4px', marginBottom: '4px', alignItems: 'center' }}>
-                  <div style={{ fontSize: '14px', padding: '8px', color: '#000000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.task}</div>
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(month => {
-                    const isActive = month >= task.startMonth && month < task.startMonth + task.duration;
-                    return (
-                      <div
-                        key={month}
-                        style={{ height: '24px', borderRadius: '4px', backgroundColor: isActive ? '#3b82f6' : '#e5e7eb' }}
-                      />
-                    );
-                  })}
-                </div>
+            <svg width="820" height="370" xmlns="http://www.w3.org/2000/svg">
+              {/* Title */}
+              <text x="10" y="25" fontFamily="Arial, sans-serif" fontSize="16" fontWeight="600" fill="#000000">
+                12-Month Project Timeline (Gantt Chart)
+              </text>
+              
+              {/* Month headers */}
+              {['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'].map((m, i) => (
+                <g key={m}>
+                  <rect x={200 + i * 50} y="40" width="48" height="25" fill="#f3f4f6" rx="2" />
+                  <text x={200 + i * 50 + 24} y="57" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="11" fontWeight="500" fill="#000000">
+                    {m}
+                  </text>
+                </g>
               ))}
-            </div>
+              
+              {/* Task header */}
+              <text x="10" y="57" fontFamily="Arial, sans-serif" fontSize="13" fontWeight="500" fill="#000000">Task</text>
+              
+              {/* Task rows */}
+              {ganttTasks.map((task, taskIndex) => {
+                const rowY = 75 + taskIndex * 35;
+                return (
+                  <g key={task.id}>
+                    {/* Task name */}
+                    <text x="10" y={rowY + 18} fontFamily="Arial, sans-serif" fontSize="12" fill="#000000">
+                      {task.task.length > 25 ? task.task.substring(0, 25) + '...' : task.task}
+                    </text>
+                    
+                    {/* Month cells */}
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((month, i) => {
+                      const isActive = month >= task.startMonth && month < task.startMonth + task.duration;
+                      return (
+                        <rect 
+                          key={month} 
+                          x={200 + i * 50} 
+                          y={rowY} 
+                          width="48" 
+                          height="28" 
+                          fill={isActive ? '#3b82f6' : '#e5e7eb'} 
+                          rx="4" 
+                        />
+                      );
+                    })}
+                  </g>
+                );
+              })}
+            </svg>
           </div>
           
           <div ref={financialExportRef} style={{ width: '850px', height: '350px', background: '#ffffff', padding: '16px', marginTop: '16px' }}>
@@ -2055,39 +2035,85 @@ export default function BusinessPlan() {
             </ComposedChart>
           </div>
           
+          {/* SVG-based Risk Heat Map for export (deterministic capture) */}
           <div ref={riskExportRef} style={{ width: '500px', height: '350px', background: '#ffffff', padding: '16px', marginTop: '16px' }}>
-            <h4 style={{ fontWeight: 600, marginBottom: '16px', color: '#000000' }}>Risk Heat Map (Probability vs Impact)</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '4px', maxWidth: '400px', margin: '0 auto' }}>
-              <div></div>
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} style={{ textAlign: 'center', fontSize: '12px', fontWeight: 500, padding: '4px', color: '#000000' }}>{i}</div>
+            <svg width="470" height="320" xmlns="http://www.w3.org/2000/svg">
+              {/* Title */}
+              <text x="235" y="25" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="16" fontWeight="600" fill="#000000">
+                Risk Heat Map (Probability vs Impact)
+              </text>
+              
+              {/* Impact header */}
+              <text x="285" y="55" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="11" fill="#666666">Impact →</text>
+              
+              {/* Probability label */}
+              <text x="60" y="160" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="11" fill="#666666" transform="rotate(-90, 30, 160)">Probability →</text>
+              
+              {/* Impact column headers */}
+              {[1, 2, 3, 4, 5].map((imp, i) => (
+                <text key={imp} x={120 + i * 65 + 30} y="75" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="12" fontWeight="500" fill="#000000">
+                  {imp}
+                </text>
               ))}
-              {[5, 4, 3, 2, 1].map(prob => (
-                <React.Fragment key={prob}>
-                  <div style={{ fontSize: '12px', fontWeight: 500, padding: '4px', display: 'flex', alignItems: 'center', color: '#000000' }}>{prob}</div>
-                  {[1, 2, 3, 4, 5].map(imp => {
+              
+              {/* Risk grid */}
+              {[5, 4, 3, 2, 1].map((prob, probIndex) => (
+                <g key={prob}>
+                  {/* Probability row label */}
+                  <text x="105" y={95 + probIndex * 42 + 25} textAnchor="end" fontFamily="Arial, sans-serif" fontSize="12" fontWeight="500" fill="#000000">
+                    {prob}
+                  </text>
+                  
+                  {/* Impact cells */}
+                  {[1, 2, 3, 4, 5].map((imp, impIndex) => {
                     const score = prob * imp;
                     const level = score >= 20 ? 'critical' : score >= 10 ? 'high' : score >= 5 ? 'medium' : 'low';
                     const colors: Record<string, string> = { low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444' };
                     const risksInCell = risks.filter(r => r.probability === prob && r.impact === imp);
                     return (
-                      <div
-                        key={`${prob}-${imp}`}
-                        style={{ height: '40px', borderRadius: '4px', backgroundColor: colors[level], display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: 'bold' }}
-                      >
-                        {risksInCell.length > 0 && risksInCell.length}
-                      </div>
+                      <g key={`${prob}-${imp}`}>
+                        <rect 
+                          x={120 + impIndex * 65} 
+                          y={90 + probIndex * 42} 
+                          width="60" 
+                          height="38" 
+                          fill={colors[level]} 
+                          rx="4" 
+                        />
+                        {risksInCell.length > 0 && (
+                          <text 
+                            x={120 + impIndex * 65 + 30} 
+                            y={90 + probIndex * 42 + 24} 
+                            textAnchor="middle" 
+                            fontFamily="Arial, sans-serif" 
+                            fontSize="14" 
+                            fontWeight="bold" 
+                            fill="#ffffff"
+                          >
+                            {risksInCell.length}
+                          </text>
+                        )}
+                      </g>
                     );
                   })}
-                </React.Fragment>
+                </g>
               ))}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '16px', fontSize: '12px', color: '#000000' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#22c55e' }} /> Low</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#eab308' }} /> Medium</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#f97316' }} /> High</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#ef4444' }} /> Critical</span>
-            </div>
+              
+              {/* Legend */}
+              <g transform="translate(120, 305)">
+                <rect x="0" y="-12" width="12" height="12" fill="#22c55e" rx="2" />
+                <text x="18" y="0" fontFamily="Arial, sans-serif" fontSize="11" fill="#000000">Low</text>
+                
+                <rect x="70" y="-12" width="12" height="12" fill="#eab308" rx="2" />
+                <text x="88" y="0" fontFamily="Arial, sans-serif" fontSize="11" fill="#000000">Medium</text>
+                
+                <rect x="160" y="-12" width="12" height="12" fill="#f97316" rx="2" />
+                <text x="178" y="0" fontFamily="Arial, sans-serif" fontSize="11" fill="#000000">High</text>
+                
+                <rect x="230" y="-12" width="12" height="12" fill="#ef4444" rx="2" />
+                <text x="248" y="0" fontFamily="Arial, sans-serif" fontSize="11" fill="#000000">Critical</text>
+              </g>
+            </svg>
           </div>
           
           <div ref={competitorExportRef} style={{ width: '850px', height: '320px', background: '#ffffff', padding: '16px', marginTop: '16px' }}>
