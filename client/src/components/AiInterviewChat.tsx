@@ -932,13 +932,32 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                           [...messages].reverse().find(m => m.role === 'agent')?.content || 
                           'General visa application question';
       
-      const res = await apiRequest('POST', '/api/ai-interview/autofill-from-documents', {
-        questionId: lastQuestion?.questionId || 'general',
-        question: questionText,
-        category: lastQuestion?.questionData?.category || 'general'
+      const res = await fetch('/api/ai-interview/autofill-from-documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          questionId: lastQuestion?.questionId || 'general',
+          question: questionText,
+          category: lastQuestion?.questionData?.category || 'general'
+        })
       });
       
       const data = await res.json();
+      
+      // Handle error responses with server message
+      if (!res.ok) {
+        if (res.status === 401) {
+          setAutofillMessage('Please log in to use this feature');
+        } else if (res.status === 403) {
+          setAutofillMessage('Upgrade to Premium to use document autofill');
+        } else {
+          setAutofillMessage(data.message || data.error || 'Unable to autofill');
+        }
+        setTimeout(() => setAutofillMessage(null), 8000);
+        return;
+      }
+      
       if (data.success && data.autofillAnswer) {
         setInputValue(data.autofillAnswer);
         setAutofillMessage(`Filled from ${data.dataSourcesUsed?.documents || 0} docs (${data.dataSourcesUsed?.extractedFields || 0} fields)`);
@@ -947,19 +966,12 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
         setAutofillMessage(data.message);
         setTimeout(() => setAutofillMessage(null), 8000);
       } else {
-        setAutofillMessage('No matching data found in your documents for this question');
+        setAutofillMessage('No matching data found in your documents');
         setTimeout(() => setAutofillMessage(null), 6000);
       }
     } catch (err: any) {
       console.error('Error autofilling from documents:', err);
-      const errorMessage = err?.message || '';
-      if (errorMessage.includes('403') || errorMessage.includes('Premium')) {
-        setAutofillMessage('Upgrade to Premium to use document autofill');
-      } else if (errorMessage.includes('401')) {
-        setAutofillMessage('Please log in to use this feature');
-      } else {
-        setAutofillMessage('Failed to autofill. Check your internet connection and try again.');
-      }
+      setAutofillMessage('Connection error - please try again');
       setTimeout(() => setAutofillMessage(null), 6000);
     } finally {
       setIsAutofilling(false);
