@@ -22,7 +22,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { usePdfExport } from "@/hooks/usePdfExport";
 import { useWordExport } from "@/hooks/useWordExport";
-import { toPng } from 'html-to-image';
+// Removed html-to-image - using native SVG→Canvas→PNG for reliable export
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer, PieChart as RePieChart, Pie, Cell,
@@ -418,73 +418,264 @@ export default function BusinessPlan() {
   const competitorExportRef = useRef<HTMLDivElement>(null);
   const scalabilityExportRef = useRef<HTMLDivElement>(null);
   
-  const captureChartImage = async (ref: React.RefObject<HTMLDivElement>, fallbackWidth = 800, fallbackHeight = 400): Promise<string | null> => {
-    const container = document.getElementById('export-charts-container');
-    if (!container) {
-      console.error('Export container not found');
-      return null;
-    }
-    if (!ref.current) {
-      console.error('Chart ref is null');
-      return null;
-    }
+  // Chart capture status for UI debug panel
+  const [chartCaptureStatus, setChartCaptureStatus] = useState<Record<string, { success: boolean; length: number; error?: string }>>({});
+  
+  // Wait for SVG to be fully ready (getBBox validation)
+  const waitForSvgReady = async (container: HTMLElement, maxWait = 2000): Promise<boolean> => {
+    const startTime = Date.now();
     
-    // Make container visible for capture
-    container.style.visibility = 'visible';
-    container.style.left = '0';
-    container.style.position = 'fixed';
-    container.style.top = '0';
-    container.style.zIndex = '-1000';
-    
-    // Wait for Recharts to fully render (SVG needs time)
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    
-    try {
-      const width = ref.current.offsetWidth || fallbackWidth;
-      const height = ref.current.offsetHeight || fallbackHeight;
-      console.log(`[CHART CAPTURE] Dimensions: ${width}x${height}`);
-      
-      if (width < 10 || height < 10) {
-        console.error(`[CHART CAPTURE] Invalid dimensions: ${width}x${height}`);
-        container.style.visibility = 'hidden';
-        container.style.left = '-9999px';
-        container.style.position = 'absolute';
-        return null;
+    while (Date.now() - startTime < maxWait) {
+      const svg = container.querySelector('svg');
+      if (svg) {
+        try {
+          const bbox = svg.getBBox();
+          // Check SVG has valid dimensions and enough elements
+          const elements = svg.querySelectorAll('*').length;
+          if (bbox.width > 10 && bbox.height > 10 && elements > 5) {
+            console.log(`[SVG READY] bbox: ${bbox.width}x${bbox.height}, elements: ${elements}`);
+            return true;
+          }
+        } catch (e) {
+          // getBBox can throw if not rendered
+        }
       }
+      // Wait and retry
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    return false;
+  };
+  
+  // Convert SVG to PNG via Canvas (most reliable method)
+  const svgToCanvas = async (svgElement: SVGSVGElement, width: number, height: number, scale = 2): Promise<string | null> => {
+    try {
+      // Clone SVG to avoid modifying original
+      const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
       
-      const dataUrl = await toPng(ref.current, {
-        backgroundColor: '#ffffff',
-        width,
-        height,
-        pixelRatio: 2,
-        cacheBust: true,
+      // Set explicit dimensions
+      clonedSvg.setAttribute('width', String(width));
+      clonedSvg.setAttribute('height', String(height));
+      clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      
+      // Inline all computed styles
+      const allElements = clonedSvg.querySelectorAll('*');
+      allElements.forEach(el => {
+        const computedStyle = window.getComputedStyle(el as Element);
+        const styleStr = Array.from(computedStyle).map(prop => 
+          `${prop}:${computedStyle.getPropertyValue(prop)}`
+        ).join(';');
+        (el as HTMLElement).setAttribute('style', styleStr);
       });
       
-      console.log(`[CHART CAPTURE] Success! Data length: ${dataUrl.length}`);
+      // Serialize SVG to string
+      const serializer = new XMLSerializer();
+      let svgString = serializer.serializeToString(clonedSvg);
       
-      // Hide container again
-      container.style.visibility = 'hidden';
-      container.style.left = '-9999px';
-      container.style.position = 'absolute';
-      container.style.zIndex = '';
+      // Encode SVG for embedding
+      const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
       
-      // Validate image data
-      if (!dataUrl || dataUrl.length < 1000) {
-        console.error('[CHART CAPTURE] Invalid or empty image data');
-        return null;
-      }
+      // Create Image and load SVG
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
       
-      return dataUrl;
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = (e) => reject(new Error('Failed to load SVG as image'));
+        img.src = svgDataUrl;
+      });
+      
+      // Decode image before drawing
+      await img.decode();
+      
+      // Create canvas and draw
+      const canvas = document.createElement('canvas');
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Cannot get canvas context');
+      
+      // Fill white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Scale and draw
+      ctx.scale(scale, scale);
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Export as PNG
+      return canvas.toDataURL('image/png', 1.0);
     } catch (err) {
-      console.error('[CHART CAPTURE] Failed:', err);
-      container.style.visibility = 'hidden';
-      container.style.left = '-9999px';
-      container.style.position = 'absolute';
-      container.style.zIndex = '';
+      console.error('[SVG→Canvas] Failed:', err);
       return null;
     }
+  };
+  
+  // Capture entire container as PNG (for non-SVG elements like Gantt)
+  const captureContainerAsCanvas = async (container: HTMLElement, scale = 2): Promise<string | null> => {
+    try {
+      const width = container.offsetWidth;
+      const height = container.offsetHeight;
+      
+      // Use html2canvas-style approach with foreignObject
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', String(width));
+      svg.setAttribute('height', String(height));
+      svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      
+      const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+      foreignObject.setAttribute('width', '100%');
+      foreignObject.setAttribute('height', '100%');
+      
+      // Clone container with inline styles
+      const clone = container.cloneNode(true) as HTMLElement;
+      clone.style.margin = '0';
+      clone.style.padding = container.style.padding;
+      clone.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+      
+      // Inline all styles for reliable capture
+      const inlineStyles = (el: Element) => {
+        const computed = window.getComputedStyle(el);
+        const style = Array.from(computed).map(prop => 
+          `${prop}:${computed.getPropertyValue(prop)}`
+        ).join(';');
+        (el as HTMLElement).style.cssText = style;
+        Array.from(el.children).forEach(inlineStyles);
+      };
+      inlineStyles(clone);
+      
+      foreignObject.appendChild(clone);
+      svg.appendChild(foreignObject);
+      
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svg);
+      const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+      
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('foreignObject capture failed'));
+        img.src = svgDataUrl;
+      });
+      
+      await img.decode();
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Cannot get canvas context');
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.scale(scale, scale);
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      return canvas.toDataURL('image/png', 1.0);
+    } catch (err) {
+      console.error('[Container→Canvas] Failed:', err);
+      return null;
+    }
+  };
+  
+  // Main capture function with retry logic
+  const captureChartImage = async (
+    ref: React.RefObject<HTMLDivElement>, 
+    chartName: string,
+    maxRetries = 3
+  ): Promise<string | null> => {
+    const container = document.getElementById('export-charts-container');
+    if (!container || !ref.current) {
+      console.error(`[CAPTURE ${chartName}] Missing container or ref`);
+      setChartCaptureStatus(prev => ({ ...prev, [chartName]: { success: false, length: 0, error: 'Missing ref' } }));
+      return null;
+    }
+    
+    // Make container visible with opacity:0 (NOT visibility:hidden)
+    container.style.opacity = '1';
+    container.style.position = 'fixed';
+    container.style.left = '0';
+    container.style.top = '0';
+    container.style.zIndex = '-9999';
+    container.style.pointerEvents = 'none';
+    container.style.background = 'white';
+    
+    let dataUrl: string | null = null;
+    let attempt = 0;
+    
+    while (attempt < maxRetries && !dataUrl) {
+      attempt++;
+      console.log(`[CAPTURE ${chartName}] Attempt ${attempt}/${maxRetries}`);
+      
+      // Wait for SVG readiness
+      const ready = await waitForSvgReady(ref.current, 1500);
+      console.log(`[CAPTURE ${chartName}] SVG ready: ${ready}`);
+      
+      // Extra wait for animations to settle (even though disabled)
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      
+      try {
+        // Try SVG capture first (for Recharts)
+        const svg = ref.current.querySelector('svg');
+        if (svg) {
+          const width = ref.current.offsetWidth || 800;
+          const height = ref.current.offsetHeight || 350;
+          dataUrl = await svgToCanvas(svg as SVGSVGElement, width, height, 2);
+        }
+        
+        // If no SVG or SVG capture failed, try container capture (for Gantt/tables)
+        if (!dataUrl) {
+          console.log(`[CAPTURE ${chartName}] Falling back to container capture`);
+          dataUrl = await captureContainerAsCanvas(ref.current, 2);
+        }
+        
+        // Validate PNG
+        if (dataUrl) {
+          const isValidPng = dataUrl.startsWith('data:image/png;base64,') && dataUrl.length > 5000;
+          if (!isValidPng) {
+            console.warn(`[CAPTURE ${chartName}] Invalid PNG: length=${dataUrl.length}`);
+            dataUrl = null;
+          }
+        }
+      } catch (err) {
+        console.error(`[CAPTURE ${chartName}] Error:`, err);
+        dataUrl = null;
+      }
+      
+      if (!dataUrl && attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 200 * attempt)); // Exponential backoff
+      }
+    }
+    
+    // Hide container again
+    container.style.opacity = '0';
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.zIndex = '';
+    
+    // Update status for UI debug
+    setChartCaptureStatus(prev => ({
+      ...prev,
+      [chartName]: {
+        success: !!dataUrl,
+        length: dataUrl?.length || 0,
+        error: dataUrl ? undefined : 'Capture failed after retries'
+      }
+    }));
+    
+    if (dataUrl) {
+      console.log(`[CAPTURE ${chartName}] SUCCESS! Length: ${dataUrl.length}`);
+    } else {
+      console.error(`[CAPTURE ${chartName}] FAILED after ${maxRetries} attempts`);
+    }
+    
+    return dataUrl;
   };
 
   const handleAiComplete = (answers: Record<string, any>) => {
@@ -884,11 +1075,11 @@ export default function BusinessPlan() {
     try {
       console.log('[PDF EXPORT] Starting chart capture using EXPORT refs...');
       const [ganttImg, financialImg, riskImg, competitorImg, scalabilityImg] = await Promise.all([
-        captureChartImage(ganttExportRef),
-        captureChartImage(financialExportRef),
-        captureChartImage(riskExportRef),
-        captureChartImage(competitorExportRef),
-        captureChartImage(scalabilityExportRef),
+        captureChartImage(ganttExportRef, 'Gantt'),
+        captureChartImage(financialExportRef, 'Financial'),
+        captureChartImage(riskExportRef, 'Risk'),
+        captureChartImage(competitorExportRef, 'Competitor'),
+        captureChartImage(scalabilityExportRef, 'Scalability'),
       ]);
       
       console.log('Chart capture results:', {
@@ -938,11 +1129,11 @@ export default function BusinessPlan() {
     try {
       console.log('[WORD EXPORT] Starting chart capture using EXPORT refs...');
       const [ganttImg, financialImg, riskImg, competitorImg, scalabilityImg] = await Promise.all([
-        captureChartImage(ganttExportRef),
-        captureChartImage(financialExportRef),
-        captureChartImage(riskExportRef),
-        captureChartImage(competitorExportRef),
-        captureChartImage(scalabilityExportRef),
+        captureChartImage(ganttExportRef, 'Gantt'),
+        captureChartImage(financialExportRef, 'Financial'),
+        captureChartImage(riskExportRef, 'Risk'),
+        captureChartImage(competitorExportRef, 'Competitor'),
+        captureChartImage(scalabilityExportRef, 'Scalability'),
       ]);
       
       console.log('Chart capture results:', {
@@ -1810,7 +2001,7 @@ export default function BusinessPlan() {
           </Card>
         </div>
         
-        {/* Hidden container for chart export - FIXED SIZE charts (no ResponsiveContainer) */}
+        {/* Hidden container for chart export - opacity:0 (NOT visibility:hidden), animations OFF */}
         <div 
           id="export-charts-container"
           style={{ 
@@ -1818,23 +2009,24 @@ export default function BusinessPlan() {
             left: '-9999px', 
             top: 0, 
             width: '900px',
-            visibility: 'hidden',
+            opacity: 0,
             pointerEvents: 'none',
+            background: '#ffffff',
             overflow: 'visible'
           }}
         >
-          <div ref={ganttExportRef} className="bg-white p-4" style={{ width: '850px', height: '400px' }}>
-            <h4 className="font-semibold mb-4 text-black">12-Month Project Timeline (Gantt Chart)</h4>
+          <div ref={ganttExportRef} style={{ width: '850px', height: '400px', background: '#ffffff', padding: '16px' }}>
+            <h4 style={{ fontWeight: 600, marginBottom: '16px', color: '#000000' }}>12-Month Project Timeline (Gantt Chart)</h4>
             <div style={{ width: '800px' }}>
-              <div className="grid grid-cols-[200px_repeat(12,1fr)] gap-1 mb-2">
-                <div className="font-medium text-sm p-2 text-black">Task</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '200px repeat(12, 1fr)', gap: '4px', marginBottom: '8px' }}>
+                <div style={{ fontWeight: 500, fontSize: '14px', padding: '8px', color: '#000000' }}>Task</div>
                 {['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'].map(m => (
-                  <div key={m} className="text-center text-xs font-medium p-2 text-black" style={{ backgroundColor: '#f3f4f6' }}>{m}</div>
+                  <div key={m} style={{ textAlign: 'center', fontSize: '12px', fontWeight: 500, padding: '8px', backgroundColor: '#f3f4f6', color: '#000000' }}>{m}</div>
                 ))}
               </div>
               {ganttTasks.map((task) => (
-                <div key={task.id} className="grid grid-cols-[200px_repeat(12,1fr)] gap-1 mb-1 items-center">
-                  <div className="text-sm p-2 truncate text-black">{task.task}</div>
+                <div key={task.id} style={{ display: 'grid', gridTemplateColumns: '200px repeat(12, 1fr)', gap: '4px', marginBottom: '4px', alignItems: 'center' }}>
+                  <div style={{ fontSize: '14px', padding: '8px', color: '#000000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.task}</div>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(month => {
                     const isActive = month >= task.startMonth && month < task.startMonth + task.duration;
                     return (
@@ -1849,30 +2041,30 @@ export default function BusinessPlan() {
             </div>
           </div>
           
-          <div ref={financialExportRef} className="bg-white p-4 mt-4" style={{ width: '850px', height: '350px' }}>
-            <h4 className="font-semibold mb-4 text-black">12-Month Cash Flow Projection</h4>
+          <div ref={financialExportRef} style={{ width: '850px', height: '350px', background: '#ffffff', padding: '16px', marginTop: '16px' }}>
+            <h4 style={{ fontWeight: 600, marginBottom: '16px', color: '#000000' }}>12-Month Cash Flow Projection</h4>
             <ComposedChart width={800} height={280} data={financialData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip formatter={(value) => `£${Number(value).toLocaleString()}`} />
               <Legend />
-              <Bar dataKey="revenue" name="Revenue" fill="#22c55e" />
-              <Bar dataKey="costs" name="Costs" fill="#ef4444" />
-              <Line type="monotone" dataKey="cumulative" name="Cumulative" stroke="#3b82f6" strokeWidth={2} />
+              <Bar dataKey="revenue" name="Revenue" fill="#22c55e" isAnimationActive={false} />
+              <Bar dataKey="costs" name="Costs" fill="#ef4444" isAnimationActive={false} />
+              <Line type="monotone" dataKey="cumulative" name="Cumulative" stroke="#3b82f6" strokeWidth={2} isAnimationActive={false} />
             </ComposedChart>
           </div>
           
-          <div ref={riskExportRef} className="bg-white p-4 mt-4" style={{ width: '500px', height: '350px' }}>
-            <h4 className="font-semibold mb-4 text-black">Risk Heat Map (Probability vs Impact)</h4>
-            <div className="grid grid-cols-6 gap-1" style={{ maxWidth: '400px', margin: '0 auto' }}>
+          <div ref={riskExportRef} style={{ width: '500px', height: '350px', background: '#ffffff', padding: '16px', marginTop: '16px' }}>
+            <h4 style={{ fontWeight: 600, marginBottom: '16px', color: '#000000' }}>Risk Heat Map (Probability vs Impact)</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '4px', maxWidth: '400px', margin: '0 auto' }}>
               <div></div>
               {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="text-center text-xs font-medium p-1 text-black">{i}</div>
+                <div key={i} style={{ textAlign: 'center', fontSize: '12px', fontWeight: 500, padding: '4px', color: '#000000' }}>{i}</div>
               ))}
               {[5, 4, 3, 2, 1].map(prob => (
                 <React.Fragment key={prob}>
-                  <div className="text-xs font-medium p-1 flex items-center text-black">{prob}</div>
+                  <div style={{ fontSize: '12px', fontWeight: 500, padding: '4px', display: 'flex', alignItems: 'center', color: '#000000' }}>{prob}</div>
                   {[1, 2, 3, 4, 5].map(imp => {
                     const score = prob * imp;
                     const level = score >= 20 ? 'critical' : score >= 10 ? 'high' : score >= 5 ? 'medium' : 'low';
@@ -1890,16 +2082,16 @@ export default function BusinessPlan() {
                 </React.Fragment>
               ))}
             </div>
-            <div className="flex justify-center gap-4 mt-4 text-xs text-black">
-              <span className="flex items-center gap-1"><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#22c55e' }} /> Low</span>
-              <span className="flex items-center gap-1"><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#eab308' }} /> Medium</span>
-              <span className="flex items-center gap-1"><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#f97316' }} /> High</span>
-              <span className="flex items-center gap-1"><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#ef4444' }} /> Critical</span>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '16px', fontSize: '12px', color: '#000000' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#22c55e' }} /> Low</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#eab308' }} /> Medium</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#f97316' }} /> High</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: '#ef4444' }} /> Critical</span>
             </div>
           </div>
           
-          <div ref={competitorExportRef} className="bg-white p-4 mt-4" style={{ width: '850px', height: '320px' }}>
-            <h4 className="font-semibold mb-4 text-black">Market Share Distribution</h4>
+          <div ref={competitorExportRef} style={{ width: '850px', height: '320px', background: '#ffffff', padding: '16px', marginTop: '16px' }}>
+            <h4 style={{ fontWeight: 600, marginBottom: '16px', color: '#000000' }}>Market Share Distribution</h4>
             <div style={{ display: 'flex', gap: '20px' }}>
               <RePieChart width={380} height={250}>
                 <Pie
@@ -1911,6 +2103,7 @@ export default function BusinessPlan() {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
+                  isAnimationActive={false}
                 >
                   {competitors.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'][index % 5]} />
@@ -1923,24 +2116,44 @@ export default function BusinessPlan() {
                 <XAxis type="number" domain={[0, 50]} />
                 <YAxis dataKey="name" type="category" width={100} />
                 <Tooltip />
-                <Bar dataKey="share" name="Market Share %" fill="#3b82f6" />
+                <Bar dataKey="share" name="Market Share %" fill="#3b82f6" isAnimationActive={false} />
               </BarChart>
             </div>
           </div>
           
-          <div ref={scalabilityExportRef} className="bg-white p-4 mt-4" style={{ width: '850px', height: '320px' }}>
-            <h4 className="font-semibold mb-4 text-black">Job Creation Timeline</h4>
+          <div ref={scalabilityExportRef} style={{ width: '850px', height: '320px', background: '#ffffff', padding: '16px', marginTop: '16px' }}>
+            <h4 style={{ fontWeight: 600, marginBottom: '16px', color: '#000000' }}>Job Creation Timeline</h4>
             <BarChart width={800} height={250} data={jobCreationPlan.map(j => ({ year: j.year, jobs: j.totalJobs, salary: j.salaryBudget / 1000 }))}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="jobs" name="Total Jobs" fill="#22c55e" />
-              <Bar dataKey="salary" name="Salary Budget (£K)" fill="#3b82f6" />
+              <Bar dataKey="jobs" name="Total Jobs" fill="#22c55e" isAnimationActive={false} />
+              <Bar dataKey="salary" name="Salary Budget (£K)" fill="#3b82f6" isAnimationActive={false} />
             </BarChart>
           </div>
         </div>
+        
+        {/* Debug panel for chart capture status (visible during export) */}
+        {isExporting && Object.keys(chartCaptureStatus).length > 0 && (
+          <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 border rounded-lg shadow-lg p-4 z-50 max-w-sm">
+            <h4 className="font-semibold mb-2 text-sm">Chart Export Status</h4>
+            <div className="space-y-1 text-xs">
+              {Object.entries(chartCaptureStatus).map(([name, status]) => (
+                <div key={name} className="flex items-center gap-2">
+                  <span className={status.success ? 'text-green-500' : 'text-red-500'}>
+                    {status.success ? '✓' : '✗'}
+                  </span>
+                  <span>{name}:</span>
+                  <span className="text-muted-foreground">
+                    {status.success ? `${(status.length / 1000).toFixed(1)}KB` : status.error}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </ToolAccessGuard>
   );
