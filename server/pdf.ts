@@ -50,6 +50,13 @@ export function generatePDFContent(plan: BusinessPlan): string {
       margin-top: 25px;
       margin-bottom: 10px;
     }
+    h4 {
+      font-size: 13pt;
+      color: #333;
+      margin-top: 20px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
     p {
       font-size: 11pt;
       text-align: justify;
@@ -152,6 +159,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
   const lines = markdown.split('\n');
   let html = '';
   let currentSection = '';
+  let lastH2Title = '';
   const usedCharts = new Set<ChartType>();
   
   for (let i = 0; i < lines.length; i++) {
@@ -159,7 +167,15 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
     
     if (line.startsWith('## ')) {
       const sectionTitle = line.slice(3).trim();
+      const normalizedTitle = sectionTitle.replace(/^\d+\.\s*/, '').toLowerCase().trim();
+      const normalizedLast = lastH2Title.replace(/^\d+\.\s*/, '').toLowerCase().trim();
+      
+      if (normalizedTitle === normalizedLast) {
+        continue;
+      }
+      
       currentSection = sectionTitle;
+      lastH2Title = sectionTitle;
       html += `<h2>${sectionTitle}</h2>\n`;
       
       if (chartData) {
@@ -180,6 +196,8 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
       }
     } else if (line.startsWith('# ')) {
       html += `<h1>${line.slice(2)}</h1>\n`;
+    } else if (line.startsWith('#### ')) {
+      html += `<h4>${line.slice(5)}</h4>\n`;
     } else if (line.startsWith('### ')) {
       html += `<h3>${line.slice(4)}</h3>\n`;
     } else if (line.startsWith('- ') || line.startsWith('* ')) {

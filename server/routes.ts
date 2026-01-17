@@ -1740,7 +1740,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const htmlContent = generatePDFContent(businessPlan);
       
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(businessPlan.businessName)}-business-plan.html"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(businessPlan.businessName)}-business-plan.html"`);
       res.send(htmlContent);
     } catch (error) {
       console.error("PDF download error:", error);
@@ -1893,6 +1893,8 @@ ${generatedSections.join('\n\n---\n\n')}`;
       );
       
       const lines = content.split('\n');
+      let lastH2Title = '';
+      
       for (const line of lines) {
         const trimmedLine = line.trim();
         
@@ -1904,6 +1906,14 @@ ${generatedSections.join('\n\n---\n\n')}`;
           }));
         } else if (trimmedLine.startsWith('## ')) {
           const sectionTitle = trimmedLine.slice(3);
+          const normalizedTitle = sectionTitle.replace(/^\d+\.\s*/, '').toLowerCase().trim();
+          const normalizedLast = lastH2Title.replace(/^\d+\.\s*/, '').toLowerCase().trim();
+          
+          if (normalizedTitle === normalizedLast) {
+            continue;
+          }
+          
+          lastH2Title = sectionTitle;
           children.push(new Paragraph({
             text: sectionTitle,
             heading: HeadingLevel.HEADING_2,
@@ -1916,6 +1926,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
               await addChartToDoc(chartType);
             }
           }
+        } else if (trimmedLine.startsWith('#### ')) {
+          children.push(new Paragraph({
+            text: trimmedLine.slice(5),
+            heading: HeadingLevel.HEADING_4,
+            spacing: { before: 150, after: 80 },
+          }));
         } else if (trimmedLine.startsWith('### ')) {
           children.push(new Paragraph({
             text: trimmedLine.slice(4),
