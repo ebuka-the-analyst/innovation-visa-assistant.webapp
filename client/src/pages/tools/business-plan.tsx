@@ -17,7 +17,7 @@ import {
   CheckCircle2, AlertTriangle, TrendingUp, Calendar, Save, FileText, 
   Target, Users, DollarSign, Shield, Lightbulb, BarChart3, PieChart,
   ArrowRight, Clock, Building, Briefcase, GraduationCap, Scale,
-  Plus, Trash2, ChevronDown, ChevronUp
+  Plus, Trash2, ChevronDown, ChevronUp, Download
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePdfExport } from "@/hooks/usePdfExport";
@@ -1438,6 +1438,25 @@ export default function BusinessPlan() {
                       <span className="text-sm font-bold text-primary">{overallCompletion}%</span>
                     </div>
                     <Progress value={overallCompletion} className="h-3" />
+                  </div>
+
+                  <div className="flex flex-wrap gap-3 mb-6">
+                    <Button 
+                      onClick={handleExportPdf} 
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
+                      data-testid="button-export-pdf"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download PDF
+                    </Button>
+                    <Button 
+                      onClick={handleExportWord} 
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
+                      data-testid="button-export-word"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Word
+                    </Button>
                   </div>
 
                   <Tabs value={activeTab} onValueChange={setActiveTab}>
