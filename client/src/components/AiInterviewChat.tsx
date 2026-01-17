@@ -30,7 +30,15 @@ import {
   BarChart3,
   Users,
   FileText,
-  Sparkles
+  Sparkles,
+  Wand2,
+  ChevronRight,
+  HelpCircle,
+  ArrowRight,
+  AlertTriangle,
+  BookOpen,
+  PenLine,
+  RotateCcw
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
@@ -276,7 +284,13 @@ interface AiInterviewChatProps {
   onSessionUpdate?: (session: InterviewSession) => void;
 }
 
+// Premium tiers that have access to enhanced AI features
+const PREMIUM_TIERS = ['premium', 'enterprise', 'ultimate'];
+
 export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewChatProps) {
+  // Check if user has premium tier for enhanced AI features
+  const hasPremiumFeatures = PREMIUM_TIERS.includes(tier?.toLowerCase() || '');
+  
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -296,6 +310,14 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
   const [showAchievement, setShowAchievement] = useState<Achievement | null>(null);
   const [showLevelUp, setShowLevelUp] = useState<Level | null>(null);
   const [earnedXPAnimation, setEarnedXPAnimation] = useState<number | null>(null);
+  
+  // Premium Features State
+  const [showSmartTips, setShowSmartTips] = useState(true);
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isGeneratingDraft, setIsGeneratingDraft] = useState(false);
+  const [showQuickResponses, setShowQuickResponses] = useState(true);
+  const [answerConfidence, setAnswerConfidence] = useState(0);
+  const [complianceWarnings, setComplianceWarnings] = useState<string[]>([]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -675,6 +697,221 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
     if (isSpeaking && synthRef.current) {
       synthRef.current.cancel();
     }
+  };
+
+  // Calculate answer confidence in real-time based on content
+  useEffect(() => {
+    if (!inputValue.trim()) {
+      setAnswerConfidence(0);
+      setComplianceWarnings([]);
+      return;
+    }
+    
+    const text = inputValue.trim().toLowerCase();
+    const wordCount = inputValue.trim().split(/\s+/).length;
+    let confidence = 0;
+    const warnings: string[] = [];
+    
+    // Base score from word count (optimal: 50-150 words)
+    if (wordCount >= 50 && wordCount <= 150) confidence += 40;
+    else if (wordCount >= 30 && wordCount < 50) confidence += 25;
+    else if (wordCount >= 150 && wordCount <= 250) confidence += 35;
+    else if (wordCount >= 10 && wordCount < 30) confidence += 15;
+    else if (wordCount > 250) confidence += 30;
+    else confidence += 5;
+    
+    // Bonus for specific numbers/data
+    if (/\d+%|\d+k|\£\d+|\$\d+|\d+\s*(users?|customers?|clients?|revenue|sales)/i.test(inputValue)) {
+      confidence += 15;
+    }
+    
+    // Bonus for dates/timelines
+    if (/\d{4}|year\s*\d|month\s*\d|q[1-4]|january|february|march|april|may|june|july|august|september|october|november|december/i.test(inputValue)) {
+      confidence += 10;
+    }
+    
+    // Bonus for specific evidence terms
+    if (/evidence|proof|demonstrated|achieved|delivered|implemented|built|launched|developed|created/i.test(inputValue)) {
+      confidence += 10;
+    }
+    
+    // Bonus for market/competitor mentions
+    if (/market|competitor|industry|sector|customer|user/i.test(inputValue)) {
+      confidence += 10;
+    }
+    
+    // Bonus for innovation terms
+    if (/unique|innovative|novel|proprietary|patent|first|different|better|improved|ai|machine learning|automation/i.test(inputValue)) {
+      confidence += 10;
+    }
+    
+    // Cap at 100
+    confidence = Math.min(100, confidence);
+    
+    // Compliance warnings
+    if (text.includes('maybe') || text.includes('might') || text.includes('probably') || text.includes('possibly')) {
+      warnings.push('Avoid uncertain language - be confident and specific');
+    }
+    if (wordCount < 20 && wordCount > 5) {
+      warnings.push('Consider adding more detail to strengthen your answer');
+    }
+    if (!(/\d/.test(inputValue)) && wordCount > 30) {
+      warnings.push('Including specific numbers or metrics would strengthen your response');
+    }
+    
+    setAnswerConfidence(confidence);
+    setComplianceWarnings(warnings);
+  }, [inputValue]);
+
+  // Get smart tips based on current question
+  const getSmartTips = useCallback(() => {
+    const lastQuestion = [...messages].reverse().find(m => m.role === 'agent' && m.questionId);
+    if (!lastQuestion?.questionData?.category) {
+      return [
+        'Include specific numbers and metrics',
+        'Reference real dates and timelines',
+        'Mention evidence you can provide'
+      ];
+    }
+    
+    const category = lastQuestion.questionData.category.toLowerCase();
+    
+    if (category.includes('innovation') || category.includes('product')) {
+      return [
+        'Explain what makes your solution unique compared to existing alternatives',
+        'Mention any patents, IP, or proprietary technology',
+        'Include specific technical differentiators with measurable benefits'
+      ];
+    } else if (category.includes('financial') || category.includes('viability')) {
+      return [
+        'Include specific revenue figures, projections, or financial milestones',
+        'Mention customer acquisition costs and lifetime value if applicable',
+        'Reference existing traction, paying customers, or letters of intent'
+      ];
+    } else if (category.includes('scalability') || category.includes('growth')) {
+      return [
+        'Describe your UK job creation plans with specific numbers',
+        'Outline your geographic or market expansion strategy',
+        'Include realistic growth milestones with timelines'
+      ];
+    } else if (category.includes('founder') || category.includes('team')) {
+      return [
+        'Highlight relevant industry experience with specific achievements',
+        'Mention any previous successful ventures or exits',
+        'Include measurable results from past projects'
+      ];
+    }
+    
+    return [
+      'Include specific numbers, dates, and metrics',
+      'Reference evidence documents you can provide',
+      'Be confident and avoid uncertain language'
+    ];
+  }, [messages]);
+
+  // Get quick response templates based on current question
+  const getQuickResponses = useCallback(() => {
+    const lastQuestion = [...messages].reverse().find(m => m.role === 'agent' && m.questionId);
+    if (!lastQuestion?.questionData?.category) return [];
+    
+    const category = lastQuestion.questionData.category.toLowerCase();
+    
+    if (category.includes('innovation')) {
+      return [
+        'Our solution is unique because it uses AI to...',
+        'Unlike competitors, we have developed proprietary technology that...',
+        'Our innovation addresses a gap in the market by...'
+      ];
+    } else if (category.includes('financial')) {
+      return [
+        'Based on our projections, we expect to achieve £... in Year 1...',
+        'Our current revenue is £... with ... paying customers...',
+        'We have secured letters of intent worth £... from...'
+      ];
+    } else if (category.includes('scalability') || category.includes('growth')) {
+      return [
+        'In Year 1, we plan to create ... UK jobs, expanding to ... by Year 3...',
+        'Our expansion strategy targets ... markets, starting with...',
+        'We project ... customers by Year 3 through...'
+      ];
+    } else if (category.includes('founder') || category.includes('team')) {
+      return [
+        'With ... years of experience in ..., I have successfully...',
+        'In my previous role at ..., I achieved...',
+        'My relevant qualifications include...'
+      ];
+    }
+    
+    return [];
+  }, [messages]);
+
+  // Enhance answer with AI
+  const enhanceAnswer = async () => {
+    if (!inputValue.trim() || isEnhancing) return;
+    
+    setIsEnhancing(true);
+    try {
+      const lastQuestion = [...messages].reverse().find(m => m.role === 'agent' && m.questionId);
+      
+      const res = await apiRequest('POST', '/api/ai-interview/enhance-answer', {
+        answer: inputValue,
+        questionId: lastQuestion?.questionId,
+        category: lastQuestion?.questionData?.category || 'general',
+        sessionId: session?.id
+      });
+      
+      const data = await res.json();
+      if (data.enhancedAnswer) {
+        setInputValue(data.enhancedAnswer);
+      }
+    } catch (err) {
+      console.error('Error enhancing answer:', err);
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
+  // Generate AI draft answer
+  const generateAIDraft = async () => {
+    if (isGeneratingDraft) return;
+    
+    setIsGeneratingDraft(true);
+    try {
+      const lastQuestion = [...messages].reverse().find(m => m.role === 'agent' && m.questionId);
+      
+      const res = await apiRequest('POST', '/api/ai-interview/generate-draft', {
+        questionId: lastQuestion?.questionId,
+        question: lastQuestion?.content,
+        category: lastQuestion?.questionData?.category || 'general',
+        sessionId: session?.id,
+        tier
+      });
+      
+      const data = await res.json();
+      if (data.draftAnswer) {
+        setInputValue(data.draftAnswer);
+      }
+    } catch (err) {
+      console.error('Error generating draft:', err);
+    } finally {
+      setIsGeneratingDraft(false);
+    }
+  };
+
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 80) return 'text-green-500';
+    if (confidence >= 60) return 'text-emerald-500';
+    if (confidence >= 40) return 'text-amber-500';
+    if (confidence >= 20) return 'text-orange-500';
+    return 'text-red-500';
+  };
+
+  const getConfidenceLabel = (confidence: number) => {
+    if (confidence >= 80) return 'Excellent';
+    if (confidence >= 60) return 'Strong';
+    if (confidence >= 40) return 'Good';
+    if (confidence >= 20) return 'Basic';
+    return 'Weak';
   };
 
   const progressPercent = session 
@@ -1084,6 +1321,122 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
           </motion.div>
         ) : (
           <div className="space-y-3">
+            {/* Real-time Confidence Meter & Compliance Warnings - Premium Only */}
+            {hasPremiumFeatures && inputValue.trim() && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-2"
+              >
+                <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className={`h-4 w-4 ${getConfidenceColor(answerConfidence)}`} />
+                    <span className="text-xs font-medium">Answer Strength:</span>
+                  </div>
+                  <div className="flex-1 max-w-[200px]">
+                    <Progress value={answerConfidence} className="h-2" />
+                  </div>
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs ${getConfidenceColor(answerConfidence)}`}
+                  >
+                    {getConfidenceLabel(answerConfidence)}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {inputValue.trim().split(/\s+/).length} words
+                  </span>
+                </div>
+                
+                {/* Compliance Warnings */}
+                {complianceWarnings.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {complianceWarnings.map((warning, idx) => (
+                      <Badge 
+                        key={idx} 
+                        variant="outline" 
+                        className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30"
+                      >
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        {warning}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Quick Response Templates - Premium Only */}
+            {hasPremiumFeatures && showQuickResponses && getQuickResponses().length > 0 && !inputValue.trim() && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-2"
+              >
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <BookOpen className="h-3.5 w-3.5 text-primary" />
+                  <span className="font-medium">Quick Start Templates</span>
+                  <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
+                    Premium
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {getQuickResponses().map((template, idx) => (
+                    <Button
+                      key={idx}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-auto py-1.5 px-3 text-left"
+                      onClick={() => setInputValue(template)}
+                      data-testid={`button-quick-response-${idx}`}
+                    >
+                      <PenLine className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                      <span className="line-clamp-1">{template}</span>
+                    </Button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Smart Tips Panel - Premium Only */}
+            {hasPremiumFeatures && showSmartTips && !inputValue.trim() && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="p-3 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20"
+              >
+                <div className="flex items-start gap-2">
+                  <Lightbulb className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-xs font-semibold text-amber-600">Smart Tips for This Question</span>
+                      <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
+                        Premium
+                      </Badge>
+                    </div>
+                    <ul className="space-y-1">
+                      {getSmartTips().map((tip, idx) => (
+                        <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                          <ChevronRight className="h-3 w-3 text-amber-500 mt-0.5 flex-shrink-0" />
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => setShowSmartTips(false)}
+                    data-testid="button-hide-tips"
+                  >
+                    <span className="sr-only">Hide tips</span>
+                    <span className="text-muted-foreground text-xs">x</span>
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+            
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <Textarea
@@ -1138,13 +1491,102 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                 </Button>
               </div>
             </div>
-            
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
+
+            {/* Premium Action Buttons */}
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-amber-500" />
-                <span>Tip: Include specific numbers, dates, and examples for higher scores</span>
+                {/* Enhance Answer Button - Premium Only */}
+                {hasPremiumFeatures ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={enhanceAnswer}
+                    disabled={!inputValue.trim() || isEnhancing || isProcessing}
+                    className="text-xs bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30"
+                    data-testid="button-enhance-answer"
+                  >
+                    {isEnhancing ? (
+                      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
+                        <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                      </motion.div>
+                    ) : (
+                      <Wand2 className="h-3.5 w-3.5 mr-1.5 text-purple-500" />
+                    )}
+                    {isEnhancing ? 'Enhancing...' : 'Enhance My Answer'}
+                    <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1 bg-purple-500/10 text-purple-500 border-purple-500/30">
+                      AI
+                    </Badge>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="text-xs opacity-60"
+                    data-testid="button-enhance-answer-locked"
+                  >
+                    <Wand2 className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                    Enhance Answer
+                    <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1">
+                      Premium
+                    </Badge>
+                  </Button>
+                )}
+
+                {/* Generate AI Draft Button - Premium Only */}
+                {hasPremiumFeatures ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={generateAIDraft}
+                    disabled={inputValue.trim().length > 0 || isGeneratingDraft || isProcessing}
+                    className="text-xs bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-500/30"
+                    data-testid="button-generate-draft"
+                  >
+                    {isGeneratingDraft ? (
+                      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
+                        <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                      </motion.div>
+                    ) : (
+                      <HelpCircle className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+                    )}
+                    {isGeneratingDraft ? 'Generating...' : 'Help Me Answer'}
+                    <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1 bg-blue-500/10 text-blue-500 border-blue-500/30">
+                      AI Draft
+                    </Badge>
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="text-xs opacity-60"
+                    data-testid="button-generate-draft-locked"
+                  >
+                    <HelpCircle className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                    Help Me Answer
+                    <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1">
+                      Premium
+                    </Badge>
+                  </Button>
+                )}
+
+                {/* Reset Tips Button */}
+                {!showSmartTips && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowSmartTips(true)}
+                    className="text-xs"
+                    data-testid="button-show-tips"
+                  >
+                    <Lightbulb className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
+                    Show Tips
+                  </Button>
+                )}
               </div>
-              <div className="flex items-center gap-4">
+
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 {speechSupported && (
                   <span className="flex items-center gap-1">
                     <Mic className="h-3 w-3" />
@@ -1155,6 +1597,12 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                   <Clock className="h-3 w-3" />
                   Auto-saves
                 </span>
+                {hasPremiumFeatures && (
+                  <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    Premium Mode
+                  </Badge>
+                )}
               </div>
             </div>
           </div>

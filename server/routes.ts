@@ -8819,6 +8819,131 @@ END:VEVENT
     }
   });
 
+  // Premium Feature: Enhance Answer with AI (Premium+ tiers only)
+  app.post("/api/ai-interview/enhance-answer", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const userTier = user?.subscriptionTier?.toLowerCase() || 'free';
+      const premiumTiers = ['premium', 'enterprise', 'ultimate'];
+      
+      if (!premiumTiers.includes(userTier)) {
+        return res.status(403).json({ error: "This feature requires a Premium or higher subscription" });
+      }
+      
+      const { answer, questionId, category, sessionId } = req.body;
+      
+      if (!answer || answer.trim().length < 10) {
+        return res.status(400).json({ error: "Answer too short to enhance" });
+      }
+
+      const enhancePrompt = `You are an expert UK Innovator Founder Visa consultant. Enhance the following answer to make it more compelling for visa endorsement bodies.
+
+CATEGORY: ${category || 'general'}
+ORIGINAL ANSWER: ${answer}
+
+ENHANCEMENT GUIDELINES:
+1. Add specific numbers, metrics, and data points where applicable
+2. Include concrete dates and timelines
+3. Reference evidence that could be provided (documents, testimonials, etc.)
+4. Use confident, professional language
+5. Ensure the enhanced answer addresses endorser criteria
+6. Keep the core message but make it PhD-level comprehensive
+7. Add UK market context where relevant
+8. Maintain first-person perspective
+
+OUTPUT: Return ONLY the enhanced answer text, ready to submit. Do not include explanations or meta-commentary. Keep it between 100-250 words for optimal impact.`;
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are an expert visa application consultant specializing in UK Innovator Founder Visa. Enhance answers to be compelling, evidence-based, and endorser-ready." },
+          { role: "user", content: enhancePrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 800
+      });
+
+      const enhancedAnswer = completion.choices[0]?.message?.content?.trim() || answer;
+
+      res.json({ 
+        success: true,
+        enhancedAnswer,
+        originalLength: answer.length,
+        enhancedLength: enhancedAnswer.length
+      });
+    } catch (error) {
+      console.error("Enhance answer error:", error);
+      res.status(500).json({ error: "Failed to enhance answer" });
+    }
+  });
+
+  // Premium Feature: Generate AI Draft Answer (Premium+ tiers only)
+  app.post("/api/ai-interview/generate-draft", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const userTier = user?.subscriptionTier?.toLowerCase() || 'free';
+      const premiumTiers = ['premium', 'enterprise', 'ultimate'];
+      
+      if (!premiumTiers.includes(userTier)) {
+        return res.status(403).json({ error: "This feature requires a Premium or higher subscription" });
+      }
+      
+      const { questionId, question, category, sessionId, tier } = req.body;
+      
+      if (!question) {
+        return res.status(400).json({ error: "Question is required" });
+      }
+
+      const draftPrompt = `You are an expert UK Innovator Founder Visa consultant helping an applicant draft a strong answer.
+
+QUESTION: ${question}
+CATEGORY: ${category || 'general'}
+
+Generate a template answer that the applicant can personalize. The answer should:
+1. Follow the structure that endorsers expect
+2. Include placeholder markers like [YOUR_NUMBER], [YOUR_DATE], [YOUR_COMPANY] for customization
+3. Demonstrate the type of detail and evidence needed
+4. Use confident, professional language
+5. Reference the type of supporting documents that should be available
+6. Be relevant to UK Innovator Founder Visa requirements
+
+OUTPUT FORMAT:
+- Write in first person
+- Use placeholders like [INSERT SPECIFIC NUMBER], [YOUR COMPANY NAME], [INSERT DATE], [INSERT METRIC] where personal data is needed
+- Keep it between 80-150 words
+- Make it easy for the applicant to customize
+- Do not include explanations - just the draft answer ready to edit`;
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are an expert UK Innovator Founder Visa consultant. Generate helpful draft answers that applicants can personalize with their specific details." },
+          { role: "user", content: draftPrompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 500
+      });
+
+      const draftAnswer = completion.choices[0]?.message?.content?.trim() || "";
+
+      res.json({ 
+        success: true,
+        draftAnswer,
+        category,
+        note: "Please customize the placeholders with your specific information"
+      });
+    } catch (error) {
+      console.error("Generate draft error:", error);
+      res.status(500).json({ error: "Failed to generate draft" });
+    }
+  });
+
   // Get session summary
   app.get("/api/ai-interview/session/:sessionId", isAuthenticated, async (req, res) => {
     try {
