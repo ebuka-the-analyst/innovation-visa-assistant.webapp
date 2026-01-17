@@ -1,0 +1,230 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+6 minutes ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+3 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+5 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+6 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+6 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+7 hours ago
+
+Scroll to load more
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+02e24796
+Active
+
+Jan 17, 2026, 12:58 AM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+1:01:51 AM [express] POST /api/activity/session 200 in 33ms :: {"sessionId":"46bc89c7-e889-43ac-9002…
+[2026-01-17T01:01:51.878Z] POST /api/activity/page-view
+1:01:51 AM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"848dc886-4022-41ce-9…
+[2026-01-17T01:01:52.372Z] GET /api/credits/balance
+1:01:52 AM [express] GET /api/credits/balance 200 in 8ms :: {"planCredits":0,"bonusCredits":0,"total…
+[2026-01-17T01:01:54.805Z] GET /api/documents
+1:01:54 AM [express] GET /api/documents 200 in 10ms :: [{"id":"3934710d-bee6-425f-ad48-52be00787d33"…
+[2026-01-17T01:02:00.023Z] POST /api/performance/metrics
+1:02:00 AM [express] POST /api/performance/metrics 204 in 21ms
+[2026-01-17T01:02:12.672Z] POST /api/activity/session/end
+1:02:12 AM [express] POST /api/activity/session/end 200 in 199ms :: {"success":true}
+[2026-01-17T01:03:19.104Z] GET /api/auth/user
+[2026-01-17T01:03:19.105Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:03:19 AM [express] GET /api/auth/user 200 in 201ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+1:03:19 AM [express] POST /api/activity/session 200 in 204ms :: {"sessionId":"bfa4d293-b699-4d44-846…
+[2026-01-17T01:03:19.490Z] POST /api/activity/page-view
+1:03:19 AM [express] POST /api/activity/page-view 200 in 12ms :: {"pageViewId":"a957d8ec-b3b9-441a-8…
+[2026-01-17T01:03:30.774Z] POST /api/questionnaire/submit
+Questionnaire submission received: {
+  "tier": "ultimate",
+  "businessName": "UK Innovator Founder Visa Assistant",
+  "industry": "LegalTech / Immigration Technology / AI•powered SaaS",
+  "problem": "Expensive and complex UK Innovator Founder Visa process",
+  "uniqueness": "• Multi•LLM AI architecture with redundancy and specialized routing • REAL•TIME COMPLIANCE INTELLIGENCE GRAPH",
+  "technology": "We use React, Python, AWS. Non-tech: Equipment, processes, suppliers, production methods, key partnerships\n\nHow business and product work by APIs, data flow, integrations. Non-tech: Production process, supply chain, service delivery model",
+  "experience": "Your Relevant Skills & Experience SummaryYour Relevant Skills & Experience SummaryYour Relevant Skills & Experience Summary",
+  "funding": 11,
+  "revenue": "subscription per clinic: £X. Tiered pricing: Solo (£200/mo), Small (£500/mo), Multi-site (£1,200/mo). One-off onboarding: £Y. Premium modules: £Z. Be specific with pricing.subscription per clinic: £X. Tiered pricing: Solo (£200/mo), Small (£500/mo), Multi-site (£1,200/mo). One-off onboarding: £Y. Premium modules: £Z. Be specific with pricing.",
+  "jobCreation": 4,
+  "expansion": "Our Market Expansion Strategy is aggressively making use of social media and other  to promote our services . ",
+  "vision": "our 5 year vision is to ensure maximum growth of the organisation.our 5 year vision is to ensure maximum growth of the organisation.our 5 year vision is to ensure maximum growth of the organisation.",
+  "innovationStage": "mvp-complete",
+  "productStatus": "We have built it to an MvP stage. And most of our codes are on github. We also have the source code readily available for upload",
+  "existingCustomers": "",
+  "betaTesters": "",
+  "tractionEvidence": "",
+  "techStack": "We use React, Python, AWS. Non-tech: Equipment, processes, suppliers, production methods, key partnerships",
+  "dataArchitecture": "How business and product work by APIs, data flow, integrations. Non-tech: Production process, supply chain, service delivery model",
+  "aiMethodology": "",
+  "complianceDesign": "We are ISo registered HACCP, BRC. Healthcare: DCB0129. Manufacturing: ISO 9001. Services: professional certifications. GDPR.",
+  "patentStatus": "We have all Patent filed, Trademark registered, Trade secrets, Recipe/formula protection, and Design registration, also with Brand protection",
+  "founderEducation": "MSc Data Science (Leeds Beckett), BSc IT, AWS certifications",
+  "founderWorkHistory": "• Founder & Lead Developer at bhenmedia.com, Leeds, UK & Lagos, Nigeria (2017 • Present): Founded web development practice; Lead end•to•end project lifecycles • AI Solutions Developer at Ibis Styles Leeds, Leeds, UK (Sep 2023 • Present): Developed AI Virtual Hotel Concierge • Web & Data Analyst Specialist at Qalhata Technology, Cheshire, UK (Nov 2024 • Present): Managed corporate website; Developed Power BI dashboards • WordPress Developer at Deskstones Ltd, Leeds, UK (Feb 2024 • Present): Led corporate website rebuild and SEO improvements",
+  "founderAchievements": "We have got several Projects delivered, revenue generated, and users reached, publications, and awards.",
+  "relevantProjects": "our recent project NHS Procurement Intelligence, and CARE-AI pediatric platform, and BhenMedia work. ",
+  "monthlyProjections": "our Month-by-month revenue and costs for 3 years. Year 1 totals not enough. Include: Month 1: £0 revenue, £5K costs. Month 2: £2K revenue, £6K costs... Other cost incurred would be added to our 36 month monthly ",
+  "customerAcquisitionCost": 20,
+  "lifetimeValue": 33,
+  "paybackPeriod": 14,
+  "fundingSources": "our detailed funding source would be £50K personal savings, £30K family loan, £20K Innovate UK grant",
+  "detailedCosts": "here is a detailed breadown of our cost break down ,£40K, DCB0129: £20K, DCB0160: £30K, Marketing: £15K, Operations: £10K, etc. Healthcare requires regulatory costs!\n\n",
+  "competitors": "here is a list of our 5+ named competitive analysis DrDoctor, Patchs, Lantum, Numan, Babylon Health, etc. For each: their strengths, weaknesses, pricing, target market",
+  "competitiveDifferentiation": "Our measurable competitive advantage would be '73% faster than Competitor X (validated with n=1,200), 90% less training data required, £5K vs £50K annual cost.' Specific metrics, not buzzwords.",
+  "customerInterviews": "Summarize findings: Who did you interview? What did you learn? What pain points validated? What are they willing to pay?\n\nSummarize findings: Who did you interview? What did you learn? What pain points validated? What are they willing to pay?\n\n",
+  "lettersOfIntent": "Lagos Immigration Consultancy: Potential partnership revenue £24,000 (Year 1), Tech Entrepreneur Network Manchester: Potential partnership revenue £24,000 (Year 1), Leeds Beckett University International Office: Potential partnership revenue £24,000 (Year 1)",
+  "willingnessToPay": "Our willing to pay evidence are Survey data, pilot pricing tests, LOI values. Show customers will actually pay.",
+  "marketSize": "here is our Market Size Calculation (TAM/SAM/SOM)TAM: £2.5 billion (Year unspecified) | SAM: £250 million | SOM: Not specified",
+  "regulatoryRequirements": "• OISC Compliance: Deadline November 2025 • GDPR Compliance: Ongoing from November 2025 • PCI DSS Compliance: Ongoing from November 2025 • Cyber Essentials Plus Certification: Deadline May 2026 • Professional Indemnity Insurance: Deadline November 2025 • ICO Registration: Deadline November 2025",
+  "complianceTimeline": "• ICO Registration: November 2025 • GDPR DPIA: December 2025 • January 2026 • Partner Agreements with OISC advisors: March 2026 • Cyber Essentials Certification Initiated: April 2026 • Cyber Essentials Plus Certification Achieved: July 2026 • Annual Review of Compliance Policies: October 2026",
+  "complianceBudget": 7,
+  "hiringPlan": "• Part•Time Content Marketing Specialist (Year 1): 1 hire at £15,000 pro•rata • Customer Success Associate (Year 1): 1 hire at £28,000 • Full•Stack Developer (Year 2): 1 hire at £50,000 • Marketing Manager (Year 2): 1 hire at £40,000 • Sales Development Representative (Year 2): 1 hire at £32,000 • Senior Developer (Year 3): 1 hire at £60,000 • Operations Manager (Year 3): 1 hire at £42,000 (dates to be confirmed)",
+  "specificRegions": "• Greater Leeds & West Yorkshire: Establishing presence • Greater London: Targeting due to high concentration of visa applicants • Greater Manchester: Secondary hub focus • Birmingham & West Midlands: Expansion from Year 2 • Edinburgh & Scotland: Expansion from Year 2 • Bristol & South West: Expansion from Year 2",
+    at file:///app/dist/index.js:11943:40
+  "internationalPlan": "• Australia (Target Year 4): Pilot market with a similar business visa system • Canada (Target Year 5): High potential market • USA (Target Year 5 and beyond): High potential market",
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+  "targetEndorser": "Innovator International, UKES (UK Endorsing Services), Envestors, SETsquared",
+  "contactPointsStrategy": "Innovator Founder Visa requires 6 contact points over 3 years. How will you achieve this? Quarterly reports, milestone reviews, annual strategy sessions?",
+  "supportingEvidence": ""
+}
+Questionnaire submission error: ZodError: [
+  {
+    "code": "too_small",
+    "minimum": 50,
+    "type": "string",
+    "inclusive": true,
+    "exact": false,
+    "message": "Specify AI models, algorithms, training data, and validation metrics",
+    "path": [
+      "aiMethodology"
+    ]
+  }
+]
+    at get error [as error] (file:///app/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (file:///app/node_modules/zod/v3/types.js:114:22)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+      minimum: 50,
+    at isAuthenticated (file:///app/dist/index.js:10640:10)
+      exact: false,
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+      type: 'string',
+  issues: [
+      message: 'Specify AI models, algorithms, training data, and validation metrics',
+      inclusive: true,
+    {
+      path: [Array]
+      exact: false,
+    }
+      code: 'too_small',
+      message: 'Specify AI models, algorithms, training data, and validation metrics',
+  ],
+      minimum: 50,
+      path: [Array]
+  addIssue: [Function (anonymous)],
+      type: 'string',
+  addIssues: [Function (anonymous)],
+    }
+      inclusive: true,
+  ]
+  errors: [
+}
+    {
+1:03:30 AM [express] POST /api/questionnaire/submit 400 in 201ms :: {"success":false,"error":"aiMeth…
+      code: 'too_small',
+[2026-01-17T01:03:38.758Z] POST /api/activity/session/end
+1:03:38 AM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+[2026-01-17T01:03:39.254Z] POST /api/activity/session
+1:03:39 AM [express] POST /api/activity/session 200 in 13ms :: {"sessionId":"f9597a56-002c-404c-adc1…
+[2026-01-17T01:03:39.460Z] POST /api/activity/page-view
+1:03:39 AM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"cce34446-d4cc-4e85-a…
+[2026-01-17T01:03:40.526Z] POST /api/activity/session/end
+1:03:40 AM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
