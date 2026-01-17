@@ -82,6 +82,7 @@ function getNextGeminiKey(): string {
 async function callGeminiWithRotation(prompt: string, maxRetries: number = 4): Promise<string> {
   const errors: Error[] = [];
   
+  // Try all Gemini keys first
   for (let attempt = 0; attempt < Math.min(maxRetries, GEMINI_API_KEYS.length); attempt++) {
     try {
       const apiKey = getNextGeminiKey();
@@ -98,7 +99,29 @@ async function callGeminiWithRotation(prompt: string, maxRetries: number = 4): P
     }
   }
   
-  throw new Error(`All ${GEMINI_API_KEYS.length} Gemini API keys failed. Last errors: ${errors.map(e => e.message).join('; ')}`);
+  // Fallback to OpenAI when all Gemini keys fail
+  console.log("[AI Fallback] All Gemini keys exhausted, falling back to OpenAI GPT-4o-mini");
+  try {
+    const OpenAI = (await import("openai")).default;
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 4000,
+      temperature: 0.7,
+    });
+    
+    const content = response.choices[0]?.message?.content;
+    if (content) {
+      console.log("[AI Fallback] OpenAI GPT-4o-mini succeeded");
+      return content;
+    }
+    throw new Error("OpenAI returned empty response");
+  } catch (openaiError: any) {
+    console.error("[AI Fallback] OpenAI also failed:", openaiError.message);
+    throw new Error(`All AI providers failed. Gemini errors: ${errors.map(e => e.message).join('; ')}. OpenAI error: ${openaiError.message}`);
+  }
 }
 
 const PRICING = {
