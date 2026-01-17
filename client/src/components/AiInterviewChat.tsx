@@ -1582,11 +1582,10 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                 {/* Enhance Answer Button - Premium Only */}
                 {hasPremiumFeatures ? (
                   <Button
-                    variant="outline"
                     size="sm"
                     onClick={enhanceAnswer}
                     disabled={!inputValue.trim() || isEnhancing || isProcessing}
-                    className="text-xs bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30"
+                    className="text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white border-0 shadow-md"
                     data-testid="button-enhance-answer"
                   >
                     {isEnhancing ? (
@@ -1594,10 +1593,10 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                         <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                       </motion.div>
                     ) : (
-                      <Wand2 className="h-3.5 w-3.5 mr-1.5 text-purple-500" />
+                      <Wand2 className="h-3.5 w-3.5 mr-1.5" />
                     )}
                     {isEnhancing ? 'Enhancing...' : 'Enhance My Answer'}
-                    <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1 bg-purple-500/10 text-purple-500 border-purple-500/30">
+                    <Badge className="ml-1.5 text-xs py-0 px-1.5 bg-white/20 text-white border-0">
                       AI
                     </Badge>
                   </Button>
@@ -1620,11 +1619,10 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                 {/* Generate AI Draft Button - Premium Only */}
                 {hasPremiumFeatures ? (
                   <Button
-                    variant="outline"
                     size="sm"
                     onClick={generateAIDraft}
                     disabled={inputValue.trim().length > 0 || isGeneratingDraft || isProcessing}
-                    className="text-xs bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-500/30"
+                    className="text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white border-0 shadow-md"
                     data-testid="button-generate-draft"
                   >
                     {isGeneratingDraft ? (
@@ -1632,11 +1630,11 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                         <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                       </motion.div>
                     ) : (
-                      <HelpCircle className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+                      <HelpCircle className="h-3.5 w-3.5 mr-1.5" />
                     )}
                     {isGeneratingDraft ? 'Generating...' : 'Help Me Answer'}
-                    <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1 bg-blue-500/10 text-blue-500 border-blue-500/30">
-                      AI Draft
+                    <Badge className="ml-1.5 text-xs py-0 px-1.5 bg-white/20 text-white border-0">
+                      AI
                     </Badge>
                   </Button>
                 ) : (
@@ -1658,11 +1656,10 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                 {/* Autofill from Documents Button - Premium Only */}
                 {hasPremiumFeatures ? (
                   <Button
-                    variant="outline"
                     size="sm"
                     onClick={autofillFromDocuments}
                     disabled={inputValue.trim().length > 0 || isAutofilling || isProcessing}
-                    className="text-xs bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-emerald-500/30"
+                    className="text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white border-0 shadow-md"
                     data-testid="button-autofill-documents"
                   >
                     {isAutofilling ? (
@@ -1670,16 +1667,16 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                         <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                       </motion.div>
                     ) : (
-                      <FileText className="h-3.5 w-3.5 mr-1.5 text-emerald-500" />
+                      <FileText className="h-3.5 w-3.5 mr-1.5" />
                     )}
                     {isAutofilling ? 'Filling...' : 'Autofill'}
                     {documentStatus?.hasData && !isAutofilling && (
-                      <Badge variant="secondary" className="ml-1.5 text-xs py-0 px-1.5 bg-emerald-500/20 text-emerald-600 border-0">
+                      <Badge className="ml-1.5 text-xs py-0 px-1.5 bg-white/20 text-white border-0">
                         {documentStatus.extractedFieldsCount} fields
                       </Badge>
                     )}
                     {!documentStatus?.hasData && !isAutofilling && (
-                      <Badge variant="outline" className="ml-1.5 text-xs py-0 px-1 text-amber-500 border-amber-500/30">
+                      <Badge className="ml-1.5 text-xs py-0 px-1.5 bg-amber-500/80 text-white border-0">
                         Upload docs
                       </Badge>
                     )}
@@ -1703,13 +1700,12 @@ export default function AiInterviewChat({ tier, onSessionUpdate }: AiInterviewCh
                 {/* Reset Tips Button */}
                 {!showSmartTips && (
                   <Button
-                    variant="ghost"
                     size="sm"
                     onClick={() => setShowSmartTips(true)}
-                    className="text-xs"
+                    className="text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white border-0 shadow-md"
                     data-testid="button-show-tips"
                   >
-                    <Lightbulb className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
+                    <Lightbulb className="h-3.5 w-3.5 mr-1.5" />
                     Show Tips
                   </Button>
                 )}
