@@ -458,6 +458,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // CRITICAL: If 100% discount applied (finalAmount = 0), bypass Stripe entirely
+      if (finalAmount === 0 && validPromoCode) {
+        console.log(`[CHECKOUT] 100% discount applied with promo ${validPromoCode.code} - bypassing Stripe payment`);
+        
+        // Mark business plan as paid
+        await storage.updateBusinessPlan(planId, { status: 'paid' });
+        
+        // Record promo code redemption
+        await storage.createPromoRedemption({
+          promoCodeId: validPromoCode.id,
+          userId: user.id,
+          discountApplied: pricing.amount,
+          originalAmount: pricing.amount,
+          finalAmount: 0,
+        });
+        
+        // Increment promo code usage
+        await storage.incrementPromoCodeUsage(validPromoCode.id);
+        
+        // Upgrade user's subscription tier
+        await storage.updateUser(user.id, {
+          subscriptionTier: businessPlan.tier,
+          subscriptionStatus: 'active',
+          subscriptionStartDate: new Date(),
+          subscriptionEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+        });
+        
+        console.log(`[CHECKOUT] User ${user.id} upgraded to ${businessPlan.tier} via 100% promo code ${validPromoCode.code}`);
+        
+        return res.json({ 
+          skipCheckout: true, 
+          redirectUrl: `/generation?plan_id=${planId}&promo_applied=true` 
+        });
+      }
+
       // Get the correct base URL for redirects - use request origin for reliability
       const getBaseUrl = () => {
         // First, check for custom domain environment variable
