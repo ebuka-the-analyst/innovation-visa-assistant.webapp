@@ -318,10 +318,15 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
-  const { data: user } = useQuery<{ id: string; email: string; displayName?: string; firstName?: string; lastName?: string }>({
+  const { data: user } = useQuery<{ id: string; email: string; displayName?: string; firstName?: string; lastName?: string; subscriptionTier?: string; subscriptionStatus?: string }>({
     queryKey: ['/api/auth/user'],
     retry: false,
   });
+  
+  // Check if user already has an active paid subscription (skip payment for them)
+  const userHasActiveSubscription = user?.subscriptionStatus === 'active' && 
+    user?.subscriptionTier && 
+    ['basic', 'premium', 'enterprise', 'ultimate'].includes(user.subscriptionTier);
   
   const {
     savedData,
@@ -2243,8 +2248,8 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
             ))}
           </div>
 
-          {/* Promo Code Section - Show on final step */}
-          {currentStep === steps.length - 1 && (
+          {/* Promo Code Section - Show on final step ONLY if user doesn't have active subscription */}
+          {currentStep === steps.length - 1 && !userHasActiveSubscription && (
             <div className="mt-8 pt-6 border-t">
               <Label className="text-base font-medium flex items-center gap-2 mb-3">
                 <Tag className="w-4 h-4" />
@@ -2292,6 +2297,16 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
               )}
             </div>
           )}
+          
+          {/* Show subscription status for premium users */}
+          {currentStep === steps.length - 1 && userHasActiveSubscription && (
+            <div className="mt-8 pt-6 border-t">
+              <Badge className="bg-emerald-500 text-white">
+                <Check className="w-3 h-3 mr-1" />
+                {user?.subscriptionTier?.charAt(0).toUpperCase()}{user?.subscriptionTier?.slice(1)} Member - No payment required
+              </Badge>
+            </div>
+          )}
 
           {/* Navigation */}
           <div className="flex justify-between mt-12">
@@ -2309,7 +2324,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
               disabled={isSubmitting}
               data-testid="button-next"
             >
-              {isSubmitting ? "Processing..." : currentStep === steps.length - 1 ? "Proceed to Payment" : "Continue"}
+              {isSubmitting ? "Processing..." : currentStep === steps.length - 1 ? (userHasActiveSubscription ? "Generate Plan" : "Proceed to Payment") : "Continue"}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>

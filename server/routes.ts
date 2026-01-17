@@ -411,6 +411,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // CRITICAL: Skip payment if user already has an active paid subscription
+      // Premium/Enterprise/Ultimate members should not pay again for the same or lower tier
+      const tierHierarchy: Record<string, number> = { 
+        'free': 0, 
+        'basic': 1, 
+        'premium': 2, 
+        'enterprise': 3, 
+        'ultimate': 4 
+      };
+      const userTierLevel = tierHierarchy[user.subscriptionTier || 'free'] || 0;
+      const planTierLevel = tierHierarchy[businessPlan.tier] || 0;
+      
+      if (user.subscriptionStatus === 'active' && userTierLevel >= planTierLevel && userTierLevel > 0) {
+        console.log(`[CHECKOUT] User ${user.id} (${user.subscriptionTier}) already has active subscription - skipping payment for ${businessPlan.tier} plan`);
+        await storage.updateBusinessPlan(planId, { status: 'paid' });
+        return res.json({ 
+          skipCheckout: true, 
+          redirectUrl: `/generation?plan_id=${planId}&already_subscribed=true` 
+        });
+      }
+
       let finalAmount = pricing.amount;
       let validPromoCode = null;
       
