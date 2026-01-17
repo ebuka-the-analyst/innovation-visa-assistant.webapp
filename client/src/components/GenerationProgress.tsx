@@ -74,8 +74,17 @@ export default function GenerationProgress({ planId }: { planId: string }) {
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
         const isFree = urlParams.get('free') === 'true';
+        const alreadySubscribed = urlParams.get('already_subscribed') === 'true';
 
+        // Free tier - no payment needed
         if (isFree) {
+          localStorage.setItem('trigger-onboarding-tour', 'true');
+          await apiRequest('POST', '/api/generate/start', { planId });
+          return;
+        }
+
+        // Premium/subscribed users - no payment session needed
+        if (alreadySubscribed) {
           localStorage.setItem('trigger-onboarding-tour', 'true');
           await apiRequest('POST', '/api/generate/start', { planId });
           return;
