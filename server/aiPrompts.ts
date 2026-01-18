@@ -91,7 +91,44 @@ export const getSectionsForTier = (tier: string): Section[] => {
         maxTokens: 1500
       },
       {
-        title: "8. RISK ANALYSIS",
+        title: "8. SWOT ANALYSIS",
+        pageTarget: "2-3 pages",
+        requirements: [
+          "Strengths (internal advantages)",
+          "Weaknesses (internal challenges)",
+          "Opportunities (external possibilities)",
+          "Threats (external risks)",
+          "Strategic implications"
+        ],
+        maxTokens: 1200
+      },
+      {
+        title: "9. CUSTOMER ANALYSIS",
+        pageTarget: "2-3 pages",
+        requirements: [
+          "Target customer profiles",
+          "Customer personas with demographics",
+          "Pain points and needs",
+          "Buying behavior and decision factors",
+          "Customer segments"
+        ],
+        maxTokens: 1200
+      },
+      {
+        title: "10. TAILORED MARKETING PLAN",
+        pageTarget: "3-4 pages",
+        requirements: [
+          "Go-to-market strategy",
+          "Marketing channels and tactics",
+          "Content marketing approach",
+          "Customer acquisition funnel",
+          "Budget allocation",
+          "Key metrics and KPIs"
+        ],
+        maxTokens: 1500
+      },
+      {
+        title: "11. RISK ANALYSIS",
         pageTarget: "2-3 pages",
         requirements: [
           "Key risks identified",
@@ -214,7 +251,46 @@ export const getSectionsForTier = (tier: string): Section[] => {
         maxTokens: 1500
       },
       {
-        title: "10. ENDORSING BODY SELECTION",
+        title: "10. SWOT ANALYSIS",
+        pageTarget: "3-4 pages",
+        requirements: [
+          "Detailed strengths with evidence",
+          "Honest weaknesses with mitigation",
+          "Market opportunities analysis",
+          "Competitive threats assessment",
+          "Strategic action plan"
+        ],
+        maxTokens: 1500
+      },
+      {
+        title: "11. CUSTOMER ANALYSIS",
+        pageTarget: "4-5 pages",
+        requirements: [
+          "Detailed customer personas (3-4 personas)",
+          "Customer journey mapping",
+          "Pain points and needs analysis",
+          "Buying behavior research",
+          "Customer lifetime value analysis",
+          "Segment prioritization"
+        ],
+        maxTokens: 2000
+      },
+      {
+        title: "12. TAILORED MARKETING PLAN",
+        pageTarget: "5-6 pages",
+        requirements: [
+          "Comprehensive go-to-market strategy",
+          "Marketing channel mix with budget",
+          "Content marketing strategy",
+          "Digital marketing campaigns",
+          "Partnership marketing",
+          "Launch plan and timeline",
+          "KPIs and success metrics"
+        ],
+        maxTokens: 2500
+      },
+      {
+        title: "13. ENDORSING BODY SELECTION",
         pageTarget: "3-4 pages",
         requirements: [
           "Recommended endorsers (Envestors, UKES, Innovator International, GEP)",
@@ -368,7 +444,50 @@ export const getSectionsForTier = (tier: string): Section[] => {
         maxTokens: 3000
       },
       {
-        title: "10. ENDORSING BODY STRATEGY",
+        title: "10. SWOT ANALYSIS",
+        pageTarget: "5-6 pages",
+        requirements: [
+          "Detailed strengths with quantified evidence",
+          "Honest weaknesses with specific mitigation plans",
+          "Market opportunities with timing analysis",
+          "Competitive threats with defensive strategies",
+          "Strategic implications and action plan",
+          "SWOT-based decision matrix"
+        ],
+        maxTokens: 2500
+      },
+      {
+        title: "11. CUSTOMER ANALYSIS",
+        pageTarget: "6-8 pages",
+        requirements: [
+          "Detailed customer personas (4-5 personas with names)",
+          "Customer journey mapping with touchpoints",
+          "Pain points analysis with severity ranking",
+          "Buying behavior research with decision factors",
+          "Customer lifetime value analysis by segment",
+          "Customer acquisition cost by persona",
+          "Segment prioritization with evidence"
+        ],
+        maxTokens: 3000
+      },
+      {
+        title: "12. TAILORED MARKETING PLAN",
+        pageTarget: "8-10 pages",
+        requirements: [
+          "Comprehensive go-to-market strategy",
+          "Marketing channel mix with detailed budget",
+          "Content marketing strategy with topics",
+          "Digital marketing campaigns (SEO, PPC, Social)",
+          "Partnership and affiliate marketing",
+          "PR and media strategy",
+          "Launch plan with timeline",
+          "Marketing KPIs and success metrics",
+          "A/B testing strategy"
+        ],
+        maxTokens: 3500
+      },
+      {
+        title: "13. ENDORSING BODY STRATEGY",
         pageTarget: "6-8 pages",
         requirements: [
           "Primary target (Envestors/Innovator International)",
@@ -381,7 +500,7 @@ export const getSectionsForTier = (tier: string): Section[] => {
         maxTokens: 3000
       },
       {
-        title: "11. RFE DEFENSE STRATEGY",
+        title: "14. RFE DEFENSE STRATEGY",
         pageTarget: "5-6 pages",
         requirements: [
           "Common RFE triggers and prevention",
@@ -393,7 +512,7 @@ export const getSectionsForTier = (tier: string): Section[] => {
         maxTokens: 2500
       },
       {
-        title: "12. APPEAL STRATEGY & REAPPLICATION GUIDE",
+        title: "15. APPEAL STRATEGY & REAPPLICATION GUIDE",
         pageTarget: "4-5 pages",
         requirements: [
           "Appeal process overview",
@@ -405,7 +524,7 @@ export const getSectionsForTier = (tier: string): Section[] => {
         maxTokens: 2000
       },
       {
-        title: "13. SUCCESS COACHING FRAMEWORK",
+        title: "16. SUCCESS COACHING FRAMEWORK",
         pageTarget: "4-5 pages",
         requirements: [
           "Interview preparation STAR method",
@@ -417,7 +536,7 @@ export const getSectionsForTier = (tier: string): Section[] => {
         maxTokens: 2000
       },
       {
-        title: "14. APPENDICES & EVIDENCE",
+        title: "17. APPENDICES & EVIDENCE",
         pageTarget: "8-10 pages",
         requirements: [
           "Financial assumptions documentation",
@@ -560,7 +679,44 @@ export const getSectionsForTier = (tier: string): Section[] => {
       maxTokens: 2000
     },
     {
-      title: "10. ENDORSING BODY STRATEGY",
+      title: "10. SWOT ANALYSIS",
+      pageTarget: "4-5 pages",
+      requirements: [
+        "Strengths with evidence",
+        "Weaknesses with mitigation strategies",
+        "Market opportunities analysis",
+        "Competitive threats assessment",
+        "Strategic action plan"
+      ],
+      maxTokens: 2000
+    },
+    {
+      title: "11. CUSTOMER ANALYSIS",
+      pageTarget: "5-6 pages",
+      requirements: [
+        "Detailed customer personas (3-4 personas)",
+        "Customer journey mapping",
+        "Pain points and needs analysis",
+        "Buying behavior research",
+        "Segment prioritization"
+      ],
+      maxTokens: 2500
+    },
+    {
+      title: "12. TAILORED MARKETING PLAN",
+      pageTarget: "6-8 pages",
+      requirements: [
+        "Go-to-market strategy",
+        "Marketing channel mix with budget",
+        "Content marketing strategy",
+        "Digital marketing campaigns",
+        "Launch plan and timeline",
+        "KPIs and success metrics"
+      ],
+      maxTokens: 3000
+    },
+    {
+      title: "13. ENDORSING BODY STRATEGY",
       pageTarget: "4-5 pages",
       requirements: [
         "Primary target (Envestors/Innovator International)",

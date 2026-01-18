@@ -96,6 +96,23 @@ export interface ChartDataPayload {
     features: number;
     target: string;
   }[];
+  swotAnalysis: {
+    category: 'strengths' | 'weaknesses' | 'opportunities' | 'threats';
+    items: string[];
+  }[];
+  customerPersonas: {
+    name: string;
+    role: string;
+    age: string;
+    painPoints: string[];
+    goals: string[];
+  }[];
+  marketingChannels: {
+    channel: string;
+    budget: number;
+    expectedLeads: number;
+    cac: number;
+  }[];
 }
 
 export function generateChartData(plan: BusinessPlan): ChartDataPayload {
@@ -269,6 +286,27 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
     { tier: "Enterprise", price: 499, features: 30, target: "Large organizations" },
   ];
 
+  const swotAnalysis: ChartDataPayload['swotAnalysis'] = [
+    { category: 'strengths', items: ["Innovative technology", "Strong founding team", "First-mover advantage", "IP protection"] },
+    { category: 'weaknesses', items: ["Limited initial capital", "Small team size", "Brand awareness"] },
+    { category: 'opportunities', items: ["Growing market demand", "Regulatory changes favoring innovation", "Partnership opportunities", "International expansion"] },
+    { category: 'threats', items: ["Established competitors", "Economic uncertainty", "Changing regulations"] },
+  ];
+
+  const customerPersonas: ChartDataPayload['customerPersonas'] = [
+    { name: "Sarah", role: "Finance Director", age: "35-45", painPoints: ["Manual processes", "Compliance burden", "Data silos"], goals: ["Efficiency gains", "Better insights", "Cost reduction"] },
+    { name: "James", role: "SME Owner", age: "40-55", painPoints: ["Time constraints", "Cash flow management", "Limited resources"], goals: ["Business growth", "Automation", "Scalability"] },
+    { name: "Priya", role: "Operations Manager", age: "30-40", painPoints: ["Legacy systems", "Team coordination", "Reporting delays"], goals: ["Streamlined workflows", "Real-time data", "Team productivity"] },
+  ];
+
+  const marketingChannels: ChartDataPayload['marketingChannels'] = [
+    { channel: "Content Marketing", budget: Math.round(funding * 0.08), expectedLeads: 500, cac: Math.round(cac * 0.8) },
+    { channel: "LinkedIn Ads", budget: Math.round(funding * 0.06), expectedLeads: 300, cac: Math.round(cac * 1.2) },
+    { channel: "Google Ads", budget: Math.round(funding * 0.07), expectedLeads: 400, cac: Math.round(cac * 1.1) },
+    { channel: "Partnerships", budget: Math.round(funding * 0.04), expectedLeads: 200, cac: Math.round(cac * 0.6) },
+    { channel: "Events/Webinars", budget: Math.round(funding * 0.03), expectedLeads: 150, cac: Math.round(cac * 0.9) },
+  ];
+
   return {
     financialProjections,
     marketSize,
@@ -287,6 +325,9 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
     complianceRoadmap,
     growthMetrics,
     pricingTiers,
+    swotAnalysis,
+    customerPersonas,
+    marketingChannels,
   };
 }
 
@@ -312,7 +353,7 @@ function extractCompetitors(competitorsText: string): string[] {
   return competitors;
 }
 
-export type ChartType = 'financial' | 'market' | 'risk' | 'competitor' | 'kpi' | 'funding' | 'revenue_streams' | 'unit_economics' | 'hiring' | 'tech_stack' | 'customer_journey' | 'gtm_channels' | 'milestones' | 'compliance' | 'growth' | 'pricing' | 'timeline';
+export type ChartType = 'financial' | 'market' | 'risk' | 'competitor' | 'kpi' | 'funding' | 'revenue_streams' | 'unit_economics' | 'hiring' | 'tech_stack' | 'customer_journey' | 'gtm_channels' | 'milestones' | 'compliance' | 'growth' | 'pricing' | 'timeline' | 'swot' | 'customer_personas' | 'marketing_channels';
 
 export const SECTION_CHART_MAP: Record<string, ChartType[]> = {
   "Executive Summary": ["kpi"],
@@ -346,6 +387,12 @@ export const SECTION_CHART_MAP: Record<string, ChartType[]> = {
   "Roadmap": ["timeline"],
   "Funding Requirements": ["funding"],
   "Use of Funds": ["funding"],
+  "SWOT Analysis": ["swot"],
+  "SWOT": ["swot"],
+  "Customer Analysis": ["customer_personas", "customer_journey"],
+  "Customer Personas": ["customer_personas"],
+  "Tailored Marketing Plan": ["marketing_channels", "gtm_channels"],
+  "Marketing Plan": ["marketing_channels", "gtm_channels"],
 };
 
 export function generateSVGChart(type: ChartType, data: ChartDataPayload): string {
@@ -384,6 +431,12 @@ export function generateSVGChart(type: ChartType, data: ChartDataPayload): strin
       return generatePricingChart(data.pricingTiers);
     case 'timeline':
       return generateTimelineChart(data.timeline);
+    case 'swot':
+      return generateSWOTChart(data.swotAnalysis);
+    case 'customer_personas':
+      return generateCustomerPersonasChart(data.customerPersonas);
+    case 'marketing_channels':
+      return generateMarketingChannelsChart(data.marketingChannels);
     default:
       return '';
   }
@@ -1011,5 +1064,133 @@ function generateTimelineChart(data: { phase: string; startMonth: number; durati
     <text x="${width/2}" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">Implementation Timeline</text>
     ${labels}
     ${bars}
+  </svg>`;
+}
+
+function generateSWOTChart(data: { category: 'strengths' | 'weaknesses' | 'opportunities' | 'threats'; items: string[] }[]): string {
+  const width = 600;
+  const height = 400;
+  const quadrantWidth = (width - 30) / 2;
+  const quadrantHeight = (height - 60) / 2;
+  
+  const colors = {
+    strengths: { bg: '#D1FAE5', border: '#10B981', text: '#065F46' },
+    weaknesses: { bg: '#FEE2E2', border: '#EF4444', text: '#991B1B' },
+    opportunities: { bg: '#DBEAFE', border: '#3B82F6', text: '#1E40AF' },
+    threats: { bg: '#FEF3C7', border: '#F59E0B', text: '#92400E' },
+  };
+  
+  const positions = {
+    strengths: { x: 15, y: 45 },
+    weaknesses: { x: 15 + quadrantWidth + 5, y: 45 },
+    opportunities: { x: 15, y: 45 + quadrantHeight + 5 },
+    threats: { x: 15 + quadrantWidth + 5, y: 45 + quadrantHeight + 5 },
+  };
+  
+  const labels = {
+    strengths: 'STRENGTHS',
+    weaknesses: 'WEAKNESSES',
+    opportunities: 'OPPORTUNITIES',
+    threats: 'THREATS',
+  };
+  
+  let quadrants = '';
+  
+  data.forEach(d => {
+    const pos = positions[d.category];
+    const color = colors[d.category];
+    
+    quadrants += `<rect x="${pos.x}" y="${pos.y}" width="${quadrantWidth}" height="${quadrantHeight}" fill="${color.bg}" stroke="${color.border}" stroke-width="2" rx="8"/>`;
+    quadrants += `<text x="${pos.x + 10}" y="${pos.y + 22}" font-size="12" font-weight="bold" fill="${color.text}">${labels[d.category]}</text>`;
+    
+    d.items.slice(0, 4).forEach((item, i) => {
+      quadrants += `<circle cx="${pos.x + 18}" cy="${pos.y + 42 + i * 20}" r="3" fill="${color.border}"/>`;
+      quadrants += `<text x="${pos.x + 28}" y="${pos.y + 46 + i * 20}" font-size="10" fill="${color.text}">${item.substring(0, 30)}</text>`;
+    });
+  });
+  
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="white"/>
+    <text x="${width/2}" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">SWOT Analysis</text>
+    ${quadrants}
+  </svg>`;
+}
+
+function generateCustomerPersonasChart(data: { name: string; role: string; age: string; painPoints: string[]; goals: string[] }[]): string {
+  const width = 600;
+  const cardWidth = (width - 40) / data.length - 10;
+  const height = 320;
+  
+  const colors = ['#005EB8', '#10B981', '#F59E0B'];
+  
+  let cards = '';
+  
+  data.forEach((d, i) => {
+    const x = 20 + i * (cardWidth + 10);
+    const color = colors[i % colors.length];
+    
+    cards += `<rect x="${x}" y="45" width="${cardWidth}" height="${height - 60}" fill="white" stroke="${color}" stroke-width="2" rx="10"/>`;
+    
+    cards += `<circle cx="${x + cardWidth / 2}" cy="75" r="20" fill="${color}"/>`;
+    cards += `<text x="${x + cardWidth / 2}" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="white">${d.name.charAt(0)}</text>`;
+    
+    cards += `<text x="${x + cardWidth / 2}" y="110" text-anchor="middle" font-size="13" font-weight="bold" fill="#111827">${d.name}</text>`;
+    cards += `<text x="${x + cardWidth / 2}" y="125" text-anchor="middle" font-size="10" fill="${color}">${d.role}</text>`;
+    cards += `<text x="${x + cardWidth / 2}" y="140" text-anchor="middle" font-size="9" fill="#6B7280">Age: ${d.age}</text>`;
+    
+    cards += `<line x1="${x + 10}" y1="150" x2="${x + cardWidth - 10}" y2="150" stroke="#E5E7EB" stroke-width="1"/>`;
+    
+    cards += `<text x="${x + 10}" y="168" font-size="9" font-weight="bold" fill="#EF4444">Pain Points:</text>`;
+    d.painPoints.slice(0, 2).forEach((p, pi) => {
+      cards += `<text x="${x + 10}" y="${182 + pi * 14}" font-size="8" fill="#6B7280">• ${p.substring(0, 20)}</text>`;
+    });
+    
+    cards += `<text x="${x + 10}" y="218" font-size="9" font-weight="bold" fill="#10B981">Goals:</text>`;
+    d.goals.slice(0, 2).forEach((g, gi) => {
+      cards += `<text x="${x + 10}" y="${232 + gi * 14}" font-size="8" fill="#6B7280">• ${g.substring(0, 20)}</text>`;
+    });
+  });
+  
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="#F9FAFB"/>
+    <text x="${width/2}" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">Customer Personas</text>
+    ${cards}
+  </svg>`;
+}
+
+function generateMarketingChannelsChart(data: { channel: string; budget: number; expectedLeads: number; cac: number }[]): string {
+  const width = 600;
+  const height = 350;
+  const padding = 60;
+  const chartWidth = width - padding * 2;
+  const barHeight = 40;
+  
+  const maxBudget = Math.max(...data.map(d => d.budget));
+  const colors = ['#005EB8', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'];
+  
+  let bars = '';
+  let labels = '';
+  
+  data.forEach((d, i) => {
+    const y = padding + i * (barHeight + 15);
+    const barWidth = (d.budget / maxBudget) * (chartWidth * 0.6);
+    const color = colors[i % colors.length];
+    
+    labels += `<text x="${padding - 5}" y="${y + barHeight / 2 + 4}" text-anchor="end" font-size="11" fill="#374151">${d.channel}</text>`;
+    
+    bars += `<rect x="${padding}" y="${y}" width="${barWidth}" height="${barHeight - 5}" fill="${color}" rx="4"/>`;
+    bars += `<text x="${padding + barWidth + 8}" y="${y + 15}" font-size="10" font-weight="bold" fill="#374151">£${(d.budget / 1000).toFixed(1)}K</text>`;
+    bars += `<text x="${padding + barWidth + 8}" y="${y + 28}" font-size="9" fill="#6B7280">${d.expectedLeads} leads</text>`;
+    
+    bars += `<rect x="${width - 80}" y="${y + 5}" width="65" height="24" fill="#F3F4F6" rx="4"/>`;
+    bars += `<text x="${width - 48}" y="${y + 22}" text-anchor="middle" font-size="10" fill="#374151">CAC: £${d.cac}</text>`;
+  });
+  
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="white"/>
+    <text x="${width/2}" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">Marketing Channel Performance</text>
+    <text x="${width/2}" y="42" text-anchor="middle" font-size="11" fill="#6B7280">Budget allocation, expected leads, and customer acquisition cost</text>
+    ${bars}
+    ${labels}
   </svg>`;
 }
