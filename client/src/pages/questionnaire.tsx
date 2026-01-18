@@ -21,7 +21,6 @@ import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 
 import QuestionnaireForm from "@/components/QuestionnaireForm";
-import EvidencePreparationGuide from "@/components/EvidencePreparationGuide";
 import FeatureNavigation from "@/components/FeatureNavigation";
 import { CreditBalanceDisplay } from "@/components/CreditBalanceDisplay";
 import AiInterviewChat from "@/components/AiInterviewChat";
@@ -266,8 +265,6 @@ export default function Questionnaire() {
                 </Card>
               </motion.div>
             </div>
-
-            <EvidencePreparationGuide />
           </div>
         </div>
       </div>
@@ -376,7 +373,6 @@ export default function Questionnaire() {
             </p>
           </div>
         </div>
-        <EvidencePreparationGuide />
         <QuestionnaireForm tier={userTier} />
       </div>
     </div>
