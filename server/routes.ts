@@ -1708,6 +1708,115 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   }
 
+  // Helper function to generate PDF using PDFKit (lightweight, no Chromium)
+  async function generatePDFWithPDFKit(businessPlan: any, disposition: 'attachment' | 'inline', res: any) {
+    const PDFDocument = (await import('pdfkit')).default;
+    
+    const doc = new PDFDocument({
+      size: 'A4',
+      margins: { top: 60, bottom: 60, left: 50, right: 50 },
+      info: {
+        Title: `${businessPlan.businessName} - Business Plan`,
+        Author: 'UK Innovator Founder Visa Assistant',
+        Subject: 'Business Plan for UK Innovator Founder Visa'
+      }
+    });
+    
+    const chunks: Buffer[] = [];
+    doc.on('data', (chunk: Buffer) => chunks.push(chunk));
+    doc.on('end', () => {
+      const pdfBuffer = Buffer.concat(chunks);
+      const sanitizedName = businessPlan.businessName.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_');
+      const filename = `${sanitizedName}-business-plan.pdf`;
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `${disposition}; filename="${filename}"`);
+      res.send(pdfBuffer);
+    });
+    
+    const content = businessPlan.generatedContent;
+    const tierName = (businessPlan.tier || 'free').charAt(0).toUpperCase() + (businessPlan.tier || 'free').slice(1);
+    
+    // Cover page
+    doc.rect(0, 0, doc.page.width, 200).fill('#005EB8');
+    doc.fontSize(28).fillColor('#FFFFFF').text(businessPlan.businessName, 50, 80, { align: 'center' });
+    doc.fontSize(14).text('UK Innovator Founder Visa Business Plan', 50, 120, { align: 'center' });
+    doc.fontSize(12).text(`${tierName} Plan | Generated ${new Date().toLocaleDateString('en-GB')}`, 50, 145, { align: 'center' });
+    
+    doc.moveDown(8);
+    doc.fillColor('#000000');
+    
+    // Parse and render content
+    const lines = content.split('\n');
+    let currentY = 220;
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        currentY += 10;
+        continue;
+      }
+      
+      // Check if we need a new page
+      if (currentY > doc.page.height - 80) {
+        doc.addPage();
+        currentY = 60;
+      }
+      
+      if (trimmed.startsWith('# ')) {
+        // Main heading
+        doc.fontSize(20).fillColor('#005EB8').font('Helvetica-Bold');
+        doc.text(trimmed.slice(2), 50, currentY);
+        currentY += 35;
+        // Add underline
+        doc.moveTo(50, currentY - 10).lineTo(545, currentY - 10).strokeColor('#005EB8').lineWidth(2).stroke();
+        currentY += 10;
+      } else if (trimmed.startsWith('## ')) {
+        // Section heading
+        currentY += 10;
+        doc.fontSize(16).fillColor('#005EB8').font('Helvetica-Bold');
+        doc.text(trimmed.slice(3), 50, currentY);
+        currentY += 28;
+      } else if (trimmed.startsWith('### ')) {
+        // Subsection heading
+        doc.fontSize(13).fillColor('#333333').font('Helvetica-Bold');
+        doc.text(trimmed.slice(4), 50, currentY);
+        currentY += 22;
+      } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        // Bullet point
+        doc.fontSize(11).fillColor('#444444').font('Helvetica');
+        doc.text('•  ' + trimmed.slice(2).replace(/\*\*([^*]+)\*\*/g, '$1'), 60, currentY, { width: 480 });
+        currentY += doc.heightOfString('•  ' + trimmed.slice(2), { width: 480 }) + 6;
+      } else if (trimmed.match(/^\d+\.\s/)) {
+        // Numbered list
+        doc.fontSize(11).fillColor('#444444').font('Helvetica');
+        doc.text(trimmed.replace(/\*\*([^*]+)\*\*/g, '$1'), 60, currentY, { width: 480 });
+        currentY += doc.heightOfString(trimmed, { width: 480 }) + 6;
+      } else {
+        // Regular paragraph
+        doc.fontSize(11).fillColor('#444444').font('Helvetica');
+        const cleanText = trimmed.replace(/\*\*([^*]+)\*\*/g, '$1');
+        doc.text(cleanText, 50, currentY, { width: 495, align: 'justify' });
+        currentY += doc.heightOfString(cleanText, { width: 495 }) + 8;
+      }
+    }
+    
+    // Footer on each page
+    const pages = doc.bufferedPageRange();
+    for (let i = 0; i < pages.count; i++) {
+      doc.switchToPage(i);
+      doc.fontSize(9).fillColor('#888888').font('Helvetica');
+      doc.text(
+        `UK Innovator Founder Visa Assistant | Page ${i + 1} of ${pages.count}`,
+        50,
+        doc.page.height - 40,
+        { align: 'center', width: 495 }
+      );
+    }
+    
+    doc.end();
+  }
+
   app.get("/api/download/pdf/:planId", isAuthenticated, async (req, res) => {
     try {
       const { planId } = req.params;
@@ -1726,31 +1835,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
         return res.status(500).json({ error: "Business plan content is missing" });
       }
 
-      const sanitizedName = businessPlan.businessName.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_');
-      const filename = `${sanitizedName}-business-plan.pdf`;
-      
-      const htmlContent = generatePDFContent(businessPlan);
-      
-      const puppeteer = await import('puppeteer');
-      const browser = await puppeteer.default.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-      });
-      
-      const page = await browser.newPage();
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-      
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: { top: '20mm', bottom: '20mm', left: '15mm', right: '15mm' }
-      });
-      
-      await browser.close();
-      
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.send(Buffer.from(pdfBuffer));
+      await generatePDFWithPDFKit(businessPlan, 'attachment', res);
     } catch (error) {
       console.error("PDF download error:", error);
       res.status(500).json({ error: "Failed to generate PDF" });
@@ -1776,31 +1861,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
         return res.status(500).json({ error: "Business plan content is missing" });
       }
 
-      const sanitizedName = businessPlan.businessName.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_');
-      const filename = `${sanitizedName}-business-plan.pdf`;
-      
-      const htmlContent = generatePDFContent(businessPlan);
-      
-      const puppeteer = await import('puppeteer');
-      const browser = await puppeteer.default.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-      });
-      
-      const page = await browser.newPage();
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-      
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: { top: '20mm', bottom: '20mm', left: '15mm', right: '15mm' }
-      });
-      
-      await browser.close();
-      
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-      res.send(Buffer.from(pdfBuffer));
+      await generatePDFWithPDFKit(businessPlan, 'inline', res);
     } catch (error) {
       console.error("PDF view error:", error);
       res.status(500).json({ error: "Failed to generate PDF" });
