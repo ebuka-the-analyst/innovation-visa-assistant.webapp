@@ -420,7 +420,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                     size="icon"
                     className="h-12 w-full hover-elevate"
                     onClick={() => {
-                      const text = `Just completed my UK Innovator Founder Visa business plan using AI! This tool saved me weeks of work and helped me structure everything endorsers look for. Highly recommend for fellow founders.\n\n#InnovatorFounderVisa #UKStartup #Entrepreneur #VisaApplication`;
+                      const text = `Hey founders! Just found this amazing AI tool that writes your UK Innovator Founder Visa business plan for you. Saved me WEEKS of work - it knows exactly what endorsers want to see. Seriously, check it out!\n\n#InnovatorFounderVisa #UKStartup #Founders`;
                       const url = window.location.origin;
                       window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400');
                     }}
@@ -435,8 +435,8 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                     size="icon"
                     className="h-12 w-full hover-elevate"
                     onClick={() => {
-                      const text = `Excited to share that I've just completed my UK Innovator Founder Visa business plan!\n\nUsed an AI-powered platform that guides you through all 12 sections endorsers require - from innovation assessment to financial projections.\n\nIf you're an entrepreneur looking to relocate to the UK, this tool is a game-changer. It helped me create a professional, comprehensive plan in under an hour.\n\n#InnovatorFounderVisa #UKBusiness #Entrepreneurship #StartupVisa #Immigration`;
-                      const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}&summary=${encodeURIComponent(text)}`;
+                      const text = `Hey everyone! Just wanted to share something that really helped me.\n\nI found this AI tool that creates your UK Innovator Founder Visa business plan - and it's honestly amazing. It knows exactly what endorsers look for and writes all 12 sections for you.\n\nWhat would normally take weeks, I finished in under an hour. If you're thinking about the UK visa route, definitely check this out - it's a game changer!`;
+                      const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}`;
                       window.open(url, '_blank', 'width=600,height=600');
                     }}
                     data-testid="button-share-linkedin"
@@ -450,7 +450,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                     size="icon"
                     className="h-12 w-full hover-elevate"
                     onClick={() => {
-                      const text = `Hey! Just wanted to share this amazing tool I found for creating UK Innovator Founder Visa business plans. It uses AI to help you write all the sections endorsers look for. Saved me so much time! Check it out: ${window.location.origin}`;
+                      const text = `Hey! You HAVE to check this out - I just found this AI tool that writes your UK Innovator Founder Visa business plan for you. It saved me weeks of work and knows exactly what endorsers want. Seriously amazing! ${window.location.origin}`;
                       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                     }}
                     data-testid="button-share-whatsapp"
@@ -464,8 +464,8 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                     size="icon"
                     className="h-12 w-full hover-elevate"
                     onClick={() => {
-                      const subject = `Helpful Tool for UK Innovator Founder Visa Applications`;
-                      const body = `Hi,\n\nI wanted to share a tool that really helped me with my UK Innovator Founder Visa application.\n\nI used this AI-powered platform to create my business plan, and it guided me through all 12 sections that endorsers require - including innovation assessment, market analysis, financial projections, and compliance documentation.\n\nWhat normally takes weeks, I completed in under an hour with professional-quality output.\n\nIf you're considering the UK Innovator Founder Visa, I'd highly recommend checking it out:\n${window.location.origin}\n\nHope this helps!\n\nBest regards`;
+                      const subject = `You need to see this - UK Visa business plan tool`;
+                      const body = `Hey!\n\nI just had to share this with you - I found this amazing AI tool that creates your UK Innovator Founder Visa business plan.\n\nIt writes all 12 sections that endorsers look for, and what normally takes weeks I finished in under an hour. Honestly it's been a game changer for my application.\n\nIf you're thinking about the UK visa route, definitely check it out:\n${window.location.origin}\n\nLet me know what you think!`;
                       window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                     }}
                     data-testid="button-share-email"
