@@ -1758,8 +1758,9 @@ ${generatedSections.join('\n\n---\n\n')}`;
       }
       
       // Skip duplicate numbered section headers and separators
-      if (/^\d+\.\s+[A-Z\s&]+$/.test(trimmed)) continue;
-      if (/^\d+\.\s+[A-Z][A-Z\s&]+/.test(trimmed) && trimmed === trimmed.toUpperCase()) continue;
+      // Match patterns like "1. EXECUTIVE SUMMARY", "2. FOUNDER CREDENTIALS & VALIDATION"
+      if (/^\d+\.\s+[A-Z][A-Z\s&]+$/.test(trimmed)) continue;
+      if (/^\d+\.\s+[A-Z]{2,}/.test(trimmed) && !trimmed.includes('(') && trimmed.length < 60) continue;
       if (trimmed === '---') continue;
       
       // Skip main title (# ) as it's already on cover page
@@ -1799,7 +1800,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
         const bulletText = trimmed.slice(2).replace(/\*\*([^*]+)\*\*/g, '$1');
         doc.text('•  ' + bulletText, 60, currentY, { width: 480 });
         currentY += doc.heightOfString('•  ' + bulletText, { width: 480 }) + 6;
-      } else if (/^\d+\.\s/.test(trimmed) && !/^\d+\.\s+[A-Z\s&]+$/.test(trimmed)) {
+      } else if (/^\d+\.\s/.test(trimmed) && !/^\d+\.\s+[A-Z]{2,}/.test(trimmed)) {
         // Numbered list item (but not section headers)
         doc.fontSize(11).fillColor('#444444').font('Helvetica');
         const listText = trimmed.replace(/\*\*([^*]+)\*\*/g, '$1');
@@ -1928,8 +1929,8 @@ ${generatedSections.join('\n\n---\n\n')}`;
     ${content.split('\n').map(line => {
       const trimmed = line.trim();
       // Skip numbered section headers that duplicate the ## headers and separators
-      if (/^\d+\.\s+[A-Z\s&]+$/.test(trimmed)) return '';
-      if (/^\d+\.\s+[A-Z][A-Z\s&]+/.test(trimmed) && trimmed === trimmed.toUpperCase()) return '';
+      if (/^\d+\.\s+[A-Z][A-Z\s&]+$/.test(trimmed)) return '';
+      if (/^\d+\.\s+[A-Z]{2,}/.test(trimmed) && !trimmed.includes('(') && trimmed.length < 60) return '';
       if (trimmed === '---') return '<hr style="margin: 30px 0; border-top: 2px solid #005EB8;">';
       // Main section headers (## ) - render as blue h2
       if (trimmed.startsWith('## ')) return `<h2 class="section-title">${trimmed.slice(3)}</h2>`;
