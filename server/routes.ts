@@ -1746,7 +1746,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
     doc.moveDown(8);
     doc.fillColor('#000000');
     
-    // Parse and render content
+    // Parse and render content - skip duplicate titles
     const lines = content.split('\n');
     let currentY = 220;
     
@@ -1757,41 +1757,54 @@ ${generatedSections.join('\n\n---\n\n')}`;
         continue;
       }
       
+      // Skip duplicate numbered section headers (e.g., "4. MARKET ANALYSIS")
+      if (/^\d+\.\s+[A-Z\s&]+$/.test(trimmed)) {
+        continue;
+      }
+      
+      // Skip main title (# ) as it's already on cover page
+      if (trimmed.startsWith('# ')) {
+        continue;
+      }
+      
       // Check if we need a new page
       if (currentY > doc.page.height - 80) {
         doc.addPage();
         currentY = 60;
       }
       
-      if (trimmed.startsWith('# ')) {
-        // Main heading
-        doc.fontSize(20).fillColor('#005EB8').font('Helvetica-Bold');
-        doc.text(trimmed.slice(2), 50, currentY);
-        currentY += 35;
-        // Add underline
-        doc.moveTo(50, currentY - 10).lineTo(545, currentY - 10).strokeColor('#005EB8').lineWidth(2).stroke();
-        currentY += 10;
-      } else if (trimmed.startsWith('## ')) {
-        // Section heading
-        currentY += 10;
+      if (trimmed.startsWith('## ')) {
+        // Section heading - blue with underline
+        currentY += 15;
         doc.fontSize(16).fillColor('#005EB8').font('Helvetica-Bold');
         doc.text(trimmed.slice(3), 50, currentY);
         currentY += 28;
+        // Add underline
+        doc.moveTo(50, currentY - 8).lineTo(545, currentY - 8).strokeColor('#005EB8').lineWidth(1).stroke();
+        currentY += 5;
       } else if (trimmed.startsWith('### ')) {
-        // Subsection heading
-        doc.fontSize(13).fillColor('#333333').font('Helvetica-Bold');
+        // Subsection heading - blue
+        currentY += 8;
+        doc.fontSize(13).fillColor('#005EB8').font('Helvetica-Bold');
         doc.text(trimmed.slice(4), 50, currentY);
         currentY += 22;
+      } else if (trimmed.startsWith('#### ')) {
+        // Sub-subsection heading
+        doc.fontSize(12).fillColor('#333333').font('Helvetica-Bold');
+        doc.text(trimmed.slice(5), 50, currentY);
+        currentY += 20;
       } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
         // Bullet point
         doc.fontSize(11).fillColor('#444444').font('Helvetica');
-        doc.text('•  ' + trimmed.slice(2).replace(/\*\*([^*]+)\*\*/g, '$1'), 60, currentY, { width: 480 });
-        currentY += doc.heightOfString('•  ' + trimmed.slice(2), { width: 480 }) + 6;
-      } else if (trimmed.match(/^\d+\.\s/)) {
-        // Numbered list
+        const bulletText = trimmed.slice(2).replace(/\*\*([^*]+)\*\*/g, '$1');
+        doc.text('•  ' + bulletText, 60, currentY, { width: 480 });
+        currentY += doc.heightOfString('•  ' + bulletText, { width: 480 }) + 6;
+      } else if (/^\d+\.\s/.test(trimmed) && !/^\d+\.\s+[A-Z\s&]+$/.test(trimmed)) {
+        // Numbered list item (but not section headers)
         doc.fontSize(11).fillColor('#444444').font('Helvetica');
-        doc.text(trimmed.replace(/\*\*([^*]+)\*\*/g, '$1'), 60, currentY, { width: 480 });
-        currentY += doc.heightOfString(trimmed, { width: 480 }) + 6;
+        const listText = trimmed.replace(/\*\*([^*]+)\*\*/g, '$1');
+        doc.text(listText, 60, currentY, { width: 480 });
+        currentY += doc.heightOfString(listText, { width: 480 }) + 6;
       } else {
         // Regular paragraph
         doc.fontSize(11).fillColor('#444444').font('Helvetica');
@@ -1887,8 +1900,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
         return res.status(500).json({ error: "Business plan content is missing" });
       }
 
-      // Generate a simple HTML preview for Word
+      // Generate a simple HTML preview for Word - remove duplicate titles
       const content = businessPlan.generatedContent;
+      
+      // Track which sections we've seen to avoid duplicates
+      const seenSections = new Set<string>();
+      
       const htmlPreview = `
 <!DOCTYPE html>
 <html>
@@ -1901,11 +1918,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
     .header h1 { margin: 0 0 10px 0; font-size: 2rem; }
     .header p { margin: 0; opacity: 0.9; }
     .content { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h1 { color: #005EB8; border-bottom: 2px solid #005EB8; padding-bottom: 10px; }
-    h2 { color: #005EB8; margin-top: 30px; }
-    h3 { color: #333; }
+    h2.section-title { color: #005EB8; border-bottom: 2px solid #005EB8; padding-bottom: 10px; margin-top: 40px; font-size: 1.5rem; }
+    h3 { color: #005EB8; margin-top: 25px; font-size: 1.2rem; }
+    h4 { color: #333; margin-top: 20px; }
     p { line-height: 1.7; color: #444; }
     ul, ol { line-height: 1.8; }
+    li { margin-bottom: 8px; }
     .download-btn { display: inline-block; background: #10B981; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 20px; }
     .download-btn:hover { background: #059669; }
   </style>
@@ -1921,10 +1939,16 @@ ${generatedSections.join('\n\n---\n\n')}`;
     </p>
     ${content.split('\n').map(line => {
       const trimmed = line.trim();
-      if (trimmed.startsWith('# ')) return `<h1>${trimmed.slice(2)}</h1>`;
-      if (trimmed.startsWith('## ')) return `<h2>${trimmed.slice(3)}</h2>`;
+      // Skip numbered section headers that duplicate the ## headers (e.g., "4. MARKET ANALYSIS")
+      if (/^\d+\.\s+[A-Z\s&]+$/.test(trimmed)) return '';
+      // Main section headers (## ) - render as blue h2
+      if (trimmed.startsWith('## ')) return `<h2 class="section-title">${trimmed.slice(3)}</h2>`;
+      // Main title (# ) - skip if it's the business name (already in header)
+      if (trimmed.startsWith('# ')) return '';
+      // Subsection headers
       if (trimmed.startsWith('### ')) return `<h3>${trimmed.slice(4)}</h3>`;
-      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) return `<li>${trimmed.slice(2)}</li>`;
+      if (trimmed.startsWith('#### ')) return `<h4>${trimmed.slice(5)}</h4>`;
+      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) return `<li>${trimmed.slice(2).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')}</li>`;
       if (trimmed.length > 0) return `<p>${trimmed.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')}</p>`;
       return '';
     }).join('\n')}
