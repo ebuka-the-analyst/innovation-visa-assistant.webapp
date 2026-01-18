@@ -113,6 +113,36 @@ export interface ChartDataPayload {
     expectedLeads: number;
     cac: number;
   }[];
+  processFlow: {
+    step: number;
+    title: string;
+    description: string;
+  }[];
+  customerSilhouettes: {
+    segment: string;
+    percentage: number;
+    color: string;
+  }[];
+  valueProposition: {
+    quadrant: number;
+    title: string;
+    points: string[];
+  }[];
+  inspirationalQuote: {
+    quote: string;
+    author: string;
+    role: string;
+  };
+  researchGrid: {
+    category: string;
+    findings: string[];
+    color: string;
+  }[];
+  businessJourney: {
+    phase: string;
+    activities: string[];
+    icon: string;
+  }[];
 }
 
 export function generateChartData(plan: BusinessPlan): ChartDataPayload {
@@ -307,6 +337,45 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
     { channel: "Events/Webinars", budget: Math.round(funding * 0.03), expectedLeads: 150, cac: Math.round(cac * 0.9) },
   ];
 
+  const processFlow: ChartDataPayload['processFlow'] = [
+    { step: 1, title: "Idea Validation", description: "Research market needs and validate your business concept" },
+    { step: 2, title: "Business Planning", description: "Create detailed strategy, financial projections and roadmap" },
+    { step: 3, title: "Launch & Scale", description: "Execute your plan and grow your customer base" },
+  ];
+
+  const customerSilhouettes: ChartDataPayload['customerSilhouettes'] = [
+    { segment: "Enterprise", percentage: 35, color: "#005EB8" },
+    { segment: "Mid-Market", percentage: 40, color: "#10B981" },
+    { segment: "SMB", percentage: 20, color: "#F59E0B" },
+    { segment: "Startups", percentage: 5, color: "#8B5CF6" },
+  ];
+
+  const valueProposition: ChartDataPayload['valueProposition'] = [
+    { quadrant: 1, title: "Core Product", points: ["Primary value delivery", "Main features", "Key differentiators"] },
+    { quadrant: 2, title: "Customer Benefits", points: ["Time savings", "Cost reduction", "Better outcomes"] },
+    { quadrant: 3, title: "Market Position", points: ["Unique positioning", "Competitive edge", "Brand promise"] },
+    { quadrant: 4, title: "Growth Path", points: ["Scalability", "Expansion plans", "Future roadmap"] },
+  ];
+
+  const inspirationalQuote: ChartDataPayload['inspirationalQuote'] = {
+    quote: "Innovation distinguishes between a leader and a follower. Build something that matters.",
+    author: "Founder Vision",
+    role: "Business Philosophy"
+  };
+
+  const researchGrid: ChartDataPayload['researchGrid'] = [
+    { category: "Market Trends", findings: ["Growing demand", "Digital transformation", "Regulatory changes"], color: "#41B6E6" },
+    { category: "Customer Needs", findings: ["Efficiency", "Cost savings", "Better experience"], color: "#10B981" },
+    { category: "Opportunities", findings: ["Underserved market", "Technology gaps", "Partnership potential"], color: "#F59E0B" },
+  ];
+
+  const businessJourney: ChartDataPayload['businessJourney'] = [
+    { phase: "Foundation", activities: ["Legal setup", "Team building", "Initial funding"], icon: "foundation" },
+    { phase: "Development", activities: ["Product build", "Beta testing", "Market research"], icon: "development" },
+    { phase: "Launch", activities: ["Go-to-market", "Customer acquisition", "Brand building"], icon: "launch" },
+    { phase: "Growth", activities: ["Scaling", "Expansion", "Optimization"], icon: "growth" },
+  ];
+
   return {
     financialProjections,
     marketSize,
@@ -328,6 +397,12 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
     swotAnalysis,
     customerPersonas,
     marketingChannels,
+    processFlow,
+    customerSilhouettes,
+    valueProposition,
+    inspirationalQuote,
+    researchGrid,
+    businessJourney,
   };
 }
 
@@ -353,16 +428,16 @@ function extractCompetitors(competitorsText: string): string[] {
   return competitors;
 }
 
-export type ChartType = 'financial' | 'market' | 'risk' | 'competitor' | 'kpi' | 'funding' | 'revenue_streams' | 'unit_economics' | 'hiring' | 'tech_stack' | 'customer_journey' | 'gtm_channels' | 'milestones' | 'compliance' | 'growth' | 'pricing' | 'timeline' | 'swot' | 'customer_personas' | 'marketing_channels';
+export type ChartType = 'financial' | 'market' | 'risk' | 'competitor' | 'kpi' | 'funding' | 'revenue_streams' | 'unit_economics' | 'hiring' | 'tech_stack' | 'customer_journey' | 'gtm_channels' | 'milestones' | 'compliance' | 'growth' | 'pricing' | 'timeline' | 'swot' | 'customer_personas' | 'marketing_channels' | 'process_flow' | 'customer_silhouettes' | 'value_proposition' | 'inspirational_quote' | 'research_grid' | 'business_journey';
 
 export const SECTION_CHART_MAP: Record<string, ChartType[]> = {
-  "Executive Summary": ["kpi"],
-  "Business Overview": ["funding"],
-  "Problem & Solution": [],
+  "Executive Summary": ["kpi", "process_flow"],
+  "Business Overview": ["funding", "value_proposition"],
+  "Problem & Solution": ["value_proposition"],
   "Innovation & Technology": ["tech_stack"],
-  "Market Analysis": ["market"],
-  "Market Size": ["market"],
-  "Target Market": ["customer_journey"],
+  "Market Analysis": ["market", "research_grid"],
+  "Market Size": ["market", "customer_silhouettes"],
+  "Target Market": ["customer_journey", "customer_silhouettes"],
   "Competitive Analysis": ["competitor"],
   "Competition": ["competitor"],
   "Competitive Landscape": ["competitor"],
@@ -371,28 +446,42 @@ export const SECTION_CHART_MAP: Record<string, ChartType[]> = {
   "Financial Projections": ["financial", "unit_economics"],
   "Financial Plan": ["financial", "unit_economics"],
   "Financials": ["financial"],
-  "Go-to-Market Strategy": ["gtm_channels"],
-  "Marketing Strategy": ["gtm_channels"],
-  "Growth Strategy": ["growth"],
+  "Go-to-Market Strategy": ["gtm_channels", "process_flow"],
+  "Marketing Strategy": ["gtm_channels", "marketing_channels"],
+  "Growth Strategy": ["growth", "business_journey"],
   "Team & Hiring": ["hiring"],
-  "Team": ["hiring"],
+  "Team": ["hiring", "inspirational_quote"],
   "Hiring Plan": ["hiring"],
   "Risk Assessment": ["risk"],
   "Risk Analysis": ["risk"],
   "Risks": ["risk"],
   "Regulatory Compliance": ["compliance"],
   "Compliance": ["compliance"],
-  "Milestones": ["milestones", "timeline"],
+  "Milestones": ["milestones", "timeline", "business_journey"],
   "Implementation Timeline": ["timeline", "milestones"],
-  "Roadmap": ["timeline"],
+  "Roadmap": ["timeline", "business_journey"],
   "Funding Requirements": ["funding"],
   "Use of Funds": ["funding"],
   "SWOT Analysis": ["swot"],
   "SWOT": ["swot"],
-  "Customer Analysis": ["customer_personas", "customer_journey"],
-  "Customer Personas": ["customer_personas"],
+  "Customer Analysis": ["customer_personas", "customer_journey", "customer_silhouettes"],
+  "Customer Personas": ["customer_personas", "customer_silhouettes"],
   "Tailored Marketing Plan": ["marketing_channels", "gtm_channels"],
   "Marketing Plan": ["marketing_channels", "gtm_channels"],
+  "Products & Services": ["value_proposition"],
+  "What We Offer": ["value_proposition"],
+  "About the Founder": ["inspirational_quote"],
+  "Founder Background": ["inspirational_quote"],
+  "All About You": ["inspirational_quote"],
+  "Market Research": ["research_grid", "market"],
+  "Do You Know What It's Like Out There": ["research_grid"],
+  "The Market": ["customer_silhouettes", "market"],
+  "Who Are Your Customers": ["customer_silhouettes", "customer_personas"],
+  "Business Journey": ["business_journey", "timeline"],
+  "How It Works": ["process_flow"],
+  "Our Process": ["process_flow"],
+  "The Quick Pitch": ["process_flow", "kpi"],
+  "Elevator Pitch": ["process_flow"],
 };
 
 export function generateSVGChart(type: ChartType, data: ChartDataPayload): string {
@@ -437,6 +526,18 @@ export function generateSVGChart(type: ChartType, data: ChartDataPayload): strin
       return generateCustomerPersonasChart(data.customerPersonas);
     case 'marketing_channels':
       return generateMarketingChannelsChart(data.marketingChannels);
+    case 'process_flow':
+      return generateProcessFlowChart(data.processFlow);
+    case 'customer_silhouettes':
+      return generateCustomerSilhouettesChart(data.customerSilhouettes);
+    case 'value_proposition':
+      return generateValuePropositionChart(data.valueProposition);
+    case 'inspirational_quote':
+      return generateInspirationalQuoteChart(data.inspirationalQuote);
+    case 'research_grid':
+      return generateResearchGridChart(data.researchGrid);
+    case 'business_journey':
+      return generateBusinessJourneyChart(data.businessJourney);
     default:
       return '';
   }
@@ -1192,5 +1293,218 @@ function generateMarketingChannelsChart(data: { channel: string; budget: number;
     <text x="${width/2}" y="42" text-anchor="middle" font-size="11" fill="#6B7280">Budget allocation, expected leads, and customer acquisition cost</text>
     ${bars}
     ${labels}
+  </svg>`;
+}
+
+function generateProcessFlowChart(data: { step: number; title: string; description: string }[]): string {
+  const width = 600;
+  const height = 200;
+  const circleRadius = 55;
+  const spacing = width / (data.length + 1);
+  
+  let circles = '';
+  let arrows = '';
+  let labels = '';
+  
+  const colors = ['#F59E0B', '#F97316', '#EF4444'];
+  
+  data.forEach((d, i) => {
+    const x = spacing * (i + 1);
+    const y = 90;
+    const color = colors[i % colors.length];
+    
+    circles += `<circle cx="${x}" cy="${y}" r="${circleRadius}" fill="${color}" opacity="0.9"/>`;
+    circles += `<circle cx="${x}" cy="${y}" r="${circleRadius - 8}" fill="none" stroke="white" stroke-width="2" stroke-dasharray="4,4"/>`;
+    
+    circles += `<text x="${x}" y="${y - 10}" text-anchor="middle" font-size="24" font-weight="bold" fill="white">${d.step}</text>`;
+    circles += `<text x="${x}" y="${y + 12}" text-anchor="middle" font-size="10" font-weight="600" fill="white">${d.title}</text>`;
+    
+    if (i < data.length - 1) {
+      const nextX = spacing * (i + 2);
+      arrows += `<path d="M${x + circleRadius + 5} ${y} L${nextX - circleRadius - 15} ${y}" stroke="#374151" stroke-width="3" marker-end="url(#arrowhead)"/>`;
+    }
+    
+    labels += `<text x="${x}" y="${height - 15}" text-anchor="middle" font-size="9" fill="#6B7280">${d.description.substring(0, 35)}</text>`;
+  });
+  
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#374151"/>
+      </marker>
+    </defs>
+    <rect width="100%" height="100%" fill="white"/>
+    <text x="${width/2}" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#111827">Your Business Journey</text>
+    ${arrows}
+    ${circles}
+    ${labels}
+  </svg>`;
+}
+
+function generateCustomerSilhouettesChart(data: { segment: string; percentage: number; color: string }[]): string {
+  const width = 600;
+  const height = 350;
+  const padding = 60;
+  const barWidth = 80;
+  const spacing = (width - padding * 2) / data.length;
+  const maxHeight = height - 140;
+  
+  let bars = '';
+  
+  data.forEach((d, i) => {
+    const x = padding + spacing * i + (spacing - barWidth) / 2;
+    const barHeight = (d.percentage / 100) * maxHeight;
+    const y = height - 60 - barHeight;
+    
+    bars += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${d.color}" rx="4"/>`;
+    
+    bars += `<circle cx="${x + barWidth/2}" cy="${y - 25}" r="15" fill="${d.color}"/>`;
+    bars += `<rect x="${x + barWidth/2 - 12}" y="${y - 8}" width="24" height="30" fill="${d.color}" rx="4"/>`;
+    bars += `<line x1="${x + barWidth/2 - 15}" y1="${y + 25}" x2="${x + barWidth/2 - 10}" y2="${y + 50}" stroke="${d.color}" stroke-width="6" stroke-linecap="round"/>`;
+    bars += `<line x1="${x + barWidth/2 + 15}" y1="${y + 25}" x2="${x + barWidth/2 + 10}" y2="${y + 50}" stroke="${d.color}" stroke-width="6" stroke-linecap="round"/>`;
+    
+    bars += `<text x="${x + barWidth/2}" y="${height - 35}" text-anchor="middle" font-size="11" font-weight="bold" fill="#111827">${d.segment}</text>`;
+    bars += `<text x="${x + barWidth/2}" y="${height - 18}" text-anchor="middle" font-size="14" font-weight="bold" fill="${d.color}">${d.percentage}%</text>`;
+  });
+  
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="#F9FAFB"/>
+    <text x="${width/2}" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">Who Are Your Customers?</text>
+    <text x="${width/2}" y="48" text-anchor="middle" font-size="11" fill="#6B7280">Customer segment distribution</text>
+    ${bars}
+  </svg>`;
+}
+
+function generateValuePropositionChart(data: { quadrant: number; title: string; points: string[] }[]): string {
+  const width = 600;
+  const height = 400;
+  const quadrantWidth = (width - 50) / 2;
+  const quadrantHeight = (height - 80) / 2;
+  
+  const positions = [
+    { x: 20, y: 50 },
+    { x: 20 + quadrantWidth + 10, y: 50 },
+    { x: 20, y: 50 + quadrantHeight + 10 },
+    { x: 20 + quadrantWidth + 10, y: 50 + quadrantHeight + 10 },
+  ];
+  
+  const colors = ['#FEF3C7', '#DBEAFE', '#D1FAE5', '#FCE7F3'];
+  const borderColors = ['#F59E0B', '#3B82F6', '#10B981', '#EC4899'];
+  const textColors = ['#92400E', '#1E40AF', '#065F46', '#9D174D'];
+  
+  let quadrants = '';
+  
+  data.forEach((d, i) => {
+    const pos = positions[i];
+    const bg = colors[i];
+    const border = borderColors[i];
+    const text = textColors[i];
+    
+    quadrants += `<rect x="${pos.x}" y="${pos.y}" width="${quadrantWidth}" height="${quadrantHeight}" fill="${bg}" stroke="${border}" stroke-width="2" rx="8"/>`;
+    
+    quadrants += `<circle cx="${pos.x + 25}" cy="${pos.y + 25}" r="18" fill="${border}"/>`;
+    quadrants += `<text x="${pos.x + 25}" y="${pos.y + 30}" text-anchor="middle" font-size="16" font-weight="bold" fill="white">${d.quadrant}</text>`;
+    
+    quadrants += `<text x="${pos.x + 55}" y="${pos.y + 30}" font-size="13" font-weight="bold" fill="${text}">${d.title}</text>`;
+    
+    d.points.slice(0, 3).forEach((point, pi) => {
+      quadrants += `<circle cx="${pos.x + 25}" cy="${pos.y + 55 + pi * 22}" r="4" fill="${border}"/>`;
+      quadrants += `<text x="${pos.x + 38}" y="${pos.y + 59 + pi * 22}" font-size="10" fill="${text}">${point}</text>`;
+    });
+  });
+  
+  quadrants += `<line x1="${width/2}" y1="50" x2="${width/2}" y2="${height - 30}" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="8,4"/>`;
+  quadrants += `<line x1="20" y1="${50 + quadrantHeight + 5}" x2="${width - 20}" y2="${50 + quadrantHeight + 5}" stroke="#E5E7EB" stroke-width="2" stroke-dasharray="8,4"/>`;
+  
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="white"/>
+    <text x="${width/2}" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">What Are You Going To Sell?</text>
+    ${quadrants}
+  </svg>`;
+}
+
+function generateInspirationalQuoteChart(data: { quote: string; author: string; role: string }): string {
+  const width = 600;
+  const height = 220;
+  
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="quoteGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#1E3A5F;stop-opacity:1"/>
+        <stop offset="100%" style="stop-color:#0F172A;stop-opacity:1"/>
+      </linearGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#quoteGradient)" rx="12"/>
+    
+    <text x="40" y="55" font-size="60" fill="#F59E0B" opacity="0.8">"</text>
+    
+    <text x="${width/2}" y="90" text-anchor="middle" font-size="16" font-style="italic" fill="white">${data.quote.substring(0, 60)}</text>
+    <text x="${width/2}" y="115" text-anchor="middle" font-size="14" font-style="italic" fill="white">${data.quote.substring(60, 120)}</text>
+    
+    <line x1="200" y1="145" x2="400" y2="145" stroke="#F59E0B" stroke-width="2"/>
+    
+    <text x="${width/2}" y="175" text-anchor="middle" font-size="14" font-weight="bold" fill="#F59E0B">${data.author}</text>
+    <text x="${width/2}" y="195" text-anchor="middle" font-size="11" fill="#94A3B8">${data.role}</text>
+  </svg>`;
+}
+
+function generateResearchGridChart(data: { category: string; findings: string[]; color: string }[]): string {
+  const width = 600;
+  const height = 280;
+  const cellWidth = (width - 40) / data.length - 10;
+  
+  let cells = '';
+  
+  data.forEach((d, i) => {
+    const x = 20 + i * (cellWidth + 10);
+    
+    cells += `<rect x="${x}" y="50" width="${cellWidth}" height="40" fill="${d.color}" rx="4 4 0 0"/>`;
+    cells += `<text x="${x + cellWidth/2}" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="white">${d.category}</text>`;
+    
+    cells += `<rect x="${x}" y="90" width="${cellWidth}" height="${height - 110}" fill="white" stroke="${d.color}" stroke-width="2" rx="0 0 4 4"/>`;
+    
+    d.findings.forEach((f, fi) => {
+      cells += `<circle cx="${x + 18}" cy="${115 + fi * 28}" r="4" fill="${d.color}"/>`;
+      cells += `<text x="${x + 30}" y="${119 + fi * 28}" font-size="10" fill="#374151">${f.substring(0, 22)}</text>`;
+    });
+  });
+  
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="#F0F9FF"/>
+    <text x="${width/2}" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">Market Research Findings</text>
+    ${cells}
+  </svg>`;
+}
+
+function generateBusinessJourneyChart(data: { phase: string; activities: string[]; icon: string }[]): string {
+  const width = 600;
+  const height = 250;
+  const phaseWidth = (width - 60) / data.length;
+  
+  const colors = ['#005EB8', '#10B981', '#F59E0B', '#8B5CF6'];
+  
+  let phases = '';
+  
+  phases += `<rect x="30" y="80" width="${width - 60}" height="8" fill="#E5E7EB" rx="4"/>`;
+  
+  data.forEach((d, i) => {
+    const x = 30 + phaseWidth * i + phaseWidth / 2;
+    const color = colors[i % colors.length];
+    
+    phases += `<circle cx="${x}" cy="84" r="18" fill="${color}" stroke="white" stroke-width="3"/>`;
+    phases += `<text x="${x}" y="89" text-anchor="middle" font-size="12" font-weight="bold" fill="white">${i + 1}</text>`;
+    
+    phases += `<text x="${x}" y="125" text-anchor="middle" font-size="12" font-weight="bold" fill="${color}">${d.phase}</text>`;
+    
+    d.activities.slice(0, 3).forEach((a, ai) => {
+      phases += `<text x="${x}" y="${148 + ai * 16}" text-anchor="middle" font-size="9" fill="#6B7280">• ${a}</text>`;
+    });
+  });
+  
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="white"/>
+    <text x="${width/2}" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#111827">Your Business Journey</text>
+    <text x="${width/2}" y="50" text-anchor="middle" font-size="11" fill="#6B7280">Key phases and activities for success</text>
+    ${phases}
   </svg>`;
 }
