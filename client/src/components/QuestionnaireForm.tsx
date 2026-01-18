@@ -746,8 +746,10 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
       
       setIsSubmitting(true);
       try {
+        // Free tier users always get 'free' tier plan, paid users get the form's selected tier
+        const effectiveTier = isFreeTier ? 'free' : (formData.tier || 'premium');
         const data = {
-          tier: formData.tier || 'premium',
+          tier: effectiveTier,
           businessName: formData.businessName,
           industry: formData.industry,
           problem: formData.problem,
