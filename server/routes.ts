@@ -1715,46 +1715,45 @@ ${generatedSections.join('\n\n---\n\n')}`;
       
       const businessPlan = await storage.getBusinessPlan(planId);
       if (!businessPlan || businessPlan.userId !== user.id) {
-        return res.status(404).send(`
-          <html><body style="font-family: sans-serif; padding: 40px; text-align: center;">
-            <h1>Business Plan Not Found</h1>
-            <p>The requested business plan could not be found.</p>
-          </body></html>
-        `);
+        return res.status(404).json({ error: "Business plan not found" });
       }
 
       if (businessPlan.status !== 'completed') {
-        return res.status(400).send(`
-          <html><body style="font-family: sans-serif; padding: 40px; text-align: center;">
-            <h1>Business Plan Not Ready</h1>
-            <p>Status: ${businessPlan.status}</p>
-            <p>Please wait for generation to complete.</p>
-          </body></html>
-        `);
+        return res.status(400).json({ error: "Business plan not ready yet", status: businessPlan.status });
       }
 
       if (!businessPlan.generatedContent) {
-        return res.status(500).send(`
-          <html><body style="font-family: sans-serif; padding: 40px; text-align: center;">
-            <h1>Content Missing</h1>
-            <p>The business plan content is missing. Please contact support.</p>
-          </body></html>
-        `);
+        return res.status(500).json({ error: "Business plan content is missing" });
       }
 
+      const sanitizedName = businessPlan.businessName.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_');
+      const filename = `${sanitizedName}-business-plan.pdf`;
+      
       const htmlContent = generatePDFContent(businessPlan);
       
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(businessPlan.businessName)}-business-plan.html"`);
-      res.send(htmlContent);
+      const puppeteer = await import('puppeteer');
+      const browser = await puppeteer.default.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      });
+      
+      const page = await browser.newPage();
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '20mm', bottom: '20mm', left: '15mm', right: '15mm' }
+      });
+      
+      await browser.close();
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(Buffer.from(pdfBuffer));
     } catch (error) {
       console.error("PDF download error:", error);
-      res.status(500).send(`
-        <html><body style="font-family: sans-serif; padding: 40px; text-align: center;">
-          <h1>Download Error</h1>
-          <p>An error occurred while generating the document. Please try again or contact support.</p>
-        </body></html>
-      `);
+      res.status(500).json({ error: "Failed to generate PDF" });
     }
   });
 
