@@ -1757,6 +1757,128 @@ ${generatedSections.join('\n\n---\n\n')}`;
     }
   });
 
+  // PDF view endpoint (opens in browser)
+  app.get("/api/view/pdf/:planId", isAuthenticated, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user as any;
+      
+      const businessPlan = await storage.getBusinessPlan(planId);
+      if (!businessPlan || businessPlan.userId !== user.id) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+
+      if (businessPlan.status !== 'completed') {
+        return res.status(400).json({ error: "Business plan not ready yet", status: businessPlan.status });
+      }
+
+      if (!businessPlan.generatedContent) {
+        return res.status(500).json({ error: "Business plan content is missing" });
+      }
+
+      const sanitizedName = businessPlan.businessName.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_');
+      const filename = `${sanitizedName}-business-plan.pdf`;
+      
+      const htmlContent = generatePDFContent(businessPlan);
+      
+      const puppeteer = await import('puppeteer');
+      const browser = await puppeteer.default.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      });
+      
+      const page = await browser.newPage();
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '20mm', bottom: '20mm', left: '15mm', right: '15mm' }
+      });
+      
+      await browser.close();
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      res.send(Buffer.from(pdfBuffer));
+    } catch (error) {
+      console.error("PDF view error:", error);
+      res.status(500).json({ error: "Failed to generate PDF" });
+    }
+  });
+
+  // Word document view endpoint (downloads but browser may preview)
+  app.get("/api/view/word/:planId", isAuthenticated, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user as any;
+      
+      const businessPlan = await storage.getBusinessPlan(planId);
+      if (!businessPlan || businessPlan.userId !== user.id) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+
+      if (businessPlan.status !== 'completed') {
+        return res.status(400).json({ error: "Business plan not ready yet" });
+      }
+
+      if (!businessPlan.generatedContent) {
+        return res.status(500).json({ error: "Business plan content is missing" });
+      }
+
+      // Generate a simple HTML preview for Word
+      const content = businessPlan.generatedContent;
+      const htmlPreview = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${businessPlan.businessName} - Business Plan</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 40px; background: #f8fafc; }
+    .header { background: linear-gradient(135deg, #005EB8, #41B6E6); color: white; padding: 40px; border-radius: 12px; margin-bottom: 30px; }
+    .header h1 { margin: 0 0 10px 0; font-size: 2rem; }
+    .header p { margin: 0; opacity: 0.9; }
+    .content { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h1 { color: #005EB8; border-bottom: 2px solid #005EB8; padding-bottom: 10px; }
+    h2 { color: #005EB8; margin-top: 30px; }
+    h3 { color: #333; }
+    p { line-height: 1.7; color: #444; }
+    ul, ol { line-height: 1.8; }
+    .download-btn { display: inline-block; background: #10B981; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 20px; }
+    .download-btn:hover { background: #059669; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>${businessPlan.businessName}</h1>
+    <p>UK Innovator Founder Visa Business Plan | ${businessPlan.tier?.toUpperCase() || 'FREE'} Plan</p>
+  </div>
+  <div class="content">
+    <p style="text-align: center; margin-bottom: 30px;">
+      <a href="/api/download/word/${planId}" class="download-btn">Download Word Document</a>
+    </p>
+    ${content.split('\n').map(line => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('# ')) return `<h1>${trimmed.slice(2)}</h1>`;
+      if (trimmed.startsWith('## ')) return `<h2>${trimmed.slice(3)}</h2>`;
+      if (trimmed.startsWith('### ')) return `<h3>${trimmed.slice(4)}</h3>`;
+      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) return `<li>${trimmed.slice(2)}</li>`;
+      if (trimmed.length > 0) return `<p>${trimmed.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')}</p>`;
+      return '';
+    }).join('\n')}
+  </div>
+</body>
+</html>`;
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.send(htmlPreview);
+    } catch (error) {
+      console.error("Word view error:", error);
+      res.status(500).json({ error: "Failed to generate preview" });
+    }
+  });
+
   // Word document download endpoint
   app.get("/api/download/word/:planId", isAuthenticated, async (req, res) => {
     try {

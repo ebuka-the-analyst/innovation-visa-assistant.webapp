@@ -3,7 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Download, CheckCircle, Home, FileText, Mail, Send, Linkedin, RefreshCw, LayoutDashboard, Clock, Lightbulb, BookOpen, Shield, TrendingUp, FileSpreadsheet } from "lucide-react";
+import { Download, CheckCircle, Home, FileText, Mail, Send, Linkedin, RefreshCw, LayoutDashboard, Clock, Lightbulb, BookOpen, Shield, TrendingUp, FileSpreadsheet, Eye, Twitter, Share2, Copy, MessageCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -336,121 +336,182 @@ export default function GenerationProgress({ planId }: { planId: string }) {
             </p>
           </div>
 
-          <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground border-t border-border pt-6">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>Elapsed: {formatTime(elapsedTime)}</span>
+          {/* Only show elapsed/remaining time while generating, hide when completed */}
+          {status !== 'completed' && (
+            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground border-t border-border pt-6">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span>Elapsed: {formatTime(elapsedTime)}</span>
+              </div>
+              <div className="h-4 w-px bg-border" />
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                <span>{getEstimatedRemaining()}</span>
+              </div>
             </div>
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              <span>{getEstimatedRemaining()}</span>
-            </div>
-          </div>
+          )}
 
           {status === 'completed' && pdfUrl ? (
             <div className="space-y-6 mt-8 border-t border-border pt-8">
-              <div className="flex items-center justify-center gap-2 text-chart-3">
-                <CheckCircle className="w-6 h-6" />
-                <p className="text-lg font-semibold">
-                  {tier === 'ultimate' ? 'Your Ultimate Business Plan Package is Complete!' : 'Your Business Plan is Ready!'}
+              <div className="flex items-center justify-center gap-2 text-emerald-500">
+                <CheckCircle className="w-8 h-8" />
+                <p className="text-xl font-bold">
+                  {tier === 'ultimate' ? 'Your Ultimate Business Plan is Complete!' : 'Your Business Plan is Ready!'}
                 </p>
               </div>
-              
-              <Dialog open={showFormatDialog} onOpenChange={setShowFormatDialog}>
-                <DialogTrigger asChild>
+
+              {/* View & Download Section */}
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-center text-muted-foreground">View or Download Your Plan</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* PDF Options */}
                   <Button
                     size="lg"
-                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
-                    data-testid="button-download-business-plan"
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
+                    onClick={() => window.open(`/api/view/pdf/${planId}`, '_blank')}
+                    data-testid="button-view-pdf"
+                  >
+                    <Eye className="w-5 h-5 mr-2" />
+                    View PDF
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
+                    onClick={() => handleDownload('pdf')}
+                    data-testid="button-download-pdf"
                   >
                     <Download className="w-5 h-5 mr-2" />
-                    Download Your {tierPageTargets[tier]} Page Business Plan
+                    Download PDF
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Choose Download Format</DialogTitle>
-                    <DialogDescription>
-                      Select your preferred format for your business plan document.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid grid-cols-2 gap-4 py-4">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="flex flex-col h-24 gap-2 hover-elevate"
-                      onClick={() => handleDownload('pdf')}
-                      disabled={isExporting}
-                      data-testid="button-download-pdf"
-                    >
-                      <FileText className="w-8 h-8 text-red-500" />
-                      <span className="font-semibold">PDF</span>
-                      <span className="text-xs text-muted-foreground">Best for sharing</span>
-                    </Button>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="flex flex-col h-24 gap-2 hover-elevate"
-                      onClick={() => handleDownload('word')}
-                      disabled={isExporting}
-                      data-testid="button-download-word"
-                    >
-                      <FileSpreadsheet className="w-8 h-8 text-blue-500" />
-                      <span className="font-semibold">Word</span>
-                      <span className="text-xs text-muted-foreground">Best for editing</span>
-                    </Button>
-                  </div>
-                  {isExporting && (
-                    <p className="text-sm text-muted-foreground text-center animate-pulse">
-                      Preparing your download...
-                    </p>
-                  )}
-                </DialogContent>
-              </Dialog>
+                  
+                  {/* Word Options */}
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950 font-semibold"
+                    onClick={() => window.open(`/api/view/word/${planId}`, '_blank')}
+                    data-testid="button-view-word"
+                  >
+                    <Eye className="w-5 h-5 mr-2" />
+                    View Word
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950 font-semibold"
+                    onClick={() => handleDownload('word')}
+                    data-testid="button-download-word"
+                  >
+                    <Download className="w-5 h-5 mr-2" />
+                    Download Word
+                  </Button>
+                </div>
+              </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const subject = `${tier.charAt(0).toUpperCase() + tier.slice(1)} Business Plan`;
-                    const body = `I've generated my UK Innovator Founder Visa business plan.\n\nView it here: ${window.location.origin}${pdfUrl}`;
-                    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                  }}
-                  data-testid="button-share-email"
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  Email Share
-                </Button>
+              {/* Social Sharing Section */}
+              <div className="space-y-3 pt-4 border-t border-border">
+                <p className="text-sm font-semibold text-center text-muted-foreground flex items-center justify-center gap-2">
+                  <Share2 className="w-4 h-4" />
+                  Share Your Success
+                </p>
+                <div className="grid grid-cols-5 gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-12 w-full hover-elevate"
+                    onClick={() => {
+                      const text = `Just created my UK Innovator Founder Visa business plan!`;
+                      const url = window.location.origin;
+                      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'width=600,height=400');
+                    }}
+                    data-testid="button-share-twitter"
+                    title="Share on X/Twitter"
+                  >
+                    <Twitter className="w-5 h-5" />
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-12 w-full hover-elevate"
+                    onClick={() => {
+                      const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}`;
+                      window.open(url, '_blank', 'width=600,height=600');
+                    }}
+                    data-testid="button-share-linkedin"
+                    title="Share on LinkedIn"
+                  >
+                    <Linkedin className="w-5 h-5" />
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-12 w-full hover-elevate"
+                    onClick={() => {
+                      const text = `Check out my UK Innovator Founder Visa business plan: ${window.location.origin}`;
+                      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                    }}
+                    data-testid="button-share-whatsapp"
+                    title="Share on WhatsApp"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-12 w-full hover-elevate"
+                    onClick={() => {
+                      const subject = `My UK Innovator Founder Visa Business Plan`;
+                      const body = `I've just created my business plan for the UK Innovator Founder Visa!\n\nCheck it out: ${window.location.origin}`;
+                      window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    }}
+                    data-testid="button-share-email"
+                    title="Share via Email"
+                  >
+                    <Mail className="w-5 h-5" />
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-12 w-full hover-elevate"
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast({
+                        title: "Link Copied!",
+                        description: "Share link copied to clipboard.",
+                      });
+                    }}
+                    data-testid="button-copy-link"
+                    title="Copy Link"
+                  >
+                    <Copy className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Actions Section - Hide revision for free tier */}
+              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
+                {tier !== 'free' && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      toast({
+                        title: "Request Revision",
+                        description: "Our team will review your request within 24 hours.",
+                      });
+                      window.location.href = `mailto:support@innovatorfoundervisaassistant.co.uk?subject=Revision Request - Plan ${planId}`;
+                    }}
+                    data-testid="button-request-revision"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Request Revision
+                  </Button>
+                )}
                 
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + pdfUrl)}`;
-                    window.open(url, '_blank', 'width=600,height=600');
-                  }}
-                  data-testid="button-share-linkedin"
-                >
-                  <Linkedin className="w-4 h-4 mr-2" />
-                  LinkedIn
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    toast({
-                      title: "Request Revision",
-                      description: "Our team will review your request within 24 hours.",
-                    });
-                    window.location.href = `mailto:support@innovatorfoundervisaassistant.co.uk?subject=Revision Request - Plan ${planId}`;
-                  }}
-                  data-testid="button-request-revision"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Request Revision
-                </Button>
-                
-                <Link href="/dashboard" className="w-full">
+                <Link href="/dashboard" className={tier === 'free' ? 'col-span-2' : ''}>
                   <Button variant="outline" className="w-full" data-testid="button-view-dashboard">
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     View Dashboard
@@ -458,31 +519,33 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 </Link>
               </div>
 
+              {/* Quick Actions */}
               <div className="pt-4 border-t border-border">
                 <p className="text-sm font-medium text-muted-foreground mb-3 text-center">Quick Actions</p>
-                <div className="space-y-2">
+                <div className="grid grid-cols-3 gap-2">
                   <Link href="/questionnaire">
-                    <Button variant="outline" className="w-full justify-start" data-testid="button-create-another">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Create Another Business Plan
+                    <Button variant="ghost" size="sm" className="w-full flex-col h-auto py-3 gap-1" data-testid="button-create-another">
+                      <FileText className="w-4 h-4" />
+                      <span className="text-xs">New Plan</span>
                     </Button>
                   </Link>
                   
                   <Link href="/">
-                    <Button variant="outline" className="w-full justify-start" data-testid="button-home">
-                      <Home className="w-4 h-4 mr-2" />
-                      Return to Home
+                    <Button variant="ghost" size="sm" className="w-full flex-col h-auto py-3 gap-1" data-testid="button-home">
+                      <Home className="w-4 h-4" />
+                      <span className="text-xs">Home</span>
                     </Button>
                   </Link>
 
                   <Button
-                    variant="outline"
-                    className="w-full justify-start"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full flex-col h-auto py-3 gap-1"
                     onClick={() => window.location.href = 'mailto:support@innovatorfoundervisaassistant.co.uk'}
                     data-testid="button-support"
                   >
-                    <Mail className="w-4 h-4 mr-2" />
-                    Contact Support
+                    <Mail className="w-4 h-4" />
+                    <span className="text-xs">Support</span>
                   </Button>
                 </div>
               </div>
