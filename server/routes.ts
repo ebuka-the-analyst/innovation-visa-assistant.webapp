@@ -1434,7 +1434,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hasUltimateAssurance = fullUser.hasUltimateAssurance || false;
       const isUnlimited = userTier === 'ultimate' || hasUltimateAssurance;
       
-      if (!isUnlimited) {
+      // FREE PLAN: Free tier users generating a free plan don't consume credits
+      const isFreePlanGeneration = businessPlan.tier === 'free';
+      
+      if (!isUnlimited && !isFreePlanGeneration) {
         const planCredits = fullUser.planCredits || 0;
         const bonusCredits = fullUser.bonusCredits || 0;
         const totalCredits = planCredits + bonusCredits;
@@ -1473,6 +1476,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `);
         
         console.log(`[CREDITS] User ${user.id} consumed 1 ${creditsDeducted} credit for plan ${planId}. Balance: ${newPlanCredits + newBonusCredits}`);
+      } else if (isFreePlanGeneration) {
+        console.log(`[CREDITS] User ${user.id} generating FREE plan ${planId} - no credits required`);
       } else {
         console.log(`[CREDITS] User ${user.id} has unlimited credits (${isUnlimited ? 'Ultimate' : 'Ultimate Assurance'}), no credit consumed`);
       }
