@@ -44,10 +44,10 @@ const visaTips = [
 
 const tierSectionCounts: Record<string, number> = {
   free: 6,
-  basic: 8,
-  premium: 10,
-  enterprise: 10,
-  ultimate: 14,
+  basic: 11,
+  premium: 13,
+  enterprise: 13,
+  ultimate: 17,
 };
 
 const tierPageTargets: Record<string, string> = {
