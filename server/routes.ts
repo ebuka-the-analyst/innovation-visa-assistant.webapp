@@ -1814,19 +1814,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       }
     }
     
-    // Footer on each page
-    const pages = doc.bufferedPageRange();
-    for (let i = 0; i < pages.count; i++) {
-      doc.switchToPage(i);
-      doc.fontSize(9).fillColor('#888888').font('Helvetica');
-      doc.text(
-        `UK Innovator Founder Visa Assistant | Page ${i + 1} of ${pages.count}`,
-        50,
-        doc.page.height - 40,
-        { align: 'center', width: 495 }
-      );
-    }
-    
+    // Finalize the PDF (footer not supported without buffering all pages)
     doc.end();
   }
 

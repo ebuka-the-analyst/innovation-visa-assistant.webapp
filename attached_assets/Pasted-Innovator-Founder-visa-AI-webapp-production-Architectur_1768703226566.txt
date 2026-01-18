@@ -1,0 +1,173 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+5 minutes ago
+
+innovation-visa-assistant.webapp
+
+Deployment building
+
+18 minutes ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+41 minutes ago
+
+innovation-visa-assistant.webapp
+
+Deployment building
+
+1 hour ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+1 hour ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+2 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+2 hours ago
+
+Scroll to load more
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+fd4f39e4
+Active
+
+Jan 18, 2026, 2:22 AM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+You reached the start of the range
+Jan 18, 2026, 2:22 AM
+Starting Container
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+2:25:06 AM [express] serving on port 8080
+2:25:06 AM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+[2026-01-18T02:26:28.261Z] POST /api/activity/session
+[2026-01-18T02:26:28.273Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: free (raw: free)
+2:26:28 AM [express] GET /api/auth/user 200 in 219ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a"…
+2:26:28 AM [express] POST /api/activity/session 200 in 227ms :: {"sessionId":"762ce5fd-b325-4afe-adc…
+[2026-01-18T02:26:28.678Z] POST /api/activity/page-view
+2:26:28 AM [express] POST /api/activity/page-view 200 in 27ms :: {"pageViewId":"9de08930-69e4-44cc-a…
+[2026-01-18T02:26:30.461Z] POST /api/activity/session/end
+[2026-01-18T02:26:30.466Z] GET /generation?plan_id=77451e34-aee0-41c7-9732-28d64f47ea96&free=true
+2:26:30 AM [express] POST /api/activity/session/end 200 in 23ms :: {"success":true}
+[2026-01-18T02:26:30.831Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: free (raw: free)
+2:26:30 AM [express] GET /api/auth/user 200 in 12ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+[2026-01-18T02:26:31.058Z] GET /api/partner/status
+[2026-01-18T02:26:31.059Z] POST /api/activity/session
+2:26:31 AM [express] GET /api/partner/status 200 in 20ms :: {"isPartner":false,"promoCodeCount":0}
+2:26:31 AM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"51bc59e0-d73f-4903-bc70…
+[2026-01-18T02:26:31.215Z] POST /api/activity/session
+2:26:31 AM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"0db74dbe-8ebf-4428-8f8f…
+[2026-01-18T02:26:31.234Z] POST /api/generate/start
+2:26:31 AM [express] POST /api/generate/start 200 in 16ms :: {"success":true,"message":"Generation a…
+[2026-01-18T02:26:31.279Z] POST /api/activity/page-view
+2:26:31 AM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"b7ebef29-2a87-471b-8…
+[2026-01-18T02:26:33.582Z] GET /api/generate/status/77451e34-aee0-41c7-9732-28d64f47ea96
+2:26:33 AM [express] GET /api/generate/status/77451e34-aee0-41c7-9732-28d64f47ea96 200 in 21ms :: {"…
+[2026-01-18T02:26:37.150Z] GET /api/view/pdf/77451e34-aee0-41c7-9732-28d64f47ea96
+PDF view error: Error: switchToPage(0) out of bounds, current buffer covers pages 33 to 33
+    at PDFDocument.switchToPage (/app/node_modules/pdfkit/js/pdfkit.js:5845:13)
+    at generatePDFWithPDFKit (file:///app/dist/index.js:13770:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/dist/index.js:13815:7
+[2026-01-18T02:26:37.449Z] POST /api/activity/session/end
+[2026-01-18T02:26:37.450Z] POST /api/performance/metrics
+2:26:37 AM [express] GET /api/view/pdf/77451e34-aee0-41c7-9732-28d64f47ea96 500 in 302ms :: {"error"…
+2:26:37 AM [express] POST /api/activity/session/end 200 in 17ms :: {"success":true}
+2:26:37 AM [express] POST /api/performance/metrics 204 in 192ms
+[2026-01-18T02:26:37.659Z] GET /favicon.ico
+
+
+innovation-visa-assistant.webapp | Railway
