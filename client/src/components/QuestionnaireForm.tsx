@@ -328,6 +328,10 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     user?.subscriptionTier && 
     ['basic', 'premium', 'enterprise', 'ultimate'].includes(user.subscriptionTier);
   
+  // Free tier users can generate their basic plan directly (no payment needed)
+  const isFreeTier = user?.subscriptionTier === 'free';
+  const canGenerateDirectly = userHasActiveSubscription || isFreeTier;
+  
   const {
     savedData,
     saveField,
@@ -3001,8 +3005,8 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
             ))}
           </div>
 
-          {/* Promo Code Section - Show on final step ONLY if user doesn't have active subscription */}
-          {currentStep === steps.length - 1 && !userHasActiveSubscription && (
+          {/* Promo Code Section - Show on final step ONLY if user needs to pay (not free tier, not active subscription) */}
+          {currentStep === steps.length - 1 && !canGenerateDirectly && (
             <div className="mt-8 pt-6 border-t">
               <Label className="text-base font-medium flex items-center gap-2 mb-3">
                 <Tag className="w-4 h-4" />
@@ -3051,12 +3055,12 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
             </div>
           )}
           
-          {/* Show subscription status for premium users */}
-          {currentStep === steps.length - 1 && userHasActiveSubscription && (
+          {/* Show subscription status for paid users or free tier */}
+          {currentStep === steps.length - 1 && canGenerateDirectly && (
             <div className="mt-8 pt-6 border-t">
               <Badge className="bg-emerald-500 text-white">
                 <Check className="w-3 h-3 mr-1" />
-                {user?.subscriptionTier?.charAt(0).toUpperCase()}{user?.subscriptionTier?.slice(1)} Member - No payment required
+                {isFreeTier ? "Free Plan - Generate your 10-15 page business overview" : `${user?.subscriptionTier?.charAt(0).toUpperCase()}${user?.subscriptionTier?.slice(1)} Member - No payment required`}
               </Badge>
             </div>
           )}
@@ -3077,7 +3081,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
               disabled={isSubmitting}
               data-testid="button-next"
             >
-              {isSubmitting ? "Processing..." : currentStep === steps.length - 1 ? (userHasActiveSubscription ? "Generate Plan" : "Proceed to Payment") : "Continue"}
+              {isSubmitting ? "Processing..." : currentStep === steps.length - 1 ? (canGenerateDirectly ? "Generate Plan" : "Proceed to Payment") : "Continue"}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
