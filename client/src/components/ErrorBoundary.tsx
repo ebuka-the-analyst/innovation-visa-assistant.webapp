@@ -39,7 +39,13 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: null, errorInfo: "" });
+    // For chunk loading errors (after deployments), do a full page reload
+    const errorMessage = this.state.error?.message || '';
+    if (errorMessage.includes('fetch') || errorMessage.includes('module') || errorMessage.includes('chunk')) {
+      window.location.reload();
+    } else {
+      this.setState({ hasError: false, error: null, errorInfo: "" });
+    }
   };
 
   handleGoHome = () => {
