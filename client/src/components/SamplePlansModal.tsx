@@ -27,7 +27,7 @@ const SAMPLE_PLANS = [
       { icon: Briefcase, text: "Committed to hiring 5+ ML engineers in Year 1" },
       { icon: BarChart3, text: "Projected £500K ARR by Year 2, £2M by Year 3" }
     ],
-    features: ["Interactive Charts", "Financial Projections", "Market Analysis", "Competitor Matrix"],
+    features: ["Interactive Charts", "Financial Projections", "Market Analysis", "Competitor Matrix", "& more..."],
     gradient: "from-violet-500/20 via-purple-500/10 to-fuchsia-500/20",
     accentColor: "text-violet-600 dark:text-violet-400",
     badgeColor: "bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-300",
@@ -48,7 +48,7 @@ const SAMPLE_PLANS = [
       { icon: Users, text: "Already hired 8 FTE in 8 months" },
       { icon: Rocket, text: "Targeting £10M ARR by Year 2" }
     ],
-    features: ["Executive Summary", "Risk Analysis", "Compliance Framework", "Growth Roadmap", "Investment Deck"],
+    features: ["Executive Summary", "Risk Analysis", "Compliance Framework", "Growth Roadmap", "Investment Deck", "& more..."],
     gradient: "from-amber-500/20 via-orange-500/10 to-yellow-500/20",
     accentColor: "text-amber-600 dark:text-amber-400",
     badgeColor: "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300",
@@ -69,7 +69,7 @@ const SAMPLE_PLANS = [
       { icon: Briefcase, text: "Hiring Head of Sales Q2 2025" },
       { icon: Target, text: "£250K revenue target Year 2" }
     ],
-    features: ["Business Overview", "Market Analysis", "Financial Summary", "Team Profile"],
+    features: ["Business Overview", "Market Analysis", "Financial Summary", "Team Profile", "& more..."],
     gradient: "from-emerald-500/20 via-green-500/10 to-teal-500/20",
     accentColor: "text-emerald-600 dark:text-emerald-400",
     badgeColor: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300",
@@ -90,7 +90,7 @@ const SAMPLE_PLANS = [
       { icon: FileCheck, text: "NHS pilot agreement for 50K annual tests" },
       { icon: Briefcase, text: "Hiring 3 lab technicians + 1 regulatory officer" }
     ],
-    features: ["IP Strategy", "Regulatory Roadmap", "Clinical Trial Plan", "NHS Partnership", "Scalability Model"],
+    features: ["IP Strategy", "Regulatory Roadmap", "Clinical Trial Plan", "NHS Partnership", "Scalability Model", "& more..."],
     gradient: "from-rose-500/20 via-pink-500/10 to-red-500/20",
     accentColor: "text-rose-600 dark:text-rose-400",
     badgeColor: "bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300",
@@ -111,7 +111,7 @@ const SAMPLE_PLANS = [
       { icon: Users, text: "Planning 2 hires: Sales + Product" },
       { icon: Target, text: "Target: 500 school subscriptions by Year 2" }
     ],
-    features: ["Interactive Charts", "Customer Journey", "Unit Economics", "Growth Metrics"],
+    features: ["Interactive Charts", "Customer Journey", "Unit Economics", "Growth Metrics", "& more..."],
     gradient: "from-blue-500/20 via-indigo-500/10 to-cyan-500/20",
     accentColor: "text-blue-600 dark:text-blue-400",
     badgeColor: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
@@ -132,7 +132,7 @@ const SAMPLE_PLANS = [
       { icon: Briefcase, text: "First hire: Senior Developer (Q1 2025)" },
       { icon: BarChart3, text: "£400K revenue projection Year 2" }
     ],
-    features: ["Business Overview", "Competitor Analysis", "Revenue Model", "Hiring Plan"],
+    features: ["Business Overview", "Competitor Analysis", "Revenue Model", "Hiring Plan", "& more..."],
     gradient: "from-sky-500/20 via-blue-500/10 to-indigo-500/20",
     accentColor: "text-sky-600 dark:text-sky-400",
     badgeColor: "bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300",
