@@ -1757,10 +1757,10 @@ ${generatedSections.join('\n\n---\n\n')}`;
         continue;
       }
       
-      // Skip duplicate numbered section headers (e.g., "4. MARKET ANALYSIS")
-      if (/^\d+\.\s+[A-Z\s&]+$/.test(trimmed)) {
-        continue;
-      }
+      // Skip duplicate numbered section headers and separators
+      if (/^\d+\.\s+[A-Z\s&]+$/.test(trimmed)) continue;
+      if (/^\d+\.\s+[A-Z][A-Z\s&]+/.test(trimmed) && trimmed === trimmed.toUpperCase()) continue;
+      if (trimmed === '---') continue;
       
       // Skip main title (# ) as it's already on cover page
       if (trimmed.startsWith('# ')) {
@@ -1927,8 +1927,10 @@ ${generatedSections.join('\n\n---\n\n')}`;
     </p>
     ${content.split('\n').map(line => {
       const trimmed = line.trim();
-      // Skip numbered section headers that duplicate the ## headers (e.g., "4. MARKET ANALYSIS")
+      // Skip numbered section headers that duplicate the ## headers and separators
       if (/^\d+\.\s+[A-Z\s&]+$/.test(trimmed)) return '';
+      if (/^\d+\.\s+[A-Z][A-Z\s&]+/.test(trimmed) && trimmed === trimmed.toUpperCase()) return '';
+      if (trimmed === '---') return '<hr style="margin: 30px 0; border-top: 2px solid #005EB8;">';
       // Main section headers (## ) - render as blue h2
       if (trimmed.startsWith('## ')) return `<h2 class="section-title">${trimmed.slice(3)}</h2>`;
       // Main title (# ) - skip if it's the business name (already in header)
