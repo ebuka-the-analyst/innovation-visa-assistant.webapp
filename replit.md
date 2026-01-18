@@ -8,6 +8,13 @@ The UK Innovator Founder Visa Assistant is an AI-powered platform designed to gu
 - **Critical Deadline:** 3-week visa application deadline
 - **Development Speed:** Batch-first approach for rapid delivery
 - **Quality Focus:** Expert-level tools worth £80-100 each
+- **LOCKED - Business Plan Exports (Jan 2026):** User loves the current implementation and it must never change. This includes:
+  - Visual PDF export with charts via client-side jsPDF + html-to-image (`useVisualPdfExport.ts`)
+  - Word export with embedded charts via server-side docx generation
+  - HTML preview endpoint at `/api/view/html/:planId`
+  - Completion page UI with "PDF (with Charts)" and "Word (with Charts)" buttons
+  - Section title stripping logic that only removes exact heading matches
+  - Progress indicator during PDF generation
 
 ## System Architecture
 
