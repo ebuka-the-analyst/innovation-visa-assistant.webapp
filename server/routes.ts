@@ -1517,6 +1517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         generatedContent: businessPlan.generatedContent,
         pdfUrl: businessPlan.pdfUrl,
         tier: businessPlan.tier,
+        businessName: businessPlan.businessName,
         currentGenerationStage: businessPlan.currentGenerationStage
       });
     } catch (error) {
@@ -1644,7 +1645,41 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
       try {
         // Use OpenAI for business plan generation
         const fullPrompt = `${sectionSystemPrompt}\n\n${sectionUserPrompt}`;
-        const sectionContent = await callAI(fullPrompt);
+        let sectionContent = await callAI(fullPrompt);
+        
+        // Strip any leading section title from AI output (prevents duplicate headers)
+        // Only removes lines that exactly match our section title pattern
+        const titleCore = section.title.replace(/^\d+\.\s*/, '').toUpperCase().trim();
+        const lines = sectionContent.split('\n');
+        let startIndex = 0;
+        
+        for (let j = 0; j < Math.min(3, lines.length); j++) {
+          const line = lines[j].trim();
+          if (!line) {
+            startIndex = j + 1;
+            continue;
+          }
+          
+          // Extract core text from the line (remove markdown, numbers, bold)
+          const lineCore = line.replace(/^#+\s*/, '').replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').toUpperCase().trim();
+          
+          // Only strip if line closely matches our specific section title
+          const isTitleMatch = lineCore === titleCore;
+          
+          // Also match exact numbered title format: "1. EXECUTIVE SUMMARY"
+          const isNumberedTitle = /^\d+\.\s+[A-Z][A-Z\s&]+$/.test(line) && isTitleMatch;
+          
+          // Match markdown H2 format only if it contains our title
+          const isH2WithTitle = /^##\s*/.test(line) && isTitleMatch;
+          
+          if (isTitleMatch || isNumberedTitle || isH2WithTitle) {
+            startIndex = j + 1;
+          } else {
+            break;
+          }
+        }
+        
+        sectionContent = lines.slice(startIndex).join('\n').trim();
 
         generatedSections.push(`\n\n## ${section.title}\n\n${sectionContent}`);
         
@@ -1867,6 +1902,92 @@ ${generatedSections.join('\n\n---\n\n')}`;
     } catch (error) {
       console.error("PDF view error:", error);
       res.status(500).json({ error: "Failed to generate PDF" });
+    }
+  });
+
+  // HTML view endpoint - serves rich HTML with SVG charts for browser viewing/printing
+  app.get("/api/view/html/:planId", isAuthenticated, async (req, res) => {
+    try {
+      const { planId } = req.params;
+      const user = req.user as any;
+      
+      const businessPlan = await storage.getBusinessPlan(planId);
+      if (!businessPlan || businessPlan.userId !== user.id) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+
+      if (businessPlan.status !== 'completed') {
+        return res.status(400).json({ error: "Business plan not ready yet", status: businessPlan.status });
+      }
+
+      if (!businessPlan.generatedContent) {
+        return res.status(500).json({ error: "Business plan content is missing" });
+      }
+
+      // Generate rich HTML with SVG charts using pdf.ts
+      const htmlContent = generatePDFContent(businessPlan);
+      
+      // Add print-friendly styles and a print button
+      const enhancedHtml = htmlContent.replace('</head>', `
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { padding: 0; margin: 0; }
+      .cover-page { page-break-after: always; }
+      .chart-container { page-break-inside: avoid; }
+      h2 { page-break-after: avoid; }
+    }
+    .print-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #005EB8;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .print-button:hover { background: #004a91; }
+    .print-instructions {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #0369a1;
+      max-width: 280px;
+      z-index: 1000;
+    }
+  </style>
+</head>`).replace('<body>', `<body>
+  <button class="print-button no-print" onclick="window.print()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/>
+    </svg>
+    Print / Save as PDF
+  </button>
+  <div class="print-instructions no-print">
+    <strong>To save as PDF:</strong><br/>
+    Click the button above, then select "Save as PDF" as the destination in the print dialog.
+  </div>
+`);
+      
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(enhancedHtml);
+    } catch (error) {
+      console.error("HTML view error:", error);
+      res.status(500).json({ error: "Failed to generate HTML view" });
     }
   });
 

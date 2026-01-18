@@ -3,10 +3,11 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Download, CheckCircle, Home, FileText, Mail, Send, Linkedin, RefreshCw, LayoutDashboard, Clock, Lightbulb, BookOpen, Shield, TrendingUp, FileSpreadsheet, Eye, Twitter, Share2, Copy, MessageCircle } from "lucide-react";
+import { Download, CheckCircle, Home, FileText, Mail, Send, Linkedin, RefreshCw, LayoutDashboard, Clock, Lightbulb, BookOpen, Shield, TrendingUp, FileSpreadsheet, Eye, Twitter, Share2, Copy, MessageCircle, Loader2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import { useVisualPdfExport } from "@/hooks/useVisualPdfExport";
 import novaAvatar from "@assets/generated_images/nova_innovation_agent_avatar.png";
 import sterlingAvatar from "@assets/generated_images/sterling_financial_agent_avatar.png";
 import atlasAvatar from "@assets/generated_images/atlas_growth_agent_avatar.png";
@@ -67,20 +68,32 @@ export default function GenerationProgress({ planId }: { planId: string }) {
   const [sectionNumber, setSectionNumber] = useState<number>(0);
   const [showFormatDialog, setShowFormatDialog] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [businessName, setBusinessName] = useState<string>('Business Plan');
+  const [visualPdfProgress, setVisualPdfProgress] = useState<string>('');
   const { toast } = useToast();
+  const { exportVisualPdf, isExporting: isVisualExporting } = useVisualPdfExport();
 
   // Download handler for selected format
   const handleDownload = async (format: 'pdf' | 'word') => {
     setIsExporting(true);
     try {
       if (format === 'pdf') {
-        // Use the existing PDF endpoint
-        window.open(pdfUrl || `/api/download/pdf/${planId}`, '_blank');
+        // Use visual PDF export (with charts)
+        const success = await exportVisualPdf({
+          planId,
+          businessName,
+          onProgress: setVisualPdfProgress
+        });
+        if (!success) {
+          // Fallback to text-only PDF
+          window.open(pdfUrl || `/api/download/pdf/${planId}`, '_blank');
+        }
       } else {
         // Use Word endpoint
         window.open(`/api/download/word/${planId}`, '_blank');
       }
       setShowFormatDialog(false);
+      setVisualPdfProgress('');
       toast({
         title: "Download Started",
         description: `Your business plan is downloading as ${format.toUpperCase()}.`,
@@ -93,6 +106,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
       });
     } finally {
       setIsExporting(false);
+      setVisualPdfProgress('');
     }
   };
 
@@ -166,6 +180,10 @@ export default function GenerationProgress({ planId }: { planId: string }) {
         
         if (data.tier) {
           setTier(data.tier);
+        }
+        
+        if (data.businessName) {
+          setBusinessName(data.businessName);
         }
         
         if (data.currentGenerationStage) {
@@ -360,31 +378,76 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 </p>
               </div>
 
-              {/* View & Download Section */}
+              {/* View Full Plan with Charts - Primary Action */}
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-center text-muted-foreground">View or Download Your Plan</p>
+                <Button
+                  size="lg"
+                  className="w-full h-14 bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-lg text-lg"
+                  onClick={() => window.open(`/api/view/html/${planId}`, '_blank')}
+                  data-testid="button-view-full-plan"
+                >
+                  <Eye className="w-6 h-6 mr-3" />
+                  View Full Plan with Charts
+                </Button>
+                <p className="text-xs text-center text-muted-foreground">
+                  Opens your complete business plan with all charts and tables. Use "Print to PDF" for best quality.
+                </p>
+              </div>
+
+              {/* Download Options */}
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-center text-muted-foreground">Download Options</p>
+                
+                {/* Visual PDF Progress Indicator */}
+                {(isVisualExporting || visualPdfProgress) && (
+                  <div className="bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-lg p-3 text-center">
+                    <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-300">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm font-medium">{visualPdfProgress || 'Generating PDF with charts...'}</span>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="grid grid-cols-2 gap-3">
-                  {/* PDF Options */}
-                  <Button
-                    size="lg"
-                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
-                    onClick={() => window.open(`/api/view/pdf/${planId}`, '_blank')}
-                    data-testid="button-view-pdf"
-                  >
-                    <Eye className="w-5 h-5 mr-2" />
-                    View PDF
-                  </Button>
+                  {/* PDF with Charts - Primary */}
                   <Button
                     size="lg"
                     className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
                     onClick={() => handleDownload('pdf')}
+                    disabled={isVisualExporting || isExporting}
                     data-testid="button-download-pdf"
                   >
-                    <Download className="w-5 h-5 mr-2" />
-                    Download PDF
+                    {isVisualExporting ? (
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="w-5 h-5 mr-2" />
+                    )}
+                    PDF (with Charts)
                   </Button>
                   
-                  {/* Word Options */}
+                  {/* Word with Charts */}
+                  <Button
+                    size="lg"
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
+                    onClick={() => handleDownload('word')}
+                    disabled={isExporting}
+                    data-testid="button-download-word"
+                  >
+                    <Download className="w-5 h-5 mr-2" />
+                    Word (with Charts)
+                  </Button>
+                  
+                  {/* Preview buttons */}
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950 font-semibold"
+                    onClick={() => window.open(`/api/view/html/${planId}`, '_blank')}
+                    data-testid="button-preview-html"
+                  >
+                    <Eye className="w-5 h-5 mr-2" />
+                    Preview Plan
+                  </Button>
                   <Button
                     size="lg"
                     variant="outline"
@@ -393,17 +456,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                     data-testid="button-view-word"
                   >
                     <Eye className="w-5 h-5 mr-2" />
-                    View Word
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950 font-semibold"
-                    onClick={() => handleDownload('word')}
-                    data-testid="button-download-word"
-                  >
-                    <Download className="w-5 h-5 mr-2" />
-                    Download Word
+                    Preview Word
                   </Button>
                 </div>
               </div>
