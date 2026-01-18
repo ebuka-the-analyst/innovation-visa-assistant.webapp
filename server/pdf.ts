@@ -95,8 +95,54 @@ export function generatePDFContent(plan: BusinessPlan): string {
       text-align: left;
     }
     th {
-      background-color: #f5f5f5;
+      background-color: #005EB8;
       font-weight: bold;
+      color: white;
+    }
+    .financial-table th {
+      background-color: #005EB8;
+      color: white;
+    }
+    .financial-table td {
+      padding: 12px;
+    }
+    .financial-table tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+    .toc {
+      background: #f8fafc;
+      padding: 30px;
+      border-radius: 8px;
+      margin: 30px 0;
+      page-break-after: always;
+    }
+    .toc h2 {
+      color: #005EB8;
+      border-bottom: 2px solid #005EB8;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .toc ol {
+      list-style: none;
+      padding: 0;
+      counter-reset: toc-counter;
+    }
+    .toc li {
+      counter-increment: toc-counter;
+      padding: 8px 0;
+      border-bottom: 1px dotted #ddd;
+      font-size: 12pt;
+    }
+    .toc li::before {
+      content: counter(toc-counter) ". ";
+      color: #005EB8;
+      font-weight: bold;
+    }
+    .toc a {
+      color: #1a1a1a;
+      text-decoration: none;
+    }
+    .toc a:hover {
       color: #005EB8;
     }
     ul, ol {
@@ -162,6 +208,8 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
   let lastH2Title = '';
   const usedCharts = new Set<ChartType>();
   
+  let inToc = false;
+  
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     
@@ -174,9 +222,21 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
         continue;
       }
       
+      // Handle TABLE OF CONTENTS section specially
+      if (sectionTitle.toUpperCase() === 'TABLE OF CONTENTS') {
+        inToc = true;
+        html += `<div class="toc"><h2>${sectionTitle}</h2><ol>\n`;
+        continue;
+      } else if (inToc) {
+        // Close TOC section when we hit the next section
+        html += `</ol></div>\n`;
+        inToc = false;
+      }
+      
       currentSection = sectionTitle;
       lastH2Title = sectionTitle;
-      html += `<h2>${sectionTitle}</h2>\n`;
+      const sectionId = sectionTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      html += `<h2 id="${sectionId}">${sectionTitle}</h2>\n`;
       
       if (chartData) {
         const chartsForSection = findChartsForSection(sectionTitle);
@@ -212,20 +272,41 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
     } else if (/^\d+\.\s/.test(line)) {
       const match = line.match(/^\d+\.\s(.+)$/);
       if (match) {
-        if (!html.endsWith('</ol>\n') && (!html.includes('<ol>') || html.lastIndexOf('</ol>') > html.lastIndexOf('<ol>'))) {
-          html += '<ol>\n';
-        }
-        html += `<li>${formatInline(match[1])}</li>\n`;
-        const nextLine = lines[i + 1]?.trim() || '';
-        if (!/^\d+\.\s/.test(nextLine)) {
-          html += '</ol>\n';
+        // If we're in the Table of Contents, format as TOC item with link
+        if (inToc) {
+          // Extract link text from markdown link format [text](#anchor)
+          const linkMatch = match[1].match(/\[([^\]]+)\]\(#([^)]+)\)/);
+          if (linkMatch) {
+            html += `<li><a href="#${linkMatch[2]}">${linkMatch[1]}</a></li>\n`;
+          } else {
+            html += `<li>${formatInline(match[1])}</li>\n`;
+          }
+        } else {
+          if (!html.endsWith('</ol>\n') && (!html.includes('<ol>') || html.lastIndexOf('</ol>') > html.lastIndexOf('<ol>'))) {
+            html += '<ol>\n';
+          }
+          html += `<li>${formatInline(match[1])}</li>\n`;
+          const nextLine = lines[i + 1]?.trim() || '';
+          if (!/^\d+\.\s/.test(nextLine)) {
+            html += '</ol>\n';
+          }
         }
       }
     } else if (line === '---') {
+      // Close TOC if we hit a separator while still in TOC
+      if (inToc) {
+        html += `</ol></div>\n`;
+        inToc = false;
+      }
       html += '<hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">\n';
     } else if (line.length > 0) {
       html += `<p>${formatInline(line)}</p>\n`;
     }
+  }
+  
+  // Close TOC if we're still in it at the end of content
+  if (inToc) {
+    html += `</ol></div>\n`;
   }
   
   if (chartData) {

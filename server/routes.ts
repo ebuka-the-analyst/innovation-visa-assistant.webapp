@@ -1700,11 +1700,24 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
       currentGenerationStage: 'Finalizing - generating your PDF document...'
     });
 
-    // Stitch all sections together
+    // Generate Table of Contents with slugified anchors matching pdf.ts
+    const tableOfContents = sections.map((section, idx) => {
+      const sectionName = section.title.replace(/^\d+\.\s*/, '');
+      const sectionId = section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      return `${idx + 1}. [${sectionName}](#${sectionId})`;
+    }).join('\n');
+
+    // Stitch all sections together with Table of Contents
     const generatedContent = `# BUSINESS PLAN: ${plan.businessName}
 **Industry:** ${plan.industry}
 **Tier:** ${plan.tier?.toUpperCase()}
 **Generated:** ${new Date().toLocaleDateString('en-GB')}
+
+---
+
+## TABLE OF CONTENTS
+
+${tableOfContents}
 
 ---
 

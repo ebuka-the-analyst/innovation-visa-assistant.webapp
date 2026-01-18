@@ -751,6 +751,16 @@ CRITICAL INSTRUCTIONS:
 5. Be thorough and detailed - fill the target page count
 6. If tier is premium/enterprise, address expert critique requirements listed below
 
+FORMATTING REQUIREMENTS:
+- For ALL financial data (Year 1, Year 2, Year 3 projections, revenue, costs, team size, customer counts), use HTML tables with proper styling:
+  <table class="financial-table" style="width:100%; border-collapse:collapse; margin:20px 0;">
+    <thead><tr style="background:#005EB8; color:white;"><th style="padding:12px; border:1px solid #ddd;">Category</th><th style="padding:12px; border:1px solid #ddd;">Year 1</th><th style="padding:12px; border:1px solid #ddd;">Year 2</th><th style="padding:12px; border:1px solid #ddd;">Year 3</th></tr></thead>
+    <tbody><tr><td style="padding:10px; border:1px solid #ddd;">Revenue</td><td style="padding:10px; border:1px solid #ddd;">£X</td><td style="padding:10px; border:1px solid #ddd;">£Y</td><td style="padding:10px; border:1px solid #ddd;">£Z</td></tr></tbody>
+  </table>
+- Use tables for: financial projections, team hiring plans, competitor comparisons, milestone timelines, pricing tiers, and any multi-year data
+- Tables should have NHS Blue (#005EB8) header background with white text
+- Include proper borders and padding for readability
+
 ${tier === 'basic' ? `
 BASIC TIER GUIDANCE:
 - Be HONEST about gaps: "Customer validation: 14 interviews (target: 30 more in next 8 weeks)"
