@@ -76,7 +76,9 @@ async function migrate() {
       { name: 'theme_primary_color', type: 'VARCHAR(20)' },
       { name: 'theme_secondary_color', type: 'VARCHAR(20)' },
       { name: 'theme_font', type: 'VARCHAR(50)' },
-      { name: 'theme_applied_at', type: 'TIMESTAMP' }
+      { name: 'theme_applied_at', type: 'TIMESTAMP' },
+      { name: 'background_image', type: 'TEXT' },
+      { name: 'use_full_cover_image', type: 'BOOLEAN DEFAULT FALSE' }
     ];
     
     for (const col of themeColumns) {
