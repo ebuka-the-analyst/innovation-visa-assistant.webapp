@@ -43,20 +43,19 @@ const TIER_TOOL_COUNTS: Record<UserTier, number> = {
   ultimate: 109,
 };
 
-export const TIER_CREDITS: Record<UserTier, number | "unlimited"> = {
+export const TIER_CREDITS: Record<UserTier, number> = {
   free: 0,
   basic: 1,
   premium: 3,
   enterprise: 6,
-  ultimate: "unlimited",
+  ultimate: 10,
 };
 
 export const ADDON_PRICING = {
-  singleCredit: { price: 12, credits: 1, name: "Single Credit" },
-  triplePack: { price: 29, credits: 3, name: "Triple Credit Pack", savings: 7 },
-  partnerBundle: { price: 19, credits: 1, name: "Partner Bundle (2 plans)", description: "Generate plans for you and your co-founder" },
-  familyPack: { price: 49, credits: 4, name: "Family Pack (5 plans)", savings: 11 },
-  ultimateAssurance: { price: 35, name: "Ultimate Assurance (Annual)", description: "Unlimited business plan generations for 1 year" },
+  singleCredit: { price: 12, credits: 1, name: "1 Coin" },
+  triplePack: { price: 29, credits: 3, name: "3 Coins", savings: 7 },
+  partnerBundle: { price: 19, credits: 2, name: "2 Coins", description: "Plans for you and your co-founder" },
+  familyPack: { price: 49, credits: 5, name: "5 Coins", savings: 11 },
 } as const;
 
 export const REFERRAL_REWARDS = {
@@ -92,7 +91,7 @@ export function useTierAccess() {
   const hasUltimateAssurance = user?.hasUltimateAssurance ?? false;
   
   const tierCreditLimit = TIER_CREDITS[userTier];
-  const hasUnlimitedCredits = userTier === "ultimate" || hasUltimateAssurance;
+  // All tiers now have finite credits - no unlimited tier exists
 
   const hasAccessToTier = (requiredTier: ToolTier): boolean => {
     const requiredLevel = TIER_HIERARCHY[requiredTier];
@@ -116,12 +115,10 @@ export function useTierAccess() {
   };
 
   const canGenerateBusinessPlan = (): boolean => {
-    if (hasUnlimitedCredits) return true;
     return totalCredits > 0;
   };
 
-  const getRemainingCredits = (): number | "unlimited" => {
-    if (hasUnlimitedCredits) return "unlimited";
+  const getRemainingCredits = (): number => {
     return totalCredits;
   };
 
@@ -132,15 +129,13 @@ export function useTierAccess() {
   };
 
   const getCreditDisplay = (): string => {
-    if (hasUnlimitedCredits) return "Unlimited";
-    if (totalCredits === 0) return "0 credits";
-    if (totalCredits === 1) return "1 credit";
-    return `${totalCredits} credits`;
+    if (totalCredits === 0) return "0 coins";
+    if (totalCredits === 1) return "1 coin";
+    return `${totalCredits} coins`;
   };
 
   const getTierCreditsDisplay = (tier: UserTier): string => {
     const credits = TIER_CREDITS[tier];
-    if (credits === "unlimited") return "Unlimited";
     if (credits === 0) return "0";
     return `${credits}`;
   };
@@ -159,9 +154,7 @@ export function useTierAccess() {
     bonusCredits,
     totalCredits,
     creditsUsed,
-    hasUnlimitedCredits,
     tierCreditLimit,
-    hasUltimateAssurance,
     canGenerateBusinessPlan,
     getRemainingCredits,
     getUpgradePrice,

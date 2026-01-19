@@ -7,7 +7,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2, Zap, FileText, CreditCard, Gift, Infinity, Users, Heart } from "lucide-react";
+import { Check, Loader2, Zap, FileText, CreditCard, Gift, Users, Heart, Coins } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
@@ -46,7 +46,7 @@ const tiers = [
     description: "Perfect for straightforward businesses",
     pages: "25-35 pages",
     features: [
-      "1 business plan credit included",
+      "1 business plan coin included",
       "Extended tools access (20 tools)",
       "Core Innovation criteria coverage",
       "Basic Viability analysis",
@@ -67,7 +67,7 @@ const tiers = [
     pages: "40-60 pages",
     popular: true,
     features: [
-      "3 business plan credits included",
+      "3 business plan coins included",
       "Comprehensive tools access (83 tools)",
       "Comprehensive Innovation analysis",
       "Detailed Viability with financials",
@@ -89,7 +89,7 @@ const tiers = [
     description: "Maximum detail for complex ventures",
     pages: "50-80 pages",
     features: [
-      "6 business plan credits included",
+      "6 business plan coins included",
       "Full tools access (109 tools)",
       "Deep-dive Innovation coverage",
       "Complete Viability assessment",
@@ -108,16 +108,15 @@ const tiers = [
     name: "Ultimate Plan",
     price: "£39",
     priceInPence: 3900,
-    credits: "unlimited",
+    credits: "10",
     description: "Everything you need for guaranteed approval",
     pages: "80+ pages",
     features: [
-      "Unlimited business plan generations",
+      "10 business plan generation coins",
       "Complete access to 109 professional-level tools",
       "All Enterprise features included",
       "24/7 VIP support & live chat",
       "Personal visa strategist",
-      "Unlimited revisions",
       "Priority endorsement prep",
       "RFE defense strategy",
       "Appeal strategy planning",
@@ -130,24 +129,24 @@ const tiers = [
 const addons = [
   {
     id: "single_credit",
-    name: "Single Credit",
+    name: "1 Coin",
     price: "£12",
     description: "Generate one additional business plan",
-    icon: CreditCard,
+    icon: Coins,
     highlight: false,
   },
   {
     id: "triple_pack",
-    name: "Triple Credit Pack",
+    name: "3 Coins",
     price: "£29",
     savings: "Save £7",
-    description: "3 business plan credits - perfect for iterations",
-    icon: Gift,
+    description: "3 business plan coins - perfect for iterations",
+    icon: Coins,
     highlight: true,
   },
   {
     id: "partner_bundle",
-    name: "Partner Bundle",
+    name: "2 Coins",
     price: "£19",
     description: "Plans for you and your co-founder",
     icon: Users,
@@ -155,20 +154,12 @@ const addons = [
   },
   {
     id: "family_pack",
-    name: "Family Pack",
+    name: "5 Coins",
     price: "£49",
     savings: "Save £11",
-    description: "5 business plans - ideal for multiple ventures",
-    icon: Heart,
+    description: "5 business plan coins - ideal for multiple ventures",
+    icon: Coins,
     highlight: false,
-  },
-  {
-    id: "ultimate_assurance",
-    name: "Ultimate Assurance",
-    price: "£35/year",
-    description: "Unlimited business plan generations for 1 year",
-    icon: Infinity,
-    highlight: true,
   },
 ];
 
@@ -477,11 +468,11 @@ export default function Pricing() {
             <div className="text-center mb-6 lg:mb-8">
               <h2 className="text-2xl lg:text-xl font-bold mb-2 lg:mb-3">Need More Business Plans?</h2>
               <p className="text-sm lg:text-base text-muted-foreground">
-                Purchase additional credits or get unlimited generations
+                Purchase additional coins for more generations
               </p>
             </div>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:gap-4">
               {addons.map((addon) => {
                 const Icon = addon.icon;
                 return (

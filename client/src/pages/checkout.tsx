@@ -28,25 +28,25 @@ const PRICING: Record<string, { name: string; amount: number; description: strin
     name: "Basic Plan",
     amount: 900,
     description: "Perfect for straightforward businesses",
-    features: ["1 business plan credit", "20 tools access", "48-hour delivery", "PDF download"]
+    features: ["1 business plan coin", "20 tools access", "48-hour delivery", "PDF download"]
   },
   premium: {
     name: "Premium Plan",
     amount: 1900,
     description: "Most popular - comprehensive coverage",
-    features: ["3 business plan credits", "83 tools access", "24-hour priority delivery", "Market research integration"]
+    features: ["3 business plan coins", "83 tools access", "24-hour priority delivery", "Market research integration"]
   },
   enterprise: {
     name: "Enterprise Plan",
     amount: 2900,
     description: "Maximum detail for complex ventures",
-    features: ["6 business plan credits", "109 tools access", "12-hour priority delivery", "IP & patent strategy"]
+    features: ["6 business plan coins", "109 tools access", "12-hour priority delivery", "IP & patent strategy"]
   },
   ultimate: {
     name: "Ultimate Plan",
     amount: 3900,
     description: "Everything for guaranteed approval",
-    features: ["Unlimited business plans", "109 tools access", "1-hour rush delivery", "Success guarantee coaching"]
+    features: ["10 business plan coins", "109 tools access", "1-hour rush delivery", "Success guarantee coaching"]
   }
 };
 
