@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+9057f529
+Active
+
+Jan 19, 2026, 6:15 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+6:22:02 PM [express] POST /api/activity/page-view 200 in 34ms :: {"pageViewId":"a8af4686-57b2-4995-8…
+[2026-01-19T18:22:03.740Z] GET /api/dashboard/plans
+Dashboard plans error: error: column "background_image" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserBusinessPlans (file:///app/dist/index.js:2622:24)
+    at async Promise.all (index 0)
+    at async file:///app/dist/index.js:14335:38 {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '953',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+}
+6:22:03 PM [express] GET /api/dashboard/plans 500 in 16ms :: {"error":"Failed to fetch business plan…
+[2026-01-19T18:22:04.683Z] GET /api/dashboard/plans
+Dashboard plans error: error: column "background_image" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserBusinessPlans (file:///app/dist/index.js:2622:24)
+    at async Promise.all (index 0)
+    at async file:///app/dist/index.js:14335:38 {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '953',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+6:22:04 PM [express] GET /api/dashboard/plans 500 in 210ms :: {"error":"Failed to fetch business pla…
+[2026-01-19T18:22:07.319Z] GET /
+[2026-01-19T18:22:07.816Z] GET /
+[2026-01-19T18:22:07.817Z] POST /api/activity/session/end
+6:22:07 PM [express] POST /api/activity/session/end 200 in 41ms :: {"success":true}
+[2026-01-19T18:22:08.055Z] GET /assets/home-DNsz-5y1.js
+[2026-01-19T18:22:08.057Z] GET /assets/index-DLjLAeF5.js
+[2026-01-19T18:22:08.211Z] GET /assets/tabs-B4d_yxrO.js
+[2026-01-19T18:22:08.214Z] GET /assets/accordion-BO5nx-8X.js
+[2026-01-19T18:22:08.217Z] GET /assets/Footer-slo99JkJ.js
+[2026-01-19T18:22:08.223Z] GET /assets/index-DCxg4lgy.js
+[2026-01-19T18:22:08.228Z] GET /api/auth/user
+[2026-01-19T18:22:08.233Z] GET /assets/SEOHead-CbUC45JA.js
+[2026-01-19T18:22:08.238Z] GET /assets/ComplianceBadges-i84haqNJ.js
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: free (raw: free)
+6:22:08 PM [express] GET /api/auth/user 200 in 32ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+[2026-01-19T18:22:08.444Z] POST /api/activity/session
+[2026-01-19T18:22:08.445Z] POST /api/activity/session
+6:22:08 PM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"01123e3b-04f9-427c-986e…
+6:22:08 PM [express] POST /api/activity/session 200 in 29ms :: {"sessionId":"2a63918d-5319-43da-b56e…
+[2026-01-19T18:22:08.531Z] GET /api/news
+6:22:08 PM [express] GET /api/news 200 in 11ms :: [{"id":"official-1","title":"Students can now swit…
+[2026-01-19T18:22:08.655Z] POST /api/activity/page-view
+6:22:08 PM [express] POST /api/activity/page-view 200 in 26ms :: {"pageViewId":"0f923dd0-4a22-4779-a…
+[2026-01-19T18:22:09.682Z] GET /api/promos/my-redemptions
+    at /app/node_modules/pg-pool/index.js:45:11
+6:22:09 PM [express] GET /api/partner/status 200 in 24ms :: {"isPartner":false,"promoCodeCount":0}
+Dashboard plans error: error: column "background_image" does not exist
+  detail: undefined,
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Promise.all (index 0)
+  hint: undefined,
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:14335:38 {
+    at async DatabaseStorage.getUserBusinessPlans (file:///app/dist/index.js:2622:24)
+  position: '953',
+  length: 117,
+  internalPosition: undefined,
+  severity: 'ERROR',
+  internalQuery: undefined,
+  code: '42703',
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+[2026-01-19T18:22:09.668Z] GET /api/partner/status
+[2026-01-19T18:22:09.671Z] POST /api/activity/page-view
+[2026-01-19T18:22:09.681Z] GET /api/dashboard/plans
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+6:22:09 PM [express] GET /api/dashboard/plans 500 in 16ms :: {"error":"Failed to fetch business plan…
+6:22:09 PM [express] POST /api/activity/page-view 200 in 26ms :: {"pageViewId":"a1defe5a-fc44-4bd6-8…
+6:22:09 PM [express] GET /api/promos/my-redemptions 200 in 199ms :: {"redemptions":[]}
+[2026-01-19T18:22:11.877Z] POST /api/activity/page-view
+[2026-01-19T18:22:11.891Z] GET /api/credits/balance
+6:22:11 PM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"71a5955f-d92b-4d00-8…
+6:22:11 PM [express] GET /api/credits/balance 200 in 12ms :: {"planCredits":0,"bonusCredits":0,"tota…
+[2026-01-19T18:22:12.827Z] POST /api/activity/session/end
+6:22:12 PM [express] POST /api/activity/session/end 200 in 17ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
