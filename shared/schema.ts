@@ -138,6 +138,10 @@ export const businessPlans = pgTable("business_plans", {
   themeFont: varchar("theme_font", { length: 50 }), // 'Inter', 'Poppins', 'Montserrat', etc.
   themeAppliedAt: timestamp("theme_applied_at"),
   
+  // Custom Cover Image (Canva uploads)
+  backgroundImage: text("background_image"), // Base64 encoded image data
+  useFullCoverImage: boolean("use_full_cover_image").default(false), // Use full custom cover instead of SVG theme
+  
   generatedContent: text("generated_content"),
   chartData: text("chart_data"), // JSON string containing structured chart data for visualizations
   pdfUrl: text("pdf_url"),
@@ -241,6 +245,10 @@ export const questionnaireSchema = z.object({
   themeSecondaryColor: z.string().nullable().optional(),
   themeFont: z.string().nullable().optional(),
   themeAppliedAt: z.coerce.date().nullable().optional(),
+  
+  // Custom cover image (Canva uploads)
+  backgroundImage: z.string().nullable().optional(), // Base64 encoded image
+  useFullCoverImage: z.boolean().optional().default(false),
 });
 
 export type UpsertUser = z.infer<typeof upsertUserSchema>;

@@ -2105,15 +2105,15 @@ ${generatedSections.join('\n\n---\n\n')}`;
         console.log("Cover design fetch failed (may not exist in production):", coverError?.message);
       }
       
-      // Create plan with cover design theme applied
+      // Create plan with cover design theme applied (prioritize savedCoverDesign, then businessPlan fields)
       const planWithTheme = {
         ...businessPlan,
         themeId: savedCoverDesign?.themeId || businessPlan.themeId,
         themePrimaryColor: savedCoverDesign?.primaryColor || businessPlan.themePrimaryColor,
         themeSecondaryColor: savedCoverDesign?.secondaryColor || businessPlan.themeSecondaryColor,
         themeFont: savedCoverDesign?.font || businessPlan.themeFont,
-        backgroundImage: savedCoverDesign?.backgroundImage || null,
-        useFullCoverImage: savedCoverDesign?.useFullCoverImage || false,
+        backgroundImage: savedCoverDesign?.backgroundImage || businessPlan.backgroundImage || null,
+        useFullCoverImage: savedCoverDesign?.useFullCoverImage || businessPlan.useFullCoverImage || false,
         textElements: savedCoverDesign?.textElements || null,
         paletteId: savedCoverDesign?.paletteId || null,
       };
@@ -2124,16 +2124,21 @@ ${generatedSections.join('\n\n---\n\n')}`;
           themeId: savedCoverDesign.themeId,
           primaryColor: savedCoverDesign.primaryColor,
           font: savedCoverDesign.font,
+          hasBackgroundImage: !!savedCoverDesign.backgroundImage,
         } : null,
         businessPlanTheme: {
           themeId: businessPlan.themeId,
           themePrimaryColor: businessPlan.themePrimaryColor,
           themeFont: businessPlan.themeFont,
+          hasBackgroundImage: !!businessPlan.backgroundImage,
+          useFullCoverImage: businessPlan.useFullCoverImage,
         },
         finalTheme: {
           themeId: planWithTheme.themeId,
           themePrimaryColor: planWithTheme.themePrimaryColor,
           themeFont: planWithTheme.themeFont,
+          hasBackgroundImage: !!planWithTheme.backgroundImage,
+          useFullCoverImage: planWithTheme.useFullCoverImage,
         },
       });
 
