@@ -54,6 +54,7 @@ export default function ThemeSelectionPage() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [useFullCoverImage, setUseFullCoverImage] = useState(true);
 
   const { data: user } = useQuery<{ firstName?: string; lastName?: string; email?: string }>({
     queryKey: ['/api/auth/user'],
@@ -76,6 +77,9 @@ export default function ThemeSelectionPage() {
           setThemeApplied(true);
           if (parsed.backgroundImage) {
             setBackgroundImage(parsed.backgroundImage);
+          }
+          if (parsed.useFullCoverImage !== undefined) {
+            setUseFullCoverImage(parsed.useFullCoverImage);
           }
         }
       } catch (e) {
@@ -203,6 +207,7 @@ export default function ThemeSelectionPage() {
         secondaryColor,
         font: selectedFont,
         backgroundImage,
+        useFullCoverImage,
       }));
 
       setThemeApplied(true);
@@ -289,6 +294,7 @@ export default function ThemeSelectionPage() {
                       isSelected={isSelected}
                       size="small"
                       backgroundImage={isSelected ? backgroundImage : null}
+                      useFullCoverImage={isSelected ? useFullCoverImage : false}
                     />
                     
                     <Button
@@ -401,35 +407,54 @@ export default function ThemeSelectionPage() {
                 <div>
                   <Label className="flex items-center gap-2 mb-3">
                     <ImageIcon className="w-4 h-4" />
-                    Cover Background Image (Optional)
+                    Custom Cover Image (Canva, etc.)
                   </Label>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Upload a photo to display behind your cover page design
+                    Upload your own cover page design from Canva or any design tool. Your image will be used as the full cover page.
                   </p>
                   
                   {backgroundImage ? (
-                    <div className="relative inline-block">
-                      <div className="relative w-48 h-32 rounded-lg overflow-hidden border-2 border-emerald-500 shadow-md">
-                        <img 
-                          src={backgroundImage} 
-                          alt="Cover background" 
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    <div className="space-y-4">
+                      <div className="relative inline-block">
+                        <div className="relative w-48 h-64 rounded-lg overflow-hidden border-2 border-emerald-500 shadow-md">
+                          <img 
+                            src={backgroundImage} 
+                            alt="Cover background" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-background border-border shadow-md"
+                          onClick={handleRemoveImage}
+                          data-testid="button-remove-image"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-background border-border shadow-md"
-                        onClick={handleRemoveImage}
-                        data-testid="button-remove-image"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                      <p className="text-xs text-muted-foreground mt-2">Click the X to remove</p>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                        <input
+                          type="checkbox"
+                          id="useFullCover"
+                          checked={useFullCoverImage}
+                          onChange={(e) => {
+                            setUseFullCoverImage(e.target.checked);
+                            setThemeApplied(false);
+                          }}
+                          className="w-4 h-4 accent-emerald-500"
+                          data-testid="checkbox-full-cover"
+                        />
+                        <label htmlFor="useFullCover" className="text-sm font-medium cursor-pointer">
+                          Use as full cover page (recommended for Canva designs)
+                        </label>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        When enabled, your uploaded image becomes the entire cover page. When disabled, it appears as a background behind theme decorations.
+                      </p>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-48 h-32 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/30 cursor-pointer transition-all hover:border-emerald-500 hover:bg-muted/50">
+                    <label className="flex flex-col items-center justify-center w-48 h-64 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/30 cursor-pointer transition-all hover:border-emerald-500 hover:bg-muted/50">
                       <input
                         type="file"
                         accept="image/*"
@@ -443,8 +468,8 @@ export default function ThemeSelectionPage() {
                       ) : (
                         <>
                           <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                          <span className="text-sm text-muted-foreground">Click to upload</span>
-                          <span className="text-xs text-muted-foreground/70 mt-1">Max 5MB</span>
+                          <span className="text-sm text-muted-foreground">Upload Cover Image</span>
+                          <span className="text-xs text-muted-foreground/70 mt-1">PNG, JPG up to 5MB</span>
                         </>
                       )}
                     </label>
@@ -541,6 +566,7 @@ export default function ThemeSelectionPage() {
                   isSelected={false}
                   size="large"
                   backgroundImage={selectedTheme === previewTheme.id ? backgroundImage : null}
+                  useFullCoverImage={selectedTheme === previewTheme.id ? useFullCoverImage : false}
                 />
               </div>
               

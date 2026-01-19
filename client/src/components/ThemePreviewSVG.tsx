@@ -11,6 +11,7 @@ interface ThemePreviewSVGProps {
   isSelected?: boolean;
   size?: 'small' | 'large';
   backgroundImage?: string | null;
+  useFullCoverImage?: boolean;
 }
 
 export function ThemePreviewSVG({
@@ -22,7 +23,8 @@ export function ThemePreviewSVG({
   founderName = "Your Name",
   isSelected = false,
   size = 'small',
-  backgroundImage = null
+  backgroundImage = null,
+  useFullCoverImage = false
 }: ThemePreviewSVGProps) {
   const currentYear = new Date().getFullYear();
   const isLarge = size === 'large';
@@ -464,6 +466,32 @@ export function ThemePreviewSVG({
   const decorations = getThemeDecorations;
   const textColor = secondaryColor;
 
+  if (useFullCoverImage && backgroundImage) {
+    return (
+      <div 
+        className="relative overflow-hidden rounded-lg"
+        style={{ 
+          width: isLarge ? '520px' : '208px',
+          height: isLarge ? '740px' : '296px',
+        }}
+      >
+        <img 
+          src={backgroundImage}
+          alt="Cover page"
+          className="w-full h-full object-cover"
+        />
+        {isSelected && (
+          <div 
+            className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <Check className="w-4 h-4 text-white" />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div 
       className="relative overflow-hidden rounded-lg"
@@ -478,7 +506,7 @@ export function ThemePreviewSVG({
         className="w-full h-full"
         style={{ backgroundColor: decorations.background || '#ffffff' }}
       >
-        {backgroundImage && (
+        {backgroundImage && !useFullCoverImage && (
           <>
             <image
               href={backgroundImage}
