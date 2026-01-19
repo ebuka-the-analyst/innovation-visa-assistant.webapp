@@ -27,11 +27,12 @@ import {
   type EligibilityAssessment, type InsertEligibilityAssessment,
   type InnovationCoachingSession, type InsertInnovationCoachingSession,
   type PerformanceMetric, type InsertPerformanceMetric,
+  type CoverDesign, type InsertCoverDesign,
   users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics,
   referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits, payoutRequests,
   supportTickets, userDocuments, immigrationLawyers, lawyerDocumentReviews, lawyerReviewComments, lawyerReviewStatusHistory,
   newsArticles, newsFetchLog, aiActionLogs, aiPendingConfirmations, aiRateLimits,
-  industryProfiles, eligibilityAssessments, innovationCoachingSessions, performanceMetrics
+  industryProfiles, eligibilityAssessments, innovationCoachingSessions, performanceMetrics, coverDesigns
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gt, lt, desc, sql, count } from "drizzle-orm";
@@ -340,6 +341,17 @@ export interface IStorage {
   getInnovationCoachingSession(id: string): Promise<InnovationCoachingSession | undefined>;
   getUserActiveCoachingSession(userId: string): Promise<InnovationCoachingSession | undefined>;
   updateInnovationCoachingSession(id: string, updates: Partial<InnovationCoachingSession>): Promise<InnovationCoachingSession | undefined>;
+  
+  // ============================================
+  // COVER DESIGNS
+  // ============================================
+  
+  saveCoverDesign(design: InsertCoverDesign): Promise<CoverDesign>;
+  getUserCoverDesigns(userId: string): Promise<CoverDesign[]>;
+  getLatestCoverDesign(userId: string): Promise<CoverDesign | undefined>;
+  getCoverDesign(id: string): Promise<CoverDesign | undefined>;
+  updateCoverDesign(id: string, updates: Partial<CoverDesign>): Promise<CoverDesign | undefined>;
+  deleteCoverDesign(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1835,6 +1847,48 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(performanceMetrics)
       .where(lt(performanceMetrics.createdAt, olderThan));
     return (result as any).rowCount || 0;
+  }
+
+  // ============================================
+  // COVER DESIGNS IMPLEMENTATION
+  // ============================================
+
+  async saveCoverDesign(design: InsertCoverDesign): Promise<CoverDesign> {
+    const result = await db.insert(coverDesigns).values(design).returning();
+    return result[0];
+  }
+
+  async getUserCoverDesigns(userId: string): Promise<CoverDesign[]> {
+    return await db.select().from(coverDesigns)
+      .where(eq(coverDesigns.userId, userId))
+      .orderBy(desc(coverDesigns.updatedAt));
+  }
+
+  async getLatestCoverDesign(userId: string): Promise<CoverDesign | undefined> {
+    const result = await db.select().from(coverDesigns)
+      .where(eq(coverDesigns.userId, userId))
+      .orderBy(desc(coverDesigns.updatedAt))
+      .limit(1);
+    return result[0];
+  }
+
+  async getCoverDesign(id: string): Promise<CoverDesign | undefined> {
+    const result = await db.select().from(coverDesigns)
+      .where(eq(coverDesigns.id, id))
+      .limit(1);
+    return result[0];
+  }
+
+  async updateCoverDesign(id: string, updates: Partial<CoverDesign>): Promise<CoverDesign | undefined> {
+    const result = await db.update(coverDesigns)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(coverDesigns.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteCoverDesign(id: string): Promise<void> {
+    await db.delete(coverDesigns).where(eq(coverDesigns.id, id));
   }
 }
 

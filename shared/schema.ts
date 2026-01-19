@@ -2850,3 +2850,52 @@ export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
 
 export type EmailLog = typeof emailLogs.$inferSelect;
 export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;
+
+// ============================================
+// COVER DESIGNS - PERSISTENT THEME/COVER STORAGE
+// ============================================
+
+export const coverDesigns = pgTable("cover_designs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  themeId: varchar("theme_id", { length: 50 }),
+  primaryColor: varchar("primary_color", { length: 20 }),
+  secondaryColor: varchar("secondary_color", { length: 20 }),
+  font: varchar("font", { length: 50 }),
+  
+  backgroundImage: text("background_image"),
+  useFullCoverImage: boolean("use_full_cover_image").notNull().default(false),
+  
+  textElements: jsonb("text_elements").$type<Array<{
+    id: string;
+    text: string;
+    x: number;
+    y: number;
+    fontSize: number;
+    fontWeight: string;
+    color: string;
+    fontFamily: string;
+  }>>(),
+  
+  paletteId: varchar("palette_id", { length: 50 }),
+  paletteColors: jsonb("palette_colors").$type<string[]>(),
+  
+  isDefault: boolean("is_default").notNull().default(false),
+  name: varchar("name", { length: 100 }),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_cover_user").on(table.userId),
+  index("idx_cover_default").on(table.userId, table.isDefault),
+]);
+
+export const insertCoverDesignSchema = createInsertSchema(coverDesigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type CoverDesign = typeof coverDesigns.$inferSelect;
+export type InsertCoverDesign = z.infer<typeof insertCoverDesignSchema>;
