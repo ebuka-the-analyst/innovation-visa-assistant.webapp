@@ -353,8 +353,132 @@ export default function ThemeSelectionPage() {
     }
   };
 
-  const handleGeneratePlan = () => {
-    navigate('/questionnaire?themeApplied=true');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleGeneratePlan = async () => {
+    setIsSubmitting(true);
+    setShowGenerateConfirm(false);
+    
+    try {
+      // Get saved questionnaire data from localStorage
+      const savedDataStr = localStorage.getItem('autosave_questionnaire');
+      if (!savedDataStr) {
+        toast({
+          title: "Error",
+          description: "No questionnaire data found. Please fill out the questionnaire first.",
+          variant: "destructive",
+        });
+        navigate('/questionnaire');
+        return;
+      }
+      
+      const formData = JSON.parse(savedDataStr);
+      const tier = formData.tier || 'premium';
+      
+      // Build submission payload with theme settings
+      const data = {
+        tier,
+        businessName: formData.businessName,
+        industry: formData.industry,
+        problem: formData.problem,
+        solution: formData.solution,
+        uniqueness: formData.uniqueness,
+        targetMarket: formData.targetMarket,
+        revenue: formData.revenue,
+        funding: parseInt(formData.funding) || 0,
+        jobCreation: parseInt(formData.jobCreation) || 2,
+        expansion: formData.expansion,
+        vision: formData.vision,
+        innovationStage: formData.innovationStage,
+        productStatus: formData.productStatus,
+        existingCustomers: formData.existingCustomers || '',
+        betaTesters: formData.betaTesters || '',
+        tractionEvidence: formData.tractionEvidence || '',
+        techStack: formData.techStack,
+        dataArchitecture: formData.dataArchitecture,
+        aiMethodology: formData.aiMethodology,
+        complianceDesign: formData.complianceDesign,
+        patentStatus: formData.patentStatus,
+        founderEducation: formData.founderEducation,
+        founderWorkHistory: formData.founderWorkHistory,
+        founderAchievements: formData.founderAchievements,
+        relevantProjects: formData.relevantProjects,
+        monthlyProjections: formData.monthlyProjections,
+        customerAcquisitionCost: parseInt(formData.customerAcquisitionCost) || 0,
+        lifetimeValue: parseInt(formData.lifetimeValue) || 0,
+        paybackPeriod: parseInt(formData.paybackPeriod) || 1,
+        fundingSources: formData.fundingSources,
+        detailedCosts: formData.detailedCosts,
+        competitors: formData.competitors,
+        competitiveDifferentiation: formData.competitiveDifferentiation,
+        customerInterviews: formData.customerInterviews,
+        lettersOfIntent: formData.lettersOfIntent || '',
+        willingnessToPay: formData.willingnessToPay,
+        marketSize: formData.marketSize,
+        regulatoryRequirements: formData.regulatoryRequirements,
+        complianceTimeline: formData.complianceTimeline,
+        complianceBudget: parseInt(formData.complianceBudget) || 0,
+        hiringPlan: formData.hiringPlan,
+        specificRegions: formData.specificRegions,
+        internationalPlan: formData.internationalPlan || '',
+        targetEndorser: formData.targetEndorser,
+        contactPointsStrategy: formData.contactPointsStrategy,
+        supportingEvidence: formData.supportingEvidence || '',
+        // Theme settings from current selection
+        themeId: selectedTheme || null,
+        themePrimaryColor: primaryColor || null,
+        themeSecondaryColor: secondaryColor || null,
+        themeFont: selectedFont || null,
+        themeAppliedAt: selectedTheme ? new Date() : null,
+      };
+
+      const response = await fetch('/api/questionnaire/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Submission failed');
+      }
+
+      if (responseData.planId) {
+        // Create checkout session
+        const checkoutResponse = await apiRequest('POST', '/api/payment/create-checkout', { 
+          planId: responseData.planId 
+        });
+        const checkoutData = await checkoutResponse.json();
+
+        if (!checkoutResponse.ok) {
+          throw new Error(checkoutData.error || "Checkout failed");
+        }
+
+        // Clear saved questionnaire data on successful submission
+        localStorage.removeItem('autosave_questionnaire');
+        localStorage.removeItem('autosave_questionnaire-step');
+
+        // Handle free tier - skip checkout and redirect directly
+        if (checkoutData.skipCheckout && checkoutData.redirectUrl) {
+          window.location.href = checkoutData.redirectUrl;
+        } else if (checkoutData.url) {
+          window.location.href = checkoutData.url;
+        } else {
+          throw new Error("Checkout URL not received");
+        }
+      } else {
+        throw new Error("Plan ID not received");
+      }
+    } catch (error) {
+      console.error("Generation submission error:", error);
+      toast({
+        title: "Submission Error",
+        description: error instanceof Error ? error.message : "Failed to submit. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -883,6 +1007,18 @@ export default function ThemeSelectionPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-card p-8 rounded-xl shadow-xl text-center max-w-md">
+            <Loader2 className="w-12 h-12 animate-spin text-emerald-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Submitting Your Plan</h3>
+            <p className="text-muted-foreground">
+              Please wait while we process your business plan with your selected theme...
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
