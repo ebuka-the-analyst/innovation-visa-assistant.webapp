@@ -25,12 +25,15 @@ import {
   Upload,
   ImageIcon,
   X,
-  Loader2
+  Loader2,
+  Edit2,
+  Save
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { THEME_TEMPLATES, AVAILABLE_FONTS, PRESET_COLORS, getThemeById, ThemeTemplate } from "@/lib/themeTemplates";
 import { ThemePreviewSVG } from "@/components/ThemePreviewSVG";
+import { CoverPageEditor, TextElement } from "@/components/CoverPageEditor";
 
 interface ThemeSelectionProps {
   planId?: string;
@@ -55,6 +58,8 @@ export default function ThemeSelectionPage() {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [useFullCoverImage, setUseFullCoverImage] = useState(true);
+  const [textElements, setTextElements] = useState<TextElement[]>([]);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const { data: user } = useQuery<{ firstName?: string; lastName?: string; email?: string }>({
     queryKey: ['/api/auth/user'],
@@ -80,6 +85,9 @@ export default function ThemeSelectionPage() {
           }
           if (parsed.useFullCoverImage !== undefined) {
             setUseFullCoverImage(parsed.useFullCoverImage);
+          }
+          if (parsed.textElements) {
+            setTextElements(parsed.textElements);
           }
         }
       } catch (e) {
@@ -208,6 +216,7 @@ export default function ThemeSelectionPage() {
         font: selectedFont,
         backgroundImage,
         useFullCoverImage,
+        textElements,
       }));
 
       setThemeApplied(true);
@@ -452,6 +461,17 @@ export default function ThemeSelectionPage() {
                       <p className="text-xs text-muted-foreground">
                         When enabled, your uploaded image becomes the entire cover page. When disabled, it appears as a background behind theme decorations.
                       </p>
+                      
+                      {useFullCoverImage && (
+                        <Button
+                          className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md mt-2"
+                          onClick={() => setIsEditorOpen(true)}
+                          data-testid="button-edit-cover"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                          Add Text to Cover
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     <label className="flex flex-col items-center justify-center w-48 h-64 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/30 cursor-pointer transition-all hover:border-emerald-500 hover:bg-muted/50">
@@ -585,6 +605,57 @@ export default function ThemeSelectionPage() {
                 >
                   <Wand2 className="w-4 h-4" />
                   Use This Theme
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
+        <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit2 className="w-5 h-5" />
+              Cover Page Editor
+            </DialogTitle>
+            <DialogDescription>
+              Add and position text elements on your cover page. Drag to move, double-click to edit text.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {backgroundImage && (
+            <div className="py-4">
+              <CoverPageEditor
+                backgroundImage={backgroundImage}
+                textElements={textElements}
+                onTextElementsChange={(elements) => {
+                  setTextElements(elements);
+                  setThemeApplied(false);
+                }}
+              />
+              
+              <div className="flex justify-end gap-4 mt-6 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditorOpen(false)}
+                  data-testid="button-cancel-editor"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
+                  onClick={() => {
+                    setIsEditorOpen(false);
+                    toast({
+                      title: "Cover Updated",
+                      description: `${textElements.length} text element(s) added to your cover.`,
+                    });
+                  }}
+                  data-testid="button-save-cover"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Cover Design
                 </Button>
               </div>
             </div>
