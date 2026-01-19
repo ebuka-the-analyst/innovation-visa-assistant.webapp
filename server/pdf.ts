@@ -420,6 +420,55 @@ function generateCoverPageSVG(themeId: string | null, primaryColor: string, seco
       bottomRight: '',
       style: 'blue-curves-circles'
     };
+  } else if (themeId === 'orange-modern-proposal') {
+    // Orange Modern Proposal - bold diagonal shapes with city image
+    return {
+      topLeft: `
+        <svg class="cover-decoration-top-left" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Large diagonal orange shape on left -->
+          <polygon points="0,100 200,0 260,180 200,380 0,320" fill="${primaryColor}" opacity="0.9"/>
+          <polygon points="0,140 160,60 200,180 160,280 0,240" fill="${primaryColor}" opacity="0.6"/>
+          <!-- Image placeholder area - rotated rectangle with city skyline styling -->
+          <rect x="40" y="80" width="180" height="220" rx="8" fill="#e2e8f0" opacity="0.9" transform="rotate(-15 130 190)"/>
+          <rect x="50" y="90" width="160" height="200" rx="6" fill="#94a3b8" opacity="0.6" transform="rotate(-15 130 190)"/>
+          <!-- Small decorative rectangles -->
+          <rect x="180" y="280" width="60" height="12" fill="${primaryColor}" opacity="0.95" transform="rotate(-45 210 286)"/>
+          <rect x="200" y="300" width="50" height="10" fill="${primaryColor}" opacity="0.7" transform="rotate(-45 225 305)"/>
+        </svg>
+      `,
+      topRight: `
+        <svg class="cover-decoration-top" viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+          <!-- Orange diagonal stripe top-right -->
+          <polygon points="80,0 200,0 200,180 160,130" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="130,0 200,0 200,110 170,80" fill="${primaryColor}" opacity="0.7"/>
+          <!-- Orange triangle accent -->
+          <polygon points="160,150 200,120 200,220" fill="${primaryColor}" opacity="0.85"/>
+          <!-- Company name -->
+          <text x="140" y="35" fill="${primaryColor}" font-size="14" font-weight="bold">FAUGET</text>
+        </svg>
+      `,
+      middleSection: `
+        <svg class="cover-decoration-middle" viewBox="0 0 600 80" xmlns="http://www.w3.org/2000/svg">
+          <!-- Year text -->
+          <text x="50" y="40" fill="${accentColor}" font-size="20" font-weight="bold">2024-2025</text>
+        </svg>
+      `,
+      bottomLeft: `
+        <svg class="cover-decoration-bottom" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Orange triangle bottom-left -->
+          <polygon points="0,100 140,200 0,200" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="0,150 80,200 0,200" fill="${primaryColor}" opacity="0.7"/>
+        </svg>
+      `,
+      bottomRight: `
+        <svg class="cover-decoration-corner" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
+          <!-- Orange diagonal bar bottom -->
+          <polygon points="100,50 400,100 400,50 180,20" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="180,70 400,100 400,70 240,50" fill="${primaryColor}" opacity="0.7"/>
+        </svg>
+      `,
+      style: 'orange-modern-proposal'
+    };
   } else if (isCorporateTheme) {
     // Corporate Geometric Theme - triangles and diagonal stripes
     return {

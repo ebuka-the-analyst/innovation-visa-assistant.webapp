@@ -165,6 +165,17 @@ export const THEME_TEMPLATES: ThemeTemplate[] = [
     style: 'modern',
     accentPattern: 'curves',
   },
+  {
+    id: 'orange-modern-proposal',
+    name: 'Orange Modern Proposal',
+    description: 'Bold orange geometric shapes with diagonal accents and city skyline image. Perfect for business proposals.',
+    previewImage: '/assets/themes/orange-modern-proposal.png',
+    defaultPrimaryColor: '#f97316',
+    defaultSecondaryColor: '#1a1a2e',
+    defaultFont: 'Poppins',
+    style: 'modern',
+    accentPattern: 'geometric',
+  },
 ];
 
 export const AVAILABLE_FONTS = [
