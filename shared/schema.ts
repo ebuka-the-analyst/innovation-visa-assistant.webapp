@@ -339,13 +339,14 @@ export type ToolAnalytic = typeof toolAnalytics.$inferSelect;
 // ============================================
 
 // Master credit configuration - SINGLE SOURCE OF TRUTH
-// Each credit = 1 business plan generation
+// Each credit/coin = 1 business plan generation
+// 2026 PRICING - Effective January 2026
 export const TIER_CREDITS = {
   free: { planCredits: 0, maxBusinesses: 0, maxRevisions: 0, pages: '10-15' },
   basic: { planCredits: 1, maxBusinesses: 1, maxRevisions: 1, pages: '25-35' },
-  premium: { planCredits: 3, maxBusinesses: 3, maxRevisions: 3, pages: '40-60' },
-  enterprise: { planCredits: 6, maxBusinesses: 6, maxRevisions: 6, pages: '50-80' },
-  ultimate: { planCredits: 10, maxBusinesses: 10, maxRevisions: 10, pages: '80+' },
+  premium: { planCredits: 3, maxBusinesses: 3, maxRevisions: 3, pages: '40-55' },
+  enterprise: { planCredits: 6, maxBusinesses: 6, maxRevisions: 6, pages: '56-80' },
+  ultimate: { planCredits: 12, maxBusinesses: 12, maxRevisions: 12, pages: '80+' },
 } as const;
 
 // Helper function to get credits for a tier - use this everywhere
@@ -355,23 +356,23 @@ export function getTierCredits(tier: string): number {
 }
 
 // Tier pricing in pence (matching pricing page)
+// 2026 PRICING - Effective January 2026
 export const TIER_PRICING = {
   free: 0,
-  basic: 900, // £9
-  premium: 1900, // £19
-  enterprise: 2900, // £29
-  ultimate: 3900, // £39
+  basic: 2900, // £29
+  premium: 5900, // £59
+  enterprise: 8500, // £85
+  ultimate: 11000, // £110
 } as const;
 
-// Add-on pricing in pence
+// Add-on/Coin pricing in pence
+// 2026 PRICING - Effective January 2026
 export const ADDON_PRICING = {
-  single_credit: 3900, // £39
-  triple_pack: 9900, // £99 (3 credits)
-  partner_bundle: 5900, // £59 (+2 seats)
-  rejection_recovery: 8900, // £45 (2 credits + coaching)
-  rush_delivery: 4900, // £29
-  compliance_refresh: 5900, // £59/year
-  ultimate_assurance: 9900, // £99/year
+  single_coin: 1500, // £15 - 1 coin
+  double_coins: 2500, // £25 - 2 coins (save £5)
+  triple_coins: 3500, // £35 - 3 coins (save £10)
+  five_coins: 5500, // £55 - 5 coins (save £20)
+  ten_coins: 9900, // £99 - 10 coins (best value)
 } as const;
 
 // Credit Transactions - Ledger of all credit movements

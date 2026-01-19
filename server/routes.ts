@@ -79,12 +79,13 @@ async function callAI(prompt: string): Promise<string> {
   return content;
 }
 
+// 2026 PRICING - Effective January 2026
 const PRICING = {
   free: { amount: 0, name: "Free Plan" },
-  basic: { amount: 900, name: "Basic Plan" },
-  premium: { amount: 1900, name: "Premium Plan" },
-  enterprise: { amount: 2900, name: "Enterprise Plan" },
-  ultimate: { amount: 3900, name: "Ultimate Plan" },
+  basic: { amount: 2900, name: "Basic Plan" },
+  premium: { amount: 5900, name: "Premium Plan" },
+  enterprise: { amount: 8500, name: "Enterprise Plan" },
+  ultimate: { amount: 11000, name: "Ultimate Plan" },
 };
 
 // Helper function to format time ago for email analytics
@@ -1221,12 +1222,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ALL TIERS HAVE FINITE CREDIT LIMITS
   // SINGLE SOURCE OF TRUTH: Use getTierCredits() from shared/schema.ts everywhere
 
+  // 2026 COIN PRICING - Effective January 2026
   const ADDON_PRICES = {
-    single_credit: { amount: 3900, credits: 1, name: "Single Credit" },
-    triple_pack: { amount: 9900, credits: 3, name: "Triple Credit Pack" },
-    partner_bundle: { amount: 5900, credits: 1, name: "Partner Bundle" },
-    family_pack: { amount: 14900, credits: 4, name: "Family Pack" },
-    ultimate_assurance: { amount: 9900, credits: 0, name: "Ultimate Assurance (Annual)" },
+    single_coin: { amount: 1500, credits: 1, name: "1 Coin" },
+    double_coins: { amount: 2500, credits: 2, name: "2 Coins" },
+    triple_coins: { amount: 3500, credits: 3, name: "3 Coins" },
+    five_coins: { amount: 5500, credits: 5, name: "5 Coins" },
+    ten_coins: { amount: 9900, credits: 10, name: "10 Coins" },
   };
 
   app.get("/api/credits/balance", isAuthenticated, async (req, res) => {
