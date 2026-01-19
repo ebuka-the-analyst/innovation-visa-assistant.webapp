@@ -14,10 +14,41 @@ const FONT_FAMILIES: Record<string, string> = {
 };
 
 // Generate professional cover page SVG decorations based on theme
-function generateCoverPageSVG(themeId: string | null, primaryColor: string): { topRight: string; bottomLeft: string; style: string } {
+function generateCoverPageSVG(themeId: string | null, primaryColor: string, secondaryColor?: string): { topRight: string; bottomLeft: string; bottomRight: string; style: string } {
   const isBlueTheme = themeId === 'blue-modern' || primaryColor.includes('1d4ed8') || primaryColor.includes('2563eb') || primaryColor.includes('3b82f6');
+  const isCorporateTheme = themeId === 'white-red-corporate';
+  const accentColor = secondaryColor || '#1e293b';
   
-  if (isBlueTheme) {
+  if (isCorporateTheme) {
+    // Corporate Geometric Theme - triangles and diagonal stripes
+    return {
+      topRight: `
+        <svg class="cover-decoration-top" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="150,0 400,0 400,250" fill="${accentColor}" opacity="0.95"/>
+          <polygon points="280,0 400,0 400,120" fill="${primaryColor}" opacity="0.9"/>
+          <polygon points="200,0 280,0 400,80 400,0" fill="${primaryColor}" opacity="0.6"/>
+        </svg>
+      `,
+      bottomLeft: `
+        <svg class="cover-decoration-bottom" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,250 0,400 150,400" fill="${accentColor}" opacity="0.95"/>
+          <polygon points="0,320 0,400 80,400" fill="${accentColor}" opacity="0.8"/>
+        </svg>
+      `,
+      bottomRight: `
+        <svg class="cover-decoration-corner" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="100,200 300,200 300,0" fill="${accentColor}" opacity="0.95"/>
+          <g transform="translate(150, 80)">
+            <rect x="0" y="0" width="8" height="40" fill="${primaryColor}" transform="rotate(-45)" opacity="0.8"/>
+            <rect x="20" y="0" width="8" height="50" fill="${primaryColor}" transform="rotate(-45)" opacity="0.8"/>
+            <rect x="40" y="0" width="8" height="60" fill="${primaryColor}" transform="rotate(-45)" opacity="0.8"/>
+            <rect x="60" y="0" width="8" height="70" fill="${primaryColor}" transform="rotate(-45)" opacity="0.8"/>
+          </g>
+        </svg>
+      `,
+      style: 'corporate-geometric'
+    };
+  } else if (isBlueTheme) {
     // Blue Modern Theme - curved shapes with circles
     return {
       topRight: `
@@ -50,10 +81,11 @@ function generateCoverPageSVG(themeId: string | null, primaryColor: string): { t
           <path d="M0,400 L150,400 L0,250 Z" fill="${primaryColor}" opacity="0.95"/>
         </svg>
       `,
+      bottomRight: '',
       style: 'blue-modern'
     };
   } else {
-    // Red/Default Theme - wave patterns
+    // Red/Default Modern Theme - wave patterns
     return {
       topRight: `
         <svg class="cover-decoration-top" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
@@ -83,6 +115,7 @@ function generateCoverPageSVG(themeId: string | null, primaryColor: string): { t
           <path d="M0,400 L0,0 C60,40 80,120 80,200 C80,280 60,340 0,400 Z" fill="${primaryColor}" opacity="0.95"/>
         </svg>
       `,
+      bottomRight: '',
       style: 'red-modern'
     };
   }
@@ -188,6 +221,14 @@ export function generatePDFContent(plan: BusinessPlan): string {
       left: 0;
       width: 250px;
       height: 250px;
+      z-index: 1;
+    }
+    .cover-decoration-corner {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 200px;
+      height: 140px;
       z-index: 1;
     }
     .cover-content {
@@ -367,7 +408,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
   </style>
 </head>
 <body>
-  ${generateCoverPageHTML(plan, primaryColor)}
+  ${generateCoverPageHTML(plan, primaryColor, secondaryColor)}
   
   <div class="content">
     ${formatContentWithCharts(content, chartData, primaryColor)}
@@ -379,9 +420,9 @@ export function generatePDFContent(plan: BusinessPlan): string {
   return html;
 }
 
-function generateCoverPageHTML(plan: BusinessPlan, primaryColor: string): string {
+function generateCoverPageHTML(plan: BusinessPlan, primaryColor: string, secondaryColor: string): string {
   const themeId = plan.themeId || null;
-  const decorations = generateCoverPageSVG(themeId, primaryColor);
+  const decorations = generateCoverPageSVG(themeId, primaryColor, secondaryColor);
   const currentYear = new Date().getFullYear();
   const generatedDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const tierDisplay = plan.tier.charAt(0).toUpperCase() + plan.tier.slice(1);
@@ -390,6 +431,7 @@ function generateCoverPageHTML(plan: BusinessPlan, primaryColor: string): string
   <div class="cover-page">
     ${decorations.topRight}
     ${decorations.bottomLeft}
+    ${decorations.bottomRight || ''}
     
     <div class="cover-content">
       <div class="cover-header">
