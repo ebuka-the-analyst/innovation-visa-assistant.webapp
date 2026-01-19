@@ -863,7 +863,7 @@ export default function ThemeSelectionPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Generate Business Plan?</AlertDialogTitle>
             <AlertDialogDescription>
-              You're about to start the business plan generation process. This will take you to the questionnaire where you'll provide details about your business.
+              This will proceed to generate your professional business plan using the details you've provided.
               {themeApplied && (
                 <span className="block mt-2 text-emerald-600 font-medium">
                   Your theme settings have been saved and will be applied to your plan.
@@ -878,7 +878,7 @@ export default function ThemeSelectionPage() {
               onClick={handleGeneratePlan}
               data-testid="button-confirm-generate"
             >
-              Continue to Questionnaire
+              Generate My Plan
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
