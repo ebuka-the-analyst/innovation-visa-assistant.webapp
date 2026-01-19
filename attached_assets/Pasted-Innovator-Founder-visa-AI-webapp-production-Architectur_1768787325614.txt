@@ -1,0 +1,230 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+6 minutes ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+1 hour ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+2 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+2 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+4 hours ago
+
+innovation-visa-assistant.webapp
+
+Deployment successful
+
+5 hours ago
+
+Scroll to load more
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+162084c9
+Active
+
+Jan 19, 2026, 1:42 AM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+    {
+  issues: [
+  }
+      code: 'invalid_type',
+    {
+]
+      expected: 'date',
+      code: 'invalid_type',
+    at get error [as error] (file:///app/node_modules/zod/v3/types.js:39:31)
+      expected: 'date',
+      received: 'string',
+    at ZodObject.parse (file:///app/node_modules/zod/v3/types.js:114:22)
+      received: 'string',
+      path: [Array],
+    at file:///app/dist/index.js:13554:40
+      message: 'Expected date, received string'
+    }
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+      message: 'Expected date, received string'
+    }
+  ]
+}
+      path: [Array],
+1:48:11 AM [express] POST /api/questionnaire/submit 400 in 14ms :: {"success":false,"error":"themeAp…
+[2026-01-19T01:48:24.480Z] POST /api/questionnaire/submit
+Questionnaire submission received: {
+  "tier": "premium",
+  "businessName": "UK Visa Assistant (Stackrise Ltd)",
+  "industry": "Legal Tech / Immigration Tech / AI SaaS",
+  "problem": "Applying for the UK Innovator Founder Visa costs £5,000-15,000 in legal fees, takes weeks for feedback, and has a 40%+ rejection rate due to preventable errors. The 100+ page guidance documents are confusing, and generic templates don't reflect individual business innovations. Talented entrepreneurs are excluded by cost barriers and lack of accessible expert guidance.",
+  "uniqueness": "First multi-agent AI system purpose-built for UK Innovator Founder Visa applications. Four specialized AI agents collaborate (Innovation, Finance, Growth, Compliance) unlike single-chatbot competitors. 100x cheaper than traditional legal advice (£35/month vs £5,000-15,000). Instant 24/7 feedback vs weeks waiting. AI-powered document extraction auto-populates business plans using GPT-4o Vision. Real-time compliance scoring against endorsing body criteria. 109 professional-grade tools worth £80-100 each.",
+  "technology": "Frontend: React 18, TypeScript, Tailwind CSS, Shadcn UI, Framer Motion\nBackend: Node.js, Express.js, PostgreSQL, Drizzle ORM\nAI: Google Gemini API, OpenAI GPT-4o, Function Calling/Tool Use\nAuth: Google OAuth 2.0, Passport.js, Session Management\nPayments: Stripe (subscriptions, invoicing)\nStorage: AWS S3 (documents), Railway (hosting)\nAnalytics: GA4, Custom Activity Tracking\nCharts: Recharts, jsPDF, html-to-image for visual exports\n\nSecure PostgreSQL database with Drizzle ORM for type-safe queries. Document storage on AWS S3 with presigned URLs. Session-based authentication with secure cookies and CSRF protection. Real-time activity tracking with heartbeat monitoring (30-second intervals). AI agents communicate through structured function calling with JSON schemas. Business plan generation uses template-based sections with AI content generation and SVG chart visualization.",
+  "experience": "Uniquely qualified: 7+ years full-stack development and AI integration experience. MSc Data Science (Leeds Beckett 2023) - academic foundation in AI/ML. Already built and launched the working platform - demonstrable product, not just an idea. Direct experience with UK visa applications - understand the pain points firsthand. Track record of delivering AI-powered SaaS products (GCA, F-RADAR, AutoInsight). Technical expertise: React, TypeScript, Node.js, PostgreSQL, OpenAI/Gemini APIs.",
+  "funding": 50000,
+  "revenue": "Tiered SaaS subscription: Free (£0, basic AI chatbot, 5 tools). Basic (£15/month, 30+ tools). Premium (£35/month, all 109 tools, multi-agent AI, visual exports). Enterprise (£99/month, white-label, API access). Add-ons: Priority support, custom templates. Unit economics: LTV £280, CAC £25, LTV:CAC 11:1, Payback 1 month, Gross margin 85%.",
+  "jobCreation": 8,
+  "expansion": "Products: Year 1: Core platform (109 tools). Year 2: Mobile app, API for immigration firms. Year 3: White-label solution for endorsing bodies. Sectors: Year 1: Tech founders. Year 2: All industries. Year 3: Enterprise immigration consultancies.",
+  "vision": "5-year vision: UK's #1 AI-powered visa guidance platform. 10,000+ active users, £2.5M ARR, 25 employees. Known for: accuracy, accessibility, affordability. Expanded to all UK visa categories. Exit potential: Acquisition by legal tech company or immigration services provider.",
+  "innovationStage": "mvp-complete",
+  "productStatus": "Fully functional MVP with 109 professional tools, multi-agent AI system (4 specialized agents: Nova for Innovation, Sterling for Finance, Atlas for Growth, Sage for Compliance), AI-Guided Interview system, visual business plan generator with charts, Stripe payment integration, Google OAuth authentication, and document intelligence using GPT-4o Vision. Platform is live and processing real users at ukvisaassistant.com.",
+  "existingCustomers": "Beta testing with initial users. Platform fully operational with authentication, payments, and all features live. Gathering testimonials and case studies from early adopters going through the visa application process.",
+  "betaTesters": "",
+  "tractionEvidence": "Working production platform deployed on Railway. Full user authentication system with Google OAuth. Complete payment integration with Stripe (live mode). 109 tools operational across 8 categories. Real-time analytics tracking user behavior. Multi-agent AI chatbot responding to user queries 24/7.",
+  "techStack": "Frontend: React 18, TypeScript, Tailwind CSS, Shadcn UI, Framer Motion\nBackend: Node.js, Express.js, PostgreSQL, Drizzle ORM\nAI: Google Gemini API, OpenAI GPT-4o, Function Calling/Tool Use\nAuth: Google OAuth 2.0, Passport.js, Session Management\nPayments: Stripe (subscriptions, invoicing)\nStorage: AWS S3 (documents), Railway (hosting)\nAnalytics: GA4, Custom Activity Tracking\nCharts: Recharts, jsPDF, html-to-image for visual exports",
+  "dataArchitecture": "Secure PostgreSQL database with Drizzle ORM for type-safe queries. Document storage on AWS S3 with presigned URLs. Session-based authentication with secure cookies and CSRF protection. Real-time activity tracking with heartbeat monitoring (30-second intervals). AI agents communicate through structured function calling with JSON schemas. Business plan generation uses template-based sections with AI content generation and SVG chart visualization.",
+  "aiMethodology": "Multi-agent AI architecture with specialized agents: Nova (Innovation & IP validation, NHS Light Blue), Sterling (Financial projections, investor readiness, Gold), Atlas (Market analysis, scaling strategies, Emerald), Sage (Regulatory requirements, document review, NHS Blue). Uses Google Gemini API with function calling for structured outputs. Adaptive interview system adjusts questions based on responses. Document extraction using OpenAI GPT-4o Vision API for CV and certificate parsing. Each agent has distinct personality and expertise area.",
+  "complianceDesign": "GDPR compliant with data encryption at rest and in transit, user consent mechanisms, right to deletion implemented. OISC compliant - provides information only, not regulated legal advice (clear disclaimers on all outputs). Cookie consent and privacy policy implemented. Cloudflare Turnstile for bot protection. Secure session management with httpOnly cookies. Data retention policies defined.",
+  "patentStatus": "Trade secrets: Proprietary AI prompts and multi-agent configurations. Trademark pending: 'UK Visa Assistant' brand. Database rights: Curated compliance knowledge base with endorsing body criteria. Copyright: All platform code and content. No patents filed yet - focus on speed to market and trade secret protection.",
+  "founderEducation": "MSc Data Science - Leeds Beckett University, UK, 2023 - Advanced AI/ML, data analytics, statistical modeling\nBSc Information Technology & Business Information Systems - Middlesex University, UK, 2017 - Systems analysis, IT management\nAdvanced Diploma in Software Engineering - Aptech Computer Institute, 2016 - Full-stack development fundamentals\nProfessional certifications: Google Data Analytics, IBM Data Analyst, Programming Fundamentals, SEO Specialist",
+  "founderWorkHistory": "CTO/Lead Developer at Stackrise (Jun 2025-Present): Leading technical delivery for UK digital consultancy, building AI-powered portals and client management systems, implementing Stripe payments and automated workflows.\n\nWeb & Performance Analyst at Qalhata Technologies (Nov 2024-Present): GA4 analytics, performance reporting, stakeholder dashboards for corporate clients.\n\nWeb Developer at Deskstones Ltd (Feb 2024-Present): Website rebuild focused on speed, SEO optimization, conversion improvement.\n\nWeb Developer/Analyst at Eden Health Care Private (2023-2024): Healthcare web development, scheduling systems, workflow automation.",
+  "founderAchievements": "Built and deployed 10+ production web applications with real users. Developed AI-powered platforms including GCA Global Competency Assessment (32 countries), F-RADAR geospatial renewable energy platform, AutoInsight hotel analytics dashboard. Implemented Stripe payment systems processing real transactions. Led technical delivery at Stackrise serving multiple SME clients. MSc thesis in data science with practical AI/ML applications.",
+  "relevantProjects": "UK Visa Assistant Platform - This exact platform, fully built with 109 tools, multi-agent AI system, Stripe payment integration, visual business plan exports with charts\n\nGCA Global Competency Assessment - AI-powered certification platform for professionals across 32 countries\n\nF-RADAR - Agentic geospatial renewable energy feasibility platform with UK public data integration and interactive mapping\n\nAutoInsight - Hotel analytics platform with 100+ KPI dashboard and AI assistant for insight retrieval\n\nAI Virtual Hotel Concierge - High-volume FAQ chatbot handling guest inquiries\n\nAfro Grocers - Multilingual e-commerce with AI-powered customer support",
+  "monthlyProjections": "Year 1: Month 1-3: £0 revenue (beta testing), £3K/month costs. Month 4-6: £3K MRR (85 subscribers), £4K costs. Month 7-12: £10K MRR (285 subscribers), £6K costs. Year 1 total: £78K revenue, £54K costs. Year 2: £29K MRR by month 24, £350K annual revenue. Year 3: £71K MRR, £850K annual revenue, strong profitability.",
+  "customerAcquisitionCost": 25,
+  "lifetimeValue": 280,
+  "paybackPeriod": 1,
+  "fundingSources": "£20,000 personal investment (development time and infrastructure). £30,000 seed funding target for marketing and scaling. Bootstrap approach with revenue reinvestment. Total: £50,000 for 18-month runway and marketing push.",
+  "detailedCosts": "AI API costs (Gemini, OpenAI): £18K/year. Cloud infrastructure (Railway, AWS S3): £12K/year. Marketing & customer acquisition: £25K/year. Founder salary (Year 2): £50K. Legal & professional: £5K/year. Content creation & SEO: £8K/year. Total Year 1: £85K.",
+  "competitors": "1. Traditional Law Firms (£5,000-15,000 legal fees, trusted but slow and expensive). 2. ImmigrationHelp.ai (AI-powered but generic, not UK-specific, £99/month). 3. Visa.ai (Document processing focused, limited guidance). 4. DIY Templates (Free/cheap but no personalization). 5. Immigration Consultants (Variable quality, £500-2,000 per application). Our advantage: UK-specific, multi-agent AI, 109 tools, 100x cheaper than traditional options.",
+  "competitiveDifferentiation": "100x cheaper than traditional legal advice (£35/month vs £5,000-15,000). Instant 24/7 AI responses vs weeks waiting for consultant feedback. Multi-agent AI with specialized expertise (4 agents) vs single generic chatbot. 109 professional tools vs basic templates. UK Innovator Founder Visa specific vs generic immigration tools. Real-time compliance scoring vs manual document review. Visual business plans with charts vs text-only exports.",
+  "customerInterviews": "30+ conversations with visa applicants, immigration advisors, and endorsing body representatives. Key findings: (1) Legal fees are prohibitive for most founders. (2) DIY attempts fail due to complex requirements. (3) Real-time feedback desperately needed. (4) Business plan quality is make-or-break for endorsement. (5) Founders willing to pay £35-99/month for comprehensive guidance.",
+  "lettersOfIntent": "Platform launched and processing real users. Early adopter testimonials being collected. Partnership discussions with immigration advisory firms for white-label solutions. University international student office outreach planned.",
+  "willingnessToPay": "Beta user feedback: 85% willing to pay £35/month for comprehensive guidance. Price point validated as 'less than one hour of legal consultation'. Enterprise tier (£99/month) attractive to immigration consultancies. Annual discount (20%) improves retention.",
+  "marketSize": "TAM: UK Innovator/Start-up visa market £560 million (80,000+ applications annually × £7,000 average spend). SAM: Tech-savvy applicants who would use software £16.8 million (40,000 × £420/year). SOM Year 3: £840,000 ARR (2,000 subscribers at £35/month average).",
+  "regulatoryRequirements": "OISC compliance (Office of Immigration Services Commissioner): Platform provides information only, not regulated advice. Clear disclaimers required. GDPR: Full compliance with data protection, ICO registration. Cloudflare Turnstile for bot protection. No FCA requirements (not financial services).",
+  "complianceTimeline": "Month 1: GDPR audit and documentation complete. Month 2: ICO registration submitted. Month 3: OISC disclaimer review with legal counsel. Month 6: Cyber Essentials certification. Month 12: Annual compliance review. Ongoing: GDPR audit, security updates.",
+  "complianceBudget": 15000,
+  "hiringPlan": "Year 1: Founder/CTO (Benedict Umeh) - full-stack development, AI integration. Year 2: Marketing Lead (£45K), Content Writer (£30K), Customer Success (£35K). Year 3: Frontend Developer (£55K), AI Engineer (£65K), Sales (£45K). Total: 8 employees by Year 3.",
+  "specificRegions": "Year 1: UK-wide focus (visa applicants globally applying to UK). Primary markets: London, Manchester, Birmingham, Leeds (tech hubs with high visa applicant concentration). University partnerships: Target international student offices nationwide.",
+  "internationalPlan": "Year 3: Expand to other UK visa categories (Skilled Worker, Global Talent). Year 4: Ireland (similar Common Travel Area). Year 5: EU startup visas (France Tech Visa, Germany). Focus: UK market leadership before international expansion.",
+}
+  "targetEndorser": "Primary: Innovator International (technology innovation focus). Alternative: Envestors (SaaS/digital business expertise). Rationale: Platform is AI/technology business, demonstrates clear innovation, addresses real market gap, founder has relevant technical credentials.",
+Questionnaire submission error: ZodError: [
+  "contactPointsStrategy": "6 engagement points: (1) Month 1: Initial pitch, working MVP demonstration, founder credentials. (2) Month 6: User traction metrics, testimonials, revenue growth. (3) Month 12: Annual review, Year 1 achievements, team growth. (4) Month 18: Partnership updates, enterprise customers. (5) Month 24: Series A preparation, international planning. (6) Month 30: Scale-up metrics, exit discussions.",
+  {
+  "supportingEvidence": "",
+    "code": "invalid_type",
+  "themeId": "white-red-modern",
+    "expected": "date",
+  "themePrimaryColor": "#dc2626",
+    "received": "string",
+  "themeSecondaryColor": "#1e293b",
+    "path": [
+      "themeAppliedAt"
+  "themeFont": "Inter",
+  "themeAppliedAt": "2026-01-19T01:48:24.185Z"
+    ],
+    "message": "Expected date, received string"
+      received: 'string',
+  }
+]
+      path: [Array],
+    at get error [as error] (file:///app/node_modules/zod/v3/types.js:39:31)
+      message: 'Expected date, received string'
+    at ZodObject.parse (file:///app/node_modules/zod/v3/types.js:114:22)
+    at file:///app/dist/index.js:13554:40
+    }
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+  ],
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+  addIssue: [Function (anonymous)],
+    at isAuthenticated (file:///app/dist/index.js:12270:10)
+  addIssues: [Function (anonymous)],
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  errors: [
+    {
+  issues: [
+    {
+      code: 'invalid_type',
+      code: 'invalid_type',
+      expected: 'date',
+      expected: 'date',
+      received: 'string',
+      path: [Array],
+      message: 'Expected date, received string'
+    }
+  ]
+}
+1:48:24 AM [express] POST /api/questionnaire/submit 400 in 197ms :: {"success":false,"error":"themeA…
+[2026-01-19T01:48:30.322Z] POST /api/activity/session/end
+1:48:30 AM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway

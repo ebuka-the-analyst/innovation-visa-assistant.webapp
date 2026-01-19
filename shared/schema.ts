@@ -240,7 +240,7 @@ export const questionnaireSchema = z.object({
   themePrimaryColor: z.string().nullable().optional(),
   themeSecondaryColor: z.string().nullable().optional(),
   themeFont: z.string().nullable().optional(),
-  themeAppliedAt: z.date().nullable().optional(),
+  themeAppliedAt: z.coerce.date().nullable().optional(),
 });
 
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
