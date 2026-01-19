@@ -7,7 +7,7 @@ export interface ThemeTemplate {
   defaultSecondaryColor: string;
   defaultFont: string;
   style: 'modern' | 'corporate' | 'creative' | 'minimal';
-  accentPattern: 'waves' | 'hexagons' | 'curves' | 'geometric' | 'none';
+  accentPattern: 'waves' | 'hexagons' | 'curves' | 'geometric' | 'diagonal' | 'none';
 }
 
 export const THEME_TEMPLATES: ThemeTemplate[] = [
