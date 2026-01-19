@@ -70,6 +70,29 @@ async function migrate() {
       }
     }
     
+    // Add theme columns to business_plans if not exists
+    const themeColumns = [
+      { name: 'theme_id', type: 'VARCHAR(50)' },
+      { name: 'theme_primary_color', type: 'VARCHAR(20)' },
+      { name: 'theme_secondary_color', type: 'VARCHAR(20)' },
+      { name: 'theme_font', type: 'VARCHAR(50)' },
+      { name: 'theme_applied_at', type: 'TIMESTAMP' }
+    ];
+    
+    for (const col of themeColumns) {
+      try {
+        await client.query(`
+          ALTER TABLE business_plans 
+          ADD COLUMN IF NOT EXISTS ${col.name} ${col.type}
+        `);
+        console.log(`${col.name} column added or already exists`);
+      } catch (err) {
+        if (err.code !== '42701') { // 42701 = column already exists
+          console.error(`Error adding ${col.name} column:`, err.message);
+        }
+      }
+    }
+    
   } catch (err) {
     console.error('Migration failed:', err.message);
     process.exit(1);
