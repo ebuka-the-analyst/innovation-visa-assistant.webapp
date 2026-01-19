@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { THEME_TEMPLATES } from "@/lib/themeTemplates";
 import {
   Select,
   SelectContent,
@@ -401,7 +402,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     if (savedData && Object.keys(savedData).length > 0) {
       setFormData(prev => {
         // Merge savedData with current formData, preserving any unsaved changes
-        const merged = { ...defaultFormData, tier, ...savedData };
+        const merged = { ...defaultFormData, ...savedData, tier } as Record<string, any>;
         // Only update if there are actual differences
         const hasChanges = Object.keys(merged).some(key => prev[key] !== merged[key]);
         return hasChanges ? merged : prev;
@@ -3239,14 +3240,31 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
             <div className="mt-6 pt-6 border-t">
               {themeApplied && selectedTheme ? (
                 <div className="flex items-center gap-3 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
-                  <div 
-                    className="w-10 h-10 rounded-lg border-2 border-background shadow"
-                    style={{ backgroundColor: selectedTheme.primaryColor }}
-                  />
-                  <div className="flex-1">
+                  {/* Show custom cover image preview or color swatch */}
+                  {selectedTheme.backgroundImage && selectedTheme.useFullCoverImage ? (
+                    <div className="w-16 h-20 rounded-lg border-2 border-background shadow overflow-hidden flex-shrink-0">
+                      <img 
+                        src={selectedTheme.backgroundImage} 
+                        alt="Custom cover preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div 
+                      className="w-10 h-10 rounded-lg border-2 border-background shadow flex-shrink-0"
+                      style={{ backgroundColor: selectedTheme.primaryColor }}
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
                     <p className="font-medium text-emerald-700 dark:text-emerald-300">Theme Applied</p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedTheme.font} font with custom colors
+                    {/* Show theme name */}
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {selectedTheme.themeId === 'custom-cover' || (selectedTheme.backgroundImage && selectedTheme.useFullCoverImage)
+                        ? 'Custom Cover Image (Canva)'
+                        : THEME_TEMPLATES.find(t => t.id === selectedTheme.themeId)?.name || selectedTheme.themeId || 'Custom Theme'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedTheme.font} font • {selectedTheme.primaryColor}
                     </p>
                   </div>
                   <Button 
@@ -3254,6 +3272,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
                     size="sm"
                     onClick={() => setLocation('/theme-selection')}
                     data-testid="button-change-theme"
+                    className="flex-shrink-0"
                   >
                     Change Theme
                   </Button>
