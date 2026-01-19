@@ -330,6 +330,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         themePrimaryColor: req.body.themePrimaryColor,
         themeSecondaryColor: req.body.themeSecondaryColor,
         themeFont: req.body.themeFont,
+        hasBackgroundImage: !!req.body.backgroundImage,
+        useFullCoverImage: req.body.useFullCoverImage,
+        textElements: req.body.textElements ? 'present' : 'missing',
+        textElementsLength: req.body.textElements ? String(req.body.textElements).length : 0,
       });
       const data = questionnaireSchema.parse(req.body);
       const user = req.user as any;
@@ -340,6 +344,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         themePrimaryColor: data.themePrimaryColor,
         themeSecondaryColor: data.themeSecondaryColor,
         themeFont: data.themeFont,
+        hasBackgroundImage: !!data.backgroundImage,
+        useFullCoverImage: data.useFullCoverImage,
+        textElements: data.textElements ? 'present' : 'missing',
       });
       
       const businessPlan = await storage.createBusinessPlan({
@@ -429,6 +436,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as any;
       const { themeId, primaryColor, secondaryColor, font, backgroundImage, useFullCoverImage, textElements, paletteId, paletteColors, name } = req.body;
+      
+      console.log("[Cover Design] Saving cover design:", {
+        userId: user.id,
+        themeId,
+        hasBackgroundImage: !!backgroundImage,
+        useFullCoverImage,
+        textElements: textElements ? {
+          isArray: Array.isArray(textElements),
+          count: Array.isArray(textElements) ? textElements.length : 0,
+          sample: Array.isArray(textElements) && textElements.length > 0 ? textElements[0] : null,
+        } : 'missing',
+      });
       
       const design = await storage.saveCoverDesign({
         userId: user.id,

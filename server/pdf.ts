@@ -920,24 +920,43 @@ function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string |
   
   // Check if using a full custom cover image
   if (plan.useFullCoverImage && plan.backgroundImage) {
+    console.log('[CoverPage] Using full custom cover image mode');
+    console.log('[CoverPage] textElements data:', {
+      exists: !!plan.textElements,
+      isArray: Array.isArray(plan.textElements),
+      count: Array.isArray(plan.textElements) ? plan.textElements.length : 0,
+      sample: Array.isArray(plan.textElements) && plan.textElements.length > 0 ? plan.textElements[0] : null,
+    });
+    
     // Render custom text elements if they exist
     let textElementsHtml = '';
     try {
       if (plan.textElements && Array.isArray(plan.textElements)) {
+        // Editor canvas dimensions for converting pixels to percentages
+        const editorWidth = 520;
+        const editorHeight = 740;
+        
         for (const el of plan.textElements) {
           // Validate required properties exist
           if (!el || typeof el.x !== 'number' || typeof el.y !== 'number') {
             continue; // Skip invalid elements
           }
+          
+          // Convert pixel coordinates to percentages
+          // The CoverPageEditor uses 520x740 canvas, so we need to convert
+          const xPercent = (el.x / editorWidth) * 100;
+          const yPercent = (el.y / editorHeight) * 100;
+          
           const style = `
             position: absolute;
-            left: ${el.x}%;
-            top: ${el.y}%;
+            left: ${xPercent.toFixed(2)}%;
+            top: ${yPercent.toFixed(2)}%;
             font-size: ${el.fontSize || 24}px;
             font-weight: ${el.fontWeight || 'normal'};
+            font-style: ${el.fontStyle || 'normal'};
+            font-family: ${el.fontFamily || 'Inter'}, sans-serif;
             color: ${el.color || '#000000'};
-            transform: translate(-50%, -50%);
-            text-align: ${el.textAlign || 'center'};
+            text-align: ${el.textAlign || 'left'};
             white-space: pre-wrap;
             max-width: 90%;
           `;

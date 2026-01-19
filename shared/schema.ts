@@ -2888,13 +2888,15 @@ export const coverDesigns = pgTable("cover_designs", {
   
   textElements: jsonb("text_elements").$type<Array<{
     id: string;
-    text: string;
+    content: string;
     x: number;
     y: number;
     fontSize: number;
     fontWeight: string;
-    color: string;
+    fontStyle?: string;
     fontFamily: string;
+    color: string;
+    textAlign?: string;
   }>>(),
   
   paletteId: varchar("palette_id", { length: 50 }),
