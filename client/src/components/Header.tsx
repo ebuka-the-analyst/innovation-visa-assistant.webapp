@@ -135,7 +135,7 @@ export default function Header() {
           <ThemeToggle />
           {isAuthenticated ? (
             <>
-              <Link href="/tools-hub">
+              <Link href="/dashboard">
                 <Button variant="ghost" size={isScrolled ? "sm" : "default"} data-testid="button-header-dashboard">
                   <LayoutDashboard className="h-4 w-4 mr-1" />
                   Dashboard
@@ -210,7 +210,7 @@ export default function Header() {
               </div>
               {isAuthenticated ? (
                 <>
-                  <Link href="/tools-hub" className="w-full">
+                  <Link href="/dashboard" className="w-full">
                     <Button variant="ghost" className="w-full justify-start" data-testid="button-mobile-dashboard">
                       <LayoutDashboard className="h-4 w-4 mr-2" />
                       Dashboard
