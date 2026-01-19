@@ -401,6 +401,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================
+  // COVER DESIGNS API
+  // ============================================
+
+  app.post("/api/cover-designs", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { themeId, primaryColor, secondaryColor, font, backgroundImage, useFullCoverImage, textElements, paletteId, paletteColors, name } = req.body;
+      
+      const design = await storage.saveCoverDesign({
+        userId: user.id,
+        themeId,
+        primaryColor,
+        secondaryColor,
+        font,
+        backgroundImage,
+        useFullCoverImage: useFullCoverImage || false,
+        textElements,
+        paletteId,
+        paletteColors,
+        name: name || `Cover Design ${new Date().toLocaleDateString()}`,
+        isDefault: false,
+      });
+      
+      res.json({ success: true, design });
+    } catch (error) {
+      console.error("Save cover design error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : "Failed to save cover design" 
+      });
+    }
+  });
+
+  app.get("/api/cover-designs", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const designs = await storage.getUserCoverDesigns(user.id);
+      res.json(designs);
+    } catch (error) {
+      console.error("Get cover designs error:", error);
+      res.status(500).json({ error: "Failed to get cover designs" });
+    }
+  });
+
+  app.get("/api/cover-designs/latest", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const design = await storage.getLatestCoverDesign(user.id);
+      res.json(design || null);
+    } catch (error) {
+      console.error("Get latest cover design error:", error);
+      res.status(500).json({ error: "Failed to get latest cover design" });
+    }
+  });
+
+  app.put("/api/cover-designs/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      
+      const existing = await storage.getCoverDesign(id);
+      if (!existing || existing.userId !== user.id) {
+        return res.status(404).json({ error: "Cover design not found" });
+      }
+      
+      const updated = await storage.updateCoverDesign(id, req.body);
+      res.json({ success: true, design: updated });
+    } catch (error) {
+      console.error("Update cover design error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : "Failed to update cover design" 
+      });
+    }
+  });
+
+  app.delete("/api/cover-designs/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      
+      const existing = await storage.getCoverDesign(id);
+      if (!existing || existing.userId !== user.id) {
+        return res.status(404).json({ error: "Cover design not found" });
+      }
+      
+      await storage.deleteCoverDesign(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete cover design error:", error);
+      res.status(500).json({ error: "Failed to delete cover design" });
+    }
+  });
+
   app.post("/api/payment/create-checkout", isAuthenticated, async (req, res) => {
     try {
       const { planId, promoCode } = req.body;
