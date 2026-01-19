@@ -14,14 +14,79 @@ const FONT_FAMILIES: Record<string, string> = {
 };
 
 // Generate professional cover page SVG decorations based on theme
-function generateCoverPageSVG(themeId: string | null, primaryColor: string, secondaryColor?: string): { topRight: string; bottomLeft: string; bottomRight: string; style: string } {
+function generateCoverPageSVG(themeId: string | null, primaryColor: string, secondaryColor?: string): { topRight: string; bottomLeft: string; bottomRight: string; topLeft: string; middleSection: string; style: string } {
   const isBlueTheme = themeId === 'blue-modern' || primaryColor.includes('1d4ed8') || primaryColor.includes('2563eb') || primaryColor.includes('3b82f6');
   const isCorporateTheme = themeId === 'white-red-corporate';
+  const isNavyDiagonal = themeId === 'navy-diagonal';
+  const isCyanModern = themeId === 'cyan-modern';
   const accentColor = secondaryColor || '#1e293b';
   
-  if (isCorporateTheme) {
+  if (isNavyDiagonal) {
+    // Navy Corporate Profile - diagonal stripes with dark overlay
+    return {
+      topLeft: `
+        <svg class="cover-decoration-top-left" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="200" height="100" fill="${primaryColor}" opacity="0.95"/>
+        </svg>
+      `,
+      topRight: `
+        <svg class="cover-decoration-top" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,0 400,0 400,120 50,120" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="0,30 400,30 400,90 30,90" fill="${primaryColor}" opacity="0.7"/>
+        </svg>
+      `,
+      middleSection: `
+        <svg class="cover-decoration-middle" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,0 600,100 600,200 0,100" fill="${accentColor}" opacity="0.85"/>
+        </svg>
+      `,
+      bottomLeft: `
+        <svg class="cover-decoration-bottom" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,50 200,200 0,200" fill="${accentColor}" opacity="0.95"/>
+          <polygon points="0,100 150,200 0,200" fill="${primaryColor}" opacity="0.8"/>
+        </svg>
+      `,
+      bottomRight: `
+        <svg class="cover-decoration-corner" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="100,0 400,200 400,0" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="200,0 400,150 400,0" fill="${primaryColor}" opacity="0.7"/>
+        </svg>
+      `,
+      style: 'navy-diagonal'
+    };
+  } else if (isCyanModern) {
+    // Cyan Modern Proposal - cyan with black geometric accents
+    return {
+      topLeft: `
+        <svg class="cover-decoration-top-left" viewBox="0 0 150 80" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="150" height="80" fill="${primaryColor}" opacity="0.95"/>
+        </svg>
+      `,
+      topRight: `
+        <svg class="cover-decoration-top" viewBox="0 0 400 350" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="80,0 400,0 400,300 200,350" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="150,30 380,30 380,280 220,320" fill="white" stroke="${primaryColor}" stroke-width="3" opacity="0.3"/>
+          <polygon points="200,60 360,60 360,250 240,280" fill="white" stroke="${primaryColor}" stroke-width="2" opacity="0.2"/>
+        </svg>
+      `,
+      middleSection: `
+        <svg class="cover-decoration-middle" viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,50 350,150 600,150 600,50 400,0 0,0" fill="${accentColor}" opacity="0.95"/>
+        </svg>
+      `,
+      bottomLeft: '',
+      bottomRight: `
+        <svg class="cover-decoration-corner" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,150 200,150 200,50" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="50,150 200,150 200,80" fill="${primaryColor}" opacity="0.7"/>
+        </svg>
+      `,
+      style: 'cyan-modern'
+    };
+  } else if (isCorporateTheme) {
     // Corporate Geometric Theme - triangles and diagonal stripes
     return {
+      topLeft: '',
       topRight: `
         <svg class="cover-decoration-top" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
           <polygon points="150,0 400,0 400,250" fill="${accentColor}" opacity="0.95"/>
@@ -29,6 +94,7 @@ function generateCoverPageSVG(themeId: string | null, primaryColor: string, seco
           <polygon points="200,0 280,0 400,80 400,0" fill="${primaryColor}" opacity="0.6"/>
         </svg>
       `,
+      middleSection: '',
       bottomLeft: `
         <svg class="cover-decoration-bottom" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
           <polygon points="0,250 0,400 150,400" fill="${accentColor}" opacity="0.95"/>
@@ -51,6 +117,7 @@ function generateCoverPageSVG(themeId: string | null, primaryColor: string, seco
   } else if (isBlueTheme) {
     // Blue Modern Theme - curved shapes with circles
     return {
+      topLeft: '',
       topRight: `
         <svg class="cover-decoration-top" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -67,6 +134,7 @@ function generateCoverPageSVG(themeId: string | null, primaryColor: string, seco
           <circle cx="380" cy="200" r="15" fill="${primaryColor}" opacity="0.5"/>
         </svg>
       `,
+      middleSection: '',
       bottomLeft: `
         <svg class="cover-decoration-bottom" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -87,6 +155,7 @@ function generateCoverPageSVG(themeId: string | null, primaryColor: string, seco
   } else {
     // Red/Default Modern Theme - wave patterns
     return {
+      topLeft: '',
       topRight: `
         <svg class="cover-decoration-top" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -101,6 +170,7 @@ function generateCoverPageSVG(themeId: string | null, primaryColor: string, seco
           <path d="M400,0 L400,400 C360,350 340,280 340,200 C340,120 360,60 400,0 Z" fill="${primaryColor}" opacity="0.95"/>
         </svg>
       `,
+      middleSection: '',
       bottomLeft: `
         <svg class="cover-decoration-bottom" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -237,6 +307,22 @@ export function generatePDFContent(plan: BusinessPlan): string {
       right: 0;
       width: 200px;
       height: 140px;
+      z-index: 1;
+    }
+    .cover-decoration-top-left {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 150px;
+      height: 70px;
+      z-index: 1;
+    }
+    .cover-decoration-middle {
+      position: absolute;
+      top: 45%;
+      left: 0;
+      width: 100%;
+      height: 120px;
       z-index: 1;
     }
     .cover-content {
@@ -441,7 +527,9 @@ function generateCoverPageHTML(plan: BusinessPlan, primaryColor: string, seconda
   
   return `
   <div class="cover-page">
+    ${decorations.topLeft || ''}
     ${decorations.topRight}
+    ${decorations.middleSection || ''}
     ${decorations.bottomLeft}
     ${decorations.bottomRight || ''}
     
