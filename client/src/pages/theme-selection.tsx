@@ -199,6 +199,32 @@ export default function ThemeSelectionPage() {
     setThemeApplied(false);
   };
 
+  const compressImage = (base64: string, maxWidth: number = 1200): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = () => resolve(base64);
+      img.src = base64;
+    });
+  };
+
   const handleApplyTheme = async () => {
     if (!selectedTheme && !backgroundImage) {
       toast({
@@ -212,19 +238,36 @@ export default function ThemeSelectionPage() {
     setIsApplying(true);
     
     try {
+      let compressedImage = backgroundImage;
+      if (backgroundImage) {
+        compressedImage = await compressImage(backgroundImage);
+      }
+
       const themeData = {
         themeId: selectedTheme || 'custom-cover',
         primaryColor,
         secondaryColor,
         font: selectedFont,
-        backgroundImage,
+        backgroundImage: compressedImage,
         useFullCoverImage,
         textElements,
         paletteId: selectedPalette,
         paletteColors: selectedPalette ? getPaletteById(selectedPalette)?.colors : null,
       };
       
-      localStorage.setItem('selectedTheme', JSON.stringify(themeData));
+      try {
+        localStorage.setItem('selectedTheme', JSON.stringify(themeData));
+      } catch (storageError: unknown) {
+        if (storageError instanceof Error && 
+            (storageError.name === 'QuotaExceededError' || 
+             storageError.message.includes('quota'))) {
+          const furtherCompressed = await compressImage(backgroundImage!, 800);
+          themeData.backgroundImage = furtherCompressed;
+          localStorage.setItem('selectedTheme', JSON.stringify(themeData));
+        } else {
+          throw storageError;
+        }
+      }
 
       setThemeApplied(true);
 
@@ -238,7 +281,9 @@ export default function ThemeSelectionPage() {
       console.error('Failed to apply theme:', error);
       toast({
         title: "Error",
-        description: "Failed to apply theme. Please try again.",
+        description: error instanceof Error && error.message.includes('quota')
+          ? "Image too large. Please use a smaller image (under 2MB recommended)."
+          : "Failed to apply theme. Please try again.",
         variant: "destructive",
       });
     } finally {

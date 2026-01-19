@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+1bdf1da2
+Active
+
+Jan 19, 2026, 9:59 AM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-19T13:48:10.318Z] GET /assets/share-2-Bxn6Tk9e.js
+[2026-01-19T13:48:10.278Z] GET /assets/mic-off-CP3wy-hy.js
+[2026-01-19T13:48:10.328Z] GET /assets/presentation-C5n4skOO.js
+[2026-01-19T13:48:10.281Z] GET /assets/map-pin-D7-fcpda.js
+[2026-01-19T13:48:10.332Z] GET /assets/smartphone-Dmo9TsuW.js
+[2026-01-19T13:48:10.335Z] GET /assets/square-X9cK1A2n.js
+[2026-01-19T13:48:10.289Z] GET /assets/plus-4T-_GF3_.js
+[2026-01-19T13:48:10.339Z] GET /assets/phone-DMTiEuE8.js
+[2026-01-19T13:48:10.293Z] GET /assets/play-D5kyYMHB.js
+[2026-01-19T13:48:10.342Z] GET /assets/quote--HWlFEAQ.js
+[2026-01-19T13:48:10.260Z] GET /assets/monitor-vSCWT-_M.js
+[2026-01-19T13:48:10.268Z] GET /assets/info-pRZ0jm02.js
+[2026-01-19T13:48:10.272Z] GET /assets/lock-DtNI4qOo.js
+[2026-01-19T13:48:10.276Z] GET /assets/menu-B5w4Fm5p.js
+[2026-01-19T13:48:10.297Z] GET /assets/pen-line-BUOjnwDB.js
+[2026-01-19T13:48:10.300Z] GET /assets/message-square-TtCjsfax.js
+[2026-01-19T13:48:10.302Z] GET /assets/package-Xvv5FsjJ.js
+[2026-01-19T13:48:10.307Z] GET /assets/server-K3ICyYn2.js
+[2026-01-19T13:48:10.311Z] GET /assets/pound-sterling-C0xCVwYb.js
+[2026-01-19T13:48:10.350Z] GET /assets/qr-code-DJZ67U0_.js
+[2026-01-19T13:48:10.353Z] GET /assets/rotate-ccw-DXk1_iyq.js
+[2026-01-19T13:48:10.354Z] GET /assets/scan-0el85q29.js
+[2026-01-19T13:48:10.357Z] GET /assets/save-O_aXK4E7.js
+[2026-01-19T13:48:10.360Z] GET /assets/percent-B2DP5a18.js
+[2026-01-19T13:48:10.362Z] GET /assets/star-B-Ohp8XV.js
+[2026-01-19T13:48:10.367Z] GET /assets/tag-BMhkahO_.js
+[2026-01-19T13:48:10.370Z] GET /assets/test-tube-D-JIKbJU.js
+[2026-01-19T13:48:10.374Z] GET /assets/tram-front-Bk5bN7yF.js
+[2026-01-19T13:48:10.377Z] GET /assets/trending-down-ZZqDC4Q6.js
+[2026-01-19T13:48:10.382Z] GET /assets/volume-2-DlHIX3im.js
+[2026-01-19T13:48:10.385Z] GET /assets/timer-20NPNA9i.js
+[2026-01-19T13:48:10.387Z] GET /assets/wand-sparkles-C9dwX-wX.js
+[2026-01-19T13:48:10.391Z] GET /assets/scale-OzJMWIg5.js
+[2026-01-19T13:48:10.395Z] GET /assets/palette-DUSlLT4Z.js
+[2026-01-19T13:48:10.399Z] GET /assets/truck-CJJOLM8J.js
+[2026-01-19T13:48:10.404Z] GET /assets/search-DS23KEs9.js
+[2026-01-19T13:48:10.407Z] GET /assets/video-DwuGlF2Y.js
+[2026-01-19T13:48:10.412Z] GET /assets/upload-DGSB3fYK.js
+[2026-01-19T13:48:10.416Z] GET /assets/trash-2-SWOEi9Vj.js
+[2026-01-19T13:48:10.424Z] GET /assets/SiteFeedbackPopup-DSc5MhSi.js
+[2026-01-19T13:48:10.428Z] GET /assets/user-plus-CVUw2xwK.js
+[2026-01-19T13:48:10.430Z] GET /assets/user-DKyFrAtd.js
+[2026-01-19T13:48:10.447Z] GET /assets/user-check-DyJdoLT3.js
+[2026-01-19T13:48:10.435Z] GET /assets/CookieConsent-BRBuab1S.js
+[2026-01-19T13:48:10.418Z] GET /assets/theme-selection-BKetGMAQ.js
+[2026-01-19T13:48:10.442Z] GET /assets/wallet-BymAX4-2.js
+[2026-01-19T13:48:10.451Z] GET /assets/dialog-CiWuN0sJ.js
+[2026-01-19T13:48:38.585Z] POST /api/activity/session
+1:48:38 PM [express] POST /api/activity/session 200 in 238ms :: {"sessionId":"e3e8919f-abd7-46b5-919…
+[2026-01-19T13:48:41.601Z] POST /api/activity/session/end
+1:48:41 PM [express] POST /api/activity/session/end 200 in 23ms :: {"success":true}
+[2026-01-19T13:48:43.647Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:48:43 PM [express] GET /api/auth/user 200 in 22ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+[2026-01-19T13:48:44.012Z] POST /api/activity/page-view
+1:48:44 PM [express] POST /api/activity/page-view 200 in 29ms :: {"pageViewId":"78c1080b-abe2-46b4-a…
+[2026-01-19T13:48:43.802Z] POST /api/activity/session
+1:48:43 PM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"18b5729f-8abc-4699-bc0c…
+[2026-01-19T13:49:14.174Z] POST /api/activity/session
+1:49:14 PM [express] POST /api/activity/session 200 in 257ms :: {"sessionId":"18b5729f-8abc-4699-bc0…
+[2026-01-19T13:49:44.178Z] POST /api/activity/session
+1:49:44 PM [express] POST /api/activity/session 200 in 254ms :: {"sessionId":"18b5729f-8abc-4699-bc0…
+[2026-01-19T13:50:14.164Z] POST /api/activity/session
+1:50:14 PM [express] POST /api/activity/session 200 in 252ms :: {"sessionId":"18b5729f-8abc-4699-bc0…
+[2026-01-19T13:50:44.173Z] POST /api/activity/session
+1:50:44 PM [express] POST /api/activity/session 200 in 283ms :: {"sessionId":"18b5729f-8abc-4699-bc0…
+[2026-01-19T13:51:14.173Z] POST /api/activity/session
+1:51:14 PM [express] POST /api/activity/session 200 in 216ms :: {"sessionId":"18b5729f-8abc-4699-bc0…
+1:51:44 PM [express] POST /api/activity/session 200 in 209ms :: {"sessionId":"18b5729f-8abc-4699-bc0…
+[2026-01-19T13:51:44.168Z] POST /api/activity/session
+[2026-01-19T13:51:55.638Z] GET /api/news
+1:51:55 PM [express] GET /api/news 200 in 202ms :: [{"id":"official-1","title":"Students can now swi…
+[2026-01-19T13:52:14.171Z] POST /api/activity/session
+1:52:14 PM [express] POST /api/activity/session 200 in 234ms :: {"sessionId":"18b5729f-8abc-4699-bc0…
+[2026-01-19T13:52:44.173Z] POST /api/activity/session
+1:52:44 PM [express] POST /api/activity/session 200 in 425ms :: {"sessionId":"18b5729f-8abc-4699-bc0…
+[2026-01-19T13:53:14.167Z] POST /api/activity/session
+1:53:14 PM [express] POST /api/activity/session 200 in 232ms :: {"sessionId":"18b5729f-8abc-4699-bc0…
+[2026-01-19T13:53:16.876Z] POST /api/activity/session/end
+1:53:16 PM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+[2026-01-19T13:53:34.521Z] GET /api/auth/user
+[2026-01-19T13:53:34.528Z] POST /api/activity/session
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:53:34 PM [express] POST /api/activity/session 200 in 263ms :: {"sessionId":"4d95038d-c631-4412-b05…
+1:53:34 PM [express] GET /api/auth/user 200 in 281ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a"…
+[2026-01-19T13:53:34.982Z] POST /api/activity/page-view
+1:53:35 PM [express] POST /api/activity/page-view 200 in 272ms :: {"pageViewId":"c8676a93-5eec-4b95-…
+[2026-01-19T13:54:05.147Z] POST /api/activity/session
+1:54:05 PM [express] POST /api/activity/session 200 in 233ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:54:35.302Z] POST /api/activity/session
+1:54:35 PM [express] POST /api/activity/session 200 in 289ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:55:05.132Z] POST /api/activity/session
+1:55:05 PM [express] POST /api/activity/session 200 in 260ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:55:35.147Z] POST /api/activity/session
+1:55:35 PM [express] POST /api/activity/session 200 in 238ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:56:05.142Z] POST /api/activity/session
+1:56:05 PM [express] POST /api/activity/session 200 in 255ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:56:35.133Z] POST /api/activity/session
+1:56:35 PM [express] POST /api/activity/session 200 in 266ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:57:05.143Z] POST /api/activity/session
+1:57:05 PM [express] POST /api/activity/session 200 in 243ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:57:35.151Z] POST /api/activity/session
+1:57:35 PM [express] POST /api/activity/session 200 in 249ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:58:05.133Z] POST /api/activity/session
+1:58:05 PM [express] POST /api/activity/session 200 in 233ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:58:35.129Z] POST /api/activity/session
+1:58:35 PM [express] POST /api/activity/session 200 in 235ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:59:05.133Z] POST /api/activity/session
+1:59:05 PM [express] POST /api/activity/session 200 in 226ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T13:59:35.138Z] POST /api/activity/session
+1:59:35 PM [express] POST /api/activity/session 200 in 261ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T14:00:05.126Z] POST /api/activity/session
+2:00:05 PM [express] POST /api/activity/session 200 in 287ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T14:00:35.143Z] POST /api/activity/session
+2:00:35 PM [express] POST /api/activity/session 200 in 217ms :: {"sessionId":"4d95038d-c631-4412-b05…
+[2026-01-19T14:00:38.853Z] POST /api/activity/session/end
+2:00:38 PM [express] POST /api/activity/session/end 200 in 31ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
