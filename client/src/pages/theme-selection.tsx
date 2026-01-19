@@ -12,6 +12,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Palette, 
   Type, 
@@ -29,7 +39,8 @@ import {
   Save
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { THEME_TEMPLATES, AVAILABLE_FONTS, PRESET_COLORS, EXCEL_COLOR_THEMES, getPaletteById, getThemeById, ThemeTemplate, ExcelColorTheme } from "@/lib/themeTemplates";
 import { ThemePreviewSVG } from "@/components/ThemePreviewSVG";
 import { CoverPageEditor, TextElement } from "@/components/CoverPageEditor";
@@ -60,44 +71,95 @@ export default function ThemeSelectionPage() {
   const [textElements, setTextElements] = useState<TextElement[]>([]);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [selectedPalette, setSelectedPalette] = useState<string | null>(null);
+  const [showGenerateConfirm, setShowGenerateConfirm] = useState(false);
+  const [isSavingCover, setIsSavingCover] = useState(false);
 
   const { data: user } = useQuery<{ firstName?: string; lastName?: string; email?: string }>({
     queryKey: ['/api/auth/user'],
   });
 
+  const { data: savedCoverDesign, isLoading: isLoadingCoverDesign, isFetched: isCoverDesignFetched } = useQuery<{
+    id: string;
+    themeId: string | null;
+    primaryColor: string | null;
+    secondaryColor: string | null;
+    font: string | null;
+    backgroundImage: string | null;
+    useFullCoverImage: boolean;
+    textElements: TextElement[] | null;
+    paletteId: string | null;
+  } | null>({
+    queryKey: ['/api/cover-designs/latest'],
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const [hasLoadedDesign, setHasLoadedDesign] = useState(false);
+
+  useEffect(() => {
+    if (hasLoadedDesign) return;
+    if (!isCoverDesignFetched) return;
+    
+    if (savedCoverDesign) {
+      if (savedCoverDesign.themeId) setSelectedTheme(savedCoverDesign.themeId);
+      if (savedCoverDesign.primaryColor) setPrimaryColor(savedCoverDesign.primaryColor);
+      if (savedCoverDesign.secondaryColor) setSecondaryColor(savedCoverDesign.secondaryColor);
+      if (savedCoverDesign.font) setSelectedFont(savedCoverDesign.font);
+      if (savedCoverDesign.backgroundImage) setBackgroundImage(savedCoverDesign.backgroundImage);
+      if (savedCoverDesign.useFullCoverImage !== undefined) setUseFullCoverImage(savedCoverDesign.useFullCoverImage);
+      if (savedCoverDesign.textElements) setTextElements(savedCoverDesign.textElements);
+      if (savedCoverDesign.paletteId) setSelectedPalette(savedCoverDesign.paletteId);
+      setHasLoadedDesign(true);
+    } else {
+      const savedTheme = localStorage.getItem('selectedTheme');
+      if (savedTheme) {
+        try {
+          const parsed = JSON.parse(savedTheme);
+          if (parsed.themeId) {
+            setSelectedTheme(parsed.themeId);
+            setPrimaryColor(parsed.primaryColor);
+            setSecondaryColor(parsed.secondaryColor);
+            setSelectedFont(parsed.font);
+            setThemeApplied(true);
+            if (parsed.backgroundImage) {
+              setBackgroundImage(parsed.backgroundImage);
+            }
+            if (parsed.useFullCoverImage !== undefined) {
+              setUseFullCoverImage(parsed.useFullCoverImage);
+            }
+            if (parsed.textElements) {
+              setTextElements(parsed.textElements);
+            }
+            if (parsed.paletteId) {
+              setSelectedPalette(parsed.paletteId);
+            }
+          }
+        } catch (e) {
+          console.error('Failed to parse saved theme');
+        }
+      }
+      setHasLoadedDesign(true);
+    }
+  }, [isCoverDesignFetched, savedCoverDesign, hasLoadedDesign]);
+
+  const saveCoverDesignMutation = useMutation({
+    mutationFn: async (data: {
+      themeId: string | null;
+      primaryColor: string;
+      secondaryColor: string;
+      font: string;
+      backgroundImage: string | null;
+      useFullCoverImage: boolean;
+      textElements: TextElement[];
+      paletteId: string | null;
+      paletteColors: string[] | null;
+    }) => {
+      return apiRequest('POST', '/api/cover-designs', data);
+    },
+  });
+
   const founderName = user?.firstName && user?.lastName 
     ? `${user.firstName} ${user.lastName}` 
     : user?.firstName || 'Your Name';
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('selectedTheme');
-    if (savedTheme) {
-      try {
-        const parsed = JSON.parse(savedTheme);
-        if (parsed.themeId) {
-          setSelectedTheme(parsed.themeId);
-          setPrimaryColor(parsed.primaryColor);
-          setSecondaryColor(parsed.secondaryColor);
-          setSelectedFont(parsed.font);
-          setThemeApplied(true);
-          if (parsed.backgroundImage) {
-            setBackgroundImage(parsed.backgroundImage);
-          }
-          if (parsed.useFullCoverImage !== undefined) {
-            setUseFullCoverImage(parsed.useFullCoverImage);
-          }
-          if (parsed.textElements) {
-            setTextElements(parsed.textElements);
-          }
-          if (parsed.paletteId) {
-            setSelectedPalette(parsed.paletteId);
-          }
-        }
-      } catch (e) {
-        console.error('Failed to parse saved theme');
-      }
-    }
-  }, []);
 
   const handleThemeSelect = (themeId: string) => {
     setSelectedTheme(themeId);
@@ -655,7 +717,7 @@ export default function ThemeSelectionPage() {
             <Button 
               size="lg"
               className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md min-w-[200px]"
-              onClick={handleGeneratePlan}
+              onClick={() => setShowGenerateConfirm(true)}
               data-testid="button-generate-plan"
             >
               <FileText className="w-4 h-4" />
@@ -750,23 +812,77 @@ export default function ThemeSelectionPage() {
                 </Button>
                 <Button
                   className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
-                  onClick={() => {
-                    setIsEditorOpen(false);
-                    toast({
-                      title: "Cover Updated",
-                      description: `${textElements.length} text element(s) added to your cover.`,
-                    });
+                  disabled={isSavingCover}
+                  onClick={async () => {
+                    setIsSavingCover(true);
+                    try {
+                      await saveCoverDesignMutation.mutateAsync({
+                        themeId: selectedTheme,
+                        primaryColor,
+                        secondaryColor,
+                        font: selectedFont,
+                        backgroundImage,
+                        useFullCoverImage,
+                        textElements,
+                        paletteId: selectedPalette,
+                        paletteColors: selectedPalette ? getPaletteById(selectedPalette)?.colors || null : null,
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['/api/cover-designs/latest'] });
+                      setIsEditorOpen(false);
+                      toast({
+                        title: "Cover Saved",
+                        description: "Your cover design has been saved permanently. You can access it anytime.",
+                      });
+                    } catch (error) {
+                      setIsEditorOpen(false);
+                      toast({
+                        title: "Cover Updated Locally",
+                        description: `${textElements.length} text element(s) added to your cover.`,
+                      });
+                    } finally {
+                      setIsSavingCover(false);
+                    }
                   }}
                   data-testid="button-save-cover"
                 >
-                  <Save className="w-4 h-4" />
-                  Save Cover Design
+                  {isSavingCover ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  {isSavingCover ? 'Saving...' : 'Save Cover Design'}
                 </Button>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={showGenerateConfirm} onOpenChange={setShowGenerateConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Generate Business Plan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You're about to start the business plan generation process. This will take you to the questionnaire where you'll provide details about your business.
+              {themeApplied && (
+                <span className="block mt-2 text-emerald-600 font-medium">
+                  Your theme settings have been saved and will be applied to your plan.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-generate">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-emerald-500 hover:bg-emerald-600 text-white"
+              onClick={handleGeneratePlan}
+              data-testid="button-confirm-generate"
+            >
+              Continue to Questionnaire
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
