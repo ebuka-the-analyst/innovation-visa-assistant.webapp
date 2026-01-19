@@ -131,6 +131,13 @@ export const businessPlans = pgTable("business_plans", {
   
   supportingEvidence: text("supporting_evidence"),
   
+  // Theme/Template Selection
+  themeId: varchar("theme_id", { length: 50 }), // 'white-red-modern', 'white-red-corporate', 'blue-modern', etc.
+  themePrimaryColor: varchar("theme_primary_color", { length: 20 }), // Hex color like '#dc2626'
+  themeSecondaryColor: varchar("theme_secondary_color", { length: 20 }), // Hex color like '#1e3a5f'
+  themeFont: varchar("theme_font", { length: 50 }), // 'Inter', 'Poppins', 'Montserrat', etc.
+  themeAppliedAt: timestamp("theme_applied_at"),
+  
   generatedContent: text("generated_content"),
   chartData: text("chart_data"), // JSON string containing structured chart data for visualizations
   pdfUrl: text("pdf_url"),
