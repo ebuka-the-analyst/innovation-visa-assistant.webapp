@@ -714,6 +714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         ],
         mode: "payment",
+        allow_promotion_codes: true,
         success_url: `${baseUrl}/generation?session_id={CHECKOUT_SESSION_ID}&plan_id=${planId}`,
         cancel_url: `${baseUrl}/questionnaire`,
         metadata: {
