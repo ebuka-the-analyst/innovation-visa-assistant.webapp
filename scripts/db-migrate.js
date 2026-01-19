@@ -78,7 +78,8 @@ async function migrate() {
       { name: 'theme_font', type: 'VARCHAR(50)' },
       { name: 'theme_applied_at', type: 'TIMESTAMP' },
       { name: 'background_image', type: 'TEXT' },
-      { name: 'use_full_cover_image', type: 'BOOLEAN DEFAULT FALSE' }
+      { name: 'use_full_cover_image', type: 'BOOLEAN DEFAULT FALSE' },
+      { name: 'text_elements', type: 'TEXT' }
     ];
     
     for (const col of themeColumns) {

@@ -2114,7 +2114,20 @@ ${generatedSections.join('\n\n---\n\n')}`;
         themeFont: savedCoverDesign?.font || businessPlan.themeFont,
         backgroundImage: savedCoverDesign?.backgroundImage || businessPlan.backgroundImage || null,
         useFullCoverImage: savedCoverDesign?.useFullCoverImage || businessPlan.useFullCoverImage || false,
-        textElements: savedCoverDesign?.textElements || null,
+        textElements: (() => {
+          // Prioritize savedCoverDesign's textElements
+          if (savedCoverDesign?.textElements) return savedCoverDesign.textElements;
+          // Parse businessPlan's textElements from JSON string with error handling
+          if (businessPlan.textElements) {
+            try {
+              return JSON.parse(businessPlan.textElements as string);
+            } catch (e) {
+              console.error("[HTML View] Failed to parse textElements:", e);
+              return null;
+            }
+          }
+          return null;
+        })(),
         paletteId: savedCoverDesign?.paletteId || null,
       };
 
@@ -2139,6 +2152,8 @@ ${generatedSections.join('\n\n---\n\n')}`;
           themeFont: planWithTheme.themeFont,
           hasBackgroundImage: !!planWithTheme.backgroundImage,
           useFullCoverImage: planWithTheme.useFullCoverImage,
+          hasTextElements: !!planWithTheme.textElements,
+          textElementsCount: Array.isArray(planWithTheme.textElements) ? planWithTheme.textElements.length : 0,
         },
       });
 

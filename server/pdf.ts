@@ -820,28 +820,36 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
     .toc {
       background: #f8fafc;
-      padding: 30px;
+      padding: 20px 30px;
       border-radius: 8px;
-      margin: 30px 0;
+      margin: 20px 0;
       page-break-after: always;
+      page-break-inside: avoid;
       border-left: 4px solid ${primaryColor};
     }
     .toc h2 {
       color: ${primaryColor};
       border-bottom: 2px solid ${primaryColor};
-      padding-bottom: 10px;
-      margin-bottom: 20px;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      font-size: 16pt;
     }
     .toc ol {
       list-style: none;
       padding: 0;
+      margin: 0;
       counter-reset: toc-counter;
+      columns: 1;
     }
     .toc li {
       counter-increment: toc-counter;
-      padding: 8px 0;
+      padding: 4px 0;
       border-bottom: 1px dotted #ddd;
-      font-size: 12pt;
+      font-size: 10pt;
+      line-height: 1.4;
+    }
+    .toc li:last-child {
+      border-bottom: none;
     }
     .toc li::before {
       content: counter(toc-counter) ". ";
@@ -895,7 +903,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
   ${generateCoverPageHTML(plan, primaryColor, secondaryColor)}
   
   <div class="content">
-    ${formatContentWithCharts(content, chartData, primaryColor)}
+    ${formatContentWithCharts(content, chartData, primaryColor, plan.useFullCoverImage || false)}
   </div>
 </body>
 </html>
@@ -993,7 +1001,7 @@ function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string |
   `;
 }
 
-function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string): string {
+function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string, skipTitle: boolean = false): string {
   const lines = markdown.split('\n');
   let html = '';
   let currentSection = '';
@@ -1001,6 +1009,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
   const usedCharts = new Set<ChartType>();
   
   let inToc = false;
+  let skippedTitle = false; // Track if we've already skipped the first title block
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -1047,6 +1056,20 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
         }
       }
     } else if (line.startsWith('# ')) {
+      // Skip the first H1 heading entirely when using custom cover (the cover already has the title)
+      if (skipTitle && !skippedTitle) {
+        skippedTitle = true;
+        // Also skip the next few lines (industry, tier, date info) as they're on the custom cover
+        while (i + 1 < lines.length) {
+          const nextLine = lines[i + 1]?.trim() || '';
+          if (nextLine.startsWith('**') || nextLine === '') {
+            i++;
+          } else {
+            break;
+          }
+        }
+        continue;
+      }
       html += `<h1>${line.slice(2)}</h1>\n`;
     } else if (line.startsWith('#### ')) {
       html += `<h4>${line.slice(5)}</h4>\n`;

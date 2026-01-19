@@ -841,6 +841,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           // Custom cover image (Canva uploads)
           backgroundImage: selectedTheme?.backgroundImage || null,
           useFullCoverImage: selectedTheme?.useFullCoverImage || false,
+          textElements: selectedTheme?.textElements ? JSON.stringify(selectedTheme.textElements) : null,
         };
 
         const response = await fetch('/api/questionnaire/submit', {

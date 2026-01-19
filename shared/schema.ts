@@ -141,6 +141,7 @@ export const businessPlans = pgTable("business_plans", {
   // Custom Cover Image (Canva uploads)
   backgroundImage: text("background_image"), // Base64 encoded image data
   useFullCoverImage: boolean("use_full_cover_image").default(false), // Use full custom cover instead of SVG theme
+  textElements: text("text_elements"), // JSON string of text elements for custom cover overlay
   
   generatedContent: text("generated_content"),
   chartData: text("chart_data"), // JSON string containing structured chart data for visualizations
@@ -249,6 +250,7 @@ export const questionnaireSchema = z.object({
   // Custom cover image (Canva uploads)
   backgroundImage: z.string().nullable().optional(), // Base64 encoded image
   useFullCoverImage: z.boolean().optional().default(false),
+  textElements: z.string().nullable().optional(), // JSON string of text overlay elements
 });
 
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
