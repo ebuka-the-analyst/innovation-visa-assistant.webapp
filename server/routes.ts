@@ -2149,8 +2149,13 @@ ${generatedSections.join('\n\n---\n\n')}`;
       
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.send(enhancedHtml);
-    } catch (error) {
-      console.error("HTML view error:", error);
+    } catch (error: any) {
+      console.error("HTML view error:", {
+        planId: req.params.planId,
+        userId: (req.user as any)?.id,
+        error: error?.message || error,
+        stack: error?.stack
+      });
       res.status(500).json({ error: "Failed to generate HTML view" });
     }
   });

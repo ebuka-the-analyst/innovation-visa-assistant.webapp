@@ -914,29 +914,39 @@ function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string |
   if (plan.useFullCoverImage && plan.backgroundImage) {
     // Render custom text elements if they exist
     let textElementsHtml = '';
-    if (plan.textElements && Array.isArray(plan.textElements)) {
-      for (const el of plan.textElements) {
-        const style = `
-          position: absolute;
-          left: ${el.x}%;
-          top: ${el.y}%;
-          font-size: ${el.fontSize}px;
-          font-weight: ${el.fontWeight || 'normal'};
-          color: ${el.color};
-          transform: translate(-50%, -50%);
-          text-align: ${el.textAlign || 'center'};
-          white-space: pre-wrap;
-          max-width: 90%;
-        `;
-        // Replace template variables with actual values
-        let content = el.content
-          .replace(/\{\{year\}\}/gi, currentYear.toString())
-          .replace(/\{\{businessName\}\}/gi, plan.businessName || '')
-          .replace(/\{\{industry\}\}/gi, plan.industry || '')
-          .replace(/\{\{tier\}\}/gi, tierDisplay)
-          .replace(/\{\{date\}\}/gi, generatedDate);
-        textElementsHtml += `<div style="${style}">${content}</div>`;
+    try {
+      if (plan.textElements && Array.isArray(plan.textElements)) {
+        for (const el of plan.textElements) {
+          // Validate required properties exist
+          if (!el || typeof el.x !== 'number' || typeof el.y !== 'number') {
+            continue; // Skip invalid elements
+          }
+          const style = `
+            position: absolute;
+            left: ${el.x}%;
+            top: ${el.y}%;
+            font-size: ${el.fontSize || 24}px;
+            font-weight: ${el.fontWeight || 'normal'};
+            color: ${el.color || '#000000'};
+            transform: translate(-50%, -50%);
+            text-align: ${el.textAlign || 'center'};
+            white-space: pre-wrap;
+            max-width: 90%;
+          `;
+          // Replace template variables with actual values - safely handle undefined content
+          const rawContent = String(el.content ?? '');
+          let content = rawContent
+            .replace(/\{\{year\}\}/gi, currentYear.toString())
+            .replace(/\{\{businessName\}\}/gi, plan.businessName || '')
+            .replace(/\{\{industry\}\}/gi, plan.industry || '')
+            .replace(/\{\{tier\}\}/gi, tierDisplay)
+            .replace(/\{\{date\}\}/gi, generatedDate);
+          textElementsHtml += `<div style="${style}">${content}</div>`;
+        }
       }
+    } catch (textError) {
+      console.error('Error rendering text elements:', textError);
+      // Continue with empty textElementsHtml rather than failing
     }
     
     return `
