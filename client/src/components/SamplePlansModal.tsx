@@ -353,14 +353,14 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                     <div className="flex items-center gap-2 mb-3">
                       <Zap className="w-5 h-5 text-emerald-500" />
                       <h4 className="font-bold text-lg">Basic</h4>
-                      <Badge className="bg-emerald-500 text-white ml-auto">£9</Badge>
+                      <Badge className="bg-emerald-500 text-white ml-auto">£29</Badge>
                     </div>
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> 25-35 pages</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> 11 core sections</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> 1 business plan coin</li>
                       <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> Visual charts included</li>
                       <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> PDF + Word download</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> Table of Contents</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> 20 tools access</li>
                     </ul>
                   </div>
                   
@@ -373,14 +373,14 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                     <div className="flex items-center gap-2 mb-3 mt-2">
                       <Sparkles className="w-5 h-5 text-violet-500" />
                       <h4 className="font-bold text-lg">Premium</h4>
-                      <Badge className="bg-violet-500 text-white ml-auto">£19</Badge>
+                      <Badge className="bg-violet-500 text-white ml-auto">£59</Badge>
                     </div>
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> 40-55 pages</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> 13 comprehensive sections</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> 3 business plan coins</li>
                       <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> All charts + financial tables</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> Competitor analysis</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> Risk mitigation plan</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> 83 tools access</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> Industry frameworks</li>
                     </ul>
                   </div>
                   
@@ -390,14 +390,14 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                     <div className="flex items-center gap-2 mb-3">
                       <Award className="w-5 h-5 text-amber-500" />
                       <h4 className="font-bold text-lg">Enterprise</h4>
-                      <Badge className="bg-amber-500 text-white ml-auto">£29</Badge>
+                      <Badge className="bg-amber-500 text-white ml-auto">£85</Badge>
                     </div>
                     <ul className="space-y-2 text-sm">
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> 55-80 pages</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> 13+ expert sections</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> All Premium features</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> IP & regulatory strategy</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> Investment deck ready</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> 56-80 pages</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> 6 business plan coins</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> 109 tools access</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> Full innovation deep-dive</li>
+                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> Advanced modelling</li>
                     </ul>
                   </div>
                 </div>

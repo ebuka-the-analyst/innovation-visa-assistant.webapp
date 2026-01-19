@@ -23,30 +23,31 @@ interface PromoCodeValidation {
   finalPrice?: number;
 }
 
+// 2026 PRICING - Effective January 2026
 const PRICING: Record<string, { name: string; amount: number; description: string; features: string[] }> = {
   basic: {
     name: "Basic Plan",
-    amount: 900,
+    amount: 2900,
     description: "Perfect for straightforward businesses",
-    features: ["1 business plan coin", "20 tools access", "48-hour delivery", "PDF download"]
+    features: ["1 business plan coin", "20 tools access", "25-35 page plan", "Core innovation coverage"]
   },
   premium: {
     name: "Premium Plan",
-    amount: 1900,
+    amount: 5900,
     description: "Most popular - comprehensive coverage",
-    features: ["3 business plan coins", "83 tools access", "24-hour priority delivery", "Market research integration"]
+    features: ["3 business plan coins", "83 tools access", "40-55 page plan", "Industry frameworks"]
   },
   enterprise: {
     name: "Enterprise Plan",
-    amount: 2900,
+    amount: 8500,
     description: "Maximum detail for complex ventures",
-    features: ["6 business plan coins", "109 tools access", "12-hour priority delivery", "IP & patent strategy"]
+    features: ["6 business plan coins", "109 tools access", "56-80 page plan", "Advanced modelling"]
   },
   ultimate: {
     name: "Ultimate Plan",
-    amount: 3900,
-    description: "Everything for guaranteed approval",
-    features: ["10 business plan coins", "109 tools access", "1-hour rush delivery", "Success guarantee coaching"]
+    amount: 11000,
+    description: "Maximum support for serious founders",
+    features: ["12 business plan coins", "109 tools access", "80+ page plan", "Priority support"]
   }
 };
 
