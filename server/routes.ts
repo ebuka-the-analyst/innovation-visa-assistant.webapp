@@ -637,15 +637,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Increment promo code usage
         await storage.incrementPromoCodeUsage(validPromoCode.id);
         
-        // Upgrade user's subscription tier
+        // Determine credits for the tier
+        const tierCreditsMap: Record<string, number | 'unlimited'> = {
+          free: 0,
+          basic: 1,
+          premium: 3,
+          enterprise: 'unlimited',
+          ultimate: 'unlimited',
+        };
+        const tierCredits = tierCreditsMap[businessPlan.tier] || 0;
+        const creditsToAdd = tierCredits === 'unlimited' ? 0 : tierCredits;
+        const hasUnlimited = businessPlan.tier === 'enterprise' || businessPlan.tier === 'ultimate';
+        
+        // Upgrade user's subscription tier AND add credits
         await storage.updateUser(user.id, {
           subscriptionTier: businessPlan.tier,
           subscriptionStatus: 'active',
           subscriptionStartDate: new Date(),
           subscriptionEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+          planCredits: hasUnlimited ? 0 : creditsToAdd, // Set credits for the tier
         });
         
-        console.log(`[CHECKOUT] User ${user.id} upgraded to ${businessPlan.tier} via 100% promo code ${validPromoCode.code}`);
+        console.log(`[CHECKOUT] User ${user.id} upgraded to ${businessPlan.tier} with ${hasUnlimited ? 'unlimited' : creditsToAdd} credits via 100% promo code ${validPromoCode.code}`);
         
         return res.json({ 
           skipCheckout: true, 
@@ -804,6 +817,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Fixed amount - discountValue is already stored in pence
           finalAmount = Math.max(0, pricing.amount - validPromoCode.discountValue);
         }
+      }
+
+      // CRITICAL: If 100% discount applied (finalAmount = 0), bypass Stripe entirely
+      if (finalAmount === 0 && validPromoCode) {
+        console.log(`[DIRECT SUBSCRIBE] 100% discount applied with promo ${validPromoCode.code} - bypassing Stripe payment`);
+        
+        // Record promo code redemption
+        await storage.createPromoRedemption({
+          promoCodeId: validPromoCode.id,
+          userId: user.id,
+          discountApplied: pricing.amount,
+          originalAmount: pricing.amount,
+          finalAmount: 0,
+          appliedAt: 'direct_subscribe',
+        });
+        
+        // Increment promo code usage
+        await storage.incrementPromoCodeUsage(validPromoCode.id);
+        
+        // Determine credits for the tier
+        const tierCreditsMap: Record<string, number | 'unlimited'> = {
+          free: 0,
+          basic: 1,
+          premium: 3,
+          enterprise: 'unlimited',
+          ultimate: 'unlimited',
+        };
+        const tierCredits = tierCreditsMap[tier] || 0;
+        const creditsToAdd = tierCredits === 'unlimited' ? 0 : tierCredits;
+        const hasUnlimited = tier === 'enterprise' || tier === 'ultimate';
+        
+        // Upgrade user's subscription tier AND add credits
+        await storage.updateUser(user.id, {
+          subscriptionTier: tier,
+          subscriptionStatus: 'active',
+          subscriptionStartDate: new Date(),
+          subscriptionEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+          planCredits: hasUnlimited ? 0 : creditsToAdd, // Set credits for the tier
+        });
+        
+        console.log(`[DIRECT SUBSCRIBE] User ${user.id} upgraded to ${tier} with ${hasUnlimited ? 'unlimited' : creditsToAdd} credits via 100% promo code ${validPromoCode.code}`);
+        
+        return res.json({ 
+          skipCheckout: true, 
+          redirectUrl: `/questionnaire?upgraded=true&tier=${tier}&promo_applied=true` 
+        });
       }
 
       // NOTE: We no longer create a business plan on direct subscription

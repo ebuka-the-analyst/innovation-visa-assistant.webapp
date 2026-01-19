@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+a120fca0
+Active
+
+Jan 19, 2026, 7:56 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+8:01:42 PM [express] POST /api/activity/session 200 in 15ms :: {"sessionId":"7d80379d-96f7-43d0-bf10…
+[2026-01-19T20:01:44.850Z] POST /api/cover-designs
+8:01:45 PM [express] POST /api/cover-designs 200 in 358ms :: {"success":true,"design":{"id":"7c35835…
+[2026-01-19T20:01:45.871Z] GET /api/cover-designs/latest
+8:01:46 PM [express] GET /api/cover-designs/latest 200 in 500ms :: {"id":"7c35835c-788c-4991-bf96-61…
+[2026-01-19T20:01:56.301Z] POST /api/questionnaire/submit
+  themePrimaryColor: '#4472C4',
+  themeSecondaryColor: '#ED7D31',
+  themeFont: 'Poppins'
+}
+[Questionnaire] Parsed theme data: {
+  themeId: 'orange-modern-proposal',
+  themePrimaryColor: '#4472C4',
+  themeSecondaryColor: '#ED7D31',
+  themeFont: 'Poppins'
+}
+[Questionnaire] Plan created with theme: {
+  planId: '57e9d363-c247-4fc2-b3fb-ef6ce53947f9',
+  themeId: 'orange-modern-proposal',
+  themePrimaryColor: '#4472C4',
+  themeFont: 'Poppins'
+}
+8:01:57 PM [express] POST /api/questionnaire/submit 200 in 231ms :: {"success":true,"planId":"57e9d3…
+Questionnaire submission received - Theme data: {
+  themeId: 'orange-modern-proposal',
+[2026-01-19T20:01:57.389Z] POST /api/payment/create-checkout
+[STRIPE] Using base URL for redirects: https://innovatorfoundervisaassistant.co.uk
+[Stripe] Using LIVE mode credentials - payments are real
+8:01:57 PM [express] POST /api/payment/create-checkout 200 in 476ms :: {"sessionId":"cs_live_b1Wsa9u…
+[2026-01-19T20:01:58.122Z] POST /api/activity/session/end
+8:01:58 PM [express] POST /api/activity/session/end 200 in 25ms :: {"success":true}
+[2026-01-19T20:01:58.341Z] POST /api/activity/session/end
+8:01:58 PM [express] POST /api/activity/session/end 200 in 17ms :: {"success":true}
+[2026-01-19T20:02:39.890Z] GET /generation?session_id=cs_live_b1Wsa9utJoOmykuRiltQOwnxWfHqhd4IY0rJ17fZawGEzPvag0q30ukgLe&plan_id=57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+[2026-01-19T20:02:40.441Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: free (raw: free)
+8:02:40 PM [express] GET /api/auth/user 200 in 16ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+[2026-01-19T20:02:40.720Z] GET /assets/generation-D4tmN8b1.js
+[2026-01-19T20:02:40.879Z] GET /api/partner/status
+[2026-01-19T20:02:40.880Z] GET /assets/jspdf.es.min-BSIV3Hrx.js
+[2026-01-19T20:02:40.888Z] POST /api/activity/session
+[2026-01-19T20:02:40.890Z] POST /api/activity/session
+8:02:40 PM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"be32c377-4286-47b5-bfb4…
+8:02:40 PM [express] GET /api/partner/status 200 in 29ms :: {"isPartner":false,"promoCodeCount":0}
+8:02:40 PM [express] POST /api/activity/session 200 in 31ms :: {"sessionId":"d7d812de-b22d-4e8a-b2a7…
+[2026-01-19T20:02:41.091Z] POST /api/activity/page-view
+8:02:41 PM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"783ab823-3ac0-4e6b-8…
+[2026-01-19T20:02:41.609Z] POST /api/payment/verify
+[Stripe] Using LIVE mode credentials - payments are real
+[PAYMENT] User 3e0feeab-8d95-4aed-a377-4cb40fbea78a upgraded to premium tier after payment for plan 57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+[Email Send] Attempting to send email to: ebuka.umeh40@gmail.com
+[Email Send] Provider: resend | Resend: true | SMTP: false
+[Email Send] Using Resend HTTP API...
+[Email Send] Resend success, messageId: 0d5d1930-4427-495c-ad53-3f37df9754ee
+Email sent successfully to: ebuka.umeh40@gmail.com MessageId: 0d5d1930-4427-495c-ad53-3f37df9754ee
+8:02:42 PM [express] POST /api/payment/verify 200 in 722ms :: {"success":true,"verified":true,"tier"…
+[2026-01-19T20:02:42.518Z] POST /api/generate/start
+8:02:42 PM [express] POST /api/generate/start 403 in 20ms :: {"error":"Insufficient credits. Please …
+[2026-01-19T20:02:44.110Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:02:44 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 20ms :: {"…
+[2026-01-19T20:02:46.614Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:02:46 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 18ms :: {"…
+8:02:49 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 19ms :: {"…
+[2026-01-19T20:02:49.158Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+[2026-01-19T20:02:50.731Z] POST /api/activity/session/end
+8:02:50 PM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+[2026-01-19T20:02:51.867Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:02:51 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 26ms :: {"…
+[2026-01-19T20:02:54.856Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:02:54 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 21ms :: {"…
+[2026-01-19T20:02:56.863Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:02:56 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 19ms :: {"…
+[2026-01-19T20:02:59.852Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:02:59 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 28ms :: {"…
+[2026-01-19T20:03:01.872Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:01 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 33ms :: {"…
+[2026-01-19T20:03:04.868Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:04 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 21ms :: {"…
+[2026-01-19T20:03:06.879Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:06 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 21ms :: {"…
+[2026-01-19T20:03:09.855Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:09 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 21ms :: {"…
+[2026-01-19T20:03:11.859Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:11 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 19ms :: {"…
+[2026-01-19T20:03:14.854Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:14 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 19ms :: {"…
+[2026-01-19T20:03:16.619Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:16 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 33ms :: {"…
+[2026-01-19T20:03:16.932Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: premium (raw: premium)
+8:03:16 PM [express] GET /api/auth/user 200 in 11ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+[2026-01-19T20:03:17.091Z] POST /api/activity/session
+8:03:17 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"5b40a0ca-7574-490c-a3f2…
+[2026-01-19T20:03:17.288Z] POST /api/activity/page-view
+8:03:17 PM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"751b7037-d490-47b6-9…
+[2026-01-19T20:03:19.116Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:19 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 24ms :: {"…
+[2026-01-19T20:03:21.627Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:21 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 15ms :: {"…
+[2026-01-19T20:03:24.123Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:24 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 17ms :: {"…
+[2026-01-19T20:03:26.630Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:26 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 18ms :: {"…
+[2026-01-19T20:03:29.114Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:29 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 17ms :: {"…
+[2026-01-19T20:03:31.619Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:31 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 21ms :: {"…
+[2026-01-19T20:03:34.118Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:34 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 30ms :: {"…
+[2026-01-19T20:03:36.616Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:36 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 15ms :: {"…
+[2026-01-19T20:03:39.116Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:39 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 22ms :: {"…
+[2026-01-19T20:03:41.615Z] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9
+8:03:41 PM [express] GET /api/generate/status/57e9d363-c247-4fc2-b3fb-ef6ce53947f9 200 in 17ms :: {"…
+[2026-01-19T20:03:41.950Z] POST /api/activity/session/end
+8:03:41 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway

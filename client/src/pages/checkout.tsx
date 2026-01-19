@@ -138,9 +138,14 @@ export default function Checkout() {
       if (data.skipCheckout) {
         toast({
           title: "Success!",
-          description: "Your subscription has been activated!",
+          description: "Your subscription has been activated with 100% discount!",
         });
-        setLocation('/dashboard');
+        // Redirect to the URL provided by the server (questionnaire or generation)
+        if (data.redirectUrl) {
+          setLocation(data.redirectUrl);
+        } else {
+          setLocation('/questionnaire');
+        }
       } else if (data.url) {
         window.location.href = data.url;
       }
