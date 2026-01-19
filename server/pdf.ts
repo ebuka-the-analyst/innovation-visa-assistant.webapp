@@ -84,31 +84,46 @@ function generateCoverPageSVG(themeId: string | null, primaryColor: string, seco
       style: 'cyan-modern'
     };
   } else if (themeId === 'yellow-modern') {
-    // Yellow Bold Proposal - diagonal yellow accents with black contrast
+    // Yellow Bold Proposal - diagonal yellow accents with black contrast and starburst icon
     return {
       topLeft: '',
       topRight: `
-        <svg class="cover-decoration-top" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="50,0 150,0 150,100" fill="${primaryColor}" opacity="0.95"/>
-          <polygon points="80,0 150,0 150,70" fill="${primaryColor}" opacity="0.7"/>
+        <svg class="cover-decoration-top" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Yellow diagonal shape -->
+          <polygon points="100,0 200,0 200,120 150,150" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="130,0 200,0 200,90 160,110" fill="${primaryColor}" opacity="0.7"/>
+          <!-- Starburst icon -->
+          <g transform="translate(160, 40)">
+            <line x1="0" y1="-18" x2="0" y2="18" stroke="${primaryColor}" stroke-width="3"/>
+            <line x1="-18" y1="0" x2="18" y2="0" stroke="${primaryColor}" stroke-width="3"/>
+            <line x1="-13" y1="-13" x2="13" y2="13" stroke="${primaryColor}" stroke-width="3"/>
+            <line x1="13" y1="-13" x2="-13" y2="13" stroke="${primaryColor}" stroke-width="3"/>
+            <line x1="-15" y1="-8" x2="15" y2="8" stroke="${primaryColor}" stroke-width="2"/>
+            <line x1="-15" y1="8" x2="15" y2="-8" stroke="${primaryColor}" stroke-width="2"/>
+            <line x1="-8" y1="-15" x2="8" y2="15" stroke="${primaryColor}" stroke-width="2"/>
+            <line x1="8" y1="-15" x2="-8" y2="15" stroke="${primaryColor}" stroke-width="2"/>
+          </g>
         </svg>
       `,
       middleSection: `
-        <svg class="cover-decoration-middle" viewBox="0 0 600 80" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="0,0 250,0 280,80 0,80" fill="${primaryColor}" opacity="0.95"/>
-          <polygon points="0,10 220,10 245,70 0,70" fill="${primaryColor}" opacity="0.7"/>
+        <svg class="cover-decoration-middle" viewBox="0 0 600 90" xmlns="http://www.w3.org/2000/svg">
+          <!-- Yellow diagonal band with year -->
+          <polygon points="0,0 280,0 320,90 0,90" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="0,8 250,8 285,82 0,82" fill="${primaryColor}" opacity="0.7"/>
         </svg>
       `,
       bottomLeft: `
         <svg class="cover-decoration-bottom" viewBox="0 0 150 200" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="0,50 80,200 0,200" fill="${accentColor}" opacity="0.9"/>
-          <polygon points="0,100 50,200 0,200" fill="${accentColor}" opacity="0.7"/>
+          <!-- Black diagonal triangle -->
+          <polygon points="0,80 100,200 0,200" fill="${accentColor}" opacity="0.95"/>
+          <polygon points="0,120 60,200 0,200" fill="${accentColor}" opacity="0.8"/>
         </svg>
       `,
       bottomRight: `
-        <svg class="cover-decoration-corner" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="100,100 400,100 400,0 150,0" fill="${primaryColor}" opacity="0.95"/>
-          <polygon points="150,100 400,100 400,20 180,20" fill="${primaryColor}" opacity="0.7"/>
+        <svg class="cover-decoration-corner" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+          <!-- Yellow diagonal bar bottom -->
+          <polygon points="80,120 400,120 400,0 130,0" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="130,120 400,120 400,25 160,25" fill="${primaryColor}" opacity="0.7"/>
         </svg>
       `,
       style: 'yellow-modern'
@@ -182,48 +197,228 @@ function generateCoverPageSVG(themeId: string | null, primaryColor: string, seco
       style: 'red-circular'
     };
   } else if (themeId === 'blue-hexagon') {
-    // Blue Hexagon Shapes - hexagons with diagonal stripes and dot patterns
+    // Blue Hexagon Shapes - hexagons with diagonal stripes and dot patterns (matching reference exactly)
     return {
       topLeft: '',
       topRight: `
-        <svg class="cover-decoration-top" viewBox="0 0 350 350" xmlns="http://www.w3.org/2000/svg">
-          <g>
-            ${Array(5).fill(0).map((_, i) => `<polygon points="${290 + i * 8},${10 + i * 5} ${295 + i * 8},${5 + i * 5} ${300 + i * 8},${10 + i * 5}" fill="#9ca3af" opacity="0.5"/>`).join('')}
+        <svg class="cover-decoration-top" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Top triangles pattern -->
+          <g transform="translate(280, 10)">
+            ${Array(5).fill(0).map((_, row) => 
+              Array(6 - row).fill(0).map((__, col) => 
+                `<polygon points="${col * 12 + row * 6},${row * 10} ${col * 12 + 6 + row * 6},${row * 10 + 8} ${col * 12 + 12 + row * 6},${row * 10}" fill="#9ca3af" opacity="0.4"/>`
+              ).join('')
+            ).join('')}
           </g>
-          <polygon points="280,0 350,0 350,70 315,100 245,70" fill="${primaryColor}" opacity="0.95"/>
-          <polygon points="200,40 280,20 320,80 280,140 200,120 160,60" fill="${primaryColor}" opacity="0.9"/>
-          <polygon points="300,120 350,100 350,180 320,200 270,180 270,140" fill="${accentColor}" opacity="0.9"/>
-          <polygon points="180,100 260,80 300,140 260,200 180,180 140,120" fill="${accentColor}" opacity="0.3"/>
-          <polygon points="320,220 350,200 350,280" fill="${primaryColor}" opacity="0.8"/>
+          <!-- Large cyan shape top-right corner -->
+          <path d="M350,0 L400,0 L400,120 Q350,140 300,100 L350,0" fill="${primaryColor}" opacity="0.95"/>
+          <!-- Large hexagon -->
+          <polygon points="250,30 320,10 370,60 350,130 280,150 230,100" fill="${primaryColor}" opacity="0.9"/>
+          <!-- Navy hexagon -->
+          <polygon points="320,100 370,80 400,130 400,200 350,220 300,180" fill="${accentColor}" opacity="0.95"/>
+          <!-- Hollow hexagon outline -->
+          <polygon points="200,80 260,60 300,110 280,170 220,190 180,140" fill="none" stroke="${accentColor}" stroke-width="2" opacity="0.4"/>
+          <!-- Small hexagon bottom -->
+          <polygon points="330,240 360,225 385,250 375,285 345,300 320,275" fill="${accentColor}" opacity="0.5"/>
         </svg>
       `,
       middleSection: `
         <svg class="cover-decoration-middle" viewBox="0 0 600 100" xmlns="http://www.w3.org/2000/svg">
+          <!-- Dot grid pattern middle-right -->
           <g>
-            ${Array(7).fill(0).map((_, i) => `<circle cx="${420 + i * 12}" cy="${30 + (i % 2) * 12}" r="3" fill="#9ca3af" opacity="0.5"/>`).join('')}
-            ${Array(7).fill(0).map((_, i) => `<circle cx="${420 + i * 12}" cy="${50 + (i % 2) * 12}" r="3" fill="#9ca3af" opacity="0.5"/>`).join('')}
+            ${Array(5).fill(0).map((_, row) => 
+              Array(8).fill(0).map((__, col) => 
+                `<circle cx="${380 + col * 14}" cy="${25 + row * 12}" r="2.5" fill="#9ca3af" opacity="0.4"/>`
+              ).join('')
+            ).join('')}
           </g>
-          <polygon points="480,20 520,0 560,20 560,60 520,80 480,60" fill="${accentColor}" opacity="0.4"/>
+          <!-- Small hexagon -->
+          <polygon points="520,40 545,25 570,40 570,70 545,85 520,70" fill="${accentColor}" opacity="0.3"/>
         </svg>
       `,
       bottomLeft: `
         <svg class="cover-decoration-bottom" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+          <!-- Dot grid pattern bottom-left -->
           <g>
-            ${Array(6).fill(0).map((_, i) => `<circle cx="${20 + i * 12}" cy="${110 + (i % 2) * 12}" r="3" fill="${primaryColor}" opacity="0.5"/>`).join('')}
-            ${Array(6).fill(0).map((_, i) => `<circle cx="${20 + i * 12}" cy="${130 + (i % 2) * 12}" r="3" fill="${primaryColor}" opacity="0.5"/>`).join('')}
+            ${Array(4).fill(0).map((_, row) => 
+              Array(6).fill(0).map((__, col) => 
+                `<circle cx="${15 + col * 14}" cy="${100 + row * 12}" r="2.5" fill="${primaryColor}" opacity="0.5"/>`
+              ).join('')
+            ).join('')}
           </g>
         </svg>
       `,
       bottomRight: `
-        <svg class="cover-decoration-corner" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-          <rect x="100" y="50" width="100" height="20" fill="${primaryColor}" opacity="0.9" transform="rotate(45 150 60)"/>
-          <rect x="120" y="80" width="100" height="15" fill="${accentColor}" opacity="0.9" transform="rotate(45 170 87)"/>
-          <rect x="140" y="110" width="100" height="20" fill="${primaryColor}" opacity="0.9" transform="rotate(45 190 120)"/>
-          <circle cx="180" cy="180" r="15" fill="${primaryColor}" opacity="0.8"/>
-          <circle cx="160" cy="165" r="8" fill="${accentColor}" opacity="0.6"/>
+        <svg class="cover-decoration-corner" viewBox="0 0 250 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Diagonal stripes -->
+          <rect x="80" y="40" width="120" height="18" fill="${primaryColor}" opacity="0.95" transform="rotate(45 140 49)"/>
+          <rect x="100" y="70" width="120" height="14" fill="${accentColor}" opacity="0.95" transform="rotate(45 160 77)"/>
+          <rect x="120" y="100" width="120" height="18" fill="${primaryColor}" opacity="0.95" transform="rotate(45 180 109)"/>
+          <!-- Circles -->
+          <circle cx="200" cy="170" r="18" fill="${primaryColor}" opacity="0.9"/>
+          <circle cx="175" cy="150" r="10" fill="${accentColor}" opacity="0.7"/>
         </svg>
       `,
       style: 'blue-hexagon'
+    };
+  } else if (themeId === 'navy-company-profile') {
+    // Navy Company Profile - bold diagonal stripes
+    return {
+      topLeft: '',
+      topRight: `
+        <svg class="cover-decoration-top" viewBox="0 0 400 150" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,0 400,0 400,100 50,100" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="80,0 400,0 400,70 120,70" fill="${primaryColor}" opacity="0.7"/>
+        </svg>
+      `,
+      middleSection: '',
+      bottomLeft: `
+        <svg class="cover-decoration-bottom" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,80 120,200 0,200" fill="${accentColor}" opacity="0.95"/>
+          <polygon points="0,130 80,200 0,200" fill="${primaryColor}" opacity="0.8"/>
+        </svg>
+      `,
+      bottomRight: `
+        <svg class="cover-decoration-corner" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="100,0 400,200 400,0" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="180,0 400,150 400,0" fill="${primaryColor}" opacity="0.7"/>
+        </svg>
+      `,
+      style: 'navy-company-profile'
+    };
+  } else if (themeId === 'blue-orange-geometric') {
+    // Blue Orange Geometric - navy and coral shapes
+    return {
+      topLeft: '',
+      topRight: `
+        <svg class="cover-decoration-top" viewBox="0 0 400 350" xmlns="http://www.w3.org/2000/svg">
+          <!-- Orange triangle top -->
+          <polygon points="300,0 400,0 400,80" fill="${accentColor}" opacity="0.95"/>
+          <!-- Navy large shape -->
+          <polygon points="200,0 400,0 400,250 300,300 150,200" fill="${primaryColor}" opacity="0.95"/>
+          <!-- Small orange accent -->
+          <polygon points="350,60 400,40 400,100" fill="${accentColor}" opacity="0.8"/>
+        </svg>
+      `,
+      middleSection: '',
+      bottomLeft: `
+        <svg class="cover-decoration-bottom" viewBox="0 0 250 200" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,100 150,200 0,200" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="0,150 80,200 0,200" fill="${primaryColor}" opacity="0.7"/>
+        </svg>
+      `,
+      bottomRight: `
+        <svg class="cover-decoration-corner" viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+          <!-- Coral diagonal stripes -->
+          <rect x="150" y="80" width="100" height="15" fill="${accentColor}" opacity="0.9" transform="rotate(-45 200 87)"/>
+          <rect x="170" y="100" width="100" height="12" fill="${accentColor}" opacity="0.7" transform="rotate(-45 220 106)"/>
+          <rect x="190" y="120" width="100" height="15" fill="${accentColor}" opacity="0.9" transform="rotate(-45 240 127)"/>
+          <!-- Navy triangle -->
+          <polygon points="200,180 300,180 300,100" fill="${primaryColor}" opacity="0.95"/>
+        </svg>
+      `,
+      style: 'blue-orange-geometric'
+    };
+  } else if (themeId === 'white-red-hexagon') {
+    // White Red Hexagon - 3D red hexagons with shadows
+    return {
+      topLeft: `
+        <svg class="cover-decoration-top-left" viewBox="0 0 250 250" xmlns="http://www.w3.org/2000/svg">
+          <!-- 3D Hexagon cluster top-left -->
+          <g>
+            <!-- Shadow hexagons -->
+            <polygon points="-20,80 30,50 80,80 80,130 30,160 -20,130" fill="#e5e5e5" opacity="0.8"/>
+            <polygon points="40,40 90,10 140,40 140,90 90,120 40,90" fill="#e5e5e5" opacity="0.6"/>
+            <!-- Red hexagons -->
+            <polygon points="-30,70 20,40 70,70 70,120 20,150 -30,120" fill="${primaryColor}" opacity="0.95"/>
+            <polygon points="50,30 100,0 150,30 150,80 100,110 50,80" fill="${primaryColor}" opacity="0.9"/>
+            <polygon points="30,120 80,90 130,120 130,170 80,200 30,170" fill="#f5f5f5" stroke="#e5e5e5" stroke-width="2" opacity="0.9"/>
+          </g>
+        </svg>
+      `,
+      topRight: '',
+      middleSection: '',
+      bottomLeft: '',
+      bottomRight: `
+        <svg class="cover-decoration-corner" viewBox="0 0 300 280" xmlns="http://www.w3.org/2000/svg">
+          <!-- 3D Hexagon cluster bottom-right -->
+          <g>
+            <!-- Shadow hexagons -->
+            <polygon points="180,120 230,90 280,120 280,170 230,200 180,170" fill="#e5e5e5" opacity="0.8"/>
+            <polygon points="220,180 270,150 320,180 320,230 270,260 220,230" fill="#e5e5e5" opacity="0.6"/>
+            <!-- Red hexagons -->
+            <polygon points="200,100 250,70 300,100 300,150 250,180 200,150" fill="${primaryColor}" opacity="0.95"/>
+            <polygon points="240,160 290,130 340,160 340,210 290,240 240,210" fill="${primaryColor}" opacity="0.9"/>
+            <polygon points="160,160 210,130 260,160 260,210 210,240 160,210" fill="#f5f5f5" stroke="#e5e5e5" stroke-width="2" opacity="0.9"/>
+          </g>
+        </svg>
+      `,
+      style: 'white-red-hexagon'
+    };
+  } else if (themeId === 'white-red-waves') {
+    // White Red Waves - flowing curved waves with gray accents
+    return {
+      topLeft: `
+        <svg class="cover-decoration-top-left" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+          <!-- Logo placeholder -->
+          <polygon points="30,20 50,10 60,25 50,40 30,40 20,25" fill="${primaryColor}" opacity="0.9"/>
+          <polygon points="35,22 48,15 55,25 48,35 35,35 28,25" fill="${accentColor}" opacity="0.6"/>
+        </svg>
+      `,
+      topRight: `
+        <svg class="cover-decoration-top" viewBox="0 0 200 350" xmlns="http://www.w3.org/2000/svg">
+          <!-- Red curved wave top-right -->
+          <path d="M200,0 L200,350 Q150,300 160,200 Q170,100 200,50 Z" fill="${primaryColor}" opacity="0.95"/>
+          <path d="M200,0 L200,300 Q160,250 170,150 Q180,80 200,30 Z" fill="${primaryColor}" opacity="0.6"/>
+        </svg>
+      `,
+      middleSection: `
+        <svg class="cover-decoration-middle" viewBox="0 0 600 60" xmlns="http://www.w3.org/2000/svg">
+          <!-- Subtle gray wave in middle -->
+          <path d="M0,40 Q100,20 200,35 Q300,50 400,30 Q500,10 600,40 L600,60 L0,60 Z" fill="${accentColor}" opacity="0.3"/>
+          <path d="M0,50 Q150,30 300,45 Q450,60 600,35 L600,60 L0,60 Z" fill="${accentColor}" opacity="0.2"/>
+        </svg>
+      `,
+      bottomLeft: `
+        <svg class="cover-decoration-bottom" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+          <!-- Red curved wave bottom-left -->
+          <path d="M0,0 Q50,50 40,100 Q30,140 0,150 L0,0 Z" fill="${primaryColor}" opacity="0.95"/>
+          <path d="M0,50 Q30,80 25,120 Q20,145 0,150 L0,50 Z" fill="${primaryColor}" opacity="0.6"/>
+        </svg>
+      `,
+      bottomRight: '',
+      style: 'white-red-waves'
+    };
+  } else if (themeId === 'blue-curves-circles') {
+    // Blue Curves & Circles - elegant curves with circular elements
+    return {
+      topLeft: '',
+      topRight: `
+        <svg class="cover-decoration-top" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Blue curved shape -->
+          <path d="M100,0 L200,0 L200,200 Q150,180 120,120 Q90,60 100,0 Z" fill="${primaryColor}" opacity="0.2"/>
+          <path d="M150,0 L200,0 L200,150 Q170,130 150,80 Q130,40 150,0 Z" fill="${primaryColor}" opacity="0.4"/>
+        </svg>
+      `,
+      middleSection: `
+        <svg class="cover-decoration-middle" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Large circular frame -->
+          <circle cx="450" cy="100" r="100" fill="none" stroke="${accentColor}" stroke-width="2" opacity="0.3"/>
+          <circle cx="450" cy="100" r="80" fill="${accentColor}" opacity="0.1"/>
+          <!-- Decorative circles -->
+          <circle cx="560" cy="50" r="25" fill="${accentColor}" opacity="0.9"/>
+          <circle cx="520" cy="30" r="12" fill="${primaryColor}" opacity="0.7"/>
+        </svg>
+      `,
+      bottomLeft: `
+        <svg class="cover-decoration-bottom" viewBox="0 0 250 150" xmlns="http://www.w3.org/2000/svg">
+          <!-- Navy diagonal bar -->
+          <polygon points="0,100 200,150 0,150" fill="${primaryColor}" opacity="0.95"/>
+          <polygon points="0,120 150,150 0,150" fill="${primaryColor}" opacity="0.7"/>
+        </svg>
+      `,
+      bottomRight: '',
+      style: 'blue-curves-circles'
     };
   } else if (isCorporateTheme) {
     // Corporate Geometric Theme - triangles and diagonal stripes
