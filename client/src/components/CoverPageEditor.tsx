@@ -43,6 +43,7 @@ interface CoverPageEditorProps {
   onTextElementsChange: (elements: TextElement[]) => void;
   width?: number;
   height?: number;
+  paletteColors?: string[];
 }
 
 const AVAILABLE_FONTS = [
@@ -69,7 +70,11 @@ export function CoverPageEditor({
   onTextElementsChange,
   width = 520,
   height = 740,
+  paletteColors,
 }: CoverPageEditorProps) {
+  const activeColors = paletteColors && paletteColors.length > 0 
+    ? [...paletteColors, ...PRESET_COLORS.slice(0, 12)] 
+    : PRESET_COLORS;
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -399,9 +404,9 @@ export function CoverPageEditor({
               </div>
 
               <div>
-                <Label className="text-xs">Text Color</Label>
+                <Label className="text-xs">Text Color {paletteColors ? '(Theme Palette)' : ''}</Label>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {PRESET_COLORS.map(color => (
+                  {activeColors.map((color, idx) => (
                     <button
                       key={color}
                       className={`w-6 h-6 rounded border-2 transition-all ${

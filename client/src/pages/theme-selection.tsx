@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { THEME_TEMPLATES, AVAILABLE_FONTS, PRESET_COLORS, getThemeById, ThemeTemplate } from "@/lib/themeTemplates";
+import { THEME_TEMPLATES, AVAILABLE_FONTS, PRESET_COLORS, EXCEL_COLOR_THEMES, getPaletteById, getThemeById, ThemeTemplate, ExcelColorTheme } from "@/lib/themeTemplates";
 import { ThemePreviewSVG } from "@/components/ThemePreviewSVG";
 import { CoverPageEditor, TextElement } from "@/components/CoverPageEditor";
 
@@ -60,6 +60,7 @@ export default function ThemeSelectionPage() {
   const [useFullCoverImage, setUseFullCoverImage] = useState(true);
   const [textElements, setTextElements] = useState<TextElement[]>([]);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [selectedPalette, setSelectedPalette] = useState<string | null>(null);
 
   const { data: user } = useQuery<{ firstName?: string; lastName?: string; email?: string }>({
     queryKey: ['/api/auth/user'],
@@ -88,6 +89,9 @@ export default function ThemeSelectionPage() {
           }
           if (parsed.textElements) {
             setTextElements(parsed.textElements);
+          }
+          if (parsed.paletteId) {
+            setSelectedPalette(parsed.paletteId);
           }
         }
       } catch (e) {
@@ -217,6 +221,8 @@ export default function ThemeSelectionPage() {
         backgroundImage,
         useFullCoverImage,
         textElements,
+        paletteId: selectedPalette,
+        paletteColors: selectedPalette ? getPaletteById(selectedPalette)?.colors : null,
       }));
 
       setThemeApplied(true);
@@ -349,7 +355,61 @@ export default function ThemeSelectionPage() {
                 <div>
                   <Label className="flex items-center gap-2 mb-3">
                     <Palette className="w-4 h-4" />
-                    Primary Color
+                    Color Theme (Excel Style)
+                  </Label>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Select a professional color palette. These colors will be available when styling text on your cover.
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
+                    {EXCEL_COLOR_THEMES.slice(0, 16).map((palette) => (
+                      <button
+                        key={palette.id}
+                        className={`p-3 rounded-lg border-2 transition-all text-left ${
+                          selectedPalette === palette.id
+                            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                            : 'border-muted hover:border-muted-foreground/50'
+                        }`}
+                        onClick={() => {
+                          setSelectedPalette(palette.id);
+                          setPrimaryColor(palette.colors[palette.primaryIndex]);
+                          setSecondaryColor(palette.colors[palette.secondaryIndex]);
+                          setThemeApplied(false);
+                        }}
+                        data-testid={`button-palette-${palette.id}`}
+                      >
+                        <div className="text-xs font-medium mb-2 truncate">{palette.name}</div>
+                        <div className="flex gap-0.5">
+                          {palette.colors.slice(0, 8).map((color, idx) => (
+                            <div
+                              key={idx}
+                              className="w-4 h-4 first:rounded-l last:rounded-r"
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  {selectedPalette && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground"
+                      onClick={() => {
+                        setSelectedPalette(null);
+                        setThemeApplied(false);
+                      }}
+                      data-testid="button-clear-palette"
+                    >
+                      Clear palette selection
+                    </Button>
+                  )}
+                </div>
+
+                <div>
+                  <Label className="flex items-center gap-2 mb-3">
+                    <Palette className="w-4 h-4" />
+                    Primary Color {selectedPalette && '(from palette)'}
                   </Label>
                   <div className="flex flex-wrap gap-2">
                     {PRESET_COLORS.map((color) => (
@@ -633,6 +693,7 @@ export default function ThemeSelectionPage() {
                   setTextElements(elements);
                   setThemeApplied(false);
                 }}
+                paletteColors={selectedPalette ? getPaletteById(selectedPalette)?.colors : undefined}
               />
               
               <div className="flex justify-end gap-4 mt-6 pt-4 border-t">
