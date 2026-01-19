@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw, Building2, Stethoscope, ShoppingBag, Laptop, Lightbulb, FileText, Upload, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw, Building2, Stethoscope, ShoppingBag, Laptop, Lightbulb, FileText, Upload, Sparkles, ChevronDown, ChevronUp, Palette } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -355,6 +355,23 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const [promoCode, setPromoCode] = useState('');
   const [promoValidation, setPromoValidation] = useState<PromoCodeValidation | null>(null);
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+  
+  // Theme selection - check if theme was applied via URL param or localStorage
+  const [themeApplied, setThemeApplied] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeFromUrl = urlParams.get('themeApplied') === 'true';
+    const savedTheme = localStorage.getItem('selectedTheme');
+    return themeFromUrl || !!savedTheme;
+  });
+  
+  const selectedTheme = (() => {
+    try {
+      const saved = localStorage.getItem('selectedTheme');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  })();
   
   // Template selection states
   const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -3209,6 +3226,54 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
               </Badge>
             </div>
           )}
+          
+          {/* Theme Selection Status - Show on final step */}
+          {currentStep === steps.length - 1 && (
+            <div className="mt-6 pt-6 border-t">
+              {themeApplied && selectedTheme ? (
+                <div className="flex items-center gap-3 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                  <div 
+                    className="w-10 h-10 rounded-lg border-2 border-background shadow"
+                    style={{ backgroundColor: selectedTheme.primaryColor }}
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-emerald-700 dark:text-emerald-300">Theme Applied</p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedTheme.font} font with custom colors
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setLocation('/theme-selection')}
+                    data-testid="button-change-theme"
+                  >
+                    Change Theme
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                  <div className="flex items-center gap-3">
+                    <Palette className="w-6 h-6 text-amber-600" />
+                    <div className="flex-1">
+                      <p className="font-medium text-amber-700 dark:text-amber-300">Choose Your Business Plan Theme</p>
+                      <p className="text-sm text-muted-foreground">
+                        Select a professional template before generating your plan
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    className="w-full mt-4 gap-2 bg-emerald-500 text-white font-semibold shadow-md"
+                    onClick={() => setLocation('/theme-selection')}
+                    data-testid="button-choose-template"
+                  >
+                    <Palette className="w-4 h-4" />
+                    Choose Template
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Navigation */}
           <div className="flex justify-between mt-12">
@@ -3221,14 +3286,25 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
-            <Button 
-              onClick={handleNext} 
-              disabled={isSubmitting}
-              data-testid="button-next"
-            >
-              {isSubmitting ? "Processing..." : currentStep === steps.length - 1 ? (canGenerateDirectly ? "Generate Plan" : "Proceed to Payment") : "Continue"}
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            {currentStep === steps.length - 1 && !themeApplied ? (
+              <Button 
+                className="gap-2 bg-emerald-500 text-white font-semibold shadow-md"
+                onClick={() => setLocation('/theme-selection')}
+                data-testid="button-next"
+              >
+                Choose Template First
+                <Palette className="w-4 h-4" />
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleNext} 
+                disabled={isSubmitting}
+                data-testid="button-next"
+              >
+                {isSubmitting ? "Processing..." : currentStep === steps.length - 1 ? (canGenerateDirectly ? "Generate Plan" : "Proceed to Payment") : "Continue"}
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            )}
           </div>
         </Card>
       </div>
