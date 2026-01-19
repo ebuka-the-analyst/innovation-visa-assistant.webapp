@@ -277,14 +277,14 @@ export default function Pricing() {
     addonMutation.mutate(addonId);
   };
 
-  // Direct subscribe - now processes payment directly with promo code
+  // Direct subscribe - routes to checkout page with promo code support
   const handleDirectSubscribe = (tierId: string) => {
     if (!user) {
       setLocation(`/signup?tier=${tierId}&direct=true`);
       return;
     }
-    setProcessingTier(tierId);
-    directSubscribeMutation.mutate(tierId);
+    // Navigate to checkout page where user can apply promo codes
+    setLocation(`/checkout?tier=${tierId}`);
   };
 
   // Full flow with questionnaire

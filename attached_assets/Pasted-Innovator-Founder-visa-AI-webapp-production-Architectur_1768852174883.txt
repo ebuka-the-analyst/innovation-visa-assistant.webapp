@@ -1,0 +1,168 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+c83330b7
+Active
+
+Jan 19, 2026, 7:40 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+7:44:58 PM [express] serving on port 8080
+7:44:58 PM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[2026-01-19T19:45:42.193Z] GET /checkout?tier=ultimate
+[2026-01-19T19:45:42.858Z] GET /api/auth/user
+[AUTH] Returning user ebere.m.luke@gmail.com with subscriptionTier: free (raw: free)
+7:45:42 PM [express] GET /api/auth/user 200 in 17ms :: {"id":"ad00c842-a318-46aa-8f49-167341f84589",…
+[2026-01-19T19:45:43.085Z] GET /assets/not-found-CeZFFXod.js
+[2026-01-19T19:45:43.240Z] POST /api/activity/session
+[2026-01-19T19:45:43.251Z] POST /api/activity/session
+[2026-01-19T19:45:43.257Z] GET /api/partner/status
+7:45:43 PM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"c2ad2b4b-3b10-4467-94a2…
+7:45:43 PM [express] GET /api/partner/status 200 in 36ms :: {"isPartner":false,"promoCodeCount":0}
+7:45:43 PM [express] POST /api/activity/session 200 in 43ms :: {"sessionId":"4cf4e83d-b397-4253-a22e…
+[2026-01-19T19:45:43.556Z] POST /api/activity/page-view
+7:45:43 PM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"a0950eba-01a7-4ae6-b…
+[2026-01-19T19:45:45.672Z] POST /api/activity/session/end
+[2026-01-19T19:45:45.676Z] GET /checkout?tier=ultimate
+7:45:45 PM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+[2026-01-19T19:45:45.907Z] POST /api/performance/metrics
+7:45:45 PM [express] POST /api/performance/metrics 204 in 23ms
+[2026-01-19T19:45:45.956Z] GET /api/auth/user
+[AUTH] Returning user ebere.m.luke@gmail.com with subscriptionTier: free (raw: free)
+7:45:45 PM [express] GET /api/auth/user 200 in 14ms :: {"id":"ad00c842-a318-46aa-8f49-167341f84589",…
+[2026-01-19T19:45:46.223Z] POST /api/activity/session
+[2026-01-19T19:45:46.224Z] GET /api/partner/status
+[2026-01-19T19:45:46.227Z] POST /api/activity/session
+7:45:46 PM [express] GET /api/partner/status 200 in 22ms :: {"isPartner":false,"promoCodeCount":0}
+7:45:46 PM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"2ee17ae7-abf0-4ce0-9d94…
+7:45:46 PM [express] POST /api/activity/session 200 in 194ms :: {"sessionId":"cdd69ef4-0251-4b2a-b68…
+[2026-01-19T19:45:46.522Z] POST /api/activity/page-view
+7:45:46 PM [express] POST /api/activity/page-view 200 in 19ms :: {"pageViewId":"4c72f61e-a911-40b0-9…
+[2026-01-19T19:45:47.791Z] POST /api/activity/session/end
+7:45:47 PM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+[2026-01-19T19:45:47.857Z] POST /api/activity/session/end
+[2026-01-19T19:45:47.859Z] POST /api/performance/metrics
+7:45:47 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+7:45:47 PM [express] POST /api/performance/metrics 204 in 10ms
+[2026-01-19T19:45:50.500Z] GET /api/auth/user
+[AUTH] Returning user ebere.m.luke@gmail.com with subscriptionTier: free (raw: free)
+7:45:50 PM [express] GET /api/auth/user 200 in 12ms :: {"id":"ad00c842-a318-46aa-8f49-167341f84589",…
+[2026-01-19T19:45:50.718Z] POST /api/activity/session
+[2026-01-19T19:45:50.720Z] POST /api/activity/session
+7:45:50 PM [express] POST /api/activity/session 200 in 15ms :: {"sessionId":"2d323dca-d5e9-4f94-b55d…
+7:45:50 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"f1170146-0c6e-4ee5-a732…
+[2026-01-19T19:45:50.748Z] GET /api/business-plans
+7:45:50 PM [express] GET /api/business-plans 200 in 10ms
+[2026-01-19T19:45:50.923Z] POST /api/activity/page-view
+7:45:50 PM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"b7613c09-bde4-481e-b…
+[2026-01-19T19:45:55.790Z] POST /api/performance/metrics
+7:45:55 PM [express] POST /api/performance/metrics 204 in 11ms
+[2026-01-19T19:46:06.347Z] POST /api/activity/session/end
+7:46:06 PM [express] POST /api/activity/session/end 200 in 199ms :: {"success":true}
+[2026-01-19T19:46:12.444Z] POST /api/activity/session
+7:46:12 PM [express] POST /api/activity/session 200 in 15ms :: {"sessionId":"66a12371-8e0d-4da0-94a6…
+[2026-01-19T19:46:12.641Z] POST /api/activity/page-view
+7:46:12 PM [express] POST /api/activity/page-view 200 in 14ms :: {"pageViewId":"aeca64c9-9d13-4f34-8…
+[2026-01-19T19:46:22.191Z] POST /api/activity/session/end
+7:46:22 PM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+[2026-01-19T19:46:22.226Z] POST /api/activity/session/end
+7:46:22 PM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+[2026-01-19T19:46:24.503Z] GET /pricing
+[2026-01-19T19:46:24.831Z] GET /api/auth/user
+[AUTH] Returning user ebere.m.luke@gmail.com with subscriptionTier: free (raw: free)
+7:46:24 PM [express] GET /api/auth/user 200 in 9ms :: {"id":"ad00c842-a318-46aa-8f49-167341f84589","…
+[2026-01-19T19:46:25.151Z] GET /api/business-plans
+[2026-01-19T19:46:25.152Z] GET /api/partner/status
+7:46:25 PM [express] GET /api/business-plans 200 in 10ms
+[2026-01-19T19:46:25.312Z] POST /api/activity/session
+[2026-01-19T19:46:25.313Z] POST /api/activity/session
+7:46:25 PM [express] POST /api/activity/session 200 in 19ms :: {"sessionId":"91052edf-dcfd-4b5e-b461…
+7:46:25 PM [express] GET /api/partner/status 200 in 188ms :: {"isPartner":false,"promoCodeCount":0}
+7:46:25 PM [express] POST /api/activity/session 200 in 63ms :: {"sessionId":"a44ed7b4-6d64-41a8-974b…
+[2026-01-19T19:46:25.541Z] POST /api/activity/page-view
+7:46:25 PM [express] POST /api/activity/page-view 200 in 12ms :: {"pageViewId":"2415cd30-9fa8-40bb-8…
+[2026-01-19T19:46:32.641Z] POST /api/performance/metrics
+7:46:32 PM [express] POST /api/performance/metrics 204 in 8ms
+[2026-01-19T19:46:40.087Z] POST /api/payment/direct-subscribe
+[STRIPE DIRECT] Using base URL for redirects: https://innovatorfoundervisaassistant.co.uk
+[Stripe] Using LIVE mode credentials - payments are real
+[DIRECT SUBSCRIBE] User ad00c842-a318-46aa-8f49-167341f84589 starting direct subscription to basic tier (no plan created yet)
+7:46:40 PM [express] POST /api/payment/direct-subscribe 200 in 442ms :: {"sessionId":"cs_live_b1hAXh…
+[2026-01-19T19:46:40.709Z] POST /api/activity/session/end
+7:46:40 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+[2026-01-19T19:46:40.874Z] POST /api/activity/session/end
+7:46:40 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+[2026-01-19T19:47:56.714Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: free (raw: free)
+7:47:56 PM [express] GET /api/auth/user 200 in 206ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a"…
+[2026-01-19T19:47:57.204Z] GET /api/partner/status
+7:47:57 PM [express] GET /api/partner/status 200 in 12ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-01-19T19:47:57.376Z] POST /api/activity/session
+[2026-01-19T19:47:57.377Z] POST /api/activity/session
+[2026-01-19T19:47:57.380Z] GET /api/cover-designs/latest
+7:47:57 PM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"576ce380-c2a2-4a3d-a6ba…
+7:47:57 PM [express] POST /api/activity/session 200 in 30ms :: {"sessionId":"cb3e9e8d-adfc-48ea-927a…
+[2026-01-19T19:47:57.597Z] POST /api/activity/page-view
+7:47:57 PM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"9e41dff6-3d8d-4a28-b…
+7:47:57 PM [express] GET /api/cover-designs/latest 200 in 516ms :: {"id":"9e854a4e-5664-40c0-859e-5b…
+[2026-01-19T19:48:14.745Z] POST /api/activity/session/end
+7:48:14 PM [express] POST /api/activity/session/end 200 in 205ms :: {"success":true}
+[2026-01-19T19:48:20.220Z] POST /api/activity/session
+7:48:20 PM [express] POST /api/activity/session 200 in 19ms :: {"sessionId":"99d1b588-b97a-416b-98f3…
+[2026-01-19T19:48:20.432Z] POST /api/activity/page-view
+7:48:20 PM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"8a6a67fa-a121-4295-b…
+[2026-01-19T19:48:31.169Z] POST /api/activity/session/end
+7:48:31 PM [express] POST /api/activity/session/end 200 in 219ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
