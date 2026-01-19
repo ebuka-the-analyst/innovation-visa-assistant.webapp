@@ -451,7 +451,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       const design = await storage.getLatestCoverDesign(user.id);
       res.json(design || null);
-    } catch (error) {
+    } catch (error: any) {
+      // Gracefully handle if table doesn't exist (return null instead of error)
+      if (error?.message?.includes('does not exist')) {
+        console.log("Cover designs table not found, returning null");
+        return res.json(null);
+      }
       console.error("Get latest cover design error:", error);
       res.status(500).json({ error: "Failed to get latest cover design" });
     }
@@ -2072,8 +2077,14 @@ ${generatedSections.join('\n\n---\n\n')}`;
         return res.status(500).json({ error: "Business plan content is missing" });
       }
 
-      // Load saved cover design from database to apply theme
-      const savedCoverDesign = await storage.getLatestCoverDesign(user.id);
+      // Load saved cover design from database to apply theme (with fallback if table doesn't exist)
+      let savedCoverDesign = null;
+      try {
+        savedCoverDesign = await storage.getLatestCoverDesign(user.id);
+      } catch (coverError: any) {
+        // Gracefully handle if cover_designs table doesn't exist in production
+        console.log("Cover design fetch failed (may not exist in production):", coverError?.message);
+      }
       
       // Create plan with cover design theme applied
       const planWithTheme = {

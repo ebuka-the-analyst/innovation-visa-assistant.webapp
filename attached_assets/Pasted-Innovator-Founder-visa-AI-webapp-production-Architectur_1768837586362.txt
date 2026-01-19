@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+40386c34
+Active
+
+Jan 19, 2026, 3:30 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+3:42:48 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 14ms :: {"…
+[2026-01-19T15:42:50.795Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:42:50 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 15ms :: {"…
+[2026-01-19T15:42:53.287Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:42:53 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 17ms :: {"…
+[2026-01-19T15:42:55.285Z] POST /api/activity/session
+3:42:55 PM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"4113badb-94bf-4a74-ae29…
+[2026-01-19T15:42:55.781Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:42:55 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 12ms :: {"…
+[2026-01-19T15:42:58.287Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:42:58 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 18ms :: {"…
+[2026-01-19T15:43:00.789Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:00 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 15ms :: {"…
+[2026-01-19T15:43:03.286Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:03 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 15ms :: {"…
+[2026-01-19T15:43:05.794Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:05 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 11ms :: {"…
+[2026-01-19T15:43:08.286Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:08 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 11ms :: {"…
+[2026-01-19T15:43:10.783Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:10 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 17ms :: {"…
+[2026-01-19T15:43:13.320Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:13 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 17ms :: {"…
+[2026-01-19T15:43:15.791Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:15 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 12ms :: {"…
+[2026-01-19T15:43:18.287Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:18 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 11ms :: {"…
+✓ Section 11 complete (8221 chars)
+Generating section 12/13: 12. TAILORED MARKETING PLAN
+[2026-01-19T15:43:20.781Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:20 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 10ms :: {"…
+[2026-01-19T15:43:23.288Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:23 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 9ms :: {"s…
+[2026-01-19T15:43:25.283Z] POST /api/activity/session
+3:43:25 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"4113badb-94bf-4a74-ae29…
+[2026-01-19T15:43:25.781Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:25 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 12ms :: {"…
+[2026-01-19T15:43:28.281Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:28 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 19ms :: {"…
+[2026-01-19T15:43:30.783Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:30 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 17ms :: {"…
+[2026-01-19T15:43:33.288Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:33 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 10ms :: {"…
+[2026-01-19T15:43:35.780Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:35 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 11ms :: {"…
+[2026-01-19T15:43:38.280Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:38 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 16ms :: {"…
+[2026-01-19T15:43:40.789Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:40 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 14ms :: {"…
+[2026-01-19T15:43:43.293Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:43 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 13ms :: {"…
+[2026-01-19T15:43:45.780Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:45 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 11ms :: {"…
+[2026-01-19T15:43:48.277Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:48 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 15ms :: {"…
+[2026-01-19T15:43:50.811Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:50 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 13ms :: {"…
+[2026-01-19T15:43:53.292Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:53 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 12ms :: {"…
+[2026-01-19T15:43:55.282Z] POST /api/activity/session
+3:43:55 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"4113badb-94bf-4a74-ae29…
+[2026-01-19T15:43:55.792Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:55 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 13ms :: {"…
+[2026-01-19T15:43:58.292Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:43:58 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 18ms :: {"…
+✓ Section 12 complete (8687 chars)
+Generating section 13/13: 13. ENDORSING BODY SELECTION
+[2026-01-19T15:44:00.795Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:00 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 22ms :: {"…
+[2026-01-19T15:44:03.289Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:03 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 14ms :: {"…
+[2026-01-19T15:44:05.795Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:05 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 13ms :: {"…
+[2026-01-19T15:44:08.299Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:08 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 10ms :: {"…
+[2026-01-19T15:44:10.793Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:10 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 22ms :: {"…
+[2026-01-19T15:44:13.293Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:13 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 15ms :: {"…
+[2026-01-19T15:44:15.790Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:15 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 13ms :: {"…
+[2026-01-19T15:44:18.294Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:18 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 13ms :: {"…
+[2026-01-19T15:44:20.794Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:20 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 14ms :: {"…
+[2026-01-19T15:44:23.291Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:23 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 10ms :: {"…
+✓ Section 13 complete (5737 chars)
+[Email Send] Attempting to send email to: ebuka.umeh40@gmail.com
+[Email Send] Provider: resend | Resend: true | SMTP: false
+[Email Send] Using Resend HTTP API...
+[Email Send] Resend success, messageId: d43c74a7-6755-4f54-9f6b-f35cba859c36
+Email sent successfully to: ebuka.umeh40@gmail.com MessageId: d43c74a7-6755-4f54-9f6b-f35cba859c36
+[2026-01-19T15:44:25.273Z] POST /api/activity/session
+3:44:25 PM [express] POST /api/activity/session 200 in 11ms :: {"sessionId":"4113badb-94bf-4a74-ae29…
+[2026-01-19T15:44:25.786Z] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:44:25 PM [express] GET /api/generate/status/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 200 in 21ms :: {"…
+[2026-01-19T15:44:55.445Z] POST /api/activity/session
+3:44:55 PM [express] POST /api/activity/session 200 in 199ms :: {"sessionId":"4113badb-94bf-4a74-ae2…
+[2026-01-19T15:45:25.437Z] POST /api/activity/session
+3:45:25 PM [express] POST /api/activity/session 200 in 209ms :: {"sessionId":"4113badb-94bf-4a74-ae2…
+[2026-01-19T15:45:51.497Z] GET /api/view/html/5710c7a3-8fd5-4d35-b64c-5a5fe93df355
+3:45:51 PM [express] POST /api/activity/session/end 200 in 229ms :: {"success":true}
+[2026-01-19T15:45:51.498Z] POST /api/activity/session/end
+HTML view error: {
+[2026-01-19T15:45:51.934Z] GET /favicon.ico
+  planId: '5710c7a3-8fd5-4d35-b64c-5a5fe93df355',
+  userId: '3e0feeab-8d95-4aed-a377-4cb40fbea78a',
+  error: 'relation "cover_designs" does not exist',
+  stack: 'error: relation "cover_designs" does not exist\n' +
+    '    at /app/node_modules/pg-pool/index.js:45:11\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22\n' +
+    '    at async DatabaseStorage.getLatestCoverDesign (file:///app/dist/index.js:3519:24)\n' +
+    '    at async file:///app/dist/index.js:15723:32'
+}
+3:45:51 PM [express] GET /api/view/html/5710c7a3-8fd5-4d35-b64c-5a5fe93df355 500 in 224ms :: {"error…
+
+
+innovation-visa-assistant.webapp | Railway
