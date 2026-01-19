@@ -21,7 +21,11 @@ import {
   ChevronRight,
   Eye,
   Wand2,
-  FileText
+  FileText,
+  Upload,
+  ImageIcon,
+  X,
+  Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -48,6 +52,8 @@ export default function ThemeSelectionPage() {
   const [themeApplied, setThemeApplied] = useState(false);
   const [previewTheme, setPreviewTheme] = useState<ThemeTemplate | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const { data: user } = useQuery<{ firstName?: string; lastName?: string; email?: string }>({
     queryKey: ['/api/auth/user'],
@@ -68,6 +74,9 @@ export default function ThemeSelectionPage() {
           setSecondaryColor(parsed.secondaryColor);
           setSelectedFont(parsed.font);
           setThemeApplied(true);
+          if (parsed.backgroundImage) {
+            setBackgroundImage(parsed.backgroundImage);
+          }
         }
       } catch (e) {
         console.error('Failed to parse saved theme');
@@ -115,6 +124,66 @@ export default function ThemeSelectionPage() {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: "Please upload an image file (JPG, PNG, etc.)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingImage(true);
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setBackgroundImage(base64);
+        setThemeApplied(false);
+        toast({
+          title: "Image Uploaded",
+          description: "Your background image has been added to the cover.",
+        });
+        setIsUploadingImage(false);
+      };
+      reader.onerror = () => {
+        toast({
+          title: "Upload Failed",
+          description: "Failed to read the image. Please try again.",
+          variant: "destructive",
+        });
+        setIsUploadingImage(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setBackgroundImage(null);
+    setThemeApplied(false);
+  };
+
   const handleApplyTheme = async () => {
     if (!selectedTheme) {
       toast({
@@ -133,6 +202,7 @@ export default function ThemeSelectionPage() {
         primaryColor,
         secondaryColor,
         font: selectedFont,
+        backgroundImage,
       }));
 
       setThemeApplied(true);
@@ -218,12 +288,13 @@ export default function ThemeSelectionPage() {
                       founderName={founderName}
                       isSelected={isSelected}
                       size="small"
+                      backgroundImage={isSelected ? backgroundImage : null}
                     />
                     
                     <Button
-                      variant="secondary"
+                      variant="outline"
                       size="sm"
-                      className="absolute bottom-2 right-2 z-10 gap-1 bg-white/90 hover:bg-white shadow-md"
+                      className="absolute bottom-2 right-2 z-10 gap-1 bg-background/95 dark:bg-background/90 backdrop-blur-sm border-border text-foreground shadow-lg"
                       onClick={(e) => handlePreview(theme, e)}
                       data-testid={`button-preview-${theme.id}`}
                     >
@@ -327,6 +398,59 @@ export default function ThemeSelectionPage() {
                   </RadioGroup>
                 </div>
 
+                <div>
+                  <Label className="flex items-center gap-2 mb-3">
+                    <ImageIcon className="w-4 h-4" />
+                    Cover Background Image (Optional)
+                  </Label>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Upload a photo to display behind your cover page design
+                  </p>
+                  
+                  {backgroundImage ? (
+                    <div className="relative inline-block">
+                      <div className="relative w-48 h-32 rounded-lg overflow-hidden border-2 border-emerald-500 shadow-md">
+                        <img 
+                          src={backgroundImage} 
+                          alt="Cover background" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-background border-border shadow-md"
+                        onClick={handleRemoveImage}
+                        data-testid="button-remove-image"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-2">Click the X to remove</p>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-48 h-32 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/30 cursor-pointer transition-all hover:border-emerald-500 hover:bg-muted/50">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                        disabled={isUploadingImage}
+                        data-testid="input-background-image"
+                      />
+                      {isUploadingImage ? (
+                        <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                          <span className="text-sm text-muted-foreground">Click to upload</span>
+                          <span className="text-xs text-muted-foreground/70 mt-1">Max 5MB</span>
+                        </>
+                      )}
+                    </label>
+                  )}
+                </div>
+
                 <div className="pt-4 border-t">
                   <div className="flex items-center justify-between mb-4">
                     <div>
@@ -416,6 +540,7 @@ export default function ThemeSelectionPage() {
                   founderName={founderName}
                   isSelected={false}
                   size="large"
+                  backgroundImage={selectedTheme === previewTheme.id ? backgroundImage : null}
                 />
               </div>
               

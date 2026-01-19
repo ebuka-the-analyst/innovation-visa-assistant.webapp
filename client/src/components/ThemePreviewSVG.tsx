@@ -10,6 +10,7 @@ interface ThemePreviewSVGProps {
   founderName?: string;
   isSelected?: boolean;
   size?: 'small' | 'large';
+  backgroundImage?: string | null;
 }
 
 export function ThemePreviewSVG({
@@ -20,7 +21,8 @@ export function ThemePreviewSVG({
   businessName = "Business Plan",
   founderName = "Your Name",
   isSelected = false,
-  size = 'small'
+  size = 'small',
+  backgroundImage = null
 }: ThemePreviewSVGProps) {
   const currentYear = new Date().getFullYear();
   const isLarge = size === 'large';
@@ -476,6 +478,20 @@ export function ThemePreviewSVG({
         className="w-full h-full"
         style={{ backgroundColor: decorations.background || '#ffffff' }}
       >
+        {backgroundImage && (
+          <>
+            <image
+              href={backgroundImage}
+              x="0"
+              y="0"
+              width="520"
+              height="740"
+              preserveAspectRatio="xMidYMid slice"
+              opacity="0.3"
+            />
+            <rect x="0" y="0" width="520" height="740" fill="white" opacity="0.5" />
+          </>
+        )}
         {decorations.topFull}
         {decorations.topLeft}
         {decorations.topRight}
