@@ -432,6 +432,17 @@ export default function ThemeSelectionPage() {
         themeAppliedAt: selectedTheme ? new Date() : null,
       };
 
+      console.log('[ThemeSelection] Submitting with theme data:', {
+        themeId: data.themeId,
+        themePrimaryColor: data.themePrimaryColor,
+        themeSecondaryColor: data.themeSecondaryColor,
+        themeFont: data.themeFont,
+        selectedTheme,
+        primaryColor,
+        secondaryColor,
+        selectedFont,
+      });
+
       const response = await fetch('/api/questionnaire/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

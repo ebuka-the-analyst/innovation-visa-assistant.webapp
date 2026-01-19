@@ -324,14 +324,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/questionnaire/submit", isAuthenticated, async (req, res) => {
     try {
-      console.log("Questionnaire submission received:", JSON.stringify(req.body, null, 2));
+      console.log("Questionnaire submission received - Theme data:", {
+        themeId: req.body.themeId,
+        themePrimaryColor: req.body.themePrimaryColor,
+        themeSecondaryColor: req.body.themeSecondaryColor,
+        themeFont: req.body.themeFont,
+      });
       const data = questionnaireSchema.parse(req.body);
       const user = req.user as any;
       const userId = user.id;
       
+      console.log("[Questionnaire] Parsed theme data:", {
+        themeId: data.themeId,
+        themePrimaryColor: data.themePrimaryColor,
+        themeSecondaryColor: data.themeSecondaryColor,
+        themeFont: data.themeFont,
+      });
+      
       const businessPlan = await storage.createBusinessPlan({
         ...data,
         userId,
+      });
+      
+      console.log("[Questionnaire] Plan created with theme:", {
+        planId: businessPlan.id,
+        themeId: businessPlan.themeId,
+        themePrimaryColor: businessPlan.themePrimaryColor,
+        themeFont: businessPlan.themeFont,
       });
       
       res.json({ 
@@ -2098,6 +2117,25 @@ ${generatedSections.join('\n\n---\n\n')}`;
         textElements: savedCoverDesign?.textElements || null,
         paletteId: savedCoverDesign?.paletteId || null,
       };
+
+      console.log("[HTML View] Theme data for plan:", {
+        planId: planId,
+        savedCoverDesign: savedCoverDesign ? {
+          themeId: savedCoverDesign.themeId,
+          primaryColor: savedCoverDesign.primaryColor,
+          font: savedCoverDesign.font,
+        } : null,
+        businessPlanTheme: {
+          themeId: businessPlan.themeId,
+          themePrimaryColor: businessPlan.themePrimaryColor,
+          themeFont: businessPlan.themeFont,
+        },
+        finalTheme: {
+          themeId: planWithTheme.themeId,
+          themePrimaryColor: planWithTheme.themePrimaryColor,
+          themeFont: planWithTheme.themeFont,
+        },
+      });
 
       // Generate rich HTML with SVG charts using pdf.ts
       const htmlContent = generatePDFContent(planWithTheme);
