@@ -13,6 +13,81 @@ const FONT_FAMILIES: Record<string, string> = {
   'Source Sans Pro': "'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
 };
 
+// Generate professional cover page SVG decorations based on theme
+function generateCoverPageSVG(themeId: string | null, primaryColor: string): { topRight: string; bottomLeft: string; style: string } {
+  const isBlueTheme = themeId === 'blue-modern' || primaryColor.includes('1d4ed8') || primaryColor.includes('2563eb') || primaryColor.includes('3b82f6');
+  
+  if (isBlueTheme) {
+    // Blue Modern Theme - curved shapes with circles
+    return {
+      topRight: `
+        <svg class="cover-decoration-top" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="blueGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:0.9" />
+              <stop offset="100%" style="stop-color:${primaryColor};stop-opacity:0.6" />
+            </linearGradient>
+          </defs>
+          <path d="M400,0 L400,400 C300,380 200,300 150,200 C100,100 50,50 0,0 Z" fill="url(#blueGrad1)" opacity="0.3"/>
+          <path d="M400,0 L400,350 C320,330 240,270 180,180 C120,90 60,40 0,0 Z" fill="${primaryColor}" opacity="0.5"/>
+          <path d="M400,0 L400,280 C340,260 280,220 220,150 C160,80 80,30 0,0 Z" fill="${primaryColor}" opacity="0.8"/>
+          <circle cx="350" cy="120" r="40" fill="${primaryColor}" opacity="0.9"/>
+          <circle cx="280" cy="60" r="20" fill="${primaryColor}" opacity="0.7"/>
+          <circle cx="380" cy="200" r="15" fill="${primaryColor}" opacity="0.5"/>
+        </svg>
+      `,
+      bottomLeft: `
+        <svg class="cover-decoration-bottom" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="blueGrad2" x1="100%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:0.9" />
+              <stop offset="100%" style="stop-color:${primaryColor};stop-opacity:0.4" />
+            </linearGradient>
+          </defs>
+          <path d="M0,400 L0,0 C100,20 200,100 250,200 C300,300 350,350 400,400 Z" fill="url(#blueGrad2)" opacity="0.3"/>
+          <path d="M0,400 L0,50 C80,70 160,130 220,220 C280,310 340,360 400,400 Z" fill="${primaryColor}" opacity="0.5"/>
+          <path d="M0,400 L0,120 C60,140 120,180 180,250 C240,320 320,370 400,400 Z" fill="${primaryColor}" opacity="0.8"/>
+          <path d="M0,400 L150,400 L0,250 Z" fill="${primaryColor}" opacity="0.95"/>
+        </svg>
+      `,
+      style: 'blue-modern'
+    };
+  } else {
+    // Red/Default Theme - wave patterns
+    return {
+      topRight: `
+        <svg class="cover-decoration-top" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="redGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
+              <stop offset="100%" style="stop-color:${primaryColor};stop-opacity:0.7" />
+            </linearGradient>
+          </defs>
+          <path d="M400,0 C350,50 300,80 250,100 C180,130 120,180 100,250 C80,320 100,360 150,400 L400,400 Z" fill="url(#redGrad1)" opacity="0.15"/>
+          <path d="M400,0 C360,30 320,50 280,70 C220,100 170,150 150,220 C130,290 160,350 220,400 L400,400 Z" fill="${primaryColor}" opacity="0.4"/>
+          <path d="M400,0 C380,20 350,35 320,50 C270,80 230,130 220,200 C210,270 250,340 320,400 L400,400 Z" fill="${primaryColor}" opacity="0.7"/>
+          <path d="M400,0 L400,400 C360,350 340,280 340,200 C340,120 360,60 400,0 Z" fill="${primaryColor}" opacity="0.95"/>
+        </svg>
+      `,
+      bottomLeft: `
+        <svg class="cover-decoration-bottom" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="redGrad2" x1="100%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
+              <stop offset="100%" style="stop-color:${primaryColor};stop-opacity:0.7" />
+            </linearGradient>
+          </defs>
+          <path d="M0,400 C50,350 80,300 100,250 C130,180 180,120 250,100 C320,80 360,100 400,150 L400,400 Z" fill="url(#redGrad2)" opacity="0.15"/>
+          <path d="M0,400 C30,360 50,320 70,280 C100,220 150,170 220,150 C290,130 350,160 400,220 L400,400 Z" fill="${primaryColor}" opacity="0.4"/>
+          <path d="M0,400 C20,380 35,350 50,320 C80,270 130,230 200,220 C270,210 340,250 400,320 L400,400 Z" fill="${primaryColor}" opacity="0.7"/>
+          <path d="M0,400 L0,0 C60,40 80,120 80,200 C80,280 60,340 0,400 Z" fill="${primaryColor}" opacity="0.95"/>
+        </svg>
+      `,
+      style: 'red-modern'
+    };
+  }
+}
+
 export function generatePDFContent(plan: BusinessPlan): string {
   const content = plan.generatedContent || "Business plan content not yet generated.";
   
@@ -85,25 +160,112 @@ export function generatePDFContent(plan: BusinessPlan): string {
       margin-bottom: 12px;
     }
     .cover-page {
-      text-align: center;
-      padding: 100px 0;
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      height: 297mm;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%);
       page-break-after: always;
-    }
-    .cover-title {
-      font-size: 36pt;
-      font-weight: bold;
-      color: ${primaryColor};
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0;
+      margin: -20px;
       margin-bottom: 20px;
     }
-    .cover-subtitle {
-      font-size: 18pt;
-      color: ${secondaryColor};
-      margin-bottom: 40px;
+    .cover-decoration-top {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 280px;
+      height: 280px;
+      z-index: 1;
     }
-    .metadata {
-      font-size: 12pt;
+    .cover-decoration-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 250px;
+      height: 250px;
+      z-index: 1;
+    }
+    .cover-content {
+      position: relative;
+      z-index: 10;
+      padding: 60px 80px;
+      text-align: left;
+    }
+    .cover-header {
+      margin-bottom: 80px;
+    }
+    .cover-main-title {
+      font-size: 72pt;
+      font-weight: 800;
+      line-height: 1;
+      margin: 0;
+      letter-spacing: -2px;
+    }
+    .cover-main-title .word-business {
+      color: #1a1a2e;
+      display: block;
+    }
+    .cover-main-title .word-plan {
+      color: ${primaryColor};
+      display: block;
+    }
+    .cover-subtitle-line {
+      width: 80px;
+      height: 3px;
+      background: #1a1a2e;
+      margin: 30px 0;
+    }
+    .cover-business-name {
+      font-size: 20pt;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .cover-tagline {
+      font-size: 14pt;
+      color: #555;
+      margin-bottom: 60px;
+    }
+    .cover-year {
+      font-size: 64pt;
+      font-weight: 800;
+      color: #1a1a2e;
+      margin: 40px 0;
+      letter-spacing: -2px;
+    }
+    .cover-metadata {
+      position: absolute;
+      bottom: 80px;
+      left: 80px;
+      z-index: 10;
+    }
+    .cover-prepared-by {
+      font-size: 10pt;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+    }
+    .cover-industry {
+      font-size: 14pt;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 20px;
+    }
+    .cover-contact {
+      font-size: 10pt;
       color: #666;
-      margin-top: 60px;
+      line-height: 1.8;
+    }
+    .cover-contact span {
+      display: block;
     }
     table {
       width: 100%;
@@ -205,15 +367,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
   </style>
 </head>
 <body>
-  <div class="cover-page">
-    <div class="cover-title">${plan.businessName}</div>
-    <div class="cover-subtitle">UK Innovation Visa Business Plan</div>
-    <div class="metadata">
-      <p>Industry: ${plan.industry}</p>
-      <p>Generated: ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-      <p>Tier: ${plan.tier.charAt(0).toUpperCase() + plan.tier.slice(1)}</p>
-    </div>
-  </div>
+  ${generateCoverPageHTML(plan, primaryColor)}
   
   <div class="content">
     ${formatContentWithCharts(content, chartData, primaryColor)}
@@ -223,6 +377,44 @@ export function generatePDFContent(plan: BusinessPlan): string {
   `;
   
   return html;
+}
+
+function generateCoverPageHTML(plan: BusinessPlan, primaryColor: string): string {
+  const themeId = plan.themeId || null;
+  const decorations = generateCoverPageSVG(themeId, primaryColor);
+  const currentYear = new Date().getFullYear();
+  const generatedDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const tierDisplay = plan.tier.charAt(0).toUpperCase() + plan.tier.slice(1);
+  
+  return `
+  <div class="cover-page">
+    ${decorations.topRight}
+    ${decorations.bottomLeft}
+    
+    <div class="cover-content">
+      <div class="cover-header">
+        <h1 class="cover-main-title">
+          <span class="word-business">BUSINESS</span>
+          <span class="word-plan">PLAN</span>
+        </h1>
+        <div class="cover-subtitle-line"></div>
+        <div class="cover-business-name">${plan.businessName}</div>
+        <div class="cover-tagline">UK Innovator Founder Visa Application</div>
+      </div>
+      
+      <div class="cover-year">${currentYear}</div>
+    </div>
+    
+    <div class="cover-metadata">
+      <div class="cover-prepared-by">Prepared By:</div>
+      <div class="cover-industry">${plan.industry}</div>
+      <div class="cover-contact">
+        <span>Tier: ${tierDisplay}</span>
+        <span>Generated: ${generatedDate}</span>
+      </div>
+    </div>
+  </div>
+  `;
 }
 
 function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string): string {
