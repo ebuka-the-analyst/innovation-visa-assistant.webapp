@@ -96,6 +96,43 @@ async function migrate() {
       }
     }
     
+    // Create cover_designs table if not exists
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS cover_designs (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL REFERENCES users(id),
+          theme_id VARCHAR(50),
+          primary_color VARCHAR(20),
+          secondary_color VARCHAR(20),
+          font VARCHAR(50),
+          background_image TEXT,
+          use_full_cover_image BOOLEAN NOT NULL DEFAULT FALSE,
+          text_elements JSONB,
+          palette_id VARCHAR(50),
+          palette_colors JSONB,
+          is_default BOOLEAN NOT NULL DEFAULT FALSE,
+          name VARCHAR(100),
+          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      console.log('cover_designs table created or already exists');
+      
+      // Create indexes for cover_designs
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_cover_user ON cover_designs(user_id)
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_cover_default ON cover_designs(user_id, is_default)
+      `);
+      console.log('cover_designs indexes created or already exist');
+    } catch (err) {
+      if (err.code !== '42P07') { // 42P07 = table already exists
+        console.error('Error creating cover_designs table:', err.message);
+      }
+    }
+    
   } catch (err) {
     console.error('Migration failed:', err.message);
     process.exit(1);

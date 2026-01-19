@@ -424,12 +424,19 @@ export default function ThemeSelectionPage() {
         targetEndorser: formData.targetEndorser,
         contactPointsStrategy: formData.contactPointsStrategy,
         supportingEvidence: formData.supportingEvidence || '',
+        // Computed fields required by backend validation
+        technology: (formData.techStack || '') + "\n\n" + (formData.dataArchitecture || ''),
+        experience: formData.experience || '',
         // Theme settings from current selection
         themeId: selectedTheme || null,
         themePrimaryColor: primaryColor || null,
         themeSecondaryColor: secondaryColor || null,
         themeFont: selectedFont || null,
         themeAppliedAt: selectedTheme ? new Date() : null,
+        // Custom cover image (Canva uploads)
+        backgroundImage: backgroundImage || null,
+        useFullCoverImage: useFullCoverImage || false,
+        textElements: textElements.length > 0 ? JSON.stringify(textElements) : null,
       };
 
       console.log('[ThemeSelection] Submitting with theme data:', {

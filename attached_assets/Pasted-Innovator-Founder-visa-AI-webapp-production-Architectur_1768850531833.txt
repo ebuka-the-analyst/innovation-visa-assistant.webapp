@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+28041067
+Active
+
+Jan 19, 2026, 7:13 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-19T19:20:54.153Z] POST /api/activity/page-view
+[2026-01-19T19:20:54.155Z] GET /assets/alert-dialog-CcUgaXPa.js
+7:20:54 PM [express] POST /api/activity/page-view 200 in 22ms :: {"pageViewId":"5c9c857f-b4d9-4b22-9…
+[2026-01-19T19:20:54.411Z] GET /api/auth/user
+[2026-01-19T19:20:54.417Z] GET /api/cover-designs/latest
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: free (raw: free)
+[2026-01-19T19:21:06.274Z] POST /api/cover-designs
+  length: 112,
+  internalQuery: undefined,
+  severity: 'ERROR',
+  where: undefined,
+  schema: undefined,
+  code: '42P01',
+  table: undefined,
+  detail: undefined,
+  column: undefined,
+  hint: undefined,
+  dataType: undefined,
+  position: '13',
+  internalPosition: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+Save cover design error: error: relation "cover_designs" does not exist
+  routine: 'parserOpenTable'
+}
+    at /app/node_modules/pg-pool/index.js:45:11
+7:21:07 PM [express] POST /api/cover-designs 500 in 217ms :: {"success":false,"error":"relation \"co…
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.saveCoverDesign (file:///app/dist/index.js:3525:24)
+    at async file:///app/dist/index.js:14459:22 {
+[2026-01-19T19:21:16.596Z] POST /api/questionnaire/submit
+Questionnaire submission received - Theme data: {
+  themeId: 'orange-modern-proposal',
+  themePrimaryColor: '#4472C4',
+  themeSecondaryColor: '#ED7D31',
+  themeFont: 'Poppins'
+}
+Questionnaire submission error: ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "technology"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "experience"
+    ],
+    "message": "Required"
+  }
+]
+    at get error [as error] (file:///app/node_modules/zod/v3/types.js:39:31)
+    at ZodObject.parse (file:///app/node_modules/zod/v3/types.js:114:22)
+    at file:///app/dist/index.js:14379:40
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at isAuthenticated (file:///app/dist/index.js:13090:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  issues: [
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)],
+  errors: [
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    }
+  ]
+}
+7:21:16 PM [express] POST /api/questionnaire/submit 400 in 189ms :: {"success":false,"error":"techno…
+[2026-01-19T19:21:23.601Z] POST /api/activity/session
+7:21:23 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"b8bab9ec-c688-4c35-bd0e…
+[2026-01-19T19:21:26.778Z] POST /api/activity/session/end
+7:21:26 PM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+[2026-01-19T19:21:47.783Z] GET /api/auth/user
+[2026-01-19T19:21:47.785Z] POST /api/activity/session
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: free (raw: free)
+7:21:47 PM [express] GET /api/auth/user 200 in 202ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a"…
+7:21:47 PM [express] POST /api/activity/session 200 in 206ms :: {"sessionId":"e522ba3d-4fb4-4c52-ae3…
+[2026-01-19T19:21:48.183Z] POST /api/activity/page-view
+7:21:48 PM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"24a930ea-0030-4974-b…
+[2026-01-19T19:21:49.627Z] POST /api/activity/session/end
+7:21:49 PM [express] POST /api/activity/session/end 200 in 22ms :: {"success":true}
+[2026-01-19T19:21:55.509Z] GET /api/news
+7:21:55 PM [express] GET /api/news 200 in 9ms :: [{"id":"official-1","title":"Students can now switc…
+
+
+innovation-visa-assistant.webapp | Railway
