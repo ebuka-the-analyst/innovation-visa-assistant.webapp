@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits } from "@shared/schema";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
@@ -637,28 +637,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Increment promo code usage
         await storage.incrementPromoCodeUsage(validPromoCode.id);
         
-        // Determine credits for the tier
-        const tierCreditsMap: Record<string, number | 'unlimited'> = {
-          free: 0,
-          basic: 1,
-          premium: 3,
-          enterprise: 'unlimited',
-          ultimate: 'unlimited',
-        };
-        const tierCredits = tierCreditsMap[businessPlan.tier] || 0;
-        const creditsToAdd = tierCredits === 'unlimited' ? 0 : tierCredits;
-        const hasUnlimited = businessPlan.tier === 'enterprise' || businessPlan.tier === 'ultimate';
+        // PhD-Level: Determine credits for the tier - ALL FINITE (using schema as single source)
+        const creditsToAdd = getTierCredits(businessPlan.tier);
         
         // Upgrade user's subscription tier AND add credits
         await storage.updateUser(user.id, {
           subscriptionTier: businessPlan.tier,
           subscriptionStatus: 'active',
-          subscriptionStartDate: new Date(),
-          subscriptionEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
-          planCredits: hasUnlimited ? 0 : creditsToAdd, // Set credits for the tier
+          planCredits: creditsToAdd,
         });
         
-        console.log(`[CHECKOUT] User ${user.id} upgraded to ${businessPlan.tier} with ${hasUnlimited ? 'unlimited' : creditsToAdd} credits via 100% promo code ${validPromoCode.code}`);
+        console.log(`[CHECKOUT] User ${user.id} upgraded to ${businessPlan.tier} with ${creditsToAdd} credits via 100% promo code ${validPromoCode.code}`);
         
         return res.json({ 
           skipCheckout: true, 
@@ -836,28 +825,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Increment promo code usage
         await storage.incrementPromoCodeUsage(validPromoCode.id);
         
-        // Determine credits for the tier
-        const tierCreditsMap: Record<string, number | 'unlimited'> = {
-          free: 0,
-          basic: 1,
-          premium: 3,
-          enterprise: 'unlimited',
-          ultimate: 'unlimited',
-        };
-        const tierCredits = tierCreditsMap[tier] || 0;
-        const creditsToAdd = tierCredits === 'unlimited' ? 0 : tierCredits;
-        const hasUnlimited = tier === 'enterprise' || tier === 'ultimate';
+        // PhD-Level: Determine credits for the tier - ALL FINITE (using schema as single source)
+        const creditsToAdd = getTierCredits(tier);
         
         // Upgrade user's subscription tier AND add credits
         await storage.updateUser(user.id, {
           subscriptionTier: tier,
           subscriptionStatus: 'active',
-          subscriptionStartDate: new Date(),
-          subscriptionEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
-          planCredits: hasUnlimited ? 0 : creditsToAdd, // Set credits for the tier
+          planCredits: creditsToAdd,
         });
         
-        console.log(`[DIRECT SUBSCRIBE] User ${user.id} upgraded to ${tier} with ${hasUnlimited ? 'unlimited' : creditsToAdd} credits via 100% promo code ${validPromoCode.code}`);
+        console.log(`[DIRECT SUBSCRIBE] User ${user.id} upgraded to ${tier} with ${creditsToAdd} credits via 100% promo code ${validPromoCode.code}`);
         
         return res.json({ 
           skipCheckout: true, 
@@ -1239,14 +1217,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Credit System Routes
-  const TIER_CREDITS: Record<string, number | 'unlimited'> = {
-    free: 0,
-    basic: 1,
-    premium: 3,
-    enterprise: 'unlimited',
-    ultimate: 'unlimited',
-  };
+  // Credit System Routes - PhD-Level Implementation
+  // ALL TIERS HAVE FINITE CREDIT LIMITS
+  // SINGLE SOURCE OF TRUTH: Use getTierCredits() from shared/schema.ts everywhere
 
   const ADDON_PRICES = {
     single_credit: { amount: 3900, credits: 1, name: "Single Credit" },
@@ -1267,20 +1240,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const userTier = freshUser.subscriptionTier || 'free';
-      const tierCredits = TIER_CREDITS[userTier];
-      // Enterprise and Ultimate tiers have unlimited credits
-      const hasUnlimited = userTier === 'ultimate' || userTier === 'enterprise' || freshUser.hasUltimateAssurance;
+      const tierCreditLimit = getTierCredits(userTier);
+      const planCredits = freshUser.planCredits || 0;
+      const bonusCredits = freshUser.bonusCredits || 0;
+      const totalCredits = planCredits + bonusCredits;
       
+      // PhD-Level: All tiers have finite credits - NO UNLIMITED
       res.json({
-        planCredits: freshUser.planCredits || 0,
-        bonusCredits: freshUser.bonusCredits || 0,
-        totalCredits: (freshUser.planCredits || 0) + (freshUser.bonusCredits || 0),
+        planCredits,
+        bonusCredits,
+        totalCredits,
         creditsUsed: freshUser.creditsUsed || 0,
-        hasUnlimitedCredits: hasUnlimited,
-        tierCreditLimit: hasUnlimited ? 'unlimited' : tierCredits,
+        hasUnlimitedCredits: false, // ALL TIERS ARE FINITE
+        tierCreditLimit,
         hasUltimateAssurance: freshUser.hasUltimateAssurance || false,
         lastCreditRefresh: freshUser.lastCreditRefresh,
-        subscriptionTier: userTier, // Include tier in response for debugging
+        subscriptionTier: userTier,
       });
     } catch (error) {
       console.error("Get credit balance error:", error);
@@ -1293,25 +1268,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       const { creditsToConsume = 1, referenceId, referenceType, description } = req.body;
       
-      const hasUnlimited = user.subscriptionTier === 'ultimate' || user.subscriptionTier === 'enterprise' || user.hasUltimateAssurance;
-      
-      // Ultimate users have unlimited credits
-      if (hasUnlimited) {
-        // Log the usage but don't deduct credits
-        await db.execute(sql`
-          INSERT INTO credit_transactions (id, user_id, type, credits_change, credits_type, balance_after, reference_id, reference_type, description)
-          VALUES (gen_random_uuid(), ${user.id}, 'unlimited_use', 0, 'unlimited', 0, ${referenceId || null}, ${referenceType || 'business_plan'}, ${description || 'Business plan generation (unlimited)'})
-        `);
-        
-        return res.json({ 
-          success: true, 
-          message: "Unlimited credits - no deduction needed",
-          remainingCredits: 'unlimited',
-          wasUnlimited: true,
-        });
+      // PhD-Level: ALL TIERS HAVE FINITE CREDITS - no unlimited logic
+      // Fetch fresh user data to ensure we have latest credits
+      const freshUser = await storage.getUser(user.id);
+      if (!freshUser) {
+        return res.status(404).json({ error: "User not found" });
       }
       
-      const totalCredits = (user.planCredits || 0) + (user.bonusCredits || 0);
+      const totalCredits = (freshUser.planCredits || 0) + (freshUser.bonusCredits || 0);
       
       if (totalCredits < creditsToConsume) {
         return res.status(402).json({ 
@@ -1324,8 +1288,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Deduct from bonus credits first, then plan credits
       let remainingToDeduct = creditsToConsume;
-      let newBonusCredits = user.bonusCredits || 0;
-      let newPlanCredits = user.planCredits || 0;
+      let newBonusCredits = freshUser.bonusCredits || 0;
+      let newPlanCredits = freshUser.planCredits || 0;
       
       if (newBonusCredits >= remainingToDeduct) {
         newBonusCredits -= remainingToDeduct;
@@ -1516,13 +1480,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentTier = user.subscriptionTier || 'free';
       const currentPrice = PRICING[currentTier as keyof typeof PRICING]?.amount || 0;
       
-      const upgradePrices: Record<string, { price: number; credits: number | 'unlimited' }> = {};
+      const upgradePrices: Record<string, { price: number; credits: number }> = {};
       
       for (const [tier, pricing] of Object.entries(PRICING)) {
         if (pricing.amount > currentPrice) {
           upgradePrices[tier] = {
             price: pricing.amount - currentPrice,
-            credits: TIER_CREDITS[tier],
+            credits: getTierCredits(tier),
           };
         }
       }
@@ -1568,26 +1532,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Grant initial plan credits when user subscribes to a tier
+  // Grant initial plan credits when user subscribes to a tier - PhD-Level: ALL FINITE
   app.post("/api/credits/grant-tier-credits", isAuthenticated, async (req, res) => {
     try {
       const { tier } = req.body;
       const user = req.user as any;
       
-      const tierCredits = TIER_CREDITS[tier];
-      if (tierCredits === undefined) {
-        return res.status(400).json({ error: "Invalid tier" });
-      }
-      
-      if (tierCredits === 'unlimited') {
-        // Ultimate tier - no credits to add, but mark as unlimited
-        res.json({ 
-          success: true, 
-          message: "Ultimate tier grants unlimited credits",
-          creditsGranted: 'unlimited',
-        });
-        return;
-      }
+      const tierCredits = getTierCredits(tier);
+      // getTierCredits returns 0 for unknown tiers
       
       // Update plan credits
       await db.update(users)
@@ -1643,20 +1595,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // CREDIT CONSUMPTION: Check if user has credits before generation
+      // CREDIT CONSUMPTION - PhD-Level: ALL TIERS HAVE FINITE CREDITS
       const fullUser = await storage.getUser(user.id);
       if (!fullUser) {
         return res.status(404).json({ error: "User not found" });
       }
       
-      const userTier = fullUser.subscriptionTier || 'free';
-      const hasUltimateAssurance = fullUser.hasUltimateAssurance || false;
-      const isUnlimited = userTier === 'ultimate' || hasUltimateAssurance;
-      
       // FREE PLAN: Free tier users generating a free plan don't consume credits
       const isFreePlanGeneration = businessPlan.tier === 'free';
       
-      if (!isUnlimited && !isFreePlanGeneration) {
+      if (!isFreePlanGeneration) {
         const planCredits = fullUser.planCredits || 0;
         const bonusCredits = fullUser.bonusCredits || 0;
         const totalCredits = planCredits + bonusCredits;
@@ -1695,10 +1643,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `);
         
         console.log(`[CREDITS] User ${user.id} consumed 1 ${creditsDeducted} credit for plan ${planId}. Balance: ${newPlanCredits + newBonusCredits}`);
-      } else if (isFreePlanGeneration) {
-        console.log(`[CREDITS] User ${user.id} generating FREE plan ${planId} - no credits required`);
       } else {
-        console.log(`[CREDITS] User ${user.id} has unlimited credits (${isUnlimited ? 'Ultimate' : 'Ultimate Assurance'}), no credit consumed`);
+        console.log(`[CREDITS] User ${user.id} generating FREE plan ${planId} - no credits required`);
       }
 
       await storage.updateBusinessPlan(planId, { 

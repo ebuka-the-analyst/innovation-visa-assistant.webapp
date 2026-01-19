@@ -334,25 +334,33 @@ export type InsertToolAnalytics = z.infer<typeof insertToolAnalyticsSchema>;
 export type ToolAnalytic = typeof toolAnalytics.$inferSelect;
 
 // ============================================
-// CREDIT SYSTEM - Expert-Level Business Model
+// CREDIT SYSTEM - PhD-Level Business Model
+// ALL TIERS HAVE FINITE CREDIT LIMITS
 // ============================================
 
-// Tier credit configuration - defines credits per tier
+// Master credit configuration - SINGLE SOURCE OF TRUTH
+// Each credit = 1 business plan generation
 export const TIER_CREDITS = {
-  free: { planCredits: 1, maxBusinesses: 1, maxRevisions: 0 }, // 1 free business plan included
-  basic: { planCredits: 2, maxBusinesses: 1, maxRevisions: 2 },
-  premium: { planCredits: 4, maxBusinesses: 2, maxRevisions: 4 },
-  enterprise: { planCredits: 7, maxBusinesses: 3, maxRevisions: 6 },
-  ultimate: { planCredits: 13, maxBusinesses: Infinity, maxRevisions: Infinity },
+  free: { planCredits: 0, maxBusinesses: 0, maxRevisions: 0, pages: '10-15' },
+  basic: { planCredits: 1, maxBusinesses: 1, maxRevisions: 1, pages: '25-35' },
+  premium: { planCredits: 3, maxBusinesses: 3, maxRevisions: 3, pages: '40-60' },
+  enterprise: { planCredits: 6, maxBusinesses: 6, maxRevisions: 6, pages: '50-80' },
+  ultimate: { planCredits: 10, maxBusinesses: 10, maxRevisions: 10, pages: '80+' },
 } as const;
 
-// Tier pricing in pence (for upgrade calculations)
+// Helper function to get credits for a tier - use this everywhere
+export function getTierCredits(tier: string): number {
+  const config = TIER_CREDITS[tier as keyof typeof TIER_CREDITS];
+  return config?.planCredits ?? 0;
+}
+
+// Tier pricing in pence (matching pricing page)
 export const TIER_PRICING = {
   free: 0,
-  basic: 2900, // £15
-  premium: 4900, // £29
-  enterprise: 8900, // £45
-  ultimate: 12900, // £60
+  basic: 900, // £9
+  premium: 1900, // £19
+  enterprise: 2900, // £29
+  ultimate: 3900, // £39
 } as const;
 
 // Add-on pricing in pence
