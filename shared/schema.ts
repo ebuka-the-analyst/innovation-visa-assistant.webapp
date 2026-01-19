@@ -234,6 +234,13 @@ export const questionnaireSchema = z.object({
   contactPointsStrategy: z.string().min(50, "Strategy for 6 required contact points with endorser over 3 years"),
   
   supportingEvidence: z.string().optional(),
+  
+  // Theme settings (optional)
+  themeId: z.string().nullable().optional(),
+  themePrimaryColor: z.string().nullable().optional(),
+  themeSecondaryColor: z.string().nullable().optional(),
+  themeFont: z.string().nullable().optional(),
+  themeAppliedAt: z.date().nullable().optional(),
 });
 
 export type UpsertUser = z.infer<typeof upsertUserSchema>;

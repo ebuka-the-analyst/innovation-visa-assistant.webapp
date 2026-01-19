@@ -829,6 +829,13 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           contactPointsStrategy: formData.contactPointsStrategy,
           
           supportingEvidence: formData.supportingEvidence || '',
+          
+          // Theme settings from localStorage
+          themeId: selectedTheme?.themeId || null,
+          themePrimaryColor: selectedTheme?.primaryColor || null,
+          themeSecondaryColor: selectedTheme?.secondaryColor || null,
+          themeFont: selectedTheme?.font || null,
+          themeAppliedAt: selectedTheme ? new Date() : null,
         };
 
         const response = await fetch('/api/questionnaire/submit', {

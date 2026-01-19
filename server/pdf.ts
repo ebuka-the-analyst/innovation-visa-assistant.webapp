@@ -1,8 +1,26 @@
 import type { BusinessPlan } from "@shared/schema";
 import { generateSVGChart, SECTION_CHART_MAP, type ChartDataPayload, type ChartType } from "./chartGenerator";
 
+// Font family mappings for Google Fonts
+const FONT_FAMILIES: Record<string, string> = {
+  'Inter': "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  'Poppins': "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  'Montserrat': "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  'Playfair Display': "'Playfair Display', Georgia, 'Times New Roman', serif",
+  'Roboto': "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  'Open Sans': "'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  'Lato': "'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  'Source Sans Pro': "'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+};
+
 export function generatePDFContent(plan: BusinessPlan): string {
   const content = plan.generatedContent || "Business plan content not yet generated.";
+  
+  // Theme settings - use plan's theme or defaults
+  const primaryColor = plan.themePrimaryColor || '#005EB8';
+  const secondaryColor = plan.themeSecondaryColor || '#1e3a5f';
+  const themeFont = plan.themeFont || 'Inter';
+  const fontFamily = FONT_FAMILIES[themeFont] || FONT_FAMILIES['Inter'];
   
   let chartData: ChartDataPayload | null = null;
   if (plan.chartData) {
@@ -13,18 +31,22 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
   }
   
+  // Generate Google Fonts import URL for the selected font
+  const fontImport = `https://fonts.googleapis.com/css2?family=${themeFont.replace(' ', '+')}:wght@400;500;600;700&display=swap`;
+  
   const html = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <title>${plan.businessName} - Business Plan</title>
+  <link rel="stylesheet" href="${fontImport}">
   <style>
     @page {
       margin: 2.5cm;
     }
     body {
-      font-family: 'Georgia', serif;
+      font-family: ${fontFamily};
       line-height: 1.6;
       color: #1a1a1a;
       max-width: 210mm;
@@ -33,20 +55,20 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
     h1 {
       font-size: 28pt;
-      color: #005EB8;
-      border-bottom: 3px solid #005EB8;
+      color: ${primaryColor};
+      border-bottom: 3px solid ${primaryColor};
       padding-bottom: 10px;
       margin-bottom: 30px;
     }
     h2 {
       font-size: 20pt;
-      color: #005EB8;
+      color: ${primaryColor};
       margin-top: 40px;
       margin-bottom: 15px;
     }
     h3 {
       font-size: 16pt;
-      color: #1a1a1a;
+      color: ${secondaryColor};
       margin-top: 25px;
       margin-bottom: 10px;
     }
@@ -70,17 +92,17 @@ export function generatePDFContent(plan: BusinessPlan): string {
     .cover-title {
       font-size: 36pt;
       font-weight: bold;
-      color: #005EB8;
+      color: ${primaryColor};
       margin-bottom: 20px;
     }
     .cover-subtitle {
       font-size: 18pt;
-      color: #666;
+      color: ${secondaryColor};
       margin-bottom: 40px;
     }
     .metadata {
       font-size: 12pt;
-      color: #888;
+      color: #666;
       margin-top: 60px;
     }
     table {
@@ -95,12 +117,12 @@ export function generatePDFContent(plan: BusinessPlan): string {
       text-align: left;
     }
     th {
-      background-color: #005EB8;
+      background-color: ${primaryColor};
       font-weight: bold;
       color: white;
     }
     .financial-table th {
-      background-color: #005EB8;
+      background-color: ${primaryColor};
       color: white;
     }
     .financial-table td {
@@ -115,10 +137,11 @@ export function generatePDFContent(plan: BusinessPlan): string {
       border-radius: 8px;
       margin: 30px 0;
       page-break-after: always;
+      border-left: 4px solid ${primaryColor};
     }
     .toc h2 {
-      color: #005EB8;
-      border-bottom: 2px solid #005EB8;
+      color: ${primaryColor};
+      border-bottom: 2px solid ${primaryColor};
       padding-bottom: 10px;
       margin-bottom: 20px;
     }
@@ -135,7 +158,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
     .toc li::before {
       content: counter(toc-counter) ". ";
-      color: #005EB8;
+      color: ${primaryColor};
       font-weight: bold;
     }
     .toc a {
@@ -143,7 +166,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
       text-decoration: none;
     }
     .toc a:hover {
-      color: #005EB8;
+      color: ${primaryColor};
     }
     ul, ol {
       margin: 15px 0;
@@ -155,11 +178,11 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
     .section-break {
       margin-top: 50px;
-      border-top: 2px solid #e0e0e0;
+      border-top: 2px solid ${primaryColor};
       padding-top: 30px;
     }
     strong {
-      color: #1a1a1a;
+      color: ${secondaryColor};
       font-weight: 600;
     }
     .chart-container {
@@ -169,6 +192,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
       padding: 20px;
       margin: 25px 0;
       text-align: center;
+      border-top: 3px solid ${primaryColor};
     }
     .chart-container svg {
       max-width: 100%;
@@ -192,7 +216,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
   </div>
   
   <div class="content">
-    ${formatContentWithCharts(content, chartData)}
+    ${formatContentWithCharts(content, chartData, primaryColor)}
   </div>
 </body>
 </html>
@@ -201,7 +225,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
   return html;
 }
 
-function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null): string {
+function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string): string {
   const lines = markdown.split('\n');
   let html = '';
   let currentSection = '';
@@ -322,7 +346,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
     }
     
     if (remainingCharts.length > 0) {
-      html += '<div style="page-break-before: always;"><h2 style="color: #005EB8;">Additional Visual Analytics</h2>\n';
+      html += `<div style="page-break-before: always;"><h2 style="color: ${primaryColor};">Additional Visual Analytics</h2>\n`;
       for (const chartType of remainingCharts) {
         try {
           const svg = generateSVGChart(chartType, chartData);

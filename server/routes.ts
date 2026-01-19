@@ -360,6 +360,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   });
+  
+  // Save theme settings for a business plan
+  app.post("/api/questionnaire/theme", isAuthenticated, async (req, res) => {
+    try {
+      const { planId, themeId, primaryColor, secondaryColor, font } = req.body;
+      const user = req.user as any;
+      
+      if (!planId) {
+        return res.status(400).json({ error: "Plan ID is required" });
+      }
+      
+      const businessPlan = await storage.getBusinessPlan(planId);
+      if (!businessPlan) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+      
+      if (businessPlan.userId !== user.id) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+      
+      await storage.updateBusinessPlan(planId, {
+        themeId: themeId || null,
+        themePrimaryColor: primaryColor || null,
+        themeSecondaryColor: secondaryColor || null,
+        themeFont: font || null,
+        themeAppliedAt: new Date(),
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Theme saved successfully" 
+      });
+    } catch (error) {
+      console.error("Theme save error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : "Failed to save theme" 
+      });
+    }
+  });
 
   app.post("/api/payment/create-checkout", isAuthenticated, async (req, res) => {
     try {
