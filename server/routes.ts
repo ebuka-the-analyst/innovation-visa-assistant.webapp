@@ -11070,11 +11070,11 @@ Return a JSON object with:
     }
   });
 
-  // Admin: Add/Remove credits
+  // Admin: Add/Remove/Set credits (supports mode: 'add' or 'set')
   app.post("/api/admin/users/:userId/credits", requireAdmin, async (req, res) => {
     try {
       const { userId } = req.params;
-      const { amount, type, reason } = req.body;
+      const { amount, type, reason, mode = 'add' } = req.body;
       const admin = req.user as any;
 
       const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
@@ -11083,23 +11083,36 @@ Return a JSON object with:
       }
 
       let newCredits: number;
+      const currentCredits = type === 'bonus' 
+        ? (targetUser.bonusCredits || 0) 
+        : (targetUser.planCredits || 0);
+      
+      if (mode === 'set') {
+        newCredits = Math.max(0, amount);
+      } else {
+        newCredits = Math.max(0, currentCredits + amount);
+      }
+
       if (type === 'bonus') {
-        newCredits = Math.max(0, (targetUser.bonusCredits || 0) + amount);
         await db.update(users).set({ 
           bonusCredits: newCredits,
           updatedAt: new Date()
         }).where(eq(users.id, userId));
       } else {
-        newCredits = Math.max(0, (targetUser.planCredits || 0) + amount);
         await db.update(users).set({ 
           planCredits: newCredits,
+          creditsUsed: mode === 'set' ? 0 : targetUser.creditsUsed,
           updatedAt: new Date()
         }).where(eq(users.id, userId));
       }
 
+      const action = mode === 'set' ? 'Set' : (amount >= 0 ? 'Added' : 'Removed');
       res.json({ 
         success: true, 
-        message: `${amount >= 0 ? 'Added' : 'Removed'} ${Math.abs(amount)} ${type || 'plan'} credits`,
+        message: mode === 'set' 
+          ? `Set ${type || 'plan'} credits to ${newCredits}`
+          : `${action} ${Math.abs(amount)} ${type || 'plan'} credits`,
+        previousBalance: currentCredits,
         newBalance: newCredits,
         reason
       });

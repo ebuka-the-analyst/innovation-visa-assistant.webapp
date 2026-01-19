@@ -639,8 +639,9 @@ export default function AdminDashboard() {
   const [overrideTier, setOverrideTier] = useState<string>("premium");
   const [overrideReason, setOverrideReason] = useState("");
   const [creditsUser, setCreditsUser] = useState<User | null>(null);
-  const [creditsAmount, setCreditsAmount] = useState(100);
-  const [creditsType, setCreditsType] = useState<'plan' | 'bonus'>('bonus');
+  const [creditsAmount, setCreditsAmount] = useState(1);
+  const [creditsType, setCreditsType] = useState<'plan' | 'bonus'>('plan');
+  const [creditsMode, setCreditsMode] = useState<'add' | 'set'>('add');
   const [notesUser, setNotesUser] = useState<User | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [impersonatingUser, setImpersonatingUser] = useState<User | null>(null);
@@ -2056,10 +2057,10 @@ export default function AdminDashboard() {
     },
   });
 
-  // Manage credits
+  // Manage credits - supports 'add' (default) or 'set' mode
   const creditsMutation = useMutation({
-    mutationFn: async ({ userId, amount, type }: { userId: string; amount: number; type: 'plan' | 'bonus' }) => {
-      await apiRequest('POST', `/api/admin/users/${userId}/credits`, { amount, type });
+    mutationFn: async ({ userId, amount, type, mode = 'add' }: { userId: string; amount: number; type: 'plan' | 'bonus'; mode?: 'add' | 'set' }) => {
+      await apiRequest('POST', `/api/admin/users/${userId}/credits`, { amount, type, mode });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin'] });
@@ -2440,34 +2441,6 @@ export default function AdminDashboard() {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-
-                      {/* Reset All Credits Button */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              if (window.confirm('Reset ALL user credits to their tier defaults?\n\nThis will set:\n- Free: 0 credits\n- Basic: 1 credit\n- Premium: 3 credits\n- Enterprise: 6 credits\n- Ultimate: 12 credits\n\nProceed?')) {
-                                resetAllCreditsMutation.mutate();
-                              }
-                            }}
-                            disabled={resetAllCreditsMutation.isPending}
-                            data-testid="button-reset-all-credits"
-                            className="text-amber-600 border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950"
-                          >
-                            {resetAllCreditsMutation.isPending ? (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <RefreshCw className="h-4 w-4 mr-2" />
-                            )}
-                            Reset Credits
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Reset all user credits to tier defaults (2026 pricing)</p>
-                        </TooltipContent>
-                      </Tooltip>
 
                       {/* Dashboard Settings */}
                       <Tooltip>
@@ -14703,11 +14676,11 @@ export default function AdminDashboard() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="free">Free (0 credits)</SelectItem>
-                    <SelectItem value="basic">Basic (50 credits)</SelectItem>
-                    <SelectItem value="premium">Premium (200 credits)</SelectItem>
-                    <SelectItem value="enterprise">Enterprise (500 credits)</SelectItem>
-                    <SelectItem value="ultimate">Ultimate (1000 credits)</SelectItem>
+                    <SelectItem value="free">Free (0 coins)</SelectItem>
+                    <SelectItem value="basic">Basic (1 coin)</SelectItem>
+                    <SelectItem value="premium">Premium (3 coins)</SelectItem>
+                    <SelectItem value="enterprise">Enterprise (6 coins)</SelectItem>
+                    <SelectItem value="ultimate">Ultimate (12 coins)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -14777,25 +14750,70 @@ export default function AdminDashboard() {
                   data-testid="input-credit-amount"
                 />
               </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => setCreditsAmount(50)}>+50</Button>
-                <Button size="sm" variant="outline" onClick={() => setCreditsAmount(100)}>+100</Button>
-                <Button size="sm" variant="outline" onClick={() => setCreditsAmount(200)}>+200</Button>
-                <Button size="sm" variant="outline" onClick={() => setCreditsAmount(500)}>+500</Button>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={() => { setCreditsMode('add'); setCreditsAmount(1); }}>+1</Button>
+                <Button size="sm" variant="outline" onClick={() => { setCreditsMode('add'); setCreditsAmount(3); }}>+3</Button>
+                <Button size="sm" variant="outline" onClick={() => { setCreditsMode('add'); setCreditsAmount(5); }}>+5</Button>
+                <Button size="sm" variant="outline" onClick={() => { setCreditsMode('add'); setCreditsAmount(10); }}>+10</Button>
+                <Button size="sm" variant="outline" onClick={() => { setCreditsMode('add'); setCreditsAmount(-1); }}>-1</Button>
+                <Button size="sm" variant="outline" onClick={() => { setCreditsMode('add'); setCreditsAmount(-3); }}>-3</Button>
+              </div>
+              
+              <div className="pt-3 border-t">
+                <p className="text-sm font-medium mb-2">Quick Actions (Set to exact value)</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="secondary"
+                    onClick={() => {
+                      const tierCredits: Record<string, number> = { free: 0, basic: 1, premium: 3, enterprise: 6, ultimate: 12 };
+                      const tier = (creditsUser?.subscriptionTier || 'free').toLowerCase();
+                      const defaultCredits = tierCredits[tier] ?? 0;
+                      setCreditsType('plan');
+                      setCreditsMode('set');
+                      setCreditsAmount(defaultCredits);
+                    }}
+                    data-testid="button-set-tier-default"
+                  >
+                    Reset to Tier Default ({
+                      { free: 0, basic: 1, premium: 3, enterprise: 6, ultimate: 12 }[
+                        (creditsUser?.subscriptionTier || 'free').toLowerCase()
+                      ] ?? 0
+                    })
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => { setCreditsMode('set'); setCreditsAmount(0); }}
+                  >
+                    Set to 0
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  2026 Tier Defaults: Free=0, Basic=1, Premium=3, Enterprise=6, Ultimate=12
+                </p>
+                {creditsMode === 'set' && (
+                  <p className="text-xs text-amber-600 mt-1 font-medium">
+                    Mode: SET (will replace current balance with {creditsAmount})
+                  </p>
+                )}
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreditsUser(null)}>Cancel</Button>
+              <Button variant="outline" onClick={() => { setCreditsUser(null); setCreditsMode('add'); }}>Cancel</Button>
               <Button
                 onClick={() => creditsUser && creditsMutation.mutate({ 
                   userId: creditsUser.id, 
                   amount: creditsAmount, 
-                  type: creditsType 
+                  type: creditsType,
+                  mode: creditsMode
                 })}
                 disabled={creditsMutation.isPending}
                 data-testid="button-confirm-credits"
               >
-                {creditsMutation.isPending ? "Updating..." : creditsAmount >= 0 ? "Add Credits" : "Remove Credits"}
+                {creditsMutation.isPending ? "Updating..." : 
+                  creditsMode === 'set' ? `Set to ${creditsAmount}` : 
+                  creditsAmount >= 0 ? "Add Credits" : "Remove Credits"}
               </Button>
             </DialogFooter>
           </DialogContent>
