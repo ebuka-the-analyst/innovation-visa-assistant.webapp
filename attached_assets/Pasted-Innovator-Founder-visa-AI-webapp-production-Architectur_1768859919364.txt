@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+3da04b09
+Active
+
+Jan 19, 2026, 9:52 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-19T21:57:02.209Z] GET /api/credits/balance
+9:57:02 PM [express] GET /api/credits/balance 200 in 10ms :: {"planCredits":0,"bonusCredits":0,"tota…
+[2026-01-19T21:57:12.487Z] POST /api/activity/session/end
+9:57:12 PM [express] POST /api/activity/session/end 200 in 192ms :: {"success":true}
+[2026-01-19T21:57:44.709Z] POST /api/activity/session/end
+9:57:44 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+[2026-01-19T21:57:44.854Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+9:57:44 PM [express] GET /api/auth/user 200 in 10ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-19T21:57:44.873Z] POST /api/activity/session
+9:57:44 PM [express] POST /api/activity/session 200 in 15ms :: {"sessionId":"29794935-e0e9-4363-8b77…
+[2026-01-19T21:57:45.073Z] POST /api/activity/page-view
+9:57:45 PM [express] POST /api/activity/page-view 200 in 11ms :: {"pageViewId":"f52bca07-3836-4c3d-9…
+[2026-01-19T21:57:45.470Z] POST /api/activity/session/end
+[2026-01-19T21:57:42.456Z] GET /api/auth/user
+[2026-01-19T21:57:42.458Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+9:57:42 PM [express] GET /api/auth/user 200 in 194ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+9:57:42 PM [express] POST /api/activity/session 200 in 197ms :: {"sessionId":"bf842c07-35d3-47af-bdf…
+[2026-01-19T21:57:42.837Z] POST /api/activity/page-view
+9:57:42 PM [express] POST /api/activity/page-view 200 in 14ms :: {"pageViewId":"0ca1e305-7e20-4939-b…
+[2026-01-19T21:57:45.479Z] POST /api/activity/session
+9:57:45 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+9:57:45 PM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"987113a2-bc8a-442b-b840…
+[2026-01-19T21:57:45.678Z] POST /api/activity/page-view
+9:57:45 PM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"e926c84e-f28b-45d1-9…
+[2026-01-19T21:57:47.800Z] POST /api/activity/session/end
+[2026-01-19T21:57:47.805Z] GET /questionnaire
+9:57:47 PM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+[2026-01-19T21:57:48.026Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+9:57:48 PM [express] GET /api/auth/user 200 in 9ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c","…
+[2026-01-19T21:57:48.240Z] GET /api/partner/status
+[2026-01-19T21:57:48.241Z] POST /api/activity/session
+[2026-01-19T21:57:48.242Z] POST /api/activity/session
+9:57:48 PM [express] GET /api/partner/status 200 in 11ms :: {"isPartner":false,"promoCodeCount":0}
+9:57:48 PM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"cf7c0fa6-44d2-498c-8ce0…
+[2026-01-19T21:57:48.406Z] GET /api/credits/balance
+9:57:48 PM [express] GET /api/credits/balance 200 in 7ms :: {"planCredits":0,"bonusCredits":0,"total…
+9:57:50 PM [express] GET /api/dashboard/plans 200 in 689ms :: [{"id":"22fcb247-073e-4ef4-aded-c5dc7c…
+[2026-01-19T21:57:50.788Z] POST /api/activity/page-view
+9:57:50 PM [express] POST /api/activity/page-view 200 in 17ms :: {"pageViewId":"2d55e13a-0fb0-46c1-9…
+[2026-01-19T21:57:50.869Z] GET /api/news
+9:57:48 PM [express] POST /api/activity/session 200 in 184ms :: {"sessionId":"da432bbb-8be5-41cc-aa2…
+9:57:50 PM [express] GET /api/news 200 in 6ms :: [{"id":"official-1","title":"Students can now switc…
+[2026-01-19T21:57:48.441Z] POST /api/activity/page-view
+9:57:48 PM [express] POST /api/activity/page-view 200 in 12ms :: {"pageViewId":"4ce844be-9cf5-40f6-b…
+[2026-01-19T21:57:49.331Z] POST /api/activity/page-view
+9:57:49 PM [express] POST /api/activity/page-view 200 in 12ms :: {"pageViewId":"2358bae9-8aa3-4312-9…
+[2026-01-19T21:57:49.347Z] GET /api/dashboard/plans
+[2026-01-19T21:57:49.348Z] GET /api/promos/my-redemptions
+9:57:49 PM [express] GET /api/promos/my-redemptions 200 in 11ms :: {"redemptions":[]}
+[2026-01-19T21:57:52.564Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+9:57:52 PM [express] GET /api/auth/user 200 in 9ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c","…
+[2026-01-19T21:57:52.606Z] GET /api/news
+9:57:52 PM [express] GET /api/news 200 in 6ms :: [{"id":"official-1","title":"Students can now switc…
+[2026-01-19T21:57:52.338Z] POST /api/activity/session/end
+[2026-01-19T21:57:52.339Z] GET /
+9:57:52 PM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+[2026-01-19T21:57:52.762Z] POST /api/activity/session
+[2026-01-19T21:57:52.763Z] POST /api/activity/session
+9:57:52 PM [express] POST /api/activity/session 200 in 25ms :: {"sessionId":"0d37b469-ff35-4baf-bab8…
+9:57:52 PM [express] POST /api/activity/session 200 in 29ms :: {"sessionId":"76b43f3c-271d-4874-b849…
+[2026-01-19T21:57:52.968Z] POST /api/activity/page-view
+9:57:52 PM [express] POST /api/activity/page-view 200 in 12ms :: {"pageViewId":"87fa2b74-6d57-4b18-9…
+[2026-01-19T21:57:53.981Z] GET /api/partner/status
+[2026-01-19T21:57:53.982Z] POST /api/activity/page-view
+[2026-01-19T21:57:53.990Z] GET /api/dashboard/plans
+9:57:53 PM [express] GET /api/partner/status 200 in 10ms :: {"isPartner":false,"promoCodeCount":0}
+9:57:53 PM [express] POST /api/activity/page-view 200 in 14ms :: {"pageViewId":"ebacf13c-2a6b-4390-a…
+[2026-01-19T21:57:54.148Z] GET /api/promos/my-redemptions
+9:57:54 PM [express] GET /api/promos/my-redemptions 200 in 9ms :: {"redemptions":[]}
+9:57:54 PM [express] GET /api/dashboard/plans 200 in 532ms :: [{"id":"22fcb247-073e-4ef4-aded-c5dc7c…
+[2026-01-19T21:57:56.118Z] POST /api/activity/page-view
+9:57:56 PM [express] POST /api/activity/page-view 200 in 14ms :: {"pageViewId":"b875a59c-20ed-4882-8…
+[2026-01-19T21:57:56.145Z] GET /api/credits/balance
+9:57:56 PM [express] GET /api/credits/balance 200 in 8ms :: {"planCredits":0,"bonusCredits":0,"total…
+[2026-01-19T21:58:02.232Z] POST /api/auth/logout
+9:58:02 PM [express] POST /api/auth/logout 200 in 8ms :: {"success":true,"redirectUrl":"/"}
+9:58:02 PM [express] POST /api/activity/session/end 401 in 3ms :: {"message":"Unauthorized"}
+[2026-01-19T21:58:02.591Z] GET /api/auth/user
+[2026-01-19T21:58:02.593Z] GET /
+9:58:02 PM [express] GET /api/auth/user 401 in 5ms :: {"message":"Unauthorized"}
+[2026-01-19T21:58:02.434Z] POST /api/activity/session/end
+[2026-01-19T21:58:02.834Z] GET /api/auth/user
+9:58:02 PM [express] GET /api/auth/user 401 in 2ms :: {"message":"Unauthorized"}
+[2026-01-19T21:58:02.853Z] GET /api/news
+9:58:02 PM [express] GET /api/news 200 in 3ms :: [{"id":"official-1","title":"Students can now switc…
+[2026-01-19T21:58:04.225Z] GET /api/auth/user
+9:58:04 PM [express] GET /api/auth/user 401 in 2ms :: {"message":"Unauthorized"}
+[2026-01-19T21:58:05.880Z] GET /api/auth/google
+9:58:05 PM [express] GET /api/auth/google 302 in 4ms
+[2026-01-19T21:58:08.437Z] GET /api/auth/callback/google?code=4%2F0ASc3gC2ZCWFKATQaNXAb1RZ7yCF-IzxEiy08hGx45gViJSccSb29fDh0I7D_bVVI8e5Snw&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid&authuser=0&prompt=none
+9:58:08 PM [express] GET /api/auth/callback/google 302 in 254ms
+[2026-01-19T21:58:08.889Z] GET /dashboard
+[2026-01-19T21:58:09.197Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: premium (raw: premium)
+9:58:09 PM [express] GET /api/auth/user 200 in 8ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a","…
+[2026-01-19T21:58:09.572Z] POST /api/activity/session
+[2026-01-19T21:58:09.573Z] GET /api/dashboard/plans
+9:58:09 PM [express] POST /api/activity/session 200 in 15ms :: {"sessionId":"0539df8c-a00a-41bf-a779…
+[2026-01-19T21:58:09.607Z] GET /api/promos/my-redemptions
+9:58:09 PM [express] GET /api/promos/my-redemptions 200 in 7ms :: {"redemptions":[]}
+[2026-01-19T21:58:09.402Z] GET /api/partner/status
+9:58:09 PM [express] GET /api/partner/status 200 in 8ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-01-19T21:58:09.571Z] POST /api/activity/session
+9:58:09 PM [express] POST /api/activity/session 200 in 194ms :: {"sessionId":"697d929b-743c-48f9-9d0…
+[2026-01-19T21:58:09.788Z] POST /api/activity/page-view
+9:58:09 PM [express] POST /api/activity/page-view 200 in 42ms :: {"pageViewId":"e6318148-04bc-443d-a…
+9:58:10 PM [express] GET /api/dashboard/plans 200 in 904ms :: [{"id":"2aa1fa02-d170-490e-af4f-02b90c…
+[2026-01-19T21:58:11.705Z] POST /api/activity/page-view
+9:58:11 PM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"f9d509c6-05af-452d-8…
+[2026-01-19T21:58:11.726Z] GET /api/credits/balance
+9:58:11 PM [express] GET /api/credits/balance 200 in 9ms :: {"planCredits":0,"bonusCredits":0,"total…
+[2026-01-19T21:58:21.094Z] POST /api/activity/session/end
+9:58:21 PM [express] POST /api/activity/session/end 200 in 8ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
