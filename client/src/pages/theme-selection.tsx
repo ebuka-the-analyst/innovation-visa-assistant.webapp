@@ -223,7 +223,7 @@ export default function ThemeSelectionPage() {
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="absolute bottom-2 right-2 gap-1 bg-white/90 hover:bg-white shadow-md"
+                      className="absolute bottom-2 right-2 z-10 gap-1 bg-white/90 hover:bg-white shadow-md"
                       onClick={(e) => handlePreview(theme, e)}
                       data-testid={`button-preview-${theme.id}`}
                     >
