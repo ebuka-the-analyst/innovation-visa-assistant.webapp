@@ -904,12 +904,50 @@ export function generatePDFContent(plan: BusinessPlan): string {
   return html;
 }
 
-function generateCoverPageHTML(plan: BusinessPlan, primaryColor: string, secondaryColor: string): string {
+function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string | null; useFullCoverImage?: boolean; textElements?: any[] | null; paletteId?: string | null }, primaryColor: string, secondaryColor: string): string {
   const themeId = plan.themeId || null;
-  const decorations = generateCoverPageSVG(themeId, primaryColor, secondaryColor);
   const currentYear = new Date().getFullYear();
   const generatedDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const tierDisplay = plan.tier.charAt(0).toUpperCase() + plan.tier.slice(1);
+  
+  // Check if using a full custom cover image
+  if (plan.useFullCoverImage && plan.backgroundImage) {
+    // Render custom text elements if they exist
+    let textElementsHtml = '';
+    if (plan.textElements && Array.isArray(plan.textElements)) {
+      for (const el of plan.textElements) {
+        const style = `
+          position: absolute;
+          left: ${el.x}%;
+          top: ${el.y}%;
+          font-size: ${el.fontSize}px;
+          font-weight: ${el.fontWeight || 'normal'};
+          color: ${el.color};
+          transform: translate(-50%, -50%);
+          text-align: ${el.textAlign || 'center'};
+          white-space: pre-wrap;
+          max-width: 90%;
+        `;
+        // Replace template variables with actual values
+        let content = el.content
+          .replace(/\{\{year\}\}/gi, currentYear.toString())
+          .replace(/\{\{businessName\}\}/gi, plan.businessName || '')
+          .replace(/\{\{industry\}\}/gi, plan.industry || '')
+          .replace(/\{\{tier\}\}/gi, tierDisplay)
+          .replace(/\{\{date\}\}/gi, generatedDate);
+        textElementsHtml += `<div style="${style}">${content}</div>`;
+      }
+    }
+    
+    return `
+    <div class="cover-page" style="position: relative; background: url('${plan.backgroundImage}') center/cover no-repeat; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+      ${textElementsHtml}
+    </div>
+    `;
+  }
+  
+  // Standard themed cover page with SVG decorations
+  const decorations = generateCoverPageSVG(themeId, primaryColor, secondaryColor);
   
   return `
   <div class="cover-page">

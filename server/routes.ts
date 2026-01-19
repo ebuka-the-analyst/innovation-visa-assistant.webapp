@@ -2072,8 +2072,24 @@ ${generatedSections.join('\n\n---\n\n')}`;
         return res.status(500).json({ error: "Business plan content is missing" });
       }
 
+      // Load saved cover design from database to apply theme
+      const savedCoverDesign = await storage.getLatestCoverDesign(user.id);
+      
+      // Create plan with cover design theme applied
+      const planWithTheme = {
+        ...businessPlan,
+        themeId: savedCoverDesign?.themeId || businessPlan.themeId,
+        themePrimaryColor: savedCoverDesign?.primaryColor || businessPlan.themePrimaryColor,
+        themeSecondaryColor: savedCoverDesign?.secondaryColor || businessPlan.themeSecondaryColor,
+        themeFont: savedCoverDesign?.font || businessPlan.themeFont,
+        backgroundImage: savedCoverDesign?.backgroundImage || null,
+        useFullCoverImage: savedCoverDesign?.useFullCoverImage || false,
+        textElements: savedCoverDesign?.textElements || null,
+        paletteId: savedCoverDesign?.paletteId || null,
+      };
+
       // Generate rich HTML with SVG charts using pdf.ts
-      const htmlContent = generatePDFContent(businessPlan);
+      const htmlContent = generatePDFContent(planWithTheme);
       
       // Add print-friendly styles and a print button
       const enhancedHtml = htmlContent.replace('</head>', `
