@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+18649059
+Active
+
+Jan 19, 2026, 4:27 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+Generating section 11/13: 11. CUSTOMER ANALYSIS
+[2026-01-19T16:39:13.560Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:13 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 16ms :: {"…
+[2026-01-19T16:39:16.060Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:16 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 14ms :: {"…
+[2026-01-19T16:39:18.564Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:18 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 16ms :: {"…
+[2026-01-19T16:39:21.059Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:21 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:39:23.566Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:23 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 11ms :: {"…
+[2026-01-19T16:39:26.074Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:26 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 13ms :: {"…
+[2026-01-19T16:39:28.039Z] POST /api/activity/session
+4:39:28 PM [express] POST /api/activity/session 200 in 20ms :: {"sessionId":"d75352e5-a16e-49e8-a197…
+[2026-01-19T16:39:28.571Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:28 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:39:31.058Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:31 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:39:33.572Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:33 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 20ms :: {"…
+[2026-01-19T16:39:36.076Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:36 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 16ms :: {"…
+4:39:38 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 13ms :: {"…
+[2026-01-19T16:39:38.578Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+[2026-01-19T16:39:41.069Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:41 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 19ms :: {"…
+[2026-01-19T16:39:43.575Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:43 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:39:46.082Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:46 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 14ms :: {"…
+✓ Section 11 complete (7887 chars)
+Generating section 12/13: 12. TAILORED MARKETING PLAN
+[2026-01-19T16:39:48.569Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:48 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:39:51.072Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:51 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:39:53.567Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:53 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 11ms :: {"…
+[2026-01-19T16:39:56.069Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:56 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 14ms :: {"…
+[2026-01-19T16:39:58.030Z] POST /api/activity/session
+4:39:58 PM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"d75352e5-a16e-49e8-a197…
+[2026-01-19T16:39:58.565Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:39:58 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 16ms :: {"…
+[2026-01-19T16:40:01.066Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:01 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 19ms :: {"…
+[2026-01-19T16:40:03.577Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:03 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 16ms :: {"…
+[2026-01-19T16:40:06.066Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:06 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 21ms :: {"…
+[2026-01-19T16:40:08.564Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:08 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 17ms :: {"…
+[2026-01-19T16:40:11.074Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:11 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 13ms :: {"…
+[2026-01-19T16:40:13.564Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:13 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 17ms :: {"…
+[2026-01-19T16:40:16.066Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:16 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 16ms :: {"…
+[2026-01-19T16:40:18.574Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:18 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 16ms :: {"…
+[2026-01-19T16:40:21.058Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:21 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 20ms :: {"…
+[2026-01-19T16:40:23.563Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:23 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 14ms :: {"…
+4:40:26 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:40:26.076Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+[2026-01-19T16:40:28.026Z] POST /api/activity/session
+4:40:28 PM [express] POST /api/activity/session 200 in 30ms :: {"sessionId":"d75352e5-a16e-49e8-a197…
+[2026-01-19T16:40:28.559Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:28 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 13ms :: {"…
+[2026-01-19T16:40:31.059Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:31 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 14ms :: {"…
+[2026-01-19T16:40:33.558Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:33 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 14ms :: {"…
+[2026-01-19T16:40:36.059Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:36 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:40:38.559Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:38 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 21ms :: {"…
+✓ Section 12 complete (9191 chars)
+Generating section 13/13: 13. ENDORSING BODY SELECTION
+[2026-01-19T16:40:41.061Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:41 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 17ms :: {"…
+[2026-01-19T16:40:43.561Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:43 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 20ms :: {"…
+[2026-01-19T16:40:46.060Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:46 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 14ms :: {"…
+[2026-01-19T16:40:48.558Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:48 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:40:51.077Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:51 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 16ms :: {"…
+[2026-01-19T16:40:53.556Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:53 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:40:56.066Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:56 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 14ms :: {"…
+[2026-01-19T16:40:58.024Z] POST /api/activity/session
+4:40:58 PM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"d75352e5-a16e-49e8-a197…
+[2026-01-19T16:40:58.556Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:40:58 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 16ms :: {"…
+[2026-01-19T16:41:01.055Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:41:01 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 15ms :: {"…
+[2026-01-19T16:41:03.553Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:41:03 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 20ms :: {"…
+✓ Section 13 complete (6247 chars)
+[Email Send] Attempting to send email to: ebuka.umeh40@gmail.com
+[Email Send] Provider: resend | Resend: true | SMTP: false
+[Email Send] Using Resend HTTP API...
+[2026-01-19T16:41:06.055Z] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+4:41:06 PM [express] GET /api/generate/status/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 30ms :: {"…
+[Email Send] Resend success, messageId: 6a430794-e8ef-42a2-9587-8567132ac23b
+Email sent successfully to: ebuka.umeh40@gmail.com MessageId: 6a430794-e8ef-42a2-9587-8567132ac23b
+[2026-01-19T16:41:19.549Z] GET /api/view/html/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8
+[2026-01-19T16:41:19.554Z] POST /api/activity/session/end
+4:41:19 PM [express] POST /api/activity/session/end 200 in 216ms :: {"success":true}
+Cover design fetch failed (may not exist in production): relation "cover_designs" does not exist
+4:41:19 PM [express] GET /api/view/html/38014ccc-cd87-4f37-89d0-f0fb1d4ca8e8 200 in 436ms
+[2026-01-19T16:41:20.355Z] GET /favicon.ico
+
+
+innovation-visa-assistant.webapp | Railway

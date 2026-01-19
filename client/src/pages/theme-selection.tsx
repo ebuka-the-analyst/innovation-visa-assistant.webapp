@@ -360,8 +360,8 @@ export default function ThemeSelectionPage() {
     setShowGenerateConfirm(false);
     
     try {
-      // Get saved questionnaire data from localStorage
-      const savedDataStr = localStorage.getItem('autosave_questionnaire');
+      // Get saved questionnaire data from localStorage (correct key: autosave_questionnaire-form)
+      const savedDataStr = localStorage.getItem('autosave_questionnaire-form');
       if (!savedDataStr) {
         toast({
           title: "Error",
@@ -456,7 +456,7 @@ export default function ThemeSelectionPage() {
         }
 
         // Clear saved questionnaire data on successful submission
-        localStorage.removeItem('autosave_questionnaire');
+        localStorage.removeItem('autosave_questionnaire-form');
         localStorage.removeItem('autosave_questionnaire-step');
 
         // Handle free tier - skip checkout and redirect directly
