@@ -141,10 +141,10 @@ export default function ThemeSelectionPage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 15 * 1024 * 1024) {
       toast({
         title: "File Too Large",
-        description: "Please upload an image smaller than 5MB",
+        description: "Please upload an image smaller than 15MB",
         variant: "destructive",
       });
       return;
@@ -469,7 +469,7 @@ export default function ThemeSelectionPage() {
                         <>
                           <Upload className="w-8 h-8 text-muted-foreground mb-2" />
                           <span className="text-sm text-muted-foreground">Upload Cover Image</span>
-                          <span className="text-xs text-muted-foreground/70 mt-1">PNG, JPG up to 5MB</span>
+                          <span className="text-xs text-muted-foreground/70 mt-1">PNG, JPG up to 15MB</span>
                         </>
                       )}
                     </label>
