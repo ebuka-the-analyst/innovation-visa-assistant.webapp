@@ -70,6 +70,7 @@ const InterviewPrep = lazy(() => import("@/pages/interview-prep"));
 const AIAssistant = lazy(() => import("@/pages/ai-assistant"));
 const Handoff = lazy(() => import("@/pages/handoff"));
 const AdaptiveIntake = lazy(() => import("@/pages/adaptive-intake"));
+const ThemeSelection = lazy(() => import("@/pages/theme-selection"));
 
 // Evidence and Endorser Preparation
 const TractionEvidence = lazy(() => import("@/pages/traction-evidence"));
@@ -207,6 +208,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/questionnaire" component={Questionnaire} />
+      <Route path="/theme-selection" component={ThemeSelection} />
       <Route path="/adaptive-intake" component={AdaptiveIntake} />
       <Route path="/generation" component={Generation} />
       <Route path="/endorser-comparison" component={EndorserComparison} />
