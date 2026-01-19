@@ -4711,6 +4711,47 @@ EXAMPLES OF GOOD RESPONSES:
     }
   });
 
+  // Admin Reset All User Credits Based on Tier - 2026 PRICING
+  app.post("/api/admin/reset-all-credits", requireAdmin, async (req, res) => {
+    try {
+      // 2026 TIER CREDITS: free=0, basic=1, premium=3, enterprise=6, ultimate=12
+      const tierCredits: Record<string, number> = {
+        'free': 0,
+        'basic': 1,
+        'premium': 3,
+        'enterprise': 6,
+        'ultimate': 12,
+      };
+      
+      const allUsers = await storage.getAllUsers();
+      let updatedCount = 0;
+      
+      for (const user of allUsers) {
+        const tier = (user.subscriptionTier || 'free').toLowerCase();
+        const credits = tierCredits[tier] ?? 0;
+        
+        await storage.updateUser(user.id, {
+          planCredits: credits,
+          creditsUsed: 0,
+          bonusCredits: 0,
+          updatedAt: new Date(),
+        });
+        updatedCount++;
+      }
+      
+      console.log(`[ADMIN] Reset credits for ${updatedCount} users based on tier`);
+      res.json({ 
+        success: true, 
+        message: `Reset credits for ${updatedCount} users`,
+        updatedCount,
+        tierCredits,
+      });
+    } catch (error) {
+      console.error("Admin reset credits error:", error);
+      res.status(500).json({ error: "Failed to reset user credits" });
+    }
+  });
+
   // Business Plan Management Endpoints
   app.get("/api/admin/plans", requireAdmin, async (req, res) => {
     try {

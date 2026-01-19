@@ -1815,6 +1815,25 @@ export default function AdminDashboard() {
     },
   });
 
+  // Reset all user credits based on tier - 2026 PRICING
+  const resetAllCreditsMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/reset-all-credits', {});
+      return response.json();
+    },
+    onSuccess: (data: { message: string; updatedCount: number }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/analytics/overview'] });
+      toast({ 
+        title: "Credits Reset Successfully", 
+        description: data.message 
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to reset credits", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Create promo code mutation
   const createPromoCodeMutation = useMutation({
     mutationFn: async (data: {
@@ -2421,6 +2440,34 @@ export default function AdminDashboard() {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
+
+                      {/* Reset All Credits Button */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (window.confirm('Reset ALL user credits to their tier defaults?\n\nThis will set:\n- Free: 0 credits\n- Basic: 1 credit\n- Premium: 3 credits\n- Enterprise: 6 credits\n- Ultimate: 12 credits\n\nProceed?')) {
+                                resetAllCreditsMutation.mutate();
+                              }
+                            }}
+                            disabled={resetAllCreditsMutation.isPending}
+                            data-testid="button-reset-all-credits"
+                            className="text-amber-600 border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950"
+                          >
+                            {resetAllCreditsMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                            )}
+                            Reset Credits
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Reset all user credits to tier defaults (2026 pricing)</p>
+                        </TooltipContent>
+                      </Tooltip>
 
                       {/* Dashboard Settings */}
                       <Tooltip>
