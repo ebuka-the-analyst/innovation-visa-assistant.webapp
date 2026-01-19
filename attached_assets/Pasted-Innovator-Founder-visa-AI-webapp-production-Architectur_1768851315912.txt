@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+a1eb24f3
+Active
+
+Jan 19, 2026, 7:28 PM
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-19T19:32:56.461Z] GET /assets/trending-down-O1_rrhCH.js
+[2026-01-19T19:32:56.462Z] GET /assets/test-tube-C7K4Ft0x.js
+[2026-01-19T19:32:56.463Z] GET /assets/user-plus-CR0drAGy.js
+[2026-01-19T19:32:56.464Z] GET /assets/infinity-DUHS1PNG.js
+[2026-01-19T19:32:56.473Z] GET /assets/flag-BKp1-ZeU.js
+[2026-01-19T19:32:56.484Z] GET /assets/CookieConsent-CzzAO0Tt.js
+[2026-01-19T19:32:56.487Z] GET /assets/heart-88yzCUtl.js
+[2026-01-19T19:32:56.495Z] GET /assets/globe-ChdVqOK0.js
+[2026-01-19T19:32:56.503Z] GET /assets/image-ClVeWhpr.js
+[2026-01-19T19:32:56.510Z] GET /assets/flame-lgDNVo5U.js
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: free (raw: free)
+[2026-01-19T19:32:56.518Z] GET /assets/info-DNlsAdQz.js
+7:32:56 PM [express] GET /api/auth/user 200 in 91ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+[2026-01-19T19:32:56.527Z] GET /assets/git-branch-wA1HgNhG.js
+[2026-01-19T19:32:56.559Z] GET /assets/twitter-DI53ZWFd.js
+[2026-01-19T19:32:56.564Z] GET /assets/log-in-DhPojv-e.js
+[2026-01-19T19:32:56.573Z] GET /assets/lock-CQjiSWtS.js
+[2026-01-19T19:32:56.579Z] GET /assets/mail-YphcO0ur.js
+[2026-01-19T19:32:56.585Z] GET /assets/medal-DjIawbUV.js
+[2026-01-19T19:32:56.591Z] GET /assets/zoom-out-C_N7kAwh.js
+[2026-01-19T19:32:56.596Z] GET /assets/map-CAy1qeai.js
+[2026-01-19T19:32:56.607Z] GET /assets/message-square-g1hK1U9x.js
+[2026-01-19T19:32:56.610Z] GET /assets/menu-B8v_njBL.js
+[2026-01-19T19:32:56.613Z] GET /assets/mic-off-DsaAJ-QL.js
+[2026-01-19T19:32:56.617Z] GET /assets/monitor-Bh2kwHI2.js
+[2026-01-19T19:32:56.620Z] GET /assets/package-BlnakGDa.js
+[2026-01-19T19:32:56.624Z] GET /assets/play-Br53s7Aq.js
+[2026-01-19T19:32:56.628Z] GET /assets/palette-D0yVNJJF.js
+[2026-01-19T19:32:56.631Z] GET /assets/pen-line-5LVRuhJa.js
+[2026-01-19T19:32:56.633Z] GET /assets/phone-Dla37SAD.js
+[2026-01-19T19:32:56.637Z] GET /assets/save-CjeEQD-c.js
+[2026-01-19T19:32:56.639Z] GET /assets/scan-D2Qp-bTW.js
+[2026-01-19T19:32:56.641Z] GET /assets/plus-Da7COOxn.js
+[2026-01-19T19:32:56.644Z] GET /assets/percent-CdZwWoq7.js
+[2026-01-19T19:32:56.648Z] GET /assets/presentation-DNNHQlya.js
+[2026-01-19T19:32:56.651Z] GET /assets/qr-code-k98aw6OJ.js
+[2026-01-19T19:32:56.654Z] GET /assets/rotate-ccw-C7VuGwPJ.js
+[2026-01-19T19:32:56.657Z] GET /assets/quote-JZoWT9MF.js
+[2026-01-19T19:32:56.661Z] GET /assets/pound-sterling-DZ9Ug9nL.js
+[2026-01-19T19:32:56.664Z] GET /assets/scale-DoJsnCjS.js
+[2026-01-19T19:32:56.666Z] GET /assets/server-DaCPpOUP.js
+[2026-01-19T19:32:56.669Z] GET /assets/search-B0Z7BR8T.js
+[2026-01-19T19:32:56.672Z] GET /assets/shield-check-C5TukrwE.js
+[2026-01-19T19:32:56.786Z] GET /api/partner/status
+[2026-01-19T19:32:56.787Z] GET /assets/skeleton-Bkk31x3O.js
+[2026-01-19T19:32:56.787Z] GET /assets/alert-CeQtUNZA.js
+[2026-01-19T19:32:56.788Z] GET /assets/generateCategoricalChart-CdOec1ZD.js
+[2026-01-19T19:32:56.788Z] GET /assets/badge-BNGvI7A6.js
+[2026-01-19T19:32:56.789Z] GET /assets/dashboard-DcbYEHoJ.js
+[2026-01-19T19:32:56.792Z] GET /assets/PolarAngleAxis-CTBD56g-.js
+[2026-01-19T19:32:56.792Z] POST /api/activity/session
+[2026-01-19T19:32:56.795Z] POST /api/activity/session
+[2026-01-19T19:32:56.796Z] GET /assets/RadarChart-BBBFktmW.js
+7:32:56 PM [express] GET /api/partner/status 200 in 27ms :: {"isPartner":false,"promoCodeCount":0}
+7:32:56 PM [express] POST /api/activity/session 200 in 32ms :: {"sessionId":"a70cc8ea-129b-4680-8f51…
+7:32:56 PM [express] POST /api/activity/session 200 in 30ms :: {"sessionId":"ed74047c-c110-42eb-9d2b…
+[2026-01-19T19:32:57.011Z] POST /api/activity/page-view
+7:32:57 PM [express] POST /api/activity/page-view 200 in 19ms :: {"pageViewId":"c570cc52-a13b-4f17-a…
+[2026-01-19T19:32:57.515Z] GET /api/dashboard/plans
+[2026-01-19T19:32:57.516Z] GET /api/promos/my-redemptions
+7:32:57 PM [express] GET /api/promos/my-redemptions 200 in 14ms :: {"redemptions":[]}
+7:32:58 PM [express] GET /api/dashboard/plans 200 in 763ms :: [{"id":"2aa1fa02-d170-490e-af4f-02b90c…
+[2026-01-19T19:33:02.013Z] GET /assets/questionnaire-DsScFAIh.js
+[2026-01-19T19:33:02.169Z] GET /assets/useTierAccess-Cy0errDG.js
+[2026-01-19T19:33:02.173Z] GET /assets/progress-BvlUAItI.js
+[2026-01-19T19:33:02.175Z] GET /assets/select-Af71Xa7P.js
+[2026-01-19T19:33:02.177Z] GET /assets/avatar-Cao5tcgt.js
+[2026-01-19T19:33:02.180Z] GET /assets/index-Bp3y-Tqi.js
+[2026-01-19T19:33:02.184Z] GET /assets/checkbox-lJhywqkW.js
+[2026-01-19T19:33:02.187Z] GET /assets/FeatureNavigation-DSCKvYsp.js
+[2026-01-19T19:33:02.190Z] POST /api/activity/page-view
+[2026-01-19T19:33:02.195Z] GET /assets/index-B9FonaAU.js
+[2026-01-19T19:33:02.200Z] GET /assets/proxy-Dos8arRB.js
+[2026-01-19T19:33:02.204Z] GET /assets/index-E6_GCxzK.js
+7:33:02 PM [express] POST /api/activity/page-view 200 in 40ms :: {"pageViewId":"f2fa4450-97d9-4134-9…
+[2026-01-19T19:33:03.022Z] GET /api/credits/balance
+7:33:03 PM [express] GET /api/credits/balance 200 in 14ms :: {"planCredits":0,"bonusCredits":0,"tota…
+[2026-01-19T19:33:05.246Z] GET /api/documents
+7:33:05 PM [express] GET /api/documents 200 in 12ms :: []
+[2026-01-19T19:33:09.812Z] POST /api/activity/page-view
+7:33:09 PM [express] POST /api/activity/page-view 200 in 21ms :: {"pageViewId":"be5e83c8-6352-4f07-a…
+[2026-01-19T19:33:09.848Z] GET /assets/alert-dialog-LIHSrxP6.js
+[2026-01-19T19:33:09.847Z] GET /assets/theme-selection-D-YvYJ0E.js
+[2026-01-19T19:33:10.218Z] GET /api/cover-designs/latest
+7:33:10 PM [express] GET /api/cover-designs/latest 200 in 13ms
+[2026-01-19T19:33:14.827Z] POST /api/cover-designs
+[2026-01-19T19:33:15.871Z] GET /api/cover-designs/latest
+7:33:15 PM [express] POST /api/cover-designs 200 in 505ms :: {"success":true,"design":{"id":"9e854a4…
+7:33:16 PM [express] GET /api/cover-designs/latest 200 in 502ms :: {"id":"9e854a4e-5664-40c0-859e-5b…
+[2026-01-19T19:33:21.790Z] POST /api/questionnaire/submit
+  themeId: 'orange-modern-proposal',
+}
+  themeSecondaryColor: '#ED7D31',
+  themePrimaryColor: '#4472C4',
+  themeFont: 'Poppins'
+[Questionnaire] Plan created with theme: {
+  planId: 'db4cac8e-03a5-4b5b-bbce-8aab745c371f',
+  themeFont: 'Poppins'
+Questionnaire submission received - Theme data: {
+}
+  themeId: 'orange-modern-proposal',
+7:33:22 PM [express] POST /api/questionnaire/submit 200 in 38ms :: {"success":true,"planId":"db4cac8…
+  themePrimaryColor: '#4472C4',
+  themeId: 'orange-modern-proposal',
+  themeFont: 'Poppins'
+  themePrimaryColor: '#4472C4',
+  themeSecondaryColor: '#ED7D31',
+}
+[Questionnaire] Parsed theme data: {
+[2026-01-19T19:33:22.664Z] POST /api/payment/create-checkout
+[STRIPE] Using base URL for redirects: https://innovatorfoundervisaassistant.co.uk
+[Stripe] Using LIVE mode credentials - payments are real
+7:33:23 PM [express] POST /api/payment/create-checkout 200 in 473ms :: {"sessionId":"cs_live_a1mUq7c…
+[2026-01-19T19:33:23.392Z] POST /api/activity/session/end
+7:33:23 PM [express] POST /api/activity/session/end 200 in 13ms :: {"success":true}
+[2026-01-19T19:33:23.603Z] POST /api/activity/session/end
+7:33:23 PM [express] POST /api/activity/session/end 200 in 14ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
