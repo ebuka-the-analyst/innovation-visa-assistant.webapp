@@ -200,10 +200,10 @@ export default function ThemeSelectionPage() {
   };
 
   const handleApplyTheme = async () => {
-    if (!selectedTheme) {
+    if (!selectedTheme && !backgroundImage) {
       toast({
         title: "Select a Theme",
-        description: "Please choose a template before continuing.",
+        description: "Please choose a template or upload a custom cover image.",
         variant: "destructive",
       });
       return;
@@ -212,8 +212,8 @@ export default function ThemeSelectionPage() {
     setIsApplying(true);
     
     try {
-      localStorage.setItem('selectedTheme', JSON.stringify({
-        themeId: selectedTheme,
+      const themeData = {
+        themeId: selectedTheme || 'custom-cover',
         primaryColor,
         secondaryColor,
         font: selectedFont,
@@ -222,15 +222,20 @@ export default function ThemeSelectionPage() {
         textElements,
         paletteId: selectedPalette,
         paletteColors: selectedPalette ? getPaletteById(selectedPalette)?.colors : null,
-      }));
+      };
+      
+      localStorage.setItem('selectedTheme', JSON.stringify(themeData));
 
       setThemeApplied(true);
 
       toast({
         title: "Theme Applied",
-        description: "Your selected theme will be applied to your business plan.",
+        description: backgroundImage && useFullCoverImage 
+          ? "Your custom cover page will be used for your business plan."
+          : "Your selected theme will be applied to your business plan.",
       });
     } catch (error) {
+      console.error('Failed to apply theme:', error);
       toast({
         title: "Error",
         description: "Failed to apply theme. Please try again.",
@@ -589,7 +594,7 @@ export default function ThemeSelectionPage() {
               size="lg"
               className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md min-w-[200px]"
               onClick={handleApplyTheme}
-              disabled={!selectedTheme || isApplying}
+              disabled={(!selectedTheme && !backgroundImage) || isApplying}
               data-testid="button-apply-theme"
             >
               {isApplying ? (
