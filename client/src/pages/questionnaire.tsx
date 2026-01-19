@@ -142,73 +142,48 @@ export default function Questionnaire() {
                 transition={{ delay: 0.1 }}
               >
                 <Card 
-                  className={`p-6 h-full border-2 transition-all ${
-                    canAccessAiInterview 
-                      ? "hover-elevate cursor-pointer border-transparent hover:border-primary/50" 
-                      : "border-muted opacity-80"
-                  }`}
-                  onClick={() => canAccessAiInterview && setMode('ai-interview')}
+                  className="p-6 h-full border-2 border-muted opacity-75 transition-all"
                   data-testid="card-ai-interview-mode"
                 >
                   <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-xl ${canAccessAiInterview ? "bg-gradient-to-br from-amber-500/20 to-orange-500/20" : "bg-muted"}`}>
-                      {canAccessAiInterview ? (
-                        <MessageSquare className="h-8 w-8 text-amber-500" />
-                      ) : (
-                        <Lock className="h-8 w-8 text-destructive" />
-                      )}
+                    <div className="p-3 rounded-xl bg-red-500/10">
+                      <Lock className="h-8 w-8 text-red-500" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <h3 className="text-xl font-bold">AI-Guided Interview</h3>
-                        {canAccessAiInterview ? (
-                          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-                            <Sparkles className="h-3 w-3 mr-1" />
-                            Recommended
-                          </Badge>
-                        ) : (
-                          <Badge variant="destructive">
-                            <Lock className="h-3 w-3 mr-1" />
-                            Paid Feature
-                          </Badge>
-                        )}
+                        <Badge className="bg-red-500 text-white">
+                          <Lock className="h-3 w-3 mr-1" />
+                          Coming Soon
+                        </Badge>
                       </div>
                       <p className="text-muted-foreground mb-4">
                         Have a natural conversation with our specialized AI agents who guide you through your visa application with real-time feedback and scoring.
                       </p>
                       
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Brain className="h-4 w-4 text-primary" />
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Brain className="h-4 w-4" />
                           <span>4 specialized AI agents (Innovation, Financial, Growth, Compliance)</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Target className="h-4 w-4 text-primary" />
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Target className="h-4 w-4" />
                           <span>Real-time Visa Readiness Score</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Zap className="h-4 w-4 text-primary" />
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Zap className="h-4 w-4" />
                           <span>Gamification with XP, streaks & achievements</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Award className="h-4 w-4 text-primary" />
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Award className="h-4 w-4" />
                           <span>Adaptive questioning based on your responses</span>
                         </div>
                       </div>
 
-                      {canAccessAiInterview ? (
-                        <Button className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white" data-testid="button-start-ai-interview">
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Start AI Interview
-                        </Button>
-                      ) : (
-                        <Link href="/pricing">
-                          <Button variant="destructive" className="w-full mt-6" data-testid="button-upgrade-ai-interview">
-                            <Lock className="h-4 w-4 mr-2" />
-                            Upgrade to Unlock
-                          </Button>
-                        </Link>
-                      )}
+                      <Button disabled className="w-full mt-6" data-testid="button-start-ai-interview">
+                        <Lock className="h-4 w-4 mr-2" />
+                        Coming Soon
+                      </Button>
                     </div>
                   </div>
                 </Card>
