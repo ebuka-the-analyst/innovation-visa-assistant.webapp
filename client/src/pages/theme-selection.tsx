@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dialog,
   DialogContent,
@@ -444,33 +443,28 @@ export default function ThemeSelectionPage() {
                     <Type className="w-4 h-4" />
                     Font Style
                   </Label>
-                  <RadioGroup 
-                    value={selectedFont} 
-                    onValueChange={(val) => {
-                      setSelectedFont(val);
-                      setThemeApplied(false);
-                    }}
-                    className="grid grid-cols-2 md:grid-cols-4 gap-3"
-                  >
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {AVAILABLE_FONTS.map((font) => (
-                      <div key={font.id}>
-                        <RadioGroupItem
-                          value={font.id}
-                          id={font.id}
-                          className="peer sr-only"
-                        />
-                        <Label
-                          htmlFor={font.id}
-                          className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-emerald-500 cursor-pointer transition-all"
-                          style={{ fontFamily: font.id }}
-                          data-testid={`label-font-${font.id}`}
-                        >
-                          <span className="text-lg font-medium">Aa</span>
-                          <span className="text-xs text-muted-foreground mt-1">{font.name}</span>
-                        </Label>
-                      </div>
+                      <button
+                        key={font.id}
+                        type="button"
+                        className={`flex flex-col items-center justify-center rounded-lg border-2 bg-popover p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all ${
+                          selectedFont === font.id 
+                            ? 'border-emerald-500' 
+                            : 'border-muted'
+                        }`}
+                        style={{ fontFamily: font.id }}
+                        onClick={() => {
+                          setSelectedFont(font.id);
+                          setThemeApplied(false);
+                        }}
+                        data-testid={`button-font-${font.id}`}
+                      >
+                        <span className="text-lg font-medium">Aa</span>
+                        <span className="text-xs text-muted-foreground mt-1">{font.name}</span>
+                      </button>
                     ))}
-                  </RadioGroup>
+                  </div>
                 </div>
 
                 <div>
