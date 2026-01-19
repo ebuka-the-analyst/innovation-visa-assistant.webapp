@@ -153,6 +153,9 @@ export function generatePDFContent(plan: BusinessPlan): string {
     @page {
       margin: 2.5cm;
     }
+    @page cover {
+      margin: 0;
+    }
     body {
       font-family: ${fontFamily};
       line-height: 1.6;
@@ -194,18 +197,23 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
     .cover-page {
       position: relative;
-      width: 100%;
-      min-height: 100vh;
+      width: 210mm;
       height: 297mm;
+      max-height: 297mm;
       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%);
+      page: cover;
+      page-break-before: avoid;
       page-break-after: always;
+      page-break-inside: avoid;
+      break-inside: avoid;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: center;
       padding: 0;
       margin: -20px;
-      margin-bottom: 20px;
+      margin-bottom: 40px;
+      box-sizing: border-box;
     }
     .cover-decoration-top {
       position: absolute;
@@ -234,14 +242,18 @@ export function generatePDFContent(plan: BusinessPlan): string {
     .cover-content {
       position: relative;
       z-index: 10;
-      padding: 60px 80px;
+      padding: 50px 60px;
       text-align: left;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .cover-header {
-      margin-bottom: 80px;
+      margin-bottom: 40px;
     }
     .cover-main-title {
-      font-size: 72pt;
+      font-size: 60pt;
       font-weight: 800;
       line-height: 1;
       margin: 0;
@@ -259,32 +271,32 @@ export function generatePDFContent(plan: BusinessPlan): string {
       width: 80px;
       height: 3px;
       background: #1a1a2e;
-      margin: 30px 0;
+      margin: 20px 0;
     }
     .cover-business-name {
-      font-size: 20pt;
+      font-size: 18pt;
       font-weight: 600;
       color: #1a1a2e;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
     .cover-tagline {
-      font-size: 14pt;
+      font-size: 12pt;
       color: #555;
-      margin-bottom: 60px;
+      margin-bottom: 30px;
     }
     .cover-year {
-      font-size: 64pt;
+      font-size: 52pt;
       font-weight: 800;
       color: #1a1a2e;
-      margin: 40px 0;
+      margin: 20px 0;
       letter-spacing: -2px;
     }
     .cover-metadata {
       position: absolute;
-      bottom: 80px;
-      left: 80px;
+      bottom: 60px;
+      left: 60px;
       z-index: 10;
     }
     .cover-prepared-by {
