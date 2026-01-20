@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
 
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -13,6 +14,12 @@ import {
   AlertTriangle, ArrowRight, Calendar, Award, Star, Trophy, Zap, Sparkles
 } from "lucide-react";
 import { Link } from "wouter";
+
+interface BusinessPlan {
+  id: string;
+  status: string;
+  businessName?: string;
+}
 
 interface JourneyPhase {
   id: string;
@@ -94,7 +101,7 @@ const JOURNEY_PHASES: JourneyPhase[] = [
   },
 ];
 
-function getStepStatus(storageKey?: string): "completed" | "in-progress" | "not-started" {
+function getStepStatusFromStorage(storageKey?: string): "completed" | "in-progress" | "not-started" {
   if (!storageKey) return "not-started";
   const saved = localStorage.getItem(storageKey);
   if (!saved) return "not-started";
@@ -107,29 +114,51 @@ function getStepStatus(storageKey?: string): "completed" | "in-progress" | "not-
   }
 }
 
-function getPhaseProgress(phase: JourneyPhase): number {
-  const completedSteps = phase.steps.filter(
-    step => getStepStatus(step.storageKey) === "completed"
-  ).length;
-  return Math.round((completedSteps / phase.steps.length) * 100);
-}
-
 export default function ProgressPage() {
   const { user } = useAuth();
   const [activePhase, setActivePhase] = useState("preparation");
+
+  // Fetch business plans from database to check completion status
+  const { data: businessPlans = [] } = useQuery<BusinessPlan[]>({
+    queryKey: ['/api/business-plans'],
+    enabled: !!user,
+  });
+
+  // Check if user has any completed business plans
+  const hasCompletedBusinessPlan = businessPlans.some(plan => plan.status === 'completed');
+  const hasProcessingBusinessPlan = businessPlans.some(plan => plan.status === 'processing' || plan.status === 'pending');
+
+  // Enhanced step status that checks both localStorage AND database
+  const getStepStatus = (step: JourneyStep): "completed" | "in-progress" | "not-started" => {
+    // Special handling for questionnaire/business plan - check database
+    if (step.id === 'questionnaire' || step.id === 'business-plan') {
+      if (hasCompletedBusinessPlan) return "completed";
+      if (hasProcessingBusinessPlan) return "in-progress";
+    }
+    
+    // Check localStorage for other steps
+    return getStepStatusFromStorage(step.storageKey);
+  };
+
+  const getPhaseProgress = (phase: JourneyPhase): number => {
+    const completedSteps = phase.steps.filter(
+      step => getStepStatus(step) === "completed"
+    ).length;
+    return Math.round((completedSteps / phase.steps.length) * 100);
+  };
 
   const overallProgress = Math.round(
     JOURNEY_PHASES.reduce((acc, phase) => acc + getPhaseProgress(phase), 0) / JOURNEY_PHASES.length
   );
 
   const completedSteps = JOURNEY_PHASES.flatMap(p => p.steps).filter(
-    s => getStepStatus(s.storageKey) === "completed"
+    s => getStepStatus(s) === "completed"
   ).length;
 
   const totalSteps = JOURNEY_PHASES.flatMap(p => p.steps).length;
 
   const nextStep = JOURNEY_PHASES.flatMap(p => p.steps).find(
-    s => getStepStatus(s.storageKey) !== "completed"
+    s => getStepStatus(s) !== "completed"
   );
 
   return (
@@ -314,7 +343,7 @@ export default function ProgressPage() {
                 <CardContent>
                   <div className="space-y-4">
                     {phase.steps.map((step, index) => {
-                      const status = getStepStatus(step.storageKey);
+                      const status = getStepStatus(step);
                       return (
                         <div 
                           key={step.id}
