@@ -584,6 +584,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending'
       });
 
+      // Get Stripe client
+      const stripe = await getUncachableStripeClient();
+      
       // Create Stripe checkout session
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -638,6 +641,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Session ID is required" });
       }
 
+      // Get Stripe client
+      const stripe = await getUncachableStripeClient();
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       
       if (session.payment_status !== 'paid') {
