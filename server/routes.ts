@@ -435,7 +435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/cover-designs", isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
-      const { themeId, primaryColor, secondaryColor, font, backgroundImage, useFullCoverImage, textElements, paletteId, paletteColors, name } = req.body;
+      const { themeId, primaryColor, secondaryColor, font, backgroundImage, useFullCoverImage, textElements, logoElement, paletteId, paletteColors, name } = req.body;
       
       console.log("[Cover Design] Saving cover design:", {
         userId: user.id,
@@ -447,6 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           count: Array.isArray(textElements) ? textElements.length : 0,
           sample: Array.isArray(textElements) && textElements.length > 0 ? textElements[0] : null,
         } : 'missing',
+        hasLogo: !!logoElement,
       });
       
       const design = await storage.saveCoverDesign({
@@ -458,6 +459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         backgroundImage,
         useFullCoverImage: useFullCoverImage || false,
         textElements,
+        logoElement: logoElement || null,
         paletteId,
         paletteColors,
         name: name || `Cover Design ${new Date().toLocaleDateString()}`,

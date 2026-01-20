@@ -44,7 +44,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { THEME_TEMPLATES, AVAILABLE_FONTS, PRESET_COLORS, EXCEL_COLOR_THEMES, getPaletteById, getThemeById, ThemeTemplate, ExcelColorTheme } from "@/lib/themeTemplates";
 import { ThemePreviewSVG } from "@/components/ThemePreviewSVG";
-import { CoverPageEditor, TextElement } from "@/components/CoverPageEditor";
+import { CoverPageEditor, TextElement, LogoElement } from "@/components/CoverPageEditor";
 import { useTierAccess } from "@/hooks/useTierAccess";
 import { Lock, Crown, Filter, ShoppingCart, Check } from "lucide-react";
 import { 
@@ -98,6 +98,7 @@ export default function ThemeSelectionPage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [useFullCoverImage, setUseFullCoverImage] = useState(true);
   const [textElements, setTextElements] = useState<TextElement[]>([]);
+  const [logoElement, setLogoElement] = useState<LogoElement | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [selectedPalette, setSelectedPalette] = useState<string | null>(null);
   const [showGenerateConfirm, setShowGenerateConfirm] = useState(false);
@@ -168,6 +169,7 @@ export default function ThemeSelectionPage() {
     backgroundImage: string | null;
     useFullCoverImage: boolean;
     textElements: TextElement[] | null;
+    logoElement: LogoElement | null;
     paletteId: string | null;
   } | null>({
     queryKey: ['/api/cover-designs/latest'],
@@ -188,6 +190,7 @@ export default function ThemeSelectionPage() {
       if (savedCoverDesign.backgroundImage) setBackgroundImage(savedCoverDesign.backgroundImage);
       if (savedCoverDesign.useFullCoverImage !== undefined) setUseFullCoverImage(savedCoverDesign.useFullCoverImage);
       if (savedCoverDesign.textElements) setTextElements(savedCoverDesign.textElements);
+      if (savedCoverDesign.logoElement) setLogoElement(savedCoverDesign.logoElement);
       if (savedCoverDesign.paletteId) setSelectedPalette(savedCoverDesign.paletteId);
       setHasLoadedDesign(true);
     } else {
@@ -231,6 +234,7 @@ export default function ThemeSelectionPage() {
       backgroundImage: string | null;
       useFullCoverImage: boolean;
       textElements: TextElement[];
+      logoElement: LogoElement | null;
       paletteId: string | null;
       paletteColors: string[] | null;
     }) => {
@@ -1293,6 +1297,11 @@ export default function ThemeSelectionPage() {
                   setTextElements(elements);
                   setThemeApplied(false);
                 }}
+                logoElement={logoElement}
+                onLogoElementChange={(logo) => {
+                  setLogoElement(logo);
+                  setThemeApplied(false);
+                }}
                 paletteColors={selectedPalette ? getPaletteById(selectedPalette)?.colors : undefined}
               />
               
@@ -1318,6 +1327,7 @@ export default function ThemeSelectionPage() {
                         backgroundImage,
                         useFullCoverImage,
                         textElements,
+                        logoElement,
                         paletteId: selectedPalette,
                         paletteColors: selectedPalette ? getPaletteById(selectedPalette)?.colors || null : null,
                       });

@@ -2919,6 +2919,15 @@ export const coverDesigns = pgTable("cover_designs", {
     textAlign?: string;
   }>>(),
   
+  logoElement: jsonb("logo_element").$type<{
+    id: string;
+    src: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(),
+  
   paletteId: varchar("palette_id", { length: 50 }),
   paletteColors: jsonb("palette_colors").$type<string[]>(),
   
