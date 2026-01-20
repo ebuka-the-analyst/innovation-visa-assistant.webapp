@@ -165,6 +165,29 @@ export default function DocumentsPage() {
     },
   });
 
+  // Delete business plan mutation
+  const deletePlanMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/business-plans/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Delete failed");
+      }
+      return { id };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/business-plans"] });
+      toast({ title: "Business plan deleted successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    },
+  });
+
   const handleUpload = async () => {
     if (!uploadForm.file || !uploadForm.name || !uploadForm.category) {
       toast({ title: "Please fill all required fields", variant: "destructive" });
@@ -319,110 +342,8 @@ export default function DocumentsPage() {
           ))}
         </div>
 
-        {/* Generated Business Plans Section */}
-        <Card className="mb-8 border-2 border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              Generated Business Plans
-              {completedPlans.length > 0 && (
-                <Badge className="bg-primary/10 text-primary">{completedPlans.length}</Badge>
-              )}
-            </CardTitle>
-            <CardDescription>
-              Your AI-generated business plans ready for download and sharing
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoadingPlans ? (
-              <div className="text-center py-8 text-muted-foreground">Loading your business plans...</div>
-            ) : completedPlans.length === 0 ? (
-              <div className="text-center py-8">
-                <FileText className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground mb-2">No generated business plans yet</p>
-                <p className="text-sm text-muted-foreground">
-                  {businessPlans.some(p => p.status !== 'completed') 
-                    ? "Your business plan is still being generated. Check back soon!"
-                    : "Generate your first business plan to get started."}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {completedPlans.map((plan) => {
-                  const getPdfUrl = () => {
-                    if (!plan.pdfUrl) return '';
-                    return plan.pdfUrl.startsWith('http') ? plan.pdfUrl : `${window.location.origin}${plan.pdfUrl}`;
-                  };
-                  const fullPdfUrl = getPdfUrl();
-                  
-                  return (
-                    <div
-                      key={plan.id}
-                      className="flex items-center gap-4 p-4 rounded-lg border bg-gradient-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
-                      data-testid={`plan-${plan.id}`}
-                    >
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-6 h-6 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-semibold truncate">{plan.businessName}</h4>
-                          <Badge variant="outline" className="capitalize">{plan.tier}</Badge>
-                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                            <CheckCircle2 className="w-3 h-3 mr-1" />Ready
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                          <span>{plan.industry}</span>
-                          <span>•</span>
-                          <span>{new Date(plan.createdAt).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Button 
-                          onClick={() => window.open(fullPdfUrl, '_blank')}
-                          data-testid={`button-download-plan-${plan.id}`}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          onClick={() => {
-                            const subject = `${plan.businessName} - Business Plan`;
-                            const body = `Here is my business plan for ${plan.businessName}.\n\nView: ${fullPdfUrl}`;
-                            window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
-                          }}
-                          data-testid={`button-share-plan-${plan.id}`}
-                        >
-                          <Send className="w-4 h-4 mr-2" />
-                          Email
-                        </Button>
-                        <Button 
-                          variant="ghost"
-                          size="icon"
-                          onClick={async () => {
-                            try {
-                              await navigator.clipboard.writeText(fullPdfUrl);
-                              toast({ title: "Link copied to clipboard" });
-                            } catch {
-                              toast({ title: "Failed to copy link", variant: "destructive" });
-                            }
-                          }}
-                          data-testid={`button-copy-link-${plan.id}`}
-                        >
-                          <Share2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
+        {/* Your Uploaded Documents Section - AT TOP */}
+        <Card className="mb-8">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <CardTitle className="flex items-center gap-2">
@@ -517,6 +438,130 @@ export default function DocumentsPage() {
                             }
                           }}
                           data-testid={`button-delete-${doc.id}`}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Generated Business Plans Section - AT BOTTOM */}
+        <Card className="mb-8 border-2 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              Generated Business Plans
+              {completedPlans.length > 0 && (
+                <Badge className="bg-primary/10 text-primary">{completedPlans.length}</Badge>
+              )}
+            </CardTitle>
+            <CardDescription>
+              Your AI-generated business plans ready for download and sharing
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoadingPlans ? (
+              <div className="text-center py-8 text-muted-foreground">Loading your business plans...</div>
+            ) : completedPlans.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground mb-2">No generated business plans yet</p>
+                <p className="text-sm text-muted-foreground">
+                  {businessPlans.some(p => p.status !== 'completed') 
+                    ? "Your business plan is still being generated. Check back soon!"
+                    : "Generate your first business plan to get started."}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {completedPlans.map((plan) => {
+                  const getPdfUrl = () => {
+                    if (!plan.pdfUrl) return '';
+                    return plan.pdfUrl.startsWith('http') ? plan.pdfUrl : `${window.location.origin}${plan.pdfUrl}`;
+                  };
+                  const fullPdfUrl = getPdfUrl();
+                  
+                  return (
+                    <div
+                      key={plan.id}
+                      className="flex items-center gap-4 p-4 rounded-lg border bg-gradient-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
+                      data-testid={`plan-${plan.id}`}
+                    >
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-semibold truncate">{plan.businessName}</h4>
+                          <Badge variant="outline" className="capitalize">{plan.tier}</Badge>
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />Ready
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                          <span>{plan.industry}</span>
+                          <span>•</span>
+                          <span>{new Date(plan.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Button 
+                          variant="outline"
+                          size="icon"
+                          onClick={() => window.open(fullPdfUrl, '_blank')}
+                          data-testid={`button-view-plan-${plan.id}`}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          onClick={() => window.open(fullPdfUrl, '_blank')}
+                          data-testid={`button-download-plan-${plan.id}`}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => {
+                            const subject = `${plan.businessName} - Business Plan`;
+                            const body = `Here is my business plan for ${plan.businessName}.\n\nView: ${fullPdfUrl}`;
+                            window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+                          }}
+                          data-testid={`button-share-plan-${plan.id}`}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Email
+                        </Button>
+                        <Button 
+                          variant="ghost"
+                          size="icon"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(fullPdfUrl);
+                              toast({ title: "Link copied to clipboard" });
+                            } catch {
+                              toast({ title: "Failed to copy link", variant: "destructive" });
+                            }
+                          }}
+                          data-testid={`button-copy-link-${plan.id}`}
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete "${plan.businessName}"? This cannot be undone.`)) {
+                              deletePlanMutation.mutate(plan.id);
+                            }
+                          }}
+                          disabled={deletePlanMutation.isPending}
+                          data-testid={`button-delete-plan-${plan.id}`}
                         >
                           <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
