@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -100,6 +101,8 @@ export default function ThemeSelectionPage() {
   const [selectedPalette, setSelectedPalette] = useState<string | null>(null);
   const [showGenerateConfirm, setShowGenerateConfirm] = useState(false);
   const [isSavingCover, setIsSavingCover] = useState(false);
+  const [customBusinessName, setCustomBusinessName] = useState('');
+  const [customFounderName, setCustomFounderName] = useState('');
   
   // Unified cover templates state (filters for both free and paid)
   const [typeFilter, setTypeFilter] = useState<CoverType | null>(null);
@@ -234,9 +237,11 @@ export default function ThemeSelectionPage() {
     },
   });
 
-  const founderName = user?.firstName && user?.lastName 
+  const defaultFounderName = user?.firstName && user?.lastName 
     ? `${user.firstName} ${user.lastName}` 
     : user?.firstName || 'Your Name';
+  const founderName = customFounderName || defaultFounderName;
+  const businessName = customBusinessName || 'Business Plan';
 
   const handleThemeSelect = (themeId: string) => {
     setSelectedTheme(themeId);
@@ -731,7 +736,8 @@ export default function ThemeSelectionPage() {
                           primaryColor={isSelected ? primaryColor : theme.defaultPrimaryColor}
                           secondaryColor={isSelected ? secondaryColor : theme.defaultSecondaryColor}
                           font={isSelected ? selectedFont : theme.defaultFont}
-                          founderName={founderName}
+                          businessName={isSelected ? businessName : undefined}
+                          founderName={isSelected ? founderName : undefined}
                           isSelected={isSelected}
                           size="small"
                           backgroundImage={isSelected ? backgroundImage : null}
@@ -875,6 +881,43 @@ export default function ThemeSelectionPage() {
               </div>
 
               <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div>
+                    <Label className="flex items-center gap-2 mb-2">
+                      <Type className="w-4 h-4" />
+                      Business Name
+                    </Label>
+                    <Input
+                      value={customBusinessName}
+                      onChange={(e) => {
+                        setCustomBusinessName(e.target.value);
+                        setThemeApplied(false);
+                      }}
+                      placeholder="Business Plan"
+                      className="bg-background"
+                      data-testid="input-business-name"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">The title shown on your cover</p>
+                  </div>
+                  <div>
+                    <Label className="flex items-center gap-2 mb-2">
+                      <Type className="w-4 h-4" />
+                      Founder Name
+                    </Label>
+                    <Input
+                      value={customFounderName}
+                      onChange={(e) => {
+                        setCustomFounderName(e.target.value);
+                        setThemeApplied(false);
+                      }}
+                      placeholder={defaultFounderName}
+                      className="bg-background"
+                      data-testid="input-founder-name"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Your name as it appears on the cover</p>
+                  </div>
+                </div>
+
                 <div>
                   <Label className="flex items-center gap-2 mb-3">
                     <Palette className="w-4 h-4" />
@@ -1182,6 +1225,7 @@ export default function ThemeSelectionPage() {
                   primaryColor={selectedTheme === previewTheme.id ? primaryColor : previewTheme.defaultPrimaryColor}
                   secondaryColor={selectedTheme === previewTheme.id ? secondaryColor : previewTheme.defaultSecondaryColor}
                   font={selectedTheme === previewTheme.id ? selectedFont : previewTheme.defaultFont}
+                  businessName={businessName}
                   founderName={founderName}
                   isSelected={false}
                   size="large"
