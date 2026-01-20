@@ -399,41 +399,25 @@ export function ThemePreviewSVG({
         return {
           topRight: (
             <g>
-              {/* Orange diagonal stripe top-right */}
               <polygon points="300,0 520,0 520,220 420,160" fill={primary} opacity="0.95" />
               <polygon points="380,0 520,0 520,140 460,100" fill={primary} opacity="0.7" />
-              {/* Orange triangle accent */}
               <polygon points="450,180 520,140 520,260" fill={primary} opacity="0.85" />
-              {/* Company name placeholder */}
-              <text x="420" y="40" fill={primary} fontSize="14" fontWeight="bold">FAUGET</text>
             </g>
           ),
           leftSide: (
             <g>
-              {/* Large diagonal orange shape on left */}
               <polygon points="0,100 200,0 260,180 200,380 0,320" fill={primary} opacity="0.9" />
               <polygon points="0,140 160,60 200,180 160,280 0,240" fill={primary} opacity="0.6" />
-              {/* Image placeholder area - rotated rectangle */}
               <rect x="40" y="80" width="180" height="220" rx="8" fill="#e2e8f0" opacity="0.9" transform="rotate(-15 130 190)" />
               <rect x="50" y="90" width="160" height="200" rx="6" fill="#cbd5e1" opacity="0.8" transform="rotate(-15 130 190)" />
-              {/* Small decorative rectangles */}
               <rect x="180" y="280" width="60" height="12" fill={primary} opacity="0.95" transform="rotate(-45 210 286)" />
               <rect x="200" y="300" width="50" height="10" fill={primary} opacity="0.7" transform="rotate(-45 225 305)" />
             </g>
           ),
-          middleLeft: (
-            <g>
-              {/* Year text area */}
-              <text x="50" y="460" fill={accent} fontSize="18" fontWeight="bold">2024-2025</text>
-            </g>
-          ),
           bottomLeft: (
             <g>
-              {/* Orange triangle bottom-left */}
               <polygon points="0,580 140,740 0,740" fill={primary} opacity="0.95" />
               <polygon points="0,640 90,740 0,740" fill={primary} opacity="0.7" />
-              {/* Prepared by section */}
-              <text x="30" y="670" fill="#64748b" fontSize="10">Prepared by:</text>
             </g>
           ),
           bottomRight: (
@@ -531,54 +515,6 @@ export function ThemePreviewSVG({
         {decorations.bottomWave}
         {decorations.bottomLeft}
         {decorations.bottomRight}
-
-        <g transform="translate(40, 280)">
-          <text 
-            x="0" 
-            y="0" 
-            fill={textColor} 
-            fontSize={isLarge ? "48" : "19"}
-            fontFamily={font}
-            fontWeight="bold"
-          >
-            BUSINESS
-          </text>
-          <text 
-            x="0" 
-            y={isLarge ? "55" : "22"}
-            fill={primaryColor} 
-            fontSize={isLarge ? "48" : "19"}
-            fontFamily={font}
-            fontWeight="bold"
-          >
-            PLAN
-          </text>
-          <rect 
-            x="0" 
-            y={isLarge ? "75" : "30"}
-            width={isLarge ? "100" : "40"}
-            height={isLarge ? "4" : "2"}
-            fill={textColor}
-          />
-          <text 
-            x="0" 
-            y={isLarge ? "110" : "44"}
-            fill="#64748b" 
-            fontSize={isLarge ? "16" : "7"}
-            fontFamily={font}
-          >
-            {founderName}
-          </text>
-          <text 
-            x="0" 
-            y={isLarge ? "135" : "54"}
-            fill="#94a3b8" 
-            fontSize={isLarge ? "14" : "6"}
-            fontFamily={font}
-          >
-            {currentYear}
-          </text>
-        </g>
       </svg>
 
       {isSelected && (

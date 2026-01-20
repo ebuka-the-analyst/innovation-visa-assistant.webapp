@@ -269,13 +269,7 @@ export default function ThemeSelectionPage() {
     setSecondaryColor(theme.defaultSecondaryColor);
     setSelectedFont(theme.defaultFont);
     
-    const defaultElements = getDefaultTextElements(
-      'BUSINESS PLAN',
-      founderName,
-      theme.defaultPrimaryColor,
-      theme.defaultSecondaryColor
-    );
-    setTextElements(defaultElements);
+    setTextElements([]);
     setIsEditorOpen(true);
   };
 
@@ -284,13 +278,7 @@ export default function ThemeSelectionPage() {
     setUseFullCoverImage(true);
     setSelectedTheme(null);
     
-    const defaultElements = getDefaultTextElements(
-      'BUSINESS PLAN',
-      founderName,
-      primaryColor,
-      secondaryColor
-    );
-    setTextElements(defaultElements);
+    setTextElements([]);
     setIsEditorOpen(true);
   };
 
@@ -356,18 +344,12 @@ export default function ThemeSelectionPage() {
         setSelectedTheme(null);
         setThemeApplied(false);
         
-        const defaultElements = getDefaultTextElements(
-          'BUSINESS PLAN',
-          founderName,
-          primaryColor,
-          secondaryColor
-        );
-        setTextElements(defaultElements);
+        setTextElements([]);
         setIsEditorOpen(true);
         
         toast({
           title: "Image Uploaded",
-          description: "Now customize your text in the editor.",
+          description: "Now add your text in the editor.",
         });
         setIsUploadingImage(false);
       };
