@@ -597,7 +597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             currency: 'gbp',
             product_data: {
               name: `Premium Cover: ${templateName || templateId}`,
-              description: 'Professional Canva-designed cover template for your business plan',
+              description: 'Professional designer cover template for your business plan',
             },
             unit_amount: priceInPence,
           },

@@ -80,8 +80,8 @@ export default function ThemeSelectionPage() {
   const { toast } = useToast();
   const { hasAccessToTier } = useTierAccess();
   
-  // Canva upload available to all paid tiers (Basic+)
-  const canUploadCanva = hasAccessToTier('basic');
+  // Custom cover upload available to all paid tiers (Basic+)
+  const canUploadCustomCover = hasAccessToTier('basic');
   
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState('#dc2626');
@@ -606,7 +606,7 @@ export default function ThemeSelectionPage() {
             <div>
               <h2 className="text-xl font-bold mb-1">All Cover Templates</h2>
               <p className="text-sm text-muted-foreground">
-                Choose from free SVG themes or premium Canva-designed covers (£5 each, own forever).
+                Choose from free SVG themes or premium designer covers (£5 each, own forever).
               </p>
             </div>
             
@@ -994,8 +994,8 @@ export default function ThemeSelectionPage() {
                 <div>
                   <Label className="flex items-center gap-2 mb-3">
                     <ImageIcon className="w-4 h-4" />
-                    Custom Cover Image (Canva, etc.)
-                    {!canUploadCanva && (
+                    Custom Cover Image
+                    {!canUploadCustomCover && (
                       <Badge variant="secondary" className="ml-2 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
                         <Lock className="w-3 h-3 mr-1" />
                         Paid Tiers Only
@@ -1003,20 +1003,20 @@ export default function ThemeSelectionPage() {
                     )}
                   </Label>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Upload your own cover page design from Canva or any design tool. Your image will be used as the full cover page.
+                    Upload your own cover page design. Your image will be used as the full cover page.
                   </p>
                   
-                  {!canUploadCanva ? (
+                  {!canUploadCustomCover ? (
                     <div className="p-6 rounded-lg border-2 border-dashed border-amber-300 bg-amber-50/50 dark:bg-amber-900/10 text-center">
                       <Lock className="w-10 h-10 text-amber-500 mx-auto mb-3" />
                       <h4 className="font-semibold text-lg mb-2">Custom Cover Upload</h4>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Upgrade to any paid plan to upload your own custom cover images from Canva or other design tools.
+                        Upgrade to any paid plan to upload your own custom cover images.
                       </p>
                       <Button 
                         onClick={() => navigate('/pricing')}
                         className="bg-amber-500 hover:bg-amber-600 text-white"
-                        data-testid="button-upgrade-for-canva"
+                        data-testid="button-upgrade-for-custom-cover"
                       >
                         <Crown className="w-4 h-4 mr-2" />
                         Upgrade from £29
@@ -1055,7 +1055,7 @@ export default function ThemeSelectionPage() {
                           data-testid="checkbox-full-cover"
                         />
                         <label htmlFor="useFullCover" className="text-sm font-medium cursor-pointer">
-                          Use as full cover page (recommended for Canva designs)
+                          Use as full cover page (recommended for custom designs)
                         </label>
                       </div>
                       <p className="text-xs text-muted-foreground">
