@@ -45,7 +45,23 @@ import { THEME_TEMPLATES, AVAILABLE_FONTS, PRESET_COLORS, EXCEL_COLOR_THEMES, ge
 import { ThemePreviewSVG } from "@/components/ThemePreviewSVG";
 import { CoverPageEditor, TextElement } from "@/components/CoverPageEditor";
 import { useTierAccess } from "@/hooks/useTierAccess";
-import { Lock, Crown } from "lucide-react";
+import { Lock, Crown, Filter, ShoppingCart, Check } from "lucide-react";
+import { 
+  PREMIUM_COVER_TEMPLATES, 
+  COVER_COLORS, 
+  COVER_STYLES, 
+  filterTemplates,
+  type CoverColor,
+  type CoverStyle,
+  type PremiumCoverTemplate
+} from "@/lib/premiumCoverTemplates";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ThemeSelectionProps {
   planId?: string;
@@ -79,6 +95,13 @@ export default function ThemeSelectionPage() {
   const [selectedPalette, setSelectedPalette] = useState<string | null>(null);
   const [showGenerateConfirm, setShowGenerateConfirm] = useState(false);
   const [isSavingCover, setIsSavingCover] = useState(false);
+  
+  // Premium cover templates state
+  const [colorFilter, setColorFilter] = useState<CoverColor | null>(null);
+  const [styleFilter, setStyleFilter] = useState<CoverStyle | null>(null);
+  const [selectedPremiumCover, setSelectedPremiumCover] = useState<string | null>(null);
+  const [purchasedCovers, setPurchasedCovers] = useState<Set<string>>(new Set());
+  const [isPurchasing, setIsPurchasing] = useState(false);
 
   const { data: user } = useQuery<{ firstName?: string; lastName?: string; email?: string }>({
     queryKey: ['/api/auth/user'],
@@ -596,6 +619,187 @@ export default function ThemeSelectionPage() {
               </motion.div>
             );
           })}
+        </div>
+
+        {/* Premium Cover Templates Section */}
+        <div className="mb-12">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Crown className="w-5 h-5 text-amber-500" />
+                <h2 className="text-xl font-bold">Premium Cover Templates</h2>
+                <Badge className="bg-amber-500 text-white">£5 each</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Professional Canva-designed covers. Purchase once, use forever with your business plans.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Filter:</span>
+              </div>
+              
+              <Select 
+                value={colorFilter || "all"} 
+                onValueChange={(v) => setColorFilter(v === "all" ? null : v as CoverColor)}
+              >
+                <SelectTrigger className="w-[130px]" data-testid="select-color-filter">
+                  <SelectValue placeholder="Color" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Colors</SelectItem>
+                  {COVER_COLORS.map((color) => (
+                    <SelectItem key={color.id} value={color.id}>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full border"
+                          style={{ backgroundColor: color.hex }}
+                        />
+                        {color.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select 
+                value={styleFilter || "all"} 
+                onValueChange={(v) => setStyleFilter(v === "all" ? null : v as CoverStyle)}
+              >
+                <SelectTrigger className="w-[140px]" data-testid="select-style-filter">
+                  <SelectValue placeholder="Style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Styles</SelectItem>
+                  {COVER_STYLES.map((style) => (
+                    <SelectItem key={style.id} value={style.id}>
+                      {style.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {(colorFilter || styleFilter) && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setColorFilter(null);
+                    setStyleFilter(null);
+                  }}
+                  data-testid="button-clear-filters"
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {filterTemplates(PREMIUM_COVER_TEMPLATES, colorFilter, styleFilter).map((template) => {
+              const isPurchased = purchasedCovers.has(template.id);
+              const isSelected = selectedPremiumCover === template.id;
+              
+              return (
+                <Card 
+                  key={template.id}
+                  className={`p-3 cursor-pointer transition-all relative ${
+                    isSelected 
+                      ? 'ring-2 ring-emerald-500 shadow-lg' 
+                      : 'hover-elevate'
+                  }`}
+                  onClick={() => {
+                    if (isPurchased) {
+                      setSelectedPremiumCover(template.id);
+                      setBackgroundImage(template.imagePath);
+                      setUseFullCoverImage(true);
+                      setThemeApplied(false);
+                    }
+                  }}
+                  data-testid={`card-premium-cover-${template.id}`}
+                >
+                  <div className="relative aspect-[3/4] rounded-md overflow-hidden mb-2">
+                    <img 
+                      src={template.imagePath}
+                      alt={template.name}
+                      className="w-full h-full object-cover"
+                    />
+                    
+                    {!isPurchased && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <Lock className="w-8 h-8 text-white/80" />
+                      </div>
+                    )}
+                    
+                    {isPurchased && isSelected && (
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-emerald-500 text-white">
+                          <Check className="w-3 h-3 mr-1" />
+                          Selected
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    {isPurchased && !isSelected && (
+                      <div className="absolute top-2 right-2">
+                        <Badge variant="secondary" className="bg-white/90 text-emerald-600">
+                          <Check className="w-3 h-3 mr-1" />
+                          Owned
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-sm truncate">{template.name}</h4>
+                    <div className="flex items-center gap-1 mt-1">
+                      {template.colors.slice(0, 3).map((color) => {
+                        const colorData = COVER_COLORS.find(c => c.id === color);
+                        return (
+                          <div
+                            key={color}
+                            className="w-3 h-3 rounded-full border border-muted"
+                            style={{ backgroundColor: colorData?.hex || '#ccc' }}
+                            title={colorData?.name}
+                          />
+                        );
+                      })}
+                      <Badge variant="outline" className="text-[10px] ml-auto">
+                        {template.style}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  {!isPurchased && (
+                    <Button
+                      size="sm"
+                      className="w-full mt-2 bg-amber-500 hover:bg-amber-600 text-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // TODO: Implement purchase flow
+                        toast({
+                          title: "Purchase Template",
+                          description: `${template.name} - £5. Stripe checkout coming soon.`,
+                        });
+                      }}
+                      data-testid={`button-purchase-${template.id}`}
+                    >
+                      <ShoppingCart className="w-3 h-3 mr-1" />
+                      £{template.price}
+                    </Button>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+          
+          {filterTemplates(PREMIUM_COVER_TEMPLATES, colorFilter, styleFilter).length === 0 && (
+            <div className="text-center py-12 text-muted-foreground">
+              No templates match your filters. Try adjusting your selection.
+            </div>
+          )}
         </div>
 
         {selectedTheme && (
