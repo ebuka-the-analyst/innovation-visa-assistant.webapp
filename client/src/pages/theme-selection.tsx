@@ -68,6 +68,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { generateThemeSvgDataUrl, getDefaultTextElements } from "@/lib/svgToDataUrl";
 
 interface ThemeSelectionProps {
   planId?: string;
@@ -254,6 +255,45 @@ export default function ThemeSelectionPage() {
     setThemeApplied(false);
   };
 
+  const openEditorForTheme = (theme: ThemeTemplate) => {
+    const svgDataUrl = generateThemeSvgDataUrl(
+      theme.id,
+      theme.defaultPrimaryColor,
+      theme.defaultSecondaryColor,
+      theme.defaultFont
+    );
+    setBackgroundImage(svgDataUrl);
+    setUseFullCoverImage(true);
+    setSelectedTheme(theme.id);
+    setPrimaryColor(theme.defaultPrimaryColor);
+    setSecondaryColor(theme.defaultSecondaryColor);
+    setSelectedFont(theme.defaultFont);
+    
+    const defaultElements = getDefaultTextElements(
+      'BUSINESS PLAN',
+      founderName,
+      theme.defaultPrimaryColor,
+      theme.defaultSecondaryColor
+    );
+    setTextElements(defaultElements);
+    setIsEditorOpen(true);
+  };
+
+  const openEditorForPremiumCover = (imagePath: string) => {
+    setBackgroundImage(imagePath);
+    setUseFullCoverImage(true);
+    setSelectedTheme(null);
+    
+    const defaultElements = getDefaultTextElements(
+      'BUSINESS PLAN',
+      founderName,
+      primaryColor,
+      secondaryColor
+    );
+    setTextElements(defaultElements);
+    setIsEditorOpen(true);
+  };
+
   const handleColorSelect = (hex: string) => {
     setPrimaryColor(hex);
     setCustomPrimaryColor('');
@@ -312,10 +352,22 @@ export default function ThemeSelectionPage() {
       reader.onloadend = () => {
         const base64 = reader.result as string;
         setBackgroundImage(base64);
+        setUseFullCoverImage(true);
+        setSelectedTheme(null);
         setThemeApplied(false);
+        
+        const defaultElements = getDefaultTextElements(
+          'BUSINESS PLAN',
+          founderName,
+          primaryColor,
+          secondaryColor
+        );
+        setTextElements(defaultElements);
+        setIsEditorOpen(true);
+        
         toast({
           title: "Image Uploaded",
-          description: "Your background image has been added to the cover.",
+          description: "Now customize your text in the editor.",
         });
         setIsUploadingImage(false);
       };
@@ -717,14 +769,11 @@ export default function ThemeSelectionPage() {
                     }`}
                     onClick={() => {
                       if (isFree && theme) {
-                        handleThemeSelect(theme.id);
                         setSelectedCover(cover);
+                        openEditorForTheme(theme);
                       } else if (isPurchased && premium) {
                         setSelectedCover(cover);
-                        setBackgroundImage(premium.imagePath);
-                        setUseFullCoverImage(true);
-                        setThemeApplied(false);
-                        setSelectedTheme(null);
+                        openEditorForPremiumCover(premium.imagePath);
                       }
                     }}
                     data-testid={`card-cover-${cover.id}`}
@@ -881,40 +930,25 @@ export default function ThemeSelectionPage() {
               </div>
 
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
-                  <div>
-                    <Label className="flex items-center gap-2 mb-2">
-                      <Type className="w-4 h-4" />
-                      Business Name
-                    </Label>
-                    <Input
-                      value={customBusinessName}
-                      onChange={(e) => {
-                        setCustomBusinessName(e.target.value);
-                        setThemeApplied(false);
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                      <p className="font-medium text-emerald-800 dark:text-emerald-200">Cover Page Editor</p>
+                      <p className="text-sm text-emerald-600 dark:text-emerald-400">Click to open the drag-and-drop text editor</p>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        const theme = getThemeById(selectedTheme);
+                        if (theme) {
+                          openEditorForTheme(theme);
+                        }
                       }}
-                      placeholder="Business Plan"
-                      className="bg-background"
-                      data-testid="input-business-name"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">The title shown on your cover</p>
-                  </div>
-                  <div>
-                    <Label className="flex items-center gap-2 mb-2">
-                      <Type className="w-4 h-4" />
-                      Founder Name
-                    </Label>
-                    <Input
-                      value={customFounderName}
-                      onChange={(e) => {
-                        setCustomFounderName(e.target.value);
-                        setThemeApplied(false);
-                      }}
-                      placeholder={defaultFounderName}
-                      className="bg-background"
-                      data-testid="input-founder-name"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">Your name as it appears on the cover</p>
+                      className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white"
+                      data-testid="button-open-editor"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      Edit Text &amp; Layout
+                    </Button>
                   </div>
                 </div>
 
