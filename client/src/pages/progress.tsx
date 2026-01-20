@@ -5,13 +5,16 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 import { useAuth } from "@/hooks/useAuth";
 import { 
   CheckCircle2, Circle, Clock, Target, TrendingUp, 
   FileText, Calculator, Users, Shield, Rocket,
-  AlertTriangle, ArrowRight, Calendar, Award, Star, Trophy, Zap, Sparkles
+  AlertTriangle, ArrowRight, Calendar, Award, Star, Trophy, Zap, Sparkles,
+  Eye, Download, Trash2
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -19,6 +22,10 @@ interface BusinessPlan {
   id: string;
   status: string;
   businessName?: string;
+  industry?: string;
+  pdfUrl?: string;
+  tier?: string;
+  createdAt?: string;
 }
 
 interface JourneyPhase {
@@ -116,12 +123,39 @@ function getStepStatusFromStorage(storageKey?: string): "completed" | "in-progre
 
 export default function ProgressPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [activePhase, setActivePhase] = useState("preparation");
 
   // Fetch business plans from database to check completion status
   const { data: businessPlans = [] } = useQuery<BusinessPlan[]>({
     queryKey: ['/api/business-plans'],
     enabled: !!user,
+  });
+
+  // Filter completed plans with PDF URLs for display
+  const completedPlansWithPdf = businessPlans.filter(plan => plan.status === 'completed' && plan.pdfUrl);
+
+  // Delete business plan mutation
+  const deletePlanMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/business-plans/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Delete failed");
+      }
+      return { id };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/business-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/plans"] });
+      toast({ title: "Business plan deleted successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    },
   });
 
   // Check if user has any completed business plans
@@ -273,6 +307,93 @@ export default function ProgressPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Your Generated Business Plans Section */}
+        {completedPlansWithPdf.length > 0 && (
+          <Card className="mb-8 border-2 border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Sparkles className="w-5 h-5 text-primary" />
+                Your Business Plans
+                <Badge className="bg-primary/10 text-primary">{completedPlansWithPdf.length}</Badge>
+              </CardTitle>
+              <CardDescription>
+                Generated business plans ready for download and review
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {completedPlansWithPdf.map((plan) => {
+                  const getPdfUrl = () => {
+                    if (!plan.pdfUrl) return '';
+                    return plan.pdfUrl.startsWith('http') ? plan.pdfUrl : `${window.location.origin}${plan.pdfUrl}`;
+                  };
+                  const fullPdfUrl = getPdfUrl();
+                  
+                  return (
+                    <div
+                      key={plan.id}
+                      className="flex items-center gap-4 p-4 rounded-lg border bg-gradient-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
+                      data-testid={`progress-plan-${plan.id}`}
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-medium truncate">{plan.businessName || 'Business Plan'}</h4>
+                          {plan.tier && <Badge variant="outline" className="capitalize text-xs">{plan.tier}</Badge>}
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />Ready
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                          {plan.industry && <span>{plan.industry}</span>}
+                          {plan.createdAt && (
+                            <>
+                              <span>•</span>
+                              <span>{new Date(plan.createdAt).toLocaleDateString()}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline"
+                          size="icon"
+                          onClick={() => window.open(fullPdfUrl, '_blank')}
+                          data-testid={`button-view-progress-plan-${plan.id}`}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          size="icon"
+                          onClick={() => window.open(fullPdfUrl, '_blank')}
+                          data-testid={`button-download-progress-plan-${plan.id}`}
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete "${plan.businessName || 'this plan'}"? This cannot be undone.`)) {
+                              deletePlanMutation.mutate(plan.id);
+                            }
+                          }}
+                          disabled={deletePlanMutation.isPending}
+                          data-testid={`button-delete-progress-plan-${plan.id}`}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {nextStep && (
           <Alert className="mb-8 border-primary/50 bg-primary/5">
