@@ -140,8 +140,8 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
             <div className="isolate z-[9999] mix-blend-normal bg-transparent opacity-70">
               <div className="logo-container overflow-hidden">
-                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
-                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
+                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" width="143" height="40" className="h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
+                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" width="143" height="40" className="h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
