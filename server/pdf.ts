@@ -912,7 +912,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
   return html;
 }
 
-function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string | null; useFullCoverImage?: boolean; textElements?: any[] | null; paletteId?: string | null }, primaryColor: string, secondaryColor: string): string {
+function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string | null; useFullCoverImage?: boolean; textElements?: any[] | null; logoElement?: { id: string; src: string; x: number; y: number; width: number; height: number } | null; paletteId?: string | null }, primaryColor: string, secondaryColor: string): string {
   const themeId = plan.themeId || null;
   const currentYear = new Date().getFullYear();
   const generatedDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -976,9 +976,34 @@ function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string |
       // Continue with empty textElementsHtml rather than failing
     }
     
+    // Render logo element if it exists
+    let logoHtml = '';
+    try {
+      if (plan.logoElement && plan.logoElement.src) {
+        const editorWidth = 520;
+        const editorHeight = 740;
+        const logoXPercent = (plan.logoElement.x / editorWidth) * 100;
+        const logoYPercent = (plan.logoElement.y / editorHeight) * 100;
+        const logoWidthPercent = (plan.logoElement.width / editorWidth) * 100;
+        
+        logoHtml = `<img src="${plan.logoElement.src}" alt="Company Logo" style="
+          position: absolute;
+          left: ${logoXPercent.toFixed(2)}%;
+          top: ${logoYPercent.toFixed(2)}%;
+          width: ${logoWidthPercent.toFixed(2)}%;
+          height: auto;
+          object-fit: contain;
+        " />`;
+        console.log('[CoverPage] Logo rendered at:', { x: logoXPercent, y: logoYPercent, width: logoWidthPercent });
+      }
+    } catch (logoError) {
+      console.error('Error rendering logo element:', logoError);
+    }
+    
     return `
     <div class="cover-page" style="position: relative; background: url('${plan.backgroundImage}') center/cover no-repeat; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
       ${textElementsHtml}
+      ${logoHtml}
     </div>
     `;
   }
@@ -986,8 +1011,33 @@ function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string |
   // Standard themed cover page with SVG decorations
   const decorations = generateCoverPageSVG(themeId, primaryColor, secondaryColor);
   
+  // Render logo for standard themed cover page too
+  let standardLogoHtml = '';
+  try {
+    if (plan.logoElement && plan.logoElement.src) {
+      const editorWidth = 520;
+      const editorHeight = 740;
+      const logoXPercent = (plan.logoElement.x / editorWidth) * 100;
+      const logoYPercent = (plan.logoElement.y / editorHeight) * 100;
+      const logoWidthPercent = (plan.logoElement.width / editorWidth) * 100;
+      
+      standardLogoHtml = `<img src="${plan.logoElement.src}" alt="Company Logo" style="
+        position: absolute;
+        left: ${logoXPercent.toFixed(2)}%;
+        top: ${logoYPercent.toFixed(2)}%;
+        width: ${logoWidthPercent.toFixed(2)}%;
+        height: auto;
+        object-fit: contain;
+        z-index: 10;
+      " />`;
+    }
+  } catch (logoError) {
+    console.error('Error rendering logo for standard theme:', logoError);
+  }
+  
   return `
-  <div class="cover-page">
+  <div class="cover-page" style="position: relative;">
+    ${standardLogoHtml}
     ${decorations.topLeft || ''}
     ${decorations.topRight}
     ${decorations.middleSection || ''}

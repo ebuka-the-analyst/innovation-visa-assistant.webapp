@@ -2294,6 +2294,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
           }
           return null;
         })(),
+        logoElement: savedCoverDesign?.logoElement || null,
         paletteId: savedCoverDesign?.paletteId || null,
       };
 
