@@ -323,6 +323,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET endpoint for user's business plans (used by Progress Tracker)
+  app.get("/api/business-plans", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const plans = await storage.getUserBusinessPlans(user.id);
+      res.json(plans);
+    } catch (error) {
+      console.error("Get business plans error:", error);
+      res.status(500).json({ error: "Failed to fetch business plans" });
+    }
+  });
+
   app.delete("/api/business-plans/:id", isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
