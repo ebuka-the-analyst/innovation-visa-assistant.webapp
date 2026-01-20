@@ -133,6 +133,39 @@ async function migrate() {
       }
     }
     
+    // Create premium_cover_purchases table if not exists
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS premium_cover_purchases (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL REFERENCES users(id),
+          template_id VARCHAR(100) NOT NULL,
+          price INTEGER NOT NULL,
+          stripe_payment_intent_id VARCHAR(255),
+          stripe_session_id VARCHAR(255),
+          status VARCHAR(20) NOT NULL DEFAULT 'pending',
+          purchased_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      console.log('premium_cover_purchases table created or already exists');
+      
+      // Create indexes for premium_cover_purchases
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_premium_cover_user ON premium_cover_purchases(user_id)
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_premium_cover_template ON premium_cover_purchases(user_id, template_id)
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_premium_cover_stripe ON premium_cover_purchases(stripe_session_id)
+      `);
+      console.log('premium_cover_purchases indexes created or already exist');
+    } catch (err) {
+      if (err.code !== '42P07') { // 42P07 = table already exists
+        console.error('Error creating premium_cover_purchases table:', err.message);
+      }
+    }
+    
   } catch (err) {
     console.error('Migration failed:', err.message);
     process.exit(1);
