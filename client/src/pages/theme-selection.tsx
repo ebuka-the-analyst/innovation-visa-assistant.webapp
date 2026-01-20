@@ -44,6 +44,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { THEME_TEMPLATES, AVAILABLE_FONTS, PRESET_COLORS, EXCEL_COLOR_THEMES, getPaletteById, getThemeById, ThemeTemplate, ExcelColorTheme } from "@/lib/themeTemplates";
 import { ThemePreviewSVG } from "@/components/ThemePreviewSVG";
 import { CoverPageEditor, TextElement } from "@/components/CoverPageEditor";
+import { useTierAccess } from "@/hooks/useTierAccess";
+import { Lock, Crown } from "lucide-react";
 
 interface ThemeSelectionProps {
   planId?: string;
@@ -55,6 +57,10 @@ interface ThemeSelectionProps {
 export default function ThemeSelectionPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { hasAccessToTier } = useTierAccess();
+  
+  // Canva upload available to all paid tiers (Basic+)
+  const canUploadCanva = hasAccessToTier('basic');
   
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState('#dc2626');
@@ -725,12 +731,34 @@ export default function ThemeSelectionPage() {
                   <Label className="flex items-center gap-2 mb-3">
                     <ImageIcon className="w-4 h-4" />
                     Custom Cover Image (Canva, etc.)
+                    {!canUploadCanva && (
+                      <Badge variant="secondary" className="ml-2 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                        <Lock className="w-3 h-3 mr-1" />
+                        Paid Tiers Only
+                      </Badge>
+                    )}
                   </Label>
                   <p className="text-sm text-muted-foreground mb-3">
                     Upload your own cover page design from Canva or any design tool. Your image will be used as the full cover page.
                   </p>
                   
-                  {backgroundImage ? (
+                  {!canUploadCanva ? (
+                    <div className="p-6 rounded-lg border-2 border-dashed border-amber-300 bg-amber-50/50 dark:bg-amber-900/10 text-center">
+                      <Lock className="w-10 h-10 text-amber-500 mx-auto mb-3" />
+                      <h4 className="font-semibold text-lg mb-2">Custom Cover Upload</h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Upgrade to any paid plan to upload your own custom cover images from Canva or other design tools.
+                      </p>
+                      <Button 
+                        onClick={() => navigate('/pricing')}
+                        className="bg-amber-500 hover:bg-amber-600 text-white"
+                        data-testid="button-upgrade-for-canva"
+                      >
+                        <Crown className="w-4 h-4 mr-2" />
+                        Upgrade from £29
+                      </Button>
+                    </div>
+                  ) : backgroundImage ? (
                     <div className="space-y-4">
                       <div className="relative inline-block">
                         <div className="relative w-48 h-64 rounded-lg overflow-hidden border-2 border-emerald-500 shadow-md">
