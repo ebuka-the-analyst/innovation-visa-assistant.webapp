@@ -8,8 +8,8 @@ import { LogIn, Mail, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import logoLightImg from "@assets/official_logo.png";
-import logoDarkImg from "@assets/logo_dark.png";
+import logoLightImg from "@assets/official_logo.webp";
+import logoDarkImg from "@assets/logo_dark.webp";
 import { SEOHead } from "@/components/SEOHead";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 

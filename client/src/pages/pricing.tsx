@@ -14,8 +14,8 @@ import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { TIER_CREDITS, ADDON_PRICING, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
-import logoLight from "@assets/official_logo.png";
-import logoDark from "@assets/logo_dark.png";
+import logoLight from "@assets/official_logo.webp";
+import logoDark from "@assets/logo_dark.webp";
 
 // 2026 PRICING - Effective January 2026
 const tiers = [

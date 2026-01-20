@@ -17,7 +17,7 @@ export function SEOHead({
   description,
   canonical,
   path,
-  ogImage = 'https://innovatorfoundervisaassistant.co.uk/og-image.png',
+  ogImage = 'https://innovatorfoundervisaassistant.co.uk/og-image.webp',
   ogType = 'website',
   keywords,
   schema,

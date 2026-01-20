@@ -11,8 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Check, X, CreditCard, Shield, Zap, ArrowLeft, Tag } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import ThemeToggle from "@/components/ThemeToggle";
-import logoLight from "@assets/official_logo.png";
-import logoDark from "@assets/logo_dark.png";
+import logoLight from "@assets/official_logo.webp";
+import logoDark from "@assets/logo_dark.webp";
 
 interface PromoCodeValidation {
   valid: boolean;

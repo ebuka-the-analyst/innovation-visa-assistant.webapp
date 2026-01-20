@@ -9,8 +9,8 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { AppSidebar } from "@/components/app-sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
-import logoLight from "@assets/official_logo.png";
-import logoDark from "@assets/logo_dark.png";
+import logoLight from "@assets/official_logo.webp";
+import logoDark from "@assets/logo_dark.webp";
 
 type IconName = keyof typeof Icons;
 

@@ -1,12 +1,12 @@
-import blackBlueCover from "@assets/Black_and_Blue_Modern_Corporate_Proposal_Cover_Page_1768870734957.png";
-import blueOrangeCover from "@assets/Blue_and_Orange_Geometric_Project_Proposal_Cover_page_1768870734958.png";
-import blackRedCover from "@assets/Black_and_Red_Modern_Project_Proposal_Cover_1768870734959.png";
-import redWhiteCover from "@assets/Red_and_White_Modern_Business_Proposal_Cover_Page_1768870734959.png";
-import orangeCover from "@assets/Orange_Modern_Business_Proposal_Cover_1768870734959.png";
-import yellowCover from "@assets/Yellow_Modern_Company_Business_Proposal_1768870734960.png";
-import orangeWhiteCover from "@assets/Orange_White_Modern_Business_Proposal_Cover_Page_1768870734960.png";
-import greenYellowCover from "@assets/Green_and_Yellow_Modern_Cover_Page_1768870734961.png";
-import redIllustrativeCover from "@assets/Red_Illustrative_Modern_Business_Proposal_Cover_1768870734961.png";
+import blackBlueCover from "@assets/Black_and_Blue_Modern_Corporate_Proposal_Cover_Page_1768870734957.webp";
+import blueOrangeCover from "@assets/Blue_and_Orange_Geometric_Project_Proposal_Cover_page_1768870734958.webp";
+import blackRedCover from "@assets/Black_and_Red_Modern_Project_Proposal_Cover_1768870734959.webp";
+import redWhiteCover from "@assets/Red_and_White_Modern_Business_Proposal_Cover_Page_1768870734959.webp";
+import orangeCover from "@assets/Orange_Modern_Business_Proposal_Cover_1768870734959.webp";
+import yellowCover from "@assets/Yellow_Modern_Company_Business_Proposal_1768870734960.webp";
+import orangeWhiteCover from "@assets/Orange_White_Modern_Business_Proposal_Cover_Page_1768870734960.webp";
+import greenYellowCover from "@assets/Green_and_Yellow_Modern_Cover_Page_1768870734961.webp";
+import redIllustrativeCover from "@assets/Red_Illustrative_Modern_Business_Proposal_Cover_1768870734961.webp";
 
 export type CoverColor = "blue" | "orange" | "red" | "yellow" | "green" | "black" | "white";
 export type CoverStyle = "modern" | "corporate" | "geometric" | "illustrative";

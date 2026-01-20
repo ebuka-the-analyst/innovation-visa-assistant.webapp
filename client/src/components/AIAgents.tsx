@@ -1,8 +1,8 @@
 import { useState } from "react";
-import novaAvatar from "@assets/generated_images/nova_innovation_agent_avatar.png";
-import sterlingAvatar from "@assets/generated_images/sterling_financial_agent_avatar.png";
-import atlasAvatar from "@assets/generated_images/atlas_growth_agent_avatar.png";
-import sageAvatar from "@assets/generated_images/sage_compliance_agent_avatar.png";
+import novaAvatar from "@assets/generated_images/nova_innovation_agent_avatar.webp";
+import sterlingAvatar from "@assets/generated_images/sterling_financial_agent_avatar.webp";
+import atlasAvatar from "@assets/generated_images/atlas_growth_agent_avatar.webp";
+import sageAvatar from "@assets/generated_images/sage_compliance_agent_avatar.webp";
 
 const agents = [
   {

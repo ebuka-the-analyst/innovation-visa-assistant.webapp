@@ -4,7 +4,7 @@ export const organizationSchema = {
   "@type": "Organization",
   "name": "UK Innovator Founder Visa Assistant",
   "url": "https://innovatorfoundervisaassistant.co.uk",
-  "logo": "https://innovatorfoundervisaassistant.co.uk/logo.png",
+  "logo": "https://innovatorfoundervisaassistant.co.uk/logo.webp",
   "description": "AI-powered platform providing 100+ expert tools for UK Innovator Founder Visa applications. Professional-level guidance covering compliance, business planning, financial modeling, and endorsement preparation.",
   "contactPoint": {
     "@type": "ContactPoint",
@@ -141,7 +141,7 @@ export const createArticleSchema = (title: string, description: string, datePubl
     "name": "UK Innovator Founder Visa Assistant",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://innovatorfoundervisaassistant.co.uk/logo.png"
+      "url": "https://innovatorfoundervisaassistant.co.uk/logo.webp"
     }
   },
   "datePublished": datePublished,

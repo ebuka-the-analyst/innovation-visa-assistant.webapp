@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { UserPlus, LogIn, Gift, CheckCircle, Mail, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import logoLightImg from "@assets/official_logo.png";
-import logoDarkImg from "@assets/logo_dark.png";
+import logoLightImg from "@assets/official_logo.webp";
+import logoDarkImg from "@assets/logo_dark.webp";
 import { SEOHead } from "@/components/SEOHead";
 
 export default function Signup() {

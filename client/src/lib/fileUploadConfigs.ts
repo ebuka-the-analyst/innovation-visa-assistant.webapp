@@ -4,7 +4,7 @@ import { FileUploadConfig } from "@/components/FileUploadButton";
 export const fileUploadConfigs = {
   // Document verification tools
   documentVerification: {
-    acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.heic'],
+    acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.webp', '.heic'],
     maxSizeMB: 10,
     label: 'Upload Document',
     description: 'Upload passport scan (JPG/PNG/HEIC) or documents (PDF)',
@@ -13,7 +13,7 @@ export const fileUploadConfigs = {
 
   // Evidence collection
   evidenceCollection: {
-    acceptedTypes: ['.pdf', '.docx', '.doc', '.jpg', '.jpeg', '.png', '.heic'],
+    acceptedTypes: ['.pdf', '.docx', '.doc', '.jpg', '.jpeg', '.webp', '.heic'],
     maxSizeMB: 15,
     label: 'Upload Evidence',
     description: 'Upload evidence documents (PDF/DOCX) or photos (JPG/PNG/HEIC)',
@@ -49,7 +49,7 @@ export const fileUploadConfigs = {
 
   // Company documents (history, bios, etc)
   companyDocuments: {
-    acceptedTypes: ['.pdf', '.docx', '.doc', '.jpg', '.jpeg', '.png'],
+    acceptedTypes: ['.pdf', '.docx', '.doc', '.jpg', '.jpeg', '.webp'],
     maxSizeMB: 10,
     label: 'Upload Company Document',
     description: 'Upload company documents or photos (PDF/DOCX/JPG/PNG)',
@@ -67,7 +67,7 @@ export const fileUploadConfigs = {
 
   // ID / Passport photos
   idPhotos: {
-    acceptedTypes: ['.jpg', '.jpeg', '.png', '.heic'],
+    acceptedTypes: ['.jpg', '.jpeg', '.webp', '.heic'],
     maxSizeMB: 5,
     label: 'Upload Photo',
     description: 'Upload passport or ID photo (JPG/PNG/HEIC)',
@@ -76,7 +76,7 @@ export const fileUploadConfigs = {
 
   // General images
   images: {
-    acceptedTypes: ['.jpg', '.jpeg', '.png', '.heic', '.webp'],
+    acceptedTypes: ['.jpg', '.jpeg', '.webp', '.heic', '.webp'],
     maxSizeMB: 8,
     label: 'Upload Image',
     description: 'Upload images (JPG/PNG/HEIC/WEBP)',

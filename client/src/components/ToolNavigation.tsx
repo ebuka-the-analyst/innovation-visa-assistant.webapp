@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Gauge, DollarSign, HelpCircle } from "lucide-react";
 import { useLocation, Link } from "wouter";
-import logoLightImg from "@assets/official_logo.png";
-import logoDarkImg from "@assets/logo_dark.png";
+import logoLightImg from "@assets/official_logo.webp";
+import logoDarkImg from "@assets/logo_dark.webp";
 import { useState } from "react";
 import PricingModal from "./PricingModal";
 import FAQModal from "./FAQModal";

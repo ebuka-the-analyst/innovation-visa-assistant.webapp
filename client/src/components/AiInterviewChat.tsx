@@ -43,10 +43,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 
-import novaAvatar from "@assets/generated_images/nova_innovation_ai_avatar.png";
-import sterlingAvatar from "@assets/generated_images/sterling_financial_ai_avatar.png";
-import atlasAvatar from "@assets/generated_images/atlas_growth_ai_avatar.png";
-import sageAvatar from "@assets/generated_images/sage_compliance_ai_avatar.png";
+import novaAvatar from "@assets/generated_images/nova_innovation_ai_avatar.webp";
+import sterlingAvatar from "@assets/generated_images/sterling_financial_ai_avatar.webp";
+import atlasAvatar from "@assets/generated_images/atlas_growth_ai_avatar.webp";
+import sageAvatar from "@assets/generated_images/sage_compliance_ai_avatar.webp";
 
 interface AgentPersona {
   id: 'nova' | 'sterling' | 'atlas' | 'sage';
