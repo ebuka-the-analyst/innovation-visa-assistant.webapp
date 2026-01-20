@@ -322,6 +322,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch business plans" });
     }
   });
+
+  app.delete("/api/business-plans/:id", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const planId = req.params.id;
+      
+      // Verify the plan belongs to this user
+      const plan = await storage.getBusinessPlan(planId as any);
+      if (!plan) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+      if (plan.userId !== user.id) {
+        return res.status(403).json({ error: "You can only delete your own business plans" });
+      }
+      
+      await storage.deleteBusinessPlan(planId);
+      res.json({ success: true, message: "Business plan deleted successfully" });
+    } catch (error) {
+      console.error("Delete business plan error:", error);
+      res.status(500).json({ error: "Failed to delete business plan" });
+    }
+  });
   
   app.post("/api/questionnaire/submit", isAuthenticated, async (req, res) => {
     try {
