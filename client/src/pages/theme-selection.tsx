@@ -100,12 +100,54 @@ export default function ThemeSelectionPage() {
   const [colorFilter, setColorFilter] = useState<CoverColor | null>(null);
   const [styleFilter, setStyleFilter] = useState<CoverStyle | null>(null);
   const [selectedPremiumCover, setSelectedPremiumCover] = useState<string | null>(null);
-  const [purchasedCovers, setPurchasedCovers] = useState<Set<string>>(new Set());
   const [isPurchasing, setIsPurchasing] = useState(false);
 
   const { data: user } = useQuery<{ firstName?: string; lastName?: string; email?: string }>({
     queryKey: ['/api/auth/user'],
   });
+
+  // Fetch user's purchased premium cover templates
+  const { data: purchasedTemplates, refetch: refetchPurchased } = useQuery<{ templateIds: string[] }>({
+    queryKey: ['/api/premium-covers/purchased'],
+    staleTime: 1000 * 60 * 5,
+  });
+  
+  const purchasedCovers = new Set(purchasedTemplates?.templateIds || []);
+
+  // Handle purchase success from URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const coverPurchased = urlParams.get('cover_purchased');
+    const sessionId = urlParams.get('session_id');
+    const templateId = urlParams.get('template');
+    
+    if (coverPurchased === 'true' && sessionId) {
+      // Verify the purchase
+      apiRequest('POST', '/api/premium-covers/verify', { sessionId })
+        .then((res) => res.json()).then((data) => {
+        if (data.success) {
+          refetchPurchased();
+          toast({
+            title: "Template Unlocked!",
+            description: `You now own the ${templateId} cover template.`,
+          });
+          // Clean URL
+          window.history.replaceState({}, '', '/theme-selection');
+        }
+      }).catch((err) => {
+        console.error("Purchase verification failed:", err);
+      });
+    }
+    
+    if (urlParams.get('cover_cancelled') === 'true') {
+      toast({
+        title: "Purchase Cancelled",
+        description: "Your template purchase was cancelled.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, '', '/theme-selection');
+    }
+  }, []);
 
   const { data: savedCoverDesign, isLoading: isLoadingCoverDesign, isFetched: isCoverDesignFetched } = useQuery<{
     id: string;
@@ -776,17 +818,37 @@ export default function ThemeSelectionPage() {
                     <Button
                       size="sm"
                       className="w-full mt-2 bg-amber-500 hover:bg-amber-600 text-white"
-                      onClick={(e) => {
+                      disabled={isPurchasing}
+                      onClick={async (e) => {
                         e.stopPropagation();
-                        // TODO: Implement purchase flow
-                        toast({
-                          title: "Purchase Template",
-                          description: `${template.name} - £5. Stripe checkout coming soon.`,
-                        });
+                        setIsPurchasing(true);
+                        try {
+                          const response = await apiRequest('POST', '/api/premium-covers/purchase', { 
+                            templateId: template.id, 
+                            templateName: template.name 
+                          });
+                          const data = await response.json();
+                          if (data.url) {
+                            window.location.href = data.url;
+                          } else {
+                            throw new Error(data.error || 'Failed to create checkout');
+                          }
+                        } catch (error: any) {
+                          toast({
+                            title: "Purchase Failed",
+                            description: error?.message || "Could not start purchase. Please try again.",
+                            variant: "destructive",
+                          });
+                          setIsPurchasing(false);
+                        }
                       }}
                       data-testid={`button-purchase-${template.id}`}
                     >
-                      <ShoppingCart className="w-3 h-3 mr-1" />
+                      {isPurchasing ? (
+                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                      ) : (
+                        <ShoppingCart className="w-3 h-3 mr-1" />
+                      )}
                       £{template.price}
                     </Button>
                   )}

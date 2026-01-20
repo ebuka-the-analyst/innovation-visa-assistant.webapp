@@ -540,6 +540,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================
+  // PREMIUM COVER TEMPLATE PURCHASES
+  // ============================================
+
+  // Get user's purchased template IDs
+  app.get("/api/premium-covers/purchased", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const templateIds = await storage.getUserPurchasedTemplateIds(user.id);
+      res.json({ templateIds });
+    } catch (error) {
+      console.error("Get purchased templates error:", error);
+      res.status(500).json({ error: "Failed to get purchased templates" });
+    }
+  });
+
+  // Create checkout session for premium cover template
+  app.post("/api/premium-covers/purchase", isAuthenticated, async (req, res) => {
+    try {
+      const { templateId, templateName } = req.body;
+      const user = req.user as any;
+      
+      if (!templateId) {
+        return res.status(400).json({ error: "Template ID is required" });
+      }
+
+      // Check if user already purchased this template
+      const alreadyPurchased = await storage.hasUserPurchasedTemplate(user.id, templateId);
+      if (alreadyPurchased) {
+        return res.status(400).json({ error: "You already own this template" });
+      }
+
+      const priceInPence = 500; // £5
+
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      
+      // Create pending purchase record
+      const purchase = await storage.createPremiumCoverPurchase({
+        userId: user.id,
+        templateId,
+        price: priceInPence,
+        status: 'pending'
+      });
+
+      // Create Stripe checkout session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        customer_email: user.email,
+        line_items: [{
+          price_data: {
+            currency: 'gbp',
+            product_data: {
+              name: `Premium Cover: ${templateName || templateId}`,
+              description: 'Professional Canva-designed cover template for your business plan',
+            },
+            unit_amount: priceInPence,
+          },
+          quantity: 1,
+        }],
+        metadata: {
+          purchaseId: purchase.id,
+          templateId,
+          userId: user.id,
+          type: 'premium_cover',
+        },
+        success_url: `${baseUrl}/theme-selection?cover_purchased=true&template=${templateId}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/theme-selection?cover_cancelled=true`,
+      });
+
+      // Update purchase with Stripe session ID
+      await storage.updatePremiumCoverPurchase(purchase.id, { 
+        stripeSessionId: session.id 
+      });
+
+      res.json({ 
+        sessionId: session.id, 
+        url: session.url,
+        purchaseId: purchase.id
+      });
+    } catch (error: any) {
+      console.error("Premium cover purchase error:", error);
+      res.status(500).json({ 
+        error: error?.message || "Failed to create checkout session" 
+      });
+    }
+  });
+
+  // Verify premium cover purchase after checkout
+  app.post("/api/premium-covers/verify", isAuthenticated, async (req, res) => {
+    try {
+      const { sessionId } = req.body;
+      const user = req.user as any;
+
+      if (!sessionId) {
+        return res.status(400).json({ error: "Session ID is required" });
+      }
+
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      if (session.payment_status !== 'paid') {
+        return res.status(400).json({ error: "Payment not completed" });
+      }
+
+      const purchase = await storage.getPremiumCoverPurchaseByStripeSession(sessionId);
+      if (!purchase) {
+        return res.status(404).json({ error: "Purchase not found" });
+      }
+
+      if (purchase.userId !== user.id) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      // Mark purchase as completed
+      await storage.updatePremiumCoverPurchase(purchase.id, {
+        status: 'completed',
+        stripePaymentIntentId: session.payment_intent as string
+      });
+
+      res.json({ 
+        success: true, 
+        templateId: purchase.templateId,
+        message: "Template unlocked successfully"
+      });
+    } catch (error: any) {
+      console.error("Verify premium cover purchase error:", error);
+      res.status(500).json({ 
+        error: error?.message || "Failed to verify purchase" 
+      });
+    }
+  });
+
   app.post("/api/payment/create-checkout", isAuthenticated, async (req, res) => {
     try {
       const { planId, promoCode } = req.body;

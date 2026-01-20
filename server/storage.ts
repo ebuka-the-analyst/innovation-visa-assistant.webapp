@@ -28,11 +28,13 @@ import {
   type InnovationCoachingSession, type InsertInnovationCoachingSession,
   type PerformanceMetric, type InsertPerformanceMetric,
   type CoverDesign, type InsertCoverDesign,
+  type PremiumCoverPurchase, type InsertPremiumCoverPurchase,
   users, businessPlans, sessionHandoffs, referrals, uploadedFiles, toolAnalytics,
   referralCodes, referralEvents, referralRewards, promoCodes, promoRedemptions, referralVisits, payoutRequests,
   supportTickets, userDocuments, immigrationLawyers, lawyerDocumentReviews, lawyerReviewComments, lawyerReviewStatusHistory,
   newsArticles, newsFetchLog, aiActionLogs, aiPendingConfirmations, aiRateLimits,
-  industryProfiles, eligibilityAssessments, innovationCoachingSessions, performanceMetrics, coverDesigns
+  industryProfiles, eligibilityAssessments, innovationCoachingSessions, performanceMetrics, coverDesigns,
+  premiumCoverPurchases
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gt, lt, desc, sql, count } from "drizzle-orm";
@@ -352,6 +354,17 @@ export interface IStorage {
   getCoverDesign(id: string): Promise<CoverDesign | undefined>;
   updateCoverDesign(id: string, updates: Partial<CoverDesign>): Promise<CoverDesign | undefined>;
   deleteCoverDesign(id: string): Promise<void>;
+  
+  // ============================================
+  // PREMIUM COVER TEMPLATE PURCHASES
+  // ============================================
+  createPremiumCoverPurchase(purchase: InsertPremiumCoverPurchase): Promise<PremiumCoverPurchase>;
+  getPremiumCoverPurchase(id: string): Promise<PremiumCoverPurchase | undefined>;
+  getUserPremiumCoverPurchases(userId: string): Promise<PremiumCoverPurchase[]>;
+  getUserPurchasedTemplateIds(userId: string): Promise<string[]>;
+  hasUserPurchasedTemplate(userId: string, templateId: string): Promise<boolean>;
+  updatePremiumCoverPurchase(id: string, updates: Partial<PremiumCoverPurchase>): Promise<PremiumCoverPurchase | undefined>;
+  getPremiumCoverPurchaseByStripeSession(sessionId: string): Promise<PremiumCoverPurchase | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1889,6 +1902,68 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCoverDesign(id: string): Promise<void> {
     await db.delete(coverDesigns).where(eq(coverDesigns.id, id));
+  }
+
+  // ============================================
+  // PREMIUM COVER TEMPLATE PURCHASES
+  // ============================================
+
+  async createPremiumCoverPurchase(purchase: InsertPremiumCoverPurchase): Promise<PremiumCoverPurchase> {
+    const result = await db.insert(premiumCoverPurchases).values(purchase).returning();
+    return result[0];
+  }
+
+  async getPremiumCoverPurchase(id: string): Promise<PremiumCoverPurchase | undefined> {
+    const result = await db.select().from(premiumCoverPurchases)
+      .where(eq(premiumCoverPurchases.id, id))
+      .limit(1);
+    return result[0];
+  }
+
+  async getUserPremiumCoverPurchases(userId: string): Promise<PremiumCoverPurchase[]> {
+    return await db.select().from(premiumCoverPurchases)
+      .where(and(
+        eq(premiumCoverPurchases.userId, userId),
+        eq(premiumCoverPurchases.status, 'completed')
+      ))
+      .orderBy(desc(premiumCoverPurchases.purchasedAt));
+  }
+
+  async getUserPurchasedTemplateIds(userId: string): Promise<string[]> {
+    const purchases = await db.select({ templateId: premiumCoverPurchases.templateId })
+      .from(premiumCoverPurchases)
+      .where(and(
+        eq(premiumCoverPurchases.userId, userId),
+        eq(premiumCoverPurchases.status, 'completed')
+      ));
+    return purchases.map(p => p.templateId);
+  }
+
+  async hasUserPurchasedTemplate(userId: string, templateId: string): Promise<boolean> {
+    const result = await db.select({ id: premiumCoverPurchases.id })
+      .from(premiumCoverPurchases)
+      .where(and(
+        eq(premiumCoverPurchases.userId, userId),
+        eq(premiumCoverPurchases.templateId, templateId),
+        eq(premiumCoverPurchases.status, 'completed')
+      ))
+      .limit(1);
+    return result.length > 0;
+  }
+
+  async updatePremiumCoverPurchase(id: string, updates: Partial<PremiumCoverPurchase>): Promise<PremiumCoverPurchase | undefined> {
+    const result = await db.update(premiumCoverPurchases)
+      .set(updates)
+      .where(eq(premiumCoverPurchases.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async getPremiumCoverPurchaseByStripeSession(sessionId: string): Promise<PremiumCoverPurchase | undefined> {
+    const result = await db.select().from(premiumCoverPurchases)
+      .where(eq(premiumCoverPurchases.stripeSessionId, sessionId))
+      .limit(1);
+    return result[0];
   }
 }
 

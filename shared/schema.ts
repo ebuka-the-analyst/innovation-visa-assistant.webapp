@@ -333,6 +333,26 @@ export const insertToolAnalyticsSchema = createInsertSchema(toolAnalytics).omit(
 export type InsertToolAnalytics = z.infer<typeof insertToolAnalyticsSchema>;
 export type ToolAnalytic = typeof toolAnalytics.$inferSelect;
 
+// Premium Cover Template Purchases
+export const premiumCoverPurchases = pgTable("premium_cover_purchases", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  templateId: varchar("template_id", { length: 50 }).notNull(),
+  price: integer("price").notNull(), // Price in pence (500 = £5)
+  stripeSessionId: text("stripe_session_id"),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  status: varchar("status", { length: 20 }).notNull().default('pending'), // pending, completed, failed
+  purchasedAt: timestamp("purchased_at").notNull().defaultNow(),
+});
+
+export const insertPremiumCoverPurchaseSchema = createInsertSchema(premiumCoverPurchases).omit({
+  id: true,
+  purchasedAt: true,
+});
+
+export type InsertPremiumCoverPurchase = z.infer<typeof insertPremiumCoverPurchaseSchema>;
+export type PremiumCoverPurchase = typeof premiumCoverPurchases.$inferSelect;
+
 // ============================================
 // CREDIT SYSTEM - PhD-Level Business Model
 // ALL TIERS HAVE FINITE CREDIT LIMITS
