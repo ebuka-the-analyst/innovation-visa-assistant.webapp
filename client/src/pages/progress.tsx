@@ -56,7 +56,7 @@ const JOURNEY_PHASES: JourneyPhase[] = [
     steps: [
       { id: "questionnaire", name: "Generate Business Plan", description: "Tell us about your business idea", toolPath: "/questionnaire", storageKey: "questionnaire-autosave", required: true },
       { id: "innovation-score", name: "Check Innovation Score", description: "Assess your innovation criteria", toolPath: "/tools/innovation-score", storageKey: "innovation-score-state", required: true },
-      { id: "eligibility", name: "Verify Eligibility", description: "Confirm you meet requirements", toolPath: "/tools/eligibility-checker", storageKey: "eligibility-checker-state", required: true },
+      { id: "eligibility", name: "Verify Eligibility", description: "Confirm you meet requirements", toolPath: "/tools/eligibility-validator", storageKey: "eligibility-validator-state", required: true },
     ]
   },
   {
