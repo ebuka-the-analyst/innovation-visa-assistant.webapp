@@ -47,14 +47,19 @@ import { CoverPageEditor, TextElement } from "@/components/CoverPageEditor";
 import { useTierAccess } from "@/hooks/useTierAccess";
 import { Lock, Crown, Filter, ShoppingCart, Check } from "lucide-react";
 import { 
-  PREMIUM_COVER_TEMPLATES, 
-  COVER_COLORS, 
-  COVER_STYLES, 
-  filterTemplates,
-  type CoverColor,
-  type CoverStyle,
+  PREMIUM_COVER_TEMPLATES,
   type PremiumCoverTemplate
 } from "@/lib/premiumCoverTemplates";
+import {
+  UNIFIED_COVERS,
+  filterUnifiedCovers,
+  COVER_COLORS,
+  COVER_STYLES,
+  type CoverColor,
+  type CoverStyle,
+  type CoverType,
+  type UnifiedCover,
+} from "@/lib/unifiedCovers";
 import {
   Select,
   SelectContent,
@@ -96,10 +101,11 @@ export default function ThemeSelectionPage() {
   const [showGenerateConfirm, setShowGenerateConfirm] = useState(false);
   const [isSavingCover, setIsSavingCover] = useState(false);
   
-  // Premium cover templates state
+  // Unified cover templates state (filters for both free and paid)
+  const [typeFilter, setTypeFilter] = useState<CoverType | null>(null);
   const [colorFilter, setColorFilter] = useState<CoverColor | null>(null);
   const [styleFilter, setStyleFilter] = useState<CoverStyle | null>(null);
-  const [selectedPremiumCover, setSelectedPremiumCover] = useState<string | null>(null);
+  const [selectedCover, setSelectedCover] = useState<UnifiedCover | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
 
   const { data: user } = useQuery<{ firstName?: string; lastName?: string; email?: string }>({
@@ -594,94 +600,35 @@ export default function ThemeSelectionPage() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 mb-12">
-          {THEME_TEMPLATES.map((theme, index) => {
-            const isSelected = selectedTheme === theme.id;
-            const displayPrimary = isSelected ? primaryColor : theme.defaultPrimaryColor;
-            const displaySecondary = isSelected ? secondaryColor : theme.defaultSecondaryColor;
-            const displayFont = isSelected ? selectedFont : theme.defaultFont;
-
-            return (
-              <motion.div
-                key={theme.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Card 
-                  className={`p-4 cursor-pointer transition-all ${
-                    isSelected 
-                      ? 'ring-2 ring-emerald-500 shadow-lg' 
-                      : 'hover-elevate'
-                  }`}
-                  onClick={() => handleThemeSelect(theme.id)}
-                  data-testid={`card-theme-${theme.id}`}
-                >
-                  <div 
-                    className="relative border rounded-lg overflow-hidden transition-all"
-                    style={{ 
-                      borderColor: isSelected ? displayPrimary : 'transparent',
-                      boxShadow: isSelected ? `0 0 20px ${displayPrimary}40` : 'none'
-                    }}
-                  >
-                    <ThemePreviewSVG
-                      themeId={theme.id}
-                      primaryColor={displayPrimary}
-                      secondaryColor={displaySecondary}
-                      font={displayFont}
-                      founderName={founderName}
-                      isSelected={isSelected}
-                      size="small"
-                      backgroundImage={isSelected ? backgroundImage : null}
-                      useFullCoverImage={isSelected ? useFullCoverImage : false}
-                    />
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="absolute bottom-2 right-2 z-10 gap-1 bg-background/95 dark:bg-background/90 backdrop-blur-sm border-border text-foreground shadow-lg"
-                      onClick={(e) => handlePreview(theme, e)}
-                      data-testid={`button-preview-${theme.id}`}
-                    >
-                      <Eye className="w-3 h-3" />
-                      Preview
-                    </Button>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold">{theme.name}</h3>
-                      <Badge variant="outline" className="text-xs">
-                        {theme.style}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{theme.description}</p>
-                  </div>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Premium Cover Templates Section */}
+        {/* Unified Cover Templates with Filters */}
         <div className="mb-12">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Crown className="w-5 h-5 text-amber-500" />
-                <h2 className="text-xl font-bold">Premium Cover Templates</h2>
-                <Badge className="bg-amber-500 text-white">£5 each</Badge>
-              </div>
+              <h2 className="text-xl font-bold mb-1">All Cover Templates</h2>
               <p className="text-sm text-muted-foreground">
-                Professional Canva-designed covers. Purchase once, use forever with your business plans.
+                Choose from free SVG themes or premium Canva-designed covers (£5 each, own forever).
               </p>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Filter:</span>
               </div>
+              
+              <Select 
+                value={typeFilter || "all"} 
+                onValueChange={(v) => setTypeFilter(v === "all" ? null : v as CoverType)}
+              >
+                <SelectTrigger className="w-[110px]" data-testid="select-type-filter">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="free">Free</SelectItem>
+                  <SelectItem value="paid">Premium</SelectItem>
+                </SelectContent>
+              </Select>
               
               <Select 
                 value={colorFilter || "all"} 
@@ -723,11 +670,12 @@ export default function ThemeSelectionPage() {
                 </SelectContent>
               </Select>
               
-              {(colorFilter || styleFilter) && (
+              {(typeFilter || colorFilter || styleFilter) && (
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => {
+                    setTypeFilter(null);
                     setColorFilter(null);
                     setStyleFilter(null);
                   }}
@@ -740,124 +688,174 @@ export default function ThemeSelectionPage() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {filterTemplates(PREMIUM_COVER_TEMPLATES, colorFilter, styleFilter).map((template) => {
-              const isPurchased = purchasedCovers.has(template.id);
-              const isSelected = selectedPremiumCover === template.id;
+            {filterUnifiedCovers(UNIFIED_COVERS, typeFilter, colorFilter, styleFilter).map((cover, index) => {
+              const isFree = cover.type === 'free';
+              const isPurchased = isFree || purchasedCovers.has(cover.originalPremium?.id || '');
+              const isSelected = selectedCover?.id === cover.id || 
+                (isFree && selectedTheme === cover.originalTheme?.id);
+              
+              const theme = cover.originalTheme;
+              const premium = cover.originalPremium;
               
               return (
-                <Card 
-                  key={template.id}
-                  className={`p-3 cursor-pointer transition-all relative ${
-                    isSelected 
-                      ? 'ring-2 ring-emerald-500 shadow-lg' 
-                      : 'hover-elevate'
-                  }`}
-                  onClick={() => {
-                    if (isPurchased) {
-                      setSelectedPremiumCover(template.id);
-                      setBackgroundImage(template.imagePath);
-                      setUseFullCoverImage(true);
-                      setThemeApplied(false);
-                    }
-                  }}
-                  data-testid={`card-premium-cover-${template.id}`}
+                <motion.div
+                  key={cover.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(index * 0.02, 0.3) }}
                 >
-                  <div className="relative aspect-[3/4] rounded-md overflow-hidden mb-2">
-                    <img 
-                      src={template.imagePath}
-                      alt={template.name}
-                      className="w-full h-full object-cover"
-                    />
-                    
-                    {!isPurchased && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <Lock className="w-8 h-8 text-white/80" />
-                      </div>
-                    )}
-                    
-                    {isPurchased && isSelected && (
-                      <div className="absolute top-2 right-2">
-                        <Badge className="bg-emerald-500 text-white">
-                          <Check className="w-3 h-3 mr-1" />
-                          Selected
-                        </Badge>
-                      </div>
-                    )}
-                    
-                    {isPurchased && !isSelected && (
-                      <div className="absolute top-2 right-2">
-                        <Badge variant="secondary" className="bg-white/90 text-emerald-600">
-                          <Check className="w-3 h-3 mr-1" />
-                          Owned
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-sm truncate">{template.name}</h4>
-                    <div className="flex items-center gap-1 mt-1">
-                      {template.colors.slice(0, 3).map((color) => {
-                        const colorData = COVER_COLORS.find(c => c.id === color);
-                        return (
-                          <div
-                            key={color}
-                            className="w-3 h-3 rounded-full border border-muted"
-                            style={{ backgroundColor: colorData?.hex || '#ccc' }}
-                            title={colorData?.name}
-                          />
-                        );
-                      })}
-                      <Badge variant="outline" className="text-[10px] ml-auto">
-                        {template.style}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  {!isPurchased && (
-                    <Button
-                      size="sm"
-                      className="w-full mt-2 bg-amber-500 hover:bg-amber-600 text-white"
-                      disabled={isPurchasing}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        setIsPurchasing(true);
-                        try {
-                          const response = await apiRequest('POST', '/api/premium-covers/purchase', { 
-                            templateId: template.id, 
-                            templateName: template.name 
-                          });
-                          const data = await response.json();
-                          if (data.url) {
-                            window.location.href = data.url;
-                          } else {
-                            throw new Error(data.error || 'Failed to create checkout');
-                          }
-                        } catch (error: any) {
-                          toast({
-                            title: "Purchase Failed",
-                            description: error?.message || "Could not start purchase. Please try again.",
-                            variant: "destructive",
-                          });
-                          setIsPurchasing(false);
-                        }
-                      }}
-                      data-testid={`button-purchase-${template.id}`}
-                    >
-                      {isPurchasing ? (
-                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  <Card 
+                    className={`p-3 cursor-pointer transition-all relative ${
+                      isSelected 
+                        ? 'ring-2 ring-emerald-500 shadow-lg' 
+                        : 'hover-elevate'
+                    }`}
+                    onClick={() => {
+                      if (isFree && theme) {
+                        handleThemeSelect(theme.id);
+                        setSelectedCover(cover);
+                      } else if (isPurchased && premium) {
+                        setSelectedCover(cover);
+                        setBackgroundImage(premium.imagePath);
+                        setUseFullCoverImage(true);
+                        setThemeApplied(false);
+                        setSelectedTheme(null);
+                      }
+                    }}
+                    data-testid={`card-cover-${cover.id}`}
+                  >
+                    <div className="relative aspect-[3/4] rounded-md overflow-hidden mb-2">
+                      {isFree && theme ? (
+                        <ThemePreviewSVG
+                          themeId={theme.id}
+                          primaryColor={isSelected ? primaryColor : theme.defaultPrimaryColor}
+                          secondaryColor={isSelected ? secondaryColor : theme.defaultSecondaryColor}
+                          font={isSelected ? selectedFont : theme.defaultFont}
+                          founderName={founderName}
+                          isSelected={isSelected}
+                          size="small"
+                          backgroundImage={isSelected ? backgroundImage : null}
+                          useFullCoverImage={isSelected ? useFullCoverImage : false}
+                        />
                       ) : (
-                        <ShoppingCart className="w-3 h-3 mr-1" />
+                        <img 
+                          src={cover.previewImage}
+                          alt={cover.name}
+                          className="w-full h-full object-cover"
+                        />
                       )}
-                      £{template.price}
-                    </Button>
-                  )}
-                </Card>
+                      
+                      {!isPurchased && !isFree && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <Lock className="w-8 h-8 text-white/80" />
+                        </div>
+                      )}
+                      
+                      {isSelected && (
+                        <div className="absolute top-2 right-2">
+                          <Badge className="bg-emerald-500 text-white">
+                            <Check className="w-3 h-3 mr-1" />
+                            Selected
+                          </Badge>
+                        </div>
+                      )}
+                      
+                      {!isFree && isPurchased && !isSelected && (
+                        <div className="absolute top-2 right-2">
+                          <Badge variant="secondary" className="bg-white/90 text-emerald-600">
+                            <Check className="w-3 h-3 mr-1" />
+                            Owned
+                          </Badge>
+                        </div>
+                      )}
+                      
+                      {isFree && theme && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="absolute bottom-2 right-2 z-10 gap-1 bg-background/95 dark:bg-background/90 backdrop-blur-sm border-border text-foreground shadow-lg"
+                          onClick={(e) => handlePreview(theme, e)}
+                          data-testid={`button-preview-${cover.id}`}
+                        >
+                          <Eye className="w-3 h-3" />
+                          Preview
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center justify-between gap-1 mb-1">
+                        <h4 className="font-medium text-sm truncate flex-1">{cover.name}</h4>
+                        <Badge 
+                          variant={isFree ? "secondary" : "default"}
+                          className={`text-[10px] shrink-0 ${isFree ? '' : 'bg-amber-500 text-white'}`}
+                        >
+                          {isFree ? 'Free' : `£${cover.price}`}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {cover.colors.slice(0, 3).map((color) => {
+                          const colorData = COVER_COLORS.find(c => c.id === color);
+                          return (
+                            <div
+                              key={color}
+                              className="w-3 h-3 rounded-full border border-muted"
+                              style={{ backgroundColor: colorData?.hex || '#ccc' }}
+                              title={colorData?.name}
+                            />
+                          );
+                        })}
+                        <Badge variant="outline" className="text-[10px] ml-auto">
+                          {cover.style}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    {!isFree && !isPurchased && premium && (
+                      <Button
+                        size="sm"
+                        className="w-full mt-2 bg-amber-500 hover:bg-amber-600 text-white"
+                        disabled={isPurchasing}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setIsPurchasing(true);
+                          try {
+                            const response = await apiRequest('POST', '/api/premium-covers/purchase', { 
+                              templateId: premium.id, 
+                              templateName: premium.name 
+                            });
+                            const data = await response.json();
+                            if (data.url) {
+                              window.location.href = data.url;
+                            } else {
+                              throw new Error(data.error || 'Failed to create checkout');
+                            }
+                          } catch (error: any) {
+                            toast({
+                              title: "Purchase Failed",
+                              description: error?.message || "Could not start purchase. Please try again.",
+                              variant: "destructive",
+                            });
+                            setIsPurchasing(false);
+                          }
+                        }}
+                        data-testid={`button-purchase-${cover.id}`}
+                      >
+                        {isPurchasing ? (
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        ) : (
+                          <ShoppingCart className="w-3 h-3 mr-1" />
+                        )}
+                        Buy £{cover.price}
+                      </Button>
+                    )}
+                  </Card>
+                </motion.div>
               );
             })}
           </div>
           
-          {filterTemplates(PREMIUM_COVER_TEMPLATES, colorFilter, styleFilter).length === 0 && (
+          {filterUnifiedCovers(UNIFIED_COVERS, typeFilter, colorFilter, styleFilter).length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
               No templates match your filters. Try adjusting your selection.
             </div>
