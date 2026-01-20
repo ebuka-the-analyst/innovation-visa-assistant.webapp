@@ -2192,8 +2192,51 @@ ${generatedSections.join('\n\n---\n\n')}`;
   <style>
     @media print {
       .no-print { display: none !important; }
-      body { padding: 0; margin: 0; }
-      .cover-page { page-break-after: always; }
+      
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      
+      @page :first {
+        margin: 0;
+      }
+      
+      html, body {
+        width: 210mm;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      
+      .cover-page {
+        width: 100% !important;
+        min-height: 100vh !important;
+        height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        page-break-after: always;
+        page-break-inside: avoid;
+        box-sizing: border-box;
+        position: relative !important;
+        left: 0 !important;
+        background-size: cover !important;
+        background-position: center !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
+      .cover-page > div {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
+      .content {
+        padding: 20mm !important;
+      }
+      
       .chart-container { page-break-inside: avoid; }
       h2 { page-break-after: avoid; }
     }
