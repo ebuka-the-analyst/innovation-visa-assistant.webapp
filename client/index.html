@@ -42,22 +42,32 @@
     }
     </script>
     
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QQR1HQ9MP3"></script>
+    <!-- Defer analytics to improve initial load performance -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-QQR1HQ9MP3');
-    </script>
-    
-    <!-- Microsoft Clarity -->
-    <script type="text/javascript">
-      (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "ufpcgvgit0");
+      // Load third-party analytics after page is interactive
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          // Google Analytics
+          var gtag = document.createElement('script');
+          gtag.async = true;
+          gtag.src = 'https://www.googletagmanager.com/gtag/js?id=G-QQR1HQ9MP3';
+          document.head.appendChild(gtag);
+          gtag.onload = function() {
+            window.dataLayer = window.dataLayer || [];
+            function gtagFn(){dataLayer.push(arguments);}
+            gtagFn('js', new Date());
+            gtagFn('config', 'G-QQR1HQ9MP3');
+            window.gtag = gtagFn;
+          };
+          
+          // Microsoft Clarity
+          (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+          })(window, document, "clarity", "script", "ufpcgvgit0");
+        }, 2000);
+      });
     </script>
     
     <!-- Performance: Resource hints for faster loading -->
@@ -71,9 +81,13 @@
     <link rel="dns-prefetch" href="https://accounts.google.com">
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     
-    <!-- Preload critical fonts -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" as="style">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Preload critical fonts with font-display swap -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- Preload logo for faster LCP -->
+    <link rel="preload" href="/attached_assets/official_logo.webp" as="image" type="image/webp">
   </head>
   <body>
     <div id="root"></div>
