@@ -56,6 +56,7 @@ type NavGroup = {
     icon: any;
     description?: string;
     badge?: string;
+    comingSoon?: boolean;
   }>;
 };
 
@@ -189,42 +190,49 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           url: "/oracle-supervisor",
           icon: Brain,
           description: "Master AI with 4 specialist agents",
+          comingSoon: true,
         },
         {
           title: "Founder Autopilot",
           url: "/founder-autopilot",
           icon: Rocket,
           description: "Full visa automation mode",
+          comingSoon: true,
         },
         {
           title: "Neural Twin",
           url: "/neural-twin",
           icon: Bot,
           description: "AI simulation of you for practice",
+          comingSoon: true,
         },
         {
           title: "Voice Builder",
           url: "/voice-builder",
           icon: Mic,
           description: "Speak to build your documents",
+          comingSoon: true,
         },
         {
           title: "Regulatory Copilot",
           url: "/regulatory-copilot",
           icon: Shield,
           description: "Real-time UK law monitoring",
+          comingSoon: true,
         },
         {
           title: "Economic Impact",
           url: "/economic-impact",
           icon: Globe2,
           description: "UK job & GDP calculator",
+          comingSoon: true,
         },
         {
           title: "Knowledge Graph",
           url: "/knowledge-graph",
           icon: Network,
           description: "Visual UK visa rules map",
+          comingSoon: true,
         },
       ],
     },
@@ -399,11 +407,16 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
                           data-testid={`nav-button-${item.url}`}
                         >
                           <div className="flex items-center gap-3 w-full">
-                            <Icon className="h-4 w-4 flex-shrink-0 opacity-70" />
-                            <span className="text-sm font-medium truncate">
+                            <Icon className={`h-4 w-4 flex-shrink-0 ${item.comingSoon ? 'opacity-40' : 'opacity-70'}`} />
+                            <span className={`text-sm font-medium truncate ${item.comingSoon ? 'opacity-50' : ''}`}>
                               {item.title}
                             </span>
-                            {item.badge && (
+                            {item.comingSoon && (
+                              <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                                Coming Soon
+                              </span>
+                            )}
+                            {item.badge && !item.comingSoon && (
                               <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 ${
                                 item.badge === "ADMIN"
                                   ? "bg-orange-500/20 text-orange-600 dark:text-orange-400"
