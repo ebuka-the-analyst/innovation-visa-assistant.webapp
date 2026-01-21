@@ -51,7 +51,7 @@ export default function BusinessPlanTemplatePage() {
   return (
     <>
       <SEOHead
-        title="UK Innovator Founder Visa Business Plan Template 2025 | Free Guide & Generator"
+        title="UK Innovator Founder Visa Business Plan Template 2026 | Free Guide & Generator"
         description="Free business plan template and guide for UK Innovator Founder Visa. Learn what endorsing bodies look for, see examples, and use our AI generator to create your plan."
         path="/business-plan-template"
         keywords="UK Innovator Visa business plan, visa business plan template, endorsement business plan, UK startup visa plan, Innovator Founder business plan example"

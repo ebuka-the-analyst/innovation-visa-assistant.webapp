@@ -72,10 +72,10 @@ export default function EndorsingBodiesPage() {
   return (
     <>
       <SEOHead
-        title="UK Innovator Founder Visa Endorsing Bodies 2025 | Complete List & Guide"
-        description="Complete list of 40+ approved endorsing bodies for UK Innovator Founder Visa in 2025. Compare Tech Nation, Seedcamp, Founders Factory & more. Find the best endorsing body for your business."
+        title="UK Innovator Founder Visa Endorsing Bodies 2026 | Complete List & Guide"
+        description="Complete list of 40+ approved endorsing bodies for UK Innovator Founder Visa in 2026. Compare Tech Nation, Seedcamp, Founders Factory & more. Find the best endorsing body for your business."
         path="/endorsing-bodies"
-        keywords="UK endorsing bodies 2025, Innovator Visa endorsement, Tech Nation endorsement, Seedcamp visa, UK visa endorsing bodies list, startup visa endorsement"
+        keywords="UK endorsing bodies 2026, Innovator Visa endorsement, Tech Nation endorsement, Seedcamp visa, UK visa endorsing bodies list, startup visa endorsement"
         schemas={[endorsingBodiesListSchema, breadcrumbSchema]}
       />
 
@@ -88,7 +88,7 @@ export default function EndorsingBodiesPage() {
               <span className="text-foreground">Endorsing Bodies</span>
             </nav>
 
-            <Badge className="mb-4 bg-primary/10 text-primary">Updated January 2025</Badge>
+            <Badge className="mb-4 bg-primary/10 text-primary">Updated January 2026</Badge>
 
             <h1 className="text-4xl md:text-5xl font-bold mb-6" data-testid="heading-endorsing-bodies">
               UK Innovator Founder Visa Endorsing Bodies

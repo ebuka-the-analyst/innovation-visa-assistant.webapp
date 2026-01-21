@@ -53,10 +53,10 @@ export default function EligibilityPage() {
   return (
     <>
       <SEOHead
-        title="UK Innovator Founder Visa Eligibility Requirements 2025 | Full Checklist"
+        title="UK Innovator Founder Visa Eligibility Requirements 2026 | Full Checklist"
         description="Complete guide to UK Innovator Founder Visa eligibility requirements. Check if you qualify with our detailed checklist covering endorsement, English language, financial requirements, and more."
         path="/eligibility"
-        keywords="UK Innovator Visa eligibility, visa requirements 2025, Innovator Founder Visa checklist, UK visa requirements, endorsement requirements"
+        keywords="UK Innovator Visa eligibility, visa requirements 2026, Innovator Founder Visa checklist, UK visa requirements, endorsement requirements"
         schemas={[faqSchema, breadcrumbSchema]}
       />
 
@@ -69,7 +69,7 @@ export default function EligibilityPage() {
               <span className="text-foreground">Eligibility</span>
             </nav>
 
-            <Badge className="mb-4 bg-primary/10 text-primary">Updated January 2025</Badge>
+            <Badge className="mb-4 bg-primary/10 text-primary">Updated January 2026</Badge>
 
             <h1 className="text-4xl md:text-5xl font-bold mb-6" data-testid="heading-eligibility">
               UK Innovator Founder Visa Eligibility Requirements

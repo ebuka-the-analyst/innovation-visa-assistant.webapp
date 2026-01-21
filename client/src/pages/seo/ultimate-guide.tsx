@@ -11,15 +11,15 @@ import {
 import { createArticleSchema, createHowToSchema, createBreadcrumbSchema } from "@/lib/seoSchemas";
 
 const articleSchema = createArticleSchema(
-  "Complete UK Innovator Founder Visa Guide 2025 - Everything You Need to Know",
+  "Complete UK Innovator Founder Visa Guide 2026 - Everything You Need to Know",
   "The definitive guide to the UK Innovator Founder Visa. Learn requirements, application process, costs, endorsing bodies, and expert tips for success.",
-  "2025-01-01",
-  "2025-01-21"
+  "2026-01-01",
+  "2026-01-21"
 );
 
 const howToSchema = createHowToSchema(
   "How to Apply for UK Innovator Founder Visa",
-  "Step-by-step guide to successfully apply for the UK Innovator Founder Visa in 2025",
+  "Step-by-step guide to successfully apply for the UK Innovator Founder Visa in 2026",
   [
     { name: "Assess Your Eligibility", text: "Verify you meet all basic requirements including innovative business idea, English proficiency, and maintenance funds of at least £1,270." },
     { name: "Develop Your Business Plan", text: "Create a comprehensive business plan demonstrating innovation, viability, and scalability. Your plan must show how your business will benefit the UK economy." },
@@ -42,10 +42,10 @@ export default function UltimateGuidePage() {
   return (
     <>
       <SEOHead
-        title="Complete UK Innovator Founder Visa Guide 2025 | Requirements, Process & Tips"
+        title="Complete UK Innovator Founder Visa Guide 2026 | Requirements, Process & Tips"
         description="The definitive 3000+ word guide to the UK Innovator Founder Visa. Learn eligibility requirements, application process, endorsing bodies, costs, timelines, and expert tips for a successful application."
         path="/guide/ultimate-uk-innovator-founder-visa-guide"
-        keywords="UK Innovator Founder Visa, Innovator Visa requirements 2025, UK startup visa, endorsing bodies UK, visa application process, UK immigration entrepreneur"
+        keywords="UK Innovator Founder Visa, Innovator Visa requirements 2026, UK startup visa, endorsing bodies UK, visa application process, UK immigration entrepreneur"
         schemas={[articleSchema, howToSchema, breadcrumbSchema]}
       />
 
@@ -60,10 +60,10 @@ export default function UltimateGuidePage() {
               <span className="text-foreground">Ultimate Guide</span>
             </nav>
             
-            <Badge className="mb-4 bg-primary/10 text-primary">Updated January 2025</Badge>
+            <Badge className="mb-4 bg-primary/10 text-primary">Updated January 2026</Badge>
             
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight" data-testid="heading-ultimate-guide">
-              The Complete UK Innovator Founder Visa Guide 2025
+              The Complete UK Innovator Founder Visa Guide 2026
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8">
