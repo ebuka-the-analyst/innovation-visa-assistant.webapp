@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { SEOHead } from "@/components/SEOHead";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ToolAccessGuard } from "@/components/ToolAccessGuard";
+import { ComingSoonOverlay } from "@/components/ComingSoonOverlay";
 
 const NeuralTwin = lazy(() => import("@/components/NeuralTwin"));
 
@@ -19,18 +19,23 @@ function LoadingFallback() {
 
 export default function NeuralTwinPage() {
   return (
-    <ToolAccessGuard requiredTier="enterprise" toolName="Neural Twin Founder Model">
+    <>
       <SEOHead
         title="Neural Twin Founder Model - UK Innovator Founder Visa Assistant"
         description="AI simulation of your founder persona for endorser interview practice. Practice with your digital twin."
         canonical="/tools/neural-twin"
       />
       
-      <div className="container max-w-5xl mx-auto py-8 px-4">
-        <Suspense fallback={<LoadingFallback />}>
-          <NeuralTwin mode="interview" />
-        </Suspense>
-      </div>
-    </ToolAccessGuard>
+      <ComingSoonOverlay 
+        title="Neural Twin" 
+        description="AI simulation of your founder persona for endorser interview practice. Practice with your digital twin."
+      >
+        <div className="container max-w-5xl mx-auto py-8 px-4">
+          <Suspense fallback={<LoadingFallback />}>
+            <NeuralTwin mode="interview" />
+          </Suspense>
+        </div>
+      </ComingSoonOverlay>
+    </>
   );
 }

@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { SEOHead } from "@/components/SEOHead";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ToolAccessGuard } from "@/components/ToolAccessGuard";
+import { ComingSoonOverlay } from "@/components/ComingSoonOverlay";
 
 const FounderAutopilot = lazy(() => import("@/components/FounderAutopilot"));
 
@@ -19,18 +19,23 @@ function LoadingFallback() {
 
 export default function FounderAutopilotPage() {
   return (
-    <ToolAccessGuard requiredTier="ultimate" toolName="Founder Autopilot">
+    <>
       <SEOHead
         title="Founder Autopilot - Build My Visa | UK Innovator Founder Visa Assistant"
         description="Say 'Build my visa' and let AI orchestrate your entire UK Innovator Founder Visa application automatically."
         canonical="/tools/founder-autopilot"
       />
       
-      <div className="container max-w-5xl mx-auto py-8 px-4">
-        <Suspense fallback={<LoadingFallback />}>
-          <FounderAutopilot />
-        </Suspense>
-      </div>
-    </ToolAccessGuard>
+      <ComingSoonOverlay 
+        title="Founder Autopilot" 
+        description="Say 'Build my visa' and let AI orchestrate your entire UK Innovator Founder Visa application automatically."
+      >
+        <div className="container max-w-5xl mx-auto py-8 px-4">
+          <Suspense fallback={<LoadingFallback />}>
+            <FounderAutopilot />
+          </Suspense>
+        </div>
+      </ComingSoonOverlay>
+    </>
   );
 }

@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { SEOHead } from "@/components/SEOHead";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ToolAccessGuard } from "@/components/ToolAccessGuard";
+import { ComingSoonOverlay } from "@/components/ComingSoonOverlay";
 
 const EconomicImpactSimulator = lazy(() => import("@/components/EconomicImpactSimulator"));
 
@@ -19,18 +19,23 @@ function LoadingFallback() {
 
 export default function EconomicImpactPage() {
   return (
-    <ToolAccessGuard requiredTier="enterprise" toolName="UK Economic Impact Simulator">
+    <>
       <SEOHead
         title="UK Economic Impact Simulator | UK Innovator Founder Visa Assistant"
         description="Calculate your business's UK economic impact including job creation, GDP contribution, and tax revenue for visa applications."
         canonical="/tools/economic-impact"
       />
       
-      <div className="container max-w-6xl mx-auto py-8 px-4">
-        <Suspense fallback={<LoadingFallback />}>
-          <EconomicImpactSimulator />
-        </Suspense>
-      </div>
-    </ToolAccessGuard>
+      <ComingSoonOverlay 
+        title="Economic Impact Simulator" 
+        description="Calculate your business's UK economic impact including job creation, GDP contribution, and tax revenue."
+      >
+        <div className="container max-w-6xl mx-auto py-8 px-4">
+          <Suspense fallback={<LoadingFallback />}>
+            <EconomicImpactSimulator />
+          </Suspense>
+        </div>
+      </ComingSoonOverlay>
+    </>
   );
 }
