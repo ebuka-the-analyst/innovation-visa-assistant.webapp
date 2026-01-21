@@ -34,7 +34,7 @@ const howToSchema = createHowToSchema(
 
 const breadcrumbSchema = createBreadcrumbSchema([
   { name: "Home", url: "/" },
-  { name: "Resources", url: "/resources" },
+  { name: "Guide", url: "/guide" },
   { name: "Ultimate Guide", url: "/guide/ultimate-uk-innovator-founder-visa-guide" }
 ]);
 
@@ -55,7 +55,7 @@ export default function UltimateGuidePage() {
             <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6" data-testid="breadcrumb-nav">
               <Link href="/" className="hover:text-primary">Home</Link>
               <span>/</span>
-              <Link href="/resources" className="hover:text-primary">Resources</Link>
+              <Link href="/guide" className="hover:text-primary">Guide</Link>
               <span>/</span>
               <span className="text-foreground">Ultimate Guide</span>
             </nav>

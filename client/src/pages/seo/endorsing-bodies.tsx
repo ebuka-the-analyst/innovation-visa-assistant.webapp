@@ -14,7 +14,6 @@ import { createBreadcrumbSchema, endorsingBodiesListSchema } from "@/lib/seoSche
 
 const breadcrumbSchema = createBreadcrumbSchema([
   { name: "Home", url: "/" },
-  { name: "Resources", url: "/resources" },
   { name: "Endorsing Bodies", url: "/endorsing-bodies" }
 ]);
 
@@ -85,8 +84,6 @@ export default function EndorsingBodiesPage() {
           <div className="container mx-auto px-4 max-w-5xl">
             <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
               <Link href="/" className="hover:text-primary">Home</Link>
-              <span>/</span>
-              <Link href="/resources" className="hover:text-primary">Resources</Link>
               <span>/</span>
               <span className="text-foreground">Endorsing Bodies</span>
             </nav>

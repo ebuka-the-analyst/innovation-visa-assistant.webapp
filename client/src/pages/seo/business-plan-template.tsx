@@ -33,7 +33,6 @@ const productSchema = createProductSchema(
 
 const breadcrumbSchema = createBreadcrumbSchema([
   { name: "Home", url: "/" },
-  { name: "Resources", url: "/resources" },
   { name: "Business Plan Template", url: "/business-plan-template" }
 ]);
 
@@ -64,8 +63,6 @@ export default function BusinessPlanTemplatePage() {
           <div className="container mx-auto px-4 max-w-4xl">
             <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
               <Link href="/" className="hover:text-primary">Home</Link>
-              <span>/</span>
-              <Link href="/resources" className="hover:text-primary">Resources</Link>
               <span>/</span>
               <span className="text-foreground">Business Plan Template</span>
             </nav>
