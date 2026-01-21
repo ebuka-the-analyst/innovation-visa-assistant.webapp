@@ -117,7 +117,14 @@ const AITransparency = lazy(() => import("@/pages/ai-transparency"));
 const TestingValidation = lazy(() => import("@/pages/testing-validation"));
 const ComplianceDashboard = lazy(() => import("@/pages/compliance-dashboard"));
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features"];
+// SEO Landing Pages
+const UltimateGuide = lazy(() => import("@/pages/seo/ultimate-guide"));
+const AboutPage = lazy(() => import("@/pages/seo/about"));
+const EndorsingBodiesPage = lazy(() => import("@/pages/seo/endorsing-bodies"));
+const EligibilityPage = lazy(() => import("@/pages/seo/eligibility"));
+const BusinessPlanTemplatePage = lazy(() => import("@/pages/seo/business-plan-template"));
+
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/resources"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
 
 // Optimized loading skeleton
@@ -272,6 +279,14 @@ function Router() {
       <Route path="/progress" component={Progress} />
       <Route path="/support" component={Support} />
       <Route path="/documents" component={Documents} />
+      
+      {/* SEO Landing Pages */}
+      <Route path="/guide/ultimate-uk-innovator-founder-visa-guide" component={UltimateGuide} />
+      <Route path="/about" component={AboutPage} />
+      <Route path="/endorsing-bodies" component={EndorsingBodiesPage} />
+      <Route path="/eligibility" component={EligibilityPage} />
+      <Route path="/business-plan-template" component={BusinessPlanTemplatePage} />
+      
       <Route component={NotFound} />
     </Switch>
   );

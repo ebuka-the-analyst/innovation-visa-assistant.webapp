@@ -1,698 +1,407 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- HIGH PRIORITY - Core Pages -->
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/guide/ultimate-uk-innovator-founder-visa-guide</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/eligibility</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/endorsing-bodies</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/business-plan-template</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/pricing</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools-hub</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/faq</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/about</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/faq</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/guide</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/privacy</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.7</priority>
+    <loc>https://innovatorfoundervisaassistant.co.uk/features</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/terms</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/cookies</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.7</priority>
-  </url>
+  
+  <!-- AUTH PAGES -->
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/login</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/signup</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/features</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  
+  <!-- LEGAL PAGES -->
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/dashboard</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
+    <loc>https://innovatorfoundervisaassistant.co.uk/privacy</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/compliance-checker</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <loc>https://innovatorfoundervisaassistant.co.uk/terms</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/requirement-tracker</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/cookies</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <!-- HIGH-VALUE TOOLS -->
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/innovation-score</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/eligibility-assessment</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/eligibility-validator</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/document-checklist</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/endorser-comparison</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/regulation-monitor</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/visa-timeline</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/fee-calculator</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/home-office-updates</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/compliance-score</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/deadline-manager</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/rule-interpreter</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/change-monitor</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/compliance-report</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/document-organizer</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/template-library</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/evidence-builder</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/letter-generator</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/cv-optimizer</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/reference-manager</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/translation-checker</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/document-validator</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/submission-packager</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/version-control</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/format-converter</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/qr-code-generator</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/digital-signature</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/co-founder-matcher</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/team-builder</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/skills-gap-analysis</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/hiring-planner</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/org-chart-designer</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/equity-calculator</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/team-dynamics</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/advisor-network</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/remote-team-guide</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/culture-builder</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/performance-tracker</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/team-assessment</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/conflict-resolver</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.85</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/business-plan</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/document-checklist</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/interview-prep</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/visa-timeline</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/fee-calculator</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/financial-projections</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/market-research</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.75</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/competitor-analysis</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.75</priority>
   </url>
   <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/pitch-coach</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/rejection-analysis</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/appeal-builder</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  
+  <!-- BUSINESS PLANNING TOOLS -->
+  <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/business-model-canvas</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/value-proposition</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/customer-persona</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/go-to-market</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/product-roadmap</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/pricing-strategy</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/revenue-model</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/swot-analysis</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/risk-assessment</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/go-to-market</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/pivot-planner</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/pricing-strategy</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/financial-projections</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/revenue-model</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  
+  <!-- FINANCIAL TOOLS -->
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/cash-flow-forecast</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/budget-planner</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/funding-tracker</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/investor-pitch-deck</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/cap-table-manager</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/burn-rate-calculator</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/unit-economics</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/financial-metrics</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/valuation-calculator</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/scenario-planner</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/burn-rate-calculator</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/grant-finder</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/tax-planner</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/growth-strategy</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/marketing-plan</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/sales-funnel</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/customer-acquisition</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/retention-strategy</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/expansion-planner</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/partnership-finder</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/channel-strategy</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/brand-builder</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/content-calendar</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/seo-strategy</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/social-media-planner</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/analytics-dashboard</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/innovation-score</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
+  
+  <!-- INNOVATION TOOLS -->
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/ip-strategy</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/patent-guide</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/r-and-d-planner</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/tech-roadmap</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/prototype-planner</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://innovatorfoundervisaassistant.co.uk/tools/mvp-builder</loc>
-    <lastmod>2025-11-24</lastmod>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- TEAM TOOLS -->
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/co-founder-matcher</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/innovation-metrics</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/team-builder</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/disruption-analyzer</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/equity-calculator</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/trend-tracker</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/hiring-planner</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- GROWTH TOOLS -->
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/growth-strategy</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/competitive-moat</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/marketing-plan</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/innovation-pipeline</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/customer-acquisition</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/ideation-framework</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/expansion-planner</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- COMPLIANCE TOOLS -->
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/compliance-checker</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/pitch-coach</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/requirement-tracker</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/interview-prep</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/home-office-updates</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/deadline-manager</loc>
+    <lastmod>2025-01-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- DOCUMENTATION TOOLS -->
+  <url>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/document-organizer</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/objection-handler</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/evidence-builder</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/endorser-comparison</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/letter-generator</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/application-reviewer</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/cv-optimizer</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/rejection-analysis</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/appeal-builder</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/rfe-defence-lab</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/evidence-graph</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/success-predictor</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/mock-interview</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/feedback-analyzer</loc>
-    <lastmod>2025-11-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://innovatorfoundervisaassistant.co.uk/tools/improvement-tracker</loc>
-    <lastmod>2025-11-24</lastmod>
+    <loc>https://innovatorfoundervisaassistant.co.uk/tools/template-library</loc>
+    <lastmod>2025-01-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
