@@ -2,7 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits } from "@shared/schema";
+import { generateBlogPost, generateMultiplePosts } from "./blogGenerator";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
@@ -13611,6 +13612,224 @@ Return a JSON object with:
     } catch (error) {
       console.error("Session end error:", error);
       res.status(500).json({ error: "Failed to end session" });
+    }
+  });
+
+  // ============================================
+  // BLOG ROUTES - Automated SEO Content System
+  // ============================================
+  
+  // Get all blog posts (public)
+  app.get("/api/blog", async (req, res) => {
+    try {
+      const { category, search, limit = "50" } = req.query;
+      
+      let query = db.select().from(blogPosts)
+        .where(eq(blogPosts.isPublished, true))
+        .orderBy(desc(blogPosts.publishedAt))
+        .limit(parseInt(limit as string));
+      
+      const posts = await query;
+      
+      // Filter by category and search in memory for simplicity
+      let filtered = posts;
+      if (category && category !== "all") {
+        filtered = filtered.filter(p => p.category === category);
+      }
+      if (search) {
+        const searchLower = (search as string).toLowerCase();
+        filtered = filtered.filter(p => 
+          p.title.toLowerCase().includes(searchLower) ||
+          p.excerpt.toLowerCase().includes(searchLower) ||
+          p.content.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      res.json(filtered);
+    } catch (error) {
+      console.error("Blog fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch blog posts" });
+    }
+  });
+  
+  // Get single blog post by slug (public - only published posts)
+  app.get("/api/blog/:slug", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      
+      const [post] = await db.select().from(blogPosts)
+        .where(and(
+          eq(blogPosts.slug, slug),
+          eq(blogPosts.isPublished, true)
+        ))
+        .limit(1);
+      
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+      
+      res.json(post);
+    } catch (error) {
+      console.error("Blog post fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch blog post" });
+    }
+  });
+  
+  // Increment view count (public)
+  app.post("/api/blog/:slug/view", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      
+      await db.update(blogPosts)
+        .set({ views: sql`${blogPosts.views} + 1` })
+        .where(eq(blogPosts.slug, slug));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("View increment error:", error);
+      res.status(500).json({ error: "Failed to increment views" });
+    }
+  });
+  
+  // Generate new blog posts (admin or cron)
+  app.post("/api/blog/generate", async (req, res) => {
+    try {
+      // Check for cron secret or admin auth
+      const cronSecret = req.headers["x-cron-secret"];
+      const user = req.user as any;
+      
+      const isValidCron = cronSecret === process.env.CRON_SECRET;
+      const isAdmin = user?.isAdmin === true;
+      
+      if (!isValidCron && !isAdmin) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+      
+      const count = parseInt(req.body.count || "5");
+      const posts = await generateMultiplePosts(Math.min(count, 10));
+      
+      // Insert generated posts into database
+      const insertedPosts = [];
+      for (const post of posts) {
+        try {
+          const [inserted] = await db.insert(blogPosts).values({
+            title: post.title,
+            slug: post.slug,
+            excerpt: post.excerpt,
+            content: post.content,
+            category: post.category,
+            tags: post.tags,
+            metaTitle: post.metaTitle,
+            metaDescription: post.metaDescription,
+            metaKeywords: post.metaKeywords,
+            readingTime: post.readingTime,
+            author: post.author,
+            authorBio: post.authorBio,
+            isPublished: true,
+            isFeatured: insertedPosts.length === 0, // First post is featured
+            publishedAt: new Date(),
+          }).returning();
+          
+          insertedPosts.push(inserted);
+        } catch (insertError) {
+          console.error("Failed to insert post:", insertError);
+        }
+      }
+      
+      console.log(`[Blog Generator] Created ${insertedPosts.length} new posts`);
+      res.json({ success: true, count: insertedPosts.length, posts: insertedPosts });
+    } catch (error) {
+      console.error("Blog generation error:", error);
+      res.status(500).json({ error: "Failed to generate blog posts" });
+    }
+  });
+  
+  // Cron endpoint for daily blog generation (called by external cron service)
+  app.get("/api/cron/generate-blogs", async (req, res) => {
+    try {
+      const cronSecret = req.headers["x-cron-secret"] || req.query.secret;
+      
+      if (cronSecret !== process.env.CRON_SECRET) {
+        return res.status(403).json({ error: "Invalid cron secret" });
+      }
+      
+      console.log("[Cron] Starting daily blog generation...");
+      
+      const posts = await generateMultiplePosts(5);
+      
+      const insertedPosts = [];
+      for (const post of posts) {
+        try {
+          const [inserted] = await db.insert(blogPosts).values({
+            title: post.title,
+            slug: post.slug,
+            excerpt: post.excerpt,
+            content: post.content,
+            category: post.category,
+            tags: post.tags,
+            metaTitle: post.metaTitle,
+            metaDescription: post.metaDescription,
+            metaKeywords: post.metaKeywords,
+            readingTime: post.readingTime,
+            author: post.author,
+            authorBio: post.authorBio,
+            isPublished: true,
+            isFeatured: insertedPosts.length === 0,
+            publishedAt: new Date(),
+          }).returning();
+          
+          insertedPosts.push(inserted);
+        } catch (insertError) {
+          console.error("Failed to insert cron post:", insertError);
+        }
+      }
+      
+      console.log(`[Cron] Generated ${insertedPosts.length} blog posts`);
+      res.json({ success: true, count: insertedPosts.length });
+    } catch (error) {
+      console.error("Cron blog generation error:", error);
+      res.status(500).json({ error: "Failed to generate blogs" });
+    }
+  });
+  
+  // Admin: Delete blog post
+  app.delete("/api/blog/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      await db.delete(blogPosts).where(eq(blogPosts.id, id));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Blog delete error:", error);
+      res.status(500).json({ error: "Failed to delete blog post" });
+    }
+  });
+  
+  // Admin: Update blog post
+  app.put("/api/blog/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { title, excerpt, content, category, tags, isPublished, isFeatured } = req.body;
+      
+      const [updated] = await db.update(blogPosts)
+        .set({
+          title,
+          excerpt,
+          content,
+          category,
+          tags,
+          isPublished,
+          isFeatured,
+          updatedAt: new Date(),
+        })
+        .where(eq(blogPosts.id, id))
+        .returning();
+      
+      res.json(updated);
+    } catch (error) {
+      console.error("Blog update error:", error);
+      res.status(500).json({ error: "Failed to update blog post" });
     }
   });
 

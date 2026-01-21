@@ -2949,3 +2949,49 @@ export const insertCoverDesignSchema = createInsertSchema(coverDesigns).omit({
 
 export type CoverDesign = typeof coverDesigns.$inferSelect;
 export type InsertCoverDesign = z.infer<typeof insertCoverDesignSchema>;
+
+// Blog Posts table for automated SEO content
+export const blogPosts = pgTable("blog_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  title: text("title").notNull(),
+  slug: varchar("slug", { length: 255 }).unique().notNull(),
+  excerpt: text("excerpt").notNull(),
+  content: text("content").notNull(),
+  
+  category: varchar("category", { length: 100 }).notNull(),
+  tags: text("tags").array(),
+  
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  metaKeywords: text("meta_keywords").array(),
+  
+  featuredImage: text("featured_image"),
+  readingTime: integer("reading_time").notNull().default(5),
+  
+  author: varchar("author", { length: 100 }).notNull().default('UK Visa Expert'),
+  authorBio: text("author_bio"),
+  
+  isPublished: boolean("is_published").notNull().default(true),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  
+  views: integer("views").notNull().default(0),
+  
+  publishedAt: timestamp("published_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_blog_slug").on(table.slug),
+  index("idx_blog_category").on(table.category),
+  index("idx_blog_published").on(table.isPublished, table.publishedAt),
+]);
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
+  id: true,
+  views: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;

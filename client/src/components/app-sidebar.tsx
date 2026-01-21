@@ -157,6 +157,12 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           icon: FolderOpen,
           description: "Secure document storage",
         },
+        {
+          title: "Regulatory Copilot",
+          url: "/regulatory-copilot",
+          icon: Shield,
+          description: "Real-time UK law monitoring",
+        },
       ],
     },
     {
@@ -208,12 +214,6 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           url: "/voice-builder",
           icon: Mic,
           description: "Speak to build your documents",
-        },
-        {
-          title: "Regulatory Copilot",
-          url: "/regulatory-copilot",
-          icon: Shield,
-          description: "Real-time UK law monitoring",
         },
         {
           title: "Economic Impact",
@@ -307,6 +307,12 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
           url: "/news",
           icon: Newspaper,
           description: "UK visa news updates",
+        },
+        {
+          title: "Blog",
+          url: "/blog",
+          icon: BookOpen,
+          description: "Expert insights & guides",
         },
         {
           title: "Calendar & Deadlines",

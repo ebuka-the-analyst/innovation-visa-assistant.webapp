@@ -124,7 +124,12 @@ const EndorsingBodiesPage = lazy(() => import("@/pages/seo/endorsing-bodies"));
 const EligibilityPage = lazy(() => import("@/pages/seo/eligibility"));
 const BusinessPlanTemplatePage = lazy(() => import("@/pages/seo/business-plan-template"));
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide"];
+// Blog
+const BlogPage = lazy(() => import("@/pages/blog"));
+const BlogPostPage = lazy(() => import("@/pages/blog-post"));
+
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog"];
+const SIDEBAR_HIDDEN_PREFIXES = ["/blog/"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
 
 // Optimized loading skeleton
@@ -287,6 +292,10 @@ function Router() {
       <Route path="/eligibility" component={EligibilityPage} />
       <Route path="/business-plan-template" component={BusinessPlanTemplatePage} />
       
+      {/* Blog */}
+      <Route path="/blog" component={BlogPage} />
+      <Route path="/blog/:slug" component={BlogPostPage} />
+      
       <Route component={NotFound} />
     </Switch>
   );
@@ -382,7 +391,8 @@ function useActivityTracker() {
 
 function AppLayout() {
   const [location] = useLocation();
-  const isPublicRoute = SIDEBAR_HIDDEN_ROUTES.includes(location);
+  const isPublicRoute = SIDEBAR_HIDDEN_ROUTES.includes(location) || 
+    SIDEBAR_HIDDEN_PREFIXES.some(prefix => location.startsWith(prefix));
   const isCustomLayoutRoute = CUSTOM_LAYOUT_ROUTES.includes(location);
 
   useActivityTracker();
