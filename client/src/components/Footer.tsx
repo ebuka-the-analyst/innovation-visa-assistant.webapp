@@ -144,9 +144,10 @@ export default function Footer() {
                 <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" width="143" height="40" className="h-10 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2025 UK Innovator Founder Visa Assistant. All rights reserved.
-            </p>
+            <div className="text-sm text-muted-foreground">
+              <p>© 2024-2026 UK Innovator Founder Visa Assistant. All rights reserved.</p>
+              <p className="text-xs mt-1">Protected by UK Copyright, Designs and Patents Act 1988. Unauthorized reproduction prohibited.</p>
+            </div>
           </div>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>

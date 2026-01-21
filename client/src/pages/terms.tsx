@@ -21,7 +21,7 @@ export default function TermsOfService() {
               </div>
               <div>
                 <h1 className="text-xl font-bold" data-testid="heading-terms">Terms of Service</h1>
-                <p className="text-muted-foreground">Last Updated: November 24, 2025</p>
+                <p className="text-muted-foreground">Last Updated: January 21, 2026</p>
               </div>
             </div>
             <p className="text-muted-foreground max-w-2xl">
@@ -100,10 +100,10 @@ export default function TermsOfService() {
                   <p className="text-muted-foreground mb-2">We offer five subscription tiers with access to our 100+ professional-level tools:</p>
                   <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-4">
                     <li><strong>Free (£0):</strong> Essential tools access</li>
-                    <li><strong>Basic (£9):</strong> Extended tools access</li>
-                    <li><strong>Premium (£19):</strong> Comprehensive tools access (Most Popular)</li>
-                    <li><strong>Enterprise (£29):</strong> Full tools access</li>
-                    <li><strong>Ultimate (£39):</strong> Complete access to 100+ professional-level tools + VIP support</li>
+                    <li><strong>Basic (£29/month):</strong> 1 coin credit for business plan generation</li>
+                    <li><strong>Premium (£59/month):</strong> 3 coin credits (Most Popular)</li>
+                    <li><strong>Enterprise (£85/month):</strong> 6 coin credits with priority support</li>
+                    <li><strong>Ultimate (£110/month):</strong> 12 coin credits + VIP support and all premium features</li>
                   </ul>
 
                   <h3 className="font-semibold mb-2">4.2 Payment Terms</h3>
@@ -140,14 +140,54 @@ export default function TermsOfService() {
               </div>
             </Card>
 
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-3">6. Intellectual Property</h2>
-              <p className="text-muted-foreground mb-3">
-                All content, tools, algorithms, and materials on the Platform are owned by UK Innovator Founder Visa Assistant and protected by copyright, trademark, and intellectual property laws.
-              </p>
-              <p className="text-muted-foreground">
-                You retain ownership of your business plan data and content you create. By using our Platform, you grant us a limited license to process and store your data to provide our services.
-              </p>
+            <Card className="p-6 border-primary/30 bg-primary/5">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Shield className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold mb-3">6. Intellectual Property Rights</h2>
+                  
+                  <h3 className="font-semibold mb-2">6.1 Our Intellectual Property</h3>
+                  <p className="text-muted-foreground mb-3">
+                    All content, software, tools, algorithms, user interface designs, workflows, methodologies, and materials on this Platform are the exclusive property of UK Innovator Founder Visa Assistant and are protected under the UK Copyright, Designs and Patents Act 1988, international copyright treaties, and applicable intellectual property laws.
+                  </p>
+                  
+                  <h3 className="font-semibold mb-2">6.2 Protected Elements</h3>
+                  <p className="text-muted-foreground mb-2">The following are specifically protected:</p>
+                  <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-4">
+                    <li>All 109+ visa application tools and their unique implementations</li>
+                    <li>AI agent designs (Nova, Sterling, Atlas, Sage) and their interaction patterns</li>
+                    <li>Business plan generation algorithms and templates</li>
+                    <li>User interface designs, layouts, and visual elements</li>
+                    <li>Compliance scoring methodologies and calculations</li>
+                    <li>Document templates and export formats</li>
+                    <li>All original written content, guides, and educational materials</li>
+                  </ul>
+                  
+                  <h3 className="font-semibold mb-2">6.3 Prohibited Activities</h3>
+                  <p className="text-muted-foreground mb-2">You expressly agree NOT to:</p>
+                  <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-4">
+                    <li>Copy, reproduce, or duplicate any part of our Platform or its features</li>
+                    <li>Reverse engineer, decompile, or attempt to extract source code</li>
+                    <li>Create derivative works or "inspired by" versions of our tools</li>
+                    <li>Scrape, crawl, or systematically collect our content</li>
+                    <li>Use automated tools to access or interact with our Platform</li>
+                    <li>Redistribute, resell, or sublicense any Platform content</li>
+                    <li>Remove or alter any copyright notices or proprietary markings</li>
+                  </ul>
+                  
+                  <h3 className="font-semibold mb-2">6.4 Your Content</h3>
+                  <p className="text-muted-foreground mb-3">
+                    You retain ownership of your business plan data and personal content you create. By using our Platform, you grant us a limited, non-exclusive license to process and store your data solely to provide our services.
+                  </p>
+                  
+                  <h3 className="font-semibold mb-2">6.5 Enforcement</h3>
+                  <p className="text-muted-foreground">
+                    We actively monitor for intellectual property violations and will pursue legal action, including injunctions and damages, against any party infringing our rights. Violations may be reported to relevant authorities and professional bodies.
+                  </p>
+                </div>
+              </div>
             </Card>
 
             <Card className="p-6 border-orange-500/30 bg-orange-500/5">

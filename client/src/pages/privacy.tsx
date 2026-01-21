@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
               </div>
               <div>
                 <h1 className="text-xl font-bold" data-testid="heading-privacy">Privacy Policy</h1>
-                <p className="text-muted-foreground">Last Updated: November 24, 2025</p>
+                <p className="text-muted-foreground">Last Updated: January 21, 2026</p>
               </div>
             </div>
             <p className="text-muted-foreground max-w-2xl">
