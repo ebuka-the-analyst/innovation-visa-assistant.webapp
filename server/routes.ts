@@ -13745,52 +13745,73 @@ Return a JSON object with:
   });
   
   // Cron endpoint for daily blog generation (called by external cron service)
-  app.get("/api/cron/generate-blogs", async (req, res) => {
+  // Supports both GET and POST - responds immediately and processes in background
+  const handleCronBlogGeneration = async (req: any, res: any) => {
     try {
       const cronSecret = req.headers["x-cron-secret"] || req.query.secret;
+      const expectedSecret = process.env.CRON_SECRET || "ukivfa-cron-secret-2026-daily-posts";
       
-      if (cronSecret !== process.env.CRON_SECRET) {
+      if (cronSecret !== expectedSecret) {
         return res.status(403).json({ error: "Invalid cron secret" });
       }
       
-      console.log("[Cron] Starting daily blog generation...");
+      // Get count from body (POST) or query (GET), default to 5
+      const count = req.body?.count || parseInt(req.query.count as string) || 5;
       
-      const posts = await generateMultiplePosts(5);
+      console.log(`[Cron] Blog generation triggered for ${count} posts...`);
       
-      const insertedPosts = [];
-      for (const post of posts) {
+      // Respond immediately - processing happens in background
+      res.status(202).json({ 
+        success: true, 
+        message: `Blog generation started for ${count} posts`,
+        status: "processing"
+      });
+      
+      // Process in background after response is sent
+      setImmediate(async () => {
         try {
-          const [inserted] = await db.insert(blogPosts).values({
-            title: post.title,
-            slug: post.slug,
-            excerpt: post.excerpt,
-            content: post.content,
-            category: post.category,
-            tags: post.tags,
-            metaTitle: post.metaTitle,
-            metaDescription: post.metaDescription,
-            metaKeywords: post.metaKeywords,
-            readingTime: post.readingTime,
-            author: post.author,
-            authorBio: post.authorBio,
-            isPublished: true,
-            isFeatured: insertedPosts.length === 0,
-            publishedAt: new Date(),
-          }).returning();
+          console.log("[Cron] Starting background blog generation...");
+          const posts = await generateMultiplePosts(count);
           
-          insertedPosts.push(inserted);
-        } catch (insertError) {
-          console.error("Failed to insert cron post:", insertError);
+          let insertedCount = 0;
+          for (const post of posts) {
+            try {
+              await db.insert(blogPosts).values({
+                title: post.title,
+                slug: post.slug,
+                excerpt: post.excerpt,
+                content: post.content,
+                category: post.category,
+                tags: post.tags,
+                metaTitle: post.metaTitle,
+                metaDescription: post.metaDescription,
+                metaKeywords: post.metaKeywords,
+                readingTime: post.readingTime,
+                author: post.author,
+                authorBio: post.authorBio,
+                isPublished: true,
+                isFeatured: insertedCount === 0,
+                publishedAt: new Date(),
+              });
+              insertedCount++;
+            } catch (insertError) {
+              console.error("Failed to insert cron post:", insertError);
+            }
+          }
+          
+          console.log(`[Cron] Background generation complete: ${insertedCount} blog posts created`);
+        } catch (bgError) {
+          console.error("[Cron] Background blog generation failed:", bgError);
         }
-      }
-      
-      console.log(`[Cron] Generated ${insertedPosts.length} blog posts`);
-      res.json({ success: true, count: insertedPosts.length });
+      });
     } catch (error) {
       console.error("Cron blog generation error:", error);
-      res.status(500).json({ error: "Failed to generate blogs" });
+      res.status(500).json({ error: "Failed to start blog generation" });
     }
-  });
+  };
+  
+  app.get("/api/cron/generate-blogs", handleCronBlogGeneration);
+  app.post("/api/cron/generate-blogs", handleCronBlogGeneration);
   
   // Admin: Delete blog post
   app.delete("/api/blog/:id", requireAdmin, async (req, res) => {
