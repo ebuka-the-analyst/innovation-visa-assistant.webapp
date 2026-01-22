@@ -94,12 +94,6 @@ function FeaturedHeroCard({ post }: { post: BlogPost }) {
             </span>
           </div>
         </div>
-        
-        <div className="absolute top-6 right-6">
-          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-            <ArrowRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
-          </div>
-        </div>
       </div>
     </Link>
   );
