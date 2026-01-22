@@ -43,7 +43,7 @@ VISA FEES (Source: GOV.UK):
 - Application fee: £${VERIFIED_VISA_FEES.innovatorFounderVisa.applicationFee}
 - Immigration Health Surcharge: £${VERIFIED_VISA_FEES.innovatorFounderVisa.immigrationHealthSurcharge} per year
 - Priority service: £${VERIFIED_VISA_FEES.innovatorFounderVisa.priorityService} (where available)
-- Typical endorsement fee: Around £${VERIFIED_VISA_FEES.endorsementCosts.initialEndorsement} initial + £${VERIFIED_VISA_FEES.endorsementCosts.contactPointMeeting} per meeting (varies by body)
+- Endorsement fees: Vary by endorsing body - typically ${VERIFIED_VISA_FEES.endorsementCosts.typicalRange}. Do NOT cite specific amounts.
 
 FINANCIAL REQUIREMENTS (Source: GOV.UK):
 - Minimum funds: £${VERIFIED_ELIGIBILITY.financialRequirement.amount}
@@ -233,75 +233,123 @@ OUTPUT FORMAT (JSON only):
 
 Return ONLY valid JSON.`;
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are a UK immigration information writer who creates accurate, helpful content. You NEVER fabricate case studies, statistics, or quotes. You ONLY use verified facts. You always include proper disclaimers. Your content is factual, practical, and trustworthy. Always respond with valid JSON only.`
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 5000,
-      temperature: 0.5, // Lower temperature for more factual output
-    });
+  const MAX_RETRIES = 3;
+  
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      console.log(`[Blog Generator] Generation attempt ${attempt}/${MAX_RETRIES}`);
+      
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are a UK immigration information writer who creates accurate, helpful content. You NEVER fabricate case studies, statistics, or quotes. You ONLY use verified facts. You always include proper disclaimers. Your content is factual, practical, and trustworthy. Always respond with valid JSON only.`
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 5000,
+        temperature: 0.3, // Low temperature for maximum factual accuracy
+      });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) throw new Error("No response from AI");
-    
-    const parsed = JSON.parse(content);
-    
-    // Validate the generated content
-    const validationResult = validateBlogContent({
-      title: parsed.title,
-      excerpt: parsed.excerpt,
-      content: parsed.content,
-      category,
-      tags: parsed.tags || [],
-      metaTitle: parsed.metaTitle,
-      metaDescription: parsed.metaDescription
-    });
-    
-    // Log validation report
-    console.log("[Blog Generator] Validation Report:");
-    console.log(generateValidationReport(validationResult));
-    
-    // If critical issues found, log warning but still proceed (content has been improved)
-    if (!validationResult.isValid) {
-      console.warn(`[Blog Generator] Content validation found ${validationResult.issues.filter(i => i.type === 'critical').length} critical issues`);
+      const content = response.choices[0]?.message?.content;
+      if (!content) throw new Error("No response from AI");
+      
+      const parsed = JSON.parse(content);
+      
+      // MANDATORY CONTENT REQUIREMENTS CHECK
+      const contentHasDisclaimer = parsed.content.includes('disclaimer-box') || 
+                                   parsed.content.includes('Important Notice') ||
+                                   parsed.content.includes('does not constitute');
+      const contentHasInternalLinks = parsed.content.includes('href="/') || 
+                                      parsed.content.includes('href="/tools') ||
+                                      parsed.content.includes('href="/business-plan');
+      
+      // Auto-fix: Add disclaimer if missing
+      let finalContent = parsed.content;
+      if (!contentHasDisclaimer) {
+        finalContent += `
+<div class="disclaimer-box bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 my-6">
+<p class="text-sm"><strong>Important Notice:</strong> This article provides general information only and does not constitute immigration or legal advice. Requirements and fees may change. Always verify current information on <a href="https://www.gov.uk/innovator-founder-visa" target="_blank" rel="noopener" class="text-primary underline">GOV.UK</a> and consider consulting a qualified immigration adviser for your specific circumstances.</p>
+</div>`;
+      }
+      
+      // Auto-fix: Add internal links section if missing
+      if (!contentHasInternalLinks) {
+        const linksSection = `
+<h3>Helpful Resources</h3>
+<p>Ready to start your UK visa journey? Explore <a href="/tools" class="text-primary hover:underline">our visa preparation tools</a>, use our <a href="/business-plan" class="text-primary hover:underline">Business Plan Generator</a>, or check our <a href="/faq" class="text-primary hover:underline">frequently asked questions</a>.</p>`;
+        // Insert before disclaimer
+        const disclaimerIndex = finalContent.indexOf('<div class="disclaimer-box');
+        if (disclaimerIndex > 0) {
+          finalContent = finalContent.slice(0, disclaimerIndex) + linksSection + finalContent.slice(disclaimerIndex);
+        } else {
+          finalContent += linksSection;
+        }
+      }
+      
+      // Validate the content
+      const validationResult = validateBlogContent({
+        title: parsed.title,
+        excerpt: parsed.excerpt,
+        content: finalContent,
+        category,
+        tags: parsed.tags || [],
+        metaTitle: parsed.metaTitle,
+        metaDescription: parsed.metaDescription
+      });
+      
+      // Log validation report
+      console.log("[Blog Generator] Validation Report:");
+      console.log(generateValidationReport(validationResult));
+      
+      // GATING: If critical issues found, retry generation
+      const criticalCount = validationResult.issues.filter(i => i.type === 'critical').length;
+      if (criticalCount > 0 && attempt < MAX_RETRIES) {
+        console.warn(`[Blog Generator] Content failed validation with ${criticalCount} critical issues. Retrying...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        continue; // Retry
+      }
+      
+      // Apply final corrections
+      const correctedContent = correctContent(finalContent);
+      
+      // Add unique slug with date
+      const dateSlug = new Date().toISOString().split('T')[0];
+      const baseSlug = slugify(parsed.title);
+      const uniqueSlug = `${baseSlug}-${dateSlug}-${Math.random().toString(36).substring(2, 6)}`;
+      
+      // Final check: if still has critical issues on last attempt, log but proceed with corrected content
+      if (criticalCount > 0) {
+        console.warn(`[Blog Generator] Content published with ${criticalCount} warnings after max retries. Manual review recommended.`);
+      }
+      
+      return {
+        title: parsed.title,
+        slug: uniqueSlug,
+        excerpt: parsed.excerpt,
+        content: correctedContent,
+        category,
+        tags: parsed.tags || [],
+        metaTitle: parsed.metaTitle || parsed.title,
+        metaDescription: parsed.metaDescription || parsed.excerpt,
+        metaKeywords: parsed.metaKeywords || parsed.tags || [],
+        readingTime: parsed.readingTime || 8,
+        author: "UK Visa Expert Team",
+        authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is reviewed for accuracy against official UK government sources.",
+      };
+    } catch (error) {
+      console.error(`[Blog Generator] Generation attempt ${attempt} failed:`, error);
+      if (attempt === MAX_RETRIES) throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    
-    // Apply automatic corrections (add disclaimers if missing)
-    const correctedContent = correctContent(parsed.content);
-    
-    // Add unique slug with date
-    const dateSlug = new Date().toISOString().split('T')[0];
-    const baseSlug = slugify(parsed.title);
-    const uniqueSlug = `${baseSlug}-${dateSlug}-${Math.random().toString(36).substring(2, 6)}`;
-    
-    return {
-      title: parsed.title,
-      slug: uniqueSlug,
-      excerpt: parsed.excerpt,
-      content: correctedContent,
-      category,
-      tags: parsed.tags || [],
-      metaTitle: parsed.metaTitle || parsed.title,
-      metaDescription: parsed.metaDescription || parsed.excerpt,
-      metaKeywords: parsed.metaKeywords || parsed.tags || [],
-      readingTime: parsed.readingTime || 8,
-      author: "UK Visa Expert Team",
-      authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is reviewed for accuracy against official UK government sources.",
-    };
-  } catch (error) {
-    console.error("Blog generation error:", error);
-    throw error;
   }
+  
+  throw new Error("Failed to generate valid blog content after maximum retries");
 }
 
 export async function generateMultiplePosts(count: number = 5): Promise<Array<{

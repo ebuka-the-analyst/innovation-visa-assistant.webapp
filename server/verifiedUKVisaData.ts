@@ -24,13 +24,16 @@ export const VERIFIED_VISA_FEES = {
     priorityService: 500, // GBP (where available)
     superPriorityService: 1000, // GBP (where available)
     source: "https://www.gov.uk/innovator-founder-visa/how-much-it-costs",
-    lastVerified: "January 2026"
+    lastVerified: "January 2026",
+    // ACCURACY NOTE: Verify these fees on GOV.UK before each content update
+    // Fees can change with each government fiscal event
   },
   endorsementCosts: {
-    initialEndorsement: 1000, // GBP (typical - varies by body)
-    contactPointMeeting: 500, // GBP per meeting (typical - varies by body)
-    note: "Endorsement fees vary by endorsing body. Contact your chosen body directly for current pricing.",
-    source: "Individual endorsing body websites",
+    // VARIABLE DATA - Do not cite as exact figures in content
+    typicalRange: "£1,000 - £2,000 for initial assessment (varies significantly)",
+    meetingCostRange: "£300 - £600 per contact point meeting (varies by body)",
+    note: "IMPORTANT: Endorsement fees vary significantly between bodies and are subject to change. Never cite specific endorsement costs as facts. Always direct readers to contact endorsing bodies directly.",
+    source: "Individual endorsing body websites - prices not standardized",
     lastVerified: "January 2026"
   }
 };
