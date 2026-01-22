@@ -1,0 +1,188 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+Apply 1 change
+
+
+Details
+
+Deploy ⇧+Enter
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+1bd41a0f
+Active
+
+Jan 22, 2026, 2:01 AM GMT
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[2026-01-22T02:11:02.044Z] GET /assets/star-DuSjmOPH.js
+[2026-01-22T02:11:02.044Z] GET /assets/credit-card-MO6doXMO.js
+[2026-01-22T02:11:02.056Z] GET /assets/copy-BS0GhcQm.js
+[2026-01-22T02:11:02.065Z] GET /assets/tag-C3cpbjSF.js
+[2026-01-22T02:11:02.066Z] GET /assets/eye-off-Bm-wCpvY.js
+[2026-01-22T02:11:02.075Z] GET /assets/cpu-w3Fvn06B.js
+[2026-01-22T02:11:02.088Z] GET /assets/external-link-BYNtI-aW.js
+[2026-01-22T02:11:02.095Z] GET /assets/trash-2-BT4phalj.js
+[2026-01-22T02:11:02.096Z] GET /assets/timer-BoefTlMm.js
+[2026-01-22T02:11:02.097Z] GET /assets/test-tube-DKw4qwTG.js
+[2026-01-22T02:11:02.098Z] GET /assets/database-nfNHcaLQ.js
+[2026-01-22T02:11:02.110Z] GET /assets/download-C-OH6MN7.js
+[2026-01-22T02:11:02.124Z] GET /assets/trending-down-C4IhhQeJ.js
+[2026-01-22T02:11:02.125Z] GET /assets/upload-CK4UdZ_L.js
+[2026-01-22T02:11:02.126Z] GET /assets/truck-CEo8ioKG.js
+[2026-01-22T02:11:02.126Z] GET /assets/eye-f6WNS5uL.js
+[2026-01-22T02:11:02.134Z] GET /assets/user-check-ITjun6c0.js
+[2026-01-22T02:11:02.135Z] GET /assets/user-plus-DNLtdbMv.js
+[2026-01-22T02:11:02.135Z] GET /assets/user-BcSutHRm.js
+[2026-01-22T02:11:02.136Z] GET /assets/file-pen-line-CiR3xbxn.js
+[2026-01-22T02:11:02.144Z] GET /assets/video-D5a_8F1H.js
+[2026-01-22T02:11:02.145Z] GET /assets/volume-2-DW_wxoma.js
+[2026-01-22T02:11:02.145Z] GET /assets/file-check-BNy6tO3l.js
+[2026-01-22T02:11:02.146Z] GET /api/auth/user
+[2026-01-22T02:11:02.153Z] GET /assets/wand-sparkles-Cj3vXqXT.js
+[2026-01-22T02:11:02.193Z] GET /assets/dialog-Be95qKg-.js
+[2026-01-22T02:11:02.226Z] GET /assets/wallet-pRHec9QB.js
+[2026-01-22T02:11:02.193Z] GET /assets/skeleton-BhqwUlcD.js
+[2026-01-22T02:11:02.194Z] GET /assets/ComplianceBadges-BdnkOprj.js
+[2026-01-22T02:11:02.227Z] GET /assets/SEOHead-DkjZrbXA.js
+[2026-01-22T02:11:02.194Z] GET /assets/CookieConsent-C1oHxxJu.js
+[2026-01-22T02:11:02.230Z] GET /assets/file-DD6CY_6g.js
+2:11:02 AM [express] GET /api/auth/user 200 in 88ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+[2026-01-22T02:11:02.195Z] GET /assets/file-type-2-D-uiSK0R.js
+[2026-01-22T02:11:02.217Z] GET /assets/filter-a4E4j2uz.js
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: premium (raw: premium)
+[2026-01-22T02:11:02.156Z] GET /assets/file-spreadsheet-DqQ8T2vX.js
+[2026-01-22T02:11:02.225Z] GET /assets/Footer-BZBhTe5z.js
+[2026-01-22T02:11:02.226Z] GET /assets/tram-front-u5-vFfsP.js
+[2026-01-22T02:11:02.170Z] GET /assets/file-question-5rFHSW7J.js
+[2026-01-22T02:11:02.180Z] GET /assets/SiteFeedbackPopup-CajmGic8.js
+[2026-01-22T02:11:02.181Z] GET /assets/file-warning-BAiuyCRn.js
+[2026-01-22T02:11:02.191Z] GET /assets/blog-7Hd5InKu.js
+[2026-01-22T02:11:02.192Z] GET /assets/badge-CsdGS2F4.js
+[2026-01-22T02:11:02.241Z] GET /assets/flame-DO1-faAK.js
+[2026-01-22T02:11:02.250Z] GET /assets/square-SYXVEvpA.js
+[2026-01-22T02:11:02.252Z] GET /assets/flag-RMCyBOOS.js
+[2026-01-22T02:11:02.261Z] GET /assets/globe-Cj78fBAH.js
+[2026-01-22T02:11:02.276Z] GET /assets/git-branch-BnnkW9nO.js
+[2026-01-22T02:11:02.285Z] GET /assets/graduation-cap-DzSZh8pR.js
+[2026-01-22T02:11:02.295Z] GET /assets/headphones-qmPeFwGj.js
+[2026-01-22T02:11:02.301Z] GET /assets/github-byWmyfwf.js
+[2026-01-22T02:11:02.334Z] GET /assets/twitter-CeUP7Ow7.js
+[2026-01-22T02:11:02.307Z] GET /assets/heart-DtIvwTAI.js
+[2026-01-22T02:11:02.313Z] GET /assets/info-BtRnK5Ub.js
+[2026-01-22T02:11:02.340Z] GET /assets/log-in-BLY6lzvl.js
+[2026-01-22T02:11:02.318Z] GET /assets/server-Hs1fyKA5.js
+[2026-01-22T02:11:02.323Z] GET /assets/layers-BTwLxUov.js
+[2026-01-22T02:11:02.346Z] GET /assets/volume-x-B_aFtyfZ.js
+[2026-01-22T02:11:02.329Z] GET /assets/key-JoAPyhh-.js
+[2026-01-22T02:11:02.352Z] GET /assets/map-BGz_xtX_.js
+[2026-01-22T02:11:02.357Z] GET /assets/lock-DU7ZuRGn.js
+[2026-01-22T02:11:02.363Z] GET /assets/wheat-CRghZc-L.js
+[2026-01-22T02:11:02.372Z] GET /assets/menu-Id1IsxxV.js
+[2026-01-22T02:11:02.378Z] GET /assets/mail-ei64gr5t.js
+[2026-01-22T02:11:02.441Z] POST /api/activity/session
+[2026-01-22T02:11:02.443Z] GET /assets/play-QsyF9dun.js
+[2026-01-22T02:11:02.449Z] GET /assets/quote-CSvx3dZ9.js
+[2026-01-22T02:11:02.454Z] GET /assets/map-pin-DUdS4zjB.js
+[2026-01-22T02:11:02.423Z] GET /assets/package-DpxMF-he.js
+[2026-01-22T02:11:02.460Z] GET /assets/qr-code-qoFtj1gr.js
+[2026-01-22T02:11:02.427Z] GET /assets/palette-DzvEJ-08.js
+[2026-01-22T02:11:02.432Z] GET /assets/pound-sterling-DJizLWi0.js
+[2026-01-22T02:11:02.482Z] GET /assets/phone-DlKUwa45.js
+[2026-01-22T02:11:02.435Z] POST /api/activity/session
+[2026-01-22T02:11:02.436Z] GET /assets/percent-CvozrHwA.js
+[2026-01-22T02:11:02.466Z] GET /assets/monitor-BD-mA_vk.js
+[2026-01-22T02:11:02.472Z] GET /assets/presentation-PQHHO9zr.js
+[2026-01-22T02:11:02.477Z] GET /assets/scale-CPhei-07.js
+[2026-01-22T02:11:02.385Z] GET /assets/mic-off-CD6N4JPr.js
+[2026-01-22T02:11:02.389Z] GET /assets/medal-BhjeQMZL.js
+[2026-01-22T02:11:02.395Z] GET /assets/zoom-out-CT3J6fPI.js
+[2026-01-22T02:11:02.403Z] GET /assets/message-square-D_pETjCW.js
+[2026-01-22T02:11:02.407Z] GET /assets/plus-B9pE7cYm.js
+[2026-01-22T02:11:02.419Z] GET /assets/pen-line-CtdVj2hu.js
+  length: 110,
+  severity: 'ERROR',
+2:11:02 AM [express] POST /api/activity/session 200 in 49ms :: {"sessionId":"b46ff08e-b50a-4443-af44…
+  code: '42P01',
+  detail: undefined,
+[2026-01-22T02:11:02.492Z] GET /assets/rotate-ccw-XvzwBDIU.js
+2:11:02 AM [express] POST /api/activity/session 200 in 60ms :: {"sessionId":"df5ae34b-9f9e-4ddd-8bff…
+Blog fetch error: error: relation "blog_posts" does not exist
+  hint: undefined,
+[2026-01-22T02:11:02.598Z] GET /api/blog?
+    at /app/node_modules/pg-pool/index.js:45:11
+  position: '270',
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+  internalPosition: undefined,
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+  internalQuery: undefined,
+  schema: undefined,
+    at async file:///app/dist/index.js:25410:21 {
+  where: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+[2026-01-22T02:11:02.487Z] GET /assets/save-YGK7Owdd.js
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+2:11:02 AM [express] GET /api/blog 500 in 14ms :: {"error":"Failed to fetch blog posts"}
+[2026-01-22T02:11:02.683Z] POST /api/activity/page-view
+2:11:02 AM [express] POST /api/activity/page-view 200 in 21ms :: {"pageViewId":"d5991b86-f4ae-479e-b…
+[2026-01-22T02:11:07.827Z] POST /api/activity/session/end
+2:11:07 AM [express] POST /api/activity/session/end 200 in 25ms :: {"success":true}
+[2026-01-22T02:11:20.022Z] POST /api/activity/session
+2:11:20 AM [express] POST /api/activity/session 200 in 237ms :: {"sessionId":"df07d5a6-87be-449e-9d7…
+[2026-01-22T02:11:20.445Z] POST /api/activity/page-view
+2:11:20 AM [express] POST /api/activity/page-view 200 in 26ms :: {"pageViewId":"121090e8-6cdc-4377-8…
+[2026-01-22T02:11:20.687Z] POST /api/activity/session/end
+2:11:20 AM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+[2026-01-22T02:11:29.977Z] POST /api/activity/session
+2:11:29 AM [express] POST /api/activity/session 200 in 20ms :: {"sessionId":"f44936f6-af8c-442e-ac05…
+
+
+innovation-visa-assistant.webapp | Railway

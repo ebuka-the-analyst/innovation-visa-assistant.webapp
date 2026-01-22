@@ -166,6 +166,54 @@ async function migrate() {
       }
     }
     
+    // Create blog_posts table if not exists
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS blog_posts (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          title TEXT NOT NULL,
+          slug VARCHAR(255) UNIQUE NOT NULL,
+          excerpt TEXT NOT NULL,
+          content TEXT NOT NULL,
+          category VARCHAR(100) NOT NULL,
+          tags TEXT[],
+          meta_title TEXT,
+          meta_description TEXT,
+          meta_keywords TEXT[],
+          featured_image TEXT,
+          reading_time INTEGER NOT NULL DEFAULT 5,
+          author VARCHAR(100) NOT NULL DEFAULT 'UK Visa Expert',
+          author_bio TEXT,
+          is_published BOOLEAN NOT NULL DEFAULT TRUE,
+          is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+          views INTEGER NOT NULL DEFAULT 0,
+          published_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      console.log('blog_posts table created or already exists');
+      
+      // Create indexes for blog_posts
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_blog_slug ON blog_posts(slug)
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_blog_published ON blog_posts(is_published, published_at DESC)
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_blog_category ON blog_posts(category)
+      `);
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_blog_featured ON blog_posts(is_featured, published_at DESC)
+      `);
+      console.log('blog_posts indexes created or already exist');
+    } catch (err) {
+      if (err.code !== '42P07') { // 42P07 = table already exists
+        console.error('Error creating blog_posts table:', err.message);
+      }
+    }
+    
   } catch (err) {
     console.error('Migration failed:', err.message);
     process.exit(1);
