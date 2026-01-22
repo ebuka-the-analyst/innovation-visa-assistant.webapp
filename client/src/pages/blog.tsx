@@ -11,9 +11,24 @@ import {
   Newspaper, Sparkles, Eye, ChevronLeft, ChevronRight, Flame, Star,
   Tag, LayoutGrid, List
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import type { BlogPost } from "@shared/schema";
 import Footer from "@/components/Footer";
+
+function LiveTime() {
+  const [time, setTime] = useState(new Date());
+  
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  
+  return (
+    <span className="font-mono text-sm">
+      {time.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+    </span>
+  );
+}
 
 const categories = [
   { id: "all", label: "All Posts", icon: Newspaper },
@@ -284,7 +299,7 @@ function StatsBar({ posts }: { posts: BlogPost[] }) {
   const categoriesCount = new Set(posts.map(p => p.category)).size;
   
   return (
-    <div className="grid grid-cols-3 gap-4 mb-8" data-testid="stats-bar">
+    <div className="grid grid-cols-3 gap-4 mb-2" data-testid="stats-bar">
       {[
         { label: "Articles", value: totalPosts, icon: Newspaper, testId: "stat-articles" },
         { label: "Categories", value: categoriesCount, icon: Tag, testId: "stat-categories" },
@@ -352,16 +367,16 @@ export default function BlogPage() {
               </div>
               
               <div className="flex items-center gap-3">
-                <Badge variant="outline" className="px-4 py-2 text-sm gap-2" data-testid="badge-updated-daily">
-                  <Flame className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-                  Updated Daily
+                <Badge variant="outline" className="px-3 py-1.5 text-sm gap-2" data-testid="badge-live-time">
+                  <Clock className="w-4 h-4 text-primary" />
+                  <LiveTime />
                 </Badge>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="responsive-container py-8">
+        <div className="responsive-container py-2">
           {!isLoading && allPosts.length > 0 && <StatsBar posts={allPosts} />}
           
           {!isLoading && featuredPosts.length > 0 && selectedCategory === "all" && !searchQuery && (
