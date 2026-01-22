@@ -1,0 +1,87 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+proactive-laughter
+Deployments
+Variables
+Metrics
+Settings
+Unexposed service
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+proactive-laughter
+/
+6090715b
+Active
+
+Jan 22, 2026, 1:12 AM GMT
+Details
+Build Logs
+Deploy Logs
+Filter and search logs
+
+You reached the start of the range
+Jan 22, 2026, 1:12 AM
+Starting Container
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+theme_id column added or already exists
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+theme_font column added or already exists
+theme_applied_at column added or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+text_elements column added or already exists
+cover_designs table created or already exists
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[Email Service] NOT CONFIGURED - emails will not be sent
+[Email Service] Missing credentials:
+  - RESEND_API_KEY is missing
+  - AWS_SES_SMTP_USERNAME is missing
+  - AWS_SES_SMTP_PASSWORD is missing
+[Auth] WARNING: SESSION_SECRET not set. Using fallback secret. Set SESSION_SECRET in production!
+[Auth] Google OAuth NOT configured - missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET
+[S3Storage] Not configured - missing AWS credentials or bucket
+1:16:07 AM [express] serving on port 8080
+1:16:07 AM [express] [STRIPE WARNING] STRIPE_SECRET_KEY not configured!
+[DB] Auto-migration: logo_element column ensured
+
+
+proactive-laughter | Railway
