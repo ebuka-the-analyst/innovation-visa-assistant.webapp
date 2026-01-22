@@ -130,24 +130,24 @@ function FeaturedCarousel({ posts }: { posts: BlogPost[] }) {
       
       {posts.length > 1 && (
         <>
-          <div className="absolute left-4 bottom-6 flex items-center gap-1">
+          <div className="absolute right-4 md:right-6 bottom-4 md:bottom-6 flex items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => goTo((current - 1 + posts.length) % posts.length)}
-              className="h-7 w-7 bg-white/80 dark:bg-white/90 text-primary border border-primary/20 shadow-md"
+              className="h-6 w-6 md:h-7 md:w-7 bg-white/80 dark:bg-white/90 text-primary border border-primary/20 shadow-md"
               data-testid="button-carousel-prev"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3 h-3 md:w-4 md:h-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => goTo((current + 1) % posts.length)}
-              className="h-7 w-7 bg-white/80 dark:bg-white/90 text-primary border border-primary/20 shadow-md"
+              className="h-6 w-6 md:h-7 md:w-7 bg-white/80 dark:bg-white/90 text-primary border border-primary/20 shadow-md"
               data-testid="button-carousel-next"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
             </Button>
           </div>
         </>
