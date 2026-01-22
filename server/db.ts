@@ -29,6 +29,18 @@ async function runAutoMigrations() {
   } catch (error) {
     console.log('[DB] Auto-migration skipped or failed:', error);
   }
+  
+  // Update blog post image URLs to use object storage
+  try {
+    const result = await db.execute(sql`
+      UPDATE blog_posts 
+      SET featured_image = REPLACE(featured_image, '/assets/blog/', '/objects/blog/') 
+      WHERE featured_image LIKE '/assets/blog/%'
+    `);
+    console.log('[DB] Auto-migration: blog image URLs updated to object storage');
+  } catch (error) {
+    console.log('[DB] Blog URL migration skipped:', error);
+  }
 }
 
 runAutoMigrations();

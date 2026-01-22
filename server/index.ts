@@ -242,6 +242,7 @@ const blogAssetsPaths = [
   path.join(process.cwd(), "dist/public/assets/blog"),
   path.join(process.cwd(), "public/assets/blog"),
 ];
+let blogAssetsFound = false;
 for (const blogAssetsDir of blogAssetsPaths) {
   if (fs.existsSync(blogAssetsDir)) {
     app.use("/assets/blog", express.static(blogAssetsDir, {
@@ -249,9 +250,31 @@ for (const blogAssetsDir of blogAssetsPaths) {
       immutable: true
     }));
     console.log(`[Static] Serving blog assets from: ${blogAssetsDir}`);
+    blogAssetsFound = true;
     break;
   }
 }
+
+// S3 fallback for blog images (production)
+import { s3Storage } from "./services/s3Storage";
+app.get(["/assets/blog/:filename", "/objects/blog/:filename"], async (req, res, next) => {
+  try {
+    const filename = req.params.filename;
+    const s3Key = `blog-images/${filename}`;
+    
+    if (s3Storage.isAvailable()) {
+      const buffer = await s3Storage.downloadFile(s3Key);
+      res.set({
+        "Content-Type": "image/jpeg",
+        "Cache-Control": "public, max-age=604800",
+      });
+      return res.send(buffer);
+    }
+    next();
+  } catch (error) {
+    next();
+  }
+});
 
 app.use((req, res, next) => {
   const start = Date.now();

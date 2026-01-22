@@ -1,0 +1,129 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+fb959eb6
+Active
+
+Jan 22, 2026, 5:01 PM GMT
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+You reached the start of the range
+Jan 22, 2026, 5:01 PM
+Starting Container
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+theme_id column added or already exists
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+theme_font column added or already exists
+theme_applied_at column added or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+text_elements column added or already exists
+cover_designs table created or already exists
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+blog_posts table created or already exists
+blog_posts indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[Static] Serving blog assets from: /app/client/src/assets/blog
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+5:04:32 PM [express] serving on port 8080
+5:04:32 PM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: logo_element column ensured
+[2026-01-22T17:04:32.999Z] POST /api/activity/page-view
+5:04:33 PM [express] POST /api/activity/page-view 200 in 80ms :: {"pageViewId":"26a5c9e1-9fe1-4326-8…
+[2026-01-22T17:04:55.859Z] POST /api/activity/session/end
+[2026-01-22T17:04:55.863Z] GET /blog
+5:04:56 PM [express] POST /api/activity/session/end 200 in 223ms :: {"success":true}
+[2026-01-22T17:05:02.780Z] GET /attached_assets/official_logo.webp
+[2026-01-22T17:05:02.782Z] GET /api/auth/user
+[2026-01-22T17:05:02.787Z] GET /api/blog?
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: premium (raw: premium)
+5:05:02 PM [express] GET /api/auth/user 200 in 35ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+5:05:02 PM [express] GET /api/blog 200 in 47ms :: [{"id":"391c0b4d-6860-4006-ad8b-205fbb214596","tit…
+[2026-01-22T17:05:03.112Z] POST /api/activity/session
+[2026-01-22T17:05:03.115Z] POST /api/activity/session
+5:05:03 PM [express] POST /api/activity/session 200 in 201ms :: {"sessionId":"2f6b75ba-e67c-4839-837…
+5:05:03 PM [express] POST /api/activity/session 200 in 45ms :: {"sessionId":"ff59a449-2de8-4b86-8b28…
+[2026-01-22T17:05:03.498Z] POST /api/activity/page-view
+5:05:03 PM [express] POST /api/activity/page-view 200 in 19ms :: {"pageViewId":"2cbfba62-cea7-48af-8…
+[2026-01-22T17:05:35.350Z] POST /api/activity/session
+5:05:35 PM [express] POST /api/activity/session 200 in 211ms :: {"sessionId":"ff59a449-2de8-4b86-8b2…
+[2026-01-22T17:06:03.968Z] POST /api/activity/session
+5:06:04 PM [express] POST /api/activity/session 200 in 204ms :: {"sessionId":"ff59a449-2de8-4b86-8b2…
+[2026-01-22T17:06:33.726Z] POST /api/activity/session
+5:06:33 PM [express] POST /api/activity/session 200 in 200ms :: {"sessionId":"ff59a449-2de8-4b86-8b2…
+[2026-01-22T17:07:03.670Z] POST /api/activity/session
+5:07:03 PM [express] POST /api/activity/session 200 in 198ms :: {"sessionId":"ff59a449-2de8-4b86-8b2…
+[2026-01-22T17:07:15.059Z] POST /api/activity/session/end
+5:07:15 PM [express] POST /api/activity/session/end 200 in 206ms :: {"success":true}
+[2026-01-22T17:07:22.241Z] POST /api/activity/session
+5:07:22 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"68c44d32-7df0-452a-906d…
+[2026-01-22T17:07:22.585Z] POST /api/activity/page-view
+5:07:22 PM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"9d249371-bdea-4f1a-a…
+[2026-01-22T17:07:23.223Z] POST /api/activity/session/end
+5:07:23 PM [express] POST /api/activity/session/end 200 in 15ms :: {"success":true}
+[2026-01-22T17:10:01.040Z] POST /api/activity/session
+5:10:01 PM [express] POST /api/activity/session 200 in 204ms :: {"sessionId":"dd4a4ff2-610c-4646-b68…
+[2026-01-22T17:10:01.589Z] POST /api/activity/page-view
+5:10:01 PM [express] POST /api/activity/page-view 200 in 21ms :: {"pageViewId":"adbe31ed-3f7b-4d94-a…
+[2026-01-22T17:10:04.616Z] POST /api/activity/session/end
+5:10:04 PM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
