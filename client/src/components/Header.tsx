@@ -114,6 +114,9 @@ export default function Header() {
           <Link href="/tools-hub" className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`} data-testid="link-tools-hub">
             Tools
           </Link>
+          <Link href="/blog" className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`} data-testid="link-blog">
+            Blog
+          </Link>
           <button
             onClick={() => handleNavigation('pricing')}
             className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`}
@@ -189,6 +192,9 @@ export default function Header() {
             >
               Features
             </button>
+            <Link href="/blog" className="block py-2 hover:text-primary transition-colors" data-testid="link-mobile-blog">
+              Blog
+            </Link>
             <button
               onClick={() => handleNavigation('pricing')}
               className="text-left py-2 hover:text-primary transition-colors"

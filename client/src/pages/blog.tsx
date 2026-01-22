@@ -14,6 +14,7 @@ import {
 import { useState, useRef, useEffect, useMemo } from "react";
 import type { BlogPost } from "@shared/schema";
 import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 
 function LiveTime() {
   const [time, setTime] = useState(new Date());
@@ -332,6 +333,8 @@ export default function BlogPage() {
         description="Stay updated with the latest UK Innovator Founder Visa news, immigration updates, business planning tips, and success stories. Expert insights for visa applicants."
         canonical="https://innovatorfoundervisaassistant.co.uk/blog"
       />
+      
+      <Header />
       
       <div className="min-h-screen bg-gradient-to-b from-background via-accent/5 to-background">
         <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-accent/5 border-b">
