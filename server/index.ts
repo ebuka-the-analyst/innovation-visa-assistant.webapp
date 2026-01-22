@@ -236,13 +236,21 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use("/uploads", express.static(uploadsDir));
 
-// Serve blog assets
-const blogAssetsDir = path.join(process.cwd(), "client/src/assets/blog");
-if (fs.existsSync(blogAssetsDir)) {
-  app.use("/assets/blog", express.static(blogAssetsDir, {
-    maxAge: "7d",
-    immutable: true
-  }));
+// Serve blog assets - check multiple locations for dev and production
+const blogAssetsPaths = [
+  path.join(process.cwd(), "client/src/assets/blog"),
+  path.join(process.cwd(), "dist/public/assets/blog"),
+  path.join(process.cwd(), "public/assets/blog"),
+];
+for (const blogAssetsDir of blogAssetsPaths) {
+  if (fs.existsSync(blogAssetsDir)) {
+    app.use("/assets/blog", express.static(blogAssetsDir, {
+      maxAge: "7d",
+      immutable: true
+    }));
+    console.log(`[Static] Serving blog assets from: ${blogAssetsDir}`);
+    break;
+  }
 }
 
 app.use((req, res, next) => {
