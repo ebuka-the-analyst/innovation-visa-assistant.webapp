@@ -13813,6 +13813,34 @@ Return a JSON object with:
   app.get("/api/cron/generate-blogs", handleCronBlogGeneration);
   app.post("/api/cron/generate-blogs", handleCronBlogGeneration);
   
+  // Admin: Fix blog image URLs to use object storage paths
+  app.post("/api/admin/blog/fix-images", requireAdmin, async (req, res) => {
+    try {
+      // Update all blog posts with old asset paths to new object storage paths
+      const result = await db.execute(sql`
+        UPDATE blog_posts 
+        SET featured_image = REPLACE(featured_image, '/assets/blog/', '/objects/blog/')
+        WHERE featured_image LIKE '/assets/blog/%'
+      `);
+      
+      // Get current URLs for verification
+      const posts = await db.select({ 
+        id: blogPosts.id, 
+        title: blogPosts.title,
+        featured_image: blogPosts.featured_image 
+      }).from(blogPosts).limit(10);
+      
+      res.json({
+        success: true,
+        message: "Blog image URLs updated to object storage paths",
+        sample: posts
+      });
+    } catch (error: any) {
+      console.error("[Admin] Fix blog images error:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   // Admin: Bulk generate backdated blog posts (for initial content seeding)
   app.post("/api/admin/blog/seed", requireAdmin, async (req, res) => {
     try {
