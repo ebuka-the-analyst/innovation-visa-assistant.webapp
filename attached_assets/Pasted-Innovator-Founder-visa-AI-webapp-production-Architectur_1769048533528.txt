@@ -1,0 +1,177 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+Apply 1 change
+
+
+Details
+
+Deploy ⇧+Enter
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+b4cb2783
+Active
+
+Jan 22, 2026, 2:13 AM GMT
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+2:16:25 AM [express] serving on port 8080
+2:16:25 AM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: logo_element column ensured
+[2026-01-22T02:16:30.124Z] POST /api/activity/session
+2:16:30 AM [express] POST /api/activity/session 200 in 250ms :: {"sessionId":"f44936f6-af8c-442e-ac0…
+[2026-01-22T02:17:29.977Z] POST /api/activity/session
+2:17:30 AM [express] POST /api/activity/session 200 in 249ms :: {"sessionId":"f44936f6-af8c-442e-ac0…
+[2026-01-22T02:18:29.965Z] POST /api/activity/session
+2:18:30 AM [express] POST /api/activity/session 200 in 243ms :: {"sessionId":"f44936f6-af8c-442e-ac0…
+[2026-01-22T02:18:36.682Z] POST /api/activity/session
+2:18:36 AM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"1b397403-6861-4dcf-bc05…
+[2026-01-22T02:18:36.891Z] POST /api/activity/page-view
+2:18:36 AM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"87cc359c-66a4-4d39-a…
+[2026-01-22T02:18:38.911Z] POST /api/activity/session/end
+2:18:38 AM [express] POST /api/activity/session/end 200 in 15ms :: {"success":true}
+[2026-01-22T02:18:39.070Z] GET /blog
+[2026-01-22T02:18:39.485Z] GET /api/blog?
+[2026-01-22T02:18:39.313Z] GET /attached_assets/official_logo.webp
+2:18:39 AM [express] GET /api/blog 200 in 13ms :: []
+[2026-01-22T02:18:39.326Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: premium (raw: premium)
+2:18:39 AM [express] GET /api/auth/user 200 in 190ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a"…
+[2026-01-22T02:18:39.702Z] POST /api/activity/session
+[2026-01-22T02:18:39.703Z] POST /api/activity/session
+2:18:39 AM [express] POST /api/activity/session 200 in 25ms :: {"sessionId":"66ee9987-8c84-4e4f-925a…
+2:18:39 AM [express] POST /api/activity/session 200 in 46ms :: {"sessionId":"ec0527db-ff8a-487b-abec…
+[2026-01-22T02:18:39.910Z] POST /api/activity/page-view
+2:18:39 AM [express] POST /api/activity/page-view 200 in 25ms :: {"pageViewId":"6588782d-7522-43e1-9…
+[2026-01-22T02:18:49.867Z] POST /api/activity/session/end
+2:18:49 AM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+[2026-01-22T02:19:30.200Z] POST /api/activity/session
+2:19:30 AM [express] POST /api/activity/session 200 in 234ms :: {"sessionId":"f44936f6-af8c-442e-ac0…
+[2026-01-22T02:19:40.460Z] POST /api/activity/session
+2:19:40 AM [express] POST /api/activity/session 200 in 214ms :: {"sessionId":"ebe3df41-60d0-4808-9b8…
+[2026-01-22T02:19:40.857Z] POST /api/activity/page-view
+2:19:40 AM [express] POST /api/activity/page-view 200 in 18ms :: {"pageViewId":"d5914ab3-eb67-4d6c-8…
+[2026-01-22T02:19:41.879Z] POST /api/activity/session/end
+2:19:41 AM [express] POST /api/activity/session/end 200 in 13ms :: {"success":true}
+[2026-01-22T02:19:42.045Z] GET /blog
+[2026-01-22T02:19:42.262Z] GET /attached_assets/official_logo.webp
+[2026-01-22T02:19:42.266Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: premium (raw: premium)
+2:19:42 AM [express] GET /api/auth/user 200 in 14ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+[2026-01-22T02:19:42.439Z] GET /api/blog?
+2:19:42 AM [express] GET /api/blog 200 in 11ms :: []
+[2026-01-22T02:19:42.472Z] POST /api/activity/session
+[2026-01-22T02:19:42.473Z] POST /api/activity/session
+2:19:42 AM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"7c50c562-b264-4e25-ae94…
+2:19:42 AM [express] POST /api/activity/session 200 in 42ms :: {"sessionId":"9ea9d9f5-477d-4aeb-952b…
+[2026-01-22T02:19:42.681Z] POST /api/activity/page-view
+2:19:42 AM [express] POST /api/activity/page-view 200 in 21ms :: {"pageViewId":"d7e1c63e-4c48-4944-8…
+[2026-01-22T02:19:47.381Z] POST /api/activity/session/end
+2:19:47 AM [express] POST /api/activity/session/end 200 in 21ms :: {"success":true}
+[2026-01-22T02:20:04.600Z] POST /api/activity/session
+2:20:04 AM [express] POST /api/activity/session 200 in 226ms :: {"sessionId":"f3ac2694-9ca3-4825-8d8…
+[2026-01-22T02:20:05.014Z] POST /api/activity/page-view
+2:20:05 AM [express] POST /api/activity/page-view 200 in 25ms :: {"pageViewId":"772fe4d7-3b4b-440c-a…
+[2026-01-22T02:20:06.613Z] POST /api/activity/session/end
+2:20:06 AM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+[2026-01-22T02:20:06.773Z] GET /blog
+[2026-01-22T02:20:06.995Z] GET /attached_assets/official_logo.webp
+[2026-01-22T02:20:07.000Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: premium (raw: premium)
+2:20:07 AM [express] GET /api/auth/user 200 in 18ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+[2026-01-22T02:20:07.168Z] GET /api/blog?
+2:20:07 AM [express] GET /api/blog 200 in 13ms :: []
+[2026-01-22T02:20:07.205Z] POST /api/activity/session
+2:20:07 AM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"84ef59fd-68bd-4fe2-8904…
+[2026-01-22T02:20:07.337Z] POST /api/activity/session
+2:20:07 AM [express] POST /api/activity/session 200 in 20ms :: {"sessionId":"22e5a3aa-20ad-4fff-b80f…
+[2026-01-22T02:20:07.411Z] POST /api/activity/page-view
+2:20:08 AM [express] POST /api/activity/session/end 200 in 15ms :: {"success":true}
+2:20:07 AM [express] POST /api/activity/page-view 200 in 25ms :: {"pageViewId":"985eb39d-4f52-4177-9…
+[2026-01-22T02:20:08.724Z] POST /api/activity/session/end
+[2026-01-22T02:20:30.261Z] POST /api/activity/session
+2:20:30 AM [express] POST /api/activity/session 200 in 247ms :: {"sessionId":"f44936f6-af8c-442e-ac0…
+[2026-01-22T02:21:29.951Z] POST /api/activity/session
+2:21:30 AM [express] POST /api/activity/session 200 in 193ms :: {"sessionId":"f44936f6-af8c-442e-ac0…
+[2026-01-22T02:21:31.991Z] POST /api/activity/session
+2:21:32 AM [express] POST /api/activity/session 200 in 18ms :: {"sessionId":"5c13a265-7bc8-4e48-8e4a…
+[2026-01-22T02:21:32.194Z] POST /api/activity/page-view
+2:21:32 AM [express] POST /api/activity/page-view 200 in 19ms :: {"pageViewId":"bad58e6b-264f-4c77-8…
+[2026-01-22T02:21:36.886Z] POST /api/activity/session/end
+2:21:36 AM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+[2026-01-22T02:21:36.904Z] GET /blog
+[2026-01-22T02:21:37.120Z] GET /attached_assets/official_logo.webp
+[2026-01-22T02:21:37.157Z] GET /api/auth/user
+[AUTH] Returning user ebuka.umeh40@gmail.com with subscriptionTier: premium (raw: premium)
+2:21:37 AM [express] GET /api/auth/user 200 in 16ms :: {"id":"3e0feeab-8d95-4aed-a377-4cb40fbea78a",…
+[2026-01-22T02:21:37.290Z] GET /api/blog?
+2:21:37 AM [express] GET /api/blog 200 in 12ms :: []
+[2026-01-22T02:21:37.367Z] POST /api/activity/session
+[2026-01-22T02:21:37.369Z] POST /api/activity/session
+2:21:37 AM [express] POST /api/activity/session 200 in 19ms :: {"sessionId":"1f0b0505-7536-4b04-a645…
+2:21:37 AM [express] POST /api/activity/session 200 in 203ms :: {"sessionId":"f827c287-c151-41b6-960…
+[2026-01-22T02:21:37.573Z] POST /api/activity/page-view
+2:21:37 AM [express] POST /api/activity/page-view 200 in 20ms :: {"pageViewId":"a9eed0c5-4ea7-4cca-b…
+[2026-01-22T02:21:42.443Z] POST /api/activity/session/end
+2:21:42 AM [express] POST /api/activity/session/end 200 in 13ms :: {"success":true}
+[2026-01-22T02:21:50.249Z] POST /api/activity/session
+2:21:50 AM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"53c38b35-eb81-48f7-831d…
+[2026-01-22T02:21:50.475Z] POST /api/activity/page-view
+2:21:50 AM [express] POST /api/activity/page-view 200 in 17ms :: {"pageViewId":"68d3fe23-1f6f-4d29-9…
+[2026-01-22T02:21:51.708Z] POST /api/activity/session/end
+2:21:51 AM [express] POST /api/activity/session/end 200 in 21ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
