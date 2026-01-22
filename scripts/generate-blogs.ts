@@ -1,24 +1,23 @@
-import fetch from 'node-fetch';
+// Daily blog generation cron script
+// Calls the production API to generate new blog posts
 
 async function generateDailyBlogs() {
-  const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-    ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-    : process.env.REPLIT_DOMAINS
-    ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
-    : 'http://localhost:5000';
-  
+  const apiUrl = process.env.PRODUCTION_API_URL || 'https://innovatorfoundervisaassistant.co.uk';
   const cronSecret = process.env.CRON_SECRET;
   
   if (!cronSecret) {
-    console.error('CRON_SECRET environment variable not set');
+    console.error('[CRON] ERROR: CRON_SECRET environment variable not set');
     process.exit(1);
   }
   
-  console.log(`[Blog Generator] Starting daily blog generation...`);
-  console.log(`[Blog Generator] Target URL: ${baseUrl}/api/cron/generate-blogs`);
+  const endpoint = `${apiUrl}/api/cron/generate-blogs`;
+  
+  console.log('[CRON] Starting daily blog generation...');
+  console.log(`[CRON] Target: ${endpoint}`);
+  console.log(`[CRON] Time: ${new Date().toISOString()}`);
   
   try {
-    const response = await fetch(`${baseUrl}/api/cron/generate-blogs`, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,17 +27,27 @@ async function generateDailyBlogs() {
     });
     
     if (!response.ok) {
-      const error = await response.text();
-      console.error(`[Blog Generator] Failed: ${response.status} - ${error}`);
+      const errorText = await response.text();
+      console.error(`[CRON] FAILED: HTTP ${response.status}`);
+      console.error(`[CRON] Response: ${errorText}`);
       process.exit(1);
     }
     
-    const result = await response.json();
-    console.log(`[Blog Generator] Success! Generated ${result.count} new blog posts`);
-    console.log(`[Blog Generator] Posts:`, result.posts?.map((p: any) => p.title).join(', '));
+    const result = await response.json() as { success: boolean; count: number; posts?: Array<{ title: string }> };
+    
+    console.log('[CRON] SUCCESS!');
+    console.log(`[CRON] Generated ${result.count} new blog posts`);
+    
+    if (result.posts && Array.isArray(result.posts)) {
+      result.posts.forEach((post, i) => {
+        console.log(`[CRON]   ${i + 1}. ${post.title}`);
+      });
+    }
+    
+    console.log('[CRON] Completed at:', new Date().toISOString());
     
   } catch (error) {
-    console.error('[Blog Generator] Error:', error);
+    console.error('[CRON] ERROR:', error);
     process.exit(1);
   }
 }

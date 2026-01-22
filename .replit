@@ -51,6 +51,7 @@ BASE_URL = "https://innovatorfoundervisaassistant.co.uk"
 AWS_SES_REGION = "eu-north-1"
 AWS_REGION = "eu-north-1"
 CRON_SECRET = "ukivfa-cron-secret-2026-daily-posts"
+PRODUCTION_API_URL = "https://innovatorfoundervisaassistant.co.uk"
 
 [userenv.production]
 APP_URL = "https://innovatorfoundervisaassistant.co.uk"
