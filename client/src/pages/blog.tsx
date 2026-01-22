@@ -363,8 +363,7 @@ export default function BlogPage() {
         </div>
 
         <div className="responsive-container py-2">
-          {!isLoading && allPosts.length > 0 && <StatsBar posts={allPosts} />}
-          
+                    
           {!isLoading && featuredPosts.length > 0 && selectedCategory === "all" && !searchQuery && (
             <FeaturedCarousel posts={featuredPosts} />
           )}
