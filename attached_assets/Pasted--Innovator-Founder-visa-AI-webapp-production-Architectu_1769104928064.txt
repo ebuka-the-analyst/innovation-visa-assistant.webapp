@@ -1,0 +1,102 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+d15d615d
+Active
+
+Jan 22, 2026, 5:58 PM GMT
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+You reached the start of the range
+Jan 22, 2026, 5:58 PM
+Starting Container
+theme_font column added or already exists
+theme_applied_at column added or already exists
+cover_designs table created or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+Connecting to database...
+text_elements column added or already exists
+Connected successfully
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+Found 273 SQL statements to execute
+premium_cover_purchases indexes created or already exist
+Migration complete: 0 executed, 273 skipped (already exist)
+blog_posts table created or already exists
+chart_data column added or already exists
+blog_posts indexes created or already exist
+theme_id column added or already exists
+npm warn config production Use `--omit=dev` instead.
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[Blog] Image route configured (local + S3 fallback)
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+6:01:28 PM [express] serving on port 8080
+6:01:28 PM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: logo_element column ensured
+[DB] Auto-migration: blog image URLs updated to object storage
+
+
+innovation-visa-assistant.webapp | Railway
