@@ -50,7 +50,7 @@ function FeaturedHeroCard({ post }: { post: BlogPost }) {
 
   return (
     <Link href={`/blog/${post.slug}`} data-testid={`link-featured-${post.slug}`}>
-      <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden group cursor-pointer">
+      <div className="relative h-[300px] md:h-[350px] lg:h-[40vh] xl:h-[45vh] max-h-[450px] rounded-2xl overflow-hidden group cursor-pointer">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-primary/90 dark:from-primary/80 dark:via-primary/60 dark:to-primary/80" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
         
@@ -299,18 +299,18 @@ function StatsBar({ posts }: { posts: BlogPost[] }) {
   const categoriesCount = new Set(posts.map(p => p.category)).size;
   
   return (
-    <div className="grid grid-cols-3 gap-4 mb-2" data-testid="stats-bar">
+    <div className="grid grid-cols-3 gap-2 lg:gap-3 mb-2" data-testid="stats-bar">
       {[
         { label: "Articles", value: totalPosts, icon: Newspaper, testId: "stat-articles" },
         { label: "Categories", value: categoriesCount, icon: Tag, testId: "stat-categories" },
         { label: "Total Views", value: totalViews.toLocaleString(), icon: Eye, testId: "stat-views" },
       ].map((stat) => (
-        <div key={stat.label} className="bg-card rounded-xl p-4 flex items-center gap-3 border" data-testid={stat.testId}>
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <stat.icon className="w-5 h-5 text-primary" />
+        <div key={stat.label} className="bg-card rounded-lg p-2 lg:p-3 flex items-center gap-2 border" data-testid={stat.testId}>
+          <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+            <stat.icon className="w-4 h-4 lg:w-5 lg:h-5 text-primary" />
           </div>
           <div>
-            <p className="text-2xl font-bold" data-testid={`text-${stat.testId}-value`}>{stat.value}</p>
+            <p className="text-lg lg:text-xl font-bold" data-testid={`text-${stat.testId}-value`}>{stat.value}</p>
             <p className="text-xs text-muted-foreground">{stat.label}</p>
           </div>
         </div>
@@ -350,17 +350,17 @@ export default function BlogPage() {
       
       <div className="min-h-screen bg-gradient-to-b from-background via-accent/5 to-background">
         <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-accent/5 border-b">
-          <div className="responsive-container py-4">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
-                  <Newspaper className="w-6 h-6 text-white" />
+          <div className="responsive-container py-2 lg:py-3">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 lg:w-11 lg:h-11 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md shadow-primary/20">
+                  <Newspaper className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl md:text-2xl font-bold text-primary" data-testid="heading-blog">
+                  <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-primary" data-testid="heading-blog">
                     UK Visa Insights
                   </h1>
-                  <p className="text-muted-foreground text-sm" data-testid="text-blog-subtitle">
+                  <p className="text-muted-foreground text-xs lg:text-sm" data-testid="text-blog-subtitle">
                     Expert guidance for Innovator Founder Visa applicants
                   </p>
                 </div>
