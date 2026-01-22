@@ -335,17 +335,17 @@ export default function BlogPage() {
       
       <div className="min-h-screen bg-gradient-to-b from-background via-accent/5 to-background">
         <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-accent/5 border-b">
-          <div className="responsive-container py-12 md:py-16">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="responsive-container py-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center shadow-lg shadow-primary/10">
-                  <Newspaper className="w-8 h-8 text-primary" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
+                  <Newspaper className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-primary" data-testid="heading-blog">
+                  <h1 className="text-xl md:text-2xl font-bold text-primary" data-testid="heading-blog">
                     UK Visa Insights
                   </h1>
-                  <p className="text-muted-foreground text-lg" data-testid="text-blog-subtitle">
+                  <p className="text-muted-foreground text-sm" data-testid="text-blog-subtitle">
                     Expert guidance for Innovator Founder Visa applicants
                   </p>
                 </div>
@@ -358,12 +358,6 @@ export default function BlogPage() {
                 </Badge>
               </div>
             </div>
-            
-            <p className="text-muted-foreground mt-6 max-w-3xl text-lg" data-testid="text-blog-description">
-              Stay informed with the latest immigration updates, business planning strategies, 
-              endorsement tips, and success stories from applicants who've successfully navigated 
-              the UK visa process.
-            </p>
           </div>
         </div>
 
