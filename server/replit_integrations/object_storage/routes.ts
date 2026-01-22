@@ -72,6 +72,16 @@ export function registerObjectStorageRoutes(app: Express): void {
    */
   app.get("/objects/:objectPath(*)", async (req, res) => {
     try {
+      // Extract the path after /objects/
+      const filePath = req.params.objectPath || req.path.replace("/objects/", "");
+      
+      // First try to find in public objects
+      const publicFile = await objectStorageService.searchPublicObject(filePath);
+      if (publicFile) {
+        return await objectStorageService.downloadObject(publicFile, res);
+      }
+      
+      // Fall back to entity file (private)
       const objectFile = await objectStorageService.getObjectEntityFile(req.path);
       await objectStorageService.downloadObject(objectFile, res);
     } catch (error) {
