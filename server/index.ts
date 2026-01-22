@@ -236,33 +236,33 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use("/uploads", express.static(uploadsDir));
 
-// Serve blog assets - check multiple locations for dev and production
-const blogAssetsPaths = [
+// Serve blog images - check local first, then S3
+import { s3Storage } from "./services/s3Storage";
+const blogLocalPaths = [
   path.join(process.cwd(), "client/src/assets/blog"),
   path.join(process.cwd(), "dist/public/assets/blog"),
   path.join(process.cwd(), "public/assets/blog"),
 ];
-let blogAssetsFound = false;
-for (const blogAssetsDir of blogAssetsPaths) {
-  if (fs.existsSync(blogAssetsDir)) {
-    app.use("/assets/blog", express.static(blogAssetsDir, {
-      maxAge: "7d",
-      immutable: true
-    }));
-    console.log(`[Static] Serving blog assets from: ${blogAssetsDir}`);
-    blogAssetsFound = true;
-    break;
-  }
-}
 
-// S3 fallback for blog images (production)
-import { s3Storage } from "./services/s3Storage";
 app.get(["/assets/blog/:filename", "/objects/blog/:filename"], async (req, res, next) => {
+  const filename = req.params.filename;
+  
+  // Try local files first
+  for (const dir of blogLocalPaths) {
+    const localPath = path.join(dir, filename);
+    if (fs.existsSync(localPath)) {
+      res.set({
+        "Content-Type": "image/jpeg",
+        "Cache-Control": "public, max-age=604800",
+      });
+      return res.sendFile(localPath);
+    }
+  }
+  
+  // Fallback to S3
   try {
-    const filename = req.params.filename;
-    const s3Key = `blog-images/${filename}`;
-    
     if (s3Storage.isAvailable()) {
+      const s3Key = `blog-images/${filename}`;
       const buffer = await s3Storage.downloadFile(s3Key);
       res.set({
         "Content-Type": "image/jpeg",
@@ -270,11 +270,13 @@ app.get(["/assets/blog/:filename", "/objects/blog/:filename"], async (req, res, 
       });
       return res.send(buffer);
     }
-    next();
   } catch (error) {
-    next();
+    console.log(`[Blog] Image not found: ${filename}`);
   }
+  
+  next();
 });
+console.log("[Blog] Image route configured (local + S3 fallback)");
 
 app.use((req, res, next) => {
   const start = Date.now();
