@@ -444,5 +444,6 @@ app.use((req, res, next) => {
         console.error("Initial notification processing error:", error);
       }
     }, 10000); // 10 second delay after startup
+    
   });
 })();
