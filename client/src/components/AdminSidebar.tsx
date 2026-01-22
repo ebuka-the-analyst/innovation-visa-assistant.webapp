@@ -289,64 +289,64 @@ export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUs
 
   return (
     <Sidebar className="border-r border-border/50">
-      <SidebarHeader className="border-b border-border/50 p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/60">
-            <Shield className="h-5 w-5 text-primary-foreground" />
+      <SidebarHeader className="border-b border-border/50 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/60">
+            <Shield className="h-4 w-4 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="text-lg font-bold">Admin Console</h2>
-            <p className="text-xs text-muted-foreground">UK Innovator Founder Visa Assistant</p>
+            <h2 className="text-sm font-bold leading-tight">Admin Console</h2>
+            <p className="text-[10px] text-muted-foreground leading-tight">UK Innovator Founder Visa</p>
           </div>
         </div>
         
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-lg bg-card/50 border border-border/50 p-2 text-center">
-            <div className="text-lg font-bold text-primary">
+        <div className="mt-2 grid grid-cols-2 gap-1.5">
+          <div className="rounded-md bg-card/50 border border-border/50 px-2 py-1 text-center">
+            <div className="text-sm font-bold text-primary leading-tight">
               <AnimatedStat value={stats?.totalUsers || 0} />
             </div>
-            <div className="text-[10px] text-muted-foreground">Total Users</div>
+            <div className="text-[9px] text-muted-foreground">Total Users</div>
           </div>
-          <div className="rounded-lg bg-card/50 border border-border/50 p-2 text-center">
-            <div className="text-lg font-bold text-green-500">
+          <div className="rounded-md bg-card/50 border border-border/50 px-2 py-1 text-center">
+            <div className="text-sm font-bold text-green-500 leading-tight">
               <AnimatedStat value={stats?.activeUsers || 0} />
             </div>
-            <div className="text-[10px] text-muted-foreground">Active Now</div>
+            <div className="text-[9px] text-muted-foreground">Active Now</div>
           </div>
         </div>
         
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-1.5 py-1">
         {menuGroups.map((group) => (
           <Collapsible 
             key={group.label}
             open={expandedGroups.includes(group.label)}
             onOpenChange={() => toggleGroup(group.label)}
           >
-            <SidebarGroup>
+            <SidebarGroup className="py-0.5">
               <CollapsibleTrigger asChild>
-                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-accent/50 rounded-md px-2 py-1.5 transition-colors">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <SidebarGroupLabel className="flex items-center justify-between cursor-pointer hover:bg-accent/50 rounded-md px-2 py-1 transition-colors min-h-0 h-auto">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {group.label}
                   </span>
-                  <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${expandedGroups.includes(group.label) ? 'rotate-90' : ''}`} />
+                  <ChevronRight className={`h-3 w-3 text-muted-foreground transition-transform duration-200 ${expandedGroups.includes(group.label) ? 'rotate-90' : ''}`} />
                 </SidebarGroupLabel>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
+                <SidebarGroupContent className="py-0">
+                  <SidebarMenu className="gap-0">
                     {group.items.map((item) => (
-                      <SidebarMenuItem key={item.id}>
+                      <SidebarMenuItem key={item.id} className="py-0">
                         <SidebarMenuButton
                           onClick={() => onSectionChange(item.id)}
                           isActive={activeSection === item.id}
-                          className="w-full justify-between"
+                          className="w-full justify-between h-7 min-h-0 px-2"
                           data-testid={`sidebar-${item.id}`}
                         >
-                          <div className="flex items-center gap-2">
-                            <item.icon className="h-4 w-4" />
-                            <span className="text-sm">{item.label}</span>
+                          <div className="flex items-center gap-1.5">
+                            <item.icon className="h-3.5 w-3.5" />
+                            <span className="text-xs">{item.label}</span>
                           </div>
                           {getBadgeContent(item.badge)}
                         </SidebarMenuButton>
@@ -360,9 +360,9 @@ export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUs
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border/50 p-4">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+      <SidebarFooter className="border-t border-border/50 px-3 py-1.5">
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
           <span>System Healthy</span>
           <span className="ml-auto">v2.0.0</span>
         </div>
