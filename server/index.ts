@@ -234,6 +234,15 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use("/uploads", express.static(uploadsDir));
 
+// Serve blog assets
+const blogAssetsDir = path.join(process.cwd(), "client/src/assets/blog");
+if (fs.existsSync(blogAssetsDir)) {
+  app.use("/assets/blog", express.static(blogAssetsDir, {
+    maxAge: "7d",
+    immutable: true
+  }));
+}
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

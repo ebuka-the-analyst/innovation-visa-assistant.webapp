@@ -169,8 +169,17 @@ function BlogPostCard({ post, variant = "default" }: { post: BlogPost; variant?:
       <Link href={`/blog/${post.slug}`} data-testid={`link-post-${post.slug}`}>
         <Card className="hover-elevate transition-all duration-300 group overflow-hidden">
           <div className="flex flex-col sm:flex-row">
-            <div className="sm:w-48 h-32 sm:h-auto bg-gradient-to-br from-primary/20 to-accent/20 dark:from-primary/10 dark:to-accent/10 flex items-center justify-center shrink-0">
-              <Newspaper className="w-12 h-12 text-primary/40" />
+            <div className="sm:w-48 h-32 sm:h-auto bg-gradient-to-br from-primary/20 to-accent/20 dark:from-primary/10 dark:to-accent/10 flex items-center justify-center shrink-0 overflow-hidden">
+              {post.featuredImage ? (
+                <img 
+                  src={post.featuredImage} 
+                  alt={post.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <Newspaper className="w-12 h-12 text-primary/40" />
+              )}
             </div>
             <div className="flex-1 p-4">
               <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -206,12 +215,23 @@ function BlogPostCard({ post, variant = "default" }: { post: BlogPost; variant?:
     <Link href={`/blog/${post.slug}`} data-testid={`link-post-${post.slug}`}>
       <Card className="hover-elevate transition-all duration-300 group h-full flex flex-col overflow-hidden border-0 shadow-lg dark:shadow-none dark:border">
         <div className="aspect-[16/10] bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 dark:from-primary/5 dark:via-accent/5 dark:to-primary/5 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDVFQjgiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <BookOpen className="w-10 h-10 text-primary/60" />
-            </div>
-          </div>
+          {post.featuredImage ? (
+            <img 
+              src={post.featuredImage} 
+              alt={post.title}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDVFQjgiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <BookOpen className="w-10 h-10 text-primary/60" />
+                </div>
+              </div>
+            </>
+          )}
           
           <div className="absolute top-3 left-3 flex items-center gap-2 flex-wrap">
             <Badge variant="secondary" className="text-xs shadow-md" data-testid={`badge-category-${post.id}`}>
