@@ -148,7 +148,7 @@ function FeaturedCarousel({ posts }: { posts: BlogPost[] }) {
               variant="ghost"
               size="icon"
               onClick={() => goTo((current - 1 + posts.length) % posts.length)}
-              className="bg-white/80 dark:bg-white/90 text-primary border border-primary/20 shadow-md"
+              className="bg-white/15 dark:bg-white/15 text-white border border-white/20"
               data-testid="button-carousel-prev"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -157,7 +157,7 @@ function FeaturedCarousel({ posts }: { posts: BlogPost[] }) {
               variant="ghost"
               size="icon"
               onClick={() => goTo((current + 1) % posts.length)}
-              className="bg-white/80 dark:bg-white/90 text-primary border border-primary/20 shadow-md"
+              className="bg-white/15 dark:bg-white/15 text-white border border-white/20"
               data-testid="button-carousel-next"
             >
               <ChevronRight className="w-5 h-5" />
