@@ -15,6 +15,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import type { BlogPost } from "@shared/schema";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import { trackBlogView, trackBlogShare, trackSearch, trackCTAClick } from "@/lib/analytics";
 
 function LiveTime() {
   const [time, setTime] = useState(new Date());

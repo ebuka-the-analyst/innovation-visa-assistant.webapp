@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import logoLightImg from "@assets/official_logo.webp";
 import logoDarkImg from "@assets/logo_dark.webp";
 import { SEOHead } from "@/components/SEOHead";
+import { trackSignUp, trackFormStart, trackFormSubmit, trackError } from "@/lib/analytics";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
@@ -73,12 +74,14 @@ export default function Signup() {
   }, [search]);
 
   const handleGoogleSignup = () => {
+    trackFormStart('signup');
     window.location.href = "/api/auth/google";
   };
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    trackFormStart('signup');
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -116,9 +119,15 @@ export default function Signup() {
       // Clear stored referral code after successful signup
       sessionStorage.removeItem('referralCode');
 
+      // Track successful signup
+      trackSignUp('email');
+      trackFormSubmit('signup', true);
+
       // Show success screen with verification instructions
       setRegistrationSuccess({ email: formData.email });
     } catch (error: any) {
+      trackError('signup', 'Connection error');
+      trackFormSubmit('signup', false);
       toast({
         title: "Connection error",
         description: "Please check your internet connection and try again",

@@ -15,6 +15,7 @@ import logoLightImg from "@assets/official_logo.webp";
 import logoDarkImg from "@assets/logo_dark.webp";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initActivityTracking, trackRouteChange } from "@/lib/activityTracker";
+import { useInitGA, useAnalytics, useUserIdentification, useScrollTracking } from "@/hooks/use-analytics";
 
 // Lazy load ChatBot, FloatingFeedback and other heavy components
 const ChatBot = lazy(() => import("@/components/ChatBot"));
@@ -435,25 +436,35 @@ function AppLayout() {
   );
 }
 
+// Google Analytics + Page Tracking component
+function AnalyticsProvider({ children }: { children: React.ReactNode }) {
+  useInitGA(); // Initialize Google Analytics on app load
+  useAnalytics(); // Track page views on route changes
+  useScrollTracking(); // Track scroll depth for engagement metrics
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <VoicePermissionProvider>
-          <TooltipProvider>
-            <Suspense fallback={null}>
-              <ChatBot />
-              <FloatingFeedback />
-              <ToolsChronographWheel />
-              <SiteFeedbackPopup />
-            </Suspense>
-            <Toaster />
-            <AppLayout />
-            <Suspense fallback={null}>
-              <CookieConsent />
-            </Suspense>
-          </TooltipProvider>
-        </VoicePermissionProvider>
+        <AnalyticsProvider>
+          <VoicePermissionProvider>
+            <TooltipProvider>
+              <Suspense fallback={null}>
+                <ChatBot />
+                <FloatingFeedback />
+                <ToolsChronographWheel />
+                <SiteFeedbackPopup />
+              </Suspense>
+              <Toaster />
+              <AppLayout />
+              <Suspense fallback={null}>
+                <CookieConsent />
+              </Suspense>
+            </TooltipProvider>
+          </VoicePermissionProvider>
+        </AnalyticsProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

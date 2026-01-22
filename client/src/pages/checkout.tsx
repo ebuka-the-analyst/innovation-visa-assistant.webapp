@@ -13,6 +13,7 @@ import { SEOHead } from "@/components/SEOHead";
 import ThemeToggle from "@/components/ThemeToggle";
 import logoLight from "@assets/official_logo.webp";
 import logoDark from "@assets/logo_dark.webp";
+import { trackBeginCheckout, trackViewItem, trackSubscriptionStart, trackCTAClick } from "@/lib/analytics";
 
 interface PromoCodeValidation {
   valid: boolean;
@@ -166,6 +167,18 @@ export default function Checkout() {
   });
 
   const handleCheckout = () => {
+    // Track checkout begin event for GA4
+    if (pricing) {
+      trackViewItem(tier, pricing.name, finalPrice, 'GBP');
+      trackBeginCheckout(finalPrice, 'GBP', [{
+        item_id: tier,
+        item_name: pricing.name,
+        price: finalPrice,
+        quantity: 1,
+      }]);
+      trackSubscriptionStart(pricing.name, finalPrice, 'monthly');
+    }
+    trackCTAClick('proceed_to_payment', 'checkout_page');
     setIsProcessing(true);
     checkoutMutation.mutate();
   };

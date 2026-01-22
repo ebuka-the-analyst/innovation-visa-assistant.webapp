@@ -12,6 +12,7 @@ import logoLightImg from "@assets/official_logo.webp";
 import logoDarkImg from "@assets/logo_dark.webp";
 import { SEOHead } from "@/components/SEOHead";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { trackLogin, trackFormStart, trackFormSubmit, trackError } from "@/lib/analytics";
 
 export default function Login() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -37,6 +38,7 @@ export default function Login() {
   }, [isAuthenticated, isLoading, user]);
 
   const handleGoogleLogin = () => {
+    trackFormStart('login');
     window.location.href = "/api/auth/google";
   };
 
@@ -44,6 +46,7 @@ export default function Login() {
     e.preventDefault();
     setIsSubmitting(true);
     setVerificationRequired(null);
+    trackFormStart('login');
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -70,6 +73,10 @@ export default function Login() {
         return;
       }
 
+      // Track successful login
+      trackLogin('email');
+      trackFormSubmit('login', true);
+      
       toast({
         title: "Welcome back!",
         description: "Successfully signed in",
@@ -88,6 +95,8 @@ export default function Login() {
       }
     } catch (error: any) {
       // Network or other error
+      trackError('login', 'Connection error');
+      trackFormSubmit('login', false);
       toast({
         title: "Connection error",
         description: "Unable to connect. Please try again.",
