@@ -1,0 +1,92 @@
+cron-job.org
+Cronjobs
+Daily Blog Generator
+Edit cronjob: Daily Blog Generator
+Title
+Daily Blog Generator
+URL *
+https://innovatorfoundervisaassistant.co.uk/api/cron/generate-blogs
+Enable job
+Save responses in job history
+Execution schedule
+Every
+15
+Every day at
+6
+:
+0
+Every
+1
+of the month at
+0
+:
+0
+Every year on
+1
+1
+at
+0
+:
+0
+Custom
+Next executions
+Thursday, January 22, 2026 6:00 AM
+Friday, January 23, 2026 6:00 AM
+Saturday, January 24, 2026 6:00 AM
+Sunday, January 25, 2026 6:00 AM
+Monday, January 26, 2026 6:00 AM
+In this job's individual timezone (Europe/London).
+Crontab expression
+0 6 * * *
+
+Schedule expires
+Notify me when...
+execution of the cronjob fails
+Notify after
+1
+failure
+
+execution of the cronjob succeeds after it failed before
+the cronjob will be disabled because of too many failures
+© 2026 cron-job.org | English | Contact | Blog | Twitter | GitHub
+
+Perform test run: Daily Blog Generator
+Test run status
+202 Accepted
+Duration
+593 ms
+Peer
+66.33.22.154:443
+Timing
+70 ms
+140 ms
+210 ms
+280 ms
+350 ms
+420 ms
+490 ms
+591.95 ms
+DNSConnectSSLSendWaitReceive
+Details
+HTTP/1.1 202 Accepted
+Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+Content-Length: 86
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://accounts.google.com https://api.resend.com wss:; frame-src 'self' https://challenges.cloudflare.com https://accounts.google.com; base-uri 'self'; form-action 'self'
+Content-Type: application/json; charset=utf-8
+Date: Thu, 22 Jan 2026 02:07:21 GMT
+Etag: W/"56-Ahj/OOKrBQJXaDJkF/qSc39v1AA"
+Expires: 0
+Permissions-Policy: camera=(), microphone=(self), geolocation=()
+Pragma: no-cache
+Referrer-Policy: strict-origin-when-cross-origin
+Server: railway-edge
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Powered-By: Express
+X-Railway-Edge: railway/europe-west4-drams3a
+X-Railway-Request-Id: kgeOtlaMQuSRiO3Qss7a6g
+X-Xss-Protection: 1; mode=block
+ 
+{"success":true,"message":"Blog generation started for 5 posts","status":"processing"}
+0 ms
