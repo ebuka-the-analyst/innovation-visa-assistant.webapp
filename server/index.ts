@@ -6,6 +6,8 @@ import path from "path";
 import fs from "fs";
 import compression from "compression";
 import { fileURLToPath } from "url";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 // Get __dirname equivalent for ESM (works in Node 18+)
 const __filename = fileURLToPath(import.meta.url);
@@ -267,6 +269,16 @@ app.use((req, res, next) => {
       }
 
       log(logLine);
+      
+      // Log API latency to database for analytics (async, non-blocking)
+      // Skip logging for the analytics endpoints themselves to avoid recursion
+      if (!path.includes('/analytics/') && !path.includes('/activity/')) {
+        const user = (req as any).user;
+        db.execute(sql`
+          INSERT INTO api_latency_log (route, method, status_code, duration_ms, user_id, timestamp)
+          VALUES (${path}, ${req.method}, ${res.statusCode}, ${duration}, ${user?.id || null}, NOW())
+        `).catch(() => {}); // Silently ignore errors to not affect main request
+      }
     }
   });
 

@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits, eventLog, apiLatencyLog } from "@shared/schema";
 import { generateBlogPost, generateMultiplePosts, generateBackdatedPosts } from "./blogGenerator";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -13916,6 +13916,959 @@ Return a JSON object with:
     } catch (error) {
       console.error("Blog update error:", error);
       res.status(500).json({ error: "Failed to update blog post" });
+    }
+  });
+
+  // ============================================
+  // COMPREHENSIVE ANALYTICS API (PhD-Level Enterprise Analytics)
+  // ============================================
+
+  // Get comprehensive dashboard KPIs
+  app.get("/api/admin/analytics/comprehensive-kpis", requireAdmin, async (req, res) => {
+    try {
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      // Active users metrics
+      const activeUsers = await db.execute(sql`
+        SELECT 
+          (SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE last_seen_at > ${new Date(now.getTime() - 5 * 60 * 1000)}) as active_now,
+          (SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE last_seen_at > ${oneDayAgo}) as active_24h,
+          (SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE last_seen_at > ${sevenDaysAgo}) as active_7d,
+          (SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE last_seen_at > ${thirtyDaysAgo}) as active_30d
+      `);
+
+      // User growth
+      const userGrowth = await db.execute(sql`
+        SELECT 
+          (SELECT COUNT(*) FROM users WHERE created_at > ${oneDayAgo}) as new_today,
+          (SELECT COUNT(*) FROM users WHERE created_at > ${sevenDaysAgo}) as new_7d,
+          (SELECT COUNT(*) FROM users WHERE created_at > ${thirtyDaysAgo}) as new_30d,
+          (SELECT COUNT(*) FROM users) as total_users
+      `);
+
+      // Plan metrics
+      const planMetrics = await db.execute(sql`
+        SELECT 
+          (SELECT COUNT(*) FROM business_plans WHERE created_at > ${oneDayAgo}) as plans_today,
+          (SELECT COUNT(*) FROM business_plans WHERE created_at > ${sevenDaysAgo}) as plans_7d,
+          (SELECT COUNT(*) FROM business_plans WHERE status = 'completed') as completed_total,
+          (SELECT COUNT(*) FROM business_plans) as total_plans
+      `);
+
+      // Revenue metrics
+      const revenueMetrics = await db.execute(sql`
+        SELECT 
+          COALESCE(SUM(CASE WHEN created_at > ${oneDayAgo} THEN amount_gbp ELSE 0 END), 0) as revenue_today,
+          COALESCE(SUM(CASE WHEN created_at > ${sevenDaysAgo} THEN amount_gbp ELSE 0 END), 0) as revenue_7d,
+          COALESCE(SUM(CASE WHEN created_at > ${thirtyDaysAgo} THEN amount_gbp ELSE 0 END), 0) as revenue_30d,
+          COALESCE(SUM(amount_gbp), 0) as revenue_total
+        FROM payment_transactions WHERE status = 'succeeded'
+      `);
+
+      // Tool usage
+      const toolUsage = await db.execute(sql`
+        SELECT 
+          COUNT(*) as total_runs,
+          COUNT(DISTINCT user_id) as unique_users,
+          COUNT(DISTINCT tool_id) as tools_used
+        FROM activity_events 
+        WHERE event_type = 'tool_use' AND occurred_at > ${sevenDaysAgo}
+      `);
+
+      // Error rate
+      const errorRate = await db.execute(sql`
+        SELECT 
+          COUNT(*) FILTER (WHERE status_code >= 500) as server_errors,
+          COUNT(*) FILTER (WHERE status_code >= 400 AND status_code < 500) as client_errors,
+          COUNT(*) as total_requests,
+          ROUND(AVG(duration_ms)::numeric, 2) as avg_latency
+        FROM api_latency_log WHERE timestamp > ${oneDayAgo}
+      `);
+
+      res.json({
+        activeUsers: activeUsers.rows[0],
+        userGrowth: userGrowth.rows[0],
+        planMetrics: planMetrics.rows[0],
+        revenueMetrics: revenueMetrics.rows[0],
+        toolUsage: toolUsage.rows[0],
+        errorRate: errorRate.rows[0],
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Comprehensive KPIs error:", error);
+      res.status(500).json({ error: "Failed to fetch KPIs" });
+    }
+  });
+
+  // API Latency monitoring endpoint (logs every request)
+  app.get("/api/admin/analytics/api-performance", requireAdmin, async (req, res) => {
+    try {
+      const hours = parseInt(req.query.hours as string) || 24;
+      const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+      // Latency by route
+      const latencyByRoute = await db.execute(sql`
+        SELECT 
+          route,
+          method,
+          COUNT(*) as request_count,
+          ROUND(AVG(duration_ms)::numeric, 2) as avg_latency,
+          ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY duration_ms)::numeric, 2) as p50,
+          ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms)::numeric, 2) as p95,
+          ROUND(PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY duration_ms)::numeric, 2) as p99,
+          MIN(duration_ms) as min_latency,
+          MAX(duration_ms) as max_latency,
+          COUNT(*) FILTER (WHERE status_code >= 500) as errors
+        FROM api_latency_log
+        WHERE timestamp > ${since}
+        GROUP BY route, method
+        ORDER BY request_count DESC
+        LIMIT 50
+      `);
+
+      // Latency over time (hourly)
+      const latencyOverTime = await db.execute(sql`
+        SELECT 
+          DATE_TRUNC('hour', timestamp) as hour,
+          ROUND(AVG(duration_ms)::numeric, 2) as avg_latency,
+          COUNT(*) as requests,
+          COUNT(*) FILTER (WHERE status_code >= 500) as errors
+        FROM api_latency_log
+        WHERE timestamp > ${since}
+        GROUP BY hour
+        ORDER BY hour
+      `);
+
+      // Slowest endpoints
+      const slowestEndpoints = await db.execute(sql`
+        SELECT 
+          route, method, duration_ms, status_code, error_message, timestamp
+        FROM api_latency_log
+        WHERE timestamp > ${since}
+        ORDER BY duration_ms DESC
+        LIMIT 20
+      `);
+
+      // Error breakdown
+      const errorBreakdown = await db.execute(sql`
+        SELECT 
+          route,
+          status_code,
+          error_type,
+          COUNT(*) as count
+        FROM api_latency_log
+        WHERE timestamp > ${since} AND status_code >= 400
+        GROUP BY route, status_code, error_type
+        ORDER BY count DESC
+        LIMIT 30
+      `);
+
+      res.json({
+        latencyByRoute: latencyByRoute.rows,
+        latencyOverTime: latencyOverTime.rows,
+        slowestEndpoints: slowestEndpoints.rows,
+        errorBreakdown: errorBreakdown.rows,
+        period: { hours, since: since.toISOString() },
+      });
+    } catch (error) {
+      console.error("API performance error:", error);
+      res.status(500).json({ error: "Failed to fetch API performance" });
+    }
+  });
+
+  // User behavior heatmap data
+  app.get("/api/admin/analytics/heatmap", requireAdmin, async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 7;
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+      // Activity by hour of day and day of week
+      const heatmapData = await db.execute(sql`
+        SELECT 
+          EXTRACT(DOW FROM view_started_at) as day_of_week,
+          EXTRACT(HOUR FROM view_started_at) as hour_of_day,
+          COUNT(*) as page_views,
+          COUNT(DISTINCT user_id) as unique_users
+        FROM page_views
+        WHERE view_started_at > ${since}
+        GROUP BY day_of_week, hour_of_day
+        ORDER BY day_of_week, hour_of_day
+      `);
+
+      // Peak hours
+      const peakHours = await db.execute(sql`
+        SELECT 
+          EXTRACT(HOUR FROM view_started_at) as hour,
+          COUNT(*) as activity_count
+        FROM page_views
+        WHERE view_started_at > ${since}
+        GROUP BY hour
+        ORDER BY activity_count DESC
+        LIMIT 5
+      `);
+
+      // Activity by day
+      const dailyActivity = await db.execute(sql`
+        SELECT 
+          DATE(view_started_at) as date,
+          COUNT(*) as page_views,
+          COUNT(DISTINCT user_id) as unique_users,
+          COUNT(DISTINCT session_id) as sessions
+        FROM page_views
+        WHERE view_started_at > ${since}
+        GROUP BY date
+        ORDER BY date
+      `);
+
+      // Aggregate hourly stats
+      const hourlyAggregates = await db.execute(sql`
+        SELECT * FROM hourly_activity_aggregates
+        WHERE hour_timestamp > ${since}
+        ORDER BY hour_timestamp
+      `);
+
+      res.json({
+        heatmapData: heatmapData.rows,
+        peakHours: peakHours.rows,
+        dailyActivity: dailyActivity.rows,
+        hourlyAggregates: hourlyAggregates.rows,
+        period: { days, since: since.toISOString() },
+      });
+    } catch (error) {
+      console.error("Heatmap error:", error);
+      res.status(500).json({ error: "Failed to fetch heatmap data" });
+    }
+  });
+
+  // User journey / Sankey flow data
+  app.get("/api/admin/analytics/user-journeys", requireAdmin, async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 7;
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+      // Page flow transitions
+      const pageFlows = await db.execute(sql`
+        WITH ordered_views AS (
+          SELECT 
+            session_id,
+            page_path,
+            LAG(page_path) OVER (PARTITION BY session_id ORDER BY view_started_at) as prev_page
+          FROM page_views
+          WHERE view_started_at > ${since}
+        )
+        SELECT 
+          prev_page as source,
+          page_path as target,
+          COUNT(*) as value
+        FROM ordered_views
+        WHERE prev_page IS NOT NULL
+        GROUP BY prev_page, page_path
+        ORDER BY value DESC
+        LIMIT 100
+      `);
+
+      // Entry points
+      const entryPoints = await db.execute(sql`
+        SELECT 
+          entry_page as page,
+          COUNT(*) as sessions,
+          COUNT(DISTINCT user_id) as unique_users
+        FROM user_sessions
+        WHERE session_started_at > ${since} AND entry_page IS NOT NULL
+        GROUP BY entry_page
+        ORDER BY sessions DESC
+        LIMIT 20
+      `);
+
+      // Exit points
+      const exitPoints = await db.execute(sql`
+        SELECT 
+          exit_page as page,
+          COUNT(*) as sessions
+        FROM user_sessions
+        WHERE session_ended_at IS NOT NULL AND session_ended_at > ${since} AND exit_page IS NOT NULL
+        GROUP BY exit_page
+        ORDER BY sessions DESC
+        LIMIT 20
+      `);
+
+      // Popular paths (sequences)
+      const popularPaths = await db.execute(sql`
+        WITH session_paths AS (
+          SELECT 
+            session_id,
+            STRING_AGG(page_path, ' → ' ORDER BY view_started_at) as path
+          FROM page_views
+          WHERE view_started_at > ${since}
+          GROUP BY session_id
+        )
+        SELECT 
+          path,
+          COUNT(*) as occurrences
+        FROM session_paths
+        GROUP BY path
+        ORDER BY occurrences DESC
+        LIMIT 20
+      `);
+
+      res.json({
+        pageFlows: pageFlows.rows,
+        entryPoints: entryPoints.rows,
+        exitPoints: exitPoints.rows,
+        popularPaths: popularPaths.rows,
+        period: { days, since: since.toISOString() },
+      });
+    } catch (error) {
+      console.error("User journeys error:", error);
+      res.status(500).json({ error: "Failed to fetch user journeys" });
+    }
+  });
+
+  // Conversion funnel analysis
+  app.get("/api/admin/analytics/conversion-funnel", requireAdmin, async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 30;
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+      // Signup to purchase funnel
+      const signupToPurchase = await db.execute(sql`
+        WITH funnel_steps AS (
+          SELECT 
+            u.id as user_id,
+            u.created_at as signup_time,
+            (SELECT MIN(created_at) FROM business_plans WHERE user_id = u.id) as first_plan_time,
+            (SELECT MIN(created_at) FROM business_plans WHERE user_id = u.id AND status = 'completed') as first_complete_time,
+            (SELECT MIN(created_at) FROM payment_transactions WHERE user_id = u.id AND status = 'succeeded') as first_purchase_time
+          FROM users u
+          WHERE u.created_at > ${since}
+        )
+        SELECT 
+          COUNT(*) as total_signups,
+          COUNT(first_plan_time) as created_plan,
+          COUNT(first_complete_time) as completed_plan,
+          COUNT(first_purchase_time) as made_purchase,
+          ROUND(100.0 * COUNT(first_plan_time) / NULLIF(COUNT(*), 0), 2) as plan_rate,
+          ROUND(100.0 * COUNT(first_complete_time) / NULLIF(COUNT(first_plan_time), 0), 2) as completion_rate,
+          ROUND(100.0 * COUNT(first_purchase_time) / NULLIF(COUNT(*), 0), 2) as purchase_rate
+        FROM funnel_steps
+      `);
+
+      // Time between funnel steps
+      const funnelTiming = await db.execute(sql`
+        WITH funnel_steps AS (
+          SELECT 
+            u.id as user_id,
+            u.created_at as signup_time,
+            (SELECT MIN(created_at) FROM business_plans WHERE user_id = u.id) as first_plan_time,
+            (SELECT MIN(created_at) FROM payment_transactions WHERE user_id = u.id AND status = 'succeeded') as first_purchase_time
+          FROM users u
+          WHERE u.created_at > ${since}
+        )
+        SELECT 
+          AVG(EXTRACT(EPOCH FROM (first_plan_time - signup_time)) / 3600) as avg_hours_to_plan,
+          AVG(EXTRACT(EPOCH FROM (first_purchase_time - signup_time)) / 3600) as avg_hours_to_purchase
+        FROM funnel_steps
+        WHERE first_plan_time IS NOT NULL OR first_purchase_time IS NOT NULL
+      `);
+
+      // Drop-off analysis by step
+      const dropOffByDevice = await db.execute(sql`
+        SELECT 
+          device_type,
+          funnel_name,
+          step_name,
+          step_index,
+          COUNT(*) as total,
+          SUM(CASE WHEN completed THEN 1 ELSE 0 END) as completed_count,
+          SUM(CASE WHEN dropped_off THEN 1 ELSE 0 END) as dropped_count,
+          ROUND(100.0 * SUM(CASE WHEN dropped_off THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0), 2) as drop_rate
+        FROM conversion_funnel_events
+        WHERE timestamp > ${since}
+        GROUP BY device_type, funnel_name, step_name, step_index
+        ORDER BY funnel_name, step_index
+      `);
+
+      // Daily conversion trend
+      const dailyConversions = await db.execute(sql`
+        SELECT 
+          DATE(created_at) as date,
+          COUNT(*) as signups,
+          COUNT(DISTINCT CASE WHEN subscription_tier != 'free' THEN id END) as paid_users
+        FROM users
+        WHERE created_at > ${since}
+        GROUP BY date
+        ORDER BY date
+      `);
+
+      res.json({
+        signupToPurchase: signupToPurchase.rows[0],
+        funnelTiming: funnelTiming.rows[0],
+        dropOffByDevice: dropOffByDevice.rows,
+        dailyConversions: dailyConversions.rows,
+        period: { days, since: since.toISOString() },
+      });
+    } catch (error) {
+      console.error("Conversion funnel error:", error);
+      res.status(500).json({ error: "Failed to fetch conversion funnel" });
+    }
+  });
+
+  // System health dashboard
+  app.get("/api/admin/analytics/system-health", requireAdmin, async (req, res) => {
+    try {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+      // Error log summary
+      const errorSummary = await db.execute(sql`
+        SELECT 
+          error_type,
+          COUNT(*) as count,
+          MAX(created_at) as last_occurrence
+        FROM error_logs
+        WHERE created_at > ${oneDayAgo}
+        GROUP BY error_type
+        ORDER BY count DESC
+        LIMIT 10
+      `);
+
+      // API health (last hour)
+      const apiHealth = await db.execute(sql`
+        SELECT 
+          COUNT(*) as total_requests,
+          COUNT(*) FILTER (WHERE status_code >= 200 AND status_code < 300) as success,
+          COUNT(*) FILTER (WHERE status_code >= 400 AND status_code < 500) as client_errors,
+          COUNT(*) FILTER (WHERE status_code >= 500) as server_errors,
+          ROUND(AVG(duration_ms)::numeric, 2) as avg_latency,
+          MAX(duration_ms) as max_latency
+        FROM api_latency_log
+        WHERE timestamp > ${oneHourAgo}
+      `);
+
+      // Database connection stats (simulated - would need pg_stat)
+      const dbHealth = await db.execute(sql`
+        SELECT 
+          (SELECT COUNT(*) FROM users) as total_users,
+          (SELECT COUNT(*) FROM business_plans) as total_plans,
+          (SELECT COUNT(*) FROM user_sessions WHERE is_active = true) as active_sessions,
+          pg_database_size(current_database()) as db_size_bytes
+      `);
+
+      // Recent critical errors
+      const criticalErrors = await db.execute(sql`
+        SELECT 
+          id, error_type, error_message, created_at, user_id
+        FROM error_logs
+        WHERE severity = 'critical' OR error_type IN ('database', 'payment', 'authentication')
+        ORDER BY created_at DESC
+        LIMIT 10
+      `);
+
+      // Security events
+      const securityEvents = await db.execute(sql`
+        SELECT 
+          event_type,
+          COUNT(*) as count,
+          MAX(timestamp) as last_occurrence
+        FROM security_analytics
+        WHERE timestamp > ${oneDayAgo}
+        GROUP BY event_type
+        ORDER BY count DESC
+      `);
+
+      res.json({
+        errorSummary: errorSummary.rows,
+        apiHealth: apiHealth.rows[0],
+        dbHealth: dbHealth.rows[0],
+        criticalErrors: criticalErrors.rows,
+        securityEvents: securityEvents.rows,
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("System health error:", error);
+      res.status(500).json({ error: "Failed to fetch system health" });
+    }
+  });
+
+  // Track event (for frontend to send events)
+  app.post("/api/analytics/track", async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { eventName, properties, pagePath, sessionId, deviceInfo } = req.body;
+
+      if (!eventName) {
+        return res.status(400).json({ error: "eventName is required" });
+      }
+
+      await db.insert(eventLog).values({
+        eventName,
+        userId: user?.id || null,
+        sessionId: sessionId || null,
+        pagePath: pagePath || null,
+        properties: properties || {},
+        deviceType: deviceInfo?.deviceType || null,
+        browser: deviceInfo?.browser || null,
+        os: deviceInfo?.os || null,
+        country: deviceInfo?.country || null,
+        utmSource: properties?.utm_source || null,
+        utmMedium: properties?.utm_medium || null,
+        utmCampaign: properties?.utm_campaign || null,
+        timestamp: new Date(),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Track event error:", error);
+      res.status(500).json({ error: "Failed to track event" });
+    }
+  });
+
+  // Log API latency (middleware helper)
+  app.post("/api/admin/analytics/log-latency", requireAdmin, async (req, res) => {
+    try {
+      const { route, method, statusCode, durationMs, userId, errorType, errorMessage } = req.body;
+
+      await db.insert(apiLatencyLog).values({
+        route,
+        method,
+        statusCode,
+        durationMs,
+        userId: userId || null,
+        errorType: errorType || null,
+        errorMessage: errorMessage || null,
+        timestamp: new Date(),
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Log latency error:", error);
+      res.status(500).json({ error: "Failed to log latency" });
+    }
+  });
+
+  // Get tool performance analytics
+  app.get("/api/admin/analytics/tool-performance", requireAdmin, async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 7;
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+      // Tool usage by category
+      const toolUsageByCategory = await db.execute(sql`
+        SELECT 
+          tool_category,
+          COUNT(*) as usage_count,
+          COUNT(DISTINCT user_id) as unique_users
+        FROM activity_events
+        WHERE event_type = 'tool_use' AND occurred_at > ${since} AND tool_category IS NOT NULL
+        GROUP BY tool_category
+        ORDER BY usage_count DESC
+      `);
+
+      // Most popular tools
+      const popularTools = await db.execute(sql`
+        SELECT 
+          tool_id,
+          tool_category,
+          COUNT(*) as usage_count,
+          COUNT(DISTINCT user_id) as unique_users
+        FROM activity_events
+        WHERE event_type = 'tool_use' AND occurred_at > ${since} AND tool_id IS NOT NULL
+        GROUP BY tool_id, tool_category
+        ORDER BY usage_count DESC
+        LIMIT 20
+      `);
+
+      // Tool usage trend
+      const toolTrend = await db.execute(sql`
+        SELECT 
+          DATE(occurred_at) as date,
+          COUNT(*) as usage_count,
+          COUNT(DISTINCT user_id) as unique_users
+        FROM activity_events
+        WHERE event_type = 'tool_use' AND occurred_at > ${since}
+        GROUP BY date
+        ORDER BY date
+      `);
+
+      // Plan section performance
+      const sectionPerformance = await db.execute(sql`
+        SELECT 
+          section_name,
+          COUNT(*) as total_runs,
+          COUNT(*) FILTER (WHERE status = 'completed') as completed,
+          COUNT(*) FILTER (WHERE status = 'failed') as failed,
+          ROUND(AVG(runtime_ms)::numeric, 2) as avg_runtime,
+          ROUND(AVG(tokens_used)::numeric, 0) as avg_tokens
+        FROM plan_section_analytics
+        WHERE started_at > ${since}
+        GROUP BY section_name
+        ORDER BY total_runs DESC
+      `);
+
+      res.json({
+        toolUsageByCategory: toolUsageByCategory.rows,
+        popularTools: popularTools.rows,
+        toolTrend: toolTrend.rows,
+        sectionPerformance: sectionPerformance.rows,
+        period: { days, since: since.toISOString() },
+      });
+    } catch (error) {
+      console.error("Tool performance error:", error);
+      res.status(500).json({ error: "Failed to fetch tool performance" });
+    }
+  });
+
+  // Export analytics
+  app.get("/api/admin/analytics/export-performance", requireAdmin, async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 7;
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+      // Export success rate by type
+      const exportsByType = await db.execute(sql`
+        SELECT 
+          export_type,
+          COUNT(*) as total,
+          COUNT(*) FILTER (WHERE status = 'completed') as successful,
+          COUNT(*) FILTER (WHERE status = 'failed') as failed,
+          ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'completed') / NULLIF(COUNT(*), 0), 2) as success_rate,
+          ROUND(AVG(export_time_ms)::numeric, 2) as avg_export_time
+        FROM export_analytics
+        WHERE started_at > ${since}
+        GROUP BY export_type
+      `);
+
+      // Chart embedding success
+      const chartSuccess = await db.execute(sql`
+        SELECT 
+          export_type,
+          SUM(charts_expected) as total_expected,
+          SUM(charts_embedded) as total_embedded,
+          ROUND(100.0 * SUM(charts_embedded) / NULLIF(SUM(charts_expected), 0), 2) as embed_rate
+        FROM export_analytics
+        WHERE started_at > ${since} AND charts_expected > 0
+        GROUP BY export_type
+      `);
+
+      // Export failures
+      const failures = await db.execute(sql`
+        SELECT 
+          export_type,
+          failure_stage,
+          error_code,
+          COUNT(*) as count
+        FROM export_analytics
+        WHERE started_at > ${since} AND status = 'failed'
+        GROUP BY export_type, failure_stage, error_code
+        ORDER BY count DESC
+        LIMIT 20
+      `);
+
+      res.json({
+        exportsByType: exportsByType.rows,
+        chartSuccess: chartSuccess.rows,
+        failures: failures.rows,
+        period: { days, since: since.toISOString() },
+      });
+    } catch (error) {
+      console.error("Export performance error:", error);
+      res.status(500).json({ error: "Failed to fetch export performance" });
+    }
+  });
+
+  // Admin audit log
+  app.get("/api/admin/analytics/audit-log", requireAdmin, async (req, res) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const auditLogs = await db.execute(sql`
+        SELECT 
+          aal.id,
+          aal.admin_id,
+          u.email as admin_email,
+          aal.action,
+          aal.target_type,
+          aal.target_id,
+          aal.details,
+          aal.ip_address,
+          aal.status,
+          aal.created_at
+        FROM admin_audit_logs aal
+        LEFT JOIN users u ON aal.admin_id = u.id
+        ORDER BY aal.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `);
+
+      const totalCount = await db.execute(sql`
+        SELECT COUNT(*) as count FROM admin_audit_logs
+      `);
+
+      res.json({
+        logs: auditLogs.rows,
+        total: parseInt(totalCount.rows[0]?.count || '0'),
+        limit,
+        offset,
+      });
+    } catch (error) {
+      console.error("Audit log error:", error);
+      res.status(500).json({ error: "Failed to fetch audit log" });
+    }
+  });
+
+  // Coins/credits usage analytics
+  app.get("/api/admin/analytics/coins-usage", requireAdmin, async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 30;
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+      // Usage summary
+      const usageSummary = await db.execute(sql`
+        SELECT 
+          change_type,
+          SUM(amount_changed) as total_amount,
+          COUNT(*) as transaction_count,
+          COUNT(DISTINCT user_id) as unique_users
+        FROM coins_usage_log
+        WHERE timestamp > ${since}
+        GROUP BY change_type
+      `);
+
+      // Top consumers
+      const topConsumers = await db.execute(sql`
+        SELECT 
+          cul.user_id,
+          u.email,
+          SUM(CASE WHEN change_type = 'deduct' THEN amount_changed ELSE 0 END) as total_spent,
+          COUNT(*) as transactions
+        FROM coins_usage_log cul
+        LEFT JOIN users u ON cul.user_id = u.id
+        WHERE timestamp > ${since}
+        GROUP BY cul.user_id, u.email
+        ORDER BY total_spent DESC
+        LIMIT 20
+      `);
+
+      // Daily usage trend
+      const dailyTrend = await db.execute(sql`
+        SELECT 
+          DATE(timestamp) as date,
+          SUM(CASE WHEN change_type = 'add' THEN amount_changed ELSE 0 END) as added,
+          SUM(CASE WHEN change_type = 'deduct' THEN amount_changed ELSE 0 END) as spent
+        FROM coins_usage_log
+        WHERE timestamp > ${since}
+        GROUP BY date
+        ORDER BY date
+      `);
+
+      res.json({
+        usageSummary: usageSummary.rows,
+        topConsumers: topConsumers.rows,
+        dailyTrend: dailyTrend.rows,
+        period: { days, since: since.toISOString() },
+      });
+    } catch (error) {
+      console.error("Coins usage error:", error);
+      res.status(500).json({ error: "Failed to fetch coins usage" });
+    }
+  });
+
+  // Feedback analytics
+  app.get("/api/admin/analytics/feedback", requireAdmin, async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 30;
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+      // Rating distribution
+      const ratingDistribution = await db.execute(sql`
+        SELECT 
+          rating,
+          COUNT(*) as count
+        FROM feedback_analytics
+        WHERE timestamp > ${since} AND rating IS NOT NULL
+        GROUP BY rating
+        ORDER BY rating
+      `);
+
+      // By category
+      const byCategory = await db.execute(sql`
+        SELECT 
+          category,
+          COUNT(*) as count,
+          ROUND(AVG(rating)::numeric, 2) as avg_rating
+        FROM feedback_analytics
+        WHERE timestamp > ${since}
+        GROUP BY category
+        ORDER BY count DESC
+      `);
+
+      // Sentiment breakdown
+      const sentimentBreakdown = await db.execute(sql`
+        SELECT 
+          sentiment,
+          COUNT(*) as count
+        FROM feedback_analytics
+        WHERE timestamp > ${since} AND sentiment IS NOT NULL
+        GROUP BY sentiment
+      `);
+
+      // Common reason tags
+      const reasonTags = await db.execute(sql`
+        SELECT 
+          reason_tag,
+          COUNT(*) as count
+        FROM feedback_analytics
+        WHERE timestamp > ${since} AND reason_tag IS NOT NULL
+        GROUP BY reason_tag
+        ORDER BY count DESC
+        LIMIT 15
+      `);
+
+      res.json({
+        ratingDistribution: ratingDistribution.rows,
+        byCategory: byCategory.rows,
+        sentimentBreakdown: sentimentBreakdown.rows,
+        reasonTags: reasonTags.rows,
+        period: { days, since: since.toISOString() },
+      });
+    } catch (error) {
+      console.error("Feedback analytics error:", error);
+      res.status(500).json({ error: "Failed to fetch feedback analytics" });
+    }
+  });
+
+  // Aggregate hourly data (call this periodically, e.g., via cron)
+  app.post("/api/admin/analytics/aggregate-hourly", requireAdmin, async (req, res) => {
+    try {
+      const now = new Date();
+      const hourStart = new Date(now);
+      hourStart.setMinutes(0, 0, 0);
+      const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
+      const prevHour = new Date(hourStart.getTime() - 60 * 60 * 1000);
+
+      // Aggregate data for previous hour
+      const aggregates = await db.execute(sql`
+        SELECT 
+          (SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE last_seen_at BETWEEN ${prevHour} AND ${hourStart}) as active_users,
+          (SELECT COUNT(*) FROM users WHERE created_at BETWEEN ${prevHour} AND ${hourStart}) as new_users,
+          (SELECT COUNT(*) FROM page_views WHERE view_started_at BETWEEN ${prevHour} AND ${hourStart}) as page_views,
+          (SELECT COUNT(*) FROM activity_events WHERE occurred_at BETWEEN ${prevHour} AND ${hourStart}) as events,
+          (SELECT COUNT(*) FROM activity_events WHERE event_type = 'tool_use' AND occurred_at BETWEEN ${prevHour} AND ${hourStart}) as tool_runs,
+          (SELECT COUNT(*) FROM business_plans WHERE created_at BETWEEN ${prevHour} AND ${hourStart}) as plans_created,
+          (SELECT COUNT(*) FROM business_plans WHERE status = 'completed' AND updated_at BETWEEN ${prevHour} AND ${hourStart}) as plans_completed,
+          (SELECT COALESCE(SUM(amount_gbp), 0) FROM payment_transactions WHERE status = 'succeeded' AND created_at BETWEEN ${prevHour} AND ${hourStart}) as revenue,
+          (SELECT COUNT(*) FROM error_logs WHERE created_at BETWEEN ${prevHour} AND ${hourStart}) as errors
+      `);
+
+      const agg = aggregates.rows[0] as any;
+
+      // Insert or update hourly aggregate
+      await db.execute(sql`
+        INSERT INTO hourly_activity_aggregates (hour_timestamp, active_users, new_users, page_views, events, tool_runs, plans_created, plans_completed, revenue, errors)
+        VALUES (${prevHour}, ${parseInt(agg.active_users || '0')}, ${parseInt(agg.new_users || '0')}, ${parseInt(agg.page_views || '0')}, ${parseInt(agg.events || '0')}, ${parseInt(agg.tool_runs || '0')}, ${parseInt(agg.plans_created || '0')}, ${parseInt(agg.plans_completed || '0')}, ${parseFloat(agg.revenue || '0')}, ${parseInt(agg.errors || '0')})
+        ON CONFLICT (hour_timestamp) DO UPDATE SET
+          active_users = EXCLUDED.active_users,
+          new_users = EXCLUDED.new_users,
+          page_views = EXCLUDED.page_views,
+          events = EXCLUDED.events,
+          tool_runs = EXCLUDED.tool_runs,
+          plans_created = EXCLUDED.plans_created,
+          plans_completed = EXCLUDED.plans_completed,
+          revenue = EXCLUDED.revenue,
+          errors = EXCLUDED.errors
+      `);
+
+      res.json({ success: true, hour: prevHour.toISOString(), aggregates: agg });
+    } catch (error) {
+      console.error("Aggregate hourly error:", error);
+      res.status(500).json({ error: "Failed to aggregate hourly data" });
+    }
+  });
+
+  // Google Analytics style real-time endpoint
+  app.get("/api/admin/analytics/realtime", requireAdmin, async (req, res) => {
+    try {
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const thirtySecondsAgo = new Date(Date.now() - 30 * 1000);
+
+      // Active users right now
+      const activeNow = await db.execute(sql`
+        SELECT 
+          us.id as session_id,
+          us.user_id,
+          u.email,
+          u.first_name,
+          u.last_name,
+          us.current_page,
+          us.device_type,
+          us.browser_name,
+          us.country,
+          us.city,
+          us.last_seen_at,
+          EXTRACT(EPOCH FROM (NOW() - us.session_started_at)) as session_duration_sec
+        FROM user_sessions us
+        LEFT JOIN users u ON us.user_id = u.id
+        WHERE us.is_active = true AND us.last_seen_at > ${fiveMinutesAgo}
+        ORDER BY us.last_seen_at DESC
+        LIMIT 100
+      `);
+
+      // Recent page views (last 30 seconds)
+      const recentViews = await db.execute(sql`
+        SELECT 
+          pv.page_path,
+          pv.page_title,
+          u.email,
+          pv.view_started_at,
+          us.device_type,
+          us.country
+        FROM page_views pv
+        LEFT JOIN users u ON pv.user_id = u.id
+        LEFT JOIN user_sessions us ON pv.session_id = us.id
+        WHERE pv.view_started_at > ${thirtySecondsAgo}
+        ORDER BY pv.view_started_at DESC
+        LIMIT 50
+      `);
+
+      // Active pages summary
+      const activePages = await db.execute(sql`
+        SELECT 
+          current_page,
+          COUNT(*) as active_users
+        FROM user_sessions
+        WHERE is_active = true AND last_seen_at > ${fiveMinutesAgo} AND current_page IS NOT NULL
+        GROUP BY current_page
+        ORDER BY active_users DESC
+        LIMIT 10
+      `);
+
+      // Geographic distribution of active users
+      const activeByCountry = await db.execute(sql`
+        SELECT 
+          country,
+          country_code,
+          COUNT(*) as active_users
+        FROM user_sessions
+        WHERE is_active = true AND last_seen_at > ${fiveMinutesAgo} AND country IS NOT NULL
+        GROUP BY country, country_code
+        ORDER BY active_users DESC
+        LIMIT 10
+      `);
+
+      res.json({
+        activeUsers: activeNow.rows,
+        activeCount: activeNow.rows.length,
+        recentViews: recentViews.rows,
+        activePages: activePages.rows,
+        activeByCountry: activeByCountry.rows,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Realtime analytics error:", error);
+      res.status(500).json({ error: "Failed to fetch realtime analytics" });
     }
   });
 
