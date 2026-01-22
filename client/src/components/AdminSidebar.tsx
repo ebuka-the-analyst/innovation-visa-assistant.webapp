@@ -245,6 +245,19 @@ const menuGroups = [
     ]
   },
   {
+    label: "Advanced Analytics",
+    items: [
+      { id: "analytics-realtime-monitor", label: "Real-Time Monitor", icon: Activity, badge: "live" },
+      { id: "analytics-heatmaps", label: "Behavior Heatmaps", icon: Layers, badge: null },
+      { id: "analytics-journeys", label: "User Journey Flow", icon: TrendingUp, badge: null },
+      { id: "analytics-funnels", label: "Conversion Funnels", icon: Filter, badge: null },
+      { id: "analytics-api-perf", label: "API Performance", icon: Cpu, badge: null },
+      { id: "analytics-exports", label: "Export Analytics", icon: FileCheck, badge: null },
+      { id: "analytics-audit", label: "Admin Audit Log", icon: Shield, badge: null },
+      { id: "analytics-coins", label: "Credits Usage", icon: Zap, badge: null },
+    ]
+  },
+  {
     label: "Admin Settings",
     items: [
       { id: "settings-general", label: "General Settings", icon: Settings, badge: null },

@@ -26,6 +26,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { PromoCodeGenerator } from "@/components/admin/PromoCodeGenerator";
+import { 
+  RealtimeMonitor, 
+  HeatmapView, 
+  UserJourneyView, 
+  ConversionFunnelView, 
+  ApiPerformanceView, 
+  ExportAnalyticsView, 
+  AuditLogView, 
+  CoinsUsageView 
+} from "@/components/admin/AdvancedAnalytics";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format, formatDistance, subDays, subHours, startOfDay, endOfDay, differenceInSeconds } from "date-fns";
@@ -13103,6 +13113,36 @@ export default function AdminDashboard() {
                         </>
                       )}
                     </motion.div>
+                  </div>
+                )}
+
+                {/* Advanced Analytics Section */}
+                {activeSection.startsWith('analytics-') && (
+                  <div className="space-y-6">
+                    {activeSection === 'analytics-realtime-monitor' && (
+                      <RealtimeMonitor isActive={activeSection === 'analytics-realtime-monitor'} />
+                    )}
+                    {activeSection === 'analytics-heatmaps' && (
+                      <HeatmapView isActive={activeSection === 'analytics-heatmaps'} />
+                    )}
+                    {activeSection === 'analytics-journeys' && (
+                      <UserJourneyView isActive={activeSection === 'analytics-journeys'} />
+                    )}
+                    {activeSection === 'analytics-funnels' && (
+                      <ConversionFunnelView isActive={activeSection === 'analytics-funnels'} />
+                    )}
+                    {activeSection === 'analytics-api-perf' && (
+                      <ApiPerformanceView isActive={activeSection === 'analytics-api-perf'} />
+                    )}
+                    {activeSection === 'analytics-exports' && (
+                      <ExportAnalyticsView isActive={activeSection === 'analytics-exports'} />
+                    )}
+                    {activeSection === 'analytics-audit' && (
+                      <AuditLogView isActive={activeSection === 'analytics-audit'} />
+                    )}
+                    {activeSection === 'analytics-coins' && (
+                      <CoinsUsageView isActive={activeSection === 'analytics-coins'} />
+                    )}
                   </div>
                 )}
 
