@@ -148,6 +148,72 @@ function getRandomCategory(): string {
 }
 
 // ============================================================================
+// FEATURED IMAGE SELECTION - Maps topics/keywords to relevant images
+// ============================================================================
+
+const BLOG_IMAGES: Record<string, string> = {
+  "documents": "/assets/blog/documents-checklist.jpg",
+  "checklist": "/assets/blog/documents-checklist.jpg",
+  "application": "/assets/blog/documents-checklist.jpg",
+  "meeting": "/assets/blog/business-meeting.jpg",
+  "interview": "/assets/blog/interview-preparation.jpg",
+  "endorsing body": "/assets/blog/endorsing-body.jpg",
+  "endorsement": "/assets/blog/compliance-endorsement.jpg",
+  "process": "/assets/blog/visa-process.jpg",
+  "visa": "/assets/blog/visa-process.jpg",
+  "compliance": "/assets/blog/compliance-endorsement.jpg",
+  "maintaining": "/assets/blog/compliance-endorsement.jpg",
+  "banking": "/assets/blog/business-banking.jpg",
+  "bank account": "/assets/blog/business-banking.jpg",
+  "business plan": "/assets/blog/business-plan.jpg",
+  "financial projections": "/assets/blog/financial-projections.jpg",
+  "financial": "/assets/blog/financial-requirements.jpg",
+  "funds": "/assets/blog/financial-requirements.jpg",
+  "family": "/assets/blog/family-visa.jpg",
+  "dependent": "/assets/blog/family-visa.jpg",
+  "uk startup": "/assets/blog/uk-business.jpg",
+  "uk business": "/assets/blog/uk-business.jpg",
+  "london": "/assets/blog/uk-business.jpg",
+  "innovation": "/assets/blog/innovation-scalability.jpg",
+  "scalability": "/assets/blog/innovation-scalability.jpg",
+  "growth": "/assets/blog/scalability-growth.jpg",
+  "settlement": "/assets/blog/settlement-ilr.jpg",
+  "ilr": "/assets/blog/settlement-ilr.jpg",
+  "indefinite leave": "/assets/blog/settlement-ilr.jpg",
+  "tax": "/assets/blog/tax-considerations.jpg",
+  "grants": "/assets/blog/uk-grants.jpg",
+  "funding": "/assets/blog/uk-grants.jpg",
+  "registering": "/assets/blog/company-registration.jpg",
+  "company": "/assets/blog/company-registration.jpg",
+  "contact point": "/assets/blog/contact-meeting.jpg",
+  "english": "/assets/blog/english-requirements.jpg",
+  "language": "/assets/blog/english-requirements.jpg",
+  "biometric": "/assets/blog/biometric-appointment.jpg",
+};
+
+function selectFeaturedImage(topic: string, category: string): string {
+  const topicLower = topic.toLowerCase();
+  
+  // Check for keyword matches in order of specificity
+  for (const [keyword, imagePath] of Object.entries(BLOG_IMAGES)) {
+    if (topicLower.includes(keyword)) {
+      return imagePath;
+    }
+  }
+  
+  // Fallback based on category
+  const categoryImages: Record<string, string> = {
+    "visa-updates": "/assets/blog/visa-process.jpg",
+    "business-planning": "/assets/blog/business-plan.jpg",
+    "endorsement": "/assets/blog/endorsing-body.jpg",
+    "guides": "/assets/blog/documents-checklist.jpg",
+    "uk-immigration": "/assets/blog/uk-business.jpg",
+  };
+  
+  return categoryImages[category] || "/assets/blog/uk-business.jpg";
+}
+
+// ============================================================================
 // MAIN GENERATION FUNCTION
 // ============================================================================
 
@@ -161,6 +227,7 @@ export async function generateBlogPost(): Promise<{
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string[];
+  featuredImage: string;
   readingTime: number;
   author: string;
   authorBio: string;
@@ -343,6 +410,7 @@ Return ONLY valid JSON.`;
         metaTitle: parsed.metaTitle || parsed.title,
         metaDescription: parsed.metaDescription || parsed.excerpt,
         metaKeywords: parsed.metaKeywords || parsed.tags || [],
+        featuredImage: selectFeaturedImage(topic, category),
         readingTime: parsed.readingTime || 8,
         author: "UK Visa Expert Team",
         authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is reviewed for accuracy against official UK government sources.",
@@ -367,6 +435,7 @@ export async function generateMultiplePosts(count: number = 5): Promise<Array<{
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string[];
+  featuredImage: string;
   readingTime: number;
   author: string;
   authorBio: string;
@@ -405,6 +474,7 @@ export async function generateBackdatedPosts(
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string[];
+  featuredImage: string;
   readingTime: number;
   author: string;
   authorBio: string;
