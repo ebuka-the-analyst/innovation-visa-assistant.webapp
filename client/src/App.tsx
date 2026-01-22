@@ -179,7 +179,7 @@ function AnimatedSidebarTrigger() {
 const navTabs = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Tools", href: "/tools-hub", icon: Wrench },
-  { label: "Documents", href: "/documents", icon: FileText },
+  { label: "Blog", href: "/blog", icon: FileText },
   { label: "Support", href: "/support", icon: HelpCircle },
 ];
 

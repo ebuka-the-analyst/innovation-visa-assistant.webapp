@@ -39,10 +39,10 @@ export default function ThemeToggle() {
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           onClick={toggleTheme}
-          className="rounded-full relative overflow-visible"
+          className="rounded-full relative overflow-visible border-2 border-primary/30 bg-background/80 backdrop-blur-sm shadow-sm"
           data-testid="button-theme-toggle"
         >
           {theme === "light" ? (

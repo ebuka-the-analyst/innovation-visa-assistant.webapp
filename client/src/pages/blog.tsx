@@ -152,19 +152,10 @@ function FeaturedCarousel({ posts }: { posts: BlogPost[] }) {
             variant="ghost"
             size="icon"
             onClick={() => goTo((current - 1 + posts.length) % posts.length)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white border-0"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-white/90 text-primary border border-primary/20 shadow-md"
             data-testid="button-carousel-prev"
           >
             <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => goTo((current + 1) % posts.length)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white border-0"
-            data-testid="button-carousel-next"
-          >
-            <ChevronRight className="w-5 h-5" />
           </Button>
         </>
       )}
