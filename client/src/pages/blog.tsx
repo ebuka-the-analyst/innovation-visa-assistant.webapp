@@ -338,8 +338,8 @@ export default function BlogPage() {
           <div className="responsive-container py-12 md:py-16">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
-                  <Newspaper className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center shadow-lg shadow-primary/10">
+                  <Newspaper className="w-8 h-8 text-primary" />
                 </div>
                 <div>
                   <h1 className="text-3xl md:text-4xl font-bold text-primary" data-testid="heading-blog">
