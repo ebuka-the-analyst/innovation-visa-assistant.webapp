@@ -130,37 +130,24 @@ function FeaturedCarousel({ posts }: { posts: BlogPost[] }) {
       
       {posts.length > 1 && (
         <>
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
-            {posts.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => goTo(idx)}
-                className={`rounded-full transition-all ${
-                  idx === current ? 'bg-white w-8 h-2.5' : 'bg-white/40 w-2.5 h-2.5'
-                }`}
-                data-testid={`button-carousel-dot-${idx}`}
-              />
-            ))}
-          </div>
-          
-          <div className="absolute left-4 bottom-6 flex items-center gap-2">
+          <div className="absolute left-4 bottom-6 flex items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => goTo((current - 1 + posts.length) % posts.length)}
-              className="bg-white/15 dark:bg-white/15 text-white border border-white/20"
+              className="h-7 w-7 bg-white/80 dark:bg-white/90 text-primary border border-primary/20 shadow-md"
               data-testid="button-carousel-prev"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => goTo((current + 1) % posts.length)}
-              className="bg-white/15 dark:bg-white/15 text-white border border-white/20"
+              className="h-7 w-7 bg-white/80 dark:bg-white/90 text-primary border border-primary/20 shadow-md"
               data-testid="button-carousel-next"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
         </>
