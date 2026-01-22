@@ -45,8 +45,15 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
+  // Use SESSION_SECRET from environment, or generate a warning with fallback
+  const sessionSecret = process.env.SESSION_SECRET;
+  if (!sessionSecret) {
+    console.warn("[Auth] WARNING: SESSION_SECRET not set. Using fallback secret. Set SESSION_SECRET in production!");
+  }
+  
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: sessionSecret || 'ukivfa-fallback-session-secret-change-in-production',
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
@@ -130,15 +137,19 @@ export async function setupAuth(app: Express) {
     )
   );
 
-  // Configure Google OAuth Strategy
-  passport.use(
-    new GoogleStrategy(
-      {
-        clientID: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL || "/api/auth/callback/google",
-        scope: ["profile", "email"],
-      },
+  // Configure Google OAuth Strategy (only if credentials are available)
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  
+  if (googleClientId && googleClientSecret) {
+    passport.use(
+      new GoogleStrategy(
+        {
+          clientID: googleClientId,
+          clientSecret: googleClientSecret,
+          callbackURL: process.env.GOOGLE_CALLBACK_URL || "/api/auth/callback/google",
+          scope: ["profile", "email"],
+        },
       async (accessToken, refreshToken, profile, done) => {
         try {
           const email = profile.emails?.[0]?.value;
@@ -190,6 +201,10 @@ export async function setupAuth(app: Express) {
       }
     )
   );
+    console.log("[Auth] Google OAuth configured successfully");
+  } else {
+    console.log("[Auth] Google OAuth NOT configured - missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET");
+  }
 
   // Serialize only userId for security (don't store full user object in session)
   passport.serializeUser((user: any, done) => {
@@ -415,22 +430,32 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  // Google OAuth routes
-  app.get("/api/auth/google", passport.authenticate("google", { prompt: "select_account" }));
+  // Google OAuth routes (only if Google OAuth is configured)
+  if (googleClientId && googleClientSecret) {
+    app.get("/api/auth/google", passport.authenticate("google", { prompt: "select_account" }));
 
-  app.get(
-    "/api/auth/callback/google",
-    passport.authenticate("google", { failureRedirect: "/login" }),
-    (req, res) => {
-      // Explicitly save session before redirecting
-      req.session.save((err) => {
-        if (err) {
-          console.error("Session save error:", err);
-        }
-        res.redirect("/dashboard");
-      });
-    }
-  );
+    app.get(
+      "/api/auth/callback/google",
+      passport.authenticate("google", { failureRedirect: "/login" }),
+      (req, res) => {
+        // Explicitly save session before redirecting
+        req.session.save((err) => {
+          if (err) {
+            console.error("Session save error:", err);
+          }
+          res.redirect("/dashboard");
+        });
+      }
+    );
+  } else {
+    // Return error if Google OAuth is not configured
+    app.get("/api/auth/google", (req, res) => {
+      res.status(503).json({ message: "Google login is not configured on this server" });
+    });
+    app.get("/api/auth/callback/google", (req, res) => {
+      res.status(503).json({ message: "Google login is not configured on this server" });
+    });
+  }
 
   // Get current user endpoint
   app.get("/api/auth/user", isAuthenticated, async (req, res) => {

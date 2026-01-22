@@ -1,0 +1,170 @@
+Innovator-Founder-visa-AI-webapp
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Activity
+
+
+proactive-laughter
+Deployments
+Variables
+Metrics
+Settings
+Unexposed service
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+History
+
+proactive-laughter
+/
+f173e85e
+Crashed
+
+Jan 22, 2026, 1:03 AM GMT
+Get Help
+Details
+Build Logs
+Deploy Logs
+Filter and search logs
+
+theme_font column added or already exists
+theme_applied_at column added or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+text_elements column added or already exists
+cover_designs table created or already exists
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[Email Service] NOT CONFIGURED - emails will not be sent
+[Email Service] Missing credentials:
+  - RESEND_API_KEY is missing
+  - AWS_SES_SMTP_USERNAME is missing
+  - AWS_SES_SMTP_PASSWORD is missing
+Thu, 22 Jan 2026 01:04:43 GMT express-session deprecated req.secret; provide secret option at file:/app/dist/index.js:12875:10
+/app/node_modules/passport-oauth2/lib/strategy.js:87
+  if (!options.clientID) { throw new TypeError('OAuth2Strategy requires a clientID option'); }
+                                 ^
+TypeError: OAuth2Strategy requires a clientID option
+    at Strategy.OAuth2Strategy (/app/node_modules/passport-oauth2/lib/strategy.js:87:34)
+    at new Strategy (/app/node_modules/passport-google-oauth20/lib/strategy.js:52:18)
+    at setupAuth (file:///app/dist/index.js:12932:5)
+    at registerRoutes (file:///app/dist/index.js:14546:9)
+    at file:///app/dist/index.js:25758:24
+    at file:///app/dist/index.js:25819:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+    at async loadESM (node:internal/process/esm_loader:34:7)
+    at async handleMainPromise (node:internal/modules/run_main:106:12)
+Node.js v18.20.5
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+theme_id column added or already exists
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+theme_font column added or already exists
+theme_applied_at column added or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+text_elements column added or already exists
+cover_designs table created or already exists
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+Node.js v18.20.5
+[Email Service] NOT CONFIGURED - emails will not be sent
+[Email Service] Missing credentials:
+  - RESEND_API_KEY is missing
+  - AWS_SES_SMTP_USERNAME is missing
+  - AWS_SES_SMTP_PASSWORD is missing
+Thu, 22 Jan 2026 01:04:47 GMT express-session deprecated req.secret; provide secret option at file:/app/dist/index.js:12875:10
+/app/node_modules/passport-oauth2/lib/strategy.js:87
+  if (!options.clientID) { throw new TypeError('OAuth2Strategy requires a clientID option'); }
+                                 ^
+TypeError: OAuth2Strategy requires a clientID option
+    at Strategy.OAuth2Strategy (/app/node_modules/passport-oauth2/lib/strategy.js:87:34)
+    at new Strategy (/app/node_modules/passport-google-oauth20/lib/strategy.js:52:18)
+    at setupAuth (file:///app/dist/index.js:12932:5)
+    at registerRoutes (file:///app/dist/index.js:14546:9)
+    at file:///app/dist/index.js:25758:24
+    at file:///app/dist/index.js:25819:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+    at async loadESM (node:internal/process/esm_loader:34:7)
+    at async handleMainPromise (node:internal/modules/run_main:106:12)
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+theme_id column added or already exists
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+theme_font column added or already exists
+theme_applied_at column added or already exists
+text_elements column added or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+cover_designs table created or already exists
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+Node.js v18.20.5
+[Email Service] NOT CONFIGURED - emails will not be sent
+[Email Service] Missing credentials:
+  - RESEND_API_KEY is missing
+  - AWS_SES_SMTP_USERNAME is missing
+  - AWS_SES_SMTP_PASSWORD is missing
+Thu, 22 Jan 2026 01:04:50 GMT express-session deprecated req.secret; provide secret option at file:/app/dist/index.js:12875:10
+/app/node_modules/passport-oauth2/lib/strategy.js:87
+  if (!options.clientID) { throw new TypeError('OAuth2Strategy requires a clientID option'); }
+                                 ^
+TypeError: OAuth2Strategy requires a clientID option
+    at Strategy.OAuth2Strategy (/app/node_modules/passport-oauth2/lib/strategy.js:87:34)
+    at new Strategy (/app/node_modules/passport-google-oauth20/lib/strategy.js:52:18)
+    at setupAuth (file:///app/dist/index.js:12932:5)
+    at registerRoutes (file:///app/dist/index.js:14546:9)
+    at file:///app/dist/index.js:25758:24
+    at file:///app/dist/index.js:25819:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+    at async loadESM (node:internal/process/esm_loader:34:7)
+    at async handleMainPromise (node:internal/modules/run_main:106:12)
+You reached the end of the range
+Jan 22, 2026, 1:04 AM
+
+
+proactive-laughter | Railway
