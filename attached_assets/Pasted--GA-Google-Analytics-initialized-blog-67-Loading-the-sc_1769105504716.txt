@@ -1,0 +1,13 @@
+[GA] Google Analytics initialized
+blog:67 Loading the script 'https://www.clarity.ms/tag/ufpcgvgit0' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://challenges.cloudflare.com". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.
+(anonymous) @ blog:67
+(anonymous) @ blog:68
+setTimeout
+(anonymous) @ blog:49Understand this error
+5The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Understand this warning
+blog:1 The resource https://innovatorfoundervisaassistant.co.uk/attached_assets/official_logo.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Understand this warning
+blog:1 The resource https://innovatorfoundervisaassistant.co.uk/attached_assets/official_logo.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Understand this warning
+blog/preparing-for-your-uk-visa-biometric-appointment-2026-01-22-4tq2:1 The resource https://innovatorfoundervisaassistant.co.uk/attached_assets/official_logo.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Understand this warning
+blog:1 The resource https://innovatorfoundervisaassistant.co.uk/attached_assets/official_logo.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Understand this warning
+blog:1 The resource https://innovatorfoundervisaassistant.co.uk/attached_assets/official_logo.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Understand this warning
+index-D_xA0Qyc.js:328  POST https://innovatorfoundervisaassistant.co.uk/api/performance/metrics net::ERR_BLOCKED_BY_CLIENT

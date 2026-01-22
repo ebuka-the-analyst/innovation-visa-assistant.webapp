@@ -13816,15 +13816,64 @@ Return a JSON object with:
   // Admin: Fix blog image URLs to use object storage paths
   app.post("/api/admin/blog/fix-images", requireAdmin, async (req, res) => {
     try {
-      // Update all blog posts with old asset paths to new object storage paths
-      const result = await db.execute(sql`
-        UPDATE blog_posts 
-        SET featured_image = REPLACE(featured_image, '/assets/blog/', '/objects/blog/')
-        WHERE featured_image LIKE '/assets/blog/%'
-      `);
+      // Image mapping based on keywords
+      const imageKeywords: Record<string, string> = {
+        "biometric": "/objects/blog/biometric-appointment.jpg",
+        "interview": "/objects/blog/interview-preparation.jpg",
+        "endorsing body": "/objects/blog/endorsing-body.jpg",
+        "endorsement": "/objects/blog/compliance-endorsement.jpg",
+        "document": "/objects/blog/documents-checklist.jpg",
+        "checklist": "/objects/blog/documents-checklist.jpg",
+        "business plan": "/objects/blog/business-plan.jpg",
+        "business": "/objects/blog/business-meeting.jpg",
+        "financial": "/objects/blog/financial-requirements.jpg",
+        "projections": "/objects/blog/financial-projections.jpg",
+        "family": "/objects/blog/family-visa.jpg",
+        "dependent": "/objects/blog/family-visa.jpg",
+        "settlement": "/objects/blog/settlement-ilr.jpg",
+        "ilr": "/objects/blog/settlement-ilr.jpg",
+        "tax": "/objects/blog/tax-considerations.jpg",
+        "grant": "/objects/blog/uk-grants.jpg",
+        "funding": "/objects/blog/uk-grants.jpg",
+        "company": "/objects/blog/company-registration.jpg",
+        "innovation": "/objects/blog/innovation-scalability.jpg",
+        "scalability": "/objects/blog/scalability-growth.jpg",
+        "growth": "/objects/blog/scalability-growth.jpg",
+        "english": "/objects/blog/english-requirements.jpg",
+        "visa": "/objects/blog/visa-process.jpg",
+        "uk": "/objects/blog/uk-business.jpg",
+      };
       
-      // Get current URLs for verification
-      const posts = await db.select({ 
+      // Get all posts with null images
+      const postsToFix = await db.select({
+        id: blogPosts.id,
+        title: blogPosts.title,
+        category: blogPosts.category,
+        featured_image: blogPosts.featured_image
+      }).from(blogPosts);
+      
+      let updatedCount = 0;
+      for (const post of postsToFix) {
+        if (!post.featured_image || post.featured_image.includes('/assets/blog/')) {
+          const titleLower = post.title.toLowerCase();
+          let newImage = "/objects/blog/uk-business.jpg"; // default
+          
+          for (const [keyword, imagePath] of Object.entries(imageKeywords)) {
+            if (titleLower.includes(keyword)) {
+              newImage = imagePath;
+              break;
+            }
+          }
+          
+          await db.update(blogPosts)
+            .set({ featured_image: newImage })
+            .where(eq(blogPosts.id, post.id));
+          updatedCount++;
+        }
+      }
+      
+      // Get updated posts for verification
+      const updatedPosts = await db.select({ 
         id: blogPosts.id, 
         title: blogPosts.title,
         featured_image: blogPosts.featured_image 
@@ -13832,8 +13881,8 @@ Return a JSON object with:
       
       res.json({
         success: true,
-        message: "Blog image URLs updated to object storage paths",
-        sample: posts
+        message: `Updated ${updatedCount} blog posts with images`,
+        sample: updatedPosts
       });
     } catch (error: any) {
       console.error("[Admin] Fix blog images error:", error);
