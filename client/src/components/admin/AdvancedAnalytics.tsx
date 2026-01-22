@@ -87,8 +87,32 @@ interface CoinsData {
   period: { days: number; since: string };
 }
 
+function ErrorState({ error, onRetry }: { error: Error | null, onRetry?: () => void }) {
+  return (
+    <Card className="border-destructive">
+      <CardContent className="pt-6">
+        <div className="flex flex-col items-center gap-4 py-8 text-center">
+          <AlertTriangle className="h-12 w-12 text-destructive" />
+          <div>
+            <h3 className="font-semibold text-destructive">Failed to load data</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {error?.message || "An unexpected error occurred"}
+            </p>
+          </div>
+          {onRetry && (
+            <Button variant="outline" size="sm" onClick={onRetry}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function RealtimeMonitor({ isActive }: RealtimeMonitorProps) {
-  const { data: realtimeData, isLoading, refetch } = useQuery<RealtimeData>({
+  const { data: realtimeData, isLoading, isError, error, refetch } = useQuery<RealtimeData>({
     queryKey: ["/api/admin/analytics/realtime"],
     enabled: isActive,
     refetchInterval: isActive ? 10000 : false,
@@ -103,6 +127,10 @@ export function RealtimeMonitor({ isActive }: RealtimeMonitorProps) {
         </div>
       </div>
     );
+  }
+
+  if (isError) {
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   const activeUsers = realtimeData?.activeUsers || [];
@@ -319,13 +347,17 @@ const HOURS = Array.from({ length: 24 }, (_, i) => i);
 export function HeatmapView({ isActive }: HeatmapViewProps) {
   const [days, setDays] = useState("7");
   
-  const { data, isLoading } = useQuery<HeatmapData>({
+  const { data, isLoading, isError, error, refetch } = useQuery<HeatmapData>({
     queryKey: ["/api/admin/analytics/heatmap", days],
     enabled: isActive,
   });
 
   if (isLoading) {
     return <Skeleton className="h-96" />;
+  }
+
+  if (isError) {
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   const heatmapData = data?.heatmapData || [];
@@ -494,13 +526,17 @@ interface UserJourneyViewProps {
 export function UserJourneyView({ isActive }: UserJourneyViewProps) {
   const [days, setDays] = useState("7");
   
-  const { data, isLoading } = useQuery<JourneyData>({
+  const { data, isLoading, isError, error, refetch } = useQuery<JourneyData>({
     queryKey: ["/api/admin/analytics/user-journeys", days],
     enabled: isActive,
   });
 
   if (isLoading) {
     return <Skeleton className="h-96" />;
+  }
+
+  if (isError) {
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   const pageFlows = data?.pageFlows || [];
@@ -645,13 +681,17 @@ interface ConversionFunnelViewProps {
 export function ConversionFunnelView({ isActive }: ConversionFunnelViewProps) {
   const [days, setDays] = useState("30");
   
-  const { data, isLoading } = useQuery<FunnelData>({
+  const { data, isLoading, isError, error, refetch } = useQuery<FunnelData>({
     queryKey: ["/api/admin/analytics/conversion-funnel", days],
     enabled: isActive,
   });
 
   if (isLoading) {
     return <Skeleton className="h-96" />;
+  }
+
+  if (isError) {
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   const funnel = data?.signupToPurchase || {};
@@ -792,13 +832,17 @@ interface ApiPerformanceViewProps {
 export function ApiPerformanceView({ isActive }: ApiPerformanceViewProps) {
   const [hours, setHours] = useState("24");
   
-  const { data, isLoading, refetch } = useQuery<ApiPerformanceData>({
+  const { data, isLoading, isError, error, refetch } = useQuery<ApiPerformanceData>({
     queryKey: ["/api/admin/analytics/api-performance", hours],
     enabled: isActive,
   });
 
   if (isLoading) {
     return <Skeleton className="h-96" />;
+  }
+
+  if (isError) {
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   const latencyByRoute = data?.latencyByRoute || [];
@@ -991,13 +1035,17 @@ interface ExportAnalyticsViewProps {
 }
 
 export function ExportAnalyticsView({ isActive }: ExportAnalyticsViewProps) {
-  const { data, isLoading } = useQuery<ExportData>({
+  const { data, isLoading, isError, error, refetch } = useQuery<ExportData>({
     queryKey: ["/api/admin/analytics/export-performance"],
     enabled: isActive,
   });
 
   if (isLoading) {
     return <Skeleton className="h-96" />;
+  }
+
+  if (isError) {
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   const exportsByType = data?.exportsByType || [];
@@ -1119,13 +1167,17 @@ export function AuditLogView({ isActive }: AuditLogViewProps) {
   const [page, setPage] = useState(0);
   const limit = 50;
   
-  const { data, isLoading, refetch } = useQuery<AuditData>({
+  const { data, isLoading, isError, error, refetch } = useQuery<AuditData>({
     queryKey: ["/api/admin/analytics/audit-log", page * limit, limit],
     enabled: isActive,
   });
 
   if (isLoading) {
     return <Skeleton className="h-96" />;
+  }
+
+  if (isError) {
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   const logs = data?.logs || [];
@@ -1231,13 +1283,17 @@ interface CoinsUsageViewProps {
 export function CoinsUsageView({ isActive }: CoinsUsageViewProps) {
   const [days, setDays] = useState("30");
   
-  const { data, isLoading } = useQuery<CoinsData>({
+  const { data, isLoading, isError, error, refetch } = useQuery<CoinsData>({
     queryKey: ["/api/admin/analytics/coins-usage", days],
     enabled: isActive,
   });
 
   if (isLoading) {
     return <Skeleton className="h-96" />;
+  }
+
+  if (isError) {
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   const usageSummary = data?.usageSummary || [];
