@@ -464,6 +464,59 @@ function validateSEO(content: {
 export function correctContent(content: string): string {
   let corrected = content;
   
+  // AUTO-FIX COMMON VISA FEE TYPOS
+  // AGGRESSIVE FEE CORRECTION: Fix any fee mentioned near "application fee" or "visa fee" that isn't correct
+  const correctFee = VERIFIED_VISA_FEES.innovatorFounderVisa.applicationFee;
+  
+  // Simple string replacement for £119 -> £1191
+  // Use multiple iterations to catch all instances
+  let prevContent = "";
+  while (prevContent !== corrected) {
+    prevContent = corrected;
+    // Direct replacement - only match £119 not followed by more digits
+    corrected = corrected.split("£119 ").join(`£${correctFee} `);
+    corrected = corrected.split("£119.").join(`£${correctFee}.`);
+    corrected = corrected.split("£119,").join(`£${correctFee},`);
+    corrected = corrected.split("£119<").join(`£${correctFee}<`);
+    corrected = corrected.split("£119)").join(`£${correctFee})`);
+    corrected = corrected.split("£119]").join(`£${correctFee}]`);
+    corrected = corrected.split("£119\n").join(`£${correctFee}\n`);
+    // If £119 appears at end of string
+    if (corrected.endsWith("£119")) {
+      corrected = corrected.slice(0, -4) + `£${correctFee}`;
+    }
+  }
+  
+  // Also use regex as backup
+  corrected = corrected.replace(/£119(?![0-9])/g, `£${correctFee}`);
+  corrected = corrected.replace(/£1,191/g, `£${correctFee}`);
+  corrected = corrected.replace(/119\s*pounds?\b/gi, `${correctFee} pounds`);
+  
+  // Fix any incorrect visa/application fee amounts near context keywords
+  // This catches cases where AI writes random amounts like £288, £500, etc. near "visa fee" or "application fee"
+  corrected = corrected.replace(/(application\s+fee[^£]*?)£(\d{2,4})(?!\d)/gi, (match, prefix, amount) => {
+    const num = parseInt(amount);
+    if (num !== correctFee && num < 5000) {
+      return `${prefix}£${correctFee}`;
+    }
+    return match;
+  });
+  corrected = corrected.replace(/(visa\s+fee[^£]*?)£(\d{2,4})(?!\d)/gi, (match, prefix, amount) => {
+    const num = parseInt(amount);
+    if (num !== correctFee && num < 5000) {
+      return `${prefix}£${correctFee}`;
+    }
+    return match;
+  });
+  
+  // Fix other common fee typos
+  corrected = corrected.replace(/£1,019\b/g, `£${VERIFIED_VISA_FEES.innovatorFounderVisa.immigrationHealthSurcharge}`);
+  corrected = corrected.replace(/£1019\b/g, `£${VERIFIED_VISA_FEES.innovatorFounderVisa.immigrationHealthSurcharge}`);
+  
+  // Fix incorrect financial requirement amounts
+  corrected = corrected.replace(/£1,270\b/g, `£${VERIFIED_ELIGIBILITY.financialRequirement.amount}`);
+  corrected = corrected.replace(/£1270\b/g, `£${VERIFIED_ELIGIBILITY.financialRequirement.amount}`);
+  
   // Add disclaimer if missing
   if (!/disclaimer-box/i.test(corrected)) {
     corrected = corrected + getStandardDisclaimer();

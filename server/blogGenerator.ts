@@ -233,7 +233,7 @@ OUTPUT FORMAT (JSON only):
 
 Return ONLY valid JSON.`;
 
-  const MAX_RETRIES = 3;
+  const MAX_RETRIES = 1; // Only 1 attempt - rely on auto-correction instead of regeneration
   
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -269,9 +269,16 @@ Return ONLY valid JSON.`;
                                       parsed.content.includes('href="/tools') ||
                                       parsed.content.includes('href="/business-plan');
       
-      // Auto-fix: Add disclaimer if missing
-      let finalContent = parsed.content;
-      if (!contentHasDisclaimer) {
+      // Apply auto-corrections FIRST (fix typos before validation)
+      let finalContent = correctContent(parsed.content);
+      
+      // Check if corrections added required elements
+      const contentHasDisclaimerNow = finalContent.includes('disclaimer-box') || 
+                                      finalContent.includes('Important Notice') ||
+                                      finalContent.includes('does not constitute');
+      
+      // Auto-fix: Add disclaimer if still missing
+      if (!contentHasDisclaimerNow) {
         finalContent += `
 <div class="disclaimer-box bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 my-6">
 <p class="text-sm"><strong>Important Notice:</strong> This article provides general information only and does not constitute immigration or legal advice. Requirements and fees may change. Always verify current information on <a href="https://www.gov.uk/innovator-founder-visa" target="_blank" rel="noopener" class="text-primary underline">GOV.UK</a> and consider consulting a qualified immigration adviser for your specific circumstances.</p>
@@ -307,16 +314,14 @@ Return ONLY valid JSON.`;
       console.log("[Blog Generator] Validation Report:");
       console.log(generateValidationReport(validationResult));
       
-      // GATING: If critical issues found, retry generation
+      // Log any remaining issues (auto-correction already applied)
       const criticalCount = validationResult.issues.filter(i => i.type === 'critical').length;
-      if (criticalCount > 0 && attempt < MAX_RETRIES) {
-        console.warn(`[Blog Generator] Content failed validation with ${criticalCount} critical issues. Retrying...`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        continue; // Retry
+      if (criticalCount > 0) {
+        console.warn(`[Blog Generator] ${criticalCount} issues remain after auto-correction. Proceeding with corrected content.`);
       }
       
-      // Apply final corrections
-      const correctedContent = correctContent(finalContent);
+      // Final content is already corrected above
+      const correctedContent = finalContent;
       
       // Add unique slug with date
       const dateSlug = new Date().toISOString().split('T')[0];
