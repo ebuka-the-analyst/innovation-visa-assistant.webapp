@@ -9,26 +9,21 @@ import { Input } from "@/components/ui/input";
 import { 
   Calendar, Clock, User, ArrowRight, Search, TrendingUp, BookOpen, 
   Newspaper, Sparkles, Eye, ChevronLeft, ChevronRight, Flame, Star,
-  Tag, Filter, LayoutGrid, List
+  Tag, LayoutGrid, List
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import type { BlogPost } from "@shared/schema";
 import Footer from "@/components/Footer";
 
 const categories = [
-  { id: "all", label: "All Posts", icon: Newspaper, color: "bg-primary" },
-  { id: "visa-updates", label: "Visa Updates", icon: TrendingUp, color: "bg-blue-500" },
-  { id: "business-planning", label: "Business Planning", icon: BookOpen, color: "bg-emerald-500" },
-  { id: "endorsement", label: "Endorsement", icon: User, color: "bg-amber-500" },
-  { id: "success-stories", label: "Success Stories", icon: Star, color: "bg-purple-500" },
-  { id: "uk-immigration", label: "UK Immigration", icon: Calendar, color: "bg-rose-500" },
-  { id: "guides", label: "Guides", icon: BookOpen, color: "bg-cyan-500" },
+  { id: "all", label: "All Posts", icon: Newspaper },
+  { id: "visa-updates", label: "Visa Updates", icon: TrendingUp },
+  { id: "business-planning", label: "Business Planning", icon: BookOpen },
+  { id: "endorsement", label: "Endorsement", icon: User },
+  { id: "success-stories", label: "Success Stories", icon: Star },
+  { id: "uk-immigration", label: "UK Immigration", icon: Calendar },
+  { id: "guides", label: "Guides", icon: BookOpen },
 ];
-
-function getCategoryColor(category: string): string {
-  const cat = categories.find(c => c.id === category);
-  return cat?.color || "bg-primary";
-}
 
 function FeaturedHeroCard({ post }: { post: BlogPost }) {
   const date = new Date(post.publishedAt);
@@ -39,46 +34,46 @@ function FeaturedHeroCard({ post }: { post: BlogPost }) {
   });
 
   return (
-    <Link href={`/blog/${post.slug}`}>
+    <Link href={`/blog/${post.slug}`} data-testid={`link-featured-${post.slug}`}>
       <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden group cursor-pointer">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-blue-900/90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-primary/90 dark:from-primary/80 dark:via-primary/60 dark:to-primary/80" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
         
         <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-10">
-          <div className="flex items-center gap-3 mb-4">
-            <Badge className={`${getCategoryColor(post.category)} text-white border-0`}>
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <Badge variant="secondary" data-testid={`badge-category-${post.category}`}>
               {post.category.replace('-', ' ')}
             </Badge>
-            <Badge className="bg-amber-500/90 text-white border-0 gap-1">
+            <Badge className="bg-amber-500 dark:bg-amber-600 text-white border-0 gap-1" data-testid="badge-featured">
               <Flame className="w-3 h-3" />
               Featured
             </Badge>
           </div>
           
-          <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 leading-tight group-hover:underline decoration-2 underline-offset-4">
+          <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 leading-tight underline decoration-2 underline-offset-4" data-testid={`text-title-${post.slug}`}>
             {post.title}
           </h2>
           
-          <p className="text-white/80 text-lg mb-6 line-clamp-2 max-w-3xl">
+          <p className="text-white/80 text-lg mb-6 line-clamp-2 max-w-3xl" data-testid={`text-excerpt-${post.slug}`}>
             {post.excerpt}
           </p>
           
           <div className="flex flex-wrap items-center gap-6 text-white/70 text-sm">
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2" data-testid={`text-author-${post.slug}`}>
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <User className="w-4 h-4" />
               </div>
               {post.author}
             </span>
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2" data-testid={`text-date-${post.slug}`}>
               <Calendar className="w-4 h-4" />
               {formattedDate}
             </span>
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2" data-testid={`text-readtime-${post.slug}`}>
               <Clock className="w-4 h-4" />
               {post.readingTime} min read
             </span>
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2" data-testid={`text-views-${post.slug}`}>
               <Eye className="w-4 h-4" />
               {post.views || 0} views
             </span>
@@ -86,7 +81,7 @@ function FeaturedHeroCard({ post }: { post: BlogPost }) {
         </div>
         
         <div className="absolute top-6 right-6">
-          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 transition-colors">
+          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
             <ArrowRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
@@ -120,7 +115,7 @@ function FeaturedCarousel({ posts }: { posts: BlogPost[] }) {
   if (posts.length === 0) return null;
   
   return (
-    <div className="relative mb-12">
+    <div className="relative mb-12" data-testid="carousel-featured">
       <FeaturedHeroCard post={posts[current]} />
       
       {posts.length > 1 && (
@@ -130,28 +125,32 @@ function FeaturedCarousel({ posts }: { posts: BlogPost[] }) {
               <button
                 key={idx}
                 onClick={() => goTo(idx)}
-                className={`w-2.5 h-2.5 rounded-full transition-all ${
-                  idx === current ? 'bg-white w-8' : 'bg-white/40 hover:bg-white/60'
+                className={`rounded-full transition-all ${
+                  idx === current ? 'bg-white w-8 h-2.5' : 'bg-white/40 w-2.5 h-2.5'
                 }`}
                 data-testid={`button-carousel-dot-${idx}`}
               />
             ))}
           </div>
           
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => goTo((current - 1 + posts.length) % posts.length)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white border-0"
             data-testid="button-carousel-prev"
           >
-            <ChevronLeft className="w-5 h-5 text-white" />
-          </button>
-          <button
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => goTo((current + 1) % posts.length)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white border-0"
             data-testid="button-carousel-next"
           >
-            <ChevronRight className="w-5 h-5 text-white" />
-          </button>
+            <ChevronRight className="w-5 h-5" />
+          </Button>
         </>
       )}
     </div>
@@ -168,31 +167,31 @@ function BlogPostCard({ post, variant = "default" }: { post: BlogPost; variant?:
   
   if (variant === "horizontal") {
     return (
-      <Link href={`/blog/${post.slug}`}>
+      <Link href={`/blog/${post.slug}`} data-testid={`link-post-${post.slug}`}>
         <Card className="hover-elevate transition-all duration-300 group overflow-hidden">
           <div className="flex flex-col sm:flex-row">
-            <div className="sm:w-48 h-32 sm:h-auto bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
+            <div className="sm:w-48 h-32 sm:h-auto bg-gradient-to-br from-primary/20 to-accent/20 dark:from-primary/10 dark:to-accent/10 flex items-center justify-center shrink-0">
               <Newspaper className="w-12 h-12 text-primary/40" />
             </div>
             <div className="flex-1 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="secondary" className="text-xs">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <Badge variant="secondary" className="text-xs" data-testid={`badge-category-${post.id}`}>
                   {post.category.replace('-', ' ')}
                 </Badge>
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <span className="text-xs text-muted-foreground flex items-center gap-1" data-testid={`text-readtime-h-${post.id}`}>
                   <Clock className="w-3 h-3" />
                   {post.readingTime} min
                 </span>
               </div>
-              <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors mb-2">
+              <h3 className="font-semibold line-clamp-2 mb-2" data-testid={`text-title-${post.id}`}>
                 {post.title}
               </h3>
-              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+              <p className="text-sm text-muted-foreground line-clamp-2 mb-2" data-testid={`text-excerpt-${post.id}`}>
                 {post.excerpt}
               </p>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{formattedDate}</span>
-                <span className="flex items-center gap-1">
+              <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                <span data-testid={`text-date-${post.id}`}>{formattedDate}</span>
+                <span className="flex items-center gap-1" data-testid={`text-views-${post.id}`}>
                   <Eye className="w-3 h-3" />
                   {post.views || 0}
                 </span>
@@ -205,9 +204,9 @@ function BlogPostCard({ post, variant = "default" }: { post: BlogPost; variant?:
   }
 
   return (
-    <Link href={`/blog/${post.slug}`}>
+    <Link href={`/blog/${post.slug}`} data-testid={`link-post-${post.slug}`}>
       <Card className="hover-elevate transition-all duration-300 group h-full flex flex-col overflow-hidden border-0 shadow-lg dark:shadow-none dark:border">
-        <div className="aspect-[16/10] bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 relative overflow-hidden">
+        <div className="aspect-[16/10] bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 dark:from-primary/5 dark:via-accent/5 dark:to-primary/5 relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDVFQjgiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -215,12 +214,12 @@ function BlogPostCard({ post, variant = "default" }: { post: BlogPost; variant?:
             </div>
           </div>
           
-          <div className="absolute top-3 left-3 flex items-center gap-2">
-            <Badge className={`${getCategoryColor(post.category)} text-white text-xs border-0 shadow-md`}>
+          <div className="absolute top-3 left-3 flex items-center gap-2 flex-wrap">
+            <Badge variant="secondary" className="text-xs shadow-md" data-testid={`badge-category-${post.id}`}>
               {post.category.replace('-', ' ')}
             </Badge>
             {post.isFeatured && (
-              <Badge className="bg-amber-500 text-white text-xs border-0 shadow-md gap-1">
+              <Badge className="bg-amber-500 dark:bg-amber-600 text-white text-xs border-0 shadow-md gap-1" data-testid={`badge-featured-${post.id}`}>
                 <Sparkles className="w-3 h-3" />
                 Featured
               </Badge>
@@ -229,29 +228,29 @@ function BlogPostCard({ post, variant = "default" }: { post: BlogPost; variant?:
         </div>
         
         <CardHeader className="pb-2 flex-1">
-          <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors leading-snug">
+          <CardTitle className="text-lg line-clamp-2 leading-snug" data-testid={`text-title-${post.id}`}>
             {post.title}
           </CardTitle>
-          <CardDescription className="line-clamp-2 text-sm mt-2">
+          <CardDescription className="line-clamp-2 text-sm mt-2" data-testid={`text-excerpt-${post.id}`}>
             {post.excerpt}
           </CardDescription>
         </CardHeader>
         
         <CardContent className="pt-0">
-          <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-4">
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1">
+          <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground border-t pt-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="flex items-center gap-1" data-testid={`text-date-${post.id}`}>
                 <Calendar className="w-3 h-3" />
                 {formattedDate}
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1" data-testid={`text-readtime-${post.id}`}>
                 <Clock className="w-3 h-3" />
                 {post.readingTime} min
               </span>
             </div>
-            <span className="flex items-center gap-1 text-primary font-medium">
+            <span className="flex items-center gap-1 text-primary font-medium" data-testid={`cta-read-${post.id}`}>
               Read
-              <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-3 h-3" />
             </span>
           </div>
         </CardContent>
@@ -282,21 +281,21 @@ function BlogSkeleton() {
 function StatsBar({ posts }: { posts: BlogPost[] }) {
   const totalViews = posts.reduce((sum, p) => sum + (p.views || 0), 0);
   const totalPosts = posts.length;
-  const categories = new Set(posts.map(p => p.category)).size;
+  const categoriesCount = new Set(posts.map(p => p.category)).size;
   
   return (
-    <div className="grid grid-cols-3 gap-4 mb-8">
+    <div className="grid grid-cols-3 gap-4 mb-8" data-testid="stats-bar">
       {[
-        { label: "Articles", value: totalPosts, icon: Newspaper },
-        { label: "Categories", value: categories, icon: Tag },
-        { label: "Total Views", value: totalViews.toLocaleString(), icon: Eye },
+        { label: "Articles", value: totalPosts, icon: Newspaper, testId: "stat-articles" },
+        { label: "Categories", value: categoriesCount, icon: Tag, testId: "stat-categories" },
+        { label: "Total Views", value: totalViews.toLocaleString(), icon: Eye, testId: "stat-views" },
       ].map((stat) => (
-        <div key={stat.label} className="bg-card rounded-xl p-4 flex items-center gap-3 border">
+        <div key={stat.label} className="bg-card rounded-xl p-4 flex items-center gap-3 border" data-testid={stat.testId}>
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
             <stat.icon className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p className="text-2xl font-bold">{stat.value}</p>
+            <p className="text-2xl font-bold" data-testid={`text-${stat.testId}-value`}>{stat.value}</p>
             <p className="text-xs text-muted-foreground">{stat.label}</p>
           </div>
         </div>
@@ -335,7 +334,6 @@ export default function BlogPage() {
       />
       
       <div className="min-h-screen bg-gradient-to-b from-background via-accent/5 to-background">
-        {/* Hero Header */}
         <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-accent/5 border-b">
           <div className="responsive-container py-12 md:py-16">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -344,24 +342,24 @@ export default function BlogPage() {
                   <Newspaper className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent" data-testid="heading-blog">
+                  <h1 className="text-3xl md:text-4xl font-bold text-primary" data-testid="heading-blog">
                     UK Visa Insights
                   </h1>
-                  <p className="text-muted-foreground text-lg">
+                  <p className="text-muted-foreground text-lg" data-testid="text-blog-subtitle">
                     Expert guidance for Innovator Founder Visa applicants
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-3">
-                <Badge variant="outline" className="px-4 py-2 text-sm gap-2">
-                  <Flame className="w-4 h-4 text-amber-500" />
+                <Badge variant="outline" className="px-4 py-2 text-sm gap-2" data-testid="badge-updated-daily">
+                  <Flame className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                   Updated Daily
                 </Badge>
               </div>
             </div>
             
-            <p className="text-muted-foreground mt-6 max-w-3xl text-lg">
+            <p className="text-muted-foreground mt-6 max-w-3xl text-lg" data-testid="text-blog-description">
               Stay informed with the latest immigration updates, business planning strategies, 
               endorsement tips, and success stories from applicants who've successfully navigated 
               the UK visa process.
@@ -370,15 +368,12 @@ export default function BlogPage() {
         </div>
 
         <div className="responsive-container py-8">
-          {/* Stats */}
           {!isLoading && allPosts.length > 0 && <StatsBar posts={allPosts} />}
           
-          {/* Featured Carousel */}
           {!isLoading && featuredPosts.length > 0 && selectedCategory === "all" && !searchQuery && (
             <FeaturedCarousel posts={featuredPosts} />
           )}
           
-          {/* Search and Filters */}
           <div className="flex flex-col lg:flex-row gap-4 mb-8">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -396,7 +391,6 @@ export default function BlogPage() {
                 variant={viewMode === "grid" ? "default" : "outline"}
                 size="icon"
                 onClick={() => setViewMode("grid")}
-                className="h-12 w-12 rounded-xl"
                 data-testid="button-view-grid"
               >
                 <LayoutGrid className="w-5 h-5" />
@@ -405,7 +399,6 @@ export default function BlogPage() {
                 variant={viewMode === "list" ? "default" : "outline"}
                 size="icon"
                 onClick={() => setViewMode("list")}
-                className="h-12 w-12 rounded-xl"
                 data-testid="button-view-list"
               >
                 <List className="w-5 h-5" />
@@ -413,7 +406,6 @@ export default function BlogPage() {
             </div>
           </div>
           
-          {/* Category Pills */}
           <div className="flex flex-wrap gap-2 mb-8">
             {categories.map((cat) => (
               <Button
@@ -421,9 +413,7 @@ export default function BlogPage() {
                 variant={selectedCategory === cat.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`gap-2 rounded-full px-4 ${
-                  selectedCategory === cat.id ? "" : "hover:bg-accent"
-                }`}
+                className="gap-2 rounded-full px-4"
                 data-testid={`button-category-${cat.id}`}
               >
                 <cat.icon className="w-4 h-4" />
@@ -433,18 +423,18 @@ export default function BlogPage() {
           </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="skeleton-grid">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <BlogSkeleton key={i} />
               ))}
             </div>
           ) : allPosts.length === 0 ? (
-            <Card className="p-16 text-center border-2 border-dashed">
+            <Card className="p-16 text-center border-2 border-dashed" data-testid="card-no-posts">
               <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
                 <Newspaper className="w-10 h-10 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">No articles found</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
+              <h3 className="text-xl font-semibold mb-2" data-testid="text-no-posts-title">No articles found</h3>
+              <p className="text-muted-foreground max-w-md mx-auto" data-testid="text-no-posts-message">
                 {searchQuery 
                   ? "Try adjusting your search terms or browse a different category" 
                   : "Check back soon for new content. We publish new articles daily!"}
@@ -454,6 +444,7 @@ export default function BlogPage() {
                   variant="outline" 
                   className="mt-6" 
                   onClick={() => { setSearchQuery(""); setSelectedCategory("all"); }}
+                  data-testid="button-clear-filters"
                 >
                   Clear filters
                 </Button>
@@ -461,24 +452,22 @@ export default function BlogPage() {
             </Card>
           ) : (
             <>
-              {/* Section Header */}
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
+              <div className="flex items-center justify-between gap-2 mb-6 flex-wrap">
+                <h2 className="text-xl font-semibold flex items-center gap-2" data-testid="heading-articles">
                   <BookOpen className="w-5 h-5 text-primary" />
                   {selectedCategory === "all" ? "Latest Articles" : categories.find(c => c.id === selectedCategory)?.label}
-                  <Badge variant="secondary" className="ml-2">{regularPosts.length + featuredPosts.length}</Badge>
+                  <Badge variant="secondary" className="ml-2" data-testid="badge-post-count">{regularPosts.length + featuredPosts.length}</Badge>
                 </h2>
               </div>
               
-              {/* Posts Grid/List */}
               {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="posts-grid">
                   {[...featuredPosts.filter(p => selectedCategory !== "all" || searchQuery), ...regularPosts].map((post) => (
                     <BlogPostCard key={post.id} post={post} />
                   ))}
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-4" data-testid="posts-list">
                   {[...featuredPosts.filter(p => selectedCategory !== "all" || searchQuery), ...regularPosts].map((post) => (
                     <BlogPostCard key={post.id} post={post} variant="horizontal" />
                   ))}
@@ -487,21 +476,20 @@ export default function BlogPage() {
             </>
           )}
           
-          {/* Newsletter CTA */}
           {!isLoading && allPosts.length > 0 && (
             <div className="mt-16 mb-8">
-              <Card className="bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5 border-primary/20 overflow-hidden">
+              <Card className="bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5 border-primary/20 overflow-hidden" data-testid="card-newsletter">
                 <CardContent className="p-8 md:p-12">
                   <div className="flex flex-col md:flex-row items-center gap-8">
                     <div className="flex-1 text-center md:text-left">
-                      <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-1 text-sm font-medium mb-4">
+                      <div className="inline-flex items-center gap-2 bg-primary/10 text-primary rounded-full px-4 py-1 text-sm font-medium mb-4" data-testid="badge-stay-updated">
                         <Sparkles className="w-4 h-4" />
                         Stay Updated
                       </div>
-                      <h3 className="text-2xl md:text-3xl font-bold mb-3">
+                      <h3 className="text-2xl md:text-3xl font-bold mb-3" data-testid="heading-newsletter">
                         Get Weekly Visa Insights
                       </h3>
-                      <p className="text-muted-foreground max-w-lg">
+                      <p className="text-muted-foreground max-w-lg" data-testid="text-newsletter-description">
                         Join thousands of entrepreneurs receiving our weekly digest of visa tips, 
                         business planning strategies, and success stories.
                       </p>

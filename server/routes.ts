@@ -13816,7 +13816,15 @@ Return a JSON object with:
   // Admin: Bulk generate backdated blog posts (for initial content seeding)
   app.post("/api/admin/blog/seed", requireAdmin, async (req, res) => {
     try {
-      const { count = 40, postsPerDay = 5, daysAgo = 8 } = req.body;
+      // Validate and constrain input parameters
+      const rawCount = Number(req.body.count) || 40;
+      const rawPostsPerDay = Number(req.body.postsPerDay) || 5;
+      const rawDaysAgo = Number(req.body.daysAgo) || 8;
+      
+      // Apply safe limits
+      const count = Math.max(1, Math.min(rawCount, 100)); // 1-100 posts max
+      const postsPerDay = Math.max(1, Math.min(rawPostsPerDay, 10)); // 1-10 per day max
+      const daysAgo = Math.max(1, Math.min(rawDaysAgo, 30)); // 1-30 days max
       
       console.log(`[Admin] Starting bulk blog generation: ${count} posts, ${postsPerDay}/day, starting ${daysAgo} days ago`);
       
