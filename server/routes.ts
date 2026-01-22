@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits } from "@shared/schema";
-import { generateBlogPost, generateMultiplePosts } from "./blogGenerator";
+import { generateBlogPost, generateMultiplePosts, generateBackdatedPosts } from "./blogGenerator";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
 import { z } from "zod";
@@ -13812,6 +13812,63 @@ Return a JSON object with:
   
   app.get("/api/cron/generate-blogs", handleCronBlogGeneration);
   app.post("/api/cron/generate-blogs", handleCronBlogGeneration);
+  
+  // Admin: Bulk generate backdated blog posts (for initial content seeding)
+  app.post("/api/admin/blog/seed", requireAdmin, async (req, res) => {
+    try {
+      const { count = 40, postsPerDay = 5, daysAgo = 8 } = req.body;
+      
+      console.log(`[Admin] Starting bulk blog generation: ${count} posts, ${postsPerDay}/day, starting ${daysAgo} days ago`);
+      
+      // Respond immediately
+      res.status(202).json({
+        success: true,
+        message: `Blog seeding started: generating ${count} backdated posts`,
+        status: "processing"
+      });
+      
+      // Process in background
+      setImmediate(async () => {
+        try {
+          const posts = await generateBackdatedPosts(count, postsPerDay, daysAgo);
+          
+          let insertedCount = 0;
+          for (const post of posts) {
+            try {
+              await db.insert(blogPosts).values({
+                title: post.title,
+                slug: post.slug,
+                excerpt: post.excerpt,
+                content: post.content,
+                category: post.category,
+                tags: post.tags,
+                metaTitle: post.metaTitle,
+                metaDescription: post.metaDescription,
+                metaKeywords: post.metaKeywords,
+                readingTime: post.readingTime,
+                author: post.author,
+                authorBio: post.authorBio,
+                isPublished: true,
+                isFeatured: post.isFeatured,
+                publishedAt: post.publishedAt,
+              });
+              insertedCount++;
+              console.log(`[Admin] Inserted backdated post ${insertedCount}: ${post.title}`);
+            } catch (insertError: any) {
+              console.error("Failed to insert backdated post:", insertError?.message || insertError);
+            }
+          }
+          
+          console.log(`[Admin] Bulk blog seeding complete: ${insertedCount} posts created`);
+        } catch (bgError) {
+          console.error("[Admin] Bulk blog generation failed:", bgError);
+        }
+      });
+    } catch (error) {
+      console.error("Admin blog seed error:", error);
+      res.status(500).json({ error: "Failed to start blog seeding" });
+    }
+  });
   
   // Admin: Delete blog post
   app.delete("/api/blog/:id", requireAdmin, async (req, res) => {

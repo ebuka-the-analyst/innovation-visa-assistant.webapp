@@ -242,3 +242,61 @@ export async function generateMultiplePosts(count: number = 5): Promise<Array<{
   
   return posts;
 }
+
+// Generate backdated posts for initial content seeding
+export async function generateBackdatedPosts(
+  totalPosts: number = 40,
+  postsPerDay: number = 5,
+  startDaysAgo: number = 8
+): Promise<Array<{
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  tags: string[];
+  metaTitle: string;
+  metaDescription: string;
+  metaKeywords: string[];
+  readingTime: number;
+  author: string;
+  authorBio: string;
+  publishedAt: Date;
+  isFeatured: boolean;
+}>> {
+  const posts = [];
+  const now = new Date();
+  
+  // Calculate how many days we need
+  const daysNeeded = Math.ceil(totalPosts / postsPerDay);
+  
+  for (let dayOffset = startDaysAgo; dayOffset >= 0 && posts.length < totalPosts; dayOffset--) {
+    const postsForThisDay = Math.min(postsPerDay, totalPosts - posts.length);
+    
+    for (let i = 0; i < postsForThisDay; i++) {
+      try {
+        console.log(`[Blog Generator] Generating backdated post ${posts.length + 1} of ${totalPosts} (Day -${dayOffset})...`);
+        const post = await generateBlogPost();
+        
+        // Calculate backdated timestamp with random hour variation
+        const publishedAt = new Date(now);
+        publishedAt.setDate(publishedAt.getDate() - dayOffset);
+        publishedAt.setHours(6 + Math.floor(Math.random() * 12)); // Random time between 6 AM and 6 PM
+        publishedAt.setMinutes(Math.floor(Math.random() * 60));
+        
+        posts.push({
+          ...post,
+          publishedAt,
+          isFeatured: posts.length < 3, // First 3 posts are featured
+        });
+        
+        // Delay between requests
+        await new Promise(resolve => setTimeout(resolve, 2500));
+      } catch (error) {
+        console.error(`[Blog Generator] Failed to generate backdated post:`, error);
+      }
+    }
+  }
+  
+  return posts;
+}
