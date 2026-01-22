@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, jsonb, boolean, index, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -2995,3 +2995,348 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
 
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+
+// ============================================
+// ENTERPRISE ANALYTICS SYSTEM (PhD-Level Comprehensive Tracking)
+// ============================================
+
+// Master Event Log - Raw truth layer for all events
+export const eventLog = pgTable("event_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Event Identification
+  eventName: varchar("event_name", { length: 100 }).notNull(),
+  eventVersion: integer("event_version").notNull().default(1),
+  
+  // User Context
+  userId: varchar("user_id").references(() => users.id),
+  sessionId: varchar("session_id"),
+  deviceId: varchar("device_id", { length: 100 }),
+  
+  // Environment
+  appEnv: varchar("app_env", { length: 20 }).default('production'),
+  appVersion: varchar("app_version", { length: 20 }),
+  
+  // Page Context
+  pagePath: varchar("page_path", { length: 255 }),
+  referrer: text("referrer"),
+  
+  // Device Info
+  deviceType: varchar("device_type", { length: 20 }),
+  os: varchar("os", { length: 50 }),
+  browser: varchar("browser", { length: 50 }),
+  
+  // Location
+  country: varchar("country", { length: 100 }),
+  countryCode: varchar("country_code", { length: 5 }),
+  city: varchar("city", { length: 100 }),
+  
+  // UTM Tracking
+  utmSource: varchar("utm_source", { length: 100 }),
+  utmMedium: varchar("utm_medium", { length: 100 }),
+  utmCampaign: varchar("utm_campaign", { length: 100 }),
+  
+  // Event-specific properties (JSONB)
+  properties: jsonb("properties").$type<Record<string, any>>(),
+  
+  // Validation
+  isValid: boolean("is_valid").notNull().default(true),
+  validationErrors: text("validation_errors").array(),
+  
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_event_log_name").on(table.eventName),
+  index("idx_event_log_user").on(table.userId),
+  index("idx_event_log_session").on(table.sessionId),
+  index("idx_event_log_timestamp").on(table.timestamp),
+  index("idx_event_log_page").on(table.pagePath),
+]);
+
+// API Latency Tracking - System performance monitoring
+export const apiLatencyLog = pgTable("api_latency_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  route: varchar("route", { length: 255 }).notNull(),
+  method: varchar("method", { length: 10 }).notNull(),
+  statusCode: integer("status_code").notNull(),
+  durationMs: integer("duration_ms").notNull(),
+  
+  userId: varchar("user_id").references(() => users.id),
+  
+  // Request details
+  requestSize: integer("request_size"),
+  responseSize: integer("response_size"),
+  
+  // Error info if failed
+  errorType: varchar("error_type", { length: 100 }),
+  errorMessage: text("error_message"),
+  
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+}, (table) => [
+  index("idx_api_latency_route").on(table.route),
+  index("idx_api_latency_timestamp").on(table.timestamp),
+  index("idx_api_latency_status").on(table.statusCode),
+]);
+
+// Plan Section Analytics - Track each section generation
+export const planSectionAnalytics = pgTable("plan_section_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  planId: varchar("plan_id").notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  sectionId: varchar("section_id", { length: 100 }).notNull(),
+  sectionName: varchar("section_name", { length: 255 }).notNull(),
+  
+  status: varchar("status", { length: 20 }).notNull(), // started, completed, failed
+  runtimeMs: integer("runtime_ms"),
+  
+  // AI Cost tracking
+  tokensUsed: integer("tokens_used"),
+  costEstimatedGbp: real("cost_estimated_gbp"),
+  
+  // Quality metrics
+  outputLength: integer("output_length"),
+  retryCount: integer("retry_count").default(0),
+  
+  startedAt: timestamp("started_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+  
+  errorCode: varchar("error_code", { length: 50 }),
+  errorMessage: text("error_message"),
+}, (table) => [
+  index("idx_plan_section_plan").on(table.planId),
+  index("idx_plan_section_user").on(table.userId),
+  index("idx_plan_section_status").on(table.status),
+]);
+
+// Export Analytics - Track all exports
+export const exportAnalytics = pgTable("export_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  planId: varchar("plan_id").notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  exportType: varchar("export_type", { length: 20 }).notNull(), // pdf, docx, html
+  status: varchar("status", { length: 20 }).notNull(), // started, completed, failed
+  
+  exportTimeMs: integer("export_time_ms"),
+  pagesCount: integer("pages_count"),
+  fileSizeBytes: integer("file_size_bytes"),
+  
+  // Chart tracking
+  chartsExpected: integer("charts_expected").default(0),
+  chartsEmbedded: integer("charts_embedded").default(0),
+  missingCharts: text("missing_charts").array(),
+  
+  startedAt: timestamp("started_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+  
+  errorCode: varchar("error_code", { length: 50 }),
+  errorMessage: text("error_message"),
+  failureStage: varchar("failure_stage", { length: 50 }),
+}, (table) => [
+  index("idx_export_analytics_plan").on(table.planId),
+  index("idx_export_analytics_user").on(table.userId),
+  index("idx_export_analytics_type").on(table.exportType),
+  index("idx_export_analytics_status").on(table.status),
+]);
+
+// Conversion Funnel Tracking
+export const conversionFunnelEvents = pgTable("conversion_funnel_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  userId: varchar("user_id").references(() => users.id),
+  sessionId: varchar("session_id", { length: 100 }),
+  
+  funnelName: varchar("funnel_name", { length: 100 }).notNull(), // signup_to_purchase, plan_completion, etc.
+  stepName: varchar("step_name", { length: 100 }).notNull(),
+  stepIndex: integer("step_index").notNull(),
+  
+  completed: boolean("completed").notNull().default(false),
+  droppedOff: boolean("dropped_off").notNull().default(false),
+  
+  timeSpentSeconds: integer("time_spent_seconds"),
+  
+  // Conversion context
+  entrySource: varchar("entry_source", { length: 100 }),
+  deviceType: varchar("device_type", { length: 20 }),
+  
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+}, (table) => [
+  index("idx_funnel_name").on(table.funnelName),
+  index("idx_funnel_user").on(table.userId),
+  index("idx_funnel_step").on(table.funnelName, table.stepIndex),
+  index("idx_funnel_timestamp").on(table.timestamp),
+]);
+
+// Coins/Credits Tracking
+export const coinsUsageLog = pgTable("coins_usage_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  changeType: varchar("change_type", { length: 20 }).notNull(), // add, deduct, refund
+  amountChanged: integer("amount_changed").notNull(),
+  previousBalance: integer("previous_balance").notNull(),
+  newBalance: integer("new_balance").notNull(),
+  
+  reason: varchar("reason", { length: 100 }).notNull(),
+  
+  // Related entities
+  toolId: varchar("tool_id", { length: 100 }),
+  planId: varchar("plan_id"),
+  orderId: varchar("order_id"),
+  
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+}, (table) => [
+  index("idx_coins_user").on(table.userId),
+  index("idx_coins_type").on(table.changeType),
+  index("idx_coins_timestamp").on(table.timestamp),
+]);
+
+// User Feedback Analytics
+export const feedbackAnalytics = pgTable("feedback_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  userId: varchar("user_id").references(() => users.id),
+  
+  category: varchar("category", { length: 50 }).notNull(), // output, pricing, bug, ui, feature
+  rating: integer("rating"), // 1-5
+  
+  feedbackType: varchar("feedback_type", { length: 50 }), // plan_output, tool_result, general
+  targetId: varchar("target_id", { length: 100 }), // plan_id or tool_id
+  
+  reasonTag: varchar("reason_tag", { length: 100 }), // too_short, unclear, not_relevant, excellent
+  messageLength: integer("message_length"),
+  
+  // Sentiment analysis
+  sentiment: varchar("sentiment", { length: 20 }), // positive, neutral, negative
+  
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+}, (table) => [
+  index("idx_feedback_user").on(table.userId),
+  index("idx_feedback_category").on(table.category),
+  index("idx_feedback_rating").on(table.rating),
+]);
+
+// Security/Fraud Events
+export const securityAnalytics = pgTable("security_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  eventType: varchar("event_type", { length: 50 }).notNull(), // failed_login, suspicious_activity, fraud_detected
+  userId: varchar("user_id").references(() => users.id),
+  
+  ipAddress: varchar("ip_address", { length: 50 }),
+  userAgent: text("user_agent"),
+  
+  signalType: varchar("signal_type", { length: 50 }), // ip_change, velocity, abuse
+  riskScore: integer("risk_score"), // 0-100
+  
+  reason: varchar("reason", { length: 100 }),
+  blocked: boolean("blocked").notNull().default(false),
+  
+  metadata: jsonb("metadata").$type<Record<string, any>>(),
+  
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+}, (table) => [
+  index("idx_security_analytics_type").on(table.eventType),
+  index("idx_security_analytics_user").on(table.userId),
+  index("idx_security_analytics_risk").on(table.riskScore),
+  index("idx_security_analytics_timestamp").on(table.timestamp),
+]);
+
+// Hourly Activity Aggregates (for heatmaps)
+export const hourlyActivityAggregates = pgTable("hourly_activity_aggregates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  hourTimestamp: timestamp("hour_timestamp").notNull(), // Truncated to hour
+  
+  // Metrics
+  activeUsers: integer("active_users").notNull().default(0),
+  newUsers: integer("new_users").notNull().default(0),
+  pageViews: integer("page_views").notNull().default(0),
+  events: integer("events").notNull().default(0),
+  
+  toolRuns: integer("tool_runs").notNull().default(0),
+  plansCreated: integer("plans_created").notNull().default(0),
+  plansCompleted: integer("plans_completed").notNull().default(0),
+  exports: integer("exports").notNull().default(0),
+  
+  revenue: real("revenue").notNull().default(0),
+  
+  // Error tracking
+  errors: integer("errors").notNull().default(0),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_hourly_timestamp").on(table.hourTimestamp),
+]);
+
+// Insert schemas for new tables
+export const insertEventLogSchema = createInsertSchema(eventLog).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertApiLatencyLogSchema = createInsertSchema(apiLatencyLog).omit({
+  id: true,
+});
+
+export const insertPlanSectionAnalyticsSchema = createInsertSchema(planSectionAnalytics).omit({
+  id: true,
+});
+
+export const insertExportAnalyticsSchema = createInsertSchema(exportAnalytics).omit({
+  id: true,
+});
+
+export const insertConversionFunnelEventSchema = createInsertSchema(conversionFunnelEvents).omit({
+  id: true,
+});
+
+export const insertCoinsUsageLogSchema = createInsertSchema(coinsUsageLog).omit({
+  id: true,
+});
+
+export const insertFeedbackAnalyticsSchema = createInsertSchema(feedbackAnalytics).omit({
+  id: true,
+});
+
+export const insertSecurityAnalyticsSchema = createInsertSchema(securityAnalytics).omit({
+  id: true,
+});
+
+export const insertHourlyActivityAggregateSchema = createInsertSchema(hourlyActivityAggregates).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types
+export type EventLog = typeof eventLog.$inferSelect;
+export type InsertEventLog = z.infer<typeof insertEventLogSchema>;
+
+export type ApiLatencyLog = typeof apiLatencyLog.$inferSelect;
+export type InsertApiLatencyLog = z.infer<typeof insertApiLatencyLogSchema>;
+
+export type PlanSectionAnalytics = typeof planSectionAnalytics.$inferSelect;
+export type InsertPlanSectionAnalytics = z.infer<typeof insertPlanSectionAnalyticsSchema>;
+
+export type ExportAnalytics = typeof exportAnalytics.$inferSelect;
+export type InsertExportAnalytics = z.infer<typeof insertExportAnalyticsSchema>;
+
+export type ConversionFunnelEvent = typeof conversionFunnelEvents.$inferSelect;
+export type InsertConversionFunnelEvent = z.infer<typeof insertConversionFunnelEventSchema>;
+
+export type CoinsUsageLog = typeof coinsUsageLog.$inferSelect;
+export type InsertCoinsUsageLog = z.infer<typeof insertCoinsUsageLogSchema>;
+
+export type FeedbackAnalytics = typeof feedbackAnalytics.$inferSelect;
+export type InsertFeedbackAnalytics = z.infer<typeof insertFeedbackAnalyticsSchema>;
+
+export type SecurityAnalytics = typeof securityAnalytics.$inferSelect;
+export type InsertSecurityAnalytics = z.infer<typeof insertSecurityAnalyticsSchema>;
+
+export type HourlyActivityAggregate = typeof hourlyActivityAggregates.$inferSelect;
+export type InsertHourlyActivityAggregate = z.infer<typeof insertHourlyActivityAggregateSchema>;
