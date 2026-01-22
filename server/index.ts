@@ -240,9 +240,28 @@ app.use("/uploads", express.static(uploadsDir));
 import { s3Storage } from "./services/s3Storage";
 const blogLocalPaths = [
   path.join(process.cwd(), "client/src/assets/blog"),
+  path.join(process.cwd(), "client/src/assets/blog/unique"),
   path.join(process.cwd(), "dist/public/assets/blog"),
+  path.join(process.cwd(), "dist/public/assets/blog/unique"),
   path.join(process.cwd(), "public/assets/blog"),
 ];
+
+// Serve unique blog images
+app.get("/assets/blog/unique/:filename", async (req, res, next) => {
+  const filename = req.params.filename;
+  const localPath = path.join(process.cwd(), "client/src/assets/blog/unique", filename);
+  
+  if (fs.existsSync(localPath)) {
+    const ext = path.extname(filename).toLowerCase();
+    const contentType = ext === ".png" ? "image/png" : "image/jpeg";
+    res.set({
+      "Content-Type": contentType,
+      "Cache-Control": "public, max-age=604800",
+    });
+    return res.sendFile(localPath);
+  }
+  next();
+});
 
 app.get(["/assets/blog/:filename", "/objects/blog/:filename"], async (req, res, next) => {
   const filename = req.params.filename;
@@ -251,8 +270,10 @@ app.get(["/assets/blog/:filename", "/objects/blog/:filename"], async (req, res, 
   for (const dir of blogLocalPaths) {
     const localPath = path.join(dir, filename);
     if (fs.existsSync(localPath)) {
+      const ext = path.extname(filename).toLowerCase();
+      const contentType = ext === ".png" ? "image/png" : "image/jpeg";
       res.set({
-        "Content-Type": "image/jpeg",
+        "Content-Type": contentType,
         "Cache-Control": "public, max-age=604800",
       });
       return res.sendFile(localPath);
@@ -276,7 +297,7 @@ app.get(["/assets/blog/:filename", "/objects/blog/:filename"], async (req, res, 
   
   next();
 });
-console.log("[Blog] Image route configured (local + S3 fallback)");
+console.log("[Blog] Image route configured (local + unique + S3 fallback)");
 
 app.use((req, res, next) => {
   const start = Date.now();

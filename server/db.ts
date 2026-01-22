@@ -42,51 +42,64 @@ async function runAutoMigrations() {
     console.log('[DB] Blog URL migration skipped:', error);
   }
   
-  // Fix blog posts with null featured_image
+  // Assign unique images to each blog post - ensures NO duplicates
   try {
-    const imageKeywords = [
-      ["biometric", "/objects/blog/biometric-appointment.jpg"],
-      ["interview", "/objects/blog/interview-preparation.jpg"],
-      ["endorsement", "/objects/blog/compliance-endorsement.jpg"],
-      ["document", "/objects/blog/documents-checklist.jpg"],
-      ["business plan", "/objects/blog/business-plan.jpg"],
-      ["business", "/objects/blog/business-meeting.jpg"],
-      ["financial", "/objects/blog/financial-requirements.jpg"],
-      ["family", "/objects/blog/family-visa.jpg"],
-      ["settlement", "/objects/blog/settlement-ilr.jpg"],
-      ["tax", "/objects/blog/tax-considerations.jpg"],
-      ["grant", "/objects/blog/uk-grants.jpg"],
-      ["company", "/objects/blog/company-registration.jpg"],
-      ["innovation", "/objects/blog/innovation-scalability.jpg"],
-      ["scalability", "/objects/blog/scalability-growth.jpg"],
-      ["english", "/objects/blog/english-requirements.jpg"],
-      ["visa", "/objects/blog/visa-process.jpg"],
-      ["uk", "/objects/blog/uk-business.jpg"],
+    const allUniqueImages = [
+      "/assets/blog/unique/biometric-scan-1.png",
+      "/assets/blog/unique/endorsement-maintenance.png",
+      "/assets/blog/unique/meeting-prep-1.png",
+      "/assets/blog/unique/contact-meeting-1.png",
+      "/assets/blog/unique/companies-house-1.png",
+      "/assets/blog/unique/bank-account-1.png",
+      "/assets/blog/unique/visa-center-waiting.png",
+      "/assets/blog/unique/scalability-chart-1.png",
+      "/assets/blog/unique/english-test-prep.png",
+      "/assets/blog/unique/visa-documents-spread.png",
+      "/assets/blog/unique/endorsing-body-meeting.png",
+      "/assets/blog/unique/tax-consultation.png",
+      "/assets/blog/unique/endorsement-compliance.png",
+      "/assets/blog/unique/financial-projections.png",
+      "/assets/blog/unique/endorsement-review-1.png",
+      "/assets/blog/unique/grant-funding-success.png",
+      "/assets/blog/unique/online-banking-setup.png",
+      "/assets/blog/unique/endorsement-warning.png",
+      "/assets/blog/unique/documents-organized.png",
+      "/assets/blog/unique/documents-checklist-1.png",
     ];
-    
-    const result = await db.execute(sql`SELECT id, title FROM blog_posts WHERE featured_image IS NULL`);
+
+    const result = await db.execute(sql`SELECT id, featured_image FROM blog_posts ORDER BY created_at ASC`);
     const rows = (result as any).rows || result;
     
     if (Array.isArray(rows) && rows.length > 0) {
       let fixed = 0;
-      for (const row of rows) {
-        const titleLower = (row.title || "").toLowerCase();
-        let newImage = "/objects/blog/uk-business.jpg";
+      const usedImages = new Set<string>();
+      
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const currentImage = row.featured_image || "";
         
-        for (const [keyword, imagePath] of imageKeywords) {
-          if (titleLower.includes(keyword)) {
-            newImage = imagePath;
+        // Skip if already has a unique image that's not used elsewhere
+        if (currentImage.includes("/unique/") && !usedImages.has(currentImage)) {
+          usedImages.add(currentImage);
+          continue;
+        }
+        
+        // Assign next available unique image
+        for (const img of allUniqueImages) {
+          if (!usedImages.has(img)) {
+            usedImages.add(img);
+            await db.execute(sql`UPDATE blog_posts SET featured_image = ${img} WHERE id = ${row.id}`);
+            fixed++;
             break;
           }
         }
-        
-        await db.execute(sql`UPDATE blog_posts SET featured_image = ${newImage} WHERE id = ${row.id}`);
-        fixed++;
       }
-      console.log(`[DB] Auto-migration: Fixed ${fixed} blog posts with null images`);
+      if (fixed > 0) {
+        console.log(`[DB] Auto-migration: Assigned unique images to ${fixed} blog posts`);
+      }
     }
   } catch (error) {
-    console.log('[DB] Blog image fix skipped:', error);
+    console.log('[DB] Blog unique image assignment skipped:', error);
   }
 }
 
