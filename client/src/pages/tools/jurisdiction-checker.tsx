@@ -155,7 +155,7 @@ export default function JurisdictionChecker() {
     if (answers.taxConsiderations) {
       updates.taxConsiderations = answers.taxConsiderations;
     }
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData((prev: typeof formData) => ({ ...prev, ...updates }));
     setMode('traditional');
   };
 
@@ -217,11 +217,11 @@ export default function JurisdictionChecker() {
     }
 
     if (formData.investmentAmount === "50k+") {
-      checks.push({ criterion: "Investment Amount", status: "pass", message: "Investment exceeds £50,000 - typically strong for endorsement" });
+      checks.push({ criterion: "Investment Amount", status: "pass", message: "Strong funding position - demonstrates serious commitment to endorsing body" });
     } else if (formData.investmentAmount === "under50k") {
-      checks.push({ criterion: "Investment Amount", status: "pass", message: "Under £50,000 - acceptable if business plan justifies this level" });
+      checks.push({ criterion: "Investment Amount", status: "pass", message: "No minimum investment required since April 2023 - just ensure funds match your business plan needs" });
     } else if (formData.investmentAmount === "none") {
-      checks.push({ criterion: "Investment Amount", status: "warning", message: "Self-funding - ensure evidence of personal investment" });
+      checks.push({ criterion: "Investment Amount", status: "pass", message: "Self-funding is acceptable - demonstrate sufficient funds for your specific business plan" });
     } else {
       checks.push({ criterion: "Investment Amount", status: "unknown", message: "Please specify investment amount" });
     }
@@ -454,19 +454,19 @@ export default function JurisdictionChecker() {
                     </div>
 
                     <div className="space-y-3">
-                      <Label>Investment Amount</Label>
+                      <Label>Available Funding (no minimum required since April 2023)</Label>
                       <RadioGroup value={formData.investmentAmount} onValueChange={(v) => updateField("investmentAmount", v)}>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="50k+" id="inv-50k" />
-                          <Label htmlFor="inv-50k">£50,000 or more</Label>
+                          <Label htmlFor="inv-50k">Significant funding available</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="under50k" id="inv-under50k" />
-                          <Label htmlFor="inv-under50k">Under £50,000</Label>
+                          <Label htmlFor="inv-under50k">Moderate funding for lean startup</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="none" id="inv-none" />
-                          <Label htmlFor="inv-none">Self-funding only</Label>
+                          <Label htmlFor="inv-none">Self-funding / bootstrapping</Label>
                         </div>
                       </RadioGroup>
                     </div>

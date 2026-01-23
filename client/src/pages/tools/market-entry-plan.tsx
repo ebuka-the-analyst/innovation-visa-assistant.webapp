@@ -167,7 +167,7 @@ ${localizationPlan}
 
 CAPITAL INVESTMENT REQUIRED:
 £${investmentRequired.toLocaleString()}
-${investmentRequired >= 50000 ? `  ✓ Investment ≥£50k may qualify for ILR achievement criterion (1 of 7)` : `  ⚠ Investment <£50k does not meet ILR investment threshold`}
+  ✓ No minimum investment required since April 2023 - amount should match your business plan needs
 
 ═══════════════════════════════════════════════════════════
 ENTRY READINESS SCORE CALCULATION
@@ -210,21 +210,21 @@ Entry Readiness: ${score}%
   ${score >= 75 ? '✓ EXCELLENT - Market entry plan demonstrates strong international scalability for UK Innovator Founder visa' : score >= 65 ? '⚠ PREPARED - Entry plan viable but needs strengthening' : '✗ NOT READY - Significant gaps in entry strategy'}
 
 Investment Requirement: £${investmentRequired.toLocaleString()}
-  ${investmentRequired >= 50000 ? '✓ Meets £50k ILR investment criterion - actively investing in UK business growth' : '⚠ Below £50k ILR investment threshold'}
-  ${investmentRequired <= 100000 ? '✓ Realistic investment level' : investmentRequired <= 500000 ? '⚠ Significant capital required - ensure funding secured' : '⚠ Very high investment (£500k+) - validate resource availability'}
+  ✓ Sufficient funds to establish your business (no minimum required since April 2023)
+  ${investmentRequired <= 100000 ? '✓ Realistic investment level for lean startup approach' : investmentRequired <= 500000 ? '⚠ Significant capital required - ensure funding secured' : '⚠ Very high investment (£500k+) - validate resource availability'}
 
 Market Fit Score: ${scores.marketFit}/100
   ${scores.marketFit >= 75 ? '✓ Strong validation supports scalability narrative' : '⚠ Market fit validation needed before expansion'}
 
 Visa Criterion Alignment:
-${score >= 75 && scores.marketFit >= 70 ? `✓ Market entry plan demonstrates clear international scalability for UK Innovator Founder visa endorsement. ${score}% readiness and £${investmentRequired.toLocaleString()} investment${investmentRequired >= 50000 ? ' (meets ILR criterion)' : ''} show realistic expansion capability.` : score >= 65 ? '⚠ Market entry plan is viable but strengthening regulatory preparedness and market validation would improve endorsement case.' : '✗ Market entry plan needs significant work - address regulatory barriers, validate market fit, and secure required resources before visa application.'}
+${score >= 75 && scores.marketFit >= 70 ? `✓ Market entry plan demonstrates clear international scalability for UK Innovator Founder visa endorsement. ${score}% readiness and £${investmentRequired.toLocaleString()} investment show realistic expansion capability.` : score >= 65 ? '⚠ Market entry plan is viable but strengthening regulatory preparedness and market validation would improve endorsement case.' : '✗ Market entry plan needs significant work - address regulatory barriers, validate market fit, and secure required resources before visa application.'}
 
 ═══════════════════════════════════════════════════════════
-Sources: GOV.UK Innovator Founder Visa Guidance (November 2025)
+Sources: GOV.UK Innovator Founder Visa Guidance (January 2026)
 https://www.gov.uk/innovator-founder-visa
 Immigration Rules Appendix Innovator Founder
 Scalability Criterion: International expansion and growth potential
-ILR Achievement Criteria: £50k active investment (1 of 7 criteria)
+Note: £50,000 minimum investment was removed in April 2023 - funding now flexible based on business plan
 Endorsing Bodies: Envestors, UKES, Innovator International, GEP
 Market Entry Methodology: International expansion framework
 `;
