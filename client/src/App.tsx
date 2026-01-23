@@ -451,17 +451,14 @@ function AnalyticsProvider({ children }: { children: React.ReactNode }) {
 // Wrapper to conditionally show country-specific widgets (not on global landing)
 function CountryWidgets() {
   const [location] = useLocation();
-  // Only show ChatBot and ToolsChronographWheel on country pages, not on global landing
+  // Only show ToolsChronographWheel on country pages, not on global landing
+  // ChatBot shows everywhere
   const isGlobalLanding = location === "/";
-  
-  if (isGlobalLanding) {
-    return null;
-  }
   
   return (
     <Suspense fallback={null}>
       <ChatBot />
-      <ToolsChronographWheel />
+      {!isGlobalLanding && <ToolsChronographWheel />}
     </Suspense>
   );
 }

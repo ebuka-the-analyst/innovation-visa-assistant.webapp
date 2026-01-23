@@ -18,6 +18,8 @@ import {
   ChevronRight
 } from "lucide-react";
 import globeImage from "@assets/unnamed_(1)_1769196836272.png";
+import LanguageSelector from "@/components/LanguageSelector";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Country {
   code: string;
@@ -224,11 +226,13 @@ export default function GlobalLanding() {
                 <p className="text-[10px] text-gray-400 leading-none">.global</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs py-0.5">
                 <Sparkles className="h-3 w-3 mr-1" />
                 AI-Powered
               </Badge>
+              <LanguageSelector />
+              <ThemeToggle />
               <Button 
                 variant="outline" 
                 size="sm"
