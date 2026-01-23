@@ -448,6 +448,24 @@ function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Wrapper to conditionally show country-specific widgets (not on global landing)
+function CountryWidgets() {
+  const [location] = useLocation();
+  // Only show ChatBot and ToolsChronographWheel on country pages, not on global landing
+  const isGlobalLanding = location === "/";
+  
+  if (isGlobalLanding) {
+    return null;
+  }
+  
+  return (
+    <Suspense fallback={null}>
+      <ChatBot />
+      <ToolsChronographWheel />
+    </Suspense>
+  );
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -455,10 +473,9 @@ function App() {
         <AnalyticsProvider>
           <VoicePermissionProvider>
             <TooltipProvider>
+              <CountryWidgets />
               <Suspense fallback={null}>
-                <ChatBot />
                 <FloatingFeedback />
-                <ToolsChronographWheel />
                 <SiteFeedbackPopup />
               </Suspense>
               <Toaster />
