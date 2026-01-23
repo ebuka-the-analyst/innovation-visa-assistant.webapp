@@ -20,6 +20,7 @@ import {
 import globeImage from "@assets/unnamed_(1)_1769196836272.png";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Country {
   code: string;
@@ -87,6 +88,7 @@ export default function GlobalLanding() {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [isZooming, setIsZooming] = useState(false);
   const globeRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   const filteredCountries = countries.filter(country =>
     country.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -277,7 +279,7 @@ export default function GlobalLanding() {
             <div className="flex items-center gap-2">
               <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs py-0.5">
                 <Sparkles className="h-3 w-3 mr-1" />
-                AI-Powered
+                {t.globalLanding.aiPowered}
               </Badge>
               <LanguageSelector />
               <ThemeToggle />
@@ -288,7 +290,7 @@ export default function GlobalLanding() {
                 onClick={() => setLocation("/login")}
                 data-testid="button-global-login"
               >
-                Sign In
+                {t.globalLanding.signIn}
               </Button>
             </div>
           </div>
@@ -299,16 +301,15 @@ export default function GlobalLanding() {
             <div className="text-center mb-1 lg:mb-2 max-w-xl">
               <Badge className="mb-1 bg-[#005EB8]/20 text-[#41B6E6] border-[#005EB8]/30 text-[10px] py-0.5">
                 <Globe2 className="h-2.5 w-2.5 mr-1" />
-                World's First Global AI Visa Platform
+                {t.globalLanding.badge}
               </Badge>
               <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold mb-1">
-                <span className="gradient-text">Your Gateway to</span>
+                <span className="gradient-text">{t.globalLanding.headline}</span>
                 <br />
-                <span className="text-gray-900 dark:text-white">Global Opportunities</span>
+                <span className="text-gray-900 dark:text-white">{t.globalLanding.subHeadline}</span>
               </h2>
               <p className="text-gray-600 dark:text-gray-400 text-xs lg:text-sm">
-                AI-powered visa assistance for entrepreneurs, innovators, and skilled professionals. 
-                Select your destination country to begin.
+                {t.globalLanding.description}
               </p>
             </div>
 
@@ -330,7 +331,7 @@ export default function GlobalLanding() {
               <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
                 <Badge variant="outline" className="bg-black/50 border-white/20 text-white text-[10px] py-0.5">
                   <Star className="h-2.5 w-2.5 mr-1 text-yellow-400" />
-                  16 Countries | 1 Live | 15 Coming Soon
+                  {t.globalLanding.countriesCount} | 1 {t.globalLanding.live} | 15 {t.globalLanding.comingSoon}
                 </Badge>
               </div>
             </div>
@@ -338,26 +339,26 @@ export default function GlobalLanding() {
             <div className="flex flex-wrap justify-center gap-3 mb-2">
               <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
                 <Bot className="h-3 w-3 text-[#41B6E6]" />
-                <span>Multi-Agent AI</span>
+                <span>{t.globalLanding.multiAgentAI}</span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
                 <FileText className="h-3 w-3 text-emerald-400" />
-                <span>Document Generation</span>
+                <span>{t.globalLanding.documentGeneration}</span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
                 <Shield className="h-3 w-3 text-yellow-400" />
-                <span>Compliance Verified</span>
+                <span>{t.globalLanding.complianceVerified}</span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
                 <Users className="h-3 w-3 text-purple-400" />
-                <span>500+ Approved</span>
+                <span>{t.globalLanding.approvedApplicants}</span>
               </div>
             </div>
 
             <div className="relative w-full max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
               <Input
-                placeholder="Search for a country..."
+                placeholder={t.globalLanding.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 py-1.5 text-sm bg-white/80 dark:bg-white/5 border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500 rounded-full focus:border-[#005EB8] focus:ring-[#005EB8]"
@@ -368,8 +369,8 @@ export default function GlobalLanding() {
 
           <div className="w-72 lg:w-80 xl:w-96 glass-panel rounded-l-2xl flex flex-col overflow-hidden">
             <div className="p-3 pb-2 flex-shrink-0">
-              <h3 className="text-sm font-semibold">Select Destination</h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Choose where you want to immigrate</p>
+              <h3 className="text-sm font-semibold">{t.globalLanding.selectDestination}</h3>
+              <p className="text-xs text-gray-600 dark:text-gray-400">{t.globalLanding.chooseCountry}</p>
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 space-y-1.5 scrollbar-thin">
@@ -408,11 +409,11 @@ export default function GlobalLanding() {
                       <ChevronRight className="h-4 w-4 text-[#005EB8]" />
                     ) : country.comingSoon ? (
                       <Badge className="text-[7px] bg-amber-500/20 text-amber-400 border-amber-500/30 px-1 py-0">
-                        NEXT
+                        {t.globalLanding.next}
                       </Badge>
                     ) : (
                       <Badge className="text-[7px] bg-gray-500/20 text-gray-400 border-gray-500/30 px-1 py-0">
-                        SOON
+                        {t.globalLanding.soon}
                       </Badge>
                     )}
                   </div>
@@ -422,7 +423,7 @@ export default function GlobalLanding() {
 
             <div className="p-2 border-t border-white/10 flex-shrink-0">
               <p className="text-[10px] text-gray-500 text-center">
-                More countries launching in 2026
+                {t.globalLanding.moreLaunching}
               </p>
             </div>
           </div>
@@ -430,10 +431,10 @@ export default function GlobalLanding() {
 
         <footer className="flex-shrink-0 glass-panel py-1.5">
           <div className="max-w-7xl mx-auto px-4 flex items-center justify-between text-xs text-gray-500">
-            <p>2026 Visa Assistant Global</p>
+            <p>2026 {t.globalLanding.footerText}</p>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" className="text-gray-500 text-xs h-6 px-2" data-testid="link-privacy">Privacy</Button>
-              <Button variant="ghost" size="sm" className="text-gray-500 text-xs h-6 px-2" data-testid="link-terms">Terms</Button>
+              <Button variant="ghost" size="sm" className="text-gray-500 text-xs h-6 px-2" data-testid="link-privacy">{t.globalLanding.privacy}</Button>
+              <Button variant="ghost" size="sm" className="text-gray-500 text-xs h-6 px-2" data-testid="link-terms">{t.globalLanding.terms}</Button>
             </div>
           </div>
         </footer>

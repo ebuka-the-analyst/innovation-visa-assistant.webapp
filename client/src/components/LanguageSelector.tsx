@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,9 +6,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageCode } from "@/lib/translations";
 
 interface Language {
-  code: string;
+  code: LanguageCode;
   name: string;
   countryCode: string;
 }
@@ -37,7 +38,12 @@ function FlagImage({ countryCode, className = "" }: { countryCode: string; class
 }
 
 export default function LanguageSelector() {
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>(languages[0]);
+  const { language, setLanguage } = useLanguage();
+  const selectedLanguage = languages.find(l => l.code === language) || languages[0];
+
+  const handleLanguageChange = (lang: Language) => {
+    setLanguage(lang.code);
+  };
 
   return (
     <DropdownMenu>
@@ -53,19 +59,19 @@ export default function LanguageSelector() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-44 bg-[#0a0a1a] border-[#1a1a3a]"
+        className="w-44"
       >
-        {languages.map((language) => (
+        {languages.map((lang) => (
           <DropdownMenuItem
-            key={language.code}
-            onClick={() => setSelectedLanguage(language)}
-            className="flex items-center gap-2.5 cursor-pointer hover:bg-[#1a1a3a]"
-            data-testid={`menu-item-language-${language.code}`}
+            key={lang.code}
+            onClick={() => handleLanguageChange(lang)}
+            className="flex items-center gap-2.5 cursor-pointer"
+            data-testid={`menu-item-language-${lang.code}`}
           >
-            <FlagImage countryCode={language.countryCode} />
-            <span className="flex-1 text-white">{language.name}</span>
-            {selectedLanguage.code === language.code && (
-              <Check className="h-4 w-4 text-[#41B6E6]" />
+            <FlagImage countryCode={lang.countryCode} />
+            <span className="flex-1">{lang.name}</span>
+            {language === lang.code && (
+              <Check className="h-4 w-4 text-primary" />
             )}
           </DropdownMenuItem>
         ))}

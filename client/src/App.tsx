@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ThemeToggle from "@/components/ThemeToggle";
 import { VoicePermissionProvider } from "@/contexts/VoicePermissionContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LogOut, Loader2, LayoutDashboard, Wrench, FileText, HelpCircle } from "lucide-react";
 import logoLightImg from "@assets/official_logo.webp";
@@ -467,22 +468,24 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <AnalyticsProvider>
-          <VoicePermissionProvider>
-            <TooltipProvider>
-              <CountryWidgets />
-              <Suspense fallback={null}>
-                <FloatingFeedback />
-                <SiteFeedbackPopup />
-              </Suspense>
-              <Toaster />
-              <AppLayout />
-              <Suspense fallback={null}>
-                <CookieConsent />
-              </Suspense>
-            </TooltipProvider>
-          </VoicePermissionProvider>
-        </AnalyticsProvider>
+        <LanguageProvider>
+          <AnalyticsProvider>
+            <VoicePermissionProvider>
+              <TooltipProvider>
+                <CountryWidgets />
+                <Suspense fallback={null}>
+                  <FloatingFeedback />
+                  <SiteFeedbackPopup />
+                </Suspense>
+                <Toaster />
+                <AppLayout />
+                <Suspense fallback={null}>
+                  <CookieConsent />
+                </Suspense>
+              </TooltipProvider>
+            </VoicePermissionProvider>
+          </AnalyticsProvider>
+        </LanguageProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

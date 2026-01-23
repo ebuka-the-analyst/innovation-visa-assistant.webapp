@@ -5,6 +5,7 @@ import { Link, useLocation } from "wouter";
 import logoLightImg from "@assets/official_logo.webp";
 import logoDarkImg from "@assets/logo_dark.webp";
 import ThemeToggle from "./ThemeToggle";
+import LanguageSelector from "./LanguageSelector";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -135,6 +136,7 @@ export default function Header() {
 
         {/* CTA Buttons & Theme Toggle */}
         <div className={`hidden md:flex items-center transition-all duration-300 ${isScrolled ? 'gap-1' : 'gap-2'}`}>
+          <LanguageSelector />
           <ThemeToggle />
           {isAuthenticated ? (
             <>
