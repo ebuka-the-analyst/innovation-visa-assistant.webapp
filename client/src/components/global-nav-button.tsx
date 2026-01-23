@@ -36,7 +36,7 @@ export function GlobalNavButton() {
             onClick={handleClick}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
-            className="fixed top-[2px] left-0.5 z-[200] soft-pulse w-4 h-4 flex items-center justify-center cursor-pointer hover:scale-150 transition-transform rounded-full overflow-hidden"
+            className="fixed top-[2px] left-0.5 z-[200] soft-pulse w-4 h-4 flex items-center justify-center cursor-pointer hover:scale-150 transition-transform rounded-full overflow-hidden opacity-50 hover:opacity-100"
             data-testid="button-global-nav"
           >
             <img src={worldIcon} alt="World Map" className="w-4 h-4 object-cover" />

@@ -79,7 +79,7 @@ export default function ChatBot() {
       >
         {/* Container with chat icon and dismiss X - pill shape when not dismissed */}
         <div className={`flex items-center gap-0.5 transition-all duration-300 ${
-          isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : ""
+          isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : "opacity-50 hover:opacity-100"
         }`}>
           {/* Dismiss X button - attached to the left */}
           {!isDismissed && !isOpen && (
