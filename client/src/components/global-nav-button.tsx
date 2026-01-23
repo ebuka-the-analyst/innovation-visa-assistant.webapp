@@ -6,13 +6,27 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import worldIcon from "@assets/worldIcon_1769203295221.png";
+import globeImage from "@assets/unnamed_(1)_1769196836272.png";
 
 export function GlobalNavButton() {
   const [, setLocation] = useLocation();
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isZooming, setIsZooming] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   const handleClick = () => {
-    setLocation("/");
+    setShowTooltip(false);
+    setIsZooming(true);
+    
+    // Start fade-out before navigation
+    setTimeout(() => {
+      setIsFadingOut(true);
+    }, 1200);
+    
+    // Navigate after animation
+    setTimeout(() => {
+      setLocation("/");
+    }, 1800);
   };
 
   return (
@@ -29,7 +43,27 @@ export function GlobalNavButton() {
         .soft-pulse {
           animation: soft-pulse 2s ease-in-out infinite;
         }
+        
+        @keyframes zoom-out-reverse {
+          0% { transform: scale(50) rotateY(360deg); opacity: 0; }
+          50% { transform: scale(2) rotateY(180deg); opacity: 1; }
+          100% { transform: scale(1) rotateY(0deg); opacity: 1; }
+        }
+        
+        .globe-zoom-reverse {
+          animation: zoom-out-reverse 1.5s ease-out forwards;
+        }
+        
+        @keyframes fade-in-overlay {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        
+        .animate-fade-in-overlay {
+          animation: fade-in-overlay 0.3s ease-out forwards;
+        }
       `}</style>
+      
       <Tooltip open={showTooltip} onOpenChange={setShowTooltip}>
         <TooltipTrigger asChild>
           <button
@@ -51,6 +85,33 @@ export function GlobalNavButton() {
           </p>
         </TooltipContent>
       </Tooltip>
+      
+      {isZooming && (
+        <div 
+          className={`fixed inset-0 z-[300] flex items-center justify-center transition-all duration-500 ease-out animate-fade-in-overlay ${
+            isFadingOut ? "bg-sky-100 dark:bg-[#0a0a1a]" : "bg-[#0a0a1a]"
+          }`}
+        >
+          <div className={`text-center transition-all duration-500 ease-out ${
+            isFadingOut ? "opacity-0 scale-90" : "opacity-100 scale-100"
+          }`}>
+            <div className="perspective-1000">
+              <div className="globe-zoom-reverse w-48 h-48 lg:w-64 lg:h-64 rounded-full overflow-hidden mx-auto shadow-2xl">
+                <img 
+                  src={globeImage} 
+                  alt="Earth Globe" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <p className={`mt-6 text-lg font-semibold text-white transition-opacity duration-300 ${
+              isFadingOut ? "opacity-0" : "animate-pulse"
+            }`}>
+              Returning to World Map...
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 }
