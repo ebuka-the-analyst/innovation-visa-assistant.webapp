@@ -452,64 +452,6 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Innovator Founder Visa Radar Chart - Only show if there's a completed plan */}
-            {completedPlan && radarData && (
-              <Card data-testid="card-visa-radar">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Award className="h-5 w-5 text-primary" />
-                    <CardTitle>Innovator Founder Visa Strength Indicator</CardTitle>
-                  </div>
-                  <CardDescription>
-                    Your business plan performance across the three core UK Innovator Founder Visa criteria
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <RadarChart data={radarData}>
-                      <PolarGrid stroke="hsl(var(--border))" />
-                      <PolarAngleAxis 
-                        dataKey="criterion" 
-                        tick={{ fill: 'hsl(var(--foreground))', fontSize: 14 }}
-                      />
-                      <PolarRadiusAxis 
-                        angle={90} 
-                        domain={[0, 100]}
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                      />
-                      <Radar
-                        name="Your Score"
-                        dataKey="score"
-                        stroke="hsl(var(--primary))"
-                        fill="hsl(var(--primary))"
-                        fillOpacity={0.6}
-                      />
-                      <Tooltip 
-                        contentStyle={{
-                          backgroundColor: 'hsl(var(--card))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px',
-                        }}
-                        labelStyle={{ color: 'hsl(var(--foreground))' }}
-                      />
-                      <Legend />
-                    </RadarChart>
-                  </ResponsiveContainer>
-                  <div className="mt-4 grid grid-cols-3 gap-4 text-center">
-                    {radarData.map((item) => (
-                      <div key={item.criterion} className="space-y-1">
-                        <p className="text-sm font-medium">{item.criterion}</p>
-                        <p className="text-lg font-bold text-primary">{item.score}/100</p>
-                        <p className="text-xs text-muted-foreground">
-                          {item.score >= 80 ? 'Excellent' : item.score >= 60 ? 'Good' : item.score >= 40 ? 'Fair' : 'Needs Work'}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Quick Actions Panel */}
             <Card data-testid="card-quick-actions">
               <CardHeader>
