@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { Globe2 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import globeImage from "@assets/unnamed_(1)_1769196836272.png";
 
 export function GlobalNavButton() {
   const [, setLocation] = useLocation();
@@ -36,10 +36,10 @@ export function GlobalNavButton() {
             onClick={handleClick}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
-            className="fixed top-1 left-1 z-[200] soft-pulse w-4 h-4 rounded-full overflow-hidden cursor-pointer hover:scale-150 transition-transform"
+            className="fixed top-1 left-1 z-[200] soft-pulse w-5 h-5 rounded-full bg-[#0a1628] flex items-center justify-center cursor-pointer hover:scale-150 transition-transform"
             data-testid="button-global-nav"
           >
-            <img src={globeImage} alt="World Map" className="w-full h-full object-cover" />
+            <Globe2 className="w-4 h-4 text-[#41B6E6]" />
           </button>
         </TooltipTrigger>
         <TooltipContent 
