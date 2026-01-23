@@ -87,6 +87,7 @@ export default function GlobalLanding() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [isZooming, setIsZooming] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const globeRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
 
@@ -102,9 +103,15 @@ export default function GlobalLanding() {
     
     sessionStorage.setItem("navigating_from_global", country.code);
     
+    // Start fade-out before navigation
+    setTimeout(() => {
+      setIsFadingOut(true);
+    }, 1200);
+    
+    // Navigate after fade-out completes
     setTimeout(() => {
       setLocation(`/${country.code}`);
-    }, 1500);
+    }, 1800);
   };
 
   useEffect(() => {
@@ -150,6 +157,15 @@ export default function GlobalLanding() {
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 0 15px rgba(0, 94, 184, 0.3); }
           50% { box-shadow: 0 0 30px rgba(0, 94, 184, 0.5), 0 0 45px rgba(0, 94, 184, 0.2); }
+        }
+        
+        @keyframes fade-in {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.4s ease-out forwards;
         }
         
         .star {
@@ -441,10 +457,20 @@ export default function GlobalLanding() {
       </div>
 
       {isZooming && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-sky-100 dark:bg-[#0a0a1a]">
-          <div className="text-center">
+        <div 
+          className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-500 ease-out ${
+            isFadingOut 
+              ? "bg-[#0a0a1a] opacity-100" 
+              : "bg-sky-100 dark:bg-[#0a0a1a] animate-fade-in"
+          }`}
+        >
+          <div className={`text-center transition-all duration-500 ease-out ${
+            isFadingOut ? "opacity-0 scale-110 translate-y-[-20px]" : "opacity-100 scale-100"
+          }`}>
             <div className="globe-container">
-              <div className="globe zooming w-48 h-48 lg:w-64 lg:h-64 rounded-full overflow-hidden">
+              <div className={`globe zooming w-48 h-48 lg:w-64 lg:h-64 rounded-full overflow-hidden transition-transform duration-500 ${
+                isFadingOut ? "scale-150" : "scale-100"
+              }`}>
                 <img 
                   src={globeImage} 
                   alt="Earth Globe" 
@@ -452,7 +478,9 @@ export default function GlobalLanding() {
                 />
               </div>
             </div>
-            <p className="mt-6 text-lg font-semibold text-gray-900 dark:text-white animate-pulse">
+            <p className={`mt-6 text-lg font-semibold text-gray-900 dark:text-white transition-opacity duration-300 ${
+              isFadingOut ? "opacity-0" : "animate-pulse"
+            }`}>
               Traveling to {selectedCountry?.name}...
             </p>
           </div>
