@@ -39,10 +39,10 @@ export default function ThemeToggle() {
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          className="rounded-full relative overflow-visible border-2 border-primary/30 bg-background/80 backdrop-blur-sm shadow-sm"
+          className="rounded-full"
           data-testid="button-theme-toggle"
         >
           {theme === "light" ? (
@@ -50,7 +50,6 @@ export default function ThemeToggle() {
           ) : (
             <Sun className="w-5 h-5" />
           )}
-          <div className="absolute -right-1 -top-1 w-2 h-2 bg-primary rounded-full animate-ping-slow" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>
