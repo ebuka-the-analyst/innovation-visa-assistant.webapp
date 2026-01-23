@@ -242,17 +242,17 @@ export default function GlobalLanding() {
 
         <main className="flex-1 flex overflow-hidden">
           <div className="flex-1 flex flex-col items-center justify-center px-4 lg:px-8 py-2">
-            <div className="text-center mb-2 lg:mb-4 max-w-xl">
-              <Badge className="mb-2 bg-[#005EB8]/20 text-[#41B6E6] border-[#005EB8]/30 text-xs">
-                <Globe2 className="h-3 w-3 mr-1" />
+            <div className="text-center mb-1 lg:mb-2 max-w-xl">
+              <Badge className="mb-1 bg-[#005EB8]/20 text-[#41B6E6] border-[#005EB8]/30 text-[10px] py-0.5">
+                <Globe2 className="h-2.5 w-2.5 mr-1" />
                 World's First Global AI Visa Platform
               </Badge>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold mb-1">
                 <span className="gradient-text">Your Gateway to</span>
                 <br />
                 <span className="text-white">Global Opportunities</span>
               </h2>
-              <p className="text-gray-400 text-sm lg:text-base">
+              <p className="text-gray-400 text-xs lg:text-sm">
                 AI-powered visa assistance for entrepreneurs, innovators, and skilled professionals. 
                 Select your destination country to begin.
               </p>
@@ -260,10 +260,10 @@ export default function GlobalLanding() {
 
             <div 
               ref={globeRef}
-              className="globe-container relative mb-2 lg:mb-4"
+              className="globe-container relative mb-1"
             >
               <div 
-                className={`globe w-32 h-32 sm:w-40 sm:h-40 lg:w-52 lg:h-52 xl:w-64 xl:h-64 rounded-full overflow-hidden ${isZooming ? 'zooming' : ''}`}
+                className={`globe w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40 xl:w-48 xl:h-48 rounded-full overflow-hidden ${isZooming ? 'zooming' : ''}`}
               >
                 <img 
                   src={globeImage} 
@@ -281,32 +281,32 @@ export default function GlobalLanding() {
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-3 mb-3 lg:mb-4">
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                <Bot className="h-3.5 w-3.5 text-[#41B6E6]" />
+            <div className="flex flex-wrap justify-center gap-3 mb-2">
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+                <Bot className="h-3 w-3 text-[#41B6E6]" />
                 <span>Multi-Agent AI</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                <FileText className="h-3.5 w-3.5 text-emerald-400" />
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+                <FileText className="h-3 w-3 text-emerald-400" />
                 <span>Document Generation</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                <Shield className="h-3.5 w-3.5 text-yellow-400" />
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+                <Shield className="h-3 w-3 text-yellow-400" />
                 <span>Compliance Verified</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                <Users className="h-3.5 w-3.5 text-purple-400" />
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+                <Users className="h-3 w-3 text-purple-400" />
                 <span>500+ Approved</span>
               </div>
             </div>
 
-            <div className="relative w-full max-w-sm">
+            <div className="relative w-full max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
               <Input
                 placeholder="Search for a country..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 rounded-full focus:border-[#005EB8] focus:ring-[#005EB8]"
+                className="pl-9 py-1.5 text-sm bg-white/5 border-white/10 text-white placeholder:text-gray-500 rounded-full focus:border-[#005EB8] focus:ring-[#005EB8]"
                 data-testid="input-country-search"
               />
             </div>

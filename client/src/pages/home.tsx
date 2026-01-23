@@ -15,6 +15,7 @@ import Disclaimer from "@/components/Disclaimer";
 import Footer from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, softwareApplicationSchema, visaFAQSchema } from "@/lib/seo-schemas";
+import { GlobalNavButton } from "@/components/global-nav-button";
 
 export default function Home() {
   const combinedSchema = {
@@ -28,6 +29,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      <GlobalNavButton />
       <SEOHead
         title="UK Innovator Founder Visa Assistant | 100+ Professional Tools & Expert Guidance"
         description="Get approved with our AI-powered UK Innovator Founder Visa platform. 100+ professional-level tools covering compliance, business plans, financial modeling, and endorsement preparation. Start your journey today."
