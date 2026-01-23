@@ -192,10 +192,18 @@ export default function EligibilityValidator() {
     setState(newState);
     
     const date = new Date().toLocaleString('en-GB');
+    const newMeetsAge = newState.age >= 18;
+    const newMeetsEnglish = newState.hasEnglishProof && ['B2', 'C1', 'C2'].includes(newState.englishLevel);
+    const newMeetsFunding = newState.fundingAmount > 0 && newState.hasFundingProof;
+    const newMeetsEntrepreneur = newState.isGenuineEntrepreneur && newState.hasBusinessPlan && newState.hasInnovationEvidence;
+    const newMeetsImmigration = newState.hasNoImmigrationViolations && !newState.hasCriminalRecord && newState.hasValidPassport;
+    const completedCount = [newMeetsAge, newMeetsEnglish, newMeetsFunding, newMeetsEntrepreneur, newMeetsImmigration].filter(Boolean).length;
     localStorage.setItem('eligibility-validator-state', JSON.stringify({
       state: newState,
       activeTab: 'checker',
-      savedDate: date
+      savedDate: date,
+      completed: completedCount >= 3,
+      overallCompletion: Math.round((completedCount / 5) * 100)
     }));
     setSavedDate(date);
     
@@ -244,10 +252,14 @@ export default function EligibilityValidator() {
   ];
 
   const getSerializedState = () => {
+    const checklistMet = [meetsAge, meetsEnglish, meetsFunding, meetsEntrepreneur, meetsImmigration];
+    const completedCount = checklistMet.filter(Boolean).length;
     return {
       state,
       activeTab,
-      savedDate: new Date().toLocaleString('en-GB')
+      savedDate: new Date().toLocaleString('en-GB'),
+      completed: completedCount >= 3,
+      overallCompletion: Math.round((completedCount / 5) * 100)
     };
   };
 

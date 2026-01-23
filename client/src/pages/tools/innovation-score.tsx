@@ -347,11 +347,20 @@ export default function InnovationScore() {
   const triggerAutoSave = useCallback((newFactors: InnovationFactors, newActiveTab: string, newSelectedSector: string) => {
     if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
     autoSaveRef.current = setTimeout(() => {
+      const innovScore = Math.round(
+        (newFactors.novelty * 0.25) +
+        (newFactors.technicalAdvancement * 0.20) +
+        (newFactors.marketDisruption * 0.20) +
+        (newFactors.ipProtection * 0.20) +
+        (newFactors.rdInvestment * 0.15)
+      );
       const state = {
         factors: newFactors,
         activeTab: newActiveTab,
         selectedSector: newSelectedSector,
-        savedDate: new Date().toLocaleString('en-GB')
+        savedDate: new Date().toLocaleString('en-GB'),
+        completed: innovScore >= 50,
+        overallCompletion: innovScore >= 65 ? 100 : Math.round((innovScore / 65) * 100)
       };
       localStorage.setItem('innovation-score-state', JSON.stringify(state));
       setSavedDate(state.savedDate);
