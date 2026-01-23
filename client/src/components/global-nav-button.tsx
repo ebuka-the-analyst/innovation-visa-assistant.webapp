@@ -18,18 +18,18 @@ export function GlobalNavButton() {
   return (
     <>
       <style>{`
-        @keyframes blink-glow {
+        @keyframes blink-bright {
           0%, 100% { 
-            opacity: 0.7;
-            box-shadow: 0 0 4px rgba(0, 94, 184, 0.3);
+            opacity: 0.85;
+            box-shadow: 0 0 6px rgba(234, 179, 8, 0.4), 0 0 12px rgba(234, 179, 8, 0.2);
           }
           50% { 
             opacity: 1;
-            box-shadow: 0 0 8px rgba(0, 94, 184, 0.6), 0 0 12px rgba(65, 182, 230, 0.4);
+            box-shadow: 0 0 12px rgba(234, 179, 8, 0.7), 0 0 20px rgba(234, 179, 8, 0.4), 0 0 30px rgba(234, 179, 8, 0.2);
           }
         }
-        .blink-globe {
-          animation: blink-glow 2s ease-in-out infinite;
+        .blink-bright {
+          animation: blink-bright 1.5s ease-in-out infinite;
         }
       `}</style>
       <Tooltip open={showTooltip} onOpenChange={setShowTooltip}>
@@ -38,18 +38,18 @@ export function GlobalNavButton() {
             onClick={handleClick}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
-            className="fixed top-2 left-2 z-[100] blink-globe w-6 h-6 rounded-full bg-[#0a0a1a] border border-[#005EB8]/50 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+            className="fixed top-[70px] left-3 z-[100] blink-bright w-7 h-7 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 border-2 border-yellow-300 flex items-center justify-center cursor-pointer hover:scale-125 transition-transform shadow-lg"
             data-testid="button-global-nav"
           >
-            <Globe2 className="h-3.5 w-3.5 text-[#41B6E6]" />
+            <Globe2 className="h-4 w-4 text-white drop-shadow-sm" />
           </button>
         </TooltipTrigger>
         <TooltipContent 
           side="right" 
-          className="bg-[#0a0a1a] text-white border-[#005EB8]/50 max-w-[200px]"
+          className="bg-[#0a0a1a] text-white border-yellow-500/50 max-w-[200px]"
         >
           <p className="text-xs">
-            Click to return to the <span className="text-[#41B6E6] font-semibold">World Map</span> and explore all countries
+            Click to return to the <span className="text-yellow-400 font-semibold">World Map</span> and explore all countries
           </p>
         </TooltipContent>
       </Tooltip>

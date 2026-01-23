@@ -93,6 +93,8 @@ export default function GlobalLanding() {
     setSelectedCountry(country);
     setIsZooming(true);
     
+    sessionStorage.setItem("navigating_from_global", country.code);
+    
     setTimeout(() => {
       setLocation(`/${country.code}`);
     }, 1500);
