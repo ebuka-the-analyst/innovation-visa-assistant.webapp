@@ -26,6 +26,9 @@ const ToolsChronographWheel = lazy(() => import("@/components/ToolsChronographWh
 const SiteFeedbackPopup = lazy(() => import("@/components/SiteFeedbackPopup").then(m => ({ default: m.SiteFeedbackPopup })));
 
 // ============ LAZY LOADED PAGES ============
+// Global landing page
+const GlobalLanding = lazy(() => import("@/pages/global-landing"));
+
 // Public pages (marketing/auth)
 const Home = lazy(() => import("@/pages/home"));
 const Login = lazy(() => import("@/pages/login"));
@@ -129,7 +132,7 @@ const BusinessPlanTemplatePage = lazy(() => import("@/pages/seo/business-plan-te
 const BlogPage = lazy(() => import("@/pages/blog"));
 const BlogPostPage = lazy(() => import("@/pages/blog-post"));
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog"];
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog"];
 const SIDEBAR_HIDDEN_PREFIXES = ["/blog/"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
 
@@ -213,7 +216,8 @@ function HeaderNavTabs() {
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={GlobalLanding} />
+      <Route path="/uk" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/verify-email" component={VerifyEmail} />
