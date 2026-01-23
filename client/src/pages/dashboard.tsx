@@ -1,11 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award, Eye, EyeOff, RefreshCw, MessageCircle, Calculator, BookOpen, Users, ArrowRight, Sparkles, Settings, Shield, Gift, Crown } from "lucide-react";
+import { Plus, FileText, Download, Clock, CheckCircle, AlertCircle, TrendingUp, Target, Zap, Award, Eye, EyeOff, RefreshCw, MessageCircle, Calculator, BookOpen, Users, ArrowRight, Sparkles, Settings, Shield, Gift, Crown, Trash2, Calendar, Building2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 import ChatBot from "@/components/ChatBot";
 import { MyWorkSection } from "@/components/MyWorkSection";
@@ -157,7 +160,34 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { hiddenIds, hidePlan, showPlan, showAllPlans } = useHiddenDemoPlans();
   const [redirecting, setRedirecting] = useState(false);
-  
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [planToDelete, setPlanToDelete] = useState<{ id: string; name: string } | null>(null);
+  const { toast } = useToast();
+
+  const deletePlanMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/business-plans/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Delete failed");
+      }
+      return { id };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/business-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/plans"] });
+      toast({ title: "Business plan deleted successfully" });
+      setSelectedPlanId(null);
+      setPlanToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+      setPlanToDelete(null);
+    },
+  });
 
   const { data: user, isLoading: userLoading, isError: userError, refetch: refetchUser } = useQuery<{ 
     id: string; 
@@ -609,118 +639,271 @@ export default function Dashboard() {
             {/* My Saved Work Section */}
             <MyWorkSection />
 
-            {/* Business Plans List */}
+            {/* Business Plans List - 50/50 Layout */}
             <div>
               <h3 className="text-lg md:text-xl font-semibold mb-4">Your Business Plans</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {displayPlans.map((plan) => (
-                  <Card key={plan.id} className="hover-elevate" data-testid={`card-plan-${plan.id}`}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-lg">{plan.businessName}</CardTitle>
-                        <div className="flex flex-col gap-1">
-                          {getStatusBadge(plan.status)}
-                          {plan.isDemoData && (
-                            <Badge variant="outline" className="text-xs">
-                              Demo
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <CardDescription>{plan.industry}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Tier:</span>
-                          <span className="font-medium capitalize">{plan.tier}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Created:</span>
-                          <span className="font-medium">
-                            {format(new Date(plan.createdAt), 'MMM d, yyyy')}
-                          </span>
-                        </div>
-                        {plan.currentGenerationStage && plan.status === 'generating' && (
-                          <div className="mt-3 p-2 bg-accent/20 rounded text-xs">
-                            <p className="text-muted-foreground">{plan.currentGenerationStage}</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Side - Plan Cards */}
+                <div className="space-y-4">
+                  {displayPlans.map((plan) => {
+                    const isSelected = selectedPlanId === plan.id;
+                    return (
+                      <Card 
+                        key={plan.id} 
+                        className={`cursor-pointer transition-all ${isSelected ? 'ring-2 ring-primary shadow-lg' : 'hover-elevate'}`}
+                        onClick={() => setSelectedPlanId(plan.id)}
+                        data-testid={`card-plan-${plan.id}`}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <CardTitle className="text-base truncate">{plan.businessName}</CardTitle>
+                              <CardDescription className="text-xs truncate">{plan.industry}</CardDescription>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {getStatusBadge(plan.status)}
+                              {plan.isDemoData && (
+                                <Badge variant="outline" className="text-xs">Demo</Badge>
+                              )}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex gap-2">
-                      {plan.status === 'completed' && plan.pdfUrl && (
-                        <>
-                          <Button 
-                            variant="default" 
-                            className="flex-1"
-                            onClick={() => window.open(plan.pdfUrl!, '_blank')}
-                            data-testid={`button-download-${plan.id}`}
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Download
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            className="flex-1"
-                            onClick={() => {
-                              localStorage.setItem('lastPlanId', plan.id);
-                              setLocation(`/diagnostics?planId=${plan.id}`);
-                            }}
-                            data-testid={`button-diagnostics-${plan.id}`}
-                          >
-                            <Zap className="h-4 w-4 mr-2" />
-                            Diagnostics
-                          </Button>
-                        </>
-                      )}
-                      {plan.isDemoData && (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => {
-                            if (hiddenIds.includes(plan.id)) {
-                              showPlan(plan.id);
-                            } else {
-                              hidePlan(plan.id);
-                            }
-                          }}
-                          data-testid={`button-toggle-visibility-${plan.id}`}
-                        >
-                          {hiddenIds.includes(plan.id) ? (
-                            <Eye className="h-4 w-4" />
-                          ) : (
-                            <EyeOff className="h-4 w-4" />
+                        </CardHeader>
+                        <CardContent className="pt-0 pb-3">
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Crown className="h-3 w-3" />
+                              <span className="capitalize">{plan.tier}</span>
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {format(new Date(plan.createdAt), 'MMM d, yyyy')}
+                            </span>
+                          </div>
+                          {plan.currentGenerationStage && plan.status === 'generating' && (
+                            <div className="mt-2 p-2 bg-accent/20 rounded text-xs">
+                              <p className="text-muted-foreground">{plan.currentGenerationStage}</p>
+                            </div>
                           )}
-                        </Button>
-                      )}
-                      {plan.status === 'pending' && (
-                        <Button 
-                          variant="outline" 
-                          className="flex-1"
-                          onClick={() => setLocation(`/questionnaire?tier=${plan.tier}`)}
-                          data-testid={`button-continue-${plan.id}`}
-                        >
-                          <FileText className="h-4 w-4 mr-2" />
-                          Continue
-                        </Button>
-                      )}
-                      {plan.status === 'generating' && (
-                        <Button 
-                          variant="outline" 
-                          className="flex-1"
-                          onClick={() => setLocation(`/generation?plan_id=${plan.id}`)}
-                          data-testid={`button-view-progress-${plan.id}`}
-                        >
-                          <Clock className="h-4 w-4 mr-2" />
-                          View Progress
-                        </Button>
-                      )}
-                    </CardFooter>
-                  </Card>
-                ))}
+                        </CardContent>
+                        <CardFooter className="pt-0 flex gap-2 flex-wrap">
+                          {plan.status === 'completed' && plan.pdfUrl && (
+                            <>
+                              <Button 
+                                size="sm"
+                                variant="default"
+                                onClick={(e) => { e.stopPropagation(); window.open(plan.pdfUrl!, '_blank'); }}
+                                data-testid={`button-download-${plan.id}`}
+                              >
+                                <Download className="h-3 w-3 mr-1" />
+                                Download
+                              </Button>
+                              <Button 
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  localStorage.setItem('lastPlanId', plan.id);
+                                  setLocation(`/diagnostics?planId=${plan.id}`);
+                                }}
+                                data-testid={`button-diagnostics-${plan.id}`}
+                              >
+                                <Zap className="h-3 w-3 mr-1" />
+                                Diagnostics
+                              </Button>
+                            </>
+                          )}
+                          {plan.status === 'pending' && (
+                            <Button 
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => { e.stopPropagation(); setLocation(`/questionnaire?tier=${plan.tier}`); }}
+                              data-testid={`button-continue-${plan.id}`}
+                            >
+                              <FileText className="h-3 w-3 mr-1" />
+                              Continue
+                            </Button>
+                          )}
+                          {plan.status === 'generating' && (
+                            <Button 
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => { e.stopPropagation(); setLocation(`/generation?plan_id=${plan.id}`); }}
+                              data-testid={`button-view-progress-${plan.id}`}
+                            >
+                              <Clock className="h-3 w-3 mr-1" />
+                              View Progress
+                            </Button>
+                          )}
+                          {!plan.isDemoData && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="ml-auto text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPlanToDelete({ id: plan.id, name: plan.businessName || 'Untitled Plan' });
+                              }}
+                              data-testid={`button-delete-${plan.id}`}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                          {plan.isDemoData && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="ml-auto"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (hiddenIds.includes(plan.id)) {
+                                  showPlan(plan.id);
+                                } else {
+                                  hidePlan(plan.id);
+                                }
+                              }}
+                              data-testid={`button-toggle-visibility-${plan.id}`}
+                            >
+                              {hiddenIds.includes(plan.id) ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                            </Button>
+                          )}
+                        </CardFooter>
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                {/* Right Side - Plan Details */}
+                <div className="lg:sticky lg:top-4 h-fit">
+                  {selectedPlanId && displayPlans.find(p => p.id === selectedPlanId) ? (() => {
+                    const selectedPlan = displayPlans.find(p => p.id === selectedPlanId)!;
+                    const radarData = calculateRadarData(selectedPlan);
+                    const approvalProb = calculateApprovalProbability(selectedPlan);
+                    return (
+                      <Card className="border-2 border-primary/20">
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <CardTitle className="text-lg">{selectedPlan.businessName}</CardTitle>
+                              <CardDescription>{selectedPlan.industry}</CardDescription>
+                            </div>
+                            {getStatusBadge(selectedPlan.status)}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {/* Plan Details */}
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Crown className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-muted-foreground">Tier:</span>
+                              <span className="font-medium capitalize">{selectedPlan.tier}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-muted-foreground">Created:</span>
+                              <span className="font-medium">{format(new Date(selectedPlan.createdAt), 'MMM d, yyyy')}</span>
+                            </div>
+                            <div className="flex items-center gap-2 col-span-2">
+                              <Building2 className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-muted-foreground">Industry:</span>
+                              <span className="font-medium">{selectedPlan.industry}</span>
+                            </div>
+                          </div>
+
+                          {/* Approval Probability */}
+                          {selectedPlan.status === 'completed' && (
+                            <div className="p-3 rounded-lg bg-muted/50">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium">Approval Probability</span>
+                                <span className="text-lg font-bold text-primary">{approvalProb}%</span>
+                              </div>
+                              <Progress value={approvalProb} className="h-2" />
+                            </div>
+                          )}
+
+                          {/* Radar Chart */}
+                          {selectedPlan.status === 'completed' && (
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">Visa Strength Indicator</h4>
+                              <div className="h-48">
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <RadarChart data={radarData}>
+                                    <PolarGrid stroke="hsl(var(--border))" />
+                                    <PolarAngleAxis dataKey="criterion" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 8 }} />
+                                    <Radar name="Score" dataKey="score" stroke="#005EB8" fill="#005EB8" fillOpacity={0.5} />
+                                    <Tooltip />
+                                  </RadarChart>
+                                </ResponsiveContainer>
+                              </div>
+                              <div className="grid grid-cols-3 gap-2 mt-2 text-center">
+                                {radarData.map((item: { criterion: string; score: number; fullMark: number }) => (
+                                  <div key={item.criterion} className="p-2 bg-muted/30 rounded">
+                                    <div className="text-xs text-muted-foreground">{item.criterion}</div>
+                                    <div className="text-sm font-bold text-primary">{item.score}/100</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Actions */}
+                          <div className="flex gap-2 pt-2">
+                            {selectedPlan.status === 'completed' && selectedPlan.pdfUrl && (
+                              <Button 
+                                className="flex-1"
+                                onClick={() => window.open(selectedPlan.pdfUrl!, '_blank')}
+                              >
+                                <Download className="h-4 w-4 mr-2" />
+                                Download PDF
+                              </Button>
+                            )}
+                            {!selectedPlan.isDemoData && (
+                              <Button
+                                variant="outline"
+                                className="text-destructive border-destructive/50 hover:bg-destructive/10"
+                                onClick={() => setPlanToDelete({ id: selectedPlan.id, name: selectedPlan.businessName || 'Untitled Plan' })}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })() : (
+                    <Card className="border-2 border-dashed border-muted">
+                      <CardContent className="py-12 text-center">
+                        <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                        <p className="text-muted-foreground">Select a business plan to view details</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!planToDelete} onOpenChange={(open) => !open && setPlanToDelete(null)}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Business Plan</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{planToDelete?.name}"? This action cannot be undone and all associated data will be permanently removed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={() => planToDelete && deletePlanMutation.mutate(planToDelete.id)}
+                    disabled={deletePlanMutation.isPending}
+                  >
+                    {deletePlanMutation.isPending ? "Deleting..." : "Delete Plan"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         ) : (
           <Card className="text-center p-12">
