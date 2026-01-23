@@ -1,18 +1,20 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   LayoutDashboard,
   Zap,
@@ -23,14 +25,12 @@ import {
   Brain,
   Settings,
   LogOut,
-  Home,
   TrendingUp,
   CheckCircle2,
   PieChart,
   Network,
   BookOpen,
   Award,
-  Clock,
   DollarSign,
   Gift,
   Target,
@@ -45,19 +45,24 @@ import {
   Mic,
   Globe2,
   Bot,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
+type NavItem = {
+  title: string;
+  url: string;
+  icon: any;
+  description?: string;
+  badge?: string;
+  comingSoon?: boolean;
+};
+
 type NavGroup = {
   label: string;
-  items: Array<{
-    title: string;
-    url: string;
-    icon: any;
-    description?: string;
-    badge?: string;
-    comingSoon?: boolean;
-  }>;
+  icon: any;
+  items: NavItem[];
 };
 
 interface AppSidebarProps {
@@ -66,6 +71,10 @@ interface AppSidebarProps {
 
 export function AppSidebar({ demoMode = false }: AppSidebarProps) {
   const [location, setLocation] = useLocation();
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    "Core Platform": true,
+  });
+
   const { data: user } = useQuery<{ id: string; email: string; displayName?: string; isAdmin?: boolean }>({
     queryKey: ["/api/auth/user"],
     retry: false,
@@ -85,7 +94,6 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
     },
     onSuccess: (data: any) => {
       queryClient.clear();
-      // Redirect to Replit Auth logout if provided, otherwise go to login
       if (data?.redirectUrl) {
         window.location.href = data.redirectUrl;
       } else {
@@ -94,7 +102,6 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
     },
   });
 
-  // Demo user data for non-logged-in users
   const demoUser = {
     id: "demo",
     email: "demo@example.com",
@@ -103,21 +110,28 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
   };
 
   const currentUser = demoMode ? demoUser : user;
-  
-  // Debug logging - remove after testing
-  console.log('[DEBUG] AppSidebar user data:', { 
-    isAdmin: currentUser?.isAdmin, 
-    email: currentUser?.email,
-    demoMode 
-  });
-  
+
   if (!currentUser && !demoMode) return null;
+
+  const toggleSection = (label: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
+
+  const isItemActive = (url: string) => location === url;
+
+  const isSectionActive = (items: NavItem[]) => {
+    return items.some(item => location === item.url);
+  };
 
   const navGroups: NavGroup[] = [
     ...(partnerStatus?.isPartner && !demoMode
       ? [
           {
             label: "Partner",
+            icon: Handshake,
             items: [
               {
                 title: "Partner Dashboard",
@@ -132,313 +146,182 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
       : []),
     {
       label: "Core Platform",
+      icon: LayoutDashboard,
       items: [
-        {
-          title: "Dashboard",
-          url: "/dashboard",
-          icon: LayoutDashboard,
-          description: "Overview & business plans",
-        },
-        {
-          title: "Generate Plan",
-          url: "/questionnaire",
-          icon: FileText,
-          description: "Business plan builder",
-        },
-        {
-          title: "Progress Tracker",
-          url: "/progress",
-          icon: Target,
-          description: "Track your visa journey",
-        },
-        {
-          title: "My Documents",
-          url: "/documents",
-          icon: FolderOpen,
-          description: "Secure document storage",
-        },
-        {
-          title: "Regulatory Copilot",
-          url: "/regulatory-copilot",
-          icon: Shield,
-          description: "Real-time UK law monitoring",
-        },
+        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, description: "Overview & business plans" },
+        { title: "Generate Plan", url: "/questionnaire", icon: FileText, description: "Business plan builder" },
+        { title: "Progress Tracker", url: "/progress", icon: Target, description: "Track your visa journey" },
+        { title: "My Documents", url: "/documents", icon: FolderOpen, description: "Secure document storage" },
+        { title: "Regulatory Copilot", url: "/regulatory-copilot", icon: Shield, description: "Real-time UK law monitoring" },
       ],
     },
     {
       label: "AI Analysis & Diagnostics",
+      icon: Brain,
       items: [
-        {
-          title: "Rejection Analysis",
-          url: "/rejection-analysis",
-          icon: TrendingUp,
-          description: "Advanced rejection strategies",
-        },
-        {
-          title: "Diagnostics",
-          url: "/diagnostics",
-          icon: Brain,
-          description: "Advanced visa assessment",
-        },
-        {
-          title: "Evidence Graph",
-          url: "/evidence-graph",
-          icon: Network,
-          description: "Evidence mapping & analysis",
-        },
+        { title: "Rejection Analysis", url: "/rejection-analysis", icon: TrendingUp, description: "Advanced rejection strategies" },
+        { title: "Diagnostics", url: "/diagnostics", icon: Brain, description: "Advanced visa assessment" },
+        { title: "Evidence Graph", url: "/evidence-graph", icon: Network, description: "Evidence mapping & analysis" },
       ],
     },
     {
       label: "OMNI",
+      icon: Bot,
       items: [
-        {
-          title: "ORACLE Supervisor",
-          url: "/oracle-supervisor",
-          icon: Brain,
-          description: "Master AI with 4 specialist agents",
-        },
-        {
-          title: "Founder Autopilot",
-          url: "/founder-autopilot",
-          icon: Rocket,
-          description: "Full visa automation mode",
-        },
-        {
-          title: "Neural Twin",
-          url: "/neural-twin",
-          icon: Bot,
-          description: "AI simulation of you for practice",
-        },
-        {
-          title: "Voice Builder",
-          url: "/voice-builder",
-          icon: Mic,
-          description: "Speak to build your documents",
-        },
-        {
-          title: "Economic Impact",
-          url: "/economic-impact",
-          icon: Globe2,
-          description: "UK job & GDP calculator",
-        },
-        {
-          title: "Knowledge Graph",
-          url: "/knowledge-graph",
-          icon: Network,
-          description: "Visual UK visa rules map",
-        },
+        { title: "ORACLE Supervisor", url: "/oracle-supervisor", icon: Brain, description: "Master AI with 4 specialist agents" },
+        { title: "Founder Autopilot", url: "/founder-autopilot", icon: Rocket, description: "Full visa automation mode" },
+        { title: "Neural Twin", url: "/neural-twin", icon: Bot, description: "AI simulation of you for practice" },
+        { title: "Voice Builder", url: "/voice-builder", icon: Mic, description: "Speak to build your documents" },
+        { title: "Economic Impact", url: "/economic-impact", icon: Globe2, description: "UK job & GDP calculator" },
+        { title: "Knowledge Graph", url: "/knowledge-graph", icon: Network, description: "Visual UK visa rules map" },
       ],
     },
     {
       label: "Visa Strategy & Prep",
+      icon: Shield,
       items: [
-        {
-          title: "Interview Prep",
-          url: "/interview-prep",
-          icon: BookOpen,
-          description: "Interview training & scenarios",
-        },
-        {
-          title: "RFE Defence Lab",
-          url: "/rfe-defence-lab",
-          icon: Shield,
-          description: "Request for further evidence",
-        },
-        {
-          title: "Settlement Planning",
-          url: "/settlement-planning",
-          icon: CheckCircle2,
-          description: "Post-approval planning",
-        },
+        { title: "Interview Prep", url: "/interview-prep", icon: BookOpen, description: "Interview training & scenarios" },
+        { title: "RFE Defence Lab", url: "/rfe-defence-lab", icon: Shield, description: "Request for further evidence" },
+        { title: "Settlement Planning", url: "/settlement-planning", icon: CheckCircle2, description: "Post-approval planning" },
       ],
     },
     {
       label: "Business Intelligence",
+      icon: BarChart3,
       items: [
-        {
-          title: "KPI Dashboard",
-          url: "/kpi-dashboard",
-          icon: PieChart,
-          description: "Business metrics & analytics",
-        },
-        {
-          title: "Features Dashboard",
-          url: "/features-dashboard",
-          icon: BarChart3,
-          description: "Feature performance tracking",
-        },
+        { title: "KPI Dashboard", url: "/kpi-dashboard", icon: PieChart, description: "Business metrics & analytics" },
+        { title: "Features Dashboard", url: "/features-dashboard", icon: BarChart3, description: "Feature performance tracking" },
       ],
     },
     {
       label: "Resources & Tools",
+      icon: Zap,
       items: [
-        {
-          title: "Tools Hub",
-          url: "/tools-hub",
-          icon: Zap,
-          description: "100+ professional tools",
-        },
-        {
-          title: "Achievements",
-          url: "/achievements",
-          icon: Trophy,
-          description: "Badges & certificates",
-        },
-        {
-          title: "Template Library",
-          url: "/template-library",
-          icon: FolderOpen,
-          description: "60+ document templates",
-        },
-        {
-          title: "AI Document Review",
-          url: "/document-review",
-          icon: Sparkles,
-          description: "AI-powered feedback",
-        },
-        {
-          title: "Success Stories",
-          url: "/success-stories",
-          icon: Award,
-          description: "Real visa success cases",
-        },
-        {
-          title: "Immigration News",
-          url: "/news",
-          icon: Newspaper,
-          description: "UK visa news updates",
-        },
-        {
-          title: "Blog",
-          url: "/blog",
-          icon: BookOpen,
-          description: "Expert insights & guides",
-        },
-        {
-          title: "Calendar & Deadlines",
-          url: "/calendar",
-          icon: CalendarDays,
-          description: "Track your timeline",
-        },
-        {
-          title: "Endorser Comparison",
-          url: "/endorser-comparison",
-          icon: Award,
-          description: "Endorser analysis",
-        },
-        {
-          title: "Investment Requirements",
-          url: "/endorser-investment",
-          icon: DollarSign,
-          description: "Investment by route",
-        },
-        {
-          title: "Document Organizer",
-          url: "/document-organizer",
-          icon: FileText,
-          description: "Document management",
-        },
-        {
-          title: "Expert Booking",
-          url: "/expert-booking",
-          icon: Users,
-          description: "Expert consultation",
-        },
-        {
-          title: "Premium Features",
-          url: "/premium-features",
-          icon: Sparkles,
-          description: "Achievements & more",
-        },
+        { title: "Tools Hub", url: "/tools-hub", icon: Zap, description: "100+ professional tools" },
+        { title: "Achievements", url: "/achievements", icon: Trophy, description: "Badges & certificates" },
+        { title: "Template Library", url: "/template-library", icon: FolderOpen, description: "60+ document templates" },
+        { title: "AI Document Review", url: "/document-review", icon: Sparkles, description: "AI-powered feedback" },
+        { title: "Success Stories", url: "/success-stories", icon: Award, description: "Real visa success cases" },
+        { title: "Immigration News", url: "/news", icon: Newspaper, description: "UK visa news updates" },
+        { title: "Blog", url: "/blog", icon: BookOpen, description: "Expert insights & guides" },
+        { title: "Calendar & Deadlines", url: "/calendar", icon: CalendarDays, description: "Track your timeline" },
+        { title: "Endorser Comparison", url: "/endorser-comparison", icon: Award, description: "Endorser analysis" },
+        { title: "Investment Requirements", url: "/endorser-investment", icon: DollarSign, description: "Investment by route" },
+        { title: "Document Organizer", url: "/document-organizer", icon: FileText, description: "Document management" },
+        { title: "Expert Booking", url: "/expert-booking", icon: Users, description: "Expert consultation" },
+      ],
+    },
+    {
+      label: "Premium Features",
+      icon: Sparkles,
+      items: [
+        { title: "Premium Features", url: "/premium-features", icon: Sparkles, description: "Achievements & more" },
       ],
     },
     {
       label: "Account",
+      icon: Settings,
       items: [
-        {
-          title: "Referral Programme",
-          url: "/referral-dashboard",
-          icon: Gift,
-          description: "Earn by referring others",
-        },
-        {
-          title: "Support",
-          url: "/support",
-          icon: HelpCircle,
-          description: "Help & contact us",
-        },
-        {
-          title: "Settings",
-          url: "/settings",
-          icon: Settings,
-          description: "Configuration & preferences",
-        },
+        { title: "Referral Programme", url: "/referral-dashboard", icon: Gift, description: "Earn by referring others" },
+        { title: "Support", url: "/support", icon: HelpCircle, description: "Help & contact us" },
+        { title: "Settings", url: "/settings", icon: Settings, description: "Configuration & preferences" },
       ],
     },
   ];
 
   return (
     <Sidebar className="border-r">
-      <SidebarContent>
-        {navGroups.map((group, idx) => (
-          <div key={idx}>
-            <SidebarGroup className="py-2">
-              <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-wide px-3 py-1.5 text-muted-foreground/80">
-                {group.label}
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu className="gap-1">
-                  {group.items.map((item) => {
-                    const isActive = location === item.url;
-                    const Icon = item.icon;
+      <SidebarContent className="py-2">
+        <SidebarMenu className="gap-0.5 px-2">
+          {navGroups.map((group) => {
+            const isOpen = openSections[group.label] ?? false;
+            const hasActiveItem = isSectionActive(group.items);
+            const GroupIcon = group.icon;
 
-                    return (
-                      <SidebarMenuItem key={item.url}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={isActive}
-                          onClick={() => setLocation(item.url)}
-                          className={`cursor-pointer transition-colors py-2.5 px-3 rounded-md ${
-                            isActive
-                              ? "bg-primary/10 text-primary border-l-2 border-primary"
-                              : "hover:bg-muted/50"
-                          }`}
-                          data-testid={`nav-button-${item.url}`}
-                        >
-                          <div className="flex items-center gap-3 w-full">
-                            <Icon className={`h-4 w-4 flex-shrink-0 ${item.comingSoon ? 'opacity-40' : 'opacity-70'}`} />
-                            <span className={`text-sm font-medium truncate ${item.comingSoon ? 'opacity-50' : ''}`}>
-                              {item.title}
-                            </span>
-                            {item.comingSoon && (
-                              <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                                Coming Soon
+            return (
+              <Collapsible
+                key={group.label}
+                open={isOpen || hasActiveItem}
+                onOpenChange={() => toggleSection(group.label)}
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      className={`w-full justify-between py-2 px-2.5 rounded-md cursor-pointer transition-colors ${
+                        hasActiveItem && !isOpen
+                          ? "bg-primary/5 text-primary"
+                          : "hover:bg-muted/50"
+                      }`}
+                      data-testid={`nav-group-${group.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <GroupIcon className="h-4 w-4 flex-shrink-0 opacity-70" />
+                        <span className="text-xs font-semibold uppercase tracking-wide">
+                          {group.label}
+                        </span>
+                      </div>
+                      {isOpen || hasActiveItem ? (
+                        <ChevronDown className="h-3.5 w-3.5 opacity-50 transition-transform" />
+                      ) : (
+                        <ChevronRight className="h-3.5 w-3.5 opacity-50 transition-transform" />
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                </SidebarMenuItem>
+
+                <CollapsibleContent className="pl-3">
+                  <SidebarMenu className="gap-0.5 mt-0.5 border-l border-border/40 ml-2">
+                    {group.items.map((item) => {
+                      const isActive = isItemActive(item.url);
+                      const Icon = item.icon;
+
+                      return (
+                        <SidebarMenuItem key={item.url}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive}
+                            onClick={() => setLocation(item.url)}
+                            className={`cursor-pointer transition-colors py-2 px-2.5 rounded-md ${
+                              isActive
+                                ? "bg-primary/10 text-primary border-l-2 border-primary -ml-px"
+                                : "hover:bg-muted/50"
+                            }`}
+                            data-testid={`nav-button-${item.url}`}
+                          >
+                            <div className="flex items-center gap-2.5 w-full">
+                              <Icon className={`h-3.5 w-3.5 flex-shrink-0 ${item.comingSoon ? 'opacity-40' : 'opacity-60'}`} />
+                              <span className={`text-sm truncate ${item.comingSoon ? 'opacity-50' : ''}`}>
+                                {item.title}
                               </span>
-                            )}
-                            {item.badge && !item.comingSoon && (
-                              <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 ${
-                                item.badge === "ADMIN"
-                                  ? "bg-orange-500/20 text-orange-600 dark:text-orange-400"
-                                  : item.badge === "PARTNER"
-                                  ? "bg-blue-500/20 text-blue-600 dark:text-blue-400"
-                                  : item.badge === "USER"
-                                  ? "bg-green-500/20 text-green-600 dark:text-green-400"
-                                  : "text-muted-foreground bg-muted"
-                              }`}>
-                                {item.badge}
-                              </span>
-                            )}
-                          </div>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            {idx < navGroups.length - 1 && <SidebarSeparator className="my-2 opacity-50" />}
-          </div>
-        ))}
+                              {item.comingSoon && (
+                                <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                                  Coming Soon
+                                </span>
+                              )}
+                              {item.badge && !item.comingSoon && (
+                                <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 ${
+                                  item.badge === "ADMIN"
+                                    ? "bg-orange-500/20 text-orange-600 dark:text-orange-400"
+                                    : item.badge === "PARTNER"
+                                    ? "bg-blue-500/20 text-blue-600 dark:text-blue-400"
+                                    : item.badge === "USER"
+                                    ? "bg-green-500/20 text-green-600 dark:text-green-400"
+                                    : "text-muted-foreground bg-muted"
+                                }`}>
+                                  {item.badge}
+                                </span>
+                              )}
+                            </div>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })}
+        </SidebarMenu>
       </SidebarContent>
 
       <SidebarFooter>
