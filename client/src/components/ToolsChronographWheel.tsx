@@ -324,7 +324,7 @@ export default function ToolsChronographWheel() {
     return createPortal(
       <div className="fixed left-4 top-1/2 -translate-y-1/2 z-[9998]">
         <div className={`flex items-center gap-0.5 transition-all duration-300 ${
-          isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : ""
+          isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : "opacity-50 hover:opacity-100"
         }`}>
           {/* Main 100+ Tools button */}
           <button
