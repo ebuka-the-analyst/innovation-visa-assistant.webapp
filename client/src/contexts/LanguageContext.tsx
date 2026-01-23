@@ -11,6 +11,15 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 const LANGUAGE_STORAGE_KEY = "visa_assistant_language";
 
+const RTL_LANGUAGES: LanguageCode[] = ["ar"];
+
+function applyLanguageSettings(lang: LanguageCode) {
+  // Set HTML dir attribute for RTL/LTR
+  document.documentElement.dir = RTL_LANGUAGES.includes(lang) ? "rtl" : "ltr";
+  // Set HTML lang attribute
+  document.documentElement.lang = lang;
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>(() => {
     if (typeof window !== "undefined") {
@@ -25,21 +34,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const setLanguage = (lang: LanguageCode) => {
     setLanguageState(lang);
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
-    
-    // Set HTML dir attribute for RTL languages
-    if (lang === "ar") {
-      document.documentElement.dir = "rtl";
-    } else {
-      document.documentElement.dir = "ltr";
-    }
+    applyLanguageSettings(lang);
   };
 
   useEffect(() => {
-    // Apply RTL on initial load if needed
-    if (language === "ar") {
-      document.documentElement.dir = "rtl";
-    }
-  }, []);
+    // Apply language settings on initial load
+    applyLanguageSettings(language);
+  }, [language]);
 
   const t = getTranslation(language);
 
