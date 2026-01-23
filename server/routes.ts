@@ -357,6 +357,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to delete business plan" });
     }
   });
+
+  // AI-powered Innovation Score Analysis from Business Plan
+  app.post("/api/business-plans/:id/analyze-innovation", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const planId = req.params.id;
+      
+      // Fetch the business plan
+      const plan = await storage.getBusinessPlan(planId as any);
+      if (!plan) {
+        return res.status(404).json({ error: "Business plan not found" });
+      }
+      if (plan.userId !== user.id) {
+        return res.status(403).json({ error: "You can only analyze your own business plans" });
+      }
+      
+      // Build context from business plan fields relevant to innovation
+      const innovationContext = `
+BUSINESS PLAN ANALYSIS FOR INNOVATION SCORING
+Business Name: ${plan.businessName}
+Industry: ${plan.industry}
+
+CORE INNOVATION DATA:
+Problem Being Solved: ${plan.problem}
+Unique Solution/Approach: ${plan.uniqueness}
+Technology Used: ${plan.technology}
+Innovation Stage: ${plan.innovationStage}
+Product Status: ${plan.productStatus}
+
+TECHNICAL INNOVATION:
+Tech Stack: ${plan.techStack}
+Data Architecture: ${plan.dataArchitecture}
+AI/ML Methodology: ${plan.aiMethodology}
+Compliance Design: ${plan.complianceDesign}
+
+INTELLECTUAL PROPERTY:
+Patent Status: ${plan.patentStatus}
+
+MARKET DISRUPTION:
+Competitors: ${plan.competitors}
+Competitive Differentiation: ${plan.competitiveDifferentiation}
+Market Size: ${plan.marketSize}
+
+R&D & INVESTMENT:
+Funding: £${plan.funding?.toLocaleString() || 'Not specified'}
+Funding Sources: ${plan.fundingSources}
+
+TRACTION & VALIDATION:
+Existing Customers: ${plan.existingCustomers || 'None yet'}
+Beta Testers: ${plan.betaTesters || 'None yet'}
+Traction Evidence: ${plan.tractionEvidence || 'None yet'}
+Customer Interviews: ${plan.customerInterviews}
+`;
+
+      const analysisPrompt = `You are an expert UK Innovator Founder Visa assessor evaluating innovation for endorsing body approval.
+
+Based on this business plan, analyze and score FIVE innovation factors on a scale of 0-100:
+
+${innovationContext}
+
+SCORING CRITERIA (UK Home Office Innovator Founder Visa Standards):
+1. NOVELTY (0-100): Is this genuinely new or a significant improvement? Not just a copy with minor changes.
+2. TECHNICAL ADVANCEMENT (0-100): Does it incorporate genuine technical innovation, proprietary technology, or scientific advancement?
+3. MARKET DISRUPTION (0-100): Will it genuinely disrupt the market or solve problems current solutions cannot?
+4. IP PROTECTION (0-100): Is there defensible intellectual property (patents, trade secrets, proprietary processes)?
+5. R&D INVESTMENT (0-100): Is there genuine commitment to ongoing research and development?
+
+SCORING GUIDELINES:
+- 0-40: Weak/No evidence - generic business with no real innovation
+- 41-64: Below threshold - needs significant improvement for endorsement
+- 65-74: Meets minimum threshold - acceptable but not strong
+- 75-89: Strong - clearly innovative and defensible
+- 90-100: Exceptional - world-class innovation with clear IP and differentiation
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "novelty": <number 0-100>,
+  "technicalAdvancement": <number 0-100>,
+  "marketDisruption": <number 0-100>,
+  "ipProtection": <number 0-100>,
+  "rdInvestment": <number 0-100>,
+  "overallScore": <number 0-100>,
+  "summary": "<1-2 sentence summary of innovation assessment>",
+  "strengths": ["<strength 1>", "<strength 2>"],
+  "improvements": ["<improvement area 1>", "<improvement area 2>"]
+}`;
+
+      const aiResponse = await callAI(analysisPrompt);
+      
+      // Parse the JSON response
+      let analysis;
+      try {
+        // Extract JSON from potential markdown code blocks
+        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error("No JSON found in response");
+        }
+        analysis = JSON.parse(jsonMatch[0]);
+      } catch (parseError) {
+        console.error("Failed to parse AI response:", aiResponse);
+        return res.status(500).json({ error: "Failed to parse innovation analysis" });
+      }
+      
+      // Validate and clamp scores
+      const clamp = (val: number) => Math.max(0, Math.min(100, Math.round(val)));
+      
+      const result = {
+        novelty: clamp(analysis.novelty || 50),
+        technicalAdvancement: clamp(analysis.technicalAdvancement || 50),
+        marketDisruption: clamp(analysis.marketDisruption || 50),
+        ipProtection: clamp(analysis.ipProtection || 50),
+        rdInvestment: clamp(analysis.rdInvestment || 50),
+        overallScore: clamp(analysis.overallScore || 50),
+        summary: analysis.summary || "Innovation analysis complete.",
+        strengths: analysis.strengths || [],
+        improvements: analysis.improvements || [],
+        businessPlanId: planId,
+        businessName: plan.businessName,
+        analyzedAt: new Date().toISOString()
+      };
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Innovation analysis error:", error);
+      res.status(500).json({ error: "Failed to analyze innovation" });
+    }
+  });
   
   app.post("/api/questionnaire/submit", isAuthenticated, async (req, res) => {
     try {

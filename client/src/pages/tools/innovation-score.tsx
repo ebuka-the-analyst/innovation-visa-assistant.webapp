@@ -3,14 +3,15 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 import { ToolUtilityBar } from "@/components/ToolUtilityBar";
 import { ToolAccessGuard } from "@/components/ToolAccessGuard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, XCircle, AlertTriangle, TrendingUp, Info, Lightbulb, Shield, Zap, Globe, Save, Sparkles } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, TrendingUp, Info, Lightbulb, Shield, Zap, Globe, Save, Sparkles, Loader2, FileText, Brain } from "lucide-react";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, LineChart, Line
@@ -21,6 +22,29 @@ import { useWordExport } from "@/hooks/useWordExport";
 import { useToast } from "@/hooks/use-toast";
 import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
 import { useTierAccess } from "@/hooks/useTierAccess";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type BusinessPlan = {
+  id: string;
+  businessName: string;
+  industry: string;
+  status?: string;
+};
+
+type InnovationAnalysis = {
+  novelty: number;
+  technicalAdvancement: number;
+  marketDisruption: number;
+  ipProtection: number;
+  rdInvestment: number;
+  overallScore: number;
+  summary: string;
+  strengths: string[];
+  improvements: string[];
+  businessPlanId: string;
+  businessName: string;
+  analyzedAt: string;
+};
 
 const AI_TOOL_CONFIG: ToolConfig = {
   toolId: 'innovation-score',
@@ -112,6 +136,73 @@ export default function InnovationScore() {
   const isPaidUser = userTier !== 'free';
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
   const [showAutoSave, setShowAutoSave] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('');
+  const [aiAnalysis, setAiAnalysis] = useState<InnovationAnalysis | null>(null);
+
+  // Fetch user's business plans
+  const { data: businessPlans = [], isLoading: plansLoading } = useQuery<BusinessPlan[]>({
+    queryKey: ['/api/business-plans'],
+  });
+
+  // Auto-analyze mutation
+  const analyzeInnovationMutation = useMutation({
+    mutationFn: async (planId: string) => {
+      const response = await apiRequest('POST', `/api/business-plans/${planId}/analyze-innovation`);
+      return response.json() as Promise<InnovationAnalysis>;
+    },
+    onSuccess: (analysis) => {
+      setAiAnalysis(analysis);
+      setFactors({
+        novelty: analysis.novelty,
+        technicalAdvancement: analysis.technicalAdvancement,
+        marketDisruption: analysis.marketDisruption,
+        ipProtection: analysis.ipProtection,
+        rdInvestment: analysis.rdInvestment
+      });
+      
+      // Save to localStorage
+      const state = {
+        factors: {
+          novelty: analysis.novelty,
+          technicalAdvancement: analysis.technicalAdvancement,
+          marketDisruption: analysis.marketDisruption,
+          ipProtection: analysis.ipProtection,
+          rdInvestment: analysis.rdInvestment
+        },
+        activeTab: 'overview',
+        selectedSector: selectedSector,
+        savedDate: new Date().toLocaleString('en-GB'),
+        aiAnalysis: analysis
+      };
+      localStorage.setItem('innovation-score-state', JSON.stringify(state));
+      setSavedDate(state.savedDate);
+      setActiveTab('overview');
+      
+      toast({
+        title: "Innovation Analysis Complete",
+        description: `Analyzed "${analysis.businessName}" - Score: ${analysis.overallScore}%`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Analysis Failed",
+        description: error.message || "Failed to analyze business plan innovation",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleAutoAnalyze = () => {
+    if (!selectedPlanId) {
+      toast({
+        title: "Select a Business Plan",
+        description: "Please select a business plan to analyze",
+        variant: "destructive",
+      });
+      return;
+    }
+    analyzeInnovationMutation.mutate(selectedPlanId);
+  };
   
   const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
     const saved = localStorage.getItem('innovation-score-mode');
@@ -215,6 +306,36 @@ export default function InnovationScore() {
     return 'FinTech';
   });
   const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
+  const handoffProcessedRef = useRef(false);
+
+  // Check for handoff from Progress Tracker and auto-trigger analysis
+  useEffect(() => {
+    if (handoffProcessedRef.current) return;
+    
+    const handoff = localStorage.getItem('innovation-score-handoff');
+    if (handoff && businessPlans.length > 0) {
+      try {
+        const data = JSON.parse(handoff);
+        // Only process if handoff is recent (within 5 minutes)
+        if (data.autoAnalyze && data.planId && Date.now() - data.timestamp < 300000) {
+          handoffProcessedRef.current = true;
+          setSelectedPlanId(data.planId);
+          // Remove handoff after reading
+          localStorage.removeItem('innovation-score-handoff');
+          // Trigger auto-analysis after a brief delay to ensure state is set
+          setTimeout(() => {
+            analyzeInnovationMutation.mutate(data.planId);
+          }, 500);
+          toast({
+            title: "Auto-Analyzing Business Plan",
+            description: `Analyzing "${data.businessName}" for innovation criteria...`,
+          });
+        }
+      } catch {
+        // Invalid handoff data, ignore
+      }
+    }
+  }, [businessPlans, toast]);
 
   useEffect(() => {
     return () => {
@@ -843,6 +964,89 @@ for official assessment and application preparation.
                 getSerializedState={getSerializedState}
                 toolName="Innovation Score"
               />
+
+              {/* Auto-Analyze from Business Plan Section */}
+              {businessPlans.length > 0 && (
+                <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Brain className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Auto-Analyze with AI</h3>
+                          <p className="text-sm text-muted-foreground">Let AI analyze your business plan and calculate innovation scores</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-3 md:ml-auto">
+                        <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                          <SelectTrigger className="w-full sm:w-[280px]" data-testid="select-business-plan">
+                            <SelectValue placeholder={plansLoading ? "Loading plans..." : "Select business plan"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {businessPlans.map((plan) => (
+                              <SelectItem key={plan.id} value={plan.id}>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4" />
+                                  <span>{plan.businessName}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          onClick={handleAutoAnalyze}
+                          disabled={!selectedPlanId || analyzeInnovationMutation.isPending}
+                          className="gap-2"
+                          data-testid="button-auto-analyze"
+                        >
+                          {analyzeInnovationMutation.isPending ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Analyzing...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="h-4 w-4" />
+                              Auto-Analyze
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* AI Analysis Results Summary */}
+                    {aiAnalysis && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400 flex items-center gap-2">
+                              <CheckCircle2 className="h-4 w-4" />
+                              AI Analysis: {aiAnalysis.summary}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Analyzed: {aiAnalysis.businessName} on {new Date(aiAnalysis.analyzedAt).toLocaleString('en-GB')}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {aiAnalysis.strengths.slice(0, 2).map((strength, i) => (
+                              <span key={i} className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
+                                {strength}
+                              </span>
+                            ))}
+                            {aiAnalysis.improvements.slice(0, 1).map((improvement, i) => (
+                              <span key={i} className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-1 rounded-full">
+                                Improve: {improvement}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                 <TabsList className="grid w-full grid-cols-5" data-testid="tabs-innovation-score">

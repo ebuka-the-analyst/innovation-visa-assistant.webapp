@@ -404,7 +404,21 @@ export default function ProgressPage() {
                 {nextStep.name} - {nextStep.description}
               </div>
               {nextStep.toolPath && (
-                <Button size="sm" asChild>
+                <Button 
+                  size="sm" 
+                  asChild
+                  onClick={() => {
+                    // Set handoff for Innovation Score auto-analysis
+                    if (nextStep.id === 'innovation-score' && completedPlansWithPdf.length > 0) {
+                      localStorage.setItem('innovation-score-handoff', JSON.stringify({
+                        planId: completedPlansWithPdf[0].id,
+                        businessName: completedPlansWithPdf[0].businessName,
+                        autoAnalyze: true,
+                        timestamp: Date.now()
+                      }));
+                    }
+                  }}
+                >
                   <Link href={nextStep.toolPath} data-testid="link-next-step">
                     Continue <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
