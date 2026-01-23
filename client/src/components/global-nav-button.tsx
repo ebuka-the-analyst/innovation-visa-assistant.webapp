@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Globe2 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import globeImage from "@assets/unnamed_(1)_1769196836272.png";
 
 export function GlobalNavButton() {
   const [, setLocation] = useLocation();
@@ -18,18 +18,16 @@ export function GlobalNavButton() {
   return (
     <>
       <style>{`
-        @keyframes blink-bright {
+        @keyframes soft-pulse {
           0%, 100% { 
-            opacity: 0.85;
-            box-shadow: 0 0 6px rgba(234, 179, 8, 0.4), 0 0 12px rgba(234, 179, 8, 0.2);
+            opacity: 0.7;
           }
           50% { 
             opacity: 1;
-            box-shadow: 0 0 12px rgba(234, 179, 8, 0.7), 0 0 20px rgba(234, 179, 8, 0.4), 0 0 30px rgba(234, 179, 8, 0.2);
           }
         }
-        .blink-bright {
-          animation: blink-bright 1.5s ease-in-out infinite;
+        .soft-pulse {
+          animation: soft-pulse 2s ease-in-out infinite;
         }
       `}</style>
       <Tooltip open={showTooltip} onOpenChange={setShowTooltip}>
@@ -38,18 +36,18 @@ export function GlobalNavButton() {
             onClick={handleClick}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
-            className="fixed top-1 left-1 z-[200] blink-bright w-3 h-3 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 border border-yellow-300/50 flex items-center justify-center cursor-pointer hover:scale-150 transition-transform"
+            className="fixed top-1 left-1 z-[200] soft-pulse w-4 h-4 rounded-full overflow-hidden cursor-pointer hover:scale-150 transition-transform"
             data-testid="button-global-nav"
           >
-            <Globe2 className="h-2 w-2 text-white" />
+            <img src={globeImage} alt="World Map" className="w-full h-full object-cover" />
           </button>
         </TooltipTrigger>
         <TooltipContent 
           side="right" 
-          className="bg-[#0a0a1a] text-white border-yellow-500/50 max-w-[200px]"
+          className="bg-[#0a0a1a] text-white border-[#005EB8]/50 max-w-[200px]"
         >
           <p className="text-xs">
-            Click to return to the <span className="text-yellow-400 font-semibold">World Map</span> and explore all countries
+            Click to return to the <span className="text-[#41B6E6] font-semibold">World Map</span> and explore all countries
           </p>
         </TooltipContent>
       </Tooltip>
