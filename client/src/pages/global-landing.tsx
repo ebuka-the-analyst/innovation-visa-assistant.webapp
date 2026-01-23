@@ -31,31 +31,34 @@ interface Country {
 }
 
 function CountryFlag({ code, className = "" }: { code: string; className?: string }) {
-  const flagColors: Record<string, { bg: string; text: string }> = {
-    uk: { bg: "bg-[#012169]", text: "text-white" },
-    us: { bg: "bg-[#3C3B6E]", text: "text-white" },
-    ca: { bg: "bg-[#FF0000]", text: "text-white" },
-    au: { bg: "bg-[#00008B]", text: "text-white" },
-    de: { bg: "bg-[#000000]", text: "text-[#FFCC00]" },
-    fr: { bg: "bg-[#0055A4]", text: "text-white" },
-    nl: { bg: "bg-[#AE1C28]", text: "text-white" },
-    sg: { bg: "bg-[#ED2939]", text: "text-white" },
-    ae: { bg: "bg-[#00732F]", text: "text-white" },
-    nz: { bg: "bg-[#00247D]", text: "text-white" },
-    jp: { bg: "bg-white", text: "text-[#BC002D]" },
-    ie: { bg: "bg-[#169B62]", text: "text-white" },
-    pt: { bg: "bg-[#006600]", text: "text-[#FF0000]" },
-    es: { bg: "bg-[#AA151B]", text: "text-[#F1BF00]" },
-    se: { bg: "bg-[#006AA7]", text: "text-[#FECC00]" },
-    ch: { bg: "bg-[#FF0000]", text: "text-white" },
+  const countryCodeMap: Record<string, string> = {
+    uk: "gb",
+    us: "us",
+    ca: "ca",
+    au: "au",
+    de: "de",
+    fr: "fr",
+    nl: "nl",
+    sg: "sg",
+    ae: "ae",
+    nz: "nz",
+    jp: "jp",
+    ie: "ie",
+    pt: "pt",
+    es: "es",
+    se: "se",
+    ch: "ch",
   };
   
-  const colors = flagColors[code] || { bg: "bg-gray-600", text: "text-white" };
+  const flagCode = countryCodeMap[code] || code;
   
   return (
-    <div className={`w-7 h-5 rounded flex items-center justify-center text-[10px] font-bold ${colors.bg} ${colors.text} ${className}`}>
-      {code.toUpperCase()}
-    </div>
+    <img 
+      src={`https://flagcdn.com/w80/${flagCode}.png`}
+      srcSet={`https://flagcdn.com/w160/${flagCode}.png 2x`}
+      alt={code.toUpperCase()}
+      className={`w-8 h-6 rounded object-cover shadow-sm ${className}`}
+    />
   );
 }
 
