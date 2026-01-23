@@ -202,13 +202,23 @@ export default function GlobalLanding() {
           border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
+        .country-card.unlocked {
+          background: rgba(5, 150, 105, 0.1);
+          border: 2px solid rgba(5, 150, 105, 0.5);
+        }
+        
+        .dark .country-card.unlocked {
+          background: rgba(5, 150, 105, 0.15);
+          border: 2px solid rgba(5, 150, 105, 0.6);
+        }
+        
         .country-card.unlocked:hover {
-          background: rgba(255, 255, 255, 0.95);
-          border-color: rgba(0, 94, 184, 0.5);
+          background: rgba(5, 150, 105, 0.2);
+          border-color: rgba(5, 150, 105, 0.7);
         }
         
         .dark .country-card.unlocked:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(5, 150, 105, 0.25);
         }
         
         .country-card.locked {
