@@ -124,7 +124,7 @@ export default function GlobalLanding() {
   }, []);
 
   return (
-    <div className="h-screen bg-[#0a0a1a] text-white overflow-hidden relative flex flex-col">
+    <div className="h-screen bg-gradient-to-b from-sky-100 to-blue-50 dark:bg-[#0a0a1a] dark:from-[#0a0a1a] dark:to-[#0a0a1a] text-gray-900 dark:text-white overflow-hidden relative flex flex-col">
       <style>{`
         @keyframes twinkle {
           0%, 100% { opacity: 0.3; }
@@ -154,6 +154,14 @@ export default function GlobalLanding() {
           animation: twinkle 3s infinite;
         }
         
+        .dark .star {
+          display: block;
+        }
+        
+        :not(.dark) .star {
+          display: none;
+        }
+        
         .globe-container {
           perspective: 1000px;
           animation: float 6s ease-in-out infinite;
@@ -162,10 +170,17 @@ export default function GlobalLanding() {
         .globe {
           border-radius: 50%;
           box-shadow: 
-            inset -20px -20px 40px rgba(0,0,0,0.5),
+            inset -20px -20px 40px rgba(0,0,0,0.3),
             0 0 30px rgba(0, 94, 184, 0.3),
             0 0 60px rgba(0, 94, 184, 0.15);
           animation: pulse-glow 4s ease-in-out infinite;
+        }
+        
+        .dark .globe {
+          box-shadow: 
+            inset -20px -20px 40px rgba(0,0,0,0.5),
+            0 0 30px rgba(0, 94, 184, 0.3),
+            0 0 60px rgba(0, 94, 184, 0.15);
         }
         
         .globe.zooming {
@@ -174,14 +189,23 @@ export default function GlobalLanding() {
         
         .country-card {
           backdrop-filter: blur(10px);
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(0, 94, 184, 0.2);
           transition: all 0.2s ease;
         }
         
+        .dark .country-card {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
         .country-card.unlocked:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.95);
           border-color: rgba(0, 94, 184, 0.5);
+        }
+        
+        .dark .country-card.unlocked:hover {
+          background: rgba(255, 255, 255, 0.1);
         }
         
         .country-card.locked {
@@ -198,6 +222,11 @@ export default function GlobalLanding() {
         
         .glass-panel {
           backdrop-filter: blur(20px);
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(0, 94, 184, 0.1);
+        }
+        
+        .dark .glass-panel {
           background: rgba(255, 255, 255, 0.03);
           border: 1px solid rgba(255, 255, 255, 0.08);
         }
@@ -206,11 +235,17 @@ export default function GlobalLanding() {
           width: 4px;
         }
         .scrollbar-thin::-webkit-scrollbar-track {
-          background: rgba(255,255,255,0.05);
+          background: rgba(0,0,0,0.05);
         }
         .scrollbar-thin::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.2);
+          background: rgba(0,94,184,0.3);
           border-radius: 2px;
+        }
+        .dark .scrollbar-thin::-webkit-scrollbar-track {
+          background: rgba(255,255,255,0.05);
+        }
+        .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.2);
         }
       `}</style>
 
@@ -223,7 +258,7 @@ export default function GlobalLanding() {
               <Globe2 className="h-6 w-6 text-[#005EB8]" />
               <div>
                 <h1 className="text-base font-bold leading-tight">Visa Assistant</h1>
-                <p className="text-[10px] text-gray-400 leading-none">.global</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-none">.global</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -256,9 +291,9 @@ export default function GlobalLanding() {
               <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold mb-1">
                 <span className="gradient-text">Your Gateway to</span>
                 <br />
-                <span className="text-white">Global Opportunities</span>
+                <span className="text-gray-900 dark:text-white">Global Opportunities</span>
               </h2>
-              <p className="text-gray-400 text-xs lg:text-sm">
+              <p className="text-gray-600 dark:text-gray-400 text-xs lg:text-sm">
                 AI-powered visa assistance for entrepreneurs, innovators, and skilled professionals. 
                 Select your destination country to begin.
               </p>
@@ -288,19 +323,19 @@ export default function GlobalLanding() {
             </div>
 
             <div className="flex flex-wrap justify-center gap-3 mb-2">
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
                 <Bot className="h-3 w-3 text-[#41B6E6]" />
                 <span>Multi-Agent AI</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
                 <FileText className="h-3 w-3 text-emerald-400" />
                 <span>Document Generation</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
                 <Shield className="h-3 w-3 text-yellow-400" />
                 <span>Compliance Verified</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
                 <Users className="h-3 w-3 text-purple-400" />
                 <span>500+ Approved</span>
               </div>
@@ -312,7 +347,7 @@ export default function GlobalLanding() {
                 placeholder="Search for a country..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 py-1.5 text-sm bg-white/5 border-white/10 text-white placeholder:text-gray-500 rounded-full focus:border-[#005EB8] focus:ring-[#005EB8]"
+                className="pl-9 py-1.5 text-sm bg-white/80 dark:bg-white/5 border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500 rounded-full focus:border-[#005EB8] focus:ring-[#005EB8]"
                 data-testid="input-country-search"
               />
             </div>
@@ -321,7 +356,7 @@ export default function GlobalLanding() {
           <div className="w-72 lg:w-80 xl:w-96 glass-panel rounded-l-2xl flex flex-col overflow-hidden">
             <div className="p-3 pb-2 flex-shrink-0">
               <h3 className="text-sm font-semibold">Select Destination</h3>
-              <p className="text-xs text-gray-400">Choose where you want to immigrate</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Choose where you want to immigrate</p>
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 space-y-1.5 scrollbar-thin">
@@ -336,7 +371,7 @@ export default function GlobalLanding() {
                     <CountryFlag code={country.flagCode} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-medium text-white truncate">{country.name}</span>
+                        <span className="text-xs font-medium text-gray-900 dark:text-white truncate">{country.name}</span>
                         {country.isUnlocked ? (
                           <Unlock className="h-3 w-3 text-emerald-400 flex-shrink-0" />
                         ) : (
@@ -345,12 +380,12 @@ export default function GlobalLanding() {
                       </div>
                       <div className="flex flex-wrap gap-0.5 mt-0.5">
                         {country.visaTypes.slice(0, 2).map((visa, i) => (
-                          <span key={i} className="text-[9px] px-1 py-0.5 rounded bg-white/10 text-gray-400">
+                          <span key={i} className="text-[9px] px-1 py-0.5 rounded bg-gray-200/80 dark:bg-white/10 text-gray-600 dark:text-gray-400">
                             {visa}
                           </span>
                         ))}
                         {country.visaTypes.length > 2 && (
-                          <span className="text-[9px] px-1 py-0.5 rounded bg-white/10 text-gray-400">
+                          <span className="text-[9px] px-1 py-0.5 rounded bg-gray-200/80 dark:bg-white/10 text-gray-600 dark:text-gray-400">
                             +{country.visaTypes.length - 2}
                           </span>
                         )}
@@ -392,7 +427,7 @@ export default function GlobalLanding() {
       </div>
 
       {isZooming && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a1a]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-sky-100 dark:bg-[#0a0a1a]">
           <div className="text-center">
             <div className="globe-container">
               <div className="globe zooming w-48 h-48 lg:w-64 lg:h-64 rounded-full overflow-hidden">
@@ -403,7 +438,7 @@ export default function GlobalLanding() {
                 />
               </div>
             </div>
-            <p className="mt-6 text-lg font-semibold text-white animate-pulse">
+            <p className="mt-6 text-lg font-semibold text-gray-900 dark:text-white animate-pulse">
               Traveling to {selectedCountry?.name}...
             </p>
           </div>
