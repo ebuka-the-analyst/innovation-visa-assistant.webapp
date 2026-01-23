@@ -38,10 +38,10 @@ export function GlobalNavButton() {
             onClick={handleClick}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
-            className="fixed top-1.5 left-1.5 z-[200] blink-bright w-5 h-5 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 border border-yellow-300 flex items-center justify-center cursor-pointer hover:scale-125 transition-transform shadow-md"
+            className="fixed top-1 left-1 z-[200] blink-bright w-3 h-3 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 border border-yellow-300/50 flex items-center justify-center cursor-pointer hover:scale-150 transition-transform"
             data-testid="button-global-nav"
           >
-            <Globe2 className="h-3 w-3 text-white drop-shadow-sm" />
+            <Globe2 className="h-2 w-2 text-white" />
           </button>
         </TooltipTrigger>
         <TooltipContent 
