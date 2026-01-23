@@ -1,22 +1,63 @@
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageCircle, X, Send, Loader2, AlertCircle } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, AlertCircle, Globe } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
+// Page context configuration
+const PAGE_CONTEXTS = {
+  global: {
+    title: "Global Visa Assistant",
+    greeting: "Welcome! I'm your Global Visa Assistant. I can help you explore visa options for 16 countries. Which destination are you interested in?",
+    disclaimer: "AI-powered guidance. Always verify with official immigration sources.",
+    placeholder: "Ask about visa options for any country...",
+    gradient: "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
+  },
+  uk: {
+    title: "UK Visa AI Assistant",
+    greeting: "Hi! I'm your UK Innovator Founder Visa assistant. Ask me about visa requirements, endorsers, or business planning.",
+    disclaimer: "Trained on GOV.UK guidance (Nov 2025). Always verify with official sources.",
+    placeholder: "Ask about visa requirements...",
+    gradient: "linear-gradient(135deg, #0D2C4A 0%, #41B6E6 100%)",
+  }
+};
+
+function getPageContext(pathname: string) {
+  if (pathname === "/" || pathname === "") {
+    return PAGE_CONTEXTS.global;
+  }
+  return PAGE_CONTEXTS.uk;
+}
+
 export default function ChatBot() {
+  const [location] = useLocation();
+  const pageContext = getPageContext(location);
+  
   const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  const [currentContext, setCurrentContext] = useState(location);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm your UK Innovator Founder Visa assistant. Ask me about visa requirements, endorsers, or business planning."
+      content: pageContext.greeting
     }
   ]);
+  
+  // Reset messages when navigating to a different page context
+  useEffect(() => {
+    const newContext = getPageContext(location);
+    const oldContext = getPageContext(currentContext);
+    
+    if (newContext.title !== oldContext.title) {
+      setMessages([{ role: "assistant", content: newContext.greeting }]);
+      setCurrentContext(location);
+    }
+  }, [location, currentContext]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -41,12 +82,14 @@ export default function ChatBot() {
     setIsLoading(true);
 
     try {
+      const isGlobalPage = location === "/" || location === "";
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMessage,
-          conversationHistory: messages
+          conversationHistory: messages,
+          pageContext: isGlobalPage ? "global" : "uk"
         })
       });
 
@@ -147,7 +190,7 @@ export default function ChatBot() {
             <div className="flex items-start gap-2">
               <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-[10px] sm:text-xs text-amber-800 dark:text-amber-200 leading-tight">
-                <strong>Disclaimer:</strong> Trained on GOV.UK guidance (Nov 2025). Always verify with official sources.
+                <strong>Disclaimer:</strong> {pageContext.disclaimer}
               </p>
             </div>
           </div>
@@ -155,11 +198,12 @@ export default function ChatBot() {
           {/* Header */}
           <div 
             className="px-3 py-3 sm:px-4 sm:py-4 text-white flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #0D2C4A 0%, #41B6E6 100%)" }}
+            style={{ background: pageContext.gradient }}
           >
             <div className="flex justify-between items-center gap-2">
-              <h3 className="font-bold text-sm sm:text-base md:text-lg truncate">
-                UK Visa AI Assistant
+              <h3 className="font-bold text-sm sm:text-base md:text-lg truncate flex items-center gap-2">
+                {location === "/" && <Globe className="w-4 h-4" />}
+                {pageContext.title}
               </h3>
               <button
                 onClick={() => setIsOpen(false)}
@@ -214,7 +258,7 @@ export default function ChatBot() {
               className="flex gap-2"
             >
               <Input
-                placeholder="Ask about visa requirements..."
+                placeholder={pageContext.placeholder}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={isLoading}

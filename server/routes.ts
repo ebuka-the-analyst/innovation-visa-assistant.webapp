@@ -3090,7 +3090,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
   // Chat API endpoint - Advanced AI Orchestrator with action capabilities
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, conversationHistory } = req.body;
+      const { message, conversationHistory, pageContext } = req.body;
 
       if (!message || typeof message !== "string" || message.trim().length === 0) {
         return res.status(400).json({ error: "Message is required" });
@@ -3106,7 +3106,8 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const context = {
         ipAddress: req.ip || req.socket.remoteAddress,
         userAgent: req.headers['user-agent'],
-        sessionId: req.sessionID
+        sessionId: req.sessionID,
+        pageContext: pageContext || "uk" // Default to UK if not specified
       };
       
       // Use the orchestrator for intelligent action handling

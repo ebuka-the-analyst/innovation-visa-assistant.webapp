@@ -83,12 +83,12 @@ export async function orchestrateChat(
   userMessage: string,
   conversationHistory: Message[],
   user: User | null,
-  context: { ipAddress?: string; userAgent?: string; sessionId?: string }
+  context: { ipAddress?: string; userAgent?: string; sessionId?: string; pageContext?: string }
 ): Promise<OrchestratorResult> {
   
   // If no authenticated user, use regular chat without actions
   if (!user) {
-    return regularChat(userMessage, conversationHistory);
+    return regularChat(userMessage, conversationHistory, context.pageContext);
   }
 
   const actionContext: ActionContext = {
@@ -254,9 +254,29 @@ async function retryWithBackoff<T>(
 // Regular chat without action capabilities (for unauthenticated users or fallback)
 async function regularChat(
   userMessage: string,
-  conversationHistory: Message[]
+  conversationHistory: Message[],
+  pageContext?: string
 ): Promise<OrchestratorResult> {
-  const systemPrompt = `You are an expert UK Innovator Founder Visa consultant.
+  // Different system prompts based on page context
+  const isGlobal = pageContext === "global";
+  
+  const systemPrompt = isGlobal 
+    ? `You are the Global Visa Assistant - an AI-powered guide for exploring immigration options across 16 countries worldwide.
+
+AVAILABLE COUNTRIES:
+- UK (Live): Innovator Founder Visa - for entrepreneurs starting innovative businesses
+- USA, Canada, Australia, Germany, Singapore, UAE, Portugal, Spain, Netherlands, France, New Zealand, Ireland, Japan, Switzerland, Hong Kong (Coming Soon)
+
+RULES:
+- Be concise: 2-4 sentences typical
+- Help users understand which country might suit their immigration goals
+- For UK questions, you can provide detailed Innovator Founder Visa guidance
+- For other countries, explain they are coming soon and what visa types will be available
+- Never guarantee visa approval for any country
+- Encourage users to select UK to explore the full platform
+
+Give helpful guidance about global immigration opportunities.`
+    : `You are an expert UK Innovator Founder Visa consultant.
 
 RULES:
 - Be concise: 2-4 sentences typical
