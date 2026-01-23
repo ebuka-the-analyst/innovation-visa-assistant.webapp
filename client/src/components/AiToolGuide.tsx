@@ -821,14 +821,12 @@ export function AiTraditionalToggle({
 }: AiTraditionalToggleProps) {
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   
-  const isPaidUser = userTier !== "free";
+  // AI mode is always locked (Coming Soon)
+  const isAiLocked = true;
   
   const handleAiClick = () => {
-    if (isPaidUser) {
-      onModeChange('ai');
-    } else {
-      setShowUpgradePrompt(true);
-    }
+    // AI mode is locked - show message
+    setShowUpgradePrompt(true);
   };
   
   return (
@@ -836,28 +834,27 @@ export function AiTraditionalToggle({
       <div className={`flex items-center gap-2 p-1 bg-muted rounded-lg ${className}`}>
         <button
           onClick={handleAiClick}
-          className={`relative flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-            mode === 'ai' && isPaidUser
-              ? 'bg-gradient-to-r from-[#005EB8] to-[#41B6E6] text-white shadow-md' 
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
+          className="relative flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all bg-[#005EB8] text-white shadow-md cursor-not-allowed opacity-90"
           data-testid="button-mode-ai"
+          disabled={isAiLocked}
         >
-          <MessageSquare className="h-4 w-4" />
+          <Lock className="h-4 w-4" />
           {aiLabel}
-          {isPaidUser ? (
-            <Badge variant="secondary" className="ml-1 text-xs bg-white/20">Recommended</Badge>
-          ) : (
-            <Badge variant="secondary" className="ml-1 text-xs bg-amber-500/20 text-amber-600 dark:text-amber-400">Premium</Badge>
-          )}
+          <Badge 
+            variant="secondary" 
+            className="ml-1 text-xs border-0"
+            style={{ 
+              backgroundColor: '#f59e0b', 
+              color: 'white' 
+            }}
+          >
+            <Lock className="h-3 w-3 mr-1" />
+            Coming Soon
+          </Badge>
         </button>
         <button
           onClick={() => onModeChange('traditional')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-            mode === 'traditional' || !isPaidUser
-              ? 'bg-background text-foreground shadow-md' 
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all bg-background text-foreground shadow-md"
           data-testid="button-mode-traditional"
         >
           <FileText className="h-4 w-4" />
@@ -884,13 +881,13 @@ export function AiTraditionalToggle({
               >
                 <Card className="p-6 shadow-xl border overflow-hidden">
                   <div className="flex items-start gap-4 mb-5">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-[#005EB8] to-[#41B6E6] text-white shadow-lg">
-                      <Sparkles className="w-5 h-5" />
+                    <div className="p-3 rounded-xl" style={{ backgroundColor: '#f59e0b' }}>
+                      <Lock className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-lg">Unlock AI-Guided Experience</h3>
+                      <h3 className="font-semibold text-lg">AI-Guided Mode Coming Soon</h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Get personalised guidance from our specialised AI agents who understand UK visa requirements.
+                        Our AI-guided interview experience is currently in development and will be available soon.
                       </p>
                     </div>
                   </div>
@@ -914,30 +911,22 @@ export function AiTraditionalToggle({
                     </div>
                   </div>
                   
-                  <div className="bg-muted/50 rounded-lg p-3 mb-5 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Available from <span className="font-semibold text-primary">Basic Plan (£15/mo)</span>
+                  <div className="rounded-lg p-3 mb-5 text-center" style={{ backgroundColor: '#fef3c7' }}>
+                    <p className="text-sm" style={{ color: '#92400e' }}>
+                      <Lock className="h-4 w-4 inline mr-1" />
+                      This feature is under development. Use the <span className="font-semibold">Calculator</span> mode for now.
                     </p>
                   </div>
                   
                   <div className="flex gap-3">
                     <Button
-                      onClick={() => {
-                        setShowUpgradePrompt(false);
-                        window.location.href = '/pricing';
-                      }}
-                      className="flex-1 bg-gradient-to-r from-[#005EB8] to-[#41B6E6] hover:opacity-90"
-                      data-testid="button-upgrade-ai"
-                    >
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      View Plans
-                    </Button>
-                    <Button
                       onClick={() => setShowUpgradePrompt(false)}
-                      variant="outline"
-                      data-testid="button-continue-free"
+                      className="flex-1"
+                      style={{ backgroundColor: '#059669' }}
+                      data-testid="button-continue-calculator"
                     >
-                      Use Traditional Form
+                      <FileText className="h-4 w-4 mr-2" />
+                      Continue with Calculator
                     </Button>
                   </div>
                 </Card>
