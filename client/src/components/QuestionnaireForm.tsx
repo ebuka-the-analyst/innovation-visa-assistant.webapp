@@ -1162,6 +1162,11 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
 
   // Load industry-specific template for non-founder users
   const handleLoadIndustryTemplate = (industry: string, templateIndex: number) => {
+    // Protect globalvisa template - only owner can load it
+    if (industry === 'globalvisa' && user?.email?.toLowerCase() !== 'benedict9211@gmail.com') {
+      return; // Block unauthorized access
+    }
+    
     const userName = user?.displayName || user?.firstName || user?.email?.split('@')[0] || 'Your Name';
     
     // COMPREHENSIVE Industry-specific template data - ALL fields filled
@@ -2840,7 +2845,15 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
             
             {!selectedIndustry ? (
               <div className="grid gap-3 mt-4">
-                {Object.entries(INDUSTRY_TEMPLATES).map(([key, industry]) => {
+                {Object.entries(INDUSTRY_TEMPLATES)
+                  .filter(([key]) => {
+                    // "globalvisa" template only visible to the owner (benedict9211@gmail.com)
+                    if (key === 'globalvisa') {
+                      return user?.email?.toLowerCase() === 'benedict9211@gmail.com';
+                    }
+                    return true;
+                  })
+                  .map(([key, industry]) => {
                   const IconComponent = industry.icon;
                   const isLocked = (industry as any).locked && !isTemplatesUnlocked;
                   return (
