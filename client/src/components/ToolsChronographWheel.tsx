@@ -344,18 +344,7 @@ export default function ToolsChronographWheel() {
             <Icons.Wrench className="w-4 h-4" />
           </button>
           
-          {/* Dismiss X button - attached to the right, like chat icon */}
-          {!isDismissed && (
-            <button
-              onClick={() => setIsDismissed(true)}
-              className="w-5 h-6 bg-red-500 hover:bg-red-600 rounded-r-full flex items-center justify-center text-white transition-colors shadow-sm"
-              data-testid="button-dismiss-tools"
-              aria-label="Minimize tools button"
-            >
-              <Icons.X className="w-3 h-3" />
-            </button>
-          )}
-        </div>
+                  </div>
       </div>,
       document.body
     );
@@ -578,9 +567,11 @@ export default function ToolsChronographWheel() {
             onMouseEnter={() => setIsHoveringUp(true)}
             onMouseLeave={() => setIsHoveringUp(false)}
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-orange-500 flex items-center justify-center">
-              <Icons.ChevronUp className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white ${isHoveringUp ? "" : "animate-bounce"}`} style={{ animationDelay: "0s" }} />
-            </div>
+            {selectedToolIdx > 0 && (
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-[#005EB8] flex items-center justify-center">
+                <Icons.ChevronUp className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white ${isHoveringUp ? "" : "animate-bounce"}`} style={{ animationDelay: "0s" }} />
+              </div>
+            )}
           </div>
           <div
             className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
@@ -591,7 +582,7 @@ export default function ToolsChronographWheel() {
             onMouseEnter={() => setIsHoveringDown(true)}
             onMouseLeave={() => setIsHoveringDown(false)}
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-orange-500 flex items-center justify-center">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-[#005EB8] flex items-center justify-center">
               <Icons.ChevronDown className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white ${isHoveringDown ? "" : "animate-bounce"}`} style={{ animationDelay: "0.2s" }} />
             </div>
           </div>
@@ -610,11 +601,9 @@ export default function ToolsChronographWheel() {
               style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
             >
               <div className="flex flex-col gap-1 sm:gap-2">
-                {selectedToolIdx + 1 > 1 && (
-                  <p className="text-sm sm:text-base md:text-2xl text-black font-black">
-                    {String(selectedToolIdx + 1).padStart(3, "0")}
-                  </p>
-                )}
+                <p className="text-sm sm:text-base md:text-2xl text-black font-black">
+                  {String(selectedToolIdx + 1).padStart(3, "0")}
+                </p>
                 <h2 className="text-2xl sm:text-xl font-black text-black leading-tight w-full">
                   {selectedTool.name.toUpperCase()}
                 </h2>
