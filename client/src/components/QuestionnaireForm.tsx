@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw, Building2, Stethoscope, ShoppingBag, Laptop, Lightbulb, FileText, Upload, Sparkles, ChevronDown, ChevronUp, Palette } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw, Building2, Stethoscope, ShoppingBag, Laptop, Lightbulb, FileText, Upload, Sparkles, ChevronDown, ChevronUp, Palette, Globe, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -38,71 +38,89 @@ import {
 
 // Industry template definitions - Tech AND Non-Tech sectors
 const INDUSTRY_TEMPLATES = {
+  globalvisa: {
+    name: "Global AI Visa Platform (My Business)",
+    icon: Globe,
+    description: "World's First Global AI Visa Platform - Your actual business for Innovator Founder Visa",
+    templates: ["Visa Assistant Global - Benedict Umeh (COMPREHENSIVE)"],
+    locked: true
+  },
   visatech: {
     name: "Legal Tech / Immigration Tech",
     icon: FileText,
     description: "AI-powered legal assistance, visa guidance, compliance automation",
-    templates: ["UK Visa Assistant - Benedict Umeh", "LegalAI - Document Analysis", "ComplianceFlow - Regulatory Automation"]
+    templates: ["UK Visa Assistant - Benedict Umeh", "LegalAI - Document Analysis", "ComplianceFlow - Regulatory Automation"],
+    locked: true
   },
   fintech: {
     name: "FinTech / Financial Services",
     icon: Building2,
     description: "AI-powered financial tools, payment solutions, lending platforms",
-    templates: ["FinFlow AI - Cash Flow Forecasting", "PaymentPro - B2B Payments", "LendSmart - SME Lending"]
+    templates: ["FinFlow AI - Cash Flow Forecasting", "PaymentPro - B2B Payments", "LendSmart - SME Lending"],
+    locked: true
   },
   healthtech: {
     name: "HealthTech / MedTech",
     icon: Stethoscope,
     description: "Healthcare AI, digital health platforms, medical devices",
-    templates: ["CareAI - Patient Management", "MedAssist - Clinical Decision Support", "HealthFlow - NHS Integration"]
+    templates: ["CareAI - Patient Management", "MedAssist - Clinical Decision Support", "HealthFlow - NHS Integration"],
+    locked: true
   },
   ecommerce: {
     name: "E-commerce / Retail Tech",
     icon: ShoppingBag,
     description: "Retail platforms, marketplace solutions, inventory management",
-    templates: ["ShopSmart - AI Recommendations", "RetailFlow - Inventory Optimization", "MarketPro - Marketplace Platform"]
+    templates: ["ShopSmart - AI Recommendations", "RetailFlow - Inventory Optimization", "MarketPro - Marketplace Platform"],
+    locked: true
   },
   saas: {
     name: "SaaS / B2B Software",
     icon: Laptop,
     description: "Business software, productivity tools, enterprise solutions",
-    templates: ["TeamFlow - Collaboration Platform", "DataSync - Integration Platform", "AutomateHQ - Workflow Automation"]
+    templates: ["TeamFlow - Collaboration Platform", "DataSync - Integration Platform", "AutomateHQ - Workflow Automation"],
+    locked: true
   },
   foodbev: {
     name: "Food & Beverage",
     icon: ShoppingBag,
     description: "Innovative food products, sustainable packaging, new production methods",
-    templates: ["GreenBite - Plant-Based Foods", "BrewCraft - Artisan Beverages", "FreshPack - Sustainable Packaging"]
+    templates: ["GreenBite - Plant-Based Foods", "BrewCraft - Artisan Beverages", "FreshPack - Sustainable Packaging"],
+    locked: true
   },
   manufacturing: {
     name: "Manufacturing & Products",
     icon: Building2,
     description: "New manufacturing processes, sustainable products, innovative materials",
-    templates: ["EcoMake - Sustainable Manufacturing", "SmartBuild - Construction Innovation", "CleanMaterials - Eco Products"]
+    templates: ["EcoMake - Sustainable Manufacturing", "SmartBuild - Construction Innovation", "CleanMaterials - Eco Products"],
+    locked: true
   },
   creative: {
     name: "Creative & Media",
     icon: Lightbulb,
     description: "Content innovation, new distribution models, creative services",
-    templates: ["StoryStream - Content Platform", "ArtConnect - Creative Marketplace", "MediaFlow - Distribution Innovation"]
+    templates: ["StoryStream - Content Platform", "ArtConnect - Creative Marketplace", "MediaFlow - Distribution Innovation"],
+    locked: true
   },
   services: {
     name: "Professional Services",
     icon: Building2,
     description: "Innovative consulting, new service delivery, business solutions",
-    templates: ["ConsultX - Advisory Platform", "TalentBridge - Recruitment Innovation", "ServicePro - B2B Solutions"]
+    templates: ["ConsultX - Advisory Platform", "TalentBridge - Recruitment Innovation", "ServicePro - B2B Solutions"],
+    locked: true
   },
   social: {
     name: "Social Enterprise",
     icon: Lightbulb,
     description: "Impact-driven businesses, community solutions, sustainability",
-    templates: ["ImpactFirst - Social Innovation", "CommunityHub - Local Solutions", "GreenFuture - Sustainability Venture"]
+    templates: ["ImpactFirst - Social Innovation", "CommunityHub - Local Solutions", "GreenFuture - Sustainability Venture"],
+    locked: true
   },
   other: {
     name: "Other Innovative Sectors",
     icon: Lightbulb,
     description: "EdTech, PropTech, CleanTech, Fashion, Tourism, or other",
-    templates: ["EduAI - Learning Platform", "PropFlow - Property Management", "GreenTech - Sustainability Platform"]
+    templates: ["EduAI - Learning Platform", "PropFlow - Property Management", "GreenTech - Sustainability Platform"],
+    locked: true
   }
 };
 
@@ -378,6 +396,40 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  
+  // Password protection for templates
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isTemplatesUnlocked, setIsTemplatesUnlocked] = useState(false);
+  const [pendingIndustrySelection, setPendingIndustrySelection] = useState<string | null>(null);
+  
+  const TEMPLATE_PASSWORD = "BENEDICT";
+  
+  const handleUnlockTemplates = () => {
+    if (passwordInput === TEMPLATE_PASSWORD) {
+      setIsTemplatesUnlocked(true);
+      setShowPasswordDialog(false);
+      setPasswordError("");
+      setPasswordInput("");
+      // If there was a pending industry selection, continue with it
+      if (pendingIndustrySelection) {
+        setSelectedIndustry(pendingIndustrySelection);
+        setPendingIndustrySelection(null);
+      }
+    } else {
+      setPasswordError("Incorrect password. Please try again.");
+    }
+  };
+  
+  const handleIndustryClick = (industryKey: string) => {
+    if (isTemplatesUnlocked) {
+      setSelectedIndustry(industryKey);
+    } else {
+      setPendingIndustrySelection(industryKey);
+      setShowPasswordDialog(true);
+    }
+  };
   
   // Auto-fill from documents states
   const [showAutoFillDrawer, setShowAutoFillDrawer] = useState(false);
@@ -1114,6 +1166,31 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     
     // COMPREHENSIVE Industry-specific template data - ALL fields filled
     const industryTemplates: Record<string, Record<string, string>[]> = {
+      globalvisa: [
+        { // Visa Assistant Global - Benedict Umeh - COMPREHENSIVE INNOVATOR FOUNDER VISA BUSINESS PLAN
+          businessName: "Visa Assistant Global (Stackrise Ltd)",
+          industry: "Global LegalTech / Immigration Tech / AI SaaS Platform",
+          problem: "The global visa and immigration industry is plagued by three critical problems: (1) COST BARRIER - Visa applicants worldwide pay £5,000-25,000+ in legal fees for advice that's often generic and template-based, excluding talented entrepreneurs from accessing proper guidance. (2) ACCESSIBILITY GAP - 850+ million people seek visas annually, but immigration lawyers are concentrated in major cities, leaving most applicants without expert support. Average wait time for legal consultations is 2-4 weeks. (3) HIGH REJECTION RATES - 40%+ of complex visa applications are rejected due to preventable errors, poor document preparation, or failure to demonstrate eligibility criteria correctly. The £17 billion global immigration services market is ripe for AI-powered disruption that can democratize access to expert-level guidance.",
+          innovationStage: "mvp-complete",
+          productStatus: "Fully operational MVP live at visaassistant.global with UK module complete (109 professional tools, 4 specialized AI agents). Platform features: Multi-agent AI system (Nova for Innovation Analysis, Sterling for Financial Modeling, Atlas for Growth Strategy, Sage for Compliance), AI-Guided Interview system that generates personalized business plans, visual Business Plan Generator with professional PDF/Word exports including charts, Stripe payment integration (live mode), Google OAuth + email authentication, document intelligence using GPT-4o Vision for auto-extraction, real-time compliance scoring against endorsing body criteria, and multi-language support (8 languages). Interactive 3D globe interface for country selection with 16 countries mapped (UK unlocked, 15 expansion markets identified).",
+          existingCustomers: "7 active users on UK platform including 2 immigration lawyers who use the platform to assist their clients. £5,000 in operating capital. Early users are beta-testing all 109 tools and providing feedback. Immigration lawyers have validated the tool quality and compliance accuracy. Platform generating real usage data and testimonials from founders going through the visa application process.",
+          tractionEvidence: "Production platform deployed and live. 7 registered users actively using the service. 2 licensed immigration lawyers onboarded as power users validating legal compliance. Full payment system operational (Stripe live mode). 109 professional tools across 8 categories fully functional. Real-time analytics tracking all user behavior. Multi-agent AI chatbot serving queries 24/7. Google Analytics 4 integrated for comprehensive metrics. Email verification and session management working. Admin dashboard with full user management capabilities. Document upload and AI extraction fully operational.",
+          uniqueness: "WORLD'S FIRST multi-agent AI system purpose-built for global visa applications. Key innovations: (1) MULTI-AGENT ARCHITECTURE - Four specialized AI agents (Nova, Sterling, Atlas, Sage) collaborate intelligently, unlike single-chatbot competitors, providing comprehensive guidance across innovation, finance, growth, and compliance dimensions. (2) 100X COST REDUCTION - £35/month subscription vs £5,000-25,000 traditional legal fees. (3) INSTANT FEEDBACK - Real-time AI guidance vs 2-4 weeks waiting for lawyer appointments. (4) DOCUMENT INTELLIGENCE - GPT-4o Vision auto-extracts and auto-populates business plans from uploaded documents. (5) COMPLIANCE SCORING - Real-time scoring against official endorsing body criteria. (6) GLOBAL SCALABILITY - Template architecture allows rapid expansion to any country's visa system. (7) MULTI-LANGUAGE - 8 languages including RTL support for Arabic. No competitor offers this combination of multi-agent AI, document intelligence, and global scalability.",
+          techStack: "Frontend: React 18, TypeScript, Tailwind CSS, Shadcn UI, Framer Motion, Recharts\nBackend: Node.js, Express.js, PostgreSQL, Drizzle ORM\nAI: Google Gemini API, OpenAI GPT-4o, Function Calling/Tool Use, Multi-Agent Orchestration\nAuth: Google OAuth 2.0, Passport.js, Session Management, Cloudflare Turnstile bot protection\nPayments: Stripe (live subscriptions, invoicing, tier-based access)\nStorage: AWS S3 (documents), Object Storage for assets\nEmail: Hostinger SMTP, Resend API\nAnalytics: GA4, Custom real-time activity tracking\nExports: jsPDF, html-to-image, docx for visual business plan exports\nInfra: Railway deployment, Neon PostgreSQL",
+          marketSize: "Global immigration services market: £17 billion (2024), growing 12% annually. UK Innovator Founder Visa market: 15,000+ applications annually at £5,000-15,000 average legal spend = £75-225M UK TAM. Expansion to 16 countries multiplies TAM significantly. Target 5% market share in Year 3 = £50M+ revenue opportunity. Secondary revenue streams: B2B licensing to immigration law firms, white-label solutions for governments, API access for enterprise clients.",
+          founderBackground: "Benedict Umeh - Technical founder with expertise in AI, full-stack development, and entrepreneurship. Built the entire platform independently demonstrating strong technical capability. Experience in software development, product design, and business strategy. Committed to relocating to UK to scale the business. Combines technical skills with understanding of the immigration pain points from personal experience.",
+          scalabilityPlan: "Phase 1 (Year 1): UK market dominance - acquire 1,000 paying subscribers, generate £420,000 ARR, partner with 10 immigration law firms. Phase 2 (Year 2): Expand to 5 English-speaking markets (USA, Canada, Australia, Ireland, New Zealand) - target 5,000 subscribers, £2.1M ARR. Phase 3 (Year 3): Global expansion to 16 countries with multi-language support, enterprise API, B2B licensing - target 25,000 subscribers, £10.5M ARR. Technology architecture supports horizontal scaling with minimal additional development per country.",
+          ukGrowthStrategy: "UK is the ideal launchpad due to: (1) Large entrepreneurial immigrant population (300,000+ visa applications annually). (2) Tech-forward regulatory environment supporting AI innovation. (3) Strong endorsing body ecosystem for Innovator Founder Visa. (4) English language reduces localization complexity for initial launch. (5) Access to world-class AI talent and tech ecosystem. (6) Gateway to Commonwealth markets. UK hiring plan: 2 full-stack developers, 1 AI/ML engineer, 1 customer success manager, 1 marketing specialist within first year.",
+          competitiveAdvantage: "Direct competitors: None with multi-agent AI architecture. Indirect competitors: Traditional immigration lawyers (expensive, slow), generic legal AI tools (not visa-specific), template websites (no AI guidance). Our moat: (1) First-mover in multi-agent visa AI. (2) Proprietary compliance scoring algorithms. (3) Growing dataset of successful applications. (4) Network effects from immigration lawyer partnerships. (5) Multi-language capability. (6) Document intelligence IP. Barriers to entry: 18+ months of development, deep visa regulation expertise required, AI orchestration complexity.",
+          revenueModel: "Tiered SaaS subscription model: FREE (3 tools, limited AI) - user acquisition. BASIC £15/month (30 tools, standard AI) - individual applicants. PREMIUM £35/month (all 109 tools, priority AI, document extraction) - serious applicants. ENTERPRISE £99/month (unlimited, API access, priority support) - immigration firms. Additional revenue: One-time business plan generation £49-149, White-label licensing £2,000-10,000/year, API access metered pricing, Endorsing body partnerships (referral fees).",
+          financialProjections: "Year 1: 1,000 subscribers average, £35 ARPU = £420,000 ARR. Operating costs: £180,000 (2 developers, cloud, marketing). Net profit: £240,000. Year 2: 5,000 subscribers = £2.1M ARR. Costs: £800,000. Net: £1.3M. Year 3: 25,000 subscribers = £10.5M ARR. Costs: £4M. Net: £6.5M. Gross margin: 85%+ (SaaS model with AI API costs only variable). Path to profitability: Month 6 with 500 paying subscribers.",
+          jobCreationPlan: "Year 1 UK Jobs: 5 positions - 2 Full-stack Developers (£55-70K each), 1 AI/ML Engineer (£65-80K), 1 Customer Success Manager (£35-45K), 1 Marketing Specialist (£40-50K). Year 2: Additional 10 positions including Sales team, Legal Compliance Officer, Content Writers. Year 3: 25+ UK-based employees. All positions UK-based to support visa requirements and access local talent. Commitment to UK tech ecosystem growth and knowledge transfer.",
+          endorsementReadiness: "Platform meets all three Innovator Founder Visa endorsement criteria: (1) INNOVATION - First multi-agent AI for visa applications, unique in the UK market, proprietary technology. (2) VIABILITY - Working MVP with paying users, clear revenue model, realistic financial projections, founder capability demonstrated. (3) SCALABILITY - Global expansion roadmap, technology architecture supports multi-country rollout, £50M+ TAM accessible. Evidence package prepared: Live platform demo, user testimonials, immigration lawyer endorsements, financial model, technical architecture documentation.",
+          ipProtection: "Intellectual property strategy: (1) Trade secrets - Multi-agent orchestration algorithms, compliance scoring models, document extraction pipelines. (2) Copyright - All code, content, and training data. (3) Trademarks - 'Visa Assistant Global', 'Nova AI', 'Sterling AI', 'Atlas AI', 'Sage AI' pending registration. (4) Future patents - AI-powered visa compliance scoring method, multi-agent immigration guidance system. Data protection: GDPR compliant, encrypted storage, SOC2 compliance roadmap.",
+          riskMitigation: "Key risks and mitigation: (1) Regulatory changes - Modular content architecture allows rapid updates, monitoring of immigration policy changes. (2) AI accuracy - Multi-layer verification, human review options, clear disclaimers about legal advice boundaries. (3) Competition - First-mover advantage, rapid feature development, strong IP protection. (4) Customer acquisition - B2B partnerships with immigration firms, content marketing, SEO strategy. (5) Technical scaling - Cloud-native architecture, horizontal scaling capability, 99.9% uptime target.",
+          socialImpact: "Democratizing access to immigration guidance creates significant social impact: (1) Enabling entrepreneurial talent to contribute to UK economy regardless of background. (2) Reducing financial barriers for skilled immigrants. (3) Improving visa success rates reducing family separation and uncertainty. (4) Creating UK jobs in growing tech sector. (5) Contributing to UK's position as global tech hub. (6) Supporting diversity and inclusion in UK business ecosystem. Commitment to allocating 1% of revenue to immigration support charities.",
+        }
+      ],
       visatech: [
         { // UK Visa Assistant - Benedict Umeh - COMPREHENSIVE
           businessName: "UK Visa Assistant (Stackrise Ltd)",
@@ -2765,22 +2842,32 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
               <div className="grid gap-3 mt-4">
                 {Object.entries(INDUSTRY_TEMPLATES).map(([key, industry]) => {
                   const IconComponent = industry.icon;
+                  const isLocked = (industry as any).locked && !isTemplatesUnlocked;
                   return (
                     <Card 
                       key={key}
-                      className="p-4 cursor-pointer hover-elevate border-2 border-transparent hover:border-primary/50 transition-all"
-                      onClick={() => setSelectedIndustry(key)}
+                      className={`p-4 cursor-pointer hover-elevate border-2 transition-all ${key === 'globalvisa' ? 'border-primary bg-primary/5' : 'border-transparent hover:border-primary/50'}`}
+                      onClick={() => handleIndustryClick(key)}
                       data-testid={`industry-${key}`}
                     >
                       <div className="flex items-start gap-4">
-                        <div className="p-2 rounded-lg bg-primary/10">
+                        <div className={`p-2 rounded-lg ${key === 'globalvisa' ? 'bg-primary/20' : 'bg-primary/10'}`}>
                           <IconComponent className="w-6 h-6 text-primary" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold">{industry.name}</h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{industry.name}</h4>
+                            {key === 'globalvisa' && (
+                              <Badge variant="default" className="text-xs">YOUR BUSINESS</Badge>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">{industry.description}</p>
                         </div>
-                        <ArrowRight className="w-5 h-5 text-muted-foreground mt-1" />
+                        {isLocked ? (
+                          <Lock className="w-5 h-5 text-amber-500 mt-1" />
+                        ) : (
+                          <ArrowRight className="w-5 h-5 text-muted-foreground mt-1" />
+                        )}
                       </div>
                     </Card>
                   );
@@ -2831,6 +2918,73 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Password Protection Dialog */}
+        <Dialog open={showPasswordDialog} onOpenChange={(open) => {
+          setShowPasswordDialog(open);
+          if (!open) {
+            setPasswordInput("");
+            setPasswordError("");
+            setPendingIndustrySelection(null);
+          }
+        }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="w-5 h-5 text-amber-500" />
+                Templates Protected
+              </DialogTitle>
+              <DialogDescription>
+                These business plan templates are password-protected. Enter the password to unlock all templates.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="template-password">Password</Label>
+                <Input
+                  id="template-password"
+                  type="password"
+                  placeholder="Enter password..."
+                  value={passwordInput}
+                  onChange={(e) => {
+                    setPasswordInput(e.target.value);
+                    setPasswordError("");
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleUnlockTemplates();
+                    }
+                  }}
+                  data-testid="input-template-password"
+                />
+                {passwordError && (
+                  <p className="text-sm text-destructive">{passwordError}</p>
+                )}
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowPasswordDialog(false);
+                    setPasswordInput("");
+                    setPasswordError("");
+                    setPendingIndustrySelection(null);
+                  }}
+                  data-testid="button-cancel-password"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleUnlockTemplates}
+                  data-testid="button-unlock-templates"
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  Unlock Templates
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
 
