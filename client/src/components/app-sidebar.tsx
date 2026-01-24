@@ -247,10 +247,10 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
-                      className={`w-full justify-between py-2 px-2.5 rounded-md cursor-pointer transition-colors ${
+                      className={`w-full justify-between py-2 px-2.5 rounded-md cursor-pointer transition-colors bg-[#005EB8]/20 ${
                         hasActiveItem && !isOpen
-                          ? "bg-primary/5 text-primary"
-                          : "hover:bg-muted/50"
+                          ? "bg-[#005EB8]/30 text-primary"
+                          : "hover:bg-[#005EB8]/30"
                       }`}
                       data-testid={`nav-group-${group.label.toLowerCase().replace(/\s+/g, '-')}`}
                     >

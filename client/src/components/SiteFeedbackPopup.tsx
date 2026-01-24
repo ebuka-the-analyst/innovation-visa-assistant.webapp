@@ -9,7 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 const FEEDBACK_STORAGE_KEY = "site_feedback_state_v2";
-const TIME_THRESHOLD_MINUTES = 10;
+const TIME_THRESHOLD_MINUTES = 30;
 const MAX_SHOWS_PER_WEEK = 3;
 const MIN_DAYS_BETWEEN_SHOWS = 2;
 
@@ -155,8 +155,7 @@ export function SiteFeedbackPopup() {
 
     const interval = setInterval(checkTime, 30000);
     
-    setTimeout(checkTime, 1000);
-
+    
     return () => clearInterval(interval);
   }, [user, location, getFeedbackState, canShowFeedback, cleanOldShowHistory, saveFeedbackState]);
 
@@ -203,10 +202,10 @@ export function SiteFeedbackPopup() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleDismiss()}>
-      <DialogContent className="sm:max-w-md border-0 bg-gradient-to-br from-background via-background to-muted/30 shadow-2xl">
+      <DialogContent className="sm:max-w-md border-0 bg-gradient-to-br from-background via-background to-muted/30 shadow-2xl [&>button]:hidden">
         <button
           onClick={handleDismiss}
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none"
+          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none z-50"
           data-testid="button-feedback-close"
         >
           <X className="h-4 w-4" />
