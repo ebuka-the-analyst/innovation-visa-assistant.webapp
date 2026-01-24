@@ -28,7 +28,8 @@ const PAGE_CONTEXTS = {
 };
 
 function getPageContext(pathname: string) {
-  if (pathname === "/" || pathname === "") {
+  // Only /v2 uses global context - everything else (including "/") uses UK context
+  if (pathname === "/v2") {
     return PAGE_CONTEXTS.global;
   }
   return PAGE_CONTEXTS.uk;
@@ -39,7 +40,7 @@ export default function ChatBot() {
   const pageContext = getPageContext(location);
   
   const [isOpen, setIsOpen] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(true); // Start minimized by default
   const [currentContext, setCurrentContext] = useState(location);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -202,7 +203,7 @@ export default function ChatBot() {
           >
             <div className="flex justify-between items-center gap-2">
               <h3 className="font-bold text-sm sm:text-base md:text-lg truncate flex items-center gap-2">
-                {location === "/" && <Globe className="w-4 h-4" />}
+                {location === "/v2" && <Globe className="w-4 h-4" />}
                 {pageContext.title}
               </h3>
               <button

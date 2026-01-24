@@ -27,7 +27,7 @@ const feedbackOptions: FeedbackOption[] = [
 
 export default function FloatingFeedback() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(true); // Start minimized by default
   const [feedbackType, setFeedbackType] = useState<FeedbackType | null>(null);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
