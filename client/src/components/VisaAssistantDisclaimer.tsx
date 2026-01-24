@@ -2,7 +2,13 @@ import { X } from 'lucide-react';
 import { useState } from 'react';
 
 export default function VisaAssistantDisclaimer() {
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    // Check sessionStorage - stay dismissed for the session
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('disclaimer_dismissed') === 'true';
+    }
+    return false;
+  });
 
   if (isDismissed) return null;
 
@@ -23,7 +29,10 @@ export default function VisaAssistantDisclaimer() {
           </a>
         </span>
         <button
-          onClick={() => setIsDismissed(true)}
+          onClick={() => {
+            setIsDismissed(true);
+            sessionStorage.setItem('disclaimer_dismissed', 'true');
+          }}
           className="text-black dark:text-white hover:opacity-75 transition-opacity flex-shrink-0 relative overflow-visible"
           data-testid="button-dismiss-disclaimer"
         >

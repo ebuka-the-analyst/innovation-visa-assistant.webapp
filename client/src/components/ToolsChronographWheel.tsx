@@ -17,7 +17,13 @@ export default function ToolsChronographWheel() {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isHoveringUp, setIsHoveringUp] = useState(false);
   const [isHoveringDown, setIsHoveringDown] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(true); // Start in small mode by default
+  const [isDismissed, setIsDismissed] = useState(() => {
+    // Check sessionStorage - start half open unless user dismissed in this session
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('tools_widget_dismissed') === 'true';
+    }
+    return false;
+  });
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const [isHoveringWidget, setIsHoveringWidget] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -166,6 +172,7 @@ export default function ToolsChronographWheel() {
       // Swipe left detected (min 50px horizontal, less vertical movement)
       if (deltaX > 50 && deltaY < 30) {
         setIsDismissed(true);
+        sessionStorage.setItem('tools_widget_dismissed', 'true');
         setShowSwipeHint(false);
       }
     };
@@ -347,7 +354,10 @@ export default function ToolsChronographWheel() {
           {/* Dismiss X button - attached to the right, like chat icon */}
           {!isDismissed && (
             <button
-              onClick={() => setIsDismissed(true)}
+              onClick={() => {
+                setIsDismissed(true);
+                sessionStorage.setItem('tools_widget_dismissed', 'true');
+              }}
               className="w-5 h-6 bg-red-500 hover:bg-red-600 rounded-r-full flex items-center justify-center text-white transition-colors shadow-sm"
               data-testid="button-dismiss-tools"
               aria-label="Minimize tools button"

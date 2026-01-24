@@ -40,7 +40,13 @@ export default function ChatBot() {
   const pageContext = getPageContext(location);
   
   const [isOpen, setIsOpen] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(true); // Start minimized by default
+  const [isDismissed, setIsDismissed] = useState(() => {
+    // Check sessionStorage - start half open unless user dismissed in this session
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('chatbot_dismissed') === 'true';
+    }
+    return false;
+  });
   const [currentContext, setCurrentContext] = useState(location);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -128,7 +134,10 @@ export default function ChatBot() {
           {/* Dismiss X button - attached to the left */}
           {!isDismissed && !isOpen && (
             <button
-              onClick={() => setIsDismissed(true)}
+              onClick={() => {
+                setIsDismissed(true);
+                sessionStorage.setItem('chatbot_dismissed', 'true');
+              }}
               className="w-5 h-6 bg-red-500 hover:bg-red-600 rounded-l-full flex items-center justify-center text-white transition-colors shadow-sm"
               data-testid="button-dismiss-chat"
               aria-label="Minimize chat button"
