@@ -344,7 +344,18 @@ export default function ToolsChronographWheel() {
             <Icons.Wrench className="w-4 h-4" />
           </button>
           
-                  </div>
+          {/* Dismiss X button - attached to the right, like chat icon */}
+          {!isDismissed && (
+            <button
+              onClick={() => setIsDismissed(true)}
+              className="w-5 h-6 bg-red-500 hover:bg-red-600 rounded-r-full flex items-center justify-center text-white transition-colors shadow-sm"
+              data-testid="button-dismiss-tools"
+              aria-label="Minimize tools button"
+            >
+              <Icons.X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
       </div>,
       document.body
     );
