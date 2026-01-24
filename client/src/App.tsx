@@ -217,8 +217,8 @@ function HeaderNavTabs() {
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={GlobalLanding} />
-      <Route path="/v2" component={GlobalLanding} /> {/* Hidden V2 preview - same as current landing */}
+      <Route path="/" component={Home} /> {/* UK landing as main homepage until global launch */}
+      <Route path="/v2" component={GlobalLanding} /> {/* Hidden V2 - Global landing with globe for future launch */}
       <Route path="/uk" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
@@ -455,7 +455,7 @@ function CountryWidgets() {
   const [location] = useLocation();
   // Only show ToolsChronographWheel on country pages, not on global landing
   // ChatBot shows everywhere
-  const isGlobalLanding = location === "/" || location === "/v2";
+  const isGlobalLanding = location === "/v2"; // Only /v2 is global landing now
   
   return (
     <Suspense fallback={null}>
