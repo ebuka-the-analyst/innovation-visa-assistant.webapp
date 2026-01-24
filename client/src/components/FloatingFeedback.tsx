@@ -135,11 +135,9 @@ export default function FloatingFeedback() {
             {/* Main feedback button */}
             <button
               onClick={() => {
-                if (isDismissed) {
-                  setIsDismissed(false);
-                } else {
-                  setIsOpen(!isOpen);
-                }
+                // Always open the feedback form directly when clicked (whether dismissed or not)
+                setIsOpen(true);
+                setIsDismissed(false);
               }}
               className={`rounded-lg shadow-lg hover-elevate transition-all duration-300 flex flex-col items-center justify-center text-white ${
                 isDismissed ? "w-8 h-8 rounded-full" : "w-[37px] h-[35px]"

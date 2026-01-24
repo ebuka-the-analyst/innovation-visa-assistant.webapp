@@ -17,7 +17,7 @@ export default function ToolsChronographWheel() {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isHoveringUp, setIsHoveringUp] = useState(false);
   const [isHoveringDown, setIsHoveringDown] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(true); // Start in small mode by default
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const [isHoveringWidget, setIsHoveringWidget] = useState(false);
   const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -329,12 +329,10 @@ export default function ToolsChronographWheel() {
           {/* Main 100+ Tools button */}
           <button
             onClick={() => {
-              if (isDismissed) {
-                setIsDismissed(false);
-              } else {
-                recordActivity();
-                setIsMinimized(false);
-              }
+              // Always open the widget directly when clicked (whether dismissed or not)
+              recordActivity();
+              setIsMinimized(false);
+              setIsDismissed(false);
             }}
             className={`rounded-lg shadow-lg hover-elevate transition-all duration-300 flex flex-col items-center justify-center text-white ${
               isDismissed ? "w-8 h-8 rounded-full" : "w-[37px] h-[35px]"

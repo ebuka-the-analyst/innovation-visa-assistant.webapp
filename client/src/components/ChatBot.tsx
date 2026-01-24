@@ -140,11 +140,9 @@ export default function ChatBot() {
           {/* Main chat button */}
           <button
             onClick={() => {
-              if (isDismissed) {
-                setIsDismissed(false);
-              } else {
-                setIsOpen(!isOpen);
-              }
+              // Always open the chat directly when clicked (whether dismissed or not)
+              setIsOpen(true);
+              setIsDismissed(false);
             }}
             className={`rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center text-white ${
               isDismissed 
