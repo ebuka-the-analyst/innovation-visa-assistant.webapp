@@ -96,16 +96,16 @@ export default function NewsTicker() {
 
         {/* Horizontal scrolling ticker */}
         <div className="flex-1 overflow-hidden" ref={tickerRef}>
-          <div className="flex gap-4 pb-2" style={{ minWidth: "max-content" }}>
+          <div className="flex items-center gap-4" style={{ minWidth: "max-content" }}>
             {/* First pass */}
             {newsItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleArticleClick(item)}
-                className="flex-shrink-0 w-80 px-3 py-1 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline text-left whitespace-normal line-clamp-2"
+                className="flex-shrink-0 w-80 px-3 py-1 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline text-left flex items-start gap-1"
               >
-                <span className="text-primary/60 mr-2">•</span>
-                {item.title}
+                <span className="text-primary/60 flex-shrink-0 leading-4">•</span>
+                <span className="line-clamp-2 leading-4">{item.title}</span>
               </button>
             ))}
             {/* Duplicate for seamless loop */}
@@ -113,10 +113,10 @@ export default function NewsTicker() {
               <button
                 key={`dup-${item.id}`}
                 onClick={() => handleArticleClick(item)}
-                className="flex-shrink-0 w-80 px-3 py-1 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline text-left whitespace-normal line-clamp-2"
+                className="flex-shrink-0 w-80 px-3 py-1 text-xs text-foreground hover:text-primary transition-colors cursor-pointer hover:underline text-left flex items-start gap-1"
               >
-                <span className="text-primary/60 mr-2">•</span>
-                {item.title}
+                <span className="text-primary/60 flex-shrink-0 leading-4">•</span>
+                <span className="line-clamp-2 leading-4">{item.title}</span>
               </button>
             ))}
           </div>
