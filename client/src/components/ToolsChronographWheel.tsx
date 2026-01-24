@@ -578,7 +578,9 @@ export default function ToolsChronographWheel() {
             onMouseEnter={() => setIsHoveringUp(true)}
             onMouseLeave={() => setIsHoveringUp(false)}
           >
-            <Icons.ChevronUp className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-orange-500 ${isHoveringUp ? "" : "animate-bounce"}`} style={{ animationDelay: "0s" }} />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-orange-500 flex items-center justify-center">
+              <Icons.ChevronUp className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white ${isHoveringUp ? "" : "animate-bounce"}`} style={{ animationDelay: "0s" }} />
+            </div>
           </div>
           <div
             className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
@@ -589,7 +591,9 @@ export default function ToolsChronographWheel() {
             onMouseEnter={() => setIsHoveringDown(true)}
             onMouseLeave={() => setIsHoveringDown(false)}
           >
-            <Icons.ChevronDown className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-orange-500 ${isHoveringDown ? "" : "animate-bounce"}`} style={{ animationDelay: "0.2s" }} />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-orange-500 flex items-center justify-center">
+              <Icons.ChevronDown className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white ${isHoveringDown ? "" : "animate-bounce"}`} style={{ animationDelay: "0.2s" }} />
+            </div>
           </div>
 
           {/* Featured Tool Box - Centered Behind */}
@@ -606,9 +610,11 @@ export default function ToolsChronographWheel() {
               style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
             >
               <div className="flex flex-col gap-1 sm:gap-2">
-                <p className="text-sm sm:text-base md:text-2xl text-black font-black">
-                  {String(selectedToolIdx + 1).padStart(3, "0")}
-                </p>
+                {selectedToolIdx + 1 > 1 && (
+                  <p className="text-sm sm:text-base md:text-2xl text-black font-black">
+                    {String(selectedToolIdx + 1).padStart(3, "0")}
+                  </p>
+                )}
                 <h2 className="text-2xl sm:text-xl font-black text-black leading-tight w-full">
                   {selectedTool.name.toUpperCase()}
                 </h2>
