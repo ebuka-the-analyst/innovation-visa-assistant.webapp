@@ -130,7 +130,7 @@ export default function FloatingFeedback() {
       {createPortal(
         <div className="fixed left-4 bottom-4 z-[9999]">
           <div className={`flex items-center gap-0.5 transition-all duration-300 ${
-            isDismissed ? "scale-50 hover:scale-75" : ""
+            isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : "opacity-50 hover:opacity-100"
           }`}>
             {/* Main feedback button */}
             <button

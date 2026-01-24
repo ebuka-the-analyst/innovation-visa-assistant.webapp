@@ -32,7 +32,7 @@ export default function HeroSection() {
 
             <h1 className="font-serif text-2xl md:text-3xl font-bold text-foreground leading-tight">
               Get Your UK Innovator Founder Visa{" "}
-              <span className="bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
+              <span className="text-[#005EB8]">
                 Approved
               </span>
             </h1>

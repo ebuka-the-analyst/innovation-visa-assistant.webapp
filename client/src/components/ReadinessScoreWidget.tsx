@@ -49,7 +49,7 @@ export default function ReadinessScoreWidget({
             </filter>
             <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#005EB8" />
-              <stop offset="100%" stopColor="#41B6E6" />
+              <stop offset="100%" stopColor="#005EB8" />
             </linearGradient>
           </defs>
 
@@ -90,7 +90,7 @@ export default function ReadinessScoreWidget({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
               Readiness
             </p>
-            <p className="text-xl font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
+            <p className="text-xl font-bold text-[#005EB8]">
               {animatedScore}%
             </p>
           </div>
@@ -107,7 +107,7 @@ export default function ReadinessScoreWidget({
           </div>
           <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all duration-1000"
+              className="h-full bg-[#005EB8] rounded-full transition-all duration-1000"
               style={{ width: `${innovationScore}%` }}
             />
           </div>
@@ -121,7 +121,7 @@ export default function ReadinessScoreWidget({
           </div>
           <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-chart-3 to-chart-3/60 rounded-full transition-all duration-1000"
+              className="h-full bg-[#eab308] rounded-full transition-all duration-1000"
               style={{ width: `${viabilityScore}%` }}
             />
           </div>
@@ -135,7 +135,7 @@ export default function ReadinessScoreWidget({
           </div>
           <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-chart-2 to-chart-2/60 rounded-full transition-all duration-1000"
+              className="h-full bg-[#059669] rounded-full transition-all duration-1000"
               style={{ width: `${scalabilityScore}%` }}
             />
           </div>
