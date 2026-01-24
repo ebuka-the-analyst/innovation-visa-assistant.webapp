@@ -105,21 +105,21 @@ export const VERIFIED_ENDORSING_BODIES = {
     source: "Home Office list of approved endorsing bodies",
     lastVerified: "January 2026"
   },
-  startupVisaCoUK: {
-    officialName: "StartUp Visa.Co.UK",
-    website: "https://www.startupvisa.co.uk",
+  ukEndorsingServices: {
+    officialName: "UK Endorsing Services (UKES)",
+    website: "https://www.ukesapp.co.uk",
     status: "Active endorsing body",
-    description: "StartUp Visa.Co.UK is an approved endorsing body providing endorsement services for the UK Innovator Founder Visa.",
+    description: "UK Endorsing Services (UKES) is a unique consortium of 6 UK businesses providing endorsement services for the UK Innovator Founder Visa.",
     contactMethod: "Via their website application process",
     source: "Home Office list of approved endorsing bodies",
     lastVerified: "January 2026"
   },
-  primus: {
-    officialName: "Primus",
-    website: "https://www.primusendorsement.com",
-    status: "Active endorsing body",
-    description: "Primus is an approved endorsing body providing endorsement services for the UK Innovator Founder Visa.",
-    contactMethod: "Via their website application process",
+  globalEntrepreneursProgramme: {
+    officialName: "Global Entrepreneurs Programme (GEP)",
+    website: "https://www.great.gov.uk/global-entrepreneurs-programme/",
+    status: "Active endorsing body - INVITATION ONLY",
+    description: "The Global Entrepreneurs Programme is run by the Department for Business & Trade. It is invitation-only and endorses founders who have been specifically invited to participate in the programme.",
+    contactMethod: "Invitation only - cannot apply directly",
     source: "Home Office list of approved endorsing bodies",
     lastVerified: "January 2026"
   }
@@ -265,14 +265,14 @@ export const SEO_DATA = {
 // ============================================================================
 
 export function getVerifiedEndorsingBodyInfo(): string {
-  return `As of January 2026, there are 4 approved endorsing bodies for the UK Innovator Founder Visa:
+  return `As of January 2026, there are 4 approved endorsing bodies for the UK Innovator Founder Visa (source: GOV.UK, last updated October 2024):
 
-1. **Envestors Limited** (envestors.co.uk) - FCA-regulated investment platform providing endorsement services
-2. **Innovator International Limited** (innovatorinternational.com) - Approved endorsing body
-3. **StartUp Visa.Co.UK** (startupvisa.co.uk) - Approved endorsing body
-4. **Primus** (primusendorsement.com) - Approved endorsing body
+1. **Envestors Limited** (envestors.co.uk) - Established commercial endorsing service
+2. **Innovator International Limited** (innovatorinternational.com) - Operates UK Growth Accelerator program, supported 700+ entrepreneurs since 2019
+3. **UK Endorsing Services (UKES)** (ukesapp.co.uk) - Unique consortium of 6 UK businesses with combined expertise
+4. **Global Entrepreneurs Programme (GEP)** (great.gov.uk) - Government programme run by Dept for Business & Trade - **INVITATION ONLY**, cannot apply directly
 
-Contact each endorsing body directly via their website to learn about their specific process, fees, and requirements. Endorsement typically costs around £1,000 for initial assessment plus £500 per contact point meeting, though this varies by body.`;
+Contact each endorsing body directly via their website to learn about their specific process, fees, and requirements. Endorsement typically costs around £1,000 for initial assessment plus £500 per contact point meeting, though this varies by body. Note: GEP only endorses founders who have been specifically invited to participate.`;
 }
 
 export function getStandardDisclaimer(): string {

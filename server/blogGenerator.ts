@@ -57,13 +57,13 @@ VISA DURATION:
 ENGLISH LANGUAGE:
 - Minimum level: ${VERIFIED_ELIGIBILITY.englishLanguage.minimumLevel} CEFR
 
-ENDORSING BODIES (ONLY these 4 exist - Home Office approved):
+ENDORSING BODIES (ONLY these 4 exist - Home Office approved as of October 2024):
 1. Envestors Limited - envestors.co.uk
 2. Innovator International Limited - innovatorinternational.com  
-3. StartUp Visa.Co.UK - startupvisa.co.uk
-4. Primus - primusendorsement.com
+3. UK Endorsing Services (UKES) - ukesapp.co.uk
+4. Global Entrepreneurs Programme (GEP) - government programme, INVITATION ONLY
 
-IMPORTANT: Do NOT describe what "type" of applicant each endorsing body prefers - this information is not publicly verified.
+IMPORTANT: Do NOT describe what "type" of applicant each endorsing body prefers - this information is not publicly verified. Note that GEP is invitation-only and cannot be applied to directly.
 
 ENDORSEMENT CRITERIA (Source: GOV.UK):
 - Innovation: Must be genuinely new or significantly different

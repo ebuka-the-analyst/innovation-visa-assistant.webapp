@@ -315,12 +315,12 @@ function validateEndorsingBodyClaims(content: string): ValidationIssue[] {
       desc: "Making unverified claims about Innovator International's specialty"
     },
     {
-      pattern: /startup\s*visa\.?co\.?uk[^.]*(?:ideal|best|suited|specializ|novice|new)/gi,
-      desc: "Making unverified claims about StartUp Visa.Co.UK's specialty"
+      pattern: /ukes[^.]*(?:ideal|best|suited|specializ|novice|new)/gi,
+      desc: "Making unverified claims about UKES's specialty"
     },
     {
-      pattern: /primus[^.]*(?:ideal|best|suited|specializ|disrupt|strategic)/gi,
-      desc: "Making unverified claims about Primus's specialty"
+      pattern: /global\s*entrepreneurs?\s*programme[^.]*(?:ideal|best|suited|specializ)/gi,
+      desc: "Making unverified claims about GEP's specialty"
     },
     {
       pattern: /(?:success rate|approval rate|acceptance rate)[^.]*(\d+)\s*%/gi,
@@ -342,7 +342,7 @@ function validateEndorsingBodyClaims(content: string): ValidationIssue[] {
   });
   
   // Check for endorsing bodies that don't exist
-  const validBodies = ['envestors', 'innovator international', 'startup visa', 'primus'];
+  const validBodies = ['envestors', 'innovator international', 'ukes', 'uk endorsing services', 'global entrepreneurs programme', 'gep'];
   const endorsingBodyMention = /(?:endorsing bod(?:y|ies)|endorsed by)[^.]*?(?:called|named|by|through|with)\s*([A-Za-z\s]+?)(?:\.|,|and)/gi;
   
   let match;
@@ -355,7 +355,7 @@ function validateEndorsingBodyClaims(content: string): ValidationIssue[] {
         category: "invalid_endorsing_body",
         description: `Unknown endorsing body mentioned: "${match[1]}". Only 4 approved bodies exist.`,
         location: match[0],
-        fix: "Only reference: Envestors, Innovator International, StartUp Visa.Co.UK, or Primus"
+        fix: "Only reference: Envestors, Innovator International, UK Endorsing Services (UKES), or Global Entrepreneurs Programme (GEP - invitation only)"
       });
     }
   }
