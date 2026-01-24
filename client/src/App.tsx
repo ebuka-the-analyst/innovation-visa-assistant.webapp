@@ -103,6 +103,7 @@ const News = lazy(() => import("@/pages/news"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
+const BlogDashboard = lazy(() => import("@/pages/admin/BlogDashboard"));
 const PartnerDashboard = lazy(() => import("@/pages/partner-dashboard"));
 
 // OMNI - Advanced AI Features
@@ -252,6 +253,7 @@ function Router() {
       <Route path="/handoff" component={Handoff} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/blog" component={BlogDashboard} />
       <Route path="/partner-dashboard" component={PartnerDashboard} />
       
       {/* OMNI Routes */}

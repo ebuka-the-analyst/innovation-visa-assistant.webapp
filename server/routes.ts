@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits, eventLog, apiLatencyLog } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, blogGenerationQueue, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits, eventLog, apiLatencyLog } from "@shared/schema";
 import { generateBlogPost, generateMultiplePosts, generateBackdatedPosts } from "./blogGenerator";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -15074,6 +15074,265 @@ Return a JSON object with:
     } catch (error) {
       console.error("Realtime analytics error:", error);
       res.status(500).json({ error: "Failed to fetch realtime analytics" });
+    }
+  });
+
+  // =============================================================================
+  // ADMIN BLOG DASHBOARD ROUTES - PhD-Level Comprehensive Blog Management
+  // =============================================================================
+
+  // Get blog statistics
+  app.get("/api/admin/blog/stats", requireAdmin, async (req, res) => {
+    try {
+      // Get counts by status
+      const statusCounts = await db.execute(sql`
+        SELECT 
+          post_status,
+          COUNT(*) as count
+        FROM blog_posts
+        GROUP BY post_status
+      `);
+
+      // Get totals
+      const totals = await db.execute(sql`
+        SELECT 
+          COUNT(*) as total,
+          COALESCE(SUM(views), 0) as total_views,
+          COALESCE(AVG(views), 0) as avg_views,
+          COALESCE(SUM(likes), 0) as total_likes,
+          COALESCE(SUM(shares), 0) as total_shares
+        FROM blog_posts
+      `);
+
+      const stats = totals.rows[0] as any;
+      const counts: Record<string, number> = {};
+      (statusCounts.rows as any[]).forEach(row => {
+        counts[row.post_status || 'published'] = parseInt(row.count);
+      });
+
+      // Top performing posts
+      const topPerforming = await db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.isPublished, true))
+        .orderBy(desc(blogPosts.views))
+        .limit(5);
+
+      // Recent posts
+      const recentPosts = await db
+        .select()
+        .from(blogPosts)
+        .orderBy(desc(blogPosts.createdAt))
+        .limit(10);
+
+      // Scheduled posts
+      const scheduledPosts = await db
+        .select()
+        .from(blogPosts)
+        .where(eq(blogPosts.postStatus, 'scheduled'))
+        .orderBy(blogPosts.scheduledFor)
+        .limit(10);
+
+      // Queue items
+      const upcomingQueue = await db
+        .select()
+        .from(blogGenerationQueue)
+        .orderBy(blogGenerationQueue.targetDate)
+        .limit(10);
+
+      res.json({
+        total: parseInt(stats.total) || 0,
+        published: counts['published'] || 0,
+        scheduled: counts['scheduled'] || 0,
+        draft: counts['draft'] || 0,
+        archived: counts['archived'] || 0,
+        totalViews: parseInt(stats.total_views) || 0,
+        avgViews: parseFloat(stats.avg_views) || 0,
+        totalLikes: parseInt(stats.total_likes) || 0,
+        totalShares: parseInt(stats.total_shares) || 0,
+        topPerforming,
+        recentPosts,
+        scheduledPosts,
+        upcomingQueue,
+      });
+    } catch (error) {
+      console.error("Blog stats error:", error);
+      res.status(500).json({ error: "Failed to fetch blog stats" });
+    }
+  });
+
+  // Get all posts with filtering
+  app.get("/api/admin/blog/posts", requireAdmin, async (req, res) => {
+    try {
+      const allPosts = await db
+        .select()
+        .from(blogPosts)
+        .orderBy(desc(blogPosts.createdAt));
+      res.json(allPosts);
+    } catch (error) {
+      console.error("Blog posts error:", error);
+      res.status(500).json({ error: "Failed to fetch posts" });
+    }
+  });
+
+  // Get generation queue
+  app.get("/api/admin/blog/queue", requireAdmin, async (req, res) => {
+    try {
+      const queue = await db
+        .select()
+        .from(blogGenerationQueue)
+        .orderBy(desc(blogGenerationQueue.targetDate))
+        .limit(20);
+      res.json(queue);
+    } catch (error) {
+      console.error("Blog queue error:", error);
+      res.status(500).json({ error: "Failed to fetch queue" });
+    }
+  });
+
+  // Generate tomorrow's post
+  app.post("/api/admin/blog/generate-next", requireAdmin, async (req, res) => {
+    try {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(6, 0, 0, 0); // Schedule for 6am tomorrow
+
+      // Generate the post using existing blog generator
+      const generatedPost = await generateBlogPost();
+
+      if (generatedPost) {
+        // Update the post to be scheduled
+        await db.update(blogPosts)
+          .set({
+            postStatus: 'scheduled',
+            scheduledFor: tomorrow,
+            generatedAt: new Date(),
+            isAutoGenerated: true,
+            isPublished: false,
+          })
+          .where(eq(blogPosts.id, generatedPost.id));
+
+        // Add to queue for tracking
+        await db.insert(blogGenerationQueue).values({
+          targetDate: tomorrow,
+          topic: generatedPost.title,
+          category: generatedPost.category,
+          status: 'generated',
+          generatedPostId: generatedPost.id,
+          generationCompletedAt: new Date(),
+        });
+
+        res.json({ success: true, post: generatedPost });
+      } else {
+        res.status(500).json({ error: "Failed to generate post" });
+      }
+    } catch (error) {
+      console.error("Generate next post error:", error);
+      res.status(500).json({ error: "Failed to generate post" });
+    }
+  });
+
+  // Update a post
+  app.patch("/api/admin/blog/posts/:postId", requireAdmin, async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const updates = req.body;
+
+      // If content is being edited, save original
+      if (updates.content) {
+        const existingPost = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.id, postId))
+          .limit(1);
+
+        if (existingPost[0] && !existingPost[0].originalContent) {
+          updates.originalContent = existingPost[0].content;
+        }
+      }
+
+      await db.update(blogPosts)
+        .set({
+          ...updates,
+          updatedAt: new Date(),
+        })
+        .where(eq(blogPosts.id, postId));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Update post error:", error);
+      res.status(500).json({ error: "Failed to update post" });
+    }
+  });
+
+  // Publish a post immediately
+  app.post("/api/admin/blog/posts/:postId/publish", requireAdmin, async (req, res) => {
+    try {
+      const { postId } = req.params;
+
+      await db.update(blogPosts)
+        .set({
+          postStatus: 'published',
+          isPublished: true,
+          publishedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(blogPosts.id, postId));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Publish post error:", error);
+      res.status(500).json({ error: "Failed to publish post" });
+    }
+  });
+
+  // Delete a post
+  app.delete("/api/admin/blog/posts/:postId", requireAdmin, async (req, res) => {
+    try {
+      const { postId } = req.params;
+
+      await db.delete(blogPosts).where(eq(blogPosts.id, postId));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete post error:", error);
+      res.status(500).json({ error: "Failed to delete post" });
+    }
+  });
+
+  // Auto-publish scheduled posts (call this via cron or scheduler)
+  app.post("/api/admin/blog/auto-publish", requireAdmin, async (req, res) => {
+    try {
+      const now = new Date();
+
+      // Find posts scheduled for before now that aren't published yet
+      const scheduledPosts = await db
+        .select()
+        .from(blogPosts)
+        .where(
+          and(
+            eq(blogPosts.postStatus, 'scheduled'),
+            sql`${blogPosts.scheduledFor} <= ${now}`
+          )
+        );
+
+      let publishedCount = 0;
+      for (const post of scheduledPosts) {
+        await db.update(blogPosts)
+          .set({
+            postStatus: 'published',
+            isPublished: true,
+            publishedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(blogPosts.id, post.id));
+        publishedCount++;
+      }
+
+      res.json({ success: true, publishedCount });
+    } catch (error) {
+      console.error("Auto-publish error:", error);
+      res.status(500).json({ error: "Failed to auto-publish" });
     }
   });
 
