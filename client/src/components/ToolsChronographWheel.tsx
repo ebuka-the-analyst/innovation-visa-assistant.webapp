@@ -378,30 +378,7 @@ export default function ToolsChronographWheel() {
         }}
       >
 
-      {/* Expand/Collapse Indicator - Only shown when expanded */}
-      {!isMinimized && (
-        <div className="absolute -top-28 left-0 right-0 flex items-center justify-center">
-          <button
-            onClick={() => {
-              recordActivity();
-              setIsMinimized(!isMinimized);
-            }}
-            className="font-medium text-center w-8 h-8 rounded-full hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center shadow-sm"
-            data-testid="button-toggle-indicator"
-            aria-label="Minimize Tools Hub"
-            style={{ 
-              color: "#ffffff", 
-              backgroundColor: "#dc2626",
-              fontSize: "1.25rem", 
-              lineHeight: "1",
-              border: "none"
-            }}
-          >
-            −
-          </button>
-        </div>
-      )}
-
+      
       {/* Outer metal bezel effect - Transparent like chat icon */}
       <div 
         className="relative flex flex-col cursor-pointer" 
