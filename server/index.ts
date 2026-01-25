@@ -384,7 +384,63 @@ app.use((req, res, next) => {
   next();
 });
 
+// Auto-migration for production database schema updates
+async function runAutoMigrations() {
+  try {
+    log("[MIGRATION] Checking for required schema updates...");
+    
+    // Check and add post_status column to blog_posts if missing
+    const postStatusExists = await db.execute(sql`
+      SELECT column_name FROM information_schema.columns 
+      WHERE table_name = 'blog_posts' AND column_name = 'post_status'
+    `);
+    
+    if (postStatusExists.rows.length === 0) {
+      log("[MIGRATION] Adding post_status column to blog_posts...");
+      await db.execute(sql`
+        ALTER TABLE blog_posts 
+        ADD COLUMN IF NOT EXISTS post_status VARCHAR(20) NOT NULL DEFAULT 'published'
+      `);
+      log("[MIGRATION] post_status column added successfully");
+    }
+    
+    // Check and create blog_generation_queue table if missing
+    const queueTableExists = await db.execute(sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'blog_generation_queue'
+      ) as table_exists
+    `);
+    
+    if (!queueTableExists.rows[0]?.table_exists) {
+      log("[MIGRATION] Creating blog_generation_queue table...");
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS blog_generation_queue (
+          id SERIAL PRIMARY KEY,
+          topic VARCHAR(500) NOT NULL,
+          category VARCHAR(100),
+          priority INTEGER NOT NULL DEFAULT 0,
+          status VARCHAR(20) NOT NULL DEFAULT 'pending',
+          scheduled_for TIMESTAMP,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          processed_at TIMESTAMP,
+          result_post_id INTEGER,
+          error_message TEXT
+        )
+      `);
+      log("[MIGRATION] blog_generation_queue table created successfully");
+    }
+    
+    log("[MIGRATION] Schema check complete");
+  } catch (error) {
+    console.error("[MIGRATION] Auto-migration error:", error);
+  }
+}
+
 (async () => {
+  // Run auto-migrations before starting server
+  await runAutoMigrations();
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

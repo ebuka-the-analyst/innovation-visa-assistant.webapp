@@ -1,0 +1,260 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+a4606b82
+Active
+
+Jan 25, 2026, 1:45 AM GMT
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+  length: 111,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '28',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+Blog queue error: error: relation "blog_generation_queue" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:27664:21 {
+  length: 121,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '160',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+1:52:36 AM [express] POST /api/activity/session 200 in 201ms :: {"sessionId":"f8531a0f-ff9b-4e9f-bca…
+1:52:36 AM [express] GET /api/admin/blog/stats 500 in 28ms :: {"error":"Failed to fetch blog stats"}
+1:52:36 AM [express] GET /api/admin/blog/queue 500 in 29ms :: {"error":"Failed to fetch queue"}
+1:52:36 AM [express] POST /api/activity/session 200 in 48ms :: {"sessionId":"e2b3b806-e1f7-43e7-9852…
+1:52:36 AM [express] GET /api/admin/blog/posts/all/ 200 in 41ms
+[2026-01-25T01:52:36.760Z] POST /api/activity/page-view
+1:52:36 AM [express] POST /api/activity/page-view 200 in 34ms :: {"pageViewId":"b94dd33b-8448-4bfc-a…
+[2026-01-25T01:52:40.330Z] POST /api/admin/blog/generate-next
+[Blog Generator] Generation attempt 1/1
+[2026-01-25T01:52:45.530Z] POST /api/performance/metrics
+1:52:45 AM [express] POST /api/performance/metrics 204 in 10ms
+[2026-01-25T01:52:47.364Z] POST /api/activity/session/end
+[2026-01-25T01:52:47.523Z] GET /api/auth/user
+[2026-01-25T01:52:47.524Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:52:47 AM [express] GET /api/auth/user 200 in 28ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+1:52:47 AM [express] POST /api/activity/session/end 200 in 184ms :: {"success":true}
+1:52:47 AM [express] POST /api/activity/session 200 in 50ms :: {"sessionId":"05f5d29b-a0bc-4fe1-847e…
+[2026-01-25T01:52:47.760Z] POST /api/activity/page-view
+1:52:47 AM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"5ac24e0f-801d-4b67-9…
+[2026-01-25T01:52:49.688Z] POST /api/activity/session/end
+1:52:49 AM [express] POST /api/activity/session/end 200 in 9ms :: {"success":true}
+[2026-01-25T01:52:50.285Z] GET /api/auth/user
+[2026-01-25T01:52:50.286Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:52:50 AM [express] GET /api/auth/user 200 in 11ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+1:52:50 AM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"436e891c-dd6c-4a72-8024…
+1:52:50 AM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"078ae084-d1ab-44ba-9…
+[2026-01-25T01:52:50.483Z] POST /api/activity/page-view
+[2026-01-25T01:52:50.983Z] POST /api/activity/session/end
+1:52:50 AM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+Critical Issues: 0
+Warnings: 0
+Suggestions: 0
+    at async file:///app/dist/index.js:27678:9 {
+  length: 136,
+  code: '42703',
+  severity: 'ERROR',
+  detail: undefined,
+  hint: undefined,
+  column: undefined,
+  position: '46',
+============================================================
+  internalPosition: undefined,
+Generate next post error: error: column "post_status" of relation "blog_posts" does not exist
+  internalQuery: undefined,
+    at /app/node_modules/pg-pool/index.js:45:11
+[Blog Generator] Validation Report:
+  where: undefined,
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+============================================================
+  schema: undefined,
+BLOG CONTENT VALIDATION REPORT
+============================================================
+  table: undefined,
+Overall Score: 100/100
+Status: PASSED
+  dataType: undefined,
+  constraint: undefined,
+  file: 'analyze.c',
+  line: '2528',
+  routine: 'transformUpdateTargetList'
+}
+1:52:53 AM [express] POST /api/admin/blog/generate-next 500 in 13446ms :: {"error":"Failed to genera…
+[2026-01-25T01:53:13.240Z] POST /api/activity/session
+1:53:13 AM [express] POST /api/activity/session 200 in 202ms :: {"sessionId":"f643cd31-64c9-4c31-968…
+[2026-01-25T01:53:13.630Z] POST /api/activity/page-view
+1:53:13 AM [express] POST /api/activity/page-view 200 in 14ms :: {"pageViewId":"b5e0d076-8d26-4671-8…
+[2026-01-25T01:53:15.094Z] GET /api/admin/blog/posts
+[2026-01-25T01:53:14.914Z] GET /api/admin/blog/stats
+Blog stats error: error: column "post_status" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Blog posts error: error: column "post_status" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at async file:///app/dist/index.js:27608:28 {
+  length: 111,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '28',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  file: 'parse_relation.c',
+  dataType: undefined,
+  constraint: undefined,
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+1:53:14 AM [express] GET /api/admin/blog/stats 500 in 10ms :: {"error":"Failed to fetch blog stats"}
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:27655:24 {
+  length: 112,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '222',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+1:53:15 AM [express] GET /api/admin/blog/posts 500 in 25ms :: {"error":"Failed to fetch posts"}
+[2026-01-25T01:53:15.578Z] POST /api/activity/session/end
+[2026-01-25T01:53:15.733Z] GET /api/auth/user
+[2026-01-25T01:53:15.733Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:53:15 AM [express] GET /api/auth/user 200 in 31ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+1:53:15 AM [express] POST /api/activity/session/end 200 in 187ms :: {"success":true}
+1:53:15 AM [express] POST /api/activity/session 200 in 54ms :: {"sessionId":"0bb77029-e9a9-4278-a914…
+[2026-01-25T01:53:15.975Z] POST /api/activity/page-view
+1:53:15 AM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"669302dd-8510-4bad-8…
+[2026-01-25T01:53:21.858Z] GET /api/auth/user
+[2026-01-25T01:53:21.864Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:53:21 AM [express] GET /api/auth/user 200 in 10ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+1:53:21 AM [express] POST /api/activity/session 200 in 15ms :: {"sessionId":"738a1bb7-1f77-427f-a366…
+[2026-01-25T01:53:22.062Z] POST /api/activity/page-view
+1:53:22 AM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"3282e65e-3728-4b12-8…
+[2026-01-25T01:53:23.028Z] GET /api/auth/user
+[2026-01-25T01:53:23.030Z] POST /api/activity/session/end
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:53:23 AM [express] GET /api/auth/user 200 in 14ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-25T01:53:23.184Z] POST /api/activity/session
+1:53:23 AM [express] POST /api/activity/session/end 200 in 187ms :: {"success":true}
+1:53:23 AM [express] POST /api/activity/session 200 in 37ms :: {"sessionId":"bd9cf0ff-4b56-4f5e-93d3…
+[2026-01-25T01:53:23.406Z] POST /api/activity/page-view
+1:53:23 AM [express] POST /api/activity/page-view 200 in 12ms :: {"pageViewId":"8a631799-dd18-4419-9…
+[2026-01-25T01:53:25.158Z] POST /api/activity/session/end
+[2026-01-25T01:53:25.168Z] POST /api/activity/session/end
+1:53:25 AM [express] POST /api/activity/session/end 200 in 9ms :: {"success":true}
+1:53:25 AM [express] POST /api/activity/session/end 200 in 7ms :: {"success":true}
+[2026-01-25T01:53:25.198Z] POST /api/activity/session
+1:53:25 AM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"719d5af3-eb3f-4886-9b0a…
+[2026-01-25T01:53:25.397Z] POST /api/activity/page-view
+1:53:25 AM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"3764e539-5090-420a-8…
+[2026-01-25T01:53:26.748Z] POST /api/activity/session/end
+1:53:26 AM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+[2026-01-25T01:53:42.957Z] POST /api/activity/session
+1:53:43 AM [express] POST /api/activity/session 200 in 209ms :: {"sessionId":"86b1a6ef-faa9-4bc5-a2d…
+[2026-01-25T01:53:43.353Z] POST /api/activity/page-view
+1:53:43 AM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"fe16a1db-fc72-4a13-8…
+[2026-01-25T01:53:49.201Z] POST /api/activity/session/end
+1:53:49 AM [express] POST /api/activity/session/end 200 in 9ms :: {"success":true}
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:53:52 AM [express] GET /api/auth/user 200 in 7ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c","…
+[2026-01-25T01:53:52.690Z] GET /api/auth/user
+[2026-01-25T01:53:52.851Z] POST /api/activity/session
+1:53:53 AM [express] POST /api/activity/session 200 in 192ms :: {"sessionId":"25ae161a-4ddb-4c0e-ab1…
+[2026-01-25T01:53:53.228Z] POST /api/activity/page-view
+1:53:53 AM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"dc29a4b9-5c6b-4a14-a…
+[2026-01-25T01:53:54.015Z] POST /api/activity/session/end
+1:53:54 AM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
