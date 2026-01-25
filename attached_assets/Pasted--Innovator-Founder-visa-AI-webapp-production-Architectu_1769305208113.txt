@@ -1,0 +1,159 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+3bcad065
+Active
+
+Jan 25, 2026, 12:55 AM GMT
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+  detail: undefined,
+  hint: undefined,
+  internalPosition: undefined,
+  position: '160',
+  internalQuery: undefined,
+  table: undefined,
+  where: undefined,
+  schema: undefined,
+  column: undefined,
+  dataType: undefined,
+1:38:58 AM [express] POST /api/activity/page-view 200 in 192ms :: {"pageViewId":"64c6b3f5-6e57-4936-…
+  constraint: undefined,
+1:38:58 AM [express] GET /api/partner/status 200 in 199ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-01-25T01:38:58.467Z] GET /api/admin/blog/posts/all/
+[2026-01-25T01:38:58.468Z] GET /api/admin/blog/queue
+[2026-01-25T01:38:58.469Z] GET /api/admin/blog/stats
+Blog queue error: error: relation "blog_generation_queue" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:27664:21 {
+  length: 121,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+1:38:58 AM [express] GET /api/admin/blog/posts/all/ 200 in 19ms
+1:38:58 AM [express] GET /api/admin/blog/queue 500 in 19ms :: {"error":"Failed to fetch queue"}
+Blog stats error: error: column "post_status" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/dist/index.js:27608:28 {
+  length: 111,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '28',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+1:38:58 AM [express] GET /api/admin/blog/stats 500 in 36ms :: {"error":"Failed to fetch blog stats"}
+[2026-01-25T01:39:07.687Z] POST /api/admin/blog/generate-next
+[Blog Generator] Generation attempt 1/1
+[2026-01-25T01:39:13.358Z] POST /api/activity/session
+1:39:13 AM [express] POST /api/activity/session 200 in 18ms :: {"sessionId":"80ff619c-dc85-4820-87d2…
+[Blog Generator] Validation Report:
+============================================================
+ISSUES FOUND:
+BLOG CONTENT VALIDATION REPORT
+----------------------------------------
+============================================================
+1. [CRITICAL] endorsing_body_claims
+Overall Score: 75/100
+   Making unverified claims about Innovator International's specialty
+Status: FAILED - REQUIRES CORRECTION
+   Location: "Innovator International Limited</strong>, <strong>UK Endorsing Services (UKES)</strong>, and the <strong>Global"
+   Fix: Remove specific claims about endorsing body preferences or rates. State only verified facts from their official websites.
+Critical Issues: 1
+Warnings: 0
+============================================================
+[Blog Generator] 1 issues remain after auto-correction. Proceeding with corrected content.
+Suggestions: 0
+[Blog Generator] Content published with 1 warnings after max retries. Manual review recommended.
+Generate next post error: error: column "post_status" of relation "blog_posts" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/dist/index.js:27678:9 {
+  length: 136,
+  dataType: undefined,
+  severity: 'ERROR',
+  code: '42703',
+  constraint: undefined,
+  detail: undefined,
+  hint: undefined,
+  file: 'analyze.c',
+  position: '46',
+  internalPosition: undefined,
+  line: '2528',
+  internalQuery: undefined,
+  where: undefined,
+  routine: 'transformUpdateTargetList'
+  schema: undefined,
+}
+  table: undefined,
+1:39:24 AM [express] POST /api/admin/blog/generate-next 500 in 16737ms :: {"error":"Failed to genera…
+  column: undefined,
+[2026-01-25T01:39:33.270Z] POST /api/activity/session/end
+1:39:33 AM [express] POST /api/activity/session/end 200 in 184ms :: {"success":true}
+[2026-01-25T01:39:34.797Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+1:39:34 AM [express] GET /api/auth/user 200 in 13ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-25T01:39:34.952Z] POST /api/activity/session
+1:39:34 AM [express] POST /api/activity/session 200 in 30ms :: {"sessionId":"c3f59d8f-fc9d-4aab-a18a…
+[2026-01-25T01:39:35.174Z] POST /api/activity/page-view
+1:39:35 AM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"ce16d957-4a4d-489b-b…
+[2026-01-25T01:39:36.808Z] POST /api/activity/session/end
+1:39:36 AM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
