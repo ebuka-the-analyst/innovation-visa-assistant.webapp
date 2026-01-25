@@ -1,0 +1,137 @@
+BENEDICT (EBUKA) UMEH
+
+Full-Stack Developer | AI Integration | Web Performance & Analytics
+
+Leeds, UK | +44 7493 363351 | benedict.umeh@stackrise.co.uk | LinkedIn: linkedin.com/in/ebukaumeh
+
+================================================================================
+PROFESSIONAL SUMMARY
+================================================================================
+
+Full-Stack Developer and AI Integrator with 7+ years' experience delivering high-performance web applications and data-driven digital products. Strong in React/TypeScript, Node.js, and modern delivery practices (performance, SEO, analytics, secure deployments). Proven in building client/admin portals, dashboards, and automation-driven experiences that improve conversion and reduce operational workload. MSc Data Science with a practical, outcome-focused engineering style.
+
+================================================================================
+CORE SKILLS
+================================================================================
+
+Engineering: React, TypeScript, Node.js/Express, PostgreSQL, MongoDB, REST APIs, Webhooks, Git/GitHub, CI/CD, DNS/SSL
+
+AI & Data: OpenAI/Gemini/Claude APIs, function calling/tool use, chatbots, analytics instrumentation, GA4, Power BI, SQL, Python
+
+UX & Frontend: Tailwind CSS, Shadcn UI, Framer Motion, Figma, accessibility (WCAG), mobile-first, i18n
+
+Delivery: stakeholder collaboration, documentation, QA mindset, performance tuning, SEO foundations, GDPR awareness
+
+================================================================================
+EXPERIENCE
+================================================================================
+
+CTO / Lead Developer — Stackrise | Leeds, UK | Jun 2025 – Present
+--------------------------------------------------------------------------------
+Lead technical delivery for a UK digital consultancy, shipping production-ready web solutions for SMEs and startups.
+
+- Built secure admin/client portals (RBAC, team management, project tracking, support ticketing, document handling).
+- Delivered AI-powered assistants using GPT models with structured tool workflows to automate lead capture, scheduling, and CRM-style interactions.
+- Implemented Stripe payments, invoice tracking, automated reminders, and transactional email flows.
+- Standardised analytics using GA4 and Clarity to improve funnel visibility and conversion decision-making.
+
+Tech: React, TypeScript, Node.js/Express, PostgreSQL, OpenAI API, Stripe, Tailwind, Shadcn UI, GA4/Clarity
+
+
+Web & Performance Analyst — Qalhata Technologies | Cheshire, UK | Nov 2024 – Present
+--------------------------------------------------------------------------------
+- Owned corporate web presence measurement and reporting; produced GA4 insights and stakeholder-friendly performance updates.
+- Built reporting outputs and dashboards to track visibility, engagement, and lead journey performance.
+
+Tech: GA4, Power BI, analytics reporting, SEO/performance monitoring
+
+
+Web Developer — Deskstones Ltd | Leeds, UK | Feb 2024 – Present
+--------------------------------------------------------------------------------
+- Led website rebuild focused on speed, SEO structure, and conversion uplift through improved UX and tracking.
+- Optimised page performance and site structure to strengthen discoverability and user flow.
+
+
+Web Developer / Analyst — Eden Health Care Private | Leeds, UK | 2023 – 2024
+--------------------------------------------------------------------------------
+- Built and maintained healthcare web presence and lightweight internal tools supporting scheduling/admin workflows.
+- Improved operational efficiency by reducing manual steps and increasing clarity of reporting views.
+
+Tech: web tooling, workflow improvement, reporting
+
+
+================================================================================
+SELECTED PROJECTS (PORTFOLIO / CONTRACT / INDEPENDENT)
+================================================================================
+
+Afro Grocers — Multilingual E-commerce Concept Build
+--------------------------------------------------------------------------------
+E-commerce build with multilingual support and AI-assisted customer support features.
+Tech: React, TypeScript, Node.js, PostgreSQL, OpenAI Vision/LLM, i18n
+
+
+GCA GLOBAL COMPETENCY ASSESSMENT
+--------------------------------------------------------------------------------
+Led development of AI-powered global certification platform for professionals across 32 countries.
+Tech: React 18, TypeScript, Node.js/Express, PostgreSQL, OpenAI API, Stripe.
+
+
+UK INNOVATOR FOUNDER VISA ASSISTANT — AI-Powered Immigration SaaS Platform
+--------------------------------------------------------------------------------
+Built a comprehensive AI-powered platform guiding applicants through the UK Innovator Founder Visa process with 100% compliance accuracy and expert-level guidance.
+
+- Architected 109 production-ready tools across 8 categories (Compliance, Documentation, Team, Business, Financial, Growth, Innovation, Defence) each valued at £80-100.
+- Developed multi-agent AI chatbot system with 4 specialised agents (Nova-Innovation, Sterling-Finance, Atlas-Growth, Sage-Compliance) providing contextual visa guidance.
+- Implemented GPT-4o Vision document extraction for passport/endorsement letter analysis with automated data population.
+- Built Business Plan Generator with visual PDF/Word exports featuring embedded Recharts graphs and OISC-compliant formatting.
+- Created PhD-level automated blog system with AI content generation, validation pipeline, and scheduled publishing (6pm generation, 6am publication).
+- Developed Innovation Score analysis tool with real-time scoring and improvement recommendations.
+- Implemented 5-tier subscription system (Free to Ultimate) with Stripe payments, Google OAuth, and role-based access control.
+- Built enterprise admin dashboard with real-time analytics, user management, error logging, and activity heatmaps.
+- Integrated GA4 for conversion tracking and user journey analytics.
+
+Tech: React 18, TypeScript, Node.js/Express, PostgreSQL, Drizzle ORM, OpenAI GPT-4o, Google Gemini API, Stripe, AWS S3, Recharts, Framer Motion, Tailwind CSS, Shadcn UI.
+
+
+F-RADAR — Agentic Geospatial Renewable Feasibility Platform
+--------------------------------------------------------------------------------
+React/Node/Postgres platform integrating UK public data sources and interactive mapping to support site screening and reporting.
+Tech: React, TypeScript, Node.js, PostgreSQL, OpenAI API, Leaflet/React-Leaflet
+
+
+AutoInsight — Hotel Analytics Platform
+--------------------------------------------------------------------------------
+KPI-rich hospitality analytics dashboard with AI assistant for insight retrieval and reporting support.
+Tech: React, TypeScript, Node.js, PostgreSQL, Recharts, LLM API
+
+(Credentials for testing purpose only) Email: emma@demohotel.com Password: demo1234
+
+
+AI Virtual Hotel Concierge
+--------------------------------------------------------------------------------
+Digital concierge assistant handling high-volume FAQ-style interactions and guided journeys.
+Tech: React, Node.js, MongoDB, LLM API
+
+
+NHS Procurement Dashboard (Excel/Analytics Portfolio)
+--------------------------------------------------------------------------------
+Procurement performance analysis and dashboarding approach (KPIs, segmentation, trends, exceptions).
+Tech: Excel, SQL (where applicable), visual analytics
+
+
+================================================================================
+EDUCATION
+================================================================================
+
+MSc: Data Science — Leeds Beckett University (2023)
+BSc: Information Technology & Business Information Systems — Middlesex University (2017)
+Advanced Diploma in Software Engineering — Aptech Computer Institute (2016)
+
+================================================================================
+CERTIFICATIONS
+================================================================================
+
+- Programming Fundamentals
+- IBM Data Analyst
+- Google Data Analytics
+- SEO Specialist
