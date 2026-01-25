@@ -215,7 +215,7 @@ const menuGroups = [
   {
     label: "Content Management",
     items: [
-      { id: "content-blog", label: "Blog Dashboard", icon: FileText, badge: null, link: "/admin/blog" },
+      { id: "content-blog", label: "Blog Dashboard", icon: FileText, badge: null },
       { id: "content-seo", label: "SEO Analytics", icon: TrendingUp, badge: null },
     ]
   },
@@ -345,34 +345,18 @@ export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUs
                   <SidebarMenu className="gap-0">
                     {group.items.map((item) => (
                       <SidebarMenuItem key={item.id} className="py-0">
-                        {'link' in item && item.link ? (
-                          <SidebarMenuButton
-                            asChild
-                            className="w-full justify-between h-7 min-h-0 px-2"
-                            data-testid={`sidebar-${item.id}`}
-                          >
-                            <Link href={item.link}>
-                              <div className="flex items-center gap-1.5">
-                                <item.icon className="h-3.5 w-3.5" />
-                                <span className="text-xs">{item.label}</span>
-                              </div>
-                              {getBadgeContent(item.badge)}
-                            </Link>
-                          </SidebarMenuButton>
-                        ) : (
-                          <SidebarMenuButton
-                            onClick={() => onSectionChange(item.id)}
-                            isActive={activeSection === item.id}
-                            className="w-full justify-between h-7 min-h-0 px-2"
-                            data-testid={`sidebar-${item.id}`}
-                          >
-                            <div className="flex items-center gap-1.5">
-                              <item.icon className="h-3.5 w-3.5" />
-                              <span className="text-xs">{item.label}</span>
-                            </div>
-                            {getBadgeContent(item.badge)}
-                          </SidebarMenuButton>
-                        )}
+                        <SidebarMenuButton
+                          onClick={() => onSectionChange(item.id)}
+                          isActive={activeSection === item.id}
+                          className="w-full justify-between h-7 min-h-0 px-2"
+                          data-testid={`sidebar-${item.id}`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <item.icon className="h-3.5 w-3.5" />
+                            <span className="text-xs">{item.label}</span>
+                          </div>
+                          {getBadgeContent(item.badge)}
+                        </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
                   </SidebarMenu>

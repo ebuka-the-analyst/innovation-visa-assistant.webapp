@@ -1537,6 +1537,52 @@ export default function AdminDashboard() {
     refetchInterval: 30000,
   });
 
+  // Blog Stats query
+  const { data: blogStats, isLoading: blogStatsLoading, refetch: refetchBlogStats } = useQuery<{
+    counts: { published: number; draft: number; scheduled: number; total: number };
+    recentPosts: Array<{
+      id: string;
+      title: string;
+      postStatus: string;
+      publishedAt: string | null;
+      scheduledFor: string | null;
+      views: number;
+    }>;
+    scheduledPosts: Array<{
+      id: string;
+      title: string;
+      scheduledFor: string;
+    }>;
+    topPosts: Array<{
+      id: string;
+      title: string;
+      views: number;
+      category: string;
+    }>;
+  }>({
+    queryKey: ['/api/admin/blog/stats'],
+    enabled: !!user?.isAdmin && activeSection === 'content-blog',
+    refetchInterval: 30000,
+  });
+
+  // Blog Posts query
+  const { data: blogPosts, isLoading: blogPostsLoading, refetch: refetchBlogPosts } = useQuery<Array<{
+    id: string;
+    title: string;
+    slug: string;
+    excerpt: string;
+    category: string;
+    postStatus: string;
+    publishedAt: string | null;
+    scheduledFor: string | null;
+    views: number;
+    author: string;
+  }>>({
+    queryKey: ['/api/admin/blog/posts'],
+    enabled: !!user?.isAdmin && activeSection === 'content-blog',
+    refetchInterval: 30000,
+  });
+
   // Refresh countdown timer
   useEffect(() => {
     if (overviewData?.lastUpdated) {
@@ -2295,6 +2341,8 @@ export default function AdminDashboard() {
       'comms-notifications': 'Notification Center',
       'feedback-overview': 'Feedback Analytics',
       'feedback-responses': 'All Feedback Responses',
+      'content-blog': 'Blog Dashboard',
+      'content-seo': 'SEO Analytics',
       'referrals-overview': 'Referral Programme Overview',
       'referrals-codes': 'Referral Codes Management',
       'referrals-rewards': 'Pending Rewards',
@@ -10100,6 +10148,257 @@ export default function AdminDashboard() {
                             </CardContent>
                           </Card>
                         </>
+                      )}
+                    </motion.div>
+                  </div>
+                )}
+
+                {/* Content Management Section */}
+                {activeSection.startsWith('content-') && (
+                  <div className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="space-y-6"
+                    >
+                      {/* Blog Dashboard */}
+                      {activeSection === 'content-blog' && (
+                        <>
+                          {blogStatsLoading ? (
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                              {[1,2,3,4].map(i => <Skeleton key={i} className="h-32" />)}
+                            </div>
+                          ) : (
+                            <>
+                              {/* Blog Stats Cards */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
+                                  <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                      <FileText className="h-4 w-4" />
+                                      Total Posts
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="text-2xl font-bold text-blue-500">
+                                      {blogStats?.counts?.total || 0}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
+                                  <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                      <CheckCircle className="h-4 w-4" />
+                                      Published
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="text-2xl font-bold text-emerald-500">
+                                      {blogStats?.counts?.published || 0}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+                                  <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                      <Clock className="h-4 w-4" />
+                                      Scheduled
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="text-2xl font-bold text-amber-500">
+                                      {blogStats?.counts?.scheduled || 0}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card className="bg-gradient-to-br from-gray-500/10 to-gray-600/5 border-gray-500/20">
+                                  <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                      <Edit className="h-4 w-4" />
+                                      Drafts
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="text-2xl font-bold text-gray-500">
+                                      {blogStats?.counts?.draft || 0}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+
+                              {/* Blog Posts Table */}
+                              <Card>
+                                <CardHeader className="flex flex-row items-center justify-between gap-4">
+                                  <div>
+                                    <CardTitle className="flex items-center gap-2">
+                                      <FileText className="h-5 w-5 text-[#005EB8]" />
+                                      Blog Posts
+                                    </CardTitle>
+                                    <CardDescription>Manage your blog content</CardDescription>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        refetchBlogStats();
+                                        refetchBlogPosts();
+                                      }}
+                                      data-testid="button-refresh-blog"
+                                    >
+                                      <RefreshCw className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      className="bg-[#005EB8] hover:bg-[#004494]"
+                                      onClick={() => window.open('/admin/blog', '_blank')}
+                                      data-testid="button-open-blog-editor"
+                                    >
+                                      Open Full Editor
+                                    </Button>
+                                  </div>
+                                </CardHeader>
+                                <CardContent>
+                                  {blogPostsLoading ? (
+                                    <Skeleton className="h-64 w-full" />
+                                  ) : (
+                                    <ScrollArea className="h-[400px]">
+                                      <Table>
+                                        <TableHeader>
+                                          <TableRow>
+                                            <TableHead>Title</TableHead>
+                                            <TableHead>Category</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Views</TableHead>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Actions</TableHead>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {blogPosts?.slice(0, 20).map((post) => (
+                                            <TableRow key={post.id}>
+                                              <TableCell className="font-medium max-w-[300px] truncate">
+                                                {post.title}
+                                              </TableCell>
+                                              <TableCell>
+                                                <Badge variant="outline">{post.category}</Badge>
+                                              </TableCell>
+                                              <TableCell>
+                                                <Badge className={
+                                                  post.postStatus === 'published' ? 'bg-emerald-500/20 text-emerald-600' :
+                                                  post.postStatus === 'scheduled' ? 'bg-amber-500/20 text-amber-600' :
+                                                  'bg-gray-500/20 text-gray-600'
+                                                }>
+                                                  {post.postStatus}
+                                                </Badge>
+                                              </TableCell>
+                                              <TableCell>{post.views || 0}</TableCell>
+                                              <TableCell className="text-muted-foreground text-sm">
+                                                {post.publishedAt ? format(new Date(post.publishedAt), 'dd MMM yyyy') :
+                                                 post.scheduledFor ? format(new Date(post.scheduledFor), 'dd MMM yyyy') :
+                                                 '-'}
+                                              </TableCell>
+                                              <TableCell>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+                                                  data-testid={`button-view-post-${post.id}`}
+                                                >
+                                                  <Eye className="h-4 w-4" />
+                                                </Button>
+                                              </TableCell>
+                                            </TableRow>
+                                          ))}
+                                          {(!blogPosts || blogPosts.length === 0) && (
+                                            <TableRow>
+                                              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                                No blog posts yet
+                                              </TableCell>
+                                            </TableRow>
+                                          )}
+                                        </TableBody>
+                                      </Table>
+                                    </ScrollArea>
+                                  )}
+                                </CardContent>
+                              </Card>
+
+                              {/* Scheduled & Top Posts */}
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="flex items-center gap-2 text-lg">
+                                      <Clock className="h-5 w-5 text-amber-500" />
+                                      Upcoming Scheduled
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="space-y-3">
+                                      {blogStats?.scheduledPosts?.slice(0, 5).map((post) => (
+                                        <div key={post.id} className="flex items-center justify-between p-3 rounded-lg border">
+                                          <span className="font-medium truncate max-w-[200px]">{post.title}</span>
+                                          <Badge variant="outline" className="text-amber-600">
+                                            {format(new Date(post.scheduledFor), 'dd MMM')}
+                                          </Badge>
+                                        </div>
+                                      ))}
+                                      {(!blogStats?.scheduledPosts || blogStats.scheduledPosts.length === 0) && (
+                                        <p className="text-center text-muted-foreground py-4">No scheduled posts</p>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="flex items-center gap-2 text-lg">
+                                      <TrendingUp className="h-5 w-5 text-emerald-500" />
+                                      Top Performing
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="space-y-3">
+                                      {blogStats?.topPosts?.slice(0, 5).map((post) => (
+                                        <div key={post.id} className="flex items-center justify-between p-3 rounded-lg border">
+                                          <span className="font-medium truncate max-w-[200px]">{post.title}</span>
+                                          <Badge className="bg-emerald-500/20 text-emerald-600">
+                                            {post.views} views
+                                          </Badge>
+                                        </div>
+                                      ))}
+                                      {(!blogStats?.topPosts || blogStats.topPosts.length === 0) && (
+                                        <p className="text-center text-muted-foreground py-4">No posts with views yet</p>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </>
+                          )}
+                        </>
+                      )}
+
+                      {/* SEO Analytics Placeholder */}
+                      {activeSection === 'content-seo' && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <TrendingUp className="h-5 w-5 text-[#005EB8]" />
+                              SEO Analytics
+                            </CardTitle>
+                            <CardDescription>Search engine optimization metrics</CardDescription>
+                          </CardHeader>
+                          <CardContent className="py-12 text-center text-muted-foreground">
+                            <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                            <p>SEO Analytics coming soon</p>
+                            <p className="text-sm mt-2">Track keyword rankings, organic traffic, and search visibility</p>
+                          </CardContent>
+                        </Card>
                       )}
                     </motion.div>
                   </div>
