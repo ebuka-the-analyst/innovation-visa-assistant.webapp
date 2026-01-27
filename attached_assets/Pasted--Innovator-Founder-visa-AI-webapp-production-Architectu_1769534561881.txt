@@ -1,0 +1,153 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+5
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+39b2ed93
+Active
+
+Jan 27, 2026, 5:18 PM GMT
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+You reached the start of the range
+Jan 27, 2026, 5:18 PM
+Starting Container
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+theme_id column added or already exists
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+theme_font column added or already exists
+theme_applied_at column added or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+text_elements column added or already exists
+cover_designs table created or already exists
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+blog_posts table created or already exists
+blog_posts indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[Blog] Image route configured (local + unique + S3 fallback)
+5:21:46 PM [express] [MIGRATION] Checking for required schema updates...
+[DB] Auto-migration: logo_element column ensured
+[DB] Auto-migration: blog image URLs updated to object storage
+5:21:46 PM [express] [MIGRATION] Schema check complete
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+5:21:46 PM [express] serving on port 8080
+5:21:46 PM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: Assigned unique images to 10 blog posts
+[2026-01-27T17:21:49.822Z] POST /api/activity/session
+[2026-01-27T17:21:49.840Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:21:50 PM [express] GET /api/auth/user 200 in 259ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+5:21:50 PM [express] POST /api/activity/session 200 in 273ms :: {"sessionId":"ea5b32ac-5532-4553-b20…
+[2026-01-27T17:21:50.709Z] POST /api/activity/page-view
+5:21:50 PM [express] POST /api/activity/page-view 200 in 41ms :: {"pageViewId":"df9631fd-a16d-4333-9…
+[2026-01-27T17:21:51.487Z] POST /api/activity/session/end
+[2026-01-27T17:21:52.059Z] GET /api/partner/status
+[2026-01-27T17:21:52.063Z] POST /api/activity/session
+5:21:52 PM [express] GET /api/partner/status 200 in 18ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-01-27T17:21:51.498Z] GET /theme-selection
+[2026-01-27T17:21:52.214Z] POST /api/activity/session
+5:21:51 PM [express] POST /api/activity/session/end 200 in 33ms :: {"success":true}
+[2026-01-27T17:21:52.235Z] GET /api/premium-covers/purchased
+[2026-01-27T17:21:51.750Z] GET /attached_assets/official_logo.webp
+[2026-01-27T17:21:51.835Z] GET /api/auth/user
+[2026-01-27T17:21:52.265Z] GET /api/cover-designs/latest
+5:21:52 PM [express] POST /api/activity/session 200 in 211ms :: {"sessionId":"0cdacc96-f537-4f03-9e5…
+5:21:52 PM [express] POST /api/activity/session 200 in 61ms :: {"sessionId":"2cdfa759-48cd-4020-a3f1…
+5:21:52 PM [express] GET /api/premium-covers/purchased 200 in 46ms :: {"templateIds":[]}
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:21:51 PM [express] GET /api/auth/user 200 in 14ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+5:21:52 PM [express] POST /api/activity/page-view 200 in 26ms :: {"pageViewId":"c2b6ad4f-1690-4b96-b…
+[2026-01-27T17:21:52.580Z] POST /api/activity/page-view
+5:21:53 PM [express] GET /api/cover-designs/latest 200 in 1207ms :: {"id":"714c4df7-5964-4a79-b98f-0…
+  column: 'discount_applied',
+  severity: 'ERROR',
+  dataType: undefined,
+  code: '23502',
+  constraint: undefined,
+  detail: 'Failing row contains (e105c3ac-128f-4361-8dc0-d3c708102f72, 62271284-6b8b-471a-88ea-5b658911d9a7, 6783e1ea-78f5-49c9-b67d-97dce58d193c, null, null, null, null, null, 2026-01-27 17:22:15.253219).',
+  file: 'execMain.c',
+  hint: undefined,
+  position: undefined,
+[2026-01-27T17:22:15.005Z] POST /api/premium-covers/purchase
+  internalPosition: undefined,
+Premium cover purchase error: error: null value in column "discount_applied" of relation "promo_redemptions" violates not-null constraint
+  internalQuery: undefined,
+    at /app/node_modules/pg-pool/index.js:45:11
+  where: undefined,
+  schema: 'public',
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+  table: 'promo_redemptions',
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.createPromoRedemption (file:///app/dist/index.js:3328:26)
+    at async file:///app/dist/index.js:16125:9 {
+  line: '2022',
+  length: 404,
+  routine: 'ExecConstraints'
+}
+5:22:15 PM [express] POST /api/premium-covers/purchase 500 in 259ms :: {"error":"null value in colum…
+[2026-01-27T17:22:20.512Z] POST /api/activity/session/end
+5:22:20 PM [express] POST /api/activity/session/end 200 in 192ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway

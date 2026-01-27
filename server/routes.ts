@@ -798,9 +798,11 @@ Respond ONLY with valid JSON in this exact format:
         await storage.createPromoRedemption({
           promoCodeId: validatedPromo.id,
           userId: user.id,
-          type: 'premium_cover',
-          referenceId: purchase.id,
-          discountAmount: discountApplied,
+          orderId: purchase.id,
+          discountApplied: discountApplied,
+          originalAmount: 500, // £5 in pence
+          finalAmount: 0,
+          appliedAt: 'checkout',
         });
 
         // Increment promo usage
