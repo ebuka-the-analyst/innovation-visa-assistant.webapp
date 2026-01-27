@@ -431,6 +431,34 @@ async function runAutoMigrations() {
       log("[MIGRATION] blog_generation_queue table created successfully");
     }
     
+    // Auto-create FREECOVER100 promo code if it doesn't exist
+    const promoCodeExists = await db.execute(sql`
+      SELECT id FROM promo_codes WHERE code = 'FREECOVER100'
+    `);
+    
+    if (promoCodeExists.rows.length === 0) {
+      log("[MIGRATION] Creating FREECOVER100 promo code...");
+      // Get the first admin user to use as created_by
+      const adminUser = await db.execute(sql`
+        SELECT id FROM users WHERE role = 'admin' OR email LIKE '%@%' ORDER BY created_at ASC LIMIT 1
+      `);
+      
+      if (adminUser.rows.length > 0) {
+        const userId = adminUser.rows[0].id;
+        await db.execute(sql`
+          INSERT INTO promo_codes (
+            code, name, description, discount_type, discount_value,
+            status, valid_from, current_uses, created_by
+          ) VALUES (
+            'FREECOVER100', 'Owner Free Cover Access',
+            '100% discount for premium covers - owner/admin use', 'percentage', 100,
+            'active', NOW(), 0, ${userId}
+          )
+        `);
+        log("[MIGRATION] FREECOVER100 promo code created successfully");
+      }
+    }
+    
     log("[MIGRATION] Schema check complete");
   } catch (error) {
     console.error("[MIGRATION] Auto-migration error:", error);
