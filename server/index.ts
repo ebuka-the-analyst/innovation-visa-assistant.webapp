@@ -438,13 +438,13 @@ async function runAutoMigrations() {
     
     if (promoCodeExists.rows.length === 0) {
       log("[MIGRATION] Creating FREECOVER100 promo code...");
-      // Get the first admin user to use as created_by
-      const adminUser = await db.execute(sql`
-        SELECT id FROM users WHERE role = 'admin' OR email LIKE '%@%' ORDER BY created_at ASC LIMIT 1
+      // Get the first user to use as created_by
+      const firstUser = await db.execute(sql`
+        SELECT id FROM users ORDER BY created_at ASC LIMIT 1
       `);
       
-      if (adminUser.rows.length > 0) {
-        const userId = adminUser.rows[0].id;
+      if (firstUser.rows.length > 0) {
+        const userId = firstUser.rows[0].id;
         await db.execute(sql`
           INSERT INTO promo_codes (
             code, name, description, discount_type, discount_value,

@@ -1,0 +1,151 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+4
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+6ccbd0f7
+Active
+
+Jan 27, 2026, 5:00 PM GMT
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+You reached the start of the range
+Jan 27, 2026, 5:00 PM
+Starting Container
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+theme_id column added or already exists
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+theme_font column added or already exists
+theme_applied_at column added or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+text_elements column added or already exists
+cover_designs table created or already exists
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+blog_posts table created or already exists
+blog_posts indexes created or already exist
+Connecting to database...
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[Blog] Image route configured (local + unique + S3 fallback)
+5:04:16 PM [express] [MIGRATION] Checking for required schema updates...
+[DB] Auto-migration: logo_element column ensured
+[DB] Auto-migration: blog image URLs updated to object storage
+5:04:17 PM [express] [MIGRATION] Creating FREECOVER100 promo code...
+[MIGRATION] Auto-migration error: error: column "role" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async runAutoMigrations2 (file:///app/dist/index.js:28183:25)
+    at async file:///app/dist/index.js:28207:3 {
+  length: 104,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '37',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+5:04:17 PM [express] serving on port 8080
+5:04:17 PM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: Assigned unique images to 10 blog posts
+[2026-01-27T17:06:35.963Z] GET /api/auth/user
+[2026-01-27T17:06:35.970Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:06:36 PM [express] GET /api/auth/user 200 in 251ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+5:06:36 PM [express] POST /api/activity/session 200 in 239ms :: {"sessionId":"844bd326-54ce-41a3-bfd…
+[2026-01-27T17:06:36.404Z] POST /api/activity/page-view
+5:06:36 PM [express] POST /api/activity/page-view 200 in 36ms :: {"pageViewId":"1c2f37ea-f9c0-4bc2-8…
+[2026-01-27T17:06:48.714Z] POST /api/premium-covers/purchase
+5:06:48 PM [express] POST /api/premium-covers/purchase 400 in 215ms :: {"error":"Invalid promo code"}
+[2026-01-27T17:06:51.800Z] POST /api/activity/session/end
+[2026-01-27T17:06:51.967Z] GET /theme-selection
+5:06:51 PM [express] POST /api/activity/session/end 200 in 191ms :: {"success":true}
+[2026-01-27T17:06:52.665Z] POST /api/activity/session
+[2026-01-27T17:06:52.222Z] GET /attached_assets/official_logo.webp
+[2026-01-27T17:06:52.284Z] GET /api/auth/user
+[2026-01-27T17:06:52.505Z] GET /api/partner/status
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+[2026-01-27T17:06:52.507Z] POST /api/activity/session
+5:06:52 PM [express] GET /api/auth/user 200 in 17ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+5:06:52 PM [express] GET /api/partner/status 200 in 14ms :: {"isPartner":false,"promoCodeCount":0}
+5:06:52 PM [express] POST /api/activity/session 200 in 33ms :: {"sessionId":"c96e531f-18a6-4d70-a309…
+[2026-01-27T17:06:52.675Z] GET /api/premium-covers/purchased
+5:06:52 PM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"e984b0c8-b279-4dc9-b206…
+[2026-01-27T17:06:52.697Z] GET /api/cover-designs/latest
+5:06:52 PM [express] GET /api/premium-covers/purchased 200 in 29ms :: {"templateIds":[]}
+[2026-01-27T17:06:52.829Z] POST /api/activity/page-view
+5:06:52 PM [express] POST /api/activity/page-view 200 in 17ms :: {"pageViewId":"f351c913-3031-4f7a-9…
+5:06:53 PM [express] GET /api/cover-designs/latest 200 in 1251ms :: {"id":"714c4df7-5964-4a79-b98f-0…
+[2026-01-27T17:06:59.666Z] POST /api/premium-covers/purchase
+5:06:59 PM [express] POST /api/premium-covers/purchase 400 in 190ms :: {"error":"Invalid promo code"}
+[2026-01-27T17:07:03.752Z] POST /api/activity/session/end
+5:07:03 PM [express] POST /api/activity/session/end 200 in 191ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
