@@ -112,6 +112,8 @@ export default function ThemeSelectionPage() {
   const [styleFilter, setStyleFilter] = useState<CoverStyle | null>(null);
   const [selectedCover, setSelectedCover] = useState<UnifiedCover | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [promoCode, setPromoCode] = useState<string>("");
+  const [showPromoInput, setShowPromoInput] = useState<string | null>(null);
 
   const { data: user } = useQuery<{ firstName?: string; lastName?: string; email?: string }>({
     queryKey: ['/api/auth/user'],
@@ -853,42 +855,89 @@ export default function ThemeSelectionPage() {
                     </div>
                     
                     {!isFree && !isPurchased && premium && (
-                      <Button
-                        size="sm"
-                        className="w-full mt-2 bg-amber-500 hover:bg-amber-600 text-white"
-                        disabled={isPurchasing}
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          setIsPurchasing(true);
-                          try {
-                            const response = await apiRequest('POST', '/api/premium-covers/purchase', { 
-                              templateId: premium.id, 
-                              templateName: premium.name 
-                            });
-                            const data = await response.json();
-                            if (data.url) {
-                              window.location.href = data.url;
-                            } else {
-                              throw new Error(data.error || 'Failed to create checkout');
-                            }
-                          } catch (error: any) {
-                            toast({
-                              title: "Purchase Failed",
-                              description: error?.message || "Could not start purchase. Please try again.",
-                              variant: "destructive",
-                            });
-                            setIsPurchasing(false);
-                          }
-                        }}
-                        data-testid={`button-purchase-${cover.id}`}
-                      >
-                        {isPurchasing ? (
-                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                      <div className="mt-2 space-y-2">
+                        {showPromoInput === cover.id ? (
+                          <div className="flex gap-1">
+                            <Input
+                              type="text"
+                              placeholder="Promo code"
+                              value={promoCode}
+                              onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                              className="h-8 text-xs"
+                              data-testid={`input-promo-${cover.id}`}
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 px-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowPromoInput(null);
+                                setPromoCode("");
+                              }}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
                         ) : (
-                          <ShoppingCart className="w-3 h-3 mr-1" />
+                          <button
+                            className="text-xs text-muted-foreground hover:text-foreground underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowPromoInput(cover.id);
+                            }}
+                            data-testid={`button-add-promo-${cover.id}`}
+                          >
+                            Have a promo code?
+                          </button>
                         )}
-                        Buy £{cover.price}
-                      </Button>
+                        <Button
+                          size="sm"
+                          className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+                          disabled={isPurchasing}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            setIsPurchasing(true);
+                            try {
+                              const response = await apiRequest('POST', '/api/premium-covers/purchase', { 
+                                templateId: premium.id, 
+                                templateName: premium.name,
+                                promoCode: showPromoInput === cover.id ? promoCode : undefined
+                              });
+                              const data = await response.json();
+                              if (data.free && data.success) {
+                                refetchPurchased();
+                                toast({
+                                  title: "Template Unlocked!",
+                                  description: data.message || "You now own this cover template.",
+                                });
+                                setShowPromoInput(null);
+                                setPromoCode("");
+                                setIsPurchasing(false);
+                              } else if (data.url) {
+                                window.location.href = data.url;
+                              } else {
+                                throw new Error(data.error || 'Failed to create checkout');
+                              }
+                            } catch (error: any) {
+                              toast({
+                                title: "Purchase Failed",
+                                description: error?.message || "Could not start purchase. Please try again.",
+                                variant: "destructive",
+                              });
+                              setIsPurchasing(false);
+                            }
+                          }}
+                          data-testid={`button-purchase-${cover.id}`}
+                        >
+                          {isPurchasing ? (
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          ) : (
+                            <ShoppingCart className="w-3 h-3 mr-1" />
+                          )}
+                          {showPromoInput === cover.id && promoCode ? "Apply & Buy" : `Buy £${cover.price}`}
+                        </Button>
+                      </div>
                     )}
                   </Card>
                 </motion.div>

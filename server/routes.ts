@@ -723,7 +723,7 @@ Respond ONLY with valid JSON in this exact format:
   // Create checkout session for premium cover template
   app.post("/api/premium-covers/purchase", isAuthenticated, async (req, res) => {
     try {
-      const { templateId, templateName } = req.body;
+      const { templateId, templateName, promoCode } = req.body;
       const user = req.user as any;
       
       if (!templateId) {
@@ -736,7 +736,83 @@ Respond ONLY with valid JSON in this exact format:
         return res.status(400).json({ error: "You already own this template" });
       }
 
-      const priceInPence = 500; // £5
+      let priceInPence = 500; // £5
+      let discountApplied = 0;
+      let validatedPromo: any = null;
+
+      // Validate and apply promo code if provided
+      if (promoCode) {
+        const promo = await storage.getPromoCodeByCode(promoCode.toUpperCase());
+        
+        if (!promo) {
+          return res.status(400).json({ error: "Invalid promo code" });
+        }
+        
+        if (promo.status !== 'active') {
+          return res.status(400).json({ error: "This promo code is no longer active" });
+        }
+        
+        const now = new Date();
+        if (now < promo.validFrom) {
+          return res.status(400).json({ error: "This promo code is not yet active" });
+        }
+        if (promo.validUntil && now > promo.validUntil) {
+          return res.status(400).json({ error: "This promo code has expired" });
+        }
+        
+        if (promo.maxTotalUses && promo.currentUses >= promo.maxTotalUses) {
+          return res.status(400).json({ error: "This promo code has reached its usage limit" });
+        }
+
+        // Check per-user limit
+        if (promo.maxUsesPerUser) {
+          const userRedemptions = await storage.getUserPromoRedemptions(user.id, promo.id);
+          if (userRedemptions >= promo.maxUsesPerUser) {
+            return res.status(400).json({ error: "You have already used this promo code" });
+          }
+        }
+
+        validatedPromo = promo;
+        
+        // Calculate discount
+        if (promo.discountType === 'percentage') {
+          discountApplied = Math.floor(priceInPence * (promo.discountValue / 100));
+        } else {
+          discountApplied = promo.discountValue; // Fixed amount in pence
+        }
+        
+        priceInPence = Math.max(0, priceInPence - discountApplied);
+      }
+
+      // If 100% discount (free), bypass Stripe and directly grant access
+      if (priceInPence === 0 && validatedPromo) {
+        // Create completed purchase record
+        const purchase = await storage.createPremiumCoverPurchase({
+          userId: user.id,
+          templateId,
+          price: 0,
+          status: 'completed'
+        });
+
+        // Record promo redemption
+        await storage.createPromoRedemption({
+          promoCodeId: validatedPromo.id,
+          userId: user.id,
+          type: 'premium_cover',
+          referenceId: purchase.id,
+          discountAmount: discountApplied,
+        });
+
+        // Increment promo usage
+        await storage.incrementPromoCodeUsage(validatedPromo.id);
+
+        return res.json({ 
+          success: true,
+          free: true,
+          message: "Template unlocked with promo code!",
+          purchaseId: purchase.id
+        });
+      }
 
       const baseUrl = `${req.protocol}://${req.get('host')}`;
       
@@ -772,6 +848,8 @@ Respond ONLY with valid JSON in this exact format:
           templateId,
           userId: user.id,
           type: 'premium_cover',
+          promoCodeId: validatedPromo?.id || null,
+          discountApplied: discountApplied.toString(),
         },
         success_url: `${baseUrl}/theme-selection?cover_purchased=true&template=${templateId}&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/theme-selection?cover_cancelled=true`,
@@ -785,7 +863,8 @@ Respond ONLY with valid JSON in this exact format:
       res.json({ 
         sessionId: session.id, 
         url: session.url,
-        purchaseId: purchase.id
+        purchaseId: purchase.id,
+        discountApplied
       });
     } catch (error: any) {
       console.error("Premium cover purchase error:", error);
