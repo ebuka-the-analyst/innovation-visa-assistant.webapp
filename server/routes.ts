@@ -766,7 +766,7 @@ Respond ONLY with valid JSON in this exact format:
 
         // Check per-user limit
         if (promo.maxUsesPerUser) {
-          const userRedemptions = await storage.getUserPromoRedemptions(user.id, promo.id);
+          const userRedemptions = await storage.getUserPromoRedemptionCount(user.id, promo.id);
           if (userRedemptions >= promo.maxUsesPerUser) {
             return res.status(400).json({ error: "You have already used this promo code" });
           }

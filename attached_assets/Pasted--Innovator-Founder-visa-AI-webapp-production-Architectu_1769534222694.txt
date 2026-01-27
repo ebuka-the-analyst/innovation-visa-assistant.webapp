@@ -1,0 +1,137 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+
+
+5
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+innovation-visa-assistant.webapp
+/
+23930205
+Active
+
+Jan 27, 2026, 5:11 PM GMT
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+You reached the start of the range
+Jan 27, 2026, 5:11 PM
+Starting Container
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+theme_id column added or already exists
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+theme_font column added or already exists
+theme_applied_at column added or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+text_elements column added or already exists
+cover_designs table created or already exists
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+blog_posts table created or already exists
+blog_posts indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[Blog] Image route configured (local + unique + S3 fallback)
+5:14:33 PM [express] [MIGRATION] Checking for required schema updates...
+[DB] Auto-migration: logo_element column ensured
+[DB] Auto-migration: blog image URLs updated to object storage
+5:14:33 PM [express] [MIGRATION] Creating FREECOVER100 promo code...
+5:14:33 PM [express] [MIGRATION] FREECOVER100 promo code created successfully
+5:14:33 PM [express] [MIGRATION] Schema check complete
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+5:14:33 PM [express] serving on port 8080
+5:14:33 PM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: Assigned unique images to 10 blog posts
+[2026-01-27T17:16:15.686Z] GET /api/auth/user
+[2026-01-27T17:16:15.696Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:16:15 PM [express] GET /api/auth/user 200 in 262ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+5:16:15 PM [express] POST /api/activity/session 200 in 245ms :: {"sessionId":"d86d1455-471a-4d4b-9f7…
+[2026-01-27T17:16:16.148Z] POST /api/activity/page-view
+5:16:16 PM [express] POST /api/activity/page-view 200 in 55ms :: {"pageViewId":"e2690732-be6e-43d9-a…
+[2026-01-27T17:16:16.578Z] POST /api/activity/session/end
+[2026-01-27T17:16:16.579Z] GET /theme-selection
+5:16:16 PM [express] POST /api/activity/session/end 200 in 45ms :: {"success":true}
+[2026-01-27T17:16:16.815Z] GET /attached_assets/official_logo.webp
+[2026-01-27T17:16:16.892Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:16:16 PM [express] GET /api/auth/user 200 in 20ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-01-27T17:16:17.124Z] GET /api/partner/status
+[2026-01-27T17:16:17.127Z] POST /api/activity/session
+5:16:17 PM [express] GET /api/partner/status 200 in 24ms :: {"isPartner":false,"promoCodeCount":0}
+5:16:17 PM [express] POST /api/activity/session 200 in 53ms :: {"sessionId":"79a7dcfa-c720-489b-af6d…
+[2026-01-27T17:16:17.279Z] POST /api/activity/session
+5:16:17 PM [express] POST /api/activity/session 200 in 19ms :: {"sessionId":"5d60609b-86b6-493c-a524…
+[2026-01-27T17:16:17.306Z] GET /api/premium-covers/purchased
+[2026-01-27T17:16:17.318Z] GET /api/cover-designs/latest
+5:16:17 PM [express] GET /api/premium-covers/purchased 200 in 20ms :: {"templateIds":[]}
+[2026-01-27T17:16:17.509Z] POST /api/activity/page-view
+5:16:17 PM [express] POST /api/activity/page-view 200 in 22ms :: {"pageViewId":"a0cd40b8-b00c-4c71-a…
+5:16:18 PM [express] GET /api/cover-designs/latest 200 in 1330ms :: {"id":"714c4df7-5964-4a79-b98f-0…
+[2026-01-27T17:16:24.521Z] POST /api/activity/session/end
+5:16:24 PM [express] POST /api/activity/session/end 200 in 191ms :: {"success":true}
+[2026-01-27T17:16:35.843Z] POST /api/activity/session
+5:16:36 PM [express] POST /api/activity/session 200 in 260ms :: {"sessionId":"55b10544-bf13-47f2-993…
+[2026-01-27T17:16:36.291Z] POST /api/activity/page-view
+5:16:36 PM [express] POST /api/activity/page-view 200 in 32ms :: {"pageViewId":"68be9dab-6863-4998-8…
+[2026-01-27T17:16:40.333Z] POST /api/premium-covers/purchase
+Premium cover purchase error: TypeError: storage.getUserPromoRedemptions is not a function
+    at file:///app/dist/index.js:16105:49
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+5:16:40 PM [express] POST /api/premium-covers/purchase 500 in 20ms :: {"error":"storage.getUserPromo…
+[2026-01-27T17:16:46.222Z] POST /api/activity/session/end
+5:16:46 PM [express] POST /api/activity/session/end 200 in 211ms :: {"success":true}
+
+
+innovation-visa-assistant.webapp | Railway
