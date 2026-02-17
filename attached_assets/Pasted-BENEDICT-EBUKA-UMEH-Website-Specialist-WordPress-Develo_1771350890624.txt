@@ -1,0 +1,99 @@
+BENEDICT (EBUKA) UMEH
+Website Specialist | WordPress Developer | Web Performance & Analytics
+Leeds, UK | Github | LinkedIn Profile
+Professional Summary
+WordPress Specialist and Full-Stack Developer with 5+ years building, optimising, and maintaining high-performance websites and digital platforms. Experienced in WordPress development, custom modules, performance optimisation, GA4 tracking, CRM integrations, and mobile-first design. MSc Data Science graduate combining technical precision with marketing collaboration and commercial awareness. GDPR-aware and security-conscious.
+Core Skills
+Website Development: WordPress (custom themes, plugins), Webflow, HTML5, CSS3, JavaScript, PHP, React, TypeScript
+Performance & SEO: Core Web Vitals, Page Speed Optimisation, Technical SEO, Schema Markup
+Tracking & Integrations: GA4, GTM, Stripe, CRM integrations, Webhooks
+Backend & Data: Node.js, Express, PostgreSQL, MongoDB, REST APIs
+Tools: Git, GitHub, Railway, Vercel, Hosting & Deployment Management
+Experience
+Lead Developer — StackRise (2025 – Present)
+•	Developing and optimising high-performance WordPress websites and digital platforms.  
+•	Architected and delivered full-stack web applications using React 18, TypeScript, Node.js, Express, and PostgreSQL.
+•	Built secure client and admin portals with role-based access control (RBAC), team management, project tracking, and support ticketing systems.
+•	Developed AI-powered virtual assistants using OpenAI GPT-4o with function calling for lead capture, customer service automation, and CRM integration.
+•	Implemented end-to-end payment processing with Stripe, including invoice generation, automated billing reminders, and subscription management.
+•	Designed and built RESTful APIs for multi-service platforms including logistics, e-commerce, certification, and analytics dashboards.
+•	Integrated analytics tooling (GA4, Microsoft Clarity) to track user behaviour, conversion funnels, and stakeholder reporting.
+•	Managed cloud deployments, CI/CD pipelines, database migrations, and production monitoring across multiple client projects.
+•	Ensured GDPR compliance across all applications including data handling, cookie consent, and privacy documentation.
+WordPress Developer & Website Manager — WAVES Academies (2019-2023)
+•	Managed day to day website updates across key sections (programmes, impact, team, blog, and contact).
+•	Built reusable page templates and content blocks (Gutenberg or ACF style) so the comms team could ship new pages without touching code.
+•	Set up and maintained application and volunteer forms with auto confirmations, spam protection, and clean routing of submissions to email and/or Sheets/CRM.
+•	Created a reports hub for annual reports and resources, with structured uploads, download tracking, and tidy navigation.
+•	Improved performance and Core Web Vitals using image optimisation, caching, asset minification, lazy loading, and plugin cleanup.
+•	Strengthened SEO with metadata templates, redirects, XML sitemap hygiene, and basic schema for blog articles.
+•	Handled security and reliability: routine updates, backups, uptime monitoring, SSL, and role based admin access.
+•	Kept GDPR basics tight: cookie consent, privacy policy visibility, and safe handling of form data.
+
+Recent Deployment
+Web Developer— Silvermaris Logistics (2025 – Present)
+•	Develop and maintain responsive, SEO-optimised corporate website and booking platform.
+•	Implement JavaScript-driven features including dynamic quote calculators and UI enhancements.
+•	Optimise HTTP requests, reduce asset payload size, and improve overall site performance.
+•	Collaborate with marketing stakeholders to translate product requirements into scalable features.
+•	Manage CMS updates and structured content workflows for distributed content publishing.
+
+
+Web Developer— Feasibly Rader (2026 – Present)
+•	Architected and developed F-RADAR, an AI-powered agentic geospatial platform for renewable energy feasibility analysis across the UK.
+•	Built full-stack application using React 18, TypeScript, Node.js, Express, PostgreSQL, and Drizzle ORM with interactive mapping via Leaflet.
+•	Integrated real UK government data sources including Environment Agency flood risk APIs, EU PVGIS solar irradiance data, and DNO grid capacity feeds.
+•	Developed AI-powered chat assistant using OpenAI GPT-4o with function calling for automated site screening, constraint analysis, and feasibility scoring.
+•	Implemented server-side PDF report generation with Chart.js visualisations and exportable GeoJSON/spreadsheet artifacts.
+•	Built public RESTful API with key-based authentication, rate limiting, and tiered access for third-party integrations.
+•	Integrated Stripe donation system for community-funded model supporting UK's renewable energy sector.
+•	Ensured GDPR compliance with cookie consent management, privacy documentation, and data provenance labelling.
+
+Web Developer— Global Competency Assessment (2025 – 2026)
+•	Architected and developed a full-stack international certification and credentialing platform using React 18, TypeScript, Vite, Node.js/Express, and PostgreSQL (Drizzle ORM).
+•	Built a Provider Portal system enabling accredited assessment centres to register candidates, schedule assessments, upload compliance documents, and track certification progress.
+•	Developed a comprehensive Admin Dashboard with real-time analytics, user management, bulk actions, role-based access control, and provider application workflows.
+•	Implemented full internationalisation (i18n) supporting 6 languages (English, French, Spanish, German, Chinese, Arabic) using i18next with browser language detection.
+•	Integrated Stripe payment processing for provider accreditation fees and candidate assessment bookings.
+•	Built AI-powered chat assistant using OpenAI GPT-4o for candidate support and assessment guidance.
+•	Designed automated database migration system ensuring seamless schema synchronisation across development and production environments.
+•	Developed currency localisation supporting 11 currencies with real-time conversion for global pricing consistency.
+•	Implemented secure authentication with Passport.js (local + Google OAuth), session management, and email verification workflows.
+•	Configured transactional email services using Resend API for candidate registration, assessment scheduling, and certificate notifications.
+•	Built digital credential verification system with unique certificate numbers and public verification portal.
+•	Ensured GDPR compliance with cookie consent, privacy documentation, and data handling policies across all platform features.
+
+E-Commerce Developer— Kristal Communication (2026 -ongoing)
+•	Architected and delivered a full-stack e-commerce platform for a phone parts retailer using React 18, TypeScript, Vite, Node.js/Express, and PostgreSQL (Drizzle ORM).
+•	Integrated dual payment gateways (Paystack and Flutterwave) with server-side cart validation, webhook verification, and automated order tracking.
+•	Implemented multi-language internationalisation (i18n) supporting English, Igbo, Yoruba, Hausa, and French to serve a diverse West African and Francophone customer base.
+•	Built an AI-powered shopping assistant using OpenAI GPT integration to help customers find products and get real-time support.
+•	Developed a product catalogue system with 100+ SKUs across 9 categories, featuring persistent database-backed image storage and cloud object storage.
+•	Designed and built a complete order history system with user authentication, payment verification, and expandable order detail views.
+•	Configured transactional email workflows using Resend for order confirmations and customer communications.
+•	Delivered a fully responsive, mobile-first UI with Tailwind CSS, dark mode support, and animated brand-themed design elements
+Web Developer — AutoInsight Hotel Analytics Dashboard (2025)
+
+Live: hotel-insight.bhenmedia.com
+Email: emma@demohotel.com 
+Password: demo1234 
+
+•	Architected and developed a full-stack hotel analytics platform using React 18, TypeScript, Vite, Node.js/Express, and PostgreSQL (Drizzle ORM), delivering 70+ hospitality KPIs including RevPAR, ADR, occupancy rates, and cancellation analysis.
+•	Built intelligent Excel/CSV data upload system with fuzzy-matching column auto-mapper, achieving 95% mapping accuracy across 20+ hotel booking field types and reducing manual data entry time by 80%.
+•	Developed AI-powered data assistant using OpenAI GPT-4o enabling hotel managers to query performance data in natural language, reducing stakeholder reporting turnaround by 65%.
+•	Engineered Guest Intelligence suite with repeat guest identification, lifetime value calculations, loyalty tier tracking, and cancellation risk matrices for data-driven revenue management.
+•	Implemented interactive data visualisations using Recharts including trend lines, channel performance breakdowns, seasonality heatmaps, and regional occupancy comparisons.
+•	Built secure authentication system with session management, auto-seeded demo accounts, and role-based access for hotel staff and administrators.
+•	Designed WCAG-compliant, ADHD-friendly UI with dark/light mode toggle, glassmorphism design system, and mobile-first responsive layout using Tailwind CSS and Shadcn UI.
+•	Deployed production-ready application on Railway with PostgreSQL, custom domain configuration (SSL), and environment-based configuration management.
+•	Ensured GDPR compliance with secure data handling, session-based authentication, and input validation using Zod schemas to prevent injection attacks.
+Education
+MSc Data Science — Leeds Beckett University (2023)
+BSc IT & Business Information Systems — Middlesex University (2017)
+Advance Diploma Software Engineering – Aptech Computer Education (2014)
+Certifications
+Web Development
+Google Analytics IQ
+Google Data Analytics Professional
+IBM Data Analyst Professional
+SEO Specialist
