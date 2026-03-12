@@ -1,0 +1,135 @@
+Skip to content
+Upwork home
+
+Find work
+
+
+Deliver work
+
+
+Manage finances
+
+Messages
+Search
+
+Search category:
+Jobs
+
+
+
+Account Settings
+Develop a Comprehensive Preschool Website with CRM and Content Management
+Posted 1 hour ago
+Worldwide
+
+Summary
+We are seeking a skilled web developer to create an end-to-end preschool website that integrates a CRM and a workflow management system for educational content tailored for teachers. The ideal candidate will ensure a user-friendly interface and robust functionality to manage student data, lesson plans, and communication.
+
+The platform will be built using React, TypeScript, and Next.js, with Supabase used for backend services including database management, authentication, and real-time features.
+
+Key Responsibilities:
+
+Develop a complete preschool website with integrated CRM and workflow management system
+
+Build responsive and user-friendly interfaces using React and Next.js
+
+Implement scalable and maintainable code using TypeScript
+
+Integrate Supabase for database, authentication, and backend functionality
+
+Create systems to manage student data, lesson plans, teacher workflows, and communication
+
+Ensure performance, security, and reliability of the platform
+
+Requirements:
+
+Strong experience with React, TypeScript, and Next.js
+
+Experience working with Supabase or similar backend platforms
+
+Experience building CRM systems or admin dashboards
+
+Understanding of database design and API integration
+
+Ability to build clean, scalable, and maintainable code
+
+Preferred:
+
+Experience with education platforms or school management systems
+
+Knowledge of workflow automation tools or CMS development
+
+If you are passionate about enhancing educational experiences through technology, we would love to hear from you.
+
+Less than 30 hrs/week
+Hourly
+1 to 3 months
+Duration
+Intermediate
+I am looking for a mix of experience and value
+$12.00
+
+-
+
+$35.00
+
+Hourly
+Project Type:Ongoing project
+Skills and Expertise
+Mandatory skills
+Next.js
+Node.js
+Amazon Web Services
+JavaScript
+Web Development
+Supabase
+Testing
+Activity on this job
+Proposals:
+15 to 20
+Last viewed by client:
+46 minutes ago
+Interviewing:
+0
+Invites sent:
+1
+Unanswered invites:
+1
+Bid range - High $35.00 | Avg $20.16 | Low $10.00
+Send a proposal for: 13 Connects
+Available Connects: 388
+About the client
+Payment method verified
+Phone number verified
+India
+2:17 PM
+0% hire rate, 1 open job
+Member since Mar 12, 2026
+Job link
+https://www.upwork.com/jobs/~022031999169137105691
+Copy link
+Footer navigation
+About Us
+Feedback
+Trust, Safety & Security
+Help & Support
+Upwork Foundation
+Terms of Service
+Privacy Policy
+CA Notice at Collection
+Your Privacy Choices
+Accessibility
+Desktop App
+Cookie Policy
+Enterprise Solutions
+Release notes
+Follow Us
+Visit Upwork on Facebook
+Read Upwork company news on LinkedIn
+Follow @Upwork on Twitter
+Watch Upwork videos on YouTube
+Follow Upwork on Instagram
+Mobile app
+Download Upwork app from iTunes
+Download Upwork app from Google Play
+© 2015 - 2026 Upwork® Global LLC
