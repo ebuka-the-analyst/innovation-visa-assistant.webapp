@@ -2487,7 +2487,7 @@ export default function AdminDashboard() {
                 
                 {/* OVERVIEW SECTION - High-level summary */}
                 {activeSection === 'overview' && (
-                  <div className="space-y-2">
+                  <div className="space-y-0.5">
               <AnimatePresence mode="wait">
                 {overviewLoading ? (
                   <motion.div
@@ -2723,7 +2723,7 @@ export default function AdminDashboard() {
                         >
                           {[1, 2, 3, 4, 5].map((i) => (
                             <Card key={i}>
-                              <CardContent className="p-4">
+                              <CardContent className="p-2">
                                 <ShimmerSkeleton />
                               </CardContent>
                             </Card>
@@ -2966,7 +2966,7 @@ export default function AdminDashboard() {
 
                 {/* EXECUTIVE KPIs SECTION - Detailed metrics with targets */}
                 {activeSection === 'kpis' && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <AnimatePresence mode="wait">
                       {overviewLoading ? (
                         <motion.div
@@ -2974,11 +2974,11 @@ export default function AdminDashboard() {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5"
                         >
                           {[1, 2, 3, 4, 5, 6].map((i) => (
                             <Card key={i}>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <ShimmerSkeleton />
                               </CardHeader>
                               <CardContent>
@@ -2994,27 +2994,27 @@ export default function AdminDashboard() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -20 }}
                           transition={{ duration: 0.5 }}
-                          className="space-y-6"
+                          className="space-y-1.5"
                         >
                           {/* KPI Performance Summary Header */}
                           <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20">
-                            <CardContent className="p-6">
-                              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <CardContent className="p-2">
+                              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1.5">
                                 <div>
                                   <h2 className="text-lg font-bold">Executive KPI Dashboard</h2>
                                   <p className="text-muted-foreground">Strategic metrics with targets and performance tracking</p>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                  <div className="text-center px-4 py-2 bg-background rounded-lg border">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="text-center px-2 py-0.5 bg-background rounded border">
                                     <p className={`text-xl font-bold ${
                                       (overviewData.extendedKPIs?.overallScore || 0) >= 80 ? 'text-green-500' :
                                       (overviewData.extendedKPIs?.overallScore || 0) >= 60 ? 'text-amber-500' : 'text-red-500'
                                     }`}>{overviewData.extendedKPIs?.overallScore || 0}%</p>
-                                    <p className="text-xs text-muted-foreground">Overall Score</p>
+                                    <p className="text-[9px] text-muted-foreground">Overall Score</p>
                                   </div>
-                                  <div className="text-center px-4 py-2 bg-background rounded-lg border">
-                                    <p className="text-xl font-bold text-primary">5</p>
-                                    <p className="text-xs text-muted-foreground">Active KPIs</p>
+                                  <div className="text-center px-2 py-0.5 bg-background rounded border">
+                                    <p className="text-xs font-bold text-primary">5</p>
+                                    <p className="text-[9px] text-muted-foreground">Active KPIs</p>
                                   </div>
                                 </div>
                               </div>
@@ -3022,7 +3022,7 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Business Performance KPIs with Targets */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5">
                             {/* User Acquisition KPI */}
                             <motion.div
                               initial={{ opacity: 0, y: 20 }}
@@ -3030,27 +3030,27 @@ export default function AdminDashboard() {
                               transition={{ delay: 0.1 }}
                             >
                               <Card className="h-full">
-                                <CardHeader className="pb-2">
+                                <CardHeader className="p-2 pb-1">
                                   <div className="flex items-center justify-between">
-                                    <CardTitle className="text-sm font-medium">User Acquisition</CardTitle>
+                                    <CardTitle className="text-[10px] font-medium">User Acquisition</CardTitle>
                                     <Badge variant="outline" className="text-green-500 border-green-500/30">On Track</Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
+                                <CardContent className="space-y-1.5">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-xl font-bold">{filteredOverviewData?.kpiMetrics?.[0]?.value || 0}</p>
-                                      <p className="text-xs text-muted-foreground">Current Users</p>
+                                      <p className="text-sm font-bold">{filteredOverviewData?.kpiMetrics?.[0]?.value || 0}</p>
+                                      <p className="text-[9px] text-muted-foreground">Current Users</p>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-lg font-semibold text-muted-foreground">/ 50</p>
-                                      <p className="text-xs text-muted-foreground">Target</p>
+                                      <p className="text-xs font-semibold text-muted-foreground">/ 50</p>
+                                      <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
                                   <Progress value={Math.min(((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 50) * 100, 100)} className="h-3" />
                                   <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Progress</span>
-                                    <span className="font-medium text-green-500">{Math.round(((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 50) * 100)}%</span>
+                                    <span className="text-[9px] font-medium text-green-500">{Math.round(((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 50) * 100)}%</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -3063,9 +3063,9 @@ export default function AdminDashboard() {
                               transition={{ delay: 0.2 }}
                             >
                               <Card className="h-full">
-                                <CardHeader className="pb-2">
+                                <CardHeader className="p-2 pb-1">
                                   <div className="flex items-center justify-between">
-                                    <CardTitle className="text-sm font-medium">Plan Completion Rate</CardTitle>
+                                    <CardTitle className="text-[10px] font-medium">Plan Completion Rate</CardTitle>
                                     <Badge variant="outline" className={
                                       (overviewData.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'text-green-500 border-green-500/30' :
                                       (overviewData.extendedKPIs?.planCompletionRate || 0) >= 50 ? 'text-amber-500 border-amber-500/30' : 'text-red-500 border-red-500/30'
@@ -3075,15 +3075,15 @@ export default function AdminDashboard() {
                                     </Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
+                                <CardContent className="space-y-1.5">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-xl font-bold">{overviewData.extendedKPIs?.planCompletionRate || 0}%</p>
-                                      <p className="text-xs text-muted-foreground">{overviewData.extendedKPIs?.completedPlans || 0} of {overviewData.extendedKPIs?.totalPlans || 0} completed</p>
+                                      <p className="text-sm font-bold">{overviewData.extendedKPIs?.planCompletionRate || 0}%</p>
+                                      <p className="text-[9px] text-muted-foreground">{overviewData.extendedKPIs?.completedPlans || 0} of {overviewData.extendedKPIs?.totalPlans || 0} completed</p>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-lg font-semibold text-muted-foreground">/ 80%</p>
-                                      <p className="text-xs text-muted-foreground">Target</p>
+                                      <p className="text-xs font-semibold text-muted-foreground">/ 80%</p>
+                                      <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
                                   <Progress value={overviewData.extendedKPIs?.planCompletionRate || 0} className="h-3" />
@@ -3104,9 +3104,9 @@ export default function AdminDashboard() {
                               transition={{ delay: 0.3 }}
                             >
                               <Card className="h-full">
-                                <CardHeader className="pb-2">
+                                <CardHeader className="p-2 pb-1">
                                   <div className="flex items-center justify-between">
-                                    <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+                                    <CardTitle className="text-[10px] font-medium">Monthly Revenue</CardTitle>
                                     <Badge variant="outline" className={
                                       (overviewData.extendedKPIs?.monthlyRevenue || 0) >= (overviewData.extendedKPIs?.revenueTarget || 2000) ? 'text-green-500 border-green-500/30' :
                                       (overviewData.extendedKPIs?.monthlyRevenue || 0) >= ((overviewData.extendedKPIs?.revenueTarget || 2000) * 0.5) ? 'text-amber-500 border-amber-500/30' : 'text-red-500 border-red-500/30'
@@ -3116,15 +3116,15 @@ export default function AdminDashboard() {
                                     </Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
+                                <CardContent className="space-y-1.5">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-xl font-bold">£{(overviewData.extendedKPIs?.monthlyRevenue || 0).toLocaleString()}</p>
-                                      <p className="text-xs text-muted-foreground">Current MRR</p>
+                                      <p className="text-sm font-bold">£{(overviewData.extendedKPIs?.monthlyRevenue || 0).toLocaleString()}</p>
+                                      <p className="text-[9px] text-muted-foreground">Current MRR</p>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-lg font-semibold text-muted-foreground">/ £{(overviewData.extendedKPIs?.revenueTarget || 2000).toLocaleString()}</p>
-                                      <p className="text-xs text-muted-foreground">Target</p>
+                                      <p className="text-xs font-semibold text-muted-foreground">/ £{(overviewData.extendedKPIs?.revenueTarget || 2000).toLocaleString()}</p>
+                                      <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
                                   <Progress value={Math.min(((overviewData.extendedKPIs?.monthlyRevenue || 0) / (overviewData.extendedKPIs?.revenueTarget || 2000)) * 100, 100)} className="h-3" />
@@ -3145,27 +3145,27 @@ export default function AdminDashboard() {
                               transition={{ delay: 0.4 }}
                             >
                               <Card className="h-full">
-                                <CardHeader className="pb-2">
+                                <CardHeader className="p-2 pb-1">
                                   <div className="flex items-center justify-between">
-                                    <CardTitle className="text-sm font-medium">Daily Active Users</CardTitle>
+                                    <CardTitle className="text-[10px] font-medium">Daily Active Users</CardTitle>
                                     <Badge variant="outline" className="text-green-500 border-green-500/30">Strong</Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
+                                <CardContent className="space-y-1.5">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-xl font-bold">{overviewData.kpiMetrics?.[1]?.value || 0}</p>
-                                      <p className="text-xs text-muted-foreground">Active Now</p>
+                                      <p className="text-sm font-bold">{overviewData.kpiMetrics?.[1]?.value || 0}</p>
+                                      <p className="text-[9px] text-muted-foreground">Active Now</p>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-lg font-semibold text-muted-foreground">/ 25</p>
-                                      <p className="text-xs text-muted-foreground">Target</p>
+                                      <p className="text-xs font-semibold text-muted-foreground">/ 25</p>
+                                      <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
                                   <Progress value={Math.min(((overviewData.kpiMetrics?.[1]?.value || 0) / 25) * 100, 100)} className="h-3" />
                                   <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Engagement</span>
-                                    <span className="font-medium text-green-500">{Math.round(((filteredOverviewData?.kpiMetrics?.[1]?.value || 0) / (filteredOverviewData?.kpiMetrics?.[0]?.value || 1)) * 100)}% of users</span>
+                                    <span className="text-[9px] font-medium text-green-500">{Math.round(((filteredOverviewData?.kpiMetrics?.[1]?.value || 0) / (filteredOverviewData?.kpiMetrics?.[0]?.value || 1)) * 100)}% of users</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -3178,9 +3178,9 @@ export default function AdminDashboard() {
                               transition={{ delay: 0.5 }}
                             >
                               <Card className="h-full">
-                                <CardHeader className="pb-2">
+                                <CardHeader className="p-2 pb-1">
                                   <div className="flex items-center justify-between">
-                                    <CardTitle className="text-sm font-medium">Tool Adoption Rate</CardTitle>
+                                    <CardTitle className="text-[10px] font-medium">Tool Adoption Rate</CardTitle>
                                     <Badge variant="outline" className={
                                       (overviewData.extendedKPIs?.toolAdoptionRate || 0) >= 75 ? 'text-green-500 border-green-500/30' :
                                       (overviewData.extendedKPIs?.toolAdoptionRate || 0) >= 50 ? 'text-blue-500 border-blue-500/30' : 'text-amber-500 border-amber-500/30'
@@ -3190,21 +3190,21 @@ export default function AdminDashboard() {
                                     </Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
+                                <CardContent className="space-y-1.5">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-xl font-bold">{overviewData.extendedKPIs?.toolAdoptionRate || 0}%</p>
-                                      <p className="text-xs text-muted-foreground">{overviewData.extendedKPIs?.uniqueToolsUsed || 0} of {overviewData.extendedKPIs?.totalTools || 109} tools</p>
+                                      <p className="text-sm font-bold">{overviewData.extendedKPIs?.toolAdoptionRate || 0}%</p>
+                                      <p className="text-[9px] text-muted-foreground">{overviewData.extendedKPIs?.uniqueToolsUsed || 0} of {overviewData.extendedKPIs?.totalTools || 109} tools</p>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-lg font-semibold text-muted-foreground">/ 75%</p>
-                                      <p className="text-xs text-muted-foreground">Target</p>
+                                      <p className="text-xs font-semibold text-muted-foreground">/ 75%</p>
+                                      <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
                                   <Progress value={overviewData.extendedKPIs?.toolAdoptionRate || 0} className="h-3" />
                                   <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Avg tools/user</span>
-                                    <span className="font-medium text-blue-500">{overviewData.extendedKPIs?.avgToolsPerUser || 0} tools</span>
+                                    <span className="text-[9px] font-medium text-blue-500">{overviewData.extendedKPIs?.avgToolsPerUser || 0} tools</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -3217,9 +3217,9 @@ export default function AdminDashboard() {
                               transition={{ delay: 0.6 }}
                             >
                               <Card className="h-full">
-                                <CardHeader className="pb-2">
+                                <CardHeader className="p-2 pb-1">
                                   <div className="flex items-center justify-between">
-                                    <CardTitle className="text-sm font-medium">User Engagement</CardTitle>
+                                    <CardTitle className="text-[10px] font-medium">User Engagement</CardTitle>
                                     <Badge variant="outline" className={
                                       ((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.5 ? 'text-green-500 border-green-500/30' :
                                       ((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.25 ? 'text-blue-500 border-blue-500/30' : 'text-amber-500 border-amber-500/30'
@@ -3229,21 +3229,21 @@ export default function AdminDashboard() {
                                     </Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
+                                <CardContent className="space-y-1.5">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-xl font-bold">{Math.round(((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100)}%</p>
-                                      <p className="text-xs text-muted-foreground">Daily active rate</p>
+                                      <p className="text-sm font-bold">{Math.round(((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100)}%</p>
+                                      <p className="text-[9px] text-muted-foreground">Daily active rate</p>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-lg font-semibold text-muted-foreground">/ 50%</p>
-                                      <p className="text-xs text-muted-foreground">Target</p>
+                                      <p className="text-xs font-semibold text-muted-foreground">/ 50%</p>
+                                      <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
                                   <Progress value={Math.min(((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100, 100)} className="h-3" />
                                   <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Active users</span>
-                                    <span className="font-medium text-blue-500">{overviewData.extendedKPIs?.dailyActiveUsers || 0} of {filteredOverviewData?.kpiMetrics?.[0]?.value || 0}</span>
+                                    <span className="text-[9px] font-medium text-blue-500">{overviewData.extendedKPIs?.dailyActiveUsers || 0} of {filteredOverviewData?.kpiMetrics?.[0]?.value || 0}</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -3252,20 +3252,20 @@ export default function AdminDashboard() {
 
                           {/* Strategic Goals Section */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <Target className="h-5 w-5 text-primary" />
                                     Quarterly Strategic Goals
                                   </CardTitle>
-                                  <CardDescription>Q4 2025 objectives and progress tracking</CardDescription>
+                                  <CardDescription className="text-[9px]">Q4 2025 objectives and progress tracking</CardDescription>
                                 </div>
                                 <Badge>Q4 2025</Badge>
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-6">
+                              <div className="space-y-1.5">
                                 {/* Goal 1 */}
                                 <div className="p-4 rounded-lg border bg-muted/30">
                                   <div className="flex items-start justify-between mb-3">
@@ -3322,15 +3322,15 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Performance Comparison */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             {/* Weekly Performance Trend */}
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Weekly Performance Trend</CardTitle>
-                                <CardDescription>7-day KPI performance overview</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Weekly Performance Trend</CardTitle>
+                                <CardDescription className="text-[9px]">7-day KPI performance overview</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <ResponsiveContainer width="100%" height={300}>
+                                <ResponsiveContainer width="100%" height={80}>
                                   <RechartsLineChart data={filteredOverviewData?.timeSeriesData?.slice(-7) || []}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                                     <XAxis
@@ -3356,41 +3356,41 @@ export default function AdminDashboard() {
 
                             {/* Tier Conversion Funnel */}
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Tier Upgrade Funnel</CardTitle>
-                                <CardDescription>User progression through subscription tiers</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Tier Upgrade Funnel</CardTitle>
+                                <CardDescription className="text-[9px]">User progression through subscription tiers</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
-                                  <div className="flex items-center gap-4">
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center gap-1.5">
                                     <div className="w-24 text-sm font-medium">Free</div>
                                     <div className="flex-1">
                                       <Progress value={100} className="h-6" />
                                     </div>
                                     <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Free')?.count || 0}</div>
                                   </div>
-                                  <div className="flex items-center gap-4">
+                                  <div className="flex items-center gap-1.5">
                                     <div className="w-24 text-sm font-medium">Basic</div>
                                     <div className="flex-1">
                                       <Progress value={60} className="h-6" />
                                     </div>
                                     <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Basic')?.count || 0}</div>
                                   </div>
-                                  <div className="flex items-center gap-4">
+                                  <div className="flex items-center gap-1.5">
                                     <div className="w-24 text-sm font-medium">Premium</div>
                                     <div className="flex-1">
                                       <Progress value={40} className="h-6" />
                                     </div>
                                     <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Premium')?.count || 0}</div>
                                   </div>
-                                  <div className="flex items-center gap-4">
+                                  <div className="flex items-center gap-1.5">
                                     <div className="w-24 text-sm font-medium">Enterprise</div>
                                     <div className="flex-1">
                                       <Progress value={20} className="h-6" />
                                     </div>
                                     <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Enterprise')?.count || 0}</div>
                                   </div>
-                                  <div className="flex items-center gap-4">
+                                  <div className="flex items-center gap-1.5">
                                     <div className="w-24 text-sm font-medium">Ultimate</div>
                                     <div className="flex-1">
                                       <Progress value={10} className="h-6" />
@@ -3404,32 +3404,32 @@ export default function AdminDashboard() {
 
                           {/* Key Insights */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <Lightbulb className="h-5 w-5 text-amber-500" />
                                 Key Performance Insights
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                                  <div className="flex items-center gap-2 mb-2">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
+                                <div className="p-1.5 rounded-lg bg-green-500/10 border border-green-500/20">
+                                  <div className="flex items-center gap-1 mb-0.5">
                                     <TrendingUp className="h-4 w-4 text-green-500" />
-                                    <span className="font-medium text-green-500">Strength</span>
+                                    <span className="text-[9px] font-medium text-green-500">Strength</span>
                                   </div>
                                   <p className="text-sm text-muted-foreground">User acquisition exceeding target by 24%. Strong organic growth from referrals.</p>
                                 </div>
-                                <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                                  <div className="flex items-center gap-2 mb-2">
+                                <div className="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                  <div className="flex items-center gap-1 mb-0.5">
                                     <AlertTriangle className="h-4 w-4 text-amber-500" />
-                                    <span className="font-medium text-amber-500">Opportunity</span>
+                                    <span className="text-[9px] font-medium text-amber-500">Opportunity</span>
                                   </div>
                                   <p className="text-sm text-muted-foreground">Plan completion rate needs improvement. Consider adding guided onboarding.</p>
                                 </div>
-                                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                                  <div className="flex items-center gap-2 mb-2">
+                                <div className="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                                  <div className="flex items-center gap-1 mb-0.5">
                                     <Target className="h-4 w-4 text-blue-500" />
-                                    <span className="font-medium text-blue-500">Focus Area</span>
+                                    <span className="text-[9px] font-medium text-blue-500">Focus Area</span>
                                   </div>
                                   <p className="text-sm text-muted-foreground">Premium tier conversion is key to hitting Q4 revenue target. Focus marketing efforts.</p>
                                 </div>
@@ -3451,19 +3451,19 @@ export default function AdminDashboard() {
 
                 {/* Users Section */}
                 {activeSection.startsWith('users') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="space-y-6"
+                className="space-y-1.5"
               >
                 {/* User Journey Analytics - detailed funnel visualization */}
                 {(activeSection === 'users-journey' || activeSection === 'users-overview') && (
                   <Card data-testid="card-user-journey-analytics">
-                    <CardHeader>
-                      <CardTitle className="text-xl font-bold">User Journey Analytics</CardTitle>
-                      <CardDescription>Track user progression from registration to active engagement</CardDescription>
+                    <CardHeader className="p-2 pb-1">
+                      <CardTitle className="text-[11px] font-bold">User Journey Analytics</CardTitle>
+                      <CardDescription className="text-[9px]">Track user progression from registration to active engagement</CardDescription>
                     </CardHeader>
                     <CardContent>
                       {(() => {
@@ -3480,7 +3480,7 @@ export default function AdminDashboard() {
                         ];
 
                         return (
-                          <div className="space-y-6">
+                          <div className="space-y-1.5">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                               {/* Custom Pyramid Funnel Visualization */}
                               <div>
@@ -3523,7 +3523,7 @@ export default function AdminDashboard() {
                               {/* Funnel Stage Breakdown - detailed */}
                               <div>
                                 <h4 className="text-sm font-semibold mb-6">Funnel Stage Breakdown</h4>
-                                <div className="space-y-5">
+                                <div className="space-y-1.5">
                                   {funnelData.map((stage, index) => {
                                     const prevCount = index > 0 ? funnelData[index - 1].count : stage.count;
                                     const conversionRate = prevCount > 0 ? ((stage.count / prevCount) * 100).toFixed(1) : '100.0';
@@ -3535,10 +3535,10 @@ export default function AdminDashboard() {
                                         initial={{ opacity: 0, x: 20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.08, duration: 0.4 }}
-                                        className="space-y-2"
+                                        className="space-y-0.5"
                                       >
                                         <div className="flex items-center justify-between">
-                                          <div className="flex items-center gap-3">
+                                          <div className="flex items-center gap-1.5">
                                             <div 
                                               className="w-3 h-3 rounded-full" 
                                               style={{ backgroundColor: stage.color }}
@@ -3624,10 +3624,10 @@ export default function AdminDashboard() {
                             {/* Conversion Insights */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                               <Card className="bg-green-500/5 border-green-500/20">
-                                <CardContent className="p-4">
-                                  <div className="flex items-center gap-2 mb-2">
+                                <CardContent className="p-2">
+                                  <div className="flex items-center gap-1 mb-0.5">
                                     <CheckCircle className="h-4 w-4 text-green-500" />
-                                    <span className="font-medium text-green-500">Strong Point</span>
+                                    <span className="text-[9px] font-medium text-green-500">Strong Point</span>
                                   </div>
                                   <p className="text-sm text-muted-foreground">
                                     Email verification rate of {((activeUsers / totalUsers) * 100).toFixed(1)}% exceeds industry average of 70%
@@ -3635,10 +3635,10 @@ export default function AdminDashboard() {
                                 </CardContent>
                               </Card>
                               <Card className="bg-amber-500/5 border-amber-500/20">
-                                <CardContent className="p-4">
-                                  <div className="flex items-center gap-2 mb-2">
+                                <CardContent className="p-2">
+                                  <div className="flex items-center gap-1 mb-0.5">
                                     <AlertTriangle className="h-4 w-4 text-amber-500" />
-                                    <span className="font-medium text-amber-500">Focus Area</span>
+                                    <span className="text-[9px] font-medium text-amber-500">Focus Area</span>
                                   </div>
                                   <p className="text-sm text-muted-foreground">
                                     Tool usage activation can be improved with better onboarding flows
@@ -3646,10 +3646,10 @@ export default function AdminDashboard() {
                                 </CardContent>
                               </Card>
                               <Card className="bg-blue-500/5 border-blue-500/20">
-                                <CardContent className="p-4">
-                                  <div className="flex items-center gap-2 mb-2">
+                                <CardContent className="p-2">
+                                  <div className="flex items-center gap-1 mb-0.5">
                                     <Target className="h-4 w-4 text-blue-500" />
-                                    <span className="font-medium text-blue-500">Next Goal</span>
+                                    <span className="text-[9px] font-medium text-blue-500">Next Goal</span>
                                   </div>
                                   <p className="text-sm text-muted-foreground">
                                     Target 90%+ first login conversion by Q1 2026
@@ -3666,15 +3666,15 @@ export default function AdminDashboard() {
 
                 {/* User Analytics Charts - Show for users-overview */}
                 {activeSection === 'users-overview' && usersAnalytics && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                     {/* Users by Tier Over Time */}
                     <Card data-testid="card-users-by-tier">
-                      <CardHeader>
-                        <CardTitle>Users by Tier Over Time</CardTitle>
-                        <CardDescription>Subscription tier evolution</CardDescription>
+                      <CardHeader className="p-2 pb-1">
+                        <CardTitle className="text-[10px] font-semibold">Users by Tier Over Time</CardTitle>
+                        <CardDescription className="text-[9px]">Subscription tier evolution</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <ResponsiveContainer width="100%" height={300}>
+                        <ResponsiveContainer width="100%" height={80}>
                           <RechartsBarChart data={filteredUsersAnalytics?.usersByTier}>
                             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                             <XAxis
@@ -3706,13 +3706,13 @@ export default function AdminDashboard() {
                 {/* Geographic Distribution - Show when users-geo is selected */}
                 {activeSection === 'users-geo' && (
                   <Card data-testid="card-geographic-distribution">
-                    <CardHeader>
-                      <CardTitle>Geographic Distribution</CardTitle>
-                      <CardDescription>User distribution by country</CardDescription>
+                    <CardHeader className="p-2 pb-1">
+                      <CardTitle className="text-[10px] font-semibold">Geographic Distribution</CardTitle>
+                      <CardDescription className="text-[9px]">User distribution by country</CardDescription>
                     </CardHeader>
                     <CardContent>
                       {usersAnalytics?.geographicDistribution && usersAnalytics.geographicDistribution.length > 0 ? (
-                        <div className="space-y-6">
+                        <div className="space-y-1.5">
                           <ResponsiveContainer width="100%" height={400}>
                             <RechartsBarChart 
                               data={usersAnalytics.geographicDistribution.sort((a, b) => b.users - a.users).slice(0, 15)}
@@ -3740,15 +3740,15 @@ export default function AdminDashboard() {
                             </RechartsBarChart>
                           </ResponsiveContainer>
                           
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
                             {usersAnalytics.geographicDistribution.slice(0, 8).map((item, index) => (
-                              <div key={item.country} className="p-4 rounded-lg bg-muted/50">
-                                <div className="flex items-center gap-2 mb-2">
+                              <div key={item.country} className="p-1.5 rounded-lg bg-muted/50">
+                                <div className="flex items-center gap-1 mb-0.5">
                                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
                                   <span className="font-medium text-sm">{item.country}</span>
                                 </div>
-                                <p className="text-lg font-bold">{item.users}</p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-sm font-bold">{item.users}</p>
+                                <p className="text-[9px] text-muted-foreground">
                                   {((item.users / usersAnalytics.geographicDistribution.reduce((sum, i) => sum + i.users, 0)) * 100).toFixed(1)}% of total
                                 </p>
                               </div>
@@ -3768,19 +3768,19 @@ export default function AdminDashboard() {
                 {/* Churn Analysis - Show only when users-churn is selected */}
                 {activeSection === 'users-churn' && (
                   <Card data-testid="card-churn-analysis">
-                    <CardHeader>
+                    <CardHeader className="p-2 pb-1">
                       <CardTitle className="flex items-center gap-2">
                         <UserX className="h-5 w-5 text-red-500" />
                         Churn Risk Analysis
                       </CardTitle>
-                      <CardDescription>Identify users at risk of churning and track retention metrics</CardDescription>
+                      <CardDescription className="text-[9px]">Identify users at risk of churning and track retention metrics</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-6">
+                      <div className="space-y-1.5">
                         {/* Churn Metrics */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                            <div className="flex items-center gap-2 mb-2">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
+                          <div className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
+                            <div className="flex items-center gap-1 mb-0.5">
                               <UserX className="h-4 w-4 text-red-500" />
                               <span className="text-sm font-medium">At-Risk Users</span>
                             </div>
@@ -3791,10 +3791,10 @@ export default function AdminDashboard() {
                                 return daysSinceActivity > 14 && daysSinceActivity <= 30;
                               }).length || 0}
                             </p>
-                            <p className="text-xs text-muted-foreground">14-30 days inactive</p>
+                            <p className="text-[9px] text-muted-foreground">14-30 days inactive</p>
                           </div>
-                          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                            <div className="flex items-center gap-2 mb-2">
+                          <div className="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                            <div className="flex items-center gap-1 mb-0.5">
                               <AlertTriangle className="h-4 w-4 text-amber-500" />
                               <span className="text-sm font-medium">Churned Users</span>
                             </div>
@@ -3805,10 +3805,10 @@ export default function AdminDashboard() {
                                 return daysSinceActivity > 30;
                               }).length || 0}
                             </p>
-                            <p className="text-xs text-muted-foreground">30+ days inactive</p>
+                            <p className="text-[9px] text-muted-foreground">30+ days inactive</p>
                           </div>
-                          <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                            <div className="flex items-center gap-2 mb-2">
+                          <div className="p-1.5 rounded-lg bg-green-500/10 border border-green-500/20">
+                            <div className="flex items-center gap-1 mb-0.5">
                               <UserCheck className="h-4 w-4 text-green-500" />
                               <span className="text-sm font-medium">Active Users</span>
                             </div>
@@ -3819,10 +3819,10 @@ export default function AdminDashboard() {
                                 return daysSinceActivity <= 7;
                               }).length || 0}
                             </p>
-                            <p className="text-xs text-muted-foreground">Active in last 7 days</p>
+                            <p className="text-[9px] text-muted-foreground">Active in last 7 days</p>
                           </div>
-                          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                            <div className="flex items-center gap-2 mb-2">
+                          <div className="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                            <div className="flex items-center gap-1 mb-0.5">
                               <Target className="h-4 w-4 text-blue-500" />
                               <span className="text-sm font-medium">Retention Rate</span>
                             </div>
@@ -3834,17 +3834,17 @@ export default function AdminDashboard() {
                                   return daysSinceActivity <= 30;
                                 }).length / usersData.users.length) * 100).toFixed(1) : 0}%
                             </p>
-                            <p className="text-xs text-muted-foreground">30-day retention</p>
+                            <p className="text-[9px] text-muted-foreground">30-day retention</p>
                           </div>
                         </div>
 
                         {/* At-Risk Users List */}
-                        <div className="space-y-4">
+                        <div className="space-y-1.5">
                           <h4 className="font-medium flex items-center gap-2">
                             <AlertCircle className="h-4 w-4 text-amber-500" />
                             Users Requiring Attention
                           </h4>
-                          <div className="space-y-2">
+                          <div className="space-y-0.5">
                             {usersData?.users?.filter(u => {
                               const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
                               const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
@@ -3855,7 +3855,7 @@ export default function AdminDashboard() {
                               const riskLevel = daysSinceActivity > 30 ? 'high' : daysSinceActivity > 14 ? 'medium' : 'low';
                               return (
                                 <div key={user.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover-elevate">
-                                  <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-1.5">
                                     <div className={`w-2 h-2 rounded-full ${riskLevel === 'high' ? 'bg-red-500' : riskLevel === 'medium' ? 'bg-amber-500' : 'bg-yellow-500'}`} />
                                     <div>
                                       <p className="font-medium">{user.firstName || user.email?.split('@')[0] || 'Unknown'}</p>
@@ -3893,9 +3893,9 @@ export default function AdminDashboard() {
                 {/* Cohort Analysis - Show only when users-cohorts is selected */}
                 {activeSection === 'users-cohorts' && usersAnalytics?.cohortAnalysis && (
                   <Card data-testid="card-cohort-analysis">
-                    <CardHeader>
-                      <CardTitle>User Retention Cohort Analysis</CardTitle>
-                      <CardDescription>Week-over-week retention rates by cohort</CardDescription>
+                    <CardHeader className="p-2 pb-1">
+                      <CardTitle className="text-[10px] font-semibold">User Retention Cohort Analysis</CardTitle>
+                      <CardDescription className="text-[9px]">Week-over-week retention rates by cohort</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="overflow-x-auto">
@@ -3972,14 +3972,14 @@ export default function AdminDashboard() {
 
                 {/* User Management Table - Always shown at bottom */}
                 <Card>
-                  <CardHeader>
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <CardHeader className="p-2 pb-1">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-1.5">
                       <div>
-                        <CardTitle>User Management</CardTitle>
-                        <CardDescription>View, search, and manage all platform users</CardDescription>
+                        <CardTitle className="text-[10px] font-semibold">User Management</CardTitle>
+                        <CardDescription className="text-[9px]">View, search, and manage all platform users</CardDescription>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         {/* Hide Demo Users Toggle */}
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border bg-muted/30">
                           <Label htmlFor="hide-demo-users" className="text-sm font-medium cursor-pointer">
@@ -4162,7 +4162,7 @@ export default function AdminDashboard() {
 
                   <CardContent>
                     {usersLoading ? (
-                      <div className="space-y-3">
+                      <div className="space-y-1">
                         {Array.from({ length: usersPageSize }).map((_, i) => (
                           <ShimmerSkeleton key={i} />
                         ))}
@@ -4468,25 +4468,25 @@ export default function AdminDashboard() {
 
                 {/* Plans Section */}
                 {activeSection.startsWith('plans') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="space-y-6"
+                className="space-y-1.5"
               >
                 {/* Plan Analytics */}
                 {plansAnalytics && (plansAnalytics.completionFunnel?.length > 0 || plansAnalytics.statusDistribution?.length > 0) && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                     {/* Plan Completion Funnel */}
                     {plansAnalytics.completionFunnel && plansAnalytics.completionFunnel.length > 0 && (
                       <Card data-testid="card-plan-completion-funnel">
-                        <CardHeader>
-                          <CardTitle>Plan Completion Funnel</CardTitle>
-                          <CardDescription>From creation to completion</CardDescription>
+                        <CardHeader className="p-2 pb-1">
+                          <CardTitle className="text-[10px] font-semibold">Plan Completion Funnel</CardTitle>
+                          <CardDescription className="text-[9px]">From creation to completion</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <ResponsiveContainer width="100%" height={300}>
+                          <ResponsiveContainer width="100%" height={80}>
                             <FunnelChart>
                               <RechartsTooltip
                                 contentStyle={{
@@ -4513,12 +4513,12 @@ export default function AdminDashboard() {
                     {/* Status Distribution */}
                     {plansAnalytics.statusDistribution && plansAnalytics.statusDistribution.length > 0 && (
                       <Card data-testid="card-plan-status-distribution">
-                        <CardHeader>
-                          <CardTitle>Plan Status Distribution</CardTitle>
-                          <CardDescription>Current status breakdown</CardDescription>
+                        <CardHeader className="p-2 pb-1">
+                          <CardTitle className="text-[10px] font-semibold">Plan Status Distribution</CardTitle>
+                          <CardDescription className="text-[9px]">Current status breakdown</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <ResponsiveContainer width="100%" height={300}>
+                          <ResponsiveContainer width="100%" height={80}>
                             <RechartsPieChart>
                               <Pie
                                 data={plansAnalytics.statusDistribution}
@@ -4551,14 +4551,14 @@ export default function AdminDashboard() {
 
                 {/* Plans Management Table */}
                 <Card>
-                  <CardHeader>
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <CardHeader className="p-2 pb-1">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-1.5">
                       <div>
-                        <CardTitle>Business Plans Management</CardTitle>
-                        <CardDescription>View and manage all business plans</CardDescription>
+                        <CardTitle className="text-[10px] font-semibold">Business Plans Management</CardTitle>
+                        <CardDescription className="text-[9px]">View and manage all business plans</CardDescription>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         {/* Filter Controls */}
                         <Select
                           value={planFilters.tierFilters?.[0] || 'all'}
@@ -4631,7 +4631,7 @@ export default function AdminDashboard() {
 
                   <CardContent>
                     {plansLoading ? (
-                      <div className="space-y-3">
+                      <div className="space-y-1">
                         {Array.from({ length: plansPageSize }).map((_, i) => (
                           <ShimmerSkeleton key={i} />
                         ))}
@@ -4825,18 +4825,18 @@ export default function AdminDashboard() {
 
                 {/* Tool Performance Section - 5 Unique Advanced Pages */}
                 {activeSection.startsWith('tools') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="space-y-6"
+                      className="space-y-1.5"
                     >
                       {/* 1. USAGE ANALYTICS - Comprehensive Tool Usage Insights */}
                       {activeSection === 'tools-usage' && (
                         <>
                           {/* Usage Overview Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             {[
                               { label: 'Total Tool Uses', value: '12,847', change: '+18%', icon: BarChart3, color: 'blue' },
                               { label: 'Unique Users', value: '342', change: '+12%', icon: Users, color: 'green' },
@@ -4854,7 +4854,7 @@ export default function AdminDashboard() {
                                     <div className="flex items-center justify-between">
                                       <div>
                                         <p className="text-sm text-muted-foreground">{stat.label}</p>
-                                        <p className="text-xl font-bold">{stat.value}</p>
+                                        <p className="text-sm font-bold">{stat.value}</p>
                                         <Badge className={`mt-2 bg-${stat.color}-500/10 text-${stat.color}-500`}>{stat.change}</Badge>
                                       </div>
                                       <stat.icon className={`h-10 w-10 text-${stat.color}-500 opacity-50`} />
@@ -4867,11 +4867,11 @@ export default function AdminDashboard() {
 
                           {/* Usage Trends Chart */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle>Tool Usage Trends</CardTitle>
-                                  <CardDescription>Daily usage patterns over 30 days with interactive brush</CardDescription>
+                                  <CardTitle className="text-[10px] font-semibold">Tool Usage Trends</CardTitle>
+                                  <CardDescription className="text-[9px]">Daily usage patterns over 30 days with interactive brush</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge variant="outline" className="text-green-500 border-green-500">
@@ -4911,14 +4911,14 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Category Breakdown & User Segments */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Usage by Category</CardTitle>
-                                <CardDescription>Tool usage distribution across categories</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Usage by Category</CardTitle>
+                                <CardDescription className="text-[9px]">Tool usage distribution across categories</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {[
                                     { category: 'Compliance', uses: 3420, percent: 27, color: '#22c55e' },
                                     { category: 'Business Planning', uses: 2890, percent: 23, color: '#3b82f6' },
@@ -4932,7 +4932,7 @@ export default function AdminDashboard() {
                                       initial={{ opacity: 0, x: -20 }}
                                       animate={{ opacity: 1, x: 0 }}
                                       transition={{ delay: index * 0.08 }}
-                                      className="space-y-2"
+                                      className="space-y-0.5"
                                     >
                                       <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
@@ -4957,9 +4957,9 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Usage by User Tier</CardTitle>
-                                <CardDescription>How different subscription tiers use tools</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Usage by User Tier</CardTitle>
+                                <CardDescription className="text-[9px]">How different subscription tiers use tools</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <ResponsiveContainer width="100%" height={280}>
@@ -5002,23 +5002,23 @@ export default function AdminDashboard() {
                           <Card className="bg-gradient-to-r from-purple-500/10 via-blue-500/5 to-cyan-500/10 border-purple-500/20">
                             <CardContent className="py-6">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <div className="p-3 rounded-xl bg-purple-500 text-white">
                                     <Grid className="h-6 w-6" />
                                   </div>
                                   <div>
                                     <p className="text-sm text-muted-foreground">Usage Heatmap Analysis</p>
-                                    <p className="text-lg font-bold">Peak: Tue-Thu, 10am-2pm GMT</p>
+                                    <p className="text-sm font-bold">Peak: Tue-Thu, 10am-2pm GMT</p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-1.5">
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Busiest Hour</p>
-                                    <p className="text-xl font-bold">11:00</p>
+                                    <p className="text-sm font-bold">11:00</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Busiest Day</p>
-                                    <p className="text-xl font-bold">Wednesday</p>
+                                    <p className="text-sm font-bold">Wednesday</p>
                                   </div>
                                 </div>
                               </div>
@@ -5027,9 +5027,9 @@ export default function AdminDashboard() {
 
                           {/* Hourly Heatmap */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>24-Hour Usage Distribution</CardTitle>
-                              <CardDescription>Tool activity intensity by hour of day</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">24-Hour Usage Distribution</CardTitle>
+                              <CardDescription className="text-[9px]">Tool activity intensity by hour of day</CardDescription>
                             </CardHeader>
                             <CardContent>
                               <div className="grid grid-cols-12 gap-2">
@@ -5052,7 +5052,7 @@ export default function AdminDashboard() {
                                       </TooltipTrigger>
                                       <TooltipContent>
                                         <p>{hour.count} tool uses at {hour.hour}:00</p>
-                                        <p className="text-xs text-muted-foreground">{((hour.count / maxCount) * 100).toFixed(0)}% of peak</p>
+                                        <p className="text-[9px] text-muted-foreground">{((hour.count / maxCount) * 100).toFixed(0)}% of peak</p>
                                       </TooltipContent>
                                     </Tooltip>
                                   );
@@ -5065,19 +5065,19 @@ export default function AdminDashboard() {
 
                           {/* Weekly Heatmap Grid */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>Weekly Activity Pattern</CardTitle>
-                              <CardDescription>Heatmap showing usage by day and time period</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">Weekly Activity Pattern</CardTitle>
+                              <CardDescription className="text-[9px]">Heatmap showing usage by day and time period</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-4">
+                              <div className="space-y-1.5">
                                 {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, dayIndex) => (
                                   <motion.div
                                     key={day}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: dayIndex * 0.08 }}
-                                    className="flex items-center gap-4"
+                                    className="flex items-center gap-1.5"
                                   >
                                     <span className="w-24 text-sm font-medium">{day}</span>
                                     <div className="flex-1 grid grid-cols-6 gap-2">
@@ -5095,7 +5095,7 @@ export default function AdminDashboard() {
                                             </TooltipTrigger>
                                             <TooltipContent>
                                               <p>{day} - {period}</p>
-                                              <p className="text-xs text-muted-foreground">{Math.round(adjustedIntensity)}% activity</p>
+                                              <p className="text-[9px] text-muted-foreground">{Math.round(adjustedIntensity)}% activity</p>
                                             </TooltipContent>
                                           </Tooltip>
                                         );
@@ -5125,14 +5125,14 @@ export default function AdminDashboard() {
                         <>
                           {/* Top Tools Leaderboard */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <Zap className="h-5 w-5 text-amber-500" />
                                     Tool Leaderboard
                                   </CardTitle>
-                                  <CardDescription>Top 15 most used tools by usage count</CardDescription>
+                                  <CardDescription className="text-[9px]">Top 15 most used tools by usage count</CardDescription>
                                 </div>
                                 <Badge className="bg-amber-500 text-white">
                                   <Crown className="h-3 w-3 mr-1" />
@@ -5141,7 +5141,7 @@ export default function AdminDashboard() {
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-3">
+                              <div className="space-y-1">
                                 {(() => {
                                   const defaultTools = [
                                     { toolName: 'Business Plan Generator', usageCount: 1847 },
@@ -5211,11 +5211,11 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Radial Bar Chart & Category Treemap */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Top Tools - Radial View</CardTitle>
-                                <CardDescription>Circular visualization of tool popularity</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Top Tools - Radial View</CardTitle>
+                                <CardDescription className="text-[9px]">Circular visualization of tool popularity</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 {(() => {
@@ -5266,9 +5266,9 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Category Treemap</CardTitle>
-                                <CardDescription>Hierarchical view of tool categories</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Category Treemap</CardTitle>
+                                <CardDescription className="text-[9px]">Hierarchical view of tool categories</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 {(() => {
@@ -5310,7 +5310,7 @@ export default function AdminDashboard() {
                       {activeSection === 'tools-engagement' && (
                         <>
                           {/* Engagement KPIs */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             {[
                               { label: 'Avg. Session Duration', value: '14.2 min', change: '+2.3 min', icon: Clock, color: 'blue' },
                               { label: 'Tools per Session', value: '3.8', change: '+0.5', icon: Layers, color: 'purple' },
@@ -5343,12 +5343,12 @@ export default function AdminDashboard() {
 
                           {/* User Journey Funnel */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>User Engagement Funnel</CardTitle>
-                              <CardDescription>How users progress through the tool ecosystem</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">User Engagement Funnel</CardTitle>
+                              <CardDescription className="text-[9px]">How users progress through the tool ecosystem</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-4">
+                              <div className="space-y-1.5">
                                 {[
                                   { stage: 'Visited Tools Hub', users: 450, percent: 100, color: '#3b82f6' },
                                   { stage: 'Opened First Tool', users: 380, percent: 84, color: '#22c55e' },
@@ -5362,11 +5362,11 @@ export default function AdminDashboard() {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.1 }}
-                                    className="flex items-center gap-4"
+                                    className="flex items-center gap-1.5"
                                   >
                                     <div className="w-48">
                                       <p className="font-medium text-sm">{item.stage}</p>
-                                      <p className="text-xs text-muted-foreground">{item.users} users</p>
+                                      <p className="text-[9px] text-muted-foreground">{item.users} users</p>
                                     </div>
                                     <div className="flex-1 relative h-8 rounded-lg overflow-hidden bg-muted/30">
                                       <motion.div
@@ -5386,14 +5386,14 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Engagement by Feature */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Feature Engagement</CardTitle>
-                                <CardDescription>Which features users interact with most</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Feature Engagement</CardTitle>
+                                <CardDescription className="text-[9px]">Which features users interact with most</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {[
                                     { feature: 'Save Progress', engagement: 89, color: '#22c55e' },
                                     { feature: 'Smart Tips', engagement: 78, color: '#3b82f6' },
@@ -5406,7 +5406,7 @@ export default function AdminDashboard() {
                                       initial={{ opacity: 0 }}
                                       animate={{ opacity: 1 }}
                                       transition={{ delay: index * 0.1 }}
-                                      className="flex items-center gap-4"
+                                      className="flex items-center gap-1.5"
                                     >
                                       <span className="w-32 text-sm font-medium">{item.feature}</span>
                                       <div className="flex-1 h-4 rounded-full bg-muted overflow-hidden">
@@ -5426,12 +5426,12 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Session Depth Analysis</CardTitle>
-                                <CardDescription>How deep users go in each session</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Session Depth Analysis</CardTitle>
+                                <CardDescription className="text-[9px]">How deep users go in each session</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <ResponsiveContainer width="100%" height={250}>
+                                <ResponsiveContainer width="100%" height={80}>
                                   <RechartsBarChart data={[
                                     { depth: '1 tool', sessions: 145 },
                                     { depth: '2-3 tools', sessions: 234 },
@@ -5461,7 +5461,7 @@ export default function AdminDashboard() {
                           <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-teal-500/10 border-green-500/20">
                             <CardContent className="py-6">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <motion.div
                                     className="p-3 rounded-xl bg-green-500 text-white"
                                     animate={{ rotate: [0, 360] }}
@@ -5471,21 +5471,21 @@ export default function AdminDashboard() {
                                   </motion.div>
                                   <div>
                                     <p className="text-sm text-muted-foreground">Overall Completion Rate</p>
-                                    <p className="text-xl font-bold text-green-500">73.4%</p>
+                                    <p className="text-xs font-bold text-green-500">73.4%</p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-1.5">
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Fully Completed</p>
-                                    <p className="text-xl font-bold">5,847</p>
+                                    <p className="text-sm font-bold">5,847</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Partially</p>
-                                    <p className="text-xl font-bold">2,134</p>
+                                    <p className="text-sm font-bold">2,134</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Abandoned</p>
-                                    <p className="text-xl font-bold">866</p>
+                                    <p className="text-sm font-bold">866</p>
                                   </div>
                                 </div>
                               </div>
@@ -5494,11 +5494,11 @@ export default function AdminDashboard() {
 
                           {/* Completion by Tool */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle>Completion Rates by Tool</CardTitle>
-                                  <CardDescription>Success rates for each tool</CardDescription>
+                                  <CardTitle className="text-[10px] font-semibold">Completion Rates by Tool</CardTitle>
+                                  <CardDescription className="text-[9px]">Success rates for each tool</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <div className="flex items-center gap-1">
@@ -5517,7 +5517,7 @@ export default function AdminDashboard() {
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                                 {[
                                   { tool: 'Document Checklist', rate: 94, started: 987 },
                                   { tool: 'Visa Timeline Planner', rate: 89, started: 742 },
@@ -5565,13 +5565,13 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Completion Trends - Real Data */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <div className="flex items-center justify-between">
                                   <div>
-                                    <CardTitle>Current Completion Rate</CardTitle>
-                                    <CardDescription>Real-time plan completion status</CardDescription>
+                                    <CardTitle className="text-[10px] font-semibold">Current Completion Rate</CardTitle>
+                                    <CardDescription className="text-[9px]">Real-time plan completion status</CardDescription>
                                   </div>
                                   <Badge variant="outline" className="text-green-500 border-green-500/30">Live</Badge>
                                 </div>
@@ -5589,7 +5589,7 @@ export default function AdminDashboard() {
                                       />
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-xl font-bold">{overviewData.extendedKPIs?.planCompletionRate || 0}%</span>
+                                      <span className="text-[11px] font-bold">{overviewData.extendedKPIs?.planCompletionRate || 0}%</span>
                                       <span className="text-sm text-muted-foreground">Complete</span>
                                     </div>
                                   </div>
@@ -5608,17 +5608,17 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <div className="flex items-center justify-between">
                                   <div>
-                                    <CardTitle>Plan Status Overview</CardTitle>
-                                    <CardDescription>Current business plan distribution</CardDescription>
+                                    <CardTitle className="text-[10px] font-semibold">Plan Status Overview</CardTitle>
+                                    <CardDescription className="text-[9px]">Current business plan distribution</CardDescription>
                                   </div>
                                   <Badge variant="outline" className="text-blue-500 border-blue-500/30">Real-time</Badge>
                                 </div>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {[
                                     { stage: 'Completed Plans', count: overviewData.extendedKPIs?.completedPlans || 0, color: 'green' },
                                     { stage: 'In Progress', count: (overviewData.extendedKPIs?.totalPlans || 0) - (overviewData.extendedKPIs?.completedPlans || 0), color: 'blue' },
@@ -5654,12 +5654,12 @@ export default function AdminDashboard() {
 
                 {/* System Health Section - 5 Unique Advanced Pages */}
                 {activeSection.startsWith('system') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="space-y-6"
+                      className="space-y-1.5"
                     >
                       {/* 1. HEALTH DASHBOARD - Executive System Overview */}
                       {activeSection === 'system-overview' && (
@@ -5668,7 +5668,7 @@ export default function AdminDashboard() {
                           <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-teal-500/10 border-green-500/20">
                             <CardContent className="py-6">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <motion.div
                                     className="p-4 rounded-2xl bg-green-500 text-white"
                                     animate={{ scale: [1, 1.05, 1] }}
@@ -5678,14 +5678,14 @@ export default function AdminDashboard() {
                                   </motion.div>
                                   <div>
                                     <p className="text-sm text-muted-foreground">System Status</p>
-                                    <p className="text-xl font-bold text-green-500">All Systems Operational</p>
+                                    <p className="text-xs font-bold text-green-500">All Systems Operational</p>
                                     <p className="text-sm text-muted-foreground mt-1">Last checked: {new Date().toLocaleTimeString()}</p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-1.5">
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Uptime</p>
-                                    <p className="text-lg font-bold">{systemMetrics?.uptime?.formatted || '99.9%'}</p>
+                                    <p className="text-sm font-bold">{systemMetrics?.uptime?.formatted || '99.9%'}</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Health Score</p>
@@ -5701,7 +5701,7 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Health Status Grid */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             {[
                               { name: 'API Server', status: 'operational', uptime: '99.99%', icon: Server, color: 'green' },
                               { name: 'Database', status: 'operational', uptime: '99.97%', icon: Database, color: 'green' },
@@ -5732,9 +5732,9 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Quick Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <Cpu className="h-5 w-5 text-blue-500" />
                                   CPU Usage
@@ -5750,7 +5750,7 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <HardDrive className="h-5 w-5 text-purple-500" />
                                   Memory
@@ -5768,7 +5768,7 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <Activity className="h-5 w-5 text-green-500" />
                                   Active Connections
@@ -5786,14 +5786,14 @@ export default function AdminDashboard() {
 
                           {/* Admin Actions */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <Settings className="h-5 w-5" />
                                 Quick Actions
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
-                              <div className="flex flex-wrap gap-4">
+                              <div className="flex flex-wrap gap-1.5">
                                 <Button
                                   onClick={async () => {
                                     try {
@@ -5830,7 +5830,7 @@ export default function AdminDashboard() {
                           <Card className="bg-gradient-to-r from-blue-500/10 via-cyan-500/5 to-blue-500/10 border-blue-500/20">
                             <CardContent className="py-6">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <div className="p-3 rounded-xl bg-blue-500 text-white">
                                     <Cpu className="h-6 w-6" />
                                   </div>
@@ -5839,14 +5839,14 @@ export default function AdminDashboard() {
                                     <p className="text-lg font-bold text-blue-500">A+ (Excellent)</p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-1.5">
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Avg Response</p>
-                                    <p className="text-xl font-bold">{systemMetrics?.api?.avgResponseTime || 45}ms</p>
+                                    <p className="text-sm font-bold">{systemMetrics?.api?.avgResponseTime || 45}ms</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Throughput</p>
-                                    <p className="text-xl font-bold">{systemMetrics?.api?.requestsPerMinute || 1250}/min</p>
+                                    <p className="text-sm font-bold">{systemMetrics?.api?.requestsPerMinute || 1250}/min</p>
                                   </div>
                                 </div>
                               </div>
@@ -5854,11 +5854,11 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* CPU & Memory Gauges */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
-                                <CardTitle>CPU Performance</CardTitle>
-                                <CardDescription>Real-time processor utilization</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">CPU Performance</CardTitle>
+                                <CardDescription className="text-[9px]">Real-time processor utilization</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="flex items-center justify-center mb-6">
@@ -5878,7 +5878,7 @@ export default function AdminDashboard() {
                                       />
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                      <span className="text-xl font-bold">{Math.min(100, Math.round(((systemMetrics?.cpu?.user || 0) + (systemMetrics?.cpu?.system || 0)) / 10000) || 35)}%</span>
+                                      <span className="text-[11px] font-bold">{Math.min(100, Math.round(((systemMetrics?.cpu?.user || 0) + (systemMetrics?.cpu?.system || 0)) / 10000) || 35)}%</span>
                                       <span className="text-sm text-muted-foreground">CPU</span>
                                     </div>
                                   </div>
@@ -5901,9 +5901,9 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Memory Usage</CardTitle>
-                                <CardDescription>RAM allocation breakdown</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Memory Usage</CardTitle>
+                                <CardDescription className="text-[9px]">RAM allocation breakdown</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="flex items-center justify-center mb-6">
@@ -5923,18 +5923,18 @@ export default function AdminDashboard() {
                                       />
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                      <span className="text-xl font-bold">{systemMetrics?.memory?.percentage || 62}%</span>
+                                      <span className="text-[11px] font-bold">{systemMetrics?.memory?.percentage || 62}%</span>
                                       <span className="text-sm text-muted-foreground">RAM</span>
                                     </div>
                                   </div>
                                 </div>
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {[
                                     { name: 'Application', value: 45, color: '#8b5cf6' },
                                     { name: 'Cache', value: 12, color: '#3b82f6' },
                                     { name: 'System', value: 5, color: '#22c55e' },
                                   ].map((item) => (
-                                    <div key={item.name} className="flex items-center gap-3">
+                                    <div key={item.name} className="flex items-center gap-1.5">
                                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
                                       <span className="text-sm flex-1">{item.name}</span>
                                       <span className="font-medium">{item.value}%</span>
@@ -5947,12 +5947,12 @@ export default function AdminDashboard() {
 
                           {/* Response Time Distribution */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>Response Time Distribution</CardTitle>
-                              <CardDescription>Request latency percentiles</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">Response Time Distribution</CardTitle>
+                              <CardDescription className="text-[9px]">Request latency percentiles</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="grid grid-cols-5 gap-4">
+                              <div className="grid grid-cols-5 gap-1.5">
                                 {[
                                   { percentile: 'p50', value: systemMetrics?.database?.queryTime?.p50 || 12, color: 'green' },
                                   { percentile: 'p75', value: 25, color: 'blue' },
@@ -5984,7 +5984,7 @@ export default function AdminDashboard() {
                           <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-green-500/10 border-green-500/20">
                             <CardContent className="py-6">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <div className="p-3 rounded-xl bg-green-500 text-white">
                                     <Activity className="h-6 w-6" />
                                   </div>
@@ -6004,15 +6004,15 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Core Metrics Overview */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
                             {/* LCP - Largest Contentful Paint */}
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <div className="w-3 h-3 rounded-full bg-blue-500" />
                                   LCP (Largest Contentful Paint)
                                 </CardTitle>
-                                <CardDescription>Loading performance - Target: &lt; 2.5s</CardDescription>
+                                <CardDescription className="text-[9px]">Loading performance - Target: &lt; 2.5s</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center mb-4">
@@ -6025,7 +6025,7 @@ export default function AdminDashboard() {
                                   <p className="text-sm text-muted-foreground mt-1">Average</p>
                                 </div>
                                 {webVitalsData?.ratings?.lcp && (
-                                  <div className="space-y-2">
+                                  <div className="space-y-0.5">
                                     <div className="flex justify-between text-sm">
                                       <span className="text-green-500">Good</span>
                                       <span>{webVitalsData.ratings.lcp.good || 0}%</span>
@@ -6048,12 +6048,12 @@ export default function AdminDashboard() {
 
                             {/* FID - First Input Delay */}
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <div className="w-3 h-3 rounded-full bg-purple-500" />
                                   FID (First Input Delay)
                                 </CardTitle>
-                                <CardDescription>Interactivity - Target: &lt; 100ms</CardDescription>
+                                <CardDescription className="text-[9px]">Interactivity - Target: &lt; 100ms</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center mb-4">
@@ -6066,7 +6066,7 @@ export default function AdminDashboard() {
                                   <p className="text-sm text-muted-foreground mt-1">Average</p>
                                 </div>
                                 {webVitalsData?.ratings?.fid && (
-                                  <div className="space-y-2">
+                                  <div className="space-y-0.5">
                                     <div className="flex justify-between text-sm">
                                       <span className="text-green-500">Good</span>
                                       <span>{webVitalsData.ratings.fid.good || 0}%</span>
@@ -6089,12 +6089,12 @@ export default function AdminDashboard() {
 
                             {/* CLS - Cumulative Layout Shift */}
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <div className="w-3 h-3 rounded-full bg-orange-500" />
                                   CLS (Cumulative Layout Shift)
                                 </CardTitle>
-                                <CardDescription>Visual stability - Target: &lt; 0.1</CardDescription>
+                                <CardDescription className="text-[9px]">Visual stability - Target: &lt; 0.1</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center mb-4">
@@ -6107,7 +6107,7 @@ export default function AdminDashboard() {
                                   <p className="text-sm text-muted-foreground mt-1">Average Score</p>
                                 </div>
                                 {webVitalsData?.ratings?.cls && (
-                                  <div className="space-y-2">
+                                  <div className="space-y-0.5">
                                     <div className="flex justify-between text-sm">
                                       <span className="text-green-500">Good</span>
                                       <span>{webVitalsData.ratings.cls.good || 0}%</span>
@@ -6130,11 +6130,11 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Additional Metrics */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
                             <Card>
-                              <CardHeader>
-                                <CardTitle>FCP (First Contentful Paint)</CardTitle>
-                                <CardDescription>Time to first visible content</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">FCP (First Contentful Paint)</CardTitle>
+                                <CardDescription className="text-[9px]">Time to first visible content</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center">
@@ -6150,9 +6150,9 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>TTFB (Time to First Byte)</CardTitle>
-                                <CardDescription>Server response time</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">TTFB (Time to First Byte)</CardTitle>
+                                <CardDescription className="text-[9px]">Server response time</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center">
@@ -6168,9 +6168,9 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>INP (Interaction to Next Paint)</CardTitle>
-                                <CardDescription>Overall responsiveness</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">INP (Interaction to Next Paint)</CardTitle>
+                                <CardDescription className="text-[9px]">Overall responsiveness</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center">
@@ -6189,9 +6189,9 @@ export default function AdminDashboard() {
                           {/* Performance by Page */}
                           {webVitalsData?.byPage && webVitalsData.byPage.length > 0 && (
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Performance by Page</CardTitle>
-                                <CardDescription>Web vitals breakdown per page</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Performance by Page</CardTitle>
+                                <CardDescription className="text-[9px]">Web vitals breakdown per page</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="overflow-x-auto">
@@ -6231,15 +6231,15 @@ export default function AdminDashboard() {
                           {/* Device Type Distribution */}
                           {webVitalsData?.byDevice && webVitalsData.byDevice.length > 0 && (
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Performance by Device</CardTitle>
-                                <CardDescription>How different devices experience your site</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Performance by Device</CardTitle>
+                                <CardDescription className="text-[9px]">How different devices experience your site</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
                                   {webVitalsData.byDevice.map((device, i) => (
                                     <div key={i} className="p-4 rounded-lg border text-center">
-                                      <p className="text-lg font-semibold capitalize">{device.deviceType || 'Unknown'}</p>
+                                      <p className="text-xs font-semibold capitalize">{device.deviceType || 'Unknown'}</p>
                                       <p className="text-xl font-bold mt-2">
                                         {device.avgLcp ? `${(device.avgLcp / 1000).toFixed(2)}s` : '--'}
                                       </p>
@@ -6282,7 +6282,7 @@ export default function AdminDashboard() {
                           <Card className="bg-gradient-to-r from-purple-500/10 via-violet-500/5 to-purple-500/10 border-purple-500/20">
                             <CardContent className="py-6">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <div className="p-3 rounded-xl bg-purple-500 text-white">
                                     <Database className="h-6 w-6" />
                                   </div>
@@ -6300,14 +6300,14 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Connection Pool */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Connection Pool</CardTitle>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Connection Pool</CardTitle>
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center mb-4">
-                                  <p className="text-2xl font-bold">{systemMetrics?.database?.connections || 8}</p>
+                                  <p className="text-sm font-bold">{systemMetrics?.database?.connections || 8}</p>
                                   <p className="text-muted-foreground">of {systemMetrics?.database?.maxConnections || 100} connections</p>
                                 </div>
                                 <Progress value={((systemMetrics?.database?.connections || 8) / (systemMetrics?.database?.maxConnections || 100)) * 100} className="h-3" />
@@ -6315,11 +6315,11 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Query Performance</CardTitle>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Query Performance</CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   <div className="flex justify-between">
                                     <span className="text-muted-foreground">Avg Query Time</span>
                                     <span className="font-bold">{systemMetrics?.database?.queryTime?.p50 || 12}ms</span>
@@ -6337,12 +6337,12 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Database Size</CardTitle>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Database Size</CardTitle>
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center mb-4">
-                                  <p className="text-2xl font-bold">2.4</p>
+                                  <p className="text-sm font-bold">2.4</p>
                                   <p className="text-muted-foreground">GB used</p>
                                 </div>
                                 <Progress value={24} className="h-3" />
@@ -6353,12 +6353,12 @@ export default function AdminDashboard() {
 
                           {/* Table Statistics */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>Table Statistics</CardTitle>
-                              <CardDescription>Row counts and sizes by table</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">Table Statistics</CardTitle>
+                              <CardDescription className="text-[9px]">Row counts and sizes by table</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-4">
+                              <div className="space-y-1.5">
                                 {[
                                   { table: 'users', rows: 342, size: '45 MB', growth: '+12%' },
                                   { table: 'business_plans', rows: 1247, size: '890 MB', growth: '+28%' },
@@ -6373,7 +6373,7 @@ export default function AdminDashboard() {
                                     transition={{ delay: index * 0.05 }}
                                     className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
                                   >
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
                                       <Database className="h-4 w-4 text-purple-500" />
                                       <span className="font-mono font-medium">{item.table}</span>
                                     </div>
@@ -6397,18 +6397,18 @@ export default function AdminDashboard() {
                           <Card className="bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-amber-500/10 border-amber-500/20">
                             <CardContent className="py-6">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <div className="p-3 rounded-xl bg-amber-500 text-white">
                                     <HardDrive className="h-6 w-6" />
                                   </div>
                                   <div>
                                     <p className="text-sm text-muted-foreground">Total Storage Used</p>
-                                    <p className="text-lg font-bold">4.7 GB <span className="text-lg text-muted-foreground font-normal">of 50 GB</span></p>
+                                    <p className="text-sm font-bold">4.7 GB <span className="text-lg text-muted-foreground font-normal">of 50 GB</span></p>
                                   </div>
                                 </div>
                                 <div className="text-right">
                                   <p className="text-sm text-muted-foreground">Available</p>
-                                  <p className="text-xl font-bold text-green-500">45.3 GB</p>
+                                  <p className="text-xs font-bold text-green-500">45.3 GB</p>
                                 </div>
                               </div>
                               <Progress value={9.4} className="h-3 mt-4" />
@@ -6416,13 +6416,13 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Storage Breakdown */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Storage by Type</CardTitle>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Storage by Type</CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {[
                                     { type: 'Documents', size: '2.1 GB', percent: 45, color: '#3b82f6', icon: FileText },
                                     { type: 'Images', size: '1.4 GB', percent: 30, color: '#22c55e', icon: ImageIcon },
@@ -6434,7 +6434,7 @@ export default function AdminDashboard() {
                                       initial={{ opacity: 0, x: -20 }}
                                       animate={{ opacity: 1, x: 0 }}
                                       transition={{ delay: index * 0.1 }}
-                                      className="space-y-2"
+                                      className="space-y-0.5"
                                     >
                                       <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
@@ -6459,11 +6459,11 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Storage Metrics</CardTitle>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Storage Metrics</CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-1.5">
                                   {[
                                     { label: 'Total Files', value: '12,847', icon: FileText },
                                     { label: 'Avg File Size', value: '365 KB', icon: HardDrive },
@@ -6477,8 +6477,8 @@ export default function AdminDashboard() {
                                       transition={{ delay: index * 0.1 }}
                                       className="p-4 rounded-lg border border-border/50 text-center"
                                     >
-                                      <stat.icon className="h-6 w-6 mx-auto mb-2 text-amber-500" />
-                                      <p className="text-lg font-bold">{stat.value}</p>
+                                      <stat.icon className="h-3 w-3 mx-auto mb-0.5 text-amber-500" />
+                                      <p className="text-sm font-bold">{stat.value}</p>
                                       <p className="text-sm text-muted-foreground">{stat.label}</p>
                                     </motion.div>
                                   ))}
@@ -6489,12 +6489,12 @@ export default function AdminDashboard() {
 
                           {/* Recent Large Files */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>Recent Large Files</CardTitle>
-                              <CardDescription>Files over 1MB uploaded recently</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">Recent Large Files</CardTitle>
+                              <CardDescription className="text-[9px]">Files over 1MB uploaded recently</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-3">
+                              <div className="space-y-1">
                                 {[
                                   { name: 'business-plan-v3.pdf', size: '4.2 MB', user: 'john@example.com', date: '2 hours ago' },
                                   { name: 'financial-model.xlsx', size: '2.8 MB', user: 'sarah@startup.io', date: '5 hours ago' },
@@ -6508,16 +6508,16 @@ export default function AdminDashboard() {
                                     transition={{ delay: index * 0.1 }}
                                     className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
                                   >
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
                                       <FileText className="h-5 w-5 text-amber-500" />
                                       <div>
                                         <p className="font-medium">{file.name}</p>
-                                        <p className="text-xs text-muted-foreground">{file.user}</p>
+                                        <p className="text-[9px] text-muted-foreground">{file.user}</p>
                                       </div>
                                     </div>
                                     <div className="text-right">
                                       <p className="font-bold">{file.size}</p>
-                                      <p className="text-xs text-muted-foreground">{file.date}</p>
+                                      <p className="text-[9px] text-muted-foreground">{file.date}</p>
                                     </div>
                                   </motion.div>
                                 ))}
@@ -6534,7 +6534,7 @@ export default function AdminDashboard() {
                           <Card className="bg-gradient-to-r from-cyan-500/10 via-sky-500/5 to-cyan-500/10 border-cyan-500/20">
                             <CardContent className="py-6">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <motion.div
                                     className="p-3 rounded-xl bg-cyan-500 text-white"
                                     animate={{ rotate: [0, 360] }}
@@ -6547,14 +6547,14 @@ export default function AdminDashboard() {
                                     <p className="text-lg font-bold text-cyan-500">All Endpoints Healthy</p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-1.5">
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Requests/min</p>
-                                    <p className="text-xl font-bold">{systemMetrics?.api?.requestsPerMinute || 1245}</p>
+                                    <p className="text-sm font-bold">{systemMetrics?.api?.requestsPerMinute || 1245}</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Error Rate</p>
-                                    <p className="text-xl font-bold text-green-500">{systemMetrics?.api?.errorRate || 0.02}%</p>
+                                    <p className="text-xs font-bold text-green-500">{systemMetrics?.api?.errorRate || 0.02}%</p>
                                   </div>
                                 </div>
                               </div>
@@ -6562,7 +6562,7 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* API KPIs */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             {[
                               { label: 'Total Requests Today', value: '1.2M', change: '+15%', icon: BarChart3, color: 'blue' },
                               { label: 'Avg Latency', value: `${systemMetrics?.api?.avgResponseTime || 45}ms`, change: '-8%', icon: Clock, color: 'green' },
@@ -6583,7 +6583,7 @@ export default function AdminDashboard() {
                                         {kpi.change}
                                       </Badge>
                                     </div>
-                                    <p className="text-lg font-bold">{kpi.value}</p>
+                                    <p className="text-sm font-bold">{kpi.value}</p>
                                     <p className="text-sm text-muted-foreground">{kpi.label}</p>
                                   </CardContent>
                                 </Card>
@@ -6593,12 +6593,12 @@ export default function AdminDashboard() {
 
                           {/* Endpoint Performance */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>Top Endpoints by Traffic</CardTitle>
-                              <CardDescription>Most called API endpoints in the last 24 hours</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">Top Endpoints by Traffic</CardTitle>
+                              <CardDescription className="text-[9px]">Most called API endpoints in the last 24 hours</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-4">
+                              <div className="space-y-1.5">
                                 {[
                                   { endpoint: 'GET /api/auth/user', calls: 45230, latency: 12, status: 'healthy' },
                                   { endpoint: 'POST /api/tools/save', calls: 23450, latency: 45, status: 'healthy' },
@@ -6613,7 +6613,7 @@ export default function AdminDashboard() {
                                     transition={{ delay: index * 0.08 }}
                                     className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover-elevate"
                                   >
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
                                       <div className={`w-2 h-2 rounded-full ${ep.status === 'healthy' ? 'bg-green-500' : 'bg-amber-500'}`} />
                                       <code className="text-sm font-mono">{ep.endpoint}</code>
                                     </div>
@@ -6632,12 +6632,12 @@ export default function AdminDashboard() {
 
                           {/* Rate Limiting */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>Rate Limiting Status</CardTitle>
-                              <CardDescription>Current rate limit utilization by tier</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">Rate Limiting Status</CardTitle>
+                              <CardDescription className="text-[9px]">Current rate limit utilization by tier</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
                                 {[
                                   { tier: 'Free', limit: '100/hr', used: 45, color: '#94a3b8' },
                                   { tier: 'Premium', limit: '1000/hr', used: 23, color: '#3b82f6' },
@@ -6663,12 +6663,12 @@ export default function AdminDashboard() {
 
                 {/* Revenue & Subscriptions Section - 5 Unique Advanced Pages */}
                 {activeSection.startsWith('revenue') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="space-y-6"
+                      className="space-y-1.5"
                     >
                       {/* 1. REVENUE DASHBOARD - Executive Overview with Real-Time Metrics */}
                       {activeSection === 'revenue-overview' && (
@@ -6676,7 +6676,7 @@ export default function AdminDashboard() {
                           {revenueAnalyticsLoading ? (
                             <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-teal-500/10 border-green-500/20">
                               <CardContent className="py-8">
-                                <div className="flex items-center justify-center gap-3">
+                                <div className="flex items-center justify-center gap-1.5">
                                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500" />
                                   <span className="text-muted-foreground">Loading real-time Stripe revenue data...</span>
                                 </div>
@@ -6687,8 +6687,8 @@ export default function AdminDashboard() {
                               {/* Real-Time Revenue Ticker */}
                               <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-teal-500/10 border-green-500/20">
                                 <CardContent className="py-4">
-                                  <div className="flex items-center justify-between flex-wrap gap-4">
-                                    <div className="flex items-center gap-4">
+                                  <div className="flex items-center justify-between flex-wrap gap-1.5">
+                                    <div className="flex items-center gap-1.5">
                                       <motion.div
                                         className="p-3 rounded-xl bg-green-500 text-white"
                                         animate={{ scale: [1, 1.05, 1] }}
@@ -6698,17 +6698,17 @@ export default function AdminDashboard() {
                                       </motion.div>
                                       <div>
                                         <p className="text-sm text-muted-foreground">Live Revenue Today</p>
-                                        <p className="text-xl font-bold text-green-500">£{(revenueAnalytics?.revenueToday || 0).toFixed(2)}</p>
+                                        <p className="text-xs font-bold text-green-500">£{(revenueAnalytics?.revenueToday || 0).toFixed(2)}</p>
                                       </div>
                                     </div>
                                     <div className="flex items-center justify-center gap-6 flex-wrap flex-1">
                                       <div className="text-center">
                                         <p className="text-sm text-muted-foreground">This Week</p>
-                                        <p className="text-xl font-bold">£{(revenueAnalytics?.revenueThisWeek || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                        <p className="text-sm font-bold">£{(revenueAnalytics?.revenueThisWeek || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                       </div>
                                       <div className="text-center">
                                         <p className="text-sm text-muted-foreground">This Month</p>
-                                        <p className="text-xl font-bold">£{(revenueAnalytics?.revenueThisMonth || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                        <p className="text-sm font-bold">£{(revenueAnalytics?.revenueThisMonth || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                       </div>
                                       <Badge className={`${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'bg-green-500' : 'bg-red-500'} text-white px-3 py-1.5 flex items-center`}>
                                         {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
@@ -6721,17 +6721,17 @@ export default function AdminDashboard() {
                               </Card>
 
                               {/* Revenue KPIs Grid */}
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                                   <Card className="hover-elevate border-l-4 border-l-green-500">
                                     <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                      <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
+                                      <CardTitle className="text-[10px] font-medium text-muted-foreground">Total Revenue</CardTitle>
                                       <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
                                         <DollarSign className="h-4 w-4" />
                                       </div>
                                     </CardHeader>
                                     <CardContent>
-                                      <div className="text-xl font-bold">£{(revenueAnalytics?.revenueAllTime || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                      <div className="text-[11px] font-bold">£{(revenueAnalytics?.revenueAllTime || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                       <div className="flex items-center gap-2 mt-2">
                                         <Badge className="bg-green-500/10 text-green-500">{revenueAnalytics?.totalTransactions || 0} transactions</Badge>
                                         <span className="text-xs text-muted-foreground">all-time</span>
@@ -6744,13 +6744,13 @@ export default function AdminDashboard() {
                                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                                   <Card className="hover-elevate border-l-4 border-l-blue-500">
                                     <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                      <CardTitle className="text-sm font-medium text-muted-foreground">MRR</CardTitle>
+                                      <CardTitle className="text-[10px] font-medium text-muted-foreground">MRR</CardTitle>
                                       <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
                                         <TrendingUp className="h-4 w-4" />
                                       </div>
                                     </CardHeader>
                                     <CardContent>
-                                      <div className="text-xl font-bold">£{(revenueAnalytics?.mrr || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                      <div className="text-[11px] font-bold">£{(revenueAnalytics?.mrr || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                       <div className="flex items-center gap-2 mt-2">
                                         <Badge className={`${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
                                           {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? '+' : ''}{revenueAnalytics?.monthlyGrowth || 0}%
@@ -6765,13 +6765,13 @@ export default function AdminDashboard() {
                                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                                   <Card className="hover-elevate border-l-4 border-l-purple-500">
                                     <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                      <CardTitle className="text-sm font-medium text-muted-foreground">ARR</CardTitle>
+                                      <CardTitle className="text-[10px] font-medium text-muted-foreground">ARR</CardTitle>
                                       <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
                                         <CalendarIcon className="h-4 w-4" />
                                       </div>
                                     </CardHeader>
                                     <CardContent>
-                                      <div className="text-xl font-bold">£{(revenueAnalytics?.arr || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                      <div className="text-[11px] font-bold">£{(revenueAnalytics?.arr || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                       <div className="flex items-center gap-2 mt-2">
                                         <Badge className="bg-purple-500/10 text-purple-500">{revenueAnalytics?.activeSubscriptions || 0} active subs</Badge>
                                         <span className="text-xs text-muted-foreground">projected</span>
@@ -6784,13 +6784,13 @@ export default function AdminDashboard() {
                                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                                   <Card className="hover-elevate border-l-4 border-l-amber-500">
                                     <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                                      <CardTitle className="text-sm font-medium text-muted-foreground">Avg. Order Value</CardTitle>
+                                      <CardTitle className="text-[10px] font-medium text-muted-foreground">Avg. Order Value</CardTitle>
                                       <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
                                         <Target className="h-4 w-4" />
                                       </div>
                                     </CardHeader>
                                     <CardContent>
-                                      <div className="text-xl font-bold">£{(revenueAnalytics?.avgOrderValue || 0).toFixed(2)}</div>
+                                      <div className="text-[11px] font-bold">£{(revenueAnalytics?.avgOrderValue || 0).toFixed(2)}</div>
                                       <div className="flex items-center gap-2 mt-2">
                                         <Badge className="bg-amber-500/10 text-amber-500">{revenueAnalytics?.totalCustomers || 0} customers</Badge>
                                         <span className="text-xs text-muted-foreground">per transaction</span>
@@ -6802,13 +6802,13 @@ export default function AdminDashboard() {
                               </div>
 
                               {/* Revenue Charts */}
-                              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                              <div className="grid grid-cols-1 lg:grid-cols-3 gap-1.5">
                                 <Card className="lg:col-span-2">
-                                  <CardHeader>
+                                  <CardHeader className="p-2 pb-1">
                                     <div className="flex items-center justify-between">
                                       <div>
-                                        <CardTitle>Revenue Trend (12 Months)</CardTitle>
-                                        <CardDescription>Monthly revenue from Stripe payments</CardDescription>
+                                        <CardTitle className="text-[10px] font-semibold">Revenue Trend (12 Months)</CardTitle>
+                                        <CardDescription className="text-[9px]">Monthly revenue from Stripe payments</CardDescription>
                                       </div>
                                       <Badge variant="outline" className={`${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'text-green-500 border-green-500' : 'text-red-500 border-red-500'}`}>
                                         {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
@@ -6817,7 +6817,7 @@ export default function AdminDashboard() {
                                     </div>
                                   </CardHeader>
                                   <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
+                                    <ResponsiveContainer width="100%" height={80}>
                                       <RechartsAreaChart data={revenueAnalytics?.monthlyTrend || []}>
                                     <defs>
                                       <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
@@ -6840,12 +6840,12 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Revenue by Tier</CardTitle>
-                                <CardDescription>Monthly revenue from each tier</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Revenue by Tier</CardTitle>
+                                <CardDescription className="text-[9px]">Monthly revenue from each tier</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {(() => {
                                     const tierData = [
                                       { source: 'Basic (£9)', amount: revenueAnalytics?.revenueByTier?.basic || 0, color: 'bg-green-500' },
@@ -6862,7 +6862,7 @@ export default function AdminDashboard() {
                                           initial={{ opacity: 0, x: -20 }}
                                           animate={{ opacity: 1, x: 0 }}
                                           transition={{ delay: index * 0.1 }}
-                                          className="space-y-2"
+                                          className="space-y-0.5"
                                         >
                                           <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
@@ -6891,14 +6891,14 @@ export default function AdminDashboard() {
 
                           {/* Revenue vs Target Comparison Chart */}
                           <Card className="border-l-4 border-l-primary">
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <Target className="h-5 w-5 text-primary" />
                                     Revenue vs Target (Year 1)
                                   </CardTitle>
-                                  <CardDescription>Actual performance compared to Year 1 projections (£72,000 target)</CardDescription>
+                                  <CardDescription className="text-[9px]">Actual performance compared to Year 1 projections (£72,000 target)</CardDescription>
                                 </div>
                                 <Badge variant="outline" className="bg-primary/10 text-primary">
                                   Since Nov 26, 2025
@@ -6923,26 +6923,26 @@ export default function AdminDashboard() {
                                 const isAheadOfTarget = actualRevenue >= expectedRevenue;
                                 
                                 return (
-                                  <div className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                      <div className="p-4 rounded-lg bg-muted/50 border">
-                                        <p className="text-xs text-muted-foreground">Year 1 Target</p>
-                                        <p className="text-lg font-bold">£{year1Target.toLocaleString()}</p>
+                                  <div className="space-y-1.5">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
+                                      <div className="p-1.5 rounded-lg bg-muted/50 border">
+                                        <p className="text-[9px] text-muted-foreground">Year 1 Target</p>
+                                        <p className="text-sm font-bold">£{year1Target.toLocaleString()}</p>
                                         <p className="text-xs text-muted-foreground mt-1">£{monthlyTarget.toLocaleString()}/mo average</p>
                                       </div>
-                                      <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                                        <p className="text-xs text-muted-foreground">Actual Revenue</p>
+                                      <div className="p-1.5 rounded-lg bg-green-500/10 border border-green-500/20">
+                                        <p className="text-[9px] text-muted-foreground">Actual Revenue</p>
                                         <p className="text-lg font-bold text-green-500">£{actualRevenue.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                         <p className="text-xs text-muted-foreground mt-1">{daysSinceLaunch} days since launch</p>
                                       </div>
                                       <div className={`p-4 rounded-lg ${isAheadOfTarget ? 'bg-green-500/10 border-green-500/20' : 'bg-amber-500/10 border-amber-500/20'} border`}>
-                                        <p className="text-xs text-muted-foreground">Projected ARR (based on MRR)</p>
+                                        <p className="text-[9px] text-muted-foreground">Projected ARR (based on MRR)</p>
                                         <p className={`text-lg font-bold ${isAheadOfTarget ? 'text-green-500' : 'text-amber-500'}`}>£{projectedARR.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                         <p className="text-xs text-muted-foreground mt-1">{projectedARR >= year1Target ? 'On track' : 'Below target'}</p>
                                       </div>
                                     </div>
                                     
-                                    <div className="space-y-2">
+                                    <div className="space-y-0.5">
                                       <div className="flex items-center justify-between text-sm">
                                         <span className="text-muted-foreground">Progress to Year 1 Target</span>
                                         <span className="font-bold">{progressPercent.toFixed(1)}%</span>
@@ -6970,7 +6970,7 @@ export default function AdminDashboard() {
                                     </div>
 
                                     <div className="pt-4 border-t">
-                                      <ResponsiveContainer width="100%" height={200}>
+                                      <ResponsiveContainer width="100%" height={70}>
                                         <RechartsBarChart
                                           data={[
                                             { name: 'Target (Expected)', value: expectedRevenue, fill: 'hsl(var(--muted-foreground))' },
@@ -6999,11 +6999,11 @@ export default function AdminDashboard() {
 
                           {/* Recent Transactions - Real Stripe Data */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle>Recent Transactions</CardTitle>
-                                  <CardDescription>Latest payment activities from Stripe</CardDescription>
+                                  <CardTitle className="text-[10px] font-semibold">Recent Transactions</CardTitle>
+                                  <CardDescription className="text-[9px]">Latest payment activities from Stripe</CardDescription>
                                 </div>
                                 <Button 
                                   variant="outline" 
@@ -7024,7 +7024,7 @@ export default function AdminDashboard() {
                                   <span className="ml-2 text-muted-foreground">Loading transactions...</span>
                                 </div>
                               ) : recentTransactionsData?.transactions && recentTransactionsData.transactions.length > 0 ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {recentTransactionsData.transactions.map((tx, index) => (
                                     <motion.div
                                       key={tx.id || index}
@@ -7033,7 +7033,7 @@ export default function AdminDashboard() {
                                       transition={{ delay: index * 0.05 }}
                                       className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
                                     >
-                                      <div className="flex items-center gap-3">
+                                      <div className="flex items-center gap-1.5">
                                         <Avatar className="h-10 w-10">
                                           <AvatarFallback className="bg-primary/10 text-primary">
                                             {tx.user.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'CU'}
@@ -7041,10 +7041,10 @@ export default function AdminDashboard() {
                                         </Avatar>
                                         <div>
                                           <p className="font-medium">{tx.user}</p>
-                                          <p className="text-xs text-muted-foreground">{tx.email}</p>
+                                          <p className="text-[9px] text-muted-foreground">{tx.email}</p>
                                         </div>
                                       </div>
-                                      <div className="flex items-center gap-4">
+                                      <div className="flex items-center gap-1.5">
                                         <Badge variant="outline" className="capitalize">{tx.tier}</Badge>
                                         <span className="font-bold text-green-500">+£{tx.amount.toFixed(2)}</span>
                                         <span className="text-xs text-muted-foreground">{tx.time}</span>
@@ -7073,7 +7073,7 @@ export default function AdminDashboard() {
                           {revenueAnalyticsLoading ? (
                             <Card className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-blue-500/10 border-blue-500/20">
                               <CardContent className="py-8">
-                                <div className="flex items-center justify-center gap-3">
+                                <div className="flex items-center justify-center gap-1.5">
                                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
                                   <span className="text-muted-foreground">Loading MRR analytics from Stripe...</span>
                                 </div>
@@ -7082,7 +7082,7 @@ export default function AdminDashboard() {
                           ) : (
                             <>
                           {/* MRR Summary Header */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-1.5">
                             {[
                               { label: 'Current MRR', value: `£${(revenueAnalytics?.mrr || 0).toFixed(2)}`, change: `${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? '+' : ''}${revenueAnalytics?.monthlyGrowth || 0}%`, icon: DollarSign, color: 'green' },
                               { label: 'Active Subs', value: `${revenueAnalytics?.activeSubscriptions || 0}`, change: 'subscribers', icon: Plus, color: 'blue' },
@@ -7102,7 +7102,7 @@ export default function AdminDashboard() {
                                       <span className="text-xs text-muted-foreground">{metric.label}</span>
                                       <metric.icon className={`h-4 w-4 text-${metric.color}-500`} />
                                     </div>
-                                    <p className="text-lg font-bold">{metric.value}</p>
+                                    <p className="text-sm font-bold">{metric.value}</p>
                                     <Badge className={`mt-2 ${metric.color === 'red' ? 'bg-red-500/10 text-red-500' : `bg-${metric.color}-500/10 text-${metric.color}-500`}`}>
                                       {metric.change}
                                     </Badge>
@@ -7114,11 +7114,11 @@ export default function AdminDashboard() {
 
                           {/* MRR Trend Chart - Real Stripe Data */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle>Monthly Revenue (from Stripe)</CardTitle>
-                                  <CardDescription>Real revenue data since launch (Nov 26, 2025)</CardDescription>
+                                  <CardTitle className="text-[10px] font-semibold">Monthly Revenue (from Stripe)</CardTitle>
+                                  <CardDescription className="text-[9px]">Real revenue data since launch (Nov 26, 2025)</CardDescription>
                                 </div>
                                 <Badge variant="outline" className="text-green-500 border-green-500/30">
                                   Live Data
@@ -7147,14 +7147,14 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* MRR by Tier & Cohort */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
-                                <CardTitle>MRR by Subscription Tier</CardTitle>
-                                <CardDescription>Revenue contribution per tier (from Stripe)</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">MRR by Subscription Tier</CardTitle>
+                                <CardDescription className="text-[9px]">Revenue contribution per tier (from Stripe)</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {(() => {
                                     const tierData = [
                                       { tier: 'Ultimate (£39)', mrr: (revenueAnalytics?.tierDistribution?.ultimate || 0) * 39, users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6' },
@@ -7171,10 +7171,10 @@ export default function AdminDashboard() {
                                           initial={{ opacity: 0, x: -20 }}
                                           animate={{ opacity: 1, x: 0 }}
                                           transition={{ delay: index * 0.1 }}
-                                          className="space-y-2"
+                                          className="space-y-0.5"
                                         >
                                           <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-1.5">
                                               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
                                               <span className="font-medium">{item.tier}</span>
                                               <Badge variant="secondary">{item.users} users</Badge>
@@ -7199,30 +7199,30 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Subscription Metrics</CardTitle>
-                                <CardDescription>Real-time subscription health</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Subscription Metrics</CardTitle>
+                                <CardDescription className="text-[9px]">Real-time subscription health</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                                     <div>
                                       <p className="font-medium">Active Subscriptions</p>
-                                      <p className="text-xs text-muted-foreground">Currently paying customers</p>
+                                      <p className="text-[9px] text-muted-foreground">Currently paying customers</p>
                                     </div>
                                     <Badge className="bg-green-500">{revenueAnalytics?.activeSubscriptions || 0}</Badge>
                                   </div>
                                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                                     <div>
                                       <p className="font-medium">Cancelled Subscriptions</p>
-                                      <p className="text-xs text-muted-foreground">All-time cancelled</p>
+                                      <p className="text-[9px] text-muted-foreground">All-time cancelled</p>
                                     </div>
                                     <Badge className="bg-red-500">{revenueAnalytics?.cancelledSubscriptions || 0}</Badge>
                                   </div>
                                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                                     <div>
                                       <p className="font-medium">Churn Rate</p>
-                                      <p className="text-xs text-muted-foreground">Percentage of cancellations</p>
+                                      <p className="text-[9px] text-muted-foreground">Percentage of cancellations</p>
                                     </div>
                                     <Badge className={(revenueAnalytics?.churnRate || 0) < 5 ? 'bg-green-500' : (revenueAnalytics?.churnRate || 0) < 10 ? 'bg-amber-500' : 'bg-red-500'}>
                                       {(revenueAnalytics?.churnRate || 0).toFixed(1)}%
@@ -7231,14 +7231,14 @@ export default function AdminDashboard() {
                                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                                     <div>
                                       <p className="font-medium">Total Customers</p>
-                                      <p className="text-xs text-muted-foreground">Unique paying customers</p>
+                                      <p className="text-[9px] text-muted-foreground">Unique paying customers</p>
                                     </div>
                                     <Badge className="bg-blue-500">{revenueAnalytics?.totalCustomers || 0}</Badge>
                                   </div>
                                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                                     <div>
                                       <p className="font-medium">Monthly Growth</p>
-                                      <p className="text-xs text-muted-foreground">vs. last month</p>
+                                      <p className="text-[9px] text-muted-foreground">vs. last month</p>
                                     </div>
                                     <Badge className={(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? 'bg-green-500' : 'bg-red-500'}>
                                       {(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? '+' : ''}{revenueAnalytics?.monthlyGrowth || 0}%
@@ -7257,13 +7257,13 @@ export default function AdminDashboard() {
                       {activeSection === 'revenue-subscriptions' && (
                         <>
                           {/* Subscription Overview Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             <Card className="hover-elevate bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm text-muted-foreground">Active Subscriptions</p>
-                                    <p className="text-xl font-bold">{revenueAnalytics?.activeSubscriptions || 0}</p>
+                                    <p className="text-sm font-bold">{revenueAnalytics?.activeSubscriptions || 0}</p>
                                     <Badge className="mt-2 bg-green-500/10 text-green-500">from Stripe</Badge>
                                   </div>
                                   <CreditCard className="h-12 w-12 text-blue-500 opacity-50" />
@@ -7276,7 +7276,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm text-muted-foreground">Retention Rate</p>
-                                    <p className="text-xl font-bold">{(100 - (revenueAnalytics?.churnRate || 0)).toFixed(1)}%</p>
+                                    <p className="text-sm font-bold">{(100 - (revenueAnalytics?.churnRate || 0)).toFixed(1)}%</p>
                                     <Badge className="mt-2 bg-green-500/10 text-green-500">
                                       {(100 - (revenueAnalytics?.churnRate || 0)) >= 90 ? 'Excellent' : (100 - (revenueAnalytics?.churnRate || 0)) >= 80 ? 'Good' : 'Needs work'}
                                     </Badge>
@@ -7291,7 +7291,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm text-muted-foreground">Monthly Revenue</p>
-                                    <p className="text-xl font-bold">£{(revenueAnalytics?.mrr || 0).toFixed(0)}</p>
+                                    <p className="text-sm font-bold">£{(revenueAnalytics?.mrr || 0).toFixed(0)}</p>
                                     <Badge className="mt-2 bg-amber-500/10 text-amber-500">MRR</Badge>
                                   </div>
                                   <TrendingUp className="h-12 w-12 text-amber-500 opacity-50" />
@@ -7304,7 +7304,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm text-muted-foreground">Cancelled</p>
-                                    <p className="text-xl font-bold">{revenueAnalytics?.cancelledSubscriptions || 0}</p>
+                                    <p className="text-sm font-bold">{revenueAnalytics?.cancelledSubscriptions || 0}</p>
                                     <Badge className="mt-2 bg-red-500/10 text-red-500">All-time</Badge>
                                   </div>
                                   <AlertTriangle className="h-12 w-12 text-red-500 opacity-50" />
@@ -7315,11 +7315,11 @@ export default function AdminDashboard() {
 
                           {/* Active Subscriptions List - Real Stripe Data */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle>Active Subscriptions</CardTitle>
-                                  <CardDescription>All current paying subscribers from Stripe</CardDescription>
+                                  <CardTitle className="text-[10px] font-semibold">Active Subscriptions</CardTitle>
+                                  <CardDescription className="text-[9px]">All current paying subscribers from Stripe</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button variant="outline" size="sm">
@@ -7346,8 +7346,8 @@ export default function AdminDashboard() {
                                   <span className="ml-2 text-muted-foreground">Loading subscriptions...</span>
                                 </div>
                               ) : activeSubscriptionsData?.subscriptions && activeSubscriptionsData.subscriptions.length > 0 ? (
-                                <ScrollArea className="h-[400px]">
-                                  <div className="space-y-3">
+                                <ScrollArea className="h-[160px]">
+                                  <div className="space-y-1">
                                     {activeSubscriptionsData.subscriptions.map((sub, index) => (
                                       <motion.div
                                         key={sub.id || index}
@@ -7360,7 +7360,7 @@ export default function AdminDashboard() {
                                           'border-border/50'
                                         } hover-elevate`}
                                       >
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-1.5">
                                           <Avatar>
                                             <AvatarFallback className="bg-primary/10">
                                               {sub.user.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'CU'}
@@ -7368,10 +7368,10 @@ export default function AdminDashboard() {
                                           </Avatar>
                                           <div>
                                             <p className="font-medium">{sub.user}</p>
-                                            <p className="text-xs text-muted-foreground">{sub.email}</p>
+                                            <p className="text-[9px] text-muted-foreground">{sub.email}</p>
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-6">
+                                        <div className="flex items-center gap-1.5">
                                           <div className="text-center">
                                             <Badge className={
                                               sub.tier === 'ultimate' ? 'bg-purple-500' :
@@ -7382,7 +7382,7 @@ export default function AdminDashboard() {
                                           </div>
                                           <div className="text-center">
                                             <p className="font-bold">£{sub.amount.toFixed(2)}/mo</p>
-                                            <p className="text-xs text-muted-foreground">Next: {sub.nextBilling}</p>
+                                            <p className="text-[9px] text-muted-foreground">Next: {sub.nextBilling}</p>
                                           </div>
                                           <Badge variant="outline" className={
                                             sub.status === 'at_risk' ? 'text-red-500 border-red-500' :
@@ -7414,7 +7414,7 @@ export default function AdminDashboard() {
                           {revenueAnalyticsLoading ? (
                             <Card className="bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-purple-500/10 border-purple-500/20">
                               <CardContent className="py-8">
-                                <div className="flex items-center justify-center gap-3">
+                                <div className="flex items-center justify-center gap-1.5">
                                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500" />
                                   <span className="text-muted-foreground">Loading tier distribution from Stripe...</span>
                                 </div>
@@ -7423,7 +7423,7 @@ export default function AdminDashboard() {
                           ) : (
                             <>
                           {/* Tier Overview Cards */}
-                          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-5 gap-1.5">
                             {[
                               { tier: 'Free', price: 0, users: revenueAnalytics?.tierDistribution?.free || 0, color: '#94a3b8', icon: Users },
                               { tier: 'Basic', price: 29, users: revenueAnalytics?.tierDistribution?.basic || 0, color: '#22c55e', icon: Zap },
@@ -7456,14 +7456,14 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Tier Distribution Charts */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
-                                <CardTitle>User Distribution by Tier</CardTitle>
-                                <CardDescription>Percentage breakdown of subscribers</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">User Distribution by Tier</CardTitle>
+                                <CardDescription className="text-[9px]">Percentage breakdown of subscribers</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <ResponsiveContainer width="100%" height={300}>
+                                <ResponsiveContainer width="100%" height={80}>
                                   <RechartsPieChart>
                                     <Pie
                                       data={[
@@ -7502,12 +7502,12 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Revenue by Tier</CardTitle>
-                                <CardDescription>Monthly revenue contribution</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Revenue by Tier</CardTitle>
+                                <CardDescription className="text-[9px]">Monthly revenue contribution</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <ResponsiveContainer width="100%" height={300}>
+                                <ResponsiveContainer width="100%" height={80}>
                                   <RechartsBarChart data={[
                                     { tier: 'Free', revenue: 0, users: revenueAnalytics?.tierDistribution?.free || 0 },
                                     { tier: 'Basic', revenue: revenueAnalytics?.revenueByTier?.basic || 0, users: revenueAnalytics?.tierDistribution?.basic || 0 },
@@ -7541,12 +7541,12 @@ export default function AdminDashboard() {
 
                           {/* Tier Conversion Funnel */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>Tier Upgrade Funnel</CardTitle>
-                              <CardDescription>User progression through subscription tiers (real data)</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">Tier Upgrade Funnel</CardTitle>
+                              <CardDescription className="text-[9px]">User progression through subscription tiers (real data)</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center justify-between gap-1.5">
                                 {(() => {
                                   const tiers = [
                                     { tier: 'Free', users: revenueAnalytics?.tierDistribution?.free || 0 },
@@ -7563,7 +7563,7 @@ export default function AdminDashboard() {
                                         transition={{ delay: index * 0.1 }}
                                         className="text-center p-4 rounded-lg bg-muted/50"
                                       >
-                                        <p className="text-xs text-muted-foreground">{stage.tier}</p>
+                                        <p className="text-[9px] text-muted-foreground">{stage.tier}</p>
                                         <p className="text-lg font-bold mt-1">{stage.users}</p>
                                         {index < arr.length - 1 && stage.users > 0 && arr[index + 1].users > 0 && (
                                           <Badge className="mt-2 bg-green-500/10 text-green-500">
@@ -7589,13 +7589,13 @@ export default function AdminDashboard() {
                       {activeSection === 'revenue-ltv' && (
                         <>
                           {/* LTV Summary */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             <Card className="hover-elevate border-l-4 border-l-purple-500">
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm text-muted-foreground">Average LTV</p>
-                                    <p className="text-xl font-bold">£{(revenueAnalytics?.avgLTV || 0).toFixed(2)}</p>
+                                    <p className="text-sm font-bold">£{(revenueAnalytics?.avgLTV || 0).toFixed(2)}</p>
                                     <Badge className="mt-2 bg-green-500/10 text-green-500">from Stripe</Badge>
                                   </div>
                                   <LineChart className="h-10 w-10 text-purple-500 opacity-50" />
@@ -7608,7 +7608,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm text-muted-foreground">Total Revenue</p>
-                                    <p className="text-xl font-bold">£{(revenueAnalytics?.revenueAllTime || 0).toFixed(2)}</p>
+                                    <p className="text-sm font-bold">£{(revenueAnalytics?.revenueAllTime || 0).toFixed(2)}</p>
                                     <Badge className="mt-2 bg-green-500/10 text-green-500">All-time</Badge>
                                   </div>
                                   <Target className="h-10 w-10 text-green-500 opacity-50" />
@@ -7621,7 +7621,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm text-muted-foreground">Total Customers</p>
-                                    <p className="text-xl font-bold">{revenueAnalytics?.totalCustomers || 0}</p>
+                                    <p className="text-sm font-bold">{revenueAnalytics?.totalCustomers || 0}</p>
                                     <Badge className="mt-2 bg-blue-500/10 text-blue-500">Unique</Badge>
                                   </div>
                                   <Users className="h-10 w-10 text-blue-500 opacity-50" />
@@ -7634,7 +7634,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm text-muted-foreground">Avg Order Value</p>
-                                    <p className="text-xl font-bold">£{(revenueAnalytics?.avgOrderValue || 0).toFixed(2)}</p>
+                                    <p className="text-sm font-bold">£{(revenueAnalytics?.avgOrderValue || 0).toFixed(2)}</p>
                                     <Badge className="mt-2 bg-amber-500/10 text-amber-500">Per transaction</Badge>
                                   </div>
                                   <Zap className="h-10 w-10 text-amber-500 opacity-50" />
@@ -7645,12 +7645,12 @@ export default function AdminDashboard() {
 
                           {/* LTV by Tier */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>Lifetime Value by Subscription Tier</CardTitle>
-                              <CardDescription>Projected revenue over customer lifetime</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">Lifetime Value by Subscription Tier</CardTitle>
+                              <CardDescription className="text-[9px]">Projected revenue over customer lifetime</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                 {[
                                   { tier: 'Basic', ltv: 87, lifespan: 3, color: '#22c55e', arpu: 29 },
                                   { tier: 'Premium', ltv: 294, lifespan: 6, color: '#3b82f6', arpu: 49 },
@@ -7688,13 +7688,13 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* LTV & Revenue Summary - Real Data */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <div className="flex items-center justify-between">
                                   <div>
-                                    <CardTitle>Customer Lifetime Value</CardTitle>
-                                    <CardDescription>Real-time LTV from Stripe data</CardDescription>
+                                    <CardTitle className="text-[10px] font-semibold">Customer Lifetime Value</CardTitle>
+                                    <CardDescription className="text-[9px]">Real-time LTV from Stripe data</CardDescription>
                                   </div>
                                   <Badge variant="outline" className="text-purple-500 border-purple-500/30">Live</Badge>
                                 </div>
@@ -7707,16 +7707,16 @@ export default function AdminDashboard() {
                                   </div>
                                   <div className="grid grid-cols-3 gap-6 w-full mt-4">
                                     <div className="text-center p-4 rounded-lg bg-muted/30">
-                                      <p className="text-lg font-bold">{revenueAnalytics?.totalCustomers || 0}</p>
-                                      <p className="text-xs text-muted-foreground">Total Customers</p>
+                                      <p className="text-sm font-bold">{revenueAnalytics?.totalCustomers || 0}</p>
+                                      <p className="text-[9px] text-muted-foreground">Total Customers</p>
                                     </div>
                                     <div className="text-center p-4 rounded-lg bg-muted/30">
-                                      <p className="text-lg font-bold">{revenueAnalytics?.activeSubscriptions || 0}</p>
-                                      <p className="text-xs text-muted-foreground">Active Subs</p>
+                                      <p className="text-sm font-bold">{revenueAnalytics?.activeSubscriptions || 0}</p>
+                                      <p className="text-[9px] text-muted-foreground">Active Subs</p>
                                     </div>
                                     <div className="text-center p-4 rounded-lg bg-muted/30">
-                                      <p className="text-lg font-bold">£{(revenueAnalytics?.avgOrderValue || 0).toFixed(0)}</p>
-                                      <p className="text-xs text-muted-foreground">Avg Order</p>
+                                      <p className="text-sm font-bold">£{(revenueAnalytics?.avgOrderValue || 0).toFixed(0)}</p>
+                                      <p className="text-[9px] text-muted-foreground">Avg Order</p>
                                     </div>
                                   </div>
                                   {(revenueAnalytics?.totalCustomers || 0) === 0 && (
@@ -7729,12 +7729,12 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Revenue Summary</CardTitle>
-                                <CardDescription>Key revenue metrics from Stripe</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Revenue Summary</CardTitle>
+                                <CardDescription className="text-[9px]">Key revenue metrics from Stripe</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-6">
+                                <div className="space-y-1.5">
                                   <div className="text-center p-6 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
                                     <p className="text-sm text-muted-foreground">Monthly Recurring Revenue</p>
                                     <p className="text-2xl font-bold text-green-500 mt-2">£{(revenueAnalytics?.mrr || 0).toFixed(2)}</p>
@@ -7742,14 +7742,14 @@ export default function AdminDashboard() {
                                       ARR: £{(revenueAnalytics?.arr || 0).toFixed(2)}
                                     </p>
                                   </div>
-                                  <div className="grid grid-cols-2 gap-4">
+                                  <div className="grid grid-cols-2 gap-1.5">
                                     <div className="text-center p-4 rounded-lg bg-muted/30">
-                                      <p className="text-xs text-muted-foreground">Avg. LTV</p>
-                                      <p className="text-lg font-bold">£{(revenueAnalytics?.avgLTV || 0).toFixed(2)}</p>
+                                      <p className="text-[9px] text-muted-foreground">Avg. LTV</p>
+                                      <p className="text-sm font-bold">£{(revenueAnalytics?.avgLTV || 0).toFixed(2)}</p>
                                     </div>
                                     <div className="text-center p-4 rounded-lg bg-muted/30">
-                                      <p className="text-xs text-muted-foreground">This Month</p>
-                                      <p className="text-lg font-bold">£{(revenueAnalytics?.revenueThisMonth || 0).toFixed(2)}</p>
+                                      <p className="text-[9px] text-muted-foreground">This Month</p>
+                                      <p className="text-sm font-bold">£{(revenueAnalytics?.revenueThisMonth || 0).toFixed(2)}</p>
                                     </div>
                                   </div>
                                   <Card className="bg-blue-500/5 border-blue-500/20">
@@ -7775,12 +7775,12 @@ export default function AdminDashboard() {
 
                 {/* Logs & Audit Section - 4 Unique Advanced Pages */}
                 {activeSection.startsWith('logs') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="space-y-6"
+                      className="space-y-1.5"
                     >
                       {/* 1. ACTIVITY LOG - Comprehensive Activity Stream */}
                       {activeSection === 'logs-activity' && (
@@ -7789,7 +7789,7 @@ export default function AdminDashboard() {
                           <Card className="bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-blue-500/10 border-blue-500/20">
                             <CardContent className="py-6">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <div className="p-3 rounded-xl bg-blue-500 text-white">
                                     <ScrollText className="h-6 w-6" />
                                   </div>
@@ -7798,14 +7798,14 @@ export default function AdminDashboard() {
                                     <p className="text-lg font-bold text-blue-500">Real-Time Event Monitoring</p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Today</p>
-                                    <p className="text-xl font-bold">2,847</p>
+                                    <p className="text-sm font-bold">2,847</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">This Week</p>
-                                    <p className="text-xl font-bold">18,234</p>
+                                    <p className="text-sm font-bold">18,234</p>
                                   </div>
                                   <Button 
                                     variant="outline" 
@@ -7823,7 +7823,7 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Activity Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             {[
                               { label: 'Total Events', value: '12,847', icon: Activity, color: 'blue', change: '+15%' },
                               { label: 'User Actions', value: '8,234', icon: Users, color: 'green', change: '+22%' },
@@ -7852,11 +7852,11 @@ export default function AdminDashboard() {
 
                           {/* Activity Timeline */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle>Activity Timeline</CardTitle>
-                                  <CardDescription>Recent user and system activities</CardDescription>
+                                  <CardTitle className="text-[10px] font-semibold">Activity Timeline</CardTitle>
+                                  <CardDescription className="text-[9px]">Recent user and system activities</CardDescription>
                                 </div>
                                 <Select defaultValue="all">
                                   <SelectTrigger className="w-40">
@@ -7873,16 +7873,16 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                               {activityLogLoading ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {[1, 2, 3, 4, 5].map((i) => (
                                     <ShimmerSkeleton key={i} />
                                   ))}
                                 </div>
                               ) : activityLog && activityLog.length > 0 ? (
-                                <ScrollArea className="h-[500px]">
+                                <ScrollArea className="h-[180px]">
                                   <div className="relative">
                                     <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border" />
-                                    <div className="space-y-4">
+                                    <div className="space-y-1.5">
                                       {activityLog.map((entry, index) => (
                                         <motion.div
                                           key={index}
@@ -7934,8 +7934,8 @@ export default function AdminDashboard() {
                           {/* Error Status Banner */}
                           <Card className="bg-gradient-to-r from-red-500/10 via-rose-500/5 to-red-500/10 border-red-500/20">
                             <CardContent className="py-6">
-                              <div className="flex flex-wrap items-center justify-between gap-4">
-                                <div className="flex items-center gap-4">
+                              <div className="flex flex-wrap items-center justify-between gap-1.5">
+                                <div className="flex items-center gap-1.5">
                                   <motion.div
                                     className={`p-3 rounded-xl text-white ${
                                       (errorLogsData?.stats?.unresolved || 0) > 0 ? 'bg-red-500' : 'bg-green-500'
@@ -7958,7 +7958,7 @@ export default function AdminDashboard() {
                                     </p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-1.5">
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Critical</p>
                                     <p className="text-xl font-bold text-red-500">{errorLogsData?.stats?.bySeverity?.critical || 0}</p>
@@ -7973,7 +7973,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <div className="text-center">
                                     <p className="text-sm text-muted-foreground">Total</p>
-                                    <p className="text-xl font-bold">{errorLogsData?.stats?.total || 0}</p>
+                                    <p className="text-sm font-bold">{errorLogsData?.stats?.total || 0}</p>
                                   </div>
                                 </div>
                               </div>
@@ -7981,7 +7981,7 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Error Stats Cards */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             {[
                               { label: 'Client Errors', type: 'client', icon: Globe, color: 'blue' },
                               { label: 'API Errors', type: 'api', icon: Server, color: 'purple' },
@@ -7992,12 +7992,12 @@ export default function AdminDashboard() {
                               return (
                                 <Card key={stat.type} className="hover-elevate">
                                   <CardContent className="pt-6">
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
                                       <div className={`p-2 rounded-lg bg-${stat.color}-500/10`}>
                                         <stat.icon className={`h-5 w-5 text-${stat.color}-500`} />
                                       </div>
                                       <div>
-                                        <p className="text-lg font-bold">{count}</p>
+                                        <p className="text-sm font-bold">{count}</p>
                                         <p className="text-sm text-muted-foreground">{stat.label}</p>
                                       </div>
                                     </div>
@@ -8009,14 +8009,14 @@ export default function AdminDashboard() {
 
                           {/* Error List */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex flex-wrap items-center justify-between gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex flex-wrap items-center justify-between gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     Recent Errors
                                     {errorLogsLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
                                   </CardTitle>
-                                  <CardDescription>Click to view details and resolve errors</CardDescription>
+                                  <CardDescription className="text-[9px]">Click to view details and resolve errors</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button 
@@ -8041,7 +8041,7 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                               {errorLogsLoading ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {Array.from({ length: 5 }).map((_, i) => (
                                     <Skeleton key={i} className="h-20 w-full" />
                                   ))}
@@ -8053,8 +8053,8 @@ export default function AdminDashboard() {
                                   <p className="text-muted-foreground">Your system is running smoothly.</p>
                                 </div>
                               ) : (
-                                <ScrollArea className="h-[500px]">
-                                  <div className="space-y-3">
+                                <ScrollArea className="h-[180px]">
+                                  <div className="space-y-1">
                                     {errorLogsData?.errors?.map((error, index) => (
                                       <motion.div
                                         key={error.id}
@@ -8070,7 +8070,7 @@ export default function AdminDashboard() {
                                         }`}
                                         onClick={() => setSelectedError(error)}
                                       >
-                                        <div className="flex items-start justify-between gap-4">
+                                        <div className="flex items-start justify-between gap-1.5">
                                           <div className="flex items-start gap-3 flex-1 min-w-0">
                                             <Badge className={
                                               error.isResolved ? 'bg-green-500 text-white' :
@@ -8163,8 +8163,8 @@ export default function AdminDashboard() {
                                 </DialogDescription>
                               </DialogHeader>
                               {selectedError && (
-                                <div className="space-y-4">
-                                  <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                  <div className="grid grid-cols-2 gap-1.5">
                                     <div>
                                       <Label className="text-muted-foreground">Error Type</Label>
                                       <p className="font-mono">{selectedError.errorType}</p>
@@ -8214,7 +8214,7 @@ export default function AdminDashboard() {
                                   )}
 
                                   {!selectedError.isResolved && (
-                                    <div className="space-y-2">
+                                    <div className="space-y-0.5">
                                       <Label>Resolution Notes</Label>
                                       <Input
                                         placeholder="How was this error resolved?"
@@ -8277,7 +8277,7 @@ export default function AdminDashboard() {
                           <Card className="bg-gradient-to-r from-purple-500/10 via-violet-500/5 to-purple-500/10 border-purple-500/20">
                             <CardContent className="py-6">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <div className="p-3 rounded-xl bg-purple-500 text-white">
                                     <History className="h-6 w-6" />
                                   </div>
@@ -8286,7 +8286,7 @@ export default function AdminDashboard() {
                                     <p className="text-lg font-bold text-purple-500">Complete Action History</p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <Button 
                                     variant="outline" 
                                     size="sm"
@@ -8303,7 +8303,7 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Audit Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             {[
                               { label: 'Total Actions', value: auditLog?.length || 0, icon: History, color: 'purple' },
                               { label: 'User Changes', value: 45, icon: Users, color: 'blue' },
@@ -8319,7 +8319,7 @@ export default function AdminDashboard() {
                                 <Card className="hover-elevate">
                                   <CardContent className="pt-6">
                                     <stat.icon className={`h-8 w-8 text-${stat.color}-500 mb-3`} />
-                                    <p className="text-xl font-bold">{stat.value}</p>
+                                    <p className="text-sm font-bold">{stat.value}</p>
                                     <p className="text-sm text-muted-foreground">{stat.label}</p>
                                   </CardContent>
                                 </Card>
@@ -8329,20 +8329,20 @@ export default function AdminDashboard() {
 
                           {/* Audit Log Table */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>Audit Trail</CardTitle>
-                              <CardDescription>All administrative actions with detailed change logs</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">Audit Trail</CardTitle>
+                              <CardDescription className="text-[9px]">All administrative actions with detailed change logs</CardDescription>
                             </CardHeader>
                             <CardContent>
                               {auditLogLoading ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {Array.from({ length: 10 }).map((_, i) => (
                                     <ShimmerSkeleton key={i} />
                                   ))}
                                 </div>
                               ) : auditLog && auditLog.length > 0 ? (
                                 <ScrollArea className="h-[600px] pr-4">
-                                  <div className="space-y-3">
+                                  <div className="space-y-1">
                                     {auditLog.map((entry, index) => (
                                       <Collapsible key={entry.id}>
                                         <motion.div
@@ -8352,9 +8352,9 @@ export default function AdminDashboard() {
                                           className="p-4 rounded-lg border border-border/50 bg-card/50 hover-elevate"
                                         >
                                           <CollapsibleTrigger className="w-full">
-                                            <div className="flex items-start justify-between gap-4">
+                                            <div className="flex items-start justify-between gap-1.5">
                                               <div className="flex-1 text-left">
-                                                <div className="flex items-center gap-2 mb-2">
+                                                <div className="flex items-center gap-1 mb-0.5">
                                                   <Shield className="h-4 w-4 text-purple-500" />
                                                   <span className="font-medium">{entry.adminEmail}</span>
                                                   <Badge variant="outline" className="text-xs">
@@ -8364,7 +8364,7 @@ export default function AdminDashboard() {
                                                 <p className="text-sm text-muted-foreground">{entry.action}</p>
                                               </div>
                                               <div className="text-right shrink-0">
-                                                <p className="text-xs text-muted-foreground">
+                                                <p className="text-[9px] text-muted-foreground">
                                                   {formatDistance(new Date(entry.timestamp), new Date(), { addSuffix: true })}
                                                 </p>
                                                 {entry.ipAddress && (
@@ -8378,7 +8378,7 @@ export default function AdminDashboard() {
 
                                           {entry.changes && (
                                             <CollapsibleContent className="mt-4 pt-4 border-t border-border/50">
-                                              <div className="space-y-2">
+                                              <div className="space-y-0.5">
                                                 <Label className="text-xs text-muted-foreground">Changes Made:</Label>
                                                 {Object.entries(entry.changes).map(([field, values]) => (
                                                   <div key={field} className="flex items-center gap-2 text-sm">
@@ -8421,8 +8421,8 @@ export default function AdminDashboard() {
                               : 'from-green-500/10 via-emerald-500/5 to-green-500/10 border-green-500/20'
                           }`}>
                             <CardContent className="py-6">
-                              <div className="flex flex-wrap items-center justify-between gap-4">
-                                <div className="flex items-center gap-4">
+                              <div className="flex flex-wrap items-center justify-between gap-1.5">
+                                <div className="flex items-center gap-1.5">
                                   <motion.div
                                     className={`p-3 rounded-xl text-white ${
                                       (securityEventsData?.stats?.unresolved || 0) > 0 ? 'bg-amber-500' : 'bg-green-500'
@@ -8443,7 +8443,7 @@ export default function AdminDashboard() {
                                     </p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <Button 
                                     variant="outline" 
                                     size="sm" 
@@ -8470,7 +8470,7 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Security Metrics */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             {[
                               { 
                                 label: 'Failed Logins', 
@@ -8513,7 +8513,7 @@ export default function AdminDashboard() {
                                       <metric.icon className={`h-6 w-6 text-${metric.color}-500`} />
                                       <Badge variant="outline">{metric.status}</Badge>
                                     </div>
-                                    <p className="text-xl font-bold">{metric.value}</p>
+                                    <p className="text-sm font-bold">{metric.value}</p>
                                     <p className="text-sm text-muted-foreground">{metric.label}</p>
                                   </CardContent>
                                 </Card>
@@ -8523,24 +8523,24 @@ export default function AdminDashboard() {
 
                           {/* Security Events List */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle>Security Events</CardTitle>
-                                  <CardDescription>Real-time security monitoring and event tracking</CardDescription>
+                                  <CardTitle className="text-[10px] font-semibold">Security Events</CardTitle>
+                                  <CardDescription className="text-[9px]">Real-time security monitoring and event tracking</CardDescription>
                                 </div>
                               </div>
                             </CardHeader>
                             <CardContent>
                               {securityEventsLoading ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {[1, 2, 3, 4, 5].map((i) => (
                                     <ShimmerSkeleton key={i} />
                                   ))}
                                 </div>
                               ) : securityEventsData?.events && securityEventsData.events.length > 0 ? (
-                                <ScrollArea className="h-[400px]">
-                                  <div className="space-y-3">
+                                <ScrollArea className="h-[160px]">
+                                  <div className="space-y-1">
                                     {securityEventsData.events.map((event, index) => (
                                       <motion.div
                                         key={event.id}
@@ -8557,8 +8557,8 @@ export default function AdminDashboard() {
                                                 : 'border-border/50'
                                         }`}
                                       >
-                                        <div className="flex items-start justify-between gap-4">
-                                          <div className="flex items-start gap-3">
+                                        <div className="flex items-start justify-between gap-1.5">
+                                          <div className="flex items-start gap-1.5">
                                             {event.isResolved ? (
                                               <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                                             ) : event.severity === 'critical' || event.severity === 'high' ? (
@@ -8649,20 +8649,20 @@ export default function AdminDashboard() {
 
                 {/* Communications Section - 2 Unique Advanced Pages */}
                 {activeSection.startsWith('comms') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="space-y-6"
+                      className="space-y-1.5"
                     >
                       {/* 1. EMAIL ANALYTICS - Real Data from Database */}
                       {activeSection === 'comms-emails' && (
                         <>
                           {emailAnalyticsLoading ? (
-                            <div className="space-y-6">
+                            <div className="space-y-1.5">
                               <Skeleton className="h-24 w-full" />
-                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                 {[1,2,3,4].map(i => <Skeleton key={i} className="h-32" />)}
                               </div>
                             </div>
@@ -8671,8 +8671,8 @@ export default function AdminDashboard() {
                               {/* Email Overview Banner */}
                               <Card className="bg-gradient-to-r from-blue-500/10 via-sky-500/5 to-blue-500/10 border-blue-500/20">
                                 <CardContent className="py-6">
-                                  <div className="flex items-center justify-between flex-wrap gap-4">
-                                    <div className="flex items-center gap-4">
+                                  <div className="flex items-center justify-between flex-wrap gap-1.5">
+                                    <div className="flex items-center gap-1.5">
                                       <div className="p-3 rounded-xl bg-blue-500 text-white">
                                         <Mail className="h-6 w-6" />
                                       </div>
@@ -8684,11 +8684,11 @@ export default function AdminDashboard() {
                                     <div className="flex items-center gap-6 flex-wrap">
                                       <div className="text-center">
                                         <p className="text-sm text-muted-foreground">Sent Today</p>
-                                        <p className="text-xl font-bold">{emailAnalytics?.summary?.sentToday || 0}</p>
+                                        <p className="text-sm font-bold">{emailAnalytics?.summary?.sentToday || 0}</p>
                                       </div>
                                       <div className="text-center">
                                         <p className="text-sm text-muted-foreground">Delivery Rate</p>
-                                        <p className="text-xl font-bold text-green-500">{emailAnalytics?.summary?.deliveryRate || '0%'}</p>
+                                        <p className="text-xs font-bold text-green-500">{emailAnalytics?.summary?.deliveryRate || '0%'}</p>
                                       </div>
                                       <Button
                                         data-testid="button-send-bulk-welcome"
@@ -8725,7 +8725,7 @@ export default function AdminDashboard() {
                               </Card>
 
                               {/* Email KPIs - Real Data */}
-                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                 {[
                                   { label: 'Total Sent (30 days)', value: emailAnalytics?.summary?.totalSent30Days?.toLocaleString() || '0', icon: Send, color: 'blue', sub: 'Last 30 days' },
                                   { label: 'Delivery Rate', value: emailAnalytics?.summary?.deliveryRate || '0%', icon: CheckCircle, color: 'green', sub: emailAnalytics?.summary?.deliveryRate === '100%' ? 'Perfect' : 'Good' },
@@ -8741,7 +8741,7 @@ export default function AdminDashboard() {
                                     <Card className={`hover-elevate border-t-4 border-t-${kpi.color}-500`}>
                                       <CardContent className="pt-6">
                                         <kpi.icon className={`h-8 w-8 text-${kpi.color}-500 mb-3`} />
-                                        <p className="text-xl font-bold">{kpi.value}</p>
+                                        <p className="text-sm font-bold">{kpi.value}</p>
                                         <p className="text-sm text-muted-foreground">{kpi.label}</p>
                                         <p className="text-xs text-muted-foreground mt-1">{kpi.sub}</p>
                                       </CardContent>
@@ -8751,14 +8751,14 @@ export default function AdminDashboard() {
                               </div>
 
                               {/* Email Charts - Real Data */}
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                                 <Card>
-                                  <CardHeader>
-                                    <CardTitle>Email Volume (30 days)</CardTitle>
-                                    <CardDescription>Weekly email sending trends</CardDescription>
+                                  <CardHeader className="p-2 pb-1">
+                                    <CardTitle className="text-[10px] font-semibold">Email Volume (30 days)</CardTitle>
+                                    <CardDescription className="text-[9px]">Weekly email sending trends</CardDescription>
                                   </CardHeader>
                                   <CardContent>
-                                    <ResponsiveContainer width="100%" height={250}>
+                                    <ResponsiveContainer width="100%" height={80}>
                                       <RechartsAreaChart data={emailAnalytics?.weeklyData || []}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                                         <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" fontSize={11} />
@@ -8783,12 +8783,12 @@ export default function AdminDashboard() {
                                 </Card>
 
                                 <Card>
-                                  <CardHeader>
-                                    <CardTitle>Email Type Distribution</CardTitle>
-                                    <CardDescription>Breakdown by category</CardDescription>
+                                  <CardHeader className="p-2 pb-1">
+                                    <CardTitle className="text-[10px] font-semibold">Email Type Distribution</CardTitle>
+                                    <CardDescription className="text-[9px]">Breakdown by category</CardDescription>
                                   </CardHeader>
                                   <CardContent>
-                                    <div className="space-y-4">
+                                    <div className="space-y-1.5">
                                       {emailAnalytics?.typeDistribution?.length ? (
                                         emailAnalytics.typeDistribution.map((item, index) => {
                                           const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899'];
@@ -8799,7 +8799,7 @@ export default function AdminDashboard() {
                                               initial={{ opacity: 0, x: -20 }}
                                               animate={{ opacity: 1, x: 0 }}
                                               transition={{ delay: index * 0.1 }}
-                                              className="space-y-2"
+                                              className="space-y-0.5"
                                             >
                                               <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
@@ -8830,13 +8830,13 @@ export default function AdminDashboard() {
 
                               {/* Recent Emails Table - Real Data */}
                               <Card>
-                                <CardHeader>
-                                  <CardTitle>Recent Emails</CardTitle>
-                                  <CardDescription>Last 10 emails sent</CardDescription>
+                                <CardHeader className="p-2 pb-1">
+                                  <CardTitle className="text-[10px] font-semibold">Recent Emails</CardTitle>
+                                  <CardDescription className="text-[9px]">Last 10 emails sent</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                  <ScrollArea className="h-[300px]">
-                                    <div className="space-y-3">
+                                  <ScrollArea className="h-[130px]">
+                                    <div className="space-y-1">
                                       {emailAnalytics?.recentEmails?.length ? (
                                         emailAnalytics.recentEmails.map((email, index) => (
                                           <motion.div
@@ -8846,14 +8846,14 @@ export default function AdminDashboard() {
                                             transition={{ delay: index * 0.05 }}
                                             className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
                                           >
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-1.5">
                                               <Mail className="h-5 w-5 text-blue-500" />
                                               <div>
                                                 <p className="font-medium text-sm">{email.subject}</p>
-                                                <p className="text-xs text-muted-foreground">{email.to}</p>
+                                                <p className="text-[9px] text-muted-foreground">{email.to}</p>
                                               </div>
                                             </div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-1.5">
                                               <Badge variant="outline">{email.type}</Badge>
                                               <Badge className={
                                                 email.status === 'sent' || email.status === 'delivered' ? 'bg-green-500 text-white' :
@@ -8880,9 +8880,9 @@ export default function AdminDashboard() {
                       {activeSection === 'comms-notifications' && (
                         <>
                           {notificationAnalyticsLoading ? (
-                            <div className="space-y-6">
+                            <div className="space-y-1.5">
                               <Skeleton className="h-24 w-full" />
-                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                 {[1,2,3,4].map(i => <Skeleton key={i} className="h-32" />)}
                               </div>
                             </div>
@@ -8892,7 +8892,7 @@ export default function AdminDashboard() {
                               <Card className="bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-amber-500/10 border-amber-500/20">
                                 <CardContent className="py-6">
                                   <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-1.5">
                                       <motion.div
                                         className="p-3 rounded-xl bg-amber-500 text-white"
                                         animate={{ rotate: [0, 15, -15, 0] }}
@@ -8918,7 +8918,7 @@ export default function AdminDashboard() {
                               </Card>
 
                               {/* Notification Stats - Real Data */}
-                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                 {[
                                   { label: 'Total Sent', value: notificationAnalytics?.summary?.totalSent30Days?.toLocaleString() || '0', icon: Bell, color: 'amber', sub: 'Last 30 days' },
                                   { label: 'In-App', value: notificationAnalytics?.summary?.inAppCount?.toLocaleString() || '0', icon: MessageSquare, color: 'blue', sub: 'System alerts' },
@@ -8936,9 +8936,9 @@ export default function AdminDashboard() {
                                         <div className="flex items-center justify-between mb-3">
                                           <stat.icon className={`h-6 w-6 text-${stat.color}-500`} />
                                         </div>
-                                        <p className="text-xl font-bold">{stat.value}</p>
+                                        <p className="text-sm font-bold">{stat.value}</p>
                                         <p className="text-sm text-muted-foreground">{stat.label}</p>
-                                        <p className="text-xs text-muted-foreground">{stat.sub}</p>
+                                        <p className="text-[9px] text-muted-foreground">{stat.sub}</p>
                                       </CardContent>
                                     </Card>
                                   </motion.div>
@@ -8946,14 +8946,14 @@ export default function AdminDashboard() {
                               </div>
 
                               {/* Notification Categories & Recent - Real Data */}
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                                 <Card>
-                                  <CardHeader>
-                                    <CardTitle>Notification Categories</CardTitle>
-                                    <CardDescription>Distribution by type</CardDescription>
+                                  <CardHeader className="p-2 pb-1">
+                                    <CardTitle className="text-[10px] font-semibold">Notification Categories</CardTitle>
+                                    <CardDescription className="text-[9px]">Distribution by type</CardDescription>
                                   </CardHeader>
                                   <CardContent>
-                                    <div className="space-y-4">
+                                    <div className="space-y-1.5">
                                       {notificationAnalytics?.typeDistribution?.length ? (
                                         notificationAnalytics.typeDistribution.map((cat, index) => {
                                           const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4'];
@@ -8997,13 +8997,13 @@ export default function AdminDashboard() {
                                 </Card>
 
                                 <Card>
-                                  <CardHeader>
-                                    <CardTitle>Recent Notifications</CardTitle>
-                                    <CardDescription>Latest sent notifications</CardDescription>
+                                  <CardHeader className="p-2 pb-1">
+                                    <CardTitle className="text-[10px] font-semibold">Recent Notifications</CardTitle>
+                                    <CardDescription className="text-[9px]">Latest sent notifications</CardDescription>
                                   </CardHeader>
                                   <CardContent>
-                                    <ScrollArea className="h-[350px]">
-                                      <div className="space-y-3">
+                                    <ScrollArea className="h-[140px]">
+                                      <div className="space-y-1">
                                         {notificationAnalytics?.recentNotifications?.length ? (
                                           notificationAnalytics.recentNotifications.map((notif, index) => (
                                             <motion.div
@@ -9011,9 +9011,9 @@ export default function AdminDashboard() {
                                               initial={{ opacity: 0 }}
                                               animate={{ opacity: 1 }}
                                               transition={{ delay: index * 0.05 }}
-                                              className="p-3 rounded-lg border border-border/50 hover-elevate"
+                                              className="p-1.5 rounded-lg border border-border/50 hover-elevate"
                                             >
-                                              <div className="flex items-start gap-3">
+                                              <div className="flex items-start gap-1.5">
                                                 <div className={`p-2 rounded-lg ${
                                                   notif.type === 'success' ? 'bg-green-500/10 text-green-500' :
                                                   notif.type === 'warning' ? 'bg-amber-500/10 text-amber-500' :
@@ -9052,12 +9052,12 @@ export default function AdminDashboard() {
 
                               {/* Notification Templates - Static config, not analytics data */}
                               <Card>
-                                <CardHeader>
-                                  <CardTitle>Notification Templates</CardTitle>
-                                  <CardDescription>Pre-configured notification types (available templates)</CardDescription>
+                                <CardHeader className="p-2 pb-1">
+                                  <CardTitle className="text-[10px] font-semibold">Notification Templates</CardTitle>
+                                  <CardDescription className="text-[9px]">Pre-configured notification types (available templates)</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
                                     {[
                                       { name: 'Welcome Message', status: 'active', description: 'Sent to new users' },
                                       { name: 'Trial Ending', status: 'active', description: 'Sent 3 days before trial ends' },
@@ -9078,7 +9078,7 @@ export default function AdminDashboard() {
                                               <span className="font-medium text-sm">{template.name}</span>
                                               <Badge className="bg-green-500 text-white">{template.status}</Badge>
                                             </div>
-                                            <p className="text-xs text-muted-foreground">{template.description}</p>
+                                            <p className="text-[9px] text-muted-foreground">{template.description}</p>
                                           </CardContent>
                                         </Card>
                                       </motion.div>
@@ -9096,18 +9096,18 @@ export default function AdminDashboard() {
 
                 {/* User Feedback Section */}
                 {activeSection.startsWith('feedback') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="space-y-6"
+                      className="space-y-1.5"
                     >
                       {/* Feedback Overview */}
                       {activeSection === 'feedback-overview' && (
                         <>
                           {/* Summary Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-1.5">
                             {(() => {
                               const feedback = feedbackData?.feedback || [];
                               const totalResponses = feedback.length;
@@ -9136,7 +9136,7 @@ export default function AdminDashboard() {
                                       <div className="flex items-center justify-between mb-3">
                                         <stat.icon className={`h-6 w-6 text-${stat.color}-500`} />
                                       </div>
-                                      <p className="text-xl font-bold">{stat.value}</p>
+                                      <p className="text-sm font-bold">{stat.value}</p>
                                       <p className="text-sm text-muted-foreground">{stat.label}</p>
                                     </CardContent>
                                   </Card>
@@ -9146,14 +9146,14 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Rating Distribution Chart */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Rating Distribution</CardTitle>
-                                <CardDescription>Breakdown by star rating</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Rating Distribution</CardTitle>
+                                <CardDescription className="text-[9px]">Breakdown by star rating</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {[5, 4, 3, 2, 1].map((rating) => {
                                     const feedback = feedbackData?.feedback || [];
                                     const count = feedback.filter(f => f.rating === rating).length;
@@ -9167,7 +9167,7 @@ export default function AdminDashboard() {
                                       1: '#ef4444'
                                     };
                                     return (
-                                      <div key={rating} className="flex items-center gap-4">
+                                      <div key={rating} className="flex items-center gap-1.5">
                                         <div className="flex items-center gap-1 w-20">
                                           {Array.from({ length: rating }).map((_, i) => (
                                             <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -9193,12 +9193,12 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
-                                <CardTitle>Feedback by Page</CardTitle>
-                                <CardDescription>Which pages received feedback</CardDescription>
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-semibold">Feedback by Page</CardTitle>
+                                <CardDescription className="text-[9px]">Which pages received feedback</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {(() => {
                                     const feedback = feedbackData?.feedback || [];
                                     const pageMap: Record<string, number> = {};
@@ -9229,13 +9229,13 @@ export default function AdminDashboard() {
 
                           {/* Recent Feedback with Comments */}
                           <Card>
-                            <CardHeader>
-                              <CardTitle>Recent Feedback with Comments</CardTitle>
-                              <CardDescription>User suggestions and improvement ideas</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">Recent Feedback with Comments</CardTitle>
+                              <CardDescription className="text-[9px]">User suggestions and improvement ideas</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <ScrollArea className="h-[400px]">
-                                <div className="space-y-4">
+                              <ScrollArea className="h-[160px]">
+                                <div className="space-y-1.5">
                                   {(feedbackData?.feedback || [])
                                     .filter(f => f.comment && f.comment.trim())
                                     .map((feedback, index) => (
@@ -9247,7 +9247,7 @@ export default function AdminDashboard() {
                                         className="p-4 rounded-lg border border-border/50 hover-elevate"
                                       >
                                         <div className="flex items-start justify-between">
-                                          <div className="flex items-center gap-3">
+                                          <div className="flex items-center gap-1.5">
                                             <div className="flex">
                                               {Array.from({ length: feedback.rating }).map((_, i) => (
                                                 <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -9292,7 +9292,7 @@ export default function AdminDashboard() {
                         <>
                           <Card className="bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-amber-500/10 border-amber-500/20">
                             <CardContent className="py-6">
-                              <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-1.5">
                                 <div className="p-3 rounded-xl bg-amber-500 text-white">
                                   <Star className="h-6 w-6" />
                                 </div>
@@ -9305,13 +9305,13 @@ export default function AdminDashboard() {
                           </Card>
 
                           <Card>
-                            <CardHeader>
-                              <CardTitle>All Feedback Entries</CardTitle>
-                              <CardDescription>Complete list of user feedback with all details</CardDescription>
+                            <CardHeader className="p-2 pb-1">
+                              <CardTitle className="text-[10px] font-semibold">All Feedback Entries</CardTitle>
+                              <CardDescription className="text-[9px]">Complete list of user feedback with all details</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <ScrollArea className="h-[600px]">
-                                <div className="space-y-3">
+                              <ScrollArea className="h-[200px]">
+                                <div className="space-y-1">
                                   {(feedbackData?.feedback || []).map((feedback, index) => (
                                     <motion.div
                                       key={feedback.id}
@@ -9320,10 +9320,10 @@ export default function AdminDashboard() {
                                       transition={{ delay: index * 0.02 }}
                                       className="p-4 rounded-lg border border-border/50 hover-elevate"
                                     >
-                                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                      <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                         {/* Rating & User */}
                                         <div>
-                                          <div className="flex items-center gap-2 mb-2">
+                                          <div className="flex items-center gap-1 mb-0.5">
                                             {Array.from({ length: feedback.rating }).map((_, i) => (
                                               <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
                                             ))}
@@ -9380,27 +9380,27 @@ export default function AdminDashboard() {
 
                 {/* Content Management Section */}
                 {activeSection.startsWith('content-') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="space-y-6"
+                      className="space-y-1.5"
                     >
                       {/* Blog Dashboard */}
                       {activeSection === 'content-blog' && (
                         <>
                           {blogStatsLoading ? (
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                               {[1,2,3,4].map(i => <Skeleton key={i} className="h-32" />)}
                             </div>
                           ) : (
                             <>
                               {/* Blog Stats Cards */}
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                                 <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
-                                  <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <CardHeader className="p-2 pb-1">
+                                    <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                       <FileText className="h-4 w-4" />
                                       Total Posts
                                     </CardTitle>
@@ -9413,8 +9413,8 @@ export default function AdminDashboard() {
                                 </Card>
 
                                 <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
-                                  <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <CardHeader className="p-2 pb-1">
+                                    <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                       <CheckCircle className="h-4 w-4" />
                                       Published
                                     </CardTitle>
@@ -9427,8 +9427,8 @@ export default function AdminDashboard() {
                                 </Card>
 
                                 <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
-                                  <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <CardHeader className="p-2 pb-1">
+                                    <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                       <Clock className="h-4 w-4" />
                                       Scheduled
                                     </CardTitle>
@@ -9441,8 +9441,8 @@ export default function AdminDashboard() {
                                 </Card>
 
                                 <Card className="bg-gradient-to-br from-gray-500/10 to-gray-600/5 border-gray-500/20">
-                                  <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                  <CardHeader className="p-2 pb-1">
+                                    <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                       <Edit className="h-4 w-4" />
                                       Drafts
                                     </CardTitle>
@@ -9457,13 +9457,13 @@ export default function AdminDashboard() {
 
                               {/* Blog Posts Table */}
                               <Card>
-                                <CardHeader className="flex flex-row items-center justify-between gap-4">
+                                <CardHeader className="flex flex-row items-center justify-between gap-1.5">
                                   <div>
                                     <CardTitle className="flex items-center gap-2">
                                       <FileText className="h-5 w-5 text-[#005EB8]" />
                                       Blog Posts
                                     </CardTitle>
-                                    <CardDescription>Manage your blog content</CardDescription>
+                                    <CardDescription className="text-[9px]">Manage your blog content</CardDescription>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <Button
@@ -9491,7 +9491,7 @@ export default function AdminDashboard() {
                                   {blogPostsLoading ? (
                                     <Skeleton className="h-64 w-full" />
                                   ) : (
-                                    <ScrollArea className="h-[400px]">
+                                    <ScrollArea className="h-[160px]">
                                       <Table>
                                         <TableHeader>
                                           <TableRow>
@@ -9554,16 +9554,16 @@ export default function AdminDashboard() {
                               </Card>
 
                               {/* Scheduled & Top Posts */}
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                                 <Card>
-                                  <CardHeader>
+                                  <CardHeader className="p-2 pb-1">
                                     <CardTitle className="flex items-center gap-2 text-lg">
                                       <Clock className="h-5 w-5 text-amber-500" />
                                       Upcoming Scheduled
                                     </CardTitle>
                                   </CardHeader>
                                   <CardContent>
-                                    <div className="space-y-3">
+                                    <div className="space-y-1">
                                       {blogStats?.scheduledPosts?.slice(0, 5).map((post) => (
                                         <div key={post.id} className="flex items-center justify-between p-3 rounded-lg border">
                                           <span className="font-medium truncate max-w-[200px]">{post.title}</span>
@@ -9580,14 +9580,14 @@ export default function AdminDashboard() {
                                 </Card>
 
                                 <Card>
-                                  <CardHeader>
+                                  <CardHeader className="p-2 pb-1">
                                     <CardTitle className="flex items-center gap-2 text-lg">
                                       <TrendingUp className="h-5 w-5 text-emerald-500" />
                                       Top Performing
                                     </CardTitle>
                                   </CardHeader>
                                   <CardContent>
-                                    <div className="space-y-3">
+                                    <div className="space-y-1">
                                       {blogStats?.topPosts?.slice(0, 5).map((post) => (
                                         <div key={post.id} className="flex items-center justify-between p-3 rounded-lg border">
                                           <span className="font-medium truncate max-w-[200px]">{post.title}</span>
@@ -9611,12 +9611,12 @@ export default function AdminDashboard() {
                       {/* SEO Analytics Placeholder */}
                       {activeSection === 'content-seo' && (
                         <Card>
-                          <CardHeader>
+                          <CardHeader className="p-2 pb-1">
                             <CardTitle className="flex items-center gap-2">
                               <TrendingUp className="h-5 w-5 text-[#005EB8]" />
                               SEO Analytics
                             </CardTitle>
-                            <CardDescription>Search engine optimization metrics</CardDescription>
+                            <CardDescription className="text-[9px]">Search engine optimization metrics</CardDescription>
                           </CardHeader>
                           <CardContent className="py-12 text-center text-muted-foreground">
                             <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -9631,21 +9631,21 @@ export default function AdminDashboard() {
 
                 {/* Referrals & Promos Section */}
                 {(activeSection.startsWith('referrals') || activeSection.startsWith('promos')) && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="space-y-6"
+                      className="space-y-1.5"
                     >
                       {/* Advanced Referral Programme Overview */}
                       {activeSection === 'referrals-overview' && (
                         <>
                           {/* Hero Stats - KPI Cards */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/20">
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                   <Link2 className="h-4 w-4" />
                                   Referral Codes
                                 </CardTitle>
@@ -9666,8 +9666,8 @@ export default function AdminDashboard() {
                             </Card>
                             
                             <Card className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/20">
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                   <Users className="h-4 w-4" />
                                   Referral Network
                                 </CardTitle>
@@ -9686,8 +9686,8 @@ export default function AdminDashboard() {
                             </Card>
                             
                             <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                   <Target className="h-4 w-4" />
                                   Viral Coefficient
                                 </CardTitle>
@@ -9707,8 +9707,8 @@ export default function AdminDashboard() {
                             </Card>
                             
                             <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                   <PoundSterling className="h-4 w-4" />
                                   Rewards Programme
                                 </CardTitle>
@@ -9727,18 +9727,18 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Referral Performance Metrics */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             {/* Referral Funnel Visualization */}
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <TrendingUp className="h-5 w-5 text-cyan-500" />
                                   Referral Conversion Funnel
                                 </CardTitle>
-                                <CardDescription>Track users through the referral journey</CardDescription>
+                                <CardDescription className="text-[9px]">Track users through the referral journey</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {[
                                     { stage: 'Link Clicks', count: referralAnalytics?.totalReferrals || 0, color: 'bg-cyan-500', percentage: 100 },
                                     { stage: 'Sign Ups', count: Math.round((referralAnalytics?.totalReferrals || 0) * 0.7), color: 'bg-violet-500', percentage: 70 },
@@ -9772,12 +9772,12 @@ export default function AdminDashboard() {
 
                             {/* Referral Network Visualization */}
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <Globe className="h-5 w-5 text-violet-500" />
                                   Network Growth
                                 </CardTitle>
-                                <CardDescription>Visualize your referral network expansion</CardDescription>
+                                <CardDescription className="text-[9px]">Visualize your referral network expansion</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="relative h-[250px] flex items-center justify-center">
@@ -9812,18 +9812,18 @@ export default function AdminDashboard() {
                                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-card to-transparent pt-8 pb-2">
                                     <div className="flex justify-around text-center">
                                       <div>
-                                        <p className="text-lg font-bold">{referralAnalytics?.topReferrers?.length || 0}</p>
-                                        <p className="text-xs text-muted-foreground">Active Referrers</p>
+                                        <p className="text-sm font-bold">{referralAnalytics?.topReferrers?.length || 0}</p>
+                                        <p className="text-[9px] text-muted-foreground">Active Referrers</p>
                                       </div>
                                       <div>
-                                        <p className="text-lg font-bold">{referralAnalytics?.successfulReferrals || 0}</p>
-                                        <p className="text-xs text-muted-foreground">Conversions</p>
+                                        <p className="text-sm font-bold">{referralAnalytics?.successfulReferrals || 0}</p>
+                                        <p className="text-[9px] text-muted-foreground">Conversions</p>
                                       </div>
                                       <div>
-                                        <p className="text-lg font-bold">
+                                        <p className="text-sm font-bold">
                                           {((referralAnalytics?.successfulReferrals || 0) / Math.max(1, referralAnalytics?.topReferrers?.length || 1)).toFixed(1)}
                                         </p>
-                                        <p className="text-xs text-muted-foreground">Avg per Referrer</p>
+                                        <p className="text-[9px] text-muted-foreground">Avg per Referrer</p>
                                       </div>
                                     </div>
                                   </div>
@@ -9834,14 +9834,14 @@ export default function AdminDashboard() {
 
                           {/* Top Referrers Leaderboard */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <Crown className="h-5 w-5 text-amber-500" />
                                     Top Referrers Leaderboard
                                   </CardTitle>
-                                  <CardDescription>Champions driving your growth through referrals</CardDescription>
+                                  <CardDescription className="text-[9px]">Champions driving your growth through referrals</CardDescription>
                                 </div>
                                 <Button variant="outline" size="sm" onClick={() => refetchReferralAnalytics()}>
                                   <RefreshCw className="h-4 w-4 mr-2" />
@@ -9851,17 +9851,17 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                               {referralAnalyticsLoading ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {Array.from({ length: 5 }).map((_, i) => (
                                     <Skeleton key={i} className="h-16 w-full" />
                                   ))}
                                 </div>
                               ) : referralAnalytics?.topReferrers && referralAnalytics.topReferrers.length > 0 ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {referralAnalytics.topReferrers.map((referrer, index) => (
                                     <Card key={referrer.userId} className={`hover-elevate ${index === 0 ? 'border-amber-500/30 bg-amber-500/5' : index === 1 ? 'border-gray-400/30 bg-gray-400/5' : index === 2 ? 'border-orange-600/30 bg-orange-600/5' : ''}`}>
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-4">
+                                      <CardContent className="p-2">
+                                        <div className="flex items-center gap-1.5">
                                           {/* Rank Badge */}
                                           <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
                                             index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white' :
@@ -9897,16 +9897,16 @@ export default function AdminDashboard() {
                                           </div>
                                           
                                           {/* Stats */}
-                                          <div className="flex items-center gap-6">
+                                          <div className="flex items-center gap-1.5">
                                             <div className="text-center">
                                               <p className="text-lg font-bold text-cyan-500">{referrer.referrals}</p>
-                                              <p className="text-xs text-muted-foreground">Referrals</p>
+                                              <p className="text-[9px] text-muted-foreground">Referrals</p>
                                             </div>
                                             <div className="text-center">
                                               <p className="text-lg font-bold text-green-500">
                                                 £{(referrer.earnings / 100).toFixed(0)}
                                               </p>
-                                              <p className="text-xs text-muted-foreground">Earned</p>
+                                              <p className="text-[9px] text-muted-foreground">Earned</p>
                                             </div>
                                           </div>
                                         </div>
@@ -9930,22 +9930,22 @@ export default function AdminDashboard() {
 
                           {/* Recent Referral Activity Timeline */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <Activity className="h-5 w-5 text-violet-500" />
                                     Referral Activity Timeline
                                   </CardTitle>
-                                  <CardDescription>Real-time stream of referral events</CardDescription>
+                                  <CardDescription className="text-[9px]">Real-time stream of referral events</CardDescription>
                                 </div>
                               </div>
                             </CardHeader>
                             <CardContent>
                               {referralAnalytics?.recentEvents && referralAnalytics.recentEvents.length > 0 ? (
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {referralAnalytics.recentEvents.map((event, index) => (
-                                    <div key={event.id} className="flex items-start gap-4">
+                                    <div key={event.id} className="flex items-start gap-1.5">
                                       {/* Timeline connector */}
                                       <div className="relative flex flex-col items-center">
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -10017,7 +10017,7 @@ export default function AdminDashboard() {
                       {activeSection === 'referrals-codes' && (
                         <>
                           {/* Summary Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
@@ -10074,14 +10074,14 @@ export default function AdminDashboard() {
 
                           {/* Referral Codes Table */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <Link2 className="h-5 w-5 text-blue-500" />
                                     All Referral Codes
                                   </CardTitle>
-                                  <CardDescription>Comprehensive view of all referral codes in the system</CardDescription>
+                                  <CardDescription className="text-[9px]">Comprehensive view of all referral codes in the system</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button variant="outline" size="sm" onClick={() => refetchReferralAnalytics()}>
@@ -10103,19 +10103,19 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                               {referralAnalyticsLoading ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {Array.from({ length: 5 }).map((_, i) => (
                                     <Skeleton key={i} className="h-20 w-full" />
                                   ))}
                                 </div>
                               ) : referralAnalytics?.topReferrers && referralAnalytics.topReferrers.length > 0 ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {referralAnalytics.topReferrers.map((referrer, index) => (
                                     <Card key={referrer.userId} className="hover-elevate">
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-4">
+                                      <CardContent className="p-2">
+                                        <div className="flex items-center gap-1.5">
                                           {/* Rank & Code */}
-                                          <div className="flex items-center gap-3">
+                                          <div className="flex items-center gap-1.5">
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
                                               index < 3 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white' : 'bg-muted text-muted-foreground'
                                             }`}>
@@ -10146,23 +10146,23 @@ export default function AdminDashboard() {
                                           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                                             <div className="p-2 rounded-lg bg-muted/50">
                                               <p className="text-lg font-bold text-blue-500">{referrer.referrals}</p>
-                                              <p className="text-xs text-muted-foreground">Total Clicks</p>
+                                              <p className="text-[9px] text-muted-foreground">Total Clicks</p>
                                             </div>
                                             <div className="p-2 rounded-lg bg-muted/50">
                                               <p className="text-lg font-bold text-green-500">{referrer.referrals}</p>
-                                              <p className="text-xs text-muted-foreground">Conversions</p>
+                                              <p className="text-[9px] text-muted-foreground">Conversions</p>
                                             </div>
                                             <div className="p-2 rounded-lg bg-muted/50">
                                               <p className="text-lg font-bold text-purple-500">
                                                 {referrer.referrals > 0 ? '100%' : '0%'}
                                               </p>
-                                              <p className="text-xs text-muted-foreground">Rate</p>
+                                              <p className="text-[9px] text-muted-foreground">Rate</p>
                                             </div>
                                             <div className="p-2 rounded-lg bg-muted/50">
                                               <p className="text-lg font-bold text-amber-500">
                                                 £{(referrer.earnings / 100).toFixed(0)}
                                               </p>
-                                              <p className="text-xs text-muted-foreground">Earnings</p>
+                                              <p className="text-[9px] text-muted-foreground">Earnings</p>
                                             </div>
                                           </div>
 
@@ -10223,7 +10223,7 @@ export default function AdminDashboard() {
                       {activeSection === 'referrals-rewards' && (
                         <>
                           {/* Rewards Summary Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
@@ -10284,14 +10284,14 @@ export default function AdminDashboard() {
 
                           {/* Pending Rewards Queue */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <Receipt className="h-5 w-5 text-amber-500" />
                                     Pending Rewards Queue
                                   </CardTitle>
-                                  <CardDescription>
+                                  <CardDescription className="text-[9px]">
                                     Review and process referral reward payouts
                                   </CardDescription>
                                 </div>
@@ -10311,17 +10311,17 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                               {pendingRewardsLoading ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {Array.from({ length: 5 }).map((_, i) => (
                                     <Skeleton key={i} className="h-24 w-full" />
                                   ))}
                                 </div>
                               ) : pendingRewardsData?.rewards && pendingRewardsData.rewards.length > 0 ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {pendingRewardsData.rewards.map((reward, index) => (
                                     <Card key={reward.id} className="hover-elevate border-l-4 border-l-amber-500">
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-4">
+                                      <CardContent className="p-2">
+                                        <div className="flex items-center gap-1.5">
                                           {/* Queue Number */}
                                           <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 font-bold">
                                             {index + 1}
@@ -10343,7 +10343,7 @@ export default function AdminDashboard() {
                                           {/* Amount */}
                                           <div className="text-center px-4">
                                             <p className="text-lg font-bold text-green-500">£{(reward.amount / 100).toFixed(2)}</p>
-                                            <p className="text-xs text-muted-foreground">Reward</p>
+                                            <p className="text-[9px] text-muted-foreground">Reward</p>
                                           </div>
                                           
                                           {/* Actions */}
@@ -10388,22 +10388,22 @@ export default function AdminDashboard() {
 
                           {/* Recent Processed Rewards */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <History className="h-5 w-5 text-blue-500" />
                                 Recently Processed
                               </CardTitle>
-                              <CardDescription>Last 10 reward decisions</CardDescription>
+                              <CardDescription className="text-[9px]">Last 10 reward decisions</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-2">
+                              <div className="space-y-0.5">
                                 {[
                                   { email: 'sarah@example.com', amount: 1500, status: 'approved', date: new Date() },
                                   { email: 'mike@example.com', amount: 1500, status: 'approved', date: subHours(new Date(), 2) },
                                   { email: 'alex@example.com', amount: 1500, status: 'rejected', date: subHours(new Date(), 5) },
                                 ].map((item, i) => (
                                   <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
                                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                                         item.status === 'approved' ? 'bg-green-500/10' : 'bg-red-500/10'
                                       }`}>
@@ -10415,7 +10415,7 @@ export default function AdminDashboard() {
                                       </div>
                                       <div>
                                         <p className="text-sm font-medium">{item.email}</p>
-                                        <p className="text-xs text-muted-foreground">{format(item.date, 'MMM d, h:mm a')}</p>
+                                        <p className="text-[9px] text-muted-foreground">{format(item.date, 'MMM d, h:mm a')}</p>
                                       </div>
                                     </div>
                                     <div className="text-right">
@@ -10436,10 +10436,10 @@ export default function AdminDashboard() {
                       {activeSection === 'promos-overview' && (
                         <>
                           {/* Promo Summary Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                   <Tag className="h-4 w-4" />
                                   Total Promo Codes
                                 </CardTitle>
@@ -10460,14 +10460,14 @@ export default function AdminDashboard() {
                             </Card>
                             
                             <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                   <CheckCircle className="h-4 w-4" />
                                   Total Redemptions
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-green-500">
+                                <div className="text-xs font-bold text-green-500">
                                   {promoCodesData?.summary?.totalRedemptions || 0}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-2">
@@ -10477,8 +10477,8 @@ export default function AdminDashboard() {
                             </Card>
                             
                             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                   <Wallet className="h-4 w-4" />
                                   Revenue Impact
                                 </CardTitle>
@@ -10494,8 +10494,8 @@ export default function AdminDashboard() {
                             </Card>
                             
                             <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
-                              <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                              <CardHeader className="p-2 pb-1">
+                                <CardTitle className="text-[10px] font-medium text-muted-foreground flex items-center gap-2">
                                   <TrendingUp className="h-4 w-4" />
                                   Avg Discount
                                 </CardTitle>
@@ -10513,14 +10513,14 @@ export default function AdminDashboard() {
 
                           {/* Promo Codes Performance Chart */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <BarChart3 className="h-5 w-5 text-purple-500" />
                                     Promo Code Performance
                                   </CardTitle>
-                                  <CardDescription>Redemptions and savings by promo code</CardDescription>
+                                  <CardDescription className="text-[9px]">Redemptions and savings by promo code</CardDescription>
                                 </div>
                               </div>
                             </CardHeader>
@@ -10528,7 +10528,7 @@ export default function AdminDashboard() {
                               {promoCodesLoading ? (
                                 <Skeleton className="h-[300px] w-full" />
                               ) : promoCodesData?.promoCodes && promoCodesData.promoCodes.length > 0 ? (
-                                <ResponsiveContainer width="100%" height={300}>
+                                <ResponsiveContainer width="100%" height={80}>
                                   <RechartsBarChart data={promoCodesData.promoCodes.slice(0, 10)}>
                                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                                     <XAxis dataKey="code" className="text-xs" />
@@ -10559,14 +10559,14 @@ export default function AdminDashboard() {
 
                           {/* Promo Codes List */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <Tag className="h-5 w-5 text-purple-500" />
                                     All Promo Codes
                                   </CardTitle>
-                                  <CardDescription>Complete promotional code management</CardDescription>
+                                  <CardDescription className="text-[9px]">Complete promotional code management</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button variant="outline" size="sm" onClick={() => refetchPromoCodes()}>
@@ -10582,17 +10582,17 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                               {promoCodesLoading ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {Array.from({ length: 5 }).map((_, i) => (
                                     <Skeleton key={i} className="h-20 w-full" />
                                   ))}
                                 </div>
                               ) : promoCodesData?.promoCodes && promoCodesData.promoCodes.length > 0 ? (
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {promoCodesData.promoCodes.map((promo) => (
                                     <Card key={promo.id} className="hover-elevate">
-                                      <CardContent className="p-4">
-                                        <div className="flex items-start justify-between flex-wrap gap-4">
+                                      <CardContent className="p-2">
+                                        <div className="flex items-start justify-between flex-wrap gap-1.5">
                                           <div className="flex-1 min-w-[200px]">
                                             <div className="flex items-center gap-3 mb-2">
                                               <Badge variant="outline" className="font-mono text-lg px-3 py-1 bg-purple-500/10 text-purple-600 border-purple-500/30">
@@ -10622,23 +10622,23 @@ export default function AdminDashboard() {
                                               <p className="text-lg font-bold text-purple-500">
                                                 {promo.discountType === 'percentage' ? `${promo.discountValue}%` : `£${promo.discountValue}`}
                                               </p>
-                                              <p className="text-xs text-muted-foreground">Discount</p>
+                                              <p className="text-[9px] text-muted-foreground">Discount</p>
                                             </div>
                                             <div className="bg-muted/50 rounded-lg p-3">
                                               <p className="text-lg font-bold text-green-500">
                                                 {promo.usedCount}{promo.maxUses ? `/${promo.maxUses}` : ''}
                                               </p>
-                                              <p className="text-xs text-muted-foreground">Redemptions</p>
+                                              <p className="text-[9px] text-muted-foreground">Redemptions</p>
                                             </div>
                                             <div className="bg-muted/50 rounded-lg p-3">
                                               <p className="text-lg font-bold text-blue-500">{promo.uniqueUsers}</p>
-                                              <p className="text-xs text-muted-foreground">Unique Users</p>
+                                              <p className="text-[9px] text-muted-foreground">Unique Users</p>
                                             </div>
                                             <div className="bg-muted/50 rounded-lg p-3">
                                               <p className="text-lg font-bold text-orange-500">
                                                 £{(promo.totalRevenueSaved / 100).toFixed(0)}
                                               </p>
-                                              <p className="text-xs text-muted-foreground">Total Savings</p>
+                                              <p className="text-[9px] text-muted-foreground">Total Savings</p>
                                             </div>
                                           </div>
                                           
@@ -10748,7 +10748,7 @@ export default function AdminDashboard() {
                       {activeSection === 'referrals-analytics' && (
                         <>
                           {/* KPI Overview */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-1.5">
                             <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/20">
                               <CardContent className="pt-6">
                                 <div className="text-center">
@@ -10756,7 +10756,7 @@ export default function AdminDashboard() {
                                     <Target className="h-6 w-6 text-cyan-500" />
                                   </div>
                                   <p className="text-lg font-bold text-cyan-500">{((referralAnalytics?.conversionRate || 0) * 100).toFixed(1)}%</p>
-                                  <p className="text-xs text-muted-foreground">Conversion Rate</p>
+                                  <p className="text-[9px] text-muted-foreground">Conversion Rate</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -10771,7 +10771,7 @@ export default function AdminDashboard() {
                                       ? ((referralAnalytics?.successfulReferrals || 0) / Math.max(1, referralAnalytics?.topReferrers?.length || 1)).toFixed(1)
                                       : '0'}
                                   </p>
-                                  <p className="text-xs text-muted-foreground">Viral Coefficient</p>
+                                  <p className="text-[9px] text-muted-foreground">Viral Coefficient</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -10782,7 +10782,7 @@ export default function AdminDashboard() {
                                     <Users className="h-6 w-6 text-green-500" />
                                   </div>
                                   <p className="text-lg font-bold text-green-500">{referralAnalytics?.successfulReferrals || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Total Conversions</p>
+                                  <p className="text-[9px] text-muted-foreground">Total Conversions</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -10793,7 +10793,7 @@ export default function AdminDashboard() {
                                     <PoundSterling className="h-6 w-6 text-amber-500" />
                                   </div>
                                   <p className="text-lg font-bold text-amber-500">£{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}</p>
-                                  <p className="text-xs text-muted-foreground">Rewards Paid</p>
+                                  <p className="text-[9px] text-muted-foreground">Rewards Paid</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -10806,7 +10806,7 @@ export default function AdminDashboard() {
                                   <p className="text-lg font-bold text-rose-500">
                                     £{Math.round((referralAnalytics?.successfulReferrals || 0) * 45)}
                                   </p>
-                                  <p className="text-xs text-muted-foreground">Est. Revenue Impact</p>
+                                  <p className="text-[9px] text-muted-foreground">Est. Revenue Impact</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -10814,14 +10814,14 @@ export default function AdminDashboard() {
 
                           {/* Referral Summary - Real Data */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <LineChart className="h-5 w-5 text-cyan-500" />
                                     Referral Summary
                                   </CardTitle>
-                                  <CardDescription>Real-time referral program statistics</CardDescription>
+                                  <CardDescription className="text-[9px]">Real-time referral program statistics</CardDescription>
                                 </div>
                                 <Badge variant="outline" className="text-cyan-500 border-cyan-500/30">Live</Badge>
                               </div>
@@ -10834,7 +10834,7 @@ export default function AdminDashboard() {
                                     <p className="text-sm text-muted-foreground mt-2">Total Referrals</p>
                                   </div>
                                   <div className="text-center p-6 rounded-lg bg-green-500/10 border border-green-500/20">
-                                    <p className="text-xl font-bold text-green-500">{referralAnalytics?.successfulReferrals || 0}</p>
+                                    <p className="text-xs font-bold text-green-500">{referralAnalytics?.successfulReferrals || 0}</p>
                                     <p className="text-sm text-muted-foreground mt-2">Conversions</p>
                                   </div>
                                 </div>
@@ -10854,17 +10854,17 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Attribution & Source Analysis */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <Globe className="h-5 w-5 text-violet-500" />
                                   Referral Sources
                                 </CardTitle>
-                                <CardDescription>How users share referral links</CardDescription>
+                                <CardDescription className="text-[9px]">How users share referral links</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {[
                                     { source: 'Direct Link', count: 45, percentage: 40, color: 'bg-cyan-500' },
                                     { source: 'Email', count: 28, percentage: 25, color: 'bg-violet-500' },
@@ -10885,15 +10885,15 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <BarChart3 className="h-5 w-5 text-green-500" />
                                   Top Converting Tiers
                                 </CardTitle>
-                                <CardDescription>Which plans referrals convert to</CardDescription>
+                                <CardDescription className="text-[9px]">Which plans referrals convert to</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <ResponsiveContainer width="100%" height={200}>
+                                <ResponsiveContainer width="100%" height={70}>
                                   <RechartsBarChart data={[
                                     { tier: 'Free', referrals: 45, conversions: 8 },
                                     { tier: 'Basic', referrals: 32, conversions: 18 },
@@ -10918,7 +10918,7 @@ export default function AdminDashboard() {
                       {activeSection === 'promos-analytics' && (
                         <>
                           {/* Performance KPIs */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
                               <CardContent className="pt-6">
                                 <div className="flex items-center justify-between">
@@ -10979,15 +10979,15 @@ export default function AdminDashboard() {
 
                           {/* Redemption Trends */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <LineChart className="h-5 w-5 text-purple-500" />
                                 Promo Code Performance Over Time
                               </CardTitle>
-                              <CardDescription>Track redemptions and savings trends</CardDescription>
+                              <CardDescription className="text-[9px]">Track redemptions and savings trends</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <ResponsiveContainer width="100%" height={300}>
+                              <ResponsiveContainer width="100%" height={80}>
                                 <RechartsLineChart data={[
                                   { date: 'Week 1', redemptions: 12, savings: 360 },
                                   { date: 'Week 2', redemptions: 18, savings: 540 },
@@ -11008,22 +11008,22 @@ export default function AdminDashboard() {
 
                           {/* Top Performing Codes */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <Crown className="h-5 w-5 text-amber-500" />
                                 Top Performing Promo Codes
                               </CardTitle>
-                              <CardDescription>Ranked by redemptions and revenue impact</CardDescription>
+                              <CardDescription className="text-[9px]">Ranked by redemptions and revenue impact</CardDescription>
                             </CardHeader>
                             <CardContent>
                               {promoCodesLoading ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {Array.from({ length: 5 }).map((_, i) => (
                                     <Skeleton key={i} className="h-16 w-full" />
                                   ))}
                                 </div>
                               ) : promoCodesData?.promoCodes && promoCodesData.promoCodes.length > 0 ? (
-                                <div className="space-y-3">
+                                <div className="space-y-1">
                                   {promoCodesData.promoCodes.slice(0, 5).map((promo, index) => (
                                     <div key={promo.id} className="flex items-center gap-4 p-4 rounded-lg bg-muted/30">
                                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
@@ -11042,13 +11042,13 @@ export default function AdminDashboard() {
                                       </div>
                                       <div className="text-center px-4">
                                         <p className="text-lg font-bold text-purple-500">{promo.usedCount}</p>
-                                        <p className="text-xs text-muted-foreground">Uses</p>
+                                        <p className="text-[9px] text-muted-foreground">Uses</p>
                                       </div>
                                       <div className="text-center px-4">
                                         <p className="text-lg font-bold text-green-500">
                                           £{((promo.totalRevenueSaved || 0) / 100).toFixed(0)}
                                         </p>
-                                        <p className="text-xs text-muted-foreground">Savings</p>
+                                        <p className="text-[9px] text-muted-foreground">Savings</p>
                                       </div>
                                     </div>
                                   ))}
@@ -11068,14 +11068,14 @@ export default function AdminDashboard() {
                       {activeSection === 'promos-campaigns' && (
                         <>
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <Target className="h-5 w-5 text-blue-500" />
                                     Campaign Manager
                                   </CardTitle>
-                                  <CardDescription>Create and manage promotional campaigns with A/B testing</CardDescription>
+                                  <CardDescription className="text-[9px]">Create and manage promotional campaigns with A/B testing</CardDescription>
                                 </div>
                                 <Button 
                                   onClick={() => setShowCampaignModal(true)}
@@ -11097,24 +11097,24 @@ export default function AdminDashboard() {
                                 </p>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-8">
                                   <Card className="hover-elevate">
-                                    <CardContent className="p-4 text-center">
-                                      <Zap className="h-8 w-8 mx-auto mb-2 text-amber-500" />
+                                    <CardContent className="p-1.5 text-center">
+                                      <Zap className="h-4 w-4 mx-auto mb-0.5 text-amber-500" />
                                       <p className="font-medium">A/B Testing</p>
-                                      <p className="text-xs text-muted-foreground">Compare code performance</p>
+                                      <p className="text-[9px] text-muted-foreground">Compare code performance</p>
                                     </CardContent>
                                   </Card>
                                   <Card className="hover-elevate">
-                                    <CardContent className="p-4 text-center">
-                                      <Users className="h-8 w-8 mx-auto mb-2 text-violet-500" />
+                                    <CardContent className="p-1.5 text-center">
+                                      <Users className="h-4 w-4 mx-auto mb-0.5 text-violet-500" />
                                       <p className="font-medium">Audience Targeting</p>
-                                      <p className="text-xs text-muted-foreground">Segment by tier, usage</p>
+                                      <p className="text-[9px] text-muted-foreground">Segment by tier, usage</p>
                                     </CardContent>
                                   </Card>
                                   <Card className="hover-elevate">
-                                    <CardContent className="p-4 text-center">
-                                      <Clock className="h-8 w-8 mx-auto mb-2 text-cyan-500" />
+                                    <CardContent className="p-1.5 text-center">
+                                      <Clock className="h-4 w-4 mx-auto mb-0.5 text-cyan-500" />
                                       <p className="font-medium">Scheduling</p>
-                                      <p className="text-xs text-muted-foreground">Time-based campaigns</p>
+                                      <p className="text-[9px] text-muted-foreground">Time-based campaigns</p>
                                     </CardContent>
                                   </Card>
                                 </div>
@@ -11136,14 +11136,14 @@ export default function AdminDashboard() {
                       {activeSection === 'promos-reports' && (
                         <>
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <FileText className="h-5 w-5 text-green-500" />
                                     Promotional Reports
                                   </CardTitle>
-                                  <CardDescription>Generate comprehensive reports on promotional performance</CardDescription>
+                                  <CardDescription className="text-[9px]">Generate comprehensive reports on promotional performance</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button 
@@ -11175,57 +11175,57 @@ export default function AdminDashboard() {
                               {/* Report Type Selection */}
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                                 <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-purple-500">
-                                  <CardContent className="p-4 text-center">
-                                    <BarChart3 className="h-8 w-8 mx-auto mb-2 text-purple-500" />
+                                  <CardContent className="p-1.5 text-center">
+                                    <BarChart3 className="h-4 w-4 mx-auto mb-0.5 text-purple-500" />
                                     <p className="font-medium">Usage Report</p>
-                                    <p className="text-xs text-muted-foreground">Redemptions by code</p>
+                                    <p className="text-[9px] text-muted-foreground">Redemptions by code</p>
                                   </CardContent>
                                 </Card>
                                 <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-green-500">
-                                  <CardContent className="p-4 text-center">
-                                    <PoundSterling className="h-8 w-8 mx-auto mb-2 text-green-500" />
+                                  <CardContent className="p-1.5 text-center">
+                                    <PoundSterling className="h-4 w-4 mx-auto mb-0.5 text-green-500" />
                                     <p className="font-medium">Revenue Impact</p>
-                                    <p className="text-xs text-muted-foreground">Financial analysis</p>
+                                    <p className="text-[9px] text-muted-foreground">Financial analysis</p>
                                   </CardContent>
                                 </Card>
                                 <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-blue-500">
-                                  <CardContent className="p-4 text-center">
-                                    <Users className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+                                  <CardContent className="p-1.5 text-center">
+                                    <Users className="h-4 w-4 mx-auto mb-0.5 text-blue-500" />
                                     <p className="font-medium">User Acquisition</p>
-                                    <p className="text-xs text-muted-foreground">New customers via promos</p>
+                                    <p className="text-[9px] text-muted-foreground">New customers via promos</p>
                                   </CardContent>
                                 </Card>
                                 <Card className="hover-elevate cursor-pointer border-2 border-transparent hover:border-amber-500">
-                                  <CardContent className="p-4 text-center">
-                                    <TrendingUp className="h-8 w-8 mx-auto mb-2 text-amber-500" />
+                                  <CardContent className="p-1.5 text-center">
+                                    <TrendingUp className="h-4 w-4 mx-auto mb-0.5 text-amber-500" />
                                     <p className="font-medium">ROI Analysis</p>
-                                    <p className="text-xs text-muted-foreground">Return on investment</p>
+                                    <p className="text-[9px] text-muted-foreground">Return on investment</p>
                                   </CardContent>
                                 </Card>
                               </div>
 
                               {/* Summary Stats */}
-                              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                 <Card className="bg-muted/30">
-                                  <CardContent className="p-4 text-center">
+                                  <CardContent className="p-1.5 text-center">
                                     <p className="text-xl font-bold text-purple-500">{promoCodesData?.summary?.totalCodes || 0}</p>
                                     <p className="text-sm text-muted-foreground">Total Codes Created</p>
                                   </CardContent>
                                 </Card>
                                 <Card className="bg-muted/30">
-                                  <CardContent className="p-4 text-center">
-                                    <p className="text-xl font-bold text-green-500">{promoCodesData?.summary?.totalRedemptions || 0}</p>
+                                  <CardContent className="p-1.5 text-center">
+                                    <p className="text-xs font-bold text-green-500">{promoCodesData?.summary?.totalRedemptions || 0}</p>
                                     <p className="text-sm text-muted-foreground">Total Redemptions</p>
                                   </CardContent>
                                 </Card>
                                 <Card className="bg-muted/30">
-                                  <CardContent className="p-4 text-center">
+                                  <CardContent className="p-1.5 text-center">
                                     <p className="text-xl font-bold text-blue-500">£{((promoCodesData?.summary?.totalRevenueSaved || 0) / 100).toFixed(0)}</p>
                                     <p className="text-sm text-muted-foreground">Total Savings</p>
                                   </CardContent>
                                 </Card>
                                 <Card className="bg-muted/30">
-                                  <CardContent className="p-4 text-center">
+                                  <CardContent className="p-1.5 text-center">
                                     <p className="text-xl font-bold text-amber-500">
                                       £{Math.round((promoCodesData?.summary?.totalRedemptions || 0) * 45)}
                                     </p>
@@ -11243,18 +11243,18 @@ export default function AdminDashboard() {
 
                 {/* Lawyer Review Center Section */}
                 {activeSection.startsWith('lawyer') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="space-y-6"
+                      className="space-y-1.5"
                     >
                       {/* Advanced Review Dashboard */}
                       {activeSection === 'lawyer-dashboard' && (
                         <>
                           {/* KPI Overview Row */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-1.5">
                             <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-orange-500/20">
                               <CardContent className="pt-6">
                                 <div className="text-center">
@@ -11262,7 +11262,7 @@ export default function AdminDashboard() {
                                     <FileText className="h-6 w-6 text-orange-500" />
                                   </div>
                                   <p className="text-lg font-bold text-orange-500">{lawyerAnalytics?.totalReviews || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Total Reviews</p>
+                                  <p className="text-[9px] text-muted-foreground">Total Reviews</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -11273,7 +11273,7 @@ export default function AdminDashboard() {
                                     <Clock className="h-6 w-6 text-yellow-500" />
                                   </div>
                                   <p className="text-lg font-bold text-yellow-500">{lawyerAnalytics?.pendingReviews || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Pending Queue</p>
+                                  <p className="text-[9px] text-muted-foreground">Pending Queue</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -11284,7 +11284,7 @@ export default function AdminDashboard() {
                                     <Activity className="h-6 w-6 text-blue-500" />
                                   </div>
                                   <p className="text-lg font-bold text-blue-500">{lawyerAnalytics?.inProgressReviews || 0}</p>
-                                  <p className="text-xs text-muted-foreground">In Progress</p>
+                                  <p className="text-[9px] text-muted-foreground">In Progress</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -11295,7 +11295,7 @@ export default function AdminDashboard() {
                                     <CheckCircle className="h-6 w-6 text-green-500" />
                                   </div>
                                   <p className="text-lg font-bold text-green-500">{lawyerAnalytics?.completedReviews || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Completed</p>
+                                  <p className="text-[9px] text-muted-foreground">Completed</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -11306,22 +11306,22 @@ export default function AdminDashboard() {
                                     <AlertTriangle className="h-6 w-6 text-red-500" />
                                   </div>
                                   <p className="text-lg font-bold text-red-500">{lawyerAnalytics?.overdueReviews || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Overdue</p>
+                                  <p className="text-[9px] text-muted-foreground">Overdue</p>
                                 </div>
                               </CardContent>
                             </Card>
                           </div>
 
                           {/* SLA Compliance & Performance Metrics */}
-                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-1.5">
                             {/* SLA Compliance Gauge */}
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <Target className="h-5 w-5 text-cyan-500" />
                                   SLA Compliance
                                 </CardTitle>
-                                <CardDescription>Meeting review deadlines</CardDescription>
+                                <CardDescription className="text-[9px]">Meeting review deadlines</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="relative h-40 flex items-center justify-center">
@@ -11344,7 +11344,7 @@ export default function AdminDashboard() {
                                       </defs>
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-xl font-bold">
+                                      <span className="text-[11px] font-bold">
                                         {lawyerAnalytics?.totalReviews 
                                           ? Math.round(((lawyerAnalytics.completedReviews - lawyerAnalytics.overdueReviews) / lawyerAnalytics.totalReviews) * 100) 
                                           : 0}%
@@ -11356,11 +11356,11 @@ export default function AdminDashboard() {
                                 <div className="grid grid-cols-2 gap-4 mt-4">
                                   <div className="text-center p-3 rounded-lg bg-green-500/10">
                                     <p className="text-lg font-bold text-green-500">{(lawyerAnalytics?.completedReviews || 0) - (lawyerAnalytics?.overdueReviews || 0)}</p>
-                                    <p className="text-xs text-muted-foreground">Met SLA</p>
+                                    <p className="text-[9px] text-muted-foreground">Met SLA</p>
                                   </div>
                                   <div className="text-center p-3 rounded-lg bg-red-500/10">
                                     <p className="text-lg font-bold text-red-500">{lawyerAnalytics?.overdueReviews || 0}</p>
-                                    <p className="text-xs text-muted-foreground">Breached</p>
+                                    <p className="text-[9px] text-muted-foreground">Breached</p>
                                   </div>
                                 </div>
                               </CardContent>
@@ -11368,22 +11368,22 @@ export default function AdminDashboard() {
 
                             {/* Review Outcome Breakdown */}
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <PieChart className="h-5 w-5 text-violet-500" />
                                   Review Outcomes
                                 </CardTitle>
-                                <CardDescription>Decision distribution</CardDescription>
+                                <CardDescription className="text-[9px]">Decision distribution</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   <div>
                                     <div className="flex items-center justify-between mb-2">
                                       <div className="flex items-center gap-2">
                                         <div className="w-3 h-3 rounded-full bg-green-500" />
                                         <span className="text-sm">Approved</span>
                                       </div>
-                                      <span className="font-medium text-green-500">{lawyerAnalytics?.approvedReviews || 0}</span>
+                                      <span className="text-[9px] font-medium text-green-500">{lawyerAnalytics?.approvedReviews || 0}</span>
                                     </div>
                                     <Progress value={lawyerAnalytics?.totalReviews ? (lawyerAnalytics.approvedReviews / lawyerAnalytics.totalReviews) * 100 : 0} className="h-2" />
                                   </div>
@@ -11411,7 +11411,7 @@ export default function AdminDashboard() {
                                 <div className="mt-6 p-4 rounded-lg bg-muted/50">
                                   <div className="flex items-center justify-between">
                                     <span className="text-sm text-muted-foreground">Approval Rate</span>
-                                    <span className="text-xl font-bold text-green-500">
+                                    <span className="text-xs font-bold text-green-500">
                                       {lawyerAnalytics?.completedReviews 
                                         ? Math.round((lawyerAnalytics.approvedReviews / lawyerAnalytics.completedReviews) * 100) 
                                         : 0}%
@@ -11423,19 +11423,19 @@ export default function AdminDashboard() {
 
                             {/* Performance Metrics */}
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <Zap className="h-5 w-5 text-amber-500" />
                                   Performance Metrics
                                 </CardTitle>
-                                <CardDescription>Efficiency indicators</CardDescription>
+                                <CardDescription className="text-[9px]">Efficiency indicators</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                                     <div>
                                       <p className="text-sm text-muted-foreground">Avg. Turnaround</p>
-                                      <p className="text-lg font-bold">{lawyerAnalytics?.averageTurnaroundHours || 0} hrs</p>
+                                      <p className="text-sm font-bold">{lawyerAnalytics?.averageTurnaroundHours || 0} hrs</p>
                                     </div>
                                     <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
                                       <Clock className="h-6 w-6 text-blue-500" />
@@ -11444,7 +11444,7 @@ export default function AdminDashboard() {
                                   <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                                     <div>
                                       <p className="text-sm text-muted-foreground">Active Lawyers</p>
-                                      <p className="text-lg font-bold">{lawyerTeam?.filter(l => l.isAvailable).length || 0}/{lawyerTeam?.length || 0}</p>
+                                      <p className="text-sm font-bold">{lawyerTeam?.filter(l => l.isAvailable).length || 0}/{lawyerTeam?.length || 0}</p>
                                     </div>
                                     <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
                                       <Users className="h-6 w-6 text-green-500" />
@@ -11453,7 +11453,7 @@ export default function AdminDashboard() {
                                   <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                                     <div>
                                       <p className="text-sm text-muted-foreground">Backlog Ratio</p>
-                                      <p className="text-lg font-bold">
+                                      <p className="text-sm font-bold">
                                         {lawyerTeam?.filter(l => l.isAvailable).length 
                                           ? ((lawyerAnalytics?.pendingReviews || 0) / lawyerTeam.filter(l => l.isAvailable).length).toFixed(1)
                                           : 0}
@@ -11470,14 +11470,14 @@ export default function AdminDashboard() {
 
                           {/* Review Stats - Real Data */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <BarChart3 className="h-5 w-5 text-blue-500" />
                                     Review Statistics
                                   </CardTitle>
-                                  <CardDescription>Real-time lawyer review performance</CardDescription>
+                                  <CardDescription className="text-[9px]">Real-time lawyer review performance</CardDescription>
                                 </div>
                                 <Badge variant="outline" className="text-blue-500 border-blue-500/30">Live</Badge>
                               </div>
@@ -11485,7 +11485,7 @@ export default function AdminDashboard() {
                             <CardContent>
                               <div className="grid grid-cols-3 gap-4 h-[280px] content-center">
                                 <div className="text-center p-6 rounded-lg bg-green-500/10 border border-green-500/20">
-                                  <p className="text-xl font-bold text-green-500">{lawyerAnalytics?.completedReviews || 0}</p>
+                                  <p className="text-xs font-bold text-green-500">{lawyerAnalytics?.completedReviews || 0}</p>
                                   <p className="text-sm text-muted-foreground mt-2">Completed</p>
                                 </div>
                                 <div className="text-center p-6 rounded-lg bg-amber-500/10 border border-amber-500/20">
@@ -11506,20 +11506,20 @@ export default function AdminDashboard() {
                           </Card>
 
                           {/* Workload Distribution & Risk Matrix */}
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <Users className="h-5 w-5 text-violet-500" />
                                   Team Workload Distribution
                                 </CardTitle>
-                                <CardDescription>Current assignments per lawyer</CardDescription>
+                                <CardDescription className="text-[9px]">Current assignments per lawyer</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 {lawyerTeam && lawyerTeam.length > 0 ? (
-                                  <div className="space-y-4">
+                                  <div className="space-y-1.5">
                                     {lawyerTeam.map((lawyer) => (
-                                      <div key={lawyer.id} className="flex items-center gap-4">
+                                      <div key={lawyer.id} className="flex items-center gap-1.5">
                                         <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${lawyer.isAvailable ? 'bg-green-500/10 text-green-600' : 'bg-gray-500/10 text-gray-500'}`}>
                                           {lawyer.firstName[0]}{lawyer.lastName[0]}
                                         </div>
@@ -11549,47 +11549,47 @@ export default function AdminDashboard() {
                             </Card>
 
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <AlertTriangle className="h-5 w-5 text-red-500" />
                                   Risk Matrix
                                 </CardTitle>
-                                <CardDescription>Reviews requiring immediate attention</CardDescription>
+                                <CardDescription className="text-[9px]">Reviews requiring immediate attention</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   <div className="flex items-center justify-between p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
                                       <div className="h-10 w-10 rounded-full bg-red-500/20 flex items-center justify-center">
                                         <AlertTriangle className="h-5 w-5 text-red-500" />
                                       </div>
                                       <div>
                                         <p className="font-medium text-red-600 dark:text-red-400">Critical - Overdue</p>
-                                        <p className="text-xs text-muted-foreground">SLA breached, immediate action needed</p>
+                                        <p className="text-[9px] text-muted-foreground">SLA breached, immediate action needed</p>
                                       </div>
                                     </div>
                                     <Badge variant="destructive" className="text-lg px-3 py-1">{lawyerAnalytics?.overdueReviews || 0}</Badge>
                                   </div>
                                   <div className="flex items-center justify-between p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
                                       <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center">
                                         <Clock className="h-5 w-5 text-amber-500" />
                                       </div>
                                       <div>
                                         <p className="font-medium text-amber-600 dark:text-amber-400">High Priority - Urgent</p>
-                                        <p className="text-xs text-muted-foreground">Due within 24 hours</p>
+                                        <p className="text-[9px] text-muted-foreground">Due within 24 hours</p>
                                       </div>
                                     </div>
                                     <Badge className="bg-amber-500 text-lg px-3 py-1">{lawyerReviews?.filter(r => r.priority === 'urgent').length || 0}</Badge>
                                   </div>
                                   <div className="flex items-center justify-between p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
                                       <div className="h-10 w-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
                                         <Zap className="h-5 w-5 text-yellow-500" />
                                       </div>
                                       <div>
                                         <p className="font-medium text-yellow-600 dark:text-yellow-400">Enterprise Tier</p>
-                                        <p className="text-xs text-muted-foreground">Premium customer priority</p>
+                                        <p className="text-[9px] text-muted-foreground">Premium customer priority</p>
                                       </div>
                                     </div>
                                     <Badge className="bg-yellow-500 text-lg px-3 py-1">{lawyerReviews?.filter(r => r.tier === 'enterprise' || r.tier === 'ultimate').length || 0}</Badge>
@@ -11605,7 +11605,7 @@ export default function AdminDashboard() {
                       {activeSection === 'lawyer-queue' && (
                         <>
                           {/* Queue Summary Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-red-500/10 to-red-600/5 border-red-500/20">
                               <CardContent className="pt-4 pb-4">
                                 <div className="flex items-center justify-between">
@@ -11654,14 +11654,14 @@ export default function AdminDashboard() {
 
                           {/* Main Queue Card */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <ClipboardCheck className="h-5 w-5 text-orange-500" />
                                     Pending Review Queue
                                   </CardTitle>
-                                  <CardDescription>Documents awaiting assignment and review</CardDescription>
+                                  <CardDescription className="text-[9px]">Documents awaiting assignment and review</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Select defaultValue="all">
@@ -11696,13 +11696,13 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                               {lawyerReviewsLoading ? (
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {Array.from({ length: 5 }).map((_, i) => (
                                     <Skeleton key={i} className="h-20 w-full" />
                                   ))}
                                 </div>
                               ) : lawyerReviews && lawyerReviews.filter(r => r.status === 'pending').length > 0 ? (
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {lawyerReviews
                                     .filter(r => r.status === 'pending')
                                     .sort((a, b) => {
@@ -11711,9 +11711,9 @@ export default function AdminDashboard() {
                                     })
                                     .map((review) => (
                                       <Card key={review.id} className={`hover-elevate ${review.isOverdue ? 'border-red-500/50 bg-red-500/5' : review.priority === 'urgent' ? 'border-amber-500/50' : ''}`}>
-                                        <CardContent className="p-4">
+                                        <CardContent className="p-2">
                                           <div className="flex items-center justify-between gap-4 flex-wrap">
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-1.5">
                                               <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${
                                                 review.priority === 'urgent' ? 'bg-red-500/10' : 
                                                 review.priority === 'high' ? 'bg-amber-500/10' : 'bg-blue-500/10'
@@ -11743,7 +11743,7 @@ export default function AdminDashboard() {
                                                 </div>
                                               </div>
                                             </div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-1.5">
                                               <Badge 
                                                 variant={review.priority === 'urgent' ? 'destructive' : review.priority === 'high' ? 'default' : 'secondary'}
                                                 className="capitalize"
@@ -11810,15 +11810,15 @@ export default function AdminDashboard() {
 
                           {/* Aging Distribution */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <Clock className="h-5 w-5 text-blue-500" />
                                 Queue Aging Distribution
                               </CardTitle>
-                              <CardDescription>How long reviews have been waiting</CardDescription>
+                              <CardDescription className="text-[9px]">How long reviews have been waiting</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <ResponsiveContainer width="100%" height={200}>
+                              <ResponsiveContainer width="100%" height={70}>
                                 <RechartsBarChart data={[
                                   { range: '< 1 day', count: lawyerReviews?.filter(r => r.status === 'pending').length || 4 },
                                   { range: '1-2 days', count: 2 },
@@ -11842,7 +11842,7 @@ export default function AdminDashboard() {
                       {activeSection === 'lawyer-documents' && (
                         <>
                           {/* Status Tabs */}
-                          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-5 gap-1.5">
                             {[
                               { status: 'all', label: 'All Reviews', count: lawyerReviews?.length || 0, color: 'blue' },
                               { status: 'pending', label: 'Pending', count: lawyerReviews?.filter(r => r.status === 'pending').length || 0, color: 'yellow' },
@@ -11853,7 +11853,7 @@ export default function AdminDashboard() {
                               <Card key={tab.status} className={`hover-elevate cursor-pointer bg-gradient-to-br from-${tab.color}-500/10 to-${tab.color}-600/5 border-${tab.color}-500/20`}>
                                 <CardContent className="pt-4 pb-4 text-center">
                                   <p className={`text-lg font-bold text-${tab.color}-500`}>{tab.count}</p>
-                                  <p className="text-xs text-muted-foreground">{tab.label}</p>
+                                  <p className="text-[9px] text-muted-foreground">{tab.label}</p>
                                 </CardContent>
                               </Card>
                             ))}
@@ -11861,14 +11861,14 @@ export default function AdminDashboard() {
 
                           {/* Document List */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <FileSearch className="h-5 w-5 text-blue-500" />
                                     All Document Reviews
                                   </CardTitle>
-                                  <CardDescription>Complete review history with detailed tracking</CardDescription>
+                                  <CardDescription className="text-[9px]">Complete review history with detailed tracking</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button 
@@ -11890,7 +11890,7 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                               {lawyerReviewsLoading ? (
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {Array.from({ length: 5 }).map((_, i) => (
                                     <Skeleton key={i} className="h-16 w-full" />
                                   ))}
@@ -12007,7 +12007,7 @@ export default function AdminDashboard() {
                       {activeSection === 'lawyer-team' && (
                         <>
                           {/* Team Overview Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-1.5">
                             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
                               <CardContent className="pt-6">
                                 <div className="text-center">
@@ -12015,7 +12015,7 @@ export default function AdminDashboard() {
                                     <Users className="h-6 w-6 text-blue-500" />
                                   </div>
                                   <p className="text-lg font-bold text-blue-500">{lawyerTeam?.length || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Total Lawyers</p>
+                                  <p className="text-[9px] text-muted-foreground">Total Lawyers</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12026,7 +12026,7 @@ export default function AdminDashboard() {
                                     <UserCheck className="h-6 w-6 text-green-500" />
                                   </div>
                                   <p className="text-lg font-bold text-green-500">{lawyerTeam?.filter(l => l.isAvailable).length || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Available</p>
+                                  <p className="text-[9px] text-muted-foreground">Available</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12037,7 +12037,7 @@ export default function AdminDashboard() {
                                     <Activity className="h-6 w-6 text-amber-500" />
                                   </div>
                                   <p className="text-lg font-bold text-amber-500">{lawyerTeam?.reduce((sum, l) => sum + l.currentReviewCount, 0) || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Active Reviews</p>
+                                  <p className="text-[9px] text-muted-foreground">Active Reviews</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12048,7 +12048,7 @@ export default function AdminDashboard() {
                                     <CheckCircle className="h-6 w-6 text-violet-500" />
                                   </div>
                                   <p className="text-lg font-bold text-violet-500">{lawyerTeam?.reduce((sum, l) => sum + l.totalReviewsCompleted, 0) || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Total Completed</p>
+                                  <p className="text-[9px] text-muted-foreground">Total Completed</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12063,7 +12063,7 @@ export default function AdminDashboard() {
                                       ? (lawyerTeam.reduce((sum, l) => sum + (l.averageRating || 0), 0) / lawyerTeam.length).toFixed(1)
                                       : '0'}
                                   </p>
-                                  <p className="text-xs text-muted-foreground">Avg. Rating</p>
+                                  <p className="text-[9px] text-muted-foreground">Avg. Rating</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12071,14 +12071,14 @@ export default function AdminDashboard() {
 
                           {/* Team Capacity Overview */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <UserCog className="h-5 w-5 text-blue-500" />
                                     Immigration Lawyer Team
                                   </CardTitle>
-                                  <CardDescription>Manage lawyers who review business plans and documents</CardDescription>
+                                  <CardDescription className="text-[9px]">Manage lawyers who review business plans and documents</CardDescription>
                                 </div>
                                 <Button>
                                   <Plus className="h-4 w-4 mr-2" />
@@ -12088,18 +12088,18 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                               {lawyerTeamLoading ? (
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {Array.from({ length: 3 }).map((_, i) => (
                                     <Skeleton key={i} className="h-32 w-full" />
                                   ))}
                                 </div>
                               ) : lawyerTeam && lawyerTeam.length > 0 ? (
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {lawyerTeam.map((lawyer) => (
                                     <Card key={lawyer.id} className={`hover-elevate ${!lawyer.isAvailable ? 'opacity-60' : ''}`}>
-                                      <CardContent className="p-4">
+                                      <CardContent className="p-2">
                                         <div className="flex items-center justify-between gap-4 flex-wrap">
-                                          <div className="flex items-center gap-4">
+                                          <div className="flex items-center gap-1.5">
                                             <div className={`h-14 w-14 rounded-full flex items-center justify-center text-lg font-bold ${lawyer.isAvailable ? 'bg-gradient-to-br from-green-500/20 to-blue-500/20 text-green-600' : 'bg-gray-500/10 text-gray-500'}`}>
                                               {lawyer.firstName[0]}{lawyer.lastName[0]}
                                             </div>
@@ -12112,7 +12112,7 @@ export default function AdminDashboard() {
                                               </div>
                                               <p className="text-sm text-muted-foreground">{lawyer.email}</p>
                                               {lawyer.firmName && (
-                                                <p className="text-xs text-muted-foreground">{lawyer.firmName}</p>
+                                                <p className="text-[9px] text-muted-foreground">{lawyer.firmName}</p>
                                               )}
                                               <div className="flex items-center gap-2 mt-2">
                                                 <Badge variant="outline" className="text-xs">Immigration Law</Badge>
@@ -12121,7 +12121,7 @@ export default function AdminDashboard() {
                                               </div>
                                             </div>
                                           </div>
-                                          <div className="flex items-center gap-6">
+                                          <div className="flex items-center gap-1.5">
                                             {/* Workload Gauge */}
                                             <div className="text-center">
                                               <div className="relative w-16 h-16">
@@ -12143,21 +12143,21 @@ export default function AdminDashboard() {
                                               <p className="text-xs text-muted-foreground mt-1">Workload</p>
                                             </div>
                                             <div className="text-center px-4 border-l">
-                                              <p className="text-lg font-bold">{lawyer.totalReviewsCompleted}</p>
-                                              <p className="text-xs text-muted-foreground">Completed</p>
+                                              <p className="text-sm font-bold">{lawyer.totalReviewsCompleted}</p>
+                                              <p className="text-[9px] text-muted-foreground">Completed</p>
                                             </div>
                                             <div className="text-center px-4 border-l">
                                               <div className="flex items-center justify-center gap-1">
                                                 <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                                                <span className="text-xl font-bold">{lawyer.averageRating || '-'}</span>
+                                                <span className="text-[11px] font-bold">{lawyer.averageRating || '-'}</span>
                                               </div>
-                                              <p className="text-xs text-muted-foreground">Rating</p>
+                                              <p className="text-[9px] text-muted-foreground">Rating</p>
                                             </div>
                                             <div className="text-center px-4 border-l">
-                                              <p className="text-xl font-bold text-green-500">
+                                              <p className="text-xs font-bold text-green-500">
                                                 {Math.round(((lawyer.totalReviewsCompleted || 0) * 0.85) || 0)}%
                                               </p>
-                                              <p className="text-xs text-muted-foreground">Approval Rate</p>
+                                              <p className="text-[9px] text-muted-foreground">Approval Rate</p>
                                             </div>
                                             <DropdownMenu>
                                               <DropdownMenuTrigger asChild>
@@ -12216,15 +12216,15 @@ export default function AdminDashboard() {
                           {/* Team Performance Chart */}
                           {lawyerTeam && lawyerTeam.length > 0 && (
                             <Card>
-                              <CardHeader>
+                              <CardHeader className="p-2 pb-1">
                                 <CardTitle className="flex items-center gap-2">
                                   <BarChart3 className="h-5 w-5 text-violet-500" />
                                   Team Performance Comparison
                                 </CardTitle>
-                                <CardDescription>Reviews completed and approval rates by lawyer</CardDescription>
+                                <CardDescription className="text-[9px]">Reviews completed and approval rates by lawyer</CardDescription>
                               </CardHeader>
                               <CardContent>
-                                <ResponsiveContainer width="100%" height={250}>
+                                <ResponsiveContainer width="100%" height={80}>
                                   <RechartsBarChart data={lawyerTeam.map(l => ({
                                     name: `${l.firstName} ${l.lastName.charAt(0)}.`,
                                     completed: l.totalReviewsCompleted,
@@ -12249,7 +12249,7 @@ export default function AdminDashboard() {
                       {activeSection === 'lawyer-completed' && (
                         <>
                           {/* Completion Stats */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
                               <CardContent className="pt-6">
                                 <div className="text-center">
@@ -12257,7 +12257,7 @@ export default function AdminDashboard() {
                                     <CheckCircle className="h-6 w-6 text-green-500" />
                                   </div>
                                   <p className="text-lg font-bold text-green-500">{lawyerAnalytics?.approvedReviews || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Approved</p>
+                                  <p className="text-[9px] text-muted-foreground">Approved</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12268,7 +12268,7 @@ export default function AdminDashboard() {
                                     <Edit className="h-6 w-6 text-yellow-500" />
                                   </div>
                                   <p className="text-lg font-bold text-yellow-500">{lawyerAnalytics?.needsRevisionReviews || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Needs Revision</p>
+                                  <p className="text-[9px] text-muted-foreground">Needs Revision</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12283,7 +12283,7 @@ export default function AdminDashboard() {
                                       ? Math.round((lawyerAnalytics.approvedReviews / lawyerAnalytics.completedReviews) * 100) 
                                       : 0}%
                                   </p>
-                                  <p className="text-xs text-muted-foreground">Approval Rate</p>
+                                  <p className="text-[9px] text-muted-foreground">Approval Rate</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12294,7 +12294,7 @@ export default function AdminDashboard() {
                                     <Clock className="h-6 w-6 text-violet-500" />
                                   </div>
                                   <p className="text-lg font-bold text-violet-500">{lawyerAnalytics?.averageTurnaroundHours || 0}h</p>
-                                  <p className="text-xs text-muted-foreground">Avg. Turnaround</p>
+                                  <p className="text-[9px] text-muted-foreground">Avg. Turnaround</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12302,14 +12302,14 @@ export default function AdminDashboard() {
 
                           {/* Review Outcomes - Real Data */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <TrendingUp className="h-5 w-5 text-green-500" />
                                     Review Outcomes
                                   </CardTitle>
-                                  <CardDescription>Real-time document review results</CardDescription>
+                                  <CardDescription className="text-[9px]">Real-time document review results</CardDescription>
                                 </div>
                                 <Badge variant="outline" className="text-green-500 border-green-500/30">Live</Badge>
                               </div>
@@ -12318,7 +12318,7 @@ export default function AdminDashboard() {
                               <div className="flex flex-col items-center justify-center h-[250px]">
                                 <div className="grid grid-cols-3 gap-4 w-full">
                                   <div className="text-center p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                                    <p className="text-xl font-bold text-green-500">{lawyerAnalytics?.approvedReviews || 0}</p>
+                                    <p className="text-xs font-bold text-green-500">{lawyerAnalytics?.approvedReviews || 0}</p>
                                     <p className="text-xs text-muted-foreground mt-1">Approved</p>
                                   </div>
                                   <div className="text-center p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
@@ -12331,7 +12331,7 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
                                 <div className="mt-6 text-center">
-                                  <p className="text-xl font-bold">
+                                  <p className="text-sm font-bold">
                                     {lawyerAnalytics?.completedReviews 
                                       ? Math.round((lawyerAnalytics.approvedReviews / lawyerAnalytics.completedReviews) * 100) 
                                       : 0}%
@@ -12349,14 +12349,14 @@ export default function AdminDashboard() {
 
                           {/* Completed Reviews List */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <CheckCircle className="h-5 w-5 text-green-500" />
                                     Completed Reviews Archive
                                   </CardTitle>
-                                  <CardDescription>Successfully reviewed documents with detailed outcomes</CardDescription>
+                                  <CardDescription className="text-[9px]">Successfully reviewed documents with detailed outcomes</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button 
@@ -12388,7 +12388,7 @@ export default function AdminDashboard() {
                             </CardHeader>
                             <CardContent>
                               {lawyerReviewsLoading ? (
-                                <div className="space-y-4">
+                                <div className="space-y-1.5">
                                   {Array.from({ length: 5 }).map((_, i) => (
                                     <Skeleton key={i} className="h-16 w-full" />
                                   ))}
@@ -12504,7 +12504,7 @@ export default function AdminDashboard() {
                       {activeSection === 'lawyer-comments' && (
                         <>
                           {/* Comments Overview */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
                               <CardContent className="pt-6">
                                 <div className="text-center">
@@ -12512,7 +12512,7 @@ export default function AdminDashboard() {
                                     <MessageSquare className="h-6 w-6 text-blue-500" />
                                   </div>
                                   <p className="text-lg font-bold text-blue-500">47</p>
-                                  <p className="text-xs text-muted-foreground">Total Comments</p>
+                                  <p className="text-[9px] text-muted-foreground">Total Comments</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12523,7 +12523,7 @@ export default function AdminDashboard() {
                                     <CheckCircle className="h-6 w-6 text-green-500" />
                                   </div>
                                   <p className="text-lg font-bold text-green-500">38</p>
-                                  <p className="text-xs text-muted-foreground">Resolved</p>
+                                  <p className="text-[9px] text-muted-foreground">Resolved</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12534,7 +12534,7 @@ export default function AdminDashboard() {
                                     <Clock className="h-6 w-6 text-amber-500" />
                                   </div>
                                   <p className="text-lg font-bold text-amber-500">9</p>
-                                  <p className="text-xs text-muted-foreground">Pending</p>
+                                  <p className="text-[9px] text-muted-foreground">Pending</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12545,7 +12545,7 @@ export default function AdminDashboard() {
                                     <Users className="h-6 w-6 text-violet-500" />
                                   </div>
                                   <p className="text-lg font-bold text-violet-500">12</p>
-                                  <p className="text-xs text-muted-foreground">Active Threads</p>
+                                  <p className="text-[9px] text-muted-foreground">Active Threads</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12553,14 +12553,14 @@ export default function AdminDashboard() {
 
                           {/* Comments List */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <MessageSquare className="h-5 w-5 text-blue-500" />
                                     Review Comments & Notes
                                   </CardTitle>
-                                  <CardDescription>Internal communication and feedback on document reviews</CardDescription>
+                                  <CardDescription className="text-[9px]">Internal communication and feedback on document reviews</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Select defaultValue="all">
@@ -12581,7 +12581,7 @@ export default function AdminDashboard() {
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-4">
+                              <div className="space-y-1.5">
                                 {/* Sample Comment Threads */}
                                 {[
                                   { id: 1, author: 'Sarah Johnson', role: 'Immigration Lawyer', content: 'The business plan needs more detail on the innovation aspect. Please request clarification on the technology differentiation.', time: '2 hours ago', status: 'pending', review: 'BP-2025-001' },
@@ -12590,8 +12590,8 @@ export default function AdminDashboard() {
                                   { id: 4, author: 'James Taylor', role: 'Senior Partner', content: 'Urgent: This Enterprise tier application needs priority review. Client has endorsement meeting scheduled next week.', time: '2 days ago', status: 'pending', review: 'BP-2025-004' },
                                 ].map((comment) => (
                                   <Card key={comment.id} className={`hover-elevate ${comment.status === 'pending' ? 'border-amber-500/30' : ''}`}>
-                                    <CardContent className="p-4">
-                                      <div className="flex items-start gap-4">
+                                    <CardContent className="p-2">
+                                      <div className="flex items-start gap-1.5">
                                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 flex items-center justify-center text-sm font-bold">
                                           {comment.author.split(' ').map(n => n[0]).join('')}
                                         </div>
@@ -12642,7 +12642,7 @@ export default function AdminDashboard() {
 
                 {/* Advanced Analytics Section */}
                 {activeSection.startsWith('analytics-') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     {activeSection === 'analytics-realtime-monitor' && (
                       <RealtimeMonitor isActive={activeSection === 'analytics-realtime-monitor'} />
                     )}
@@ -12672,18 +12672,18 @@ export default function AdminDashboard() {
 
                 {/* Settings Section */}
                 {activeSection.startsWith('settings') && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="space-y-6"
+                      className="space-y-1.5"
                     >
                       {/* General Settings Section */}
                       {activeSection === 'settings-general' && (
                         <>
                           {/* Platform Settings Overview */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
                               <CardContent className="pt-6">
                                 <div className="text-center">
@@ -12691,7 +12691,7 @@ export default function AdminDashboard() {
                                     <Settings className="h-6 w-6 text-blue-500" />
                                   </div>
                                   <p className="text-lg font-bold text-blue-500">24</p>
-                                  <p className="text-xs text-muted-foreground">Active Settings</p>
+                                  <p className="text-[9px] text-muted-foreground">Active Settings</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12702,7 +12702,7 @@ export default function AdminDashboard() {
                                     <CheckCircle className="h-6 w-6 text-green-500" />
                                   </div>
                                   <p className="text-lg font-bold text-green-500">18</p>
-                                  <p className="text-xs text-muted-foreground">Enabled Features</p>
+                                  <p className="text-[9px] text-muted-foreground">Enabled Features</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12713,7 +12713,7 @@ export default function AdminDashboard() {
                                     <Clock className="h-6 w-6 text-amber-500" />
                                   </div>
                                   <p className="text-lg font-bold text-amber-500">3</p>
-                                  <p className="text-xs text-muted-foreground">Pending Changes</p>
+                                  <p className="text-[9px] text-muted-foreground">Pending Changes</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12724,7 +12724,7 @@ export default function AdminDashboard() {
                                     <History className="h-6 w-6 text-violet-500" />
                                   </div>
                                   <p className="text-lg font-bold text-violet-500">12</p>
-                                  <p className="text-xs text-muted-foreground">Config History</p>
+                                  <p className="text-[9px] text-muted-foreground">Config History</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12732,40 +12732,40 @@ export default function AdminDashboard() {
 
                           {/* Platform Configuration */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <Settings className="h-5 w-5 text-blue-500" />
                                 Platform Configuration
                               </CardTitle>
-                              <CardDescription>Core platform settings and feature toggles</CardDescription>
+                              <CardDescription className="text-[9px]">Core platform settings and feature toggles</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6">
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <CardContent className="space-y-1.5">
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                                 {/* Registration Settings */}
                                 <div className="space-y-4 p-4 rounded-lg border border-border/50">
                                   <h4 className="font-semibold flex items-center gap-2">
                                     <UserPlus className="h-4 w-4 text-blue-500" />
                                     User Registration
                                   </h4>
-                                  <div className="space-y-4">
+                                  <div className="space-y-1.5">
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Allow New Registrations</Label>
-                                        <p className="text-xs text-muted-foreground">Enable public user signups</p>
+                                        <p className="text-[9px] text-muted-foreground">Enable public user signups</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Email Verification Required</Label>
-                                        <p className="text-xs text-muted-foreground">Require email verification before access</p>
+                                        <p className="text-[9px] text-muted-foreground">Require email verification before access</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Google OAuth Login</Label>
-                                        <p className="text-xs text-muted-foreground">Allow sign-in with Google</p>
+                                        <p className="text-[9px] text-muted-foreground">Allow sign-in with Google</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
@@ -12778,25 +12778,25 @@ export default function AdminDashboard() {
                                     <Bell className="h-4 w-4 text-amber-500" />
                                     Notifications
                                   </h4>
-                                  <div className="space-y-4">
+                                  <div className="space-y-1.5">
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Email Notifications</Label>
-                                        <p className="text-xs text-muted-foreground">System event email alerts</p>
+                                        <p className="text-[9px] text-muted-foreground">System event email alerts</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Welcome Emails</Label>
-                                        <p className="text-xs text-muted-foreground">Send welcome email to new users</p>
+                                        <p className="text-[9px] text-muted-foreground">Send welcome email to new users</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Payment Confirmations</Label>
-                                        <p className="text-xs text-muted-foreground">Send receipt after payment</p>
+                                        <p className="text-[9px] text-muted-foreground">Send receipt after payment</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
@@ -12809,25 +12809,25 @@ export default function AdminDashboard() {
                                     <LayoutDashboard className="h-4 w-4 text-green-500" />
                                     Dashboard Behavior
                                   </h4>
-                                  <div className="space-y-4">
+                                  <div className="space-y-1.5">
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Auto-Refresh Data</Label>
-                                        <p className="text-xs text-muted-foreground">Refresh every 30 seconds</p>
+                                        <p className="text-[9px] text-muted-foreground">Refresh every 30 seconds</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Show Analytics</Label>
-                                        <p className="text-xs text-muted-foreground">Display detailed analytics</p>
+                                        <p className="text-[9px] text-muted-foreground">Display detailed analytics</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Compact Mode</Label>
-                                        <p className="text-xs text-muted-foreground">Reduce spacing for more data</p>
+                                        <p className="text-[9px] text-muted-foreground">Reduce spacing for more data</p>
                                       </div>
                                       <Switch />
                                     </div>
@@ -12840,25 +12840,25 @@ export default function AdminDashboard() {
                                     <Shield className="h-4 w-4 text-red-500" />
                                     Security
                                   </h4>
-                                  <div className="space-y-4">
+                                  <div className="space-y-1.5">
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Turnstile Bot Protection</Label>
-                                        <p className="text-xs text-muted-foreground">Cloudflare captcha on forms</p>
+                                        <p className="text-[9px] text-muted-foreground">Cloudflare captcha on forms</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Session Timeout</Label>
-                                        <p className="text-xs text-muted-foreground">Auto logout after 24 hours</p>
+                                        <p className="text-[9px] text-muted-foreground">Auto logout after 24 hours</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
                                     <div className="flex items-center justify-between">
                                       <div className="space-y-0.5">
                                         <Label>Login Rate Limiting</Label>
-                                        <p className="text-xs text-muted-foreground">Limit failed login attempts</p>
+                                        <p className="text-[9px] text-muted-foreground">Limit failed login attempts</p>
                                       </div>
                                       <Switch defaultChecked />
                                     </div>
@@ -12870,28 +12870,28 @@ export default function AdminDashboard() {
 
                           {/* System Information */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <Server className="h-5 w-5 text-violet-500" />
                                 System Information
                               </CardTitle>
-                              <CardDescription>Platform version and environment details</CardDescription>
+                              <CardDescription className="text-[9px]">Platform version and environment details</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+                                <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
                                   <p className="text-sm text-muted-foreground">Version</p>
                                   <p className="text-xl font-bold text-blue-500">v2.0.0</p>
                                 </div>
-                                <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
+                                <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
                                   <p className="text-sm text-muted-foreground">Environment</p>
-                                  <p className="text-xl font-bold text-green-500">Production</p>
+                                  <p className="text-xs font-bold text-green-500">Production</p>
                                 </div>
-                                <div className="p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
+                                <div className="p-1.5 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
                                   <p className="text-sm text-muted-foreground">Node.js</p>
                                   <p className="text-xl font-bold text-amber-500">v20.x</p>
                                 </div>
-                                <div className="p-4 rounded-lg bg-gradient-to-br from-violet-500/10 to-violet-600/5 border border-violet-500/20">
+                                <div className="p-1.5 rounded-lg bg-gradient-to-br from-violet-500/10 to-violet-600/5 border border-violet-500/20">
                                   <p className="text-sm text-muted-foreground">Database</p>
                                   <p className="text-xl font-bold text-violet-500">PostgreSQL</p>
                                 </div>
@@ -12901,28 +12901,28 @@ export default function AdminDashboard() {
 
                           {/* Configuration History */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <History className="h-5 w-5 text-amber-500" />
                                 Recent Configuration Changes
                               </CardTitle>
-                              <CardDescription>Track who changed what and when</CardDescription>
+                              <CardDescription className="text-[9px]">Track who changed what and when</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-4">
+                              <div className="space-y-1.5">
                                 {[
                                   { setting: 'Email Notifications', oldValue: 'Disabled', newValue: 'Enabled', user: 'Admin', time: '2 hours ago' },
                                   { setting: 'Bot Protection', oldValue: 'Basic', newValue: 'Enhanced', user: 'Admin', time: '1 day ago' },
                                   { setting: 'Session Timeout', oldValue: '12 hours', newValue: '24 hours', user: 'Admin', time: '3 days ago' },
                                 ].map((change, i) => (
                                   <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
                                       <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center">
                                         <Settings className="h-4 w-4 text-amber-500" />
                                       </div>
                                       <div>
                                         <p className="font-medium text-sm">{change.setting}</p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-[9px] text-muted-foreground">
                                           <span className="text-red-500">{change.oldValue}</span>
                                           <ArrowRight className="h-3 w-3 inline mx-1" />
                                           <span className="text-green-500">{change.newValue}</span>
@@ -12931,7 +12931,7 @@ export default function AdminDashboard() {
                                     </div>
                                     <div className="text-right">
                                       <p className="text-sm font-medium">{change.user}</p>
-                                      <p className="text-xs text-muted-foreground">{change.time}</p>
+                                      <p className="text-[9px] text-muted-foreground">{change.time}</p>
                                     </div>
                                   </div>
                                 ))}
@@ -12945,7 +12945,7 @@ export default function AdminDashboard() {
                       {activeSection === 'settings-access' && (
                         <>
                           {/* Access Control Overview */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/20">
                               <CardContent className="pt-6">
                                 <div className="text-center">
@@ -12953,7 +12953,7 @@ export default function AdminDashboard() {
                                     <Shield className="h-6 w-6 text-violet-500" />
                                   </div>
                                   <p className="text-lg font-bold text-violet-500">3</p>
-                                  <p className="text-xs text-muted-foreground">Admin Users</p>
+                                  <p className="text-[9px] text-muted-foreground">Admin Users</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12964,7 +12964,7 @@ export default function AdminDashboard() {
                                     <LockKeyhole className="h-6 w-6 text-blue-500" />
                                   </div>
                                   <p className="text-lg font-bold text-blue-500">12</p>
-                                  <p className="text-xs text-muted-foreground">Permission Sets</p>
+                                  <p className="text-[9px] text-muted-foreground">Permission Sets</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12975,7 +12975,7 @@ export default function AdminDashboard() {
                                     <CheckCircle className="h-6 w-6 text-green-500" />
                                   </div>
                                   <p className="text-lg font-bold text-green-500">45</p>
-                                  <p className="text-xs text-muted-foreground">Active Sessions</p>
+                                  <p className="text-[9px] text-muted-foreground">Active Sessions</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12986,7 +12986,7 @@ export default function AdminDashboard() {
                                     <AlertTriangle className="h-6 w-6 text-red-500" />
                                   </div>
                                   <p className="text-lg font-bold text-red-500">2</p>
-                                  <p className="text-xs text-muted-foreground">Security Alerts</p>
+                                  <p className="text-[9px] text-muted-foreground">Security Alerts</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -12994,14 +12994,14 @@ export default function AdminDashboard() {
 
                           {/* Admin Team Management */}
                           <Card>
-                            <CardHeader>
-                              <div className="flex items-center justify-between flex-wrap gap-4">
+                            <CardHeader className="p-2 pb-1">
+                              <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
                                   <CardTitle className="flex items-center gap-2">
                                     <Shield className="h-5 w-5 text-violet-500" />
                                     Admin Team
                                   </CardTitle>
-                                  <CardDescription>Manage administrator accounts and permissions</CardDescription>
+                                  <CardDescription className="text-[9px]">Manage administrator accounts and permissions</CardDescription>
                                 </div>
                                 <Button>
                                   <Plus className="h-4 w-4 mr-2" />
@@ -13010,16 +13010,16 @@ export default function AdminDashboard() {
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-4">
+                              <div className="space-y-1.5">
                                 {[
                                   { name: 'Ebuka Benedict Umeh', email: 'ebuka@example.com', role: 'Super Admin', status: 'Active', lastLogin: '2 hours ago', permissions: ['All'] },
                                   { name: 'System Administrator', email: 'admin@ukvisaassistant.com', role: 'Admin', status: 'Active', lastLogin: '1 day ago', permissions: ['Users', 'Plans', 'Analytics'] },
                                   { name: 'Support Manager', email: 'support@ukvisaassistant.com', role: 'Moderator', status: 'Active', lastLogin: '3 days ago', permissions: ['Users', 'Support'] },
                                 ].map((admin, i) => (
                                   <Card key={i} className="hover-elevate">
-                                    <CardContent className="p-4">
+                                    <CardContent className="p-2">
                                       <div className="flex items-center justify-between gap-4 flex-wrap">
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-1.5">
                                           <div className={`h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold ${
                                             admin.role === 'Super Admin' ? 'bg-gradient-to-br from-violet-500/20 to-purple-500/20 text-violet-600' :
                                             admin.role === 'Admin' ? 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 text-blue-600' :
@@ -13042,7 +13042,7 @@ export default function AdminDashboard() {
                                             </div>
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-1.5">
                                           <div className="text-right">
                                             <Badge variant="default" className="text-xs bg-green-500">{admin.status}</Badge>
                                             <p className="text-xs text-muted-foreground mt-1">Last login: {admin.lastLogin}</p>
@@ -13080,12 +13080,12 @@ export default function AdminDashboard() {
 
                           {/* Permission Matrix */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <LockKeyhole className="h-5 w-5 text-blue-500" />
                                 Permission Matrix
                               </CardTitle>
-                              <CardDescription>Role-based access control settings</CardDescription>
+                              <CardDescription className="text-[9px]">Role-based access control settings</CardDescription>
                             </CardHeader>
                             <CardContent>
                               <Table>
@@ -13130,15 +13130,15 @@ export default function AdminDashboard() {
 
                           {/* Recent Security Events */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <AlertTriangle className="h-5 w-5 text-amber-500" />
                                 Security Events
                               </CardTitle>
-                              <CardDescription>Recent login attempts and security alerts</CardDescription>
+                              <CardDescription className="text-[9px]">Recent login attempts and security alerts</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-3">
+                              <div className="space-y-1">
                                 {[
                                   { event: 'Successful admin login', user: 'ebuka@example.com', ip: '192.168.1.x', time: '2 hours ago', status: 'success' },
                                   { event: 'Failed login attempt', user: 'unknown@attacker.com', ip: '45.33.x.x', time: '5 hours ago', status: 'blocked' },
@@ -13148,7 +13148,7 @@ export default function AdminDashboard() {
                                   <div key={i} className={`flex items-center justify-between p-3 rounded-lg ${
                                     event.status === 'blocked' ? 'bg-red-500/10 border border-red-500/20' : 'bg-muted/50'
                                   }`}>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
                                       <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
                                         event.status === 'blocked' ? 'bg-red-500/20' : 'bg-green-500/20'
                                       }`}>
@@ -13160,7 +13160,7 @@ export default function AdminDashboard() {
                                       </div>
                                       <div>
                                         <p className="font-medium text-sm">{event.event}</p>
-                                        <p className="text-xs text-muted-foreground">{event.user} • IP: {event.ip}</p>
+                                        <p className="text-[9px] text-muted-foreground">{event.user} • IP: {event.ip}</p>
                                       </div>
                                     </div>
                                     <div className="text-right">
@@ -13181,7 +13181,7 @@ export default function AdminDashboard() {
                       {activeSection === 'settings-maintenance' && (
                         <>
                           {/* Maintenance Status */}
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
                               <CardContent className="pt-6">
                                 <div className="text-center">
@@ -13189,7 +13189,7 @@ export default function AdminDashboard() {
                                     <CheckCircle className="h-6 w-6 text-green-500" />
                                   </div>
                                   <p className="text-lg font-bold text-green-500">Online</p>
-                                  <p className="text-xs text-muted-foreground">System Status</p>
+                                  <p className="text-[9px] text-muted-foreground">System Status</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -13200,7 +13200,7 @@ export default function AdminDashboard() {
                                     <Clock className="h-6 w-6 text-blue-500" />
                                   </div>
                                   <p className="text-lg font-bold text-blue-500">99.9%</p>
-                                  <p className="text-xs text-muted-foreground">Uptime (30 days)</p>
+                                  <p className="text-[9px] text-muted-foreground">Uptime (30 days)</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -13211,7 +13211,7 @@ export default function AdminDashboard() {
                                     <Database className="h-6 w-6 text-amber-500" />
                                   </div>
                                   <p className="text-lg font-bold text-amber-500">1.2GB</p>
-                                  <p className="text-xs text-muted-foreground">Database Size</p>
+                                  <p className="text-[9px] text-muted-foreground">Database Size</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -13222,7 +13222,7 @@ export default function AdminDashboard() {
                                     <History className="h-6 w-6 text-violet-500" />
                                   </div>
                                   <p className="text-lg font-bold text-violet-500">2h ago</p>
-                                  <p className="text-xs text-muted-foreground">Last Backup</p>
+                                  <p className="text-[9px] text-muted-foreground">Last Backup</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -13230,16 +13230,16 @@ export default function AdminDashboard() {
 
                           {/* Maintenance Mode Control */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <AlertTriangle className="h-5 w-5 text-amber-500" />
                                 Maintenance Mode
                               </CardTitle>
-                              <CardDescription>Temporarily disable access for non-admin users</CardDescription>
+                              <CardDescription className="text-[9px]">Temporarily disable access for non-admin users</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6">
+                            <CardContent className="space-y-1.5">
                               <div className="flex items-center justify-between p-6 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5">
                                   <div className="h-14 w-14 rounded-full bg-amber-500/20 flex items-center justify-center">
                                     <AlertTriangle className="h-7 w-7 text-amber-500" />
                                   </div>
@@ -13253,7 +13253,7 @@ export default function AdminDashboard() {
                                 <Switch />
                               </div>
 
-                              <div className="space-y-4">
+                              <div className="space-y-1.5">
                                 <Label>Maintenance Message (shown to users)</Label>
                                 <Input
                                   placeholder="We're performing scheduled maintenance. Please check back soon."
@@ -13261,12 +13261,12 @@ export default function AdminDashboard() {
                                 />
                               </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                                <div className="space-y-0.5">
                                   <Label>Scheduled Start</Label>
                                   <Input type="datetime-local" />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-0.5">
                                   <Label>Scheduled End</Label>
                                   <Input type="datetime-local" />
                                 </div>
@@ -13276,25 +13276,25 @@ export default function AdminDashboard() {
 
                           {/* System Maintenance Actions */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <Server className="h-5 w-5 text-blue-500" />
                                 System Actions
                               </CardTitle>
-                              <CardDescription>Database and cache management operations</CardDescription>
+                              <CardDescription className="text-[9px]">Database and cache management operations</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                                 <Card className="hover-elevate">
-                                  <CardContent className="p-4">
+                                  <CardContent className="p-2">
                                     <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-3">
+                                      <div className="flex items-center gap-1.5">
                                         <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                                           <Database className="h-5 w-5 text-blue-500" />
                                         </div>
                                         <div>
                                           <p className="font-medium">Backup Database</p>
-                                          <p className="text-xs text-muted-foreground">Create a full database backup</p>
+                                          <p className="text-[9px] text-muted-foreground">Create a full database backup</p>
                                         </div>
                                       </div>
                                       <Button variant="outline" size="sm">
@@ -13306,15 +13306,15 @@ export default function AdminDashboard() {
                                 </Card>
 
                                 <Card className="hover-elevate">
-                                  <CardContent className="p-4">
+                                  <CardContent className="p-2">
                                     <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-3">
+                                      <div className="flex items-center gap-1.5">
                                         <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
                                           <RefreshCw className="h-5 w-5 text-amber-500" />
                                         </div>
                                         <div>
                                           <p className="font-medium">Clear Cache</p>
-                                          <p className="text-xs text-muted-foreground">Clear application cache</p>
+                                          <p className="text-[9px] text-muted-foreground">Clear application cache</p>
                                         </div>
                                       </div>
                                       <Button variant="outline" size="sm">
@@ -13326,15 +13326,15 @@ export default function AdminDashboard() {
                                 </Card>
 
                                 <Card className="hover-elevate">
-                                  <CardContent className="p-4">
+                                  <CardContent className="p-2">
                                     <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-3">
+                                      <div className="flex items-center gap-1.5">
                                         <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
                                           <RotateCcw className="h-5 w-5 text-green-500" />
                                         </div>
                                         <div>
                                           <p className="font-medium">Restart Services</p>
-                                          <p className="text-xs text-muted-foreground">Restart application services</p>
+                                          <p className="text-[9px] text-muted-foreground">Restart application services</p>
                                         </div>
                                       </div>
                                       <Button variant="outline" size="sm">
@@ -13346,15 +13346,15 @@ export default function AdminDashboard() {
                                 </Card>
 
                                 <Card className="hover-elevate">
-                                  <CardContent className="p-4">
+                                  <CardContent className="p-2">
                                     <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-3">
+                                      <div className="flex items-center gap-1.5">
                                         <div className="h-10 w-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
                                           <FileText className="h-5 w-5 text-violet-500" />
                                         </div>
                                         <div>
                                           <p className="font-medium">View Logs</p>
-                                          <p className="text-xs text-muted-foreground">Access system logs</p>
+                                          <p className="text-[9px] text-muted-foreground">Access system logs</p>
                                         </div>
                                       </div>
                                       <Button variant="outline" size="sm">
@@ -13370,12 +13370,12 @@ export default function AdminDashboard() {
 
                           {/* Backup History */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <History className="h-5 w-5 text-violet-500" />
                                 Backup History
                               </CardTitle>
-                              <CardDescription>Recent database backups and restore points</CardDescription>
+                              <CardDescription className="text-[9px]">Recent database backups and restore points</CardDescription>
                             </CardHeader>
                             <CardContent>
                               <Table>
@@ -13446,15 +13446,15 @@ export default function AdminDashboard() {
 
                           {/* Scheduled Tasks */}
                           <Card>
-                            <CardHeader>
+                            <CardHeader className="p-2 pb-1">
                               <CardTitle className="flex items-center gap-2">
                                 <Clock className="h-5 w-5 text-cyan-500" />
                                 Scheduled Tasks
                               </CardTitle>
-                              <CardDescription>Automated maintenance tasks and their schedules</CardDescription>
+                              <CardDescription className="text-[9px]">Automated maintenance tasks and their schedules</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-4">
+                              <div className="space-y-1.5">
                                 {[
                                   { task: 'Database Backup', schedule: 'Daily at 3:00 AM', lastRun: '2 hours ago', nextRun: '22 hours', status: 'Active' },
                                   { task: 'Clear Expired Sessions', schedule: 'Every 6 hours', lastRun: '1 hour ago', nextRun: '5 hours', status: 'Active' },
@@ -13462,19 +13462,19 @@ export default function AdminDashboard() {
                                   { task: 'Email Queue Processing', schedule: 'Every 5 minutes', lastRun: '2 minutes ago', nextRun: '3 minutes', status: 'Active' },
                                 ].map((task, i) => (
                                   <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover-elevate">
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-1.5">
                                       <div className="h-10 w-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
                                         <Clock className="h-5 w-5 text-cyan-500" />
                                       </div>
                                       <div>
                                         <p className="font-medium">{task.task}</p>
-                                        <p className="text-xs text-muted-foreground">{task.schedule}</p>
+                                        <p className="text-[9px] text-muted-foreground">{task.schedule}</p>
                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-6">
+                                    <div className="flex items-center gap-1.5">
                                       <div className="text-right">
                                         <p className="text-sm">Last: {task.lastRun}</p>
-                                        <p className="text-xs text-muted-foreground">Next: {task.nextRun}</p>
+                                        <p className="text-[9px] text-muted-foreground">Next: {task.nextRun}</p>
                                       </div>
                                       <Badge variant="default" className="text-xs bg-green-500">{task.status}</Badge>
                                       <Switch defaultChecked />
@@ -13506,8 +13506,8 @@ export default function AdminDashboard() {
             </DialogHeader>
 
             {editingUser && (
-              <div className="space-y-4">
-                <div className="space-y-2">
+              <div className="space-y-1.5">
+                <div className="space-y-0.5">
                   <Label htmlFor="edit-tier">Subscription Tier</Label>
                   <Select value={editUserTier} onValueChange={setEditUserTier}>
                     <SelectTrigger id="edit-tier">
@@ -13588,8 +13588,8 @@ export default function AdminDashboard() {
             </DialogHeader>
 
             {viewingUserDetails && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <div className="grid grid-cols-2 gap-1.5">
                   <div>
                     <Label className="text-muted-foreground">Email</Label>
                     <p className="font-medium">{viewingUserDetails.email}</p>
@@ -13641,7 +13641,7 @@ export default function AdminDashboard() {
 
                 <div>
                   <Label className="text-muted-foreground mb-2">Total Plans Created</Label>
-                  <div className="text-xl font-bold">
+                  <div className="text-[11px] font-bold">
                     {viewingUserDetails.totalPlans || 0}
                   </div>
                 </div>
@@ -13705,7 +13705,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Key Metrics Grid */}
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-4 gap-1.5">
                     <Card className="p-4">
                       <div className="flex items-center gap-2 text-muted-foreground mb-1">
                         <Gauge className="h-4 w-4" />
@@ -13746,7 +13746,7 @@ export default function AdminDashboard() {
                       <Brain className="h-4 w-4 text-purple-500" />
                       Insights & Recommendations
                     </h4>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-3 gap-1.5">
                       <div>
                         <p className="text-sm text-muted-foreground">Churn Risk</p>
                         <Badge variant={
@@ -13788,15 +13788,15 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-3 gap-4 mb-4">
                       <div className="text-center p-3 bg-muted/30 rounded-lg">
                         <div className="text-lg font-bold">{userAnalysis.toolEngagement.uniqueToolsUsed}</div>
-                        <p className="text-xs text-muted-foreground">Unique Tools</p>
+                        <p className="text-[9px] text-muted-foreground">Unique Tools</p>
                       </div>
                       <div className="text-center p-3 bg-muted/30 rounded-lg">
                         <div className="text-lg font-bold">{userAnalysis.toolEngagement.totalToolInteractions}</div>
-                        <p className="text-xs text-muted-foreground">Total Interactions</p>
+                        <p className="text-[9px] text-muted-foreground">Total Interactions</p>
                       </div>
                       <div className="text-center p-3 bg-muted/30 rounded-lg">
                         <div className="text-lg font-bold">{userAnalysis.aiInteractions.total}</div>
-                        <p className="text-xs text-muted-foreground">AI Interactions</p>
+                        <p className="text-[9px] text-muted-foreground">AI Interactions</p>
                       </div>
                     </div>
                     {userAnalysis.toolEngagement.topTools.length > 0 && (
@@ -13820,12 +13820,12 @@ export default function AdminDashboard() {
                         <FileText className="h-4 w-4 text-green-500" />
                         Business Plans
                       </h4>
-                      <div className="space-y-2">
+                      <div className="space-y-0.5">
                         {userAnalysis.businessPlans.plans.map((plan: any) => (
                           <div key={plan.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
                             <div>
                               <p className="font-medium">{plan.name || 'Untitled Plan'}</p>
-                              <p className="text-xs text-muted-foreground">Created {format(new Date(plan.createdAt), 'MMM dd, yyyy')}</p>
+                              <p className="text-[9px] text-muted-foreground">Created {format(new Date(plan.createdAt), 'MMM dd, yyyy')}</p>
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="capitalize">{plan.status || 'draft'}</Badge>
@@ -13839,7 +13839,7 @@ export default function AdminDashboard() {
                   )}
 
                   {/* Support & Security */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-1.5">
                     <Card className="p-4">
                       <h4 className="font-semibold mb-3 flex items-center gap-2">
                         <MessageSquare className="h-4 w-4 text-orange-500" />
@@ -13847,16 +13847,16 @@ export default function AdminDashboard() {
                       </h4>
                       <div className="grid grid-cols-3 gap-2 text-center">
                         <div className="p-2 bg-muted/30 rounded">
-                          <div className="text-xl font-bold">{userAnalysis.support.totalTickets}</div>
-                          <p className="text-xs text-muted-foreground">Total</p>
+                          <div className="text-[11px] font-bold">{userAnalysis.support.totalTickets}</div>
+                          <p className="text-[9px] text-muted-foreground">Total</p>
                         </div>
                         <div className="p-2 bg-muted/30 rounded">
                           <div className="text-xl font-bold text-orange-500">{userAnalysis.support.openTickets}</div>
-                          <p className="text-xs text-muted-foreground">Open</p>
+                          <p className="text-[9px] text-muted-foreground">Open</p>
                         </div>
                         <div className="p-2 bg-muted/30 rounded">
-                          <div className="text-xl font-bold text-green-500">{userAnalysis.support.resolvedTickets}</div>
-                          <p className="text-xs text-muted-foreground">Resolved</p>
+                          <div className="text-xs font-bold text-green-500">{userAnalysis.support.resolvedTickets}</div>
+                          <p className="text-[9px] text-muted-foreground">Resolved</p>
                         </div>
                       </div>
                     </Card>
@@ -13866,8 +13866,8 @@ export default function AdminDashboard() {
                         Security Events
                       </h4>
                       <div className="text-center p-2 bg-muted/30 rounded">
-                        <div className="text-xl font-bold">{userAnalysis.security.totalEvents}</div>
-                        <p className="text-xs text-muted-foreground">Total Events</p>
+                        <div className="text-[11px] font-bold">{userAnalysis.security.totalEvents}</div>
+                        <p className="text-[9px] text-muted-foreground">Total Events</p>
                       </div>
                       {userAnalysis.security.events.length > 0 && (
                         <div className="mt-2 space-y-1">
@@ -13885,7 +13885,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Referrals & Files */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-1.5">
                     <Card className="p-4">
                       <h4 className="font-semibold mb-3 flex items-center gap-2">
                         <UserPlus className="h-4 w-4 text-blue-500" />
@@ -13893,16 +13893,16 @@ export default function AdminDashboard() {
                       </h4>
                       <div className="grid grid-cols-3 gap-2 text-center">
                         <div className="p-2 bg-muted/30 rounded">
-                          <div className="text-xl font-bold">{userAnalysis.referrals.codesCreated}</div>
-                          <p className="text-xs text-muted-foreground">Codes</p>
+                          <div className="text-[11px] font-bold">{userAnalysis.referrals.codesCreated}</div>
+                          <p className="text-[9px] text-muted-foreground">Codes</p>
                         </div>
                         <div className="p-2 bg-muted/30 rounded">
-                          <div className="text-xl font-bold">{userAnalysis.referrals.successfulReferrals}</div>
-                          <p className="text-xs text-muted-foreground">Referrals</p>
+                          <div className="text-[11px] font-bold">{userAnalysis.referrals.successfulReferrals}</div>
+                          <p className="text-[9px] text-muted-foreground">Referrals</p>
                         </div>
                         <div className="p-2 bg-muted/30 rounded">
-                          <div className="text-xl font-bold">£{userAnalysis.referrals.totalRewards?.toFixed(0) || 0}</div>
-                          <p className="text-xs text-muted-foreground">Rewards</p>
+                          <div className="text-[11px] font-bold">£{userAnalysis.referrals.totalRewards?.toFixed(0) || 0}</div>
+                          <p className="text-[9px] text-muted-foreground">Rewards</p>
                         </div>
                       </div>
                     </Card>
@@ -13913,16 +13913,16 @@ export default function AdminDashboard() {
                       </h4>
                       <div className="grid grid-cols-2 gap-2 text-center">
                         <div className="p-2 bg-muted/30 rounded">
-                          <div className="text-xl font-bold">{userAnalysis.files.totalUploaded}</div>
-                          <p className="text-xs text-muted-foreground">Files</p>
+                          <div className="text-[11px] font-bold">{userAnalysis.files.totalUploaded}</div>
+                          <p className="text-[9px] text-muted-foreground">Files</p>
                         </div>
                         <div className="p-2 bg-muted/30 rounded">
-                          <div className="text-xl font-bold">
+                          <div className="text-[11px] font-bold">
                             {userAnalysis.files.totalSize > 0 
                               ? `${(userAnalysis.files.totalSize / 1024 / 1024).toFixed(1)}MB`
                               : '0'}
                           </div>
-                          <p className="text-xs text-muted-foreground">Total Size</p>
+                          <p className="text-[9px] text-muted-foreground">Total Size</p>
                         </div>
                       </div>
                     </Card>
@@ -13940,7 +13940,7 @@ export default function AdminDashboard() {
                           </Badge>
                         )}
                       </h4>
-                      <div className="space-y-2">
+                      <div className="space-y-0.5">
                         {userAnalysis.feedback.submissions.slice(0, 3).map((fb: any, i: number) => (
                           <div key={i} className="p-2 bg-muted/30 rounded">
                             <div className="flex items-center gap-2 mb-1">
@@ -14002,7 +14002,7 @@ export default function AdminDashboard() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="ban-reason">Reason for Ban</Label>
                 <Input
                   id="ban-reason"
@@ -14041,7 +14041,7 @@ export default function AdminDashboard() {
                 <Trash2 className="h-5 w-5" />
                 Delete User Permanently
               </AlertDialogTitle>
-              <AlertDialogDescription className="space-y-2">
+              <AlertDialogDescription className="space-y-0.5">
                 <p>This action <span className="font-bold text-red-600">CANNOT be undone</span>. This will permanently delete:</p>
                 <ul className="list-disc list-inside text-sm space-y-1 mt-2">
                   <li>User account and profile</li>
@@ -14091,9 +14091,9 @@ export default function AdminDashboard() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-1.5">
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-xs text-muted-foreground">Account Created</p>
+                  <p className="text-[9px] text-muted-foreground">Account Created</p>
                   <p className="font-medium">
                     {viewingUserActivity?.createdAt 
                       ? format(new Date(viewingUserActivity.createdAt), 'PPp')
@@ -14101,7 +14101,7 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-xs text-muted-foreground">Last Login</p>
+                  <p className="text-[9px] text-muted-foreground">Last Login</p>
                   <p className="font-medium">
                     {viewingUserActivity?.lastLogin 
                       ? formatDistance(new Date(viewingUserActivity.lastLogin), new Date(), { addSuffix: true })
@@ -14109,13 +14109,13 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-xs text-muted-foreground">Current Tier</p>
+                  <p className="text-[9px] text-muted-foreground">Current Tier</p>
                   <Badge variant="outline" className="capitalize mt-1">
                     {viewingUserActivity?.subscriptionTier || 'free'}
                   </Badge>
                 </div>
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-xs text-muted-foreground">Credits Remaining</p>
+                  <p className="text-[9px] text-muted-foreground">Credits Remaining</p>
                   <p className="font-medium">
                     {((viewingUserActivity as any)?.planCredits || 0) + ((viewingUserActivity as any)?.bonusCredits || 0)}
                   </p>
@@ -14165,7 +14165,7 @@ export default function AdminDashboard() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="suspend-duration">Suspension Duration (days)</Label>
                 <Select
                   value={suspendDays.toString()}
@@ -14184,7 +14184,7 @@ export default function AdminDashboard() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="suspend-reason">Reason for Suspension</Label>
                 <Input
                   id="suspend-reason"
@@ -14235,7 +14235,7 @@ export default function AdminDashboard() {
                   {tierOverrideUser?.subscriptionTier}
                 </Badge>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="new-tier">New Tier</Label>
                 <Select value={overrideTier} onValueChange={setOverrideTier}>
                   <SelectTrigger id="new-tier" data-testid="select-new-tier">
@@ -14250,7 +14250,7 @@ export default function AdminDashboard() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="override-reason">Reason for Override</Label>
                 <Input
                   id="override-reason"
@@ -14294,7 +14294,7 @@ export default function AdminDashboard() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="credit-type">Credit Type</Label>
                 <Select value={creditsType} onValueChange={(v) => setCreditsType(v as 'plan' | 'bonus')}>
                   <SelectTrigger id="credit-type" data-testid="select-credit-type">
@@ -14306,7 +14306,7 @@ export default function AdminDashboard() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="credit-amount">Amount (positive to add, negative to remove)</Label>
                 <Input
                   id="credit-amount"
@@ -14463,7 +14463,7 @@ export default function AdminDashboard() {
                 <div>
                   <h4 className="font-semibold mb-3">Recent Business Plans ({impersonationData.businessPlans?.length || 0})</h4>
                   {impersonationData.businessPlans?.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-0.5">
                       {impersonationData.businessPlans.map((plan: any) => (
                         <div key={plan.id} className="p-3 border rounded-lg text-sm">
                           <div className="flex justify-between">
@@ -14514,8 +14514,8 @@ export default function AdminDashboard() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
+            <div className="space-y-1.5">
+              <div className="space-y-0.5">
                 <Label htmlFor="promo-code">Promo Code</Label>
                 <Input
                   id="promo-code"
@@ -14526,8 +14526,8 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="space-y-0.5">
                   <Label htmlFor="discount-type">Discount Type</Label>
                   <Select
                     value={newPromoCode.discountType}
@@ -14545,7 +14545,7 @@ export default function AdminDashboard() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-0.5">
                   <Label htmlFor="discount-value">Discount Value</Label>
                   <Input
                     id="discount-value"
@@ -14558,7 +14558,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="max-uses">Max Uses (optional)</Label>
                 <Input
                   id="max-uses"
@@ -14573,8 +14573,8 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="space-y-0.5">
                   <Label>Valid From</Label>
                   <Button variant="outline" className="w-full justify-start" onClick={() => setPromoValidFromOpen(true)}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -14601,7 +14601,7 @@ export default function AdminDashboard() {
                   </Dialog>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-0.5">
                   <Label>Valid Until</Label>
                   <Button variant="outline" className="w-full justify-start" onClick={() => setPromoValidUntilOpen(true)}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -14680,8 +14680,8 @@ export default function AdminDashboard() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
+            <div className="space-y-1.5">
+              <div className="space-y-0.5">
                 <Label htmlFor="reject-reason">Rejection Reason</Label>
                 <Input
                   id="reject-reason"
@@ -14729,8 +14729,8 @@ export default function AdminDashboard() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
+            <div className="space-y-1.5">
+              <div className="space-y-0.5">
                 <Label htmlFor="broadcast-title">Notification Title</Label>
                 <Input
                   id="broadcast-title"
@@ -14741,7 +14741,7 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="broadcast-message">Message</Label>
                 <textarea
                   id="broadcast-message"
@@ -14753,7 +14753,7 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="broadcast-type">Notification Type</Label>
                 <Select
                   value={broadcastData.type}
@@ -14773,7 +14773,7 @@ export default function AdminDashboard() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label>Target Tiers (leave empty for all users)</Label>
                 <div className="flex flex-wrap gap-2">
                   {['free', 'basic', 'premium', 'enterprise', 'ultimate'].map(tier => (
@@ -14830,8 +14830,8 @@ export default function AdminDashboard() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
+            <div className="space-y-1.5">
+              <div className="space-y-0.5">
                 <Label htmlFor="campaign-name">Campaign Name</Label>
                 <Input
                   id="campaign-name"
@@ -14842,7 +14842,7 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label htmlFor="campaign-description">Description</Label>
                 <textarea
                   id="campaign-description"
@@ -14854,8 +14854,8 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="space-y-0.5">
                   <Label htmlFor="campaign-discount-type">Discount Type</Label>
                   <Select
                     value={campaignData.discountType}
@@ -14873,7 +14873,7 @@ export default function AdminDashboard() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-0.5">
                   <Label htmlFor="campaign-discount-value">Discount Value</Label>
                   <Input
                     id="campaign-discount-value"
@@ -14887,8 +14887,8 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="space-y-0.5">
                   <Label>Start Date</Label>
                   <Button variant="outline" className="w-full justify-start" onClick={() => setCampaignStartDateOpen(true)}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -14913,7 +14913,7 @@ export default function AdminDashboard() {
                   </Dialog>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-0.5">
                   <Label>End Date</Label>
                   <Button variant="outline" className="w-full justify-start" onClick={() => setCampaignEndDateOpen(true)}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -14939,7 +14939,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-0.5">
                 <Label>Target Tiers (leave empty for all users)</Label>
                 <div className="flex flex-wrap gap-2">
                   {['free', 'basic', 'premium', 'enterprise', 'ultimate'].map(tier => (
