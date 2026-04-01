@@ -207,6 +207,19 @@ async function runOpenAIVerification(title: string, content: string): Promise<{
     };
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
+    // Detect quota / rate-limit errors — these are service outages, not content failures
+    const isQuotaError = errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("rate_limit") || errMsg.includes("exceeded");
+    if (isQuotaError) {
+      console.warn("[MultiVerifier] OpenAI quota/rate-limit — marking as unavailable (not score 0):", errMsg);
+      return {
+        score: -1, // sentinel: service unavailable, not a content score
+        passed: false,
+        flags: [],
+        details: { unavailable: true, reason: "quota_exceeded", error: errMsg },
+        error: errMsg,
+        unavailable: true,
+      } as any;
+    }
     console.error("[MultiVerifier] OpenAI verification error:", errMsg);
     return {
       score: 0,
@@ -281,7 +294,14 @@ export async function verifyBlogPost(title: string, content: string): Promise<Ve
     runOpenAIVerification(title, content),
   ]);
 
-  const compositeScore = Math.round((geminiResult.score + openaiResult.score) / 2);
+  // Detect OpenAI service unavailability (quota/rate-limit) — score=-1 is the sentinel
+  const openaiUnavailable = (openaiResult as any).unavailable === true || openaiResult.score === -1;
+
+  // Composite: if OpenAI is unavailable use Gemini alone; otherwise average both
+  const compositeScore = openaiUnavailable
+    ? geminiResult.score
+    : Math.round((geminiResult.score + openaiResult.score) / 2);
+
   const contradictions = detectContradictions(geminiResult.flags, openaiResult.flags);
   const sources = countSourcesCited(content);
   const hash = computeContentHash(content);
@@ -289,41 +309,50 @@ export async function verifyBlogPost(title: string, content: string): Promise<Ve
   const expiresAt = new Date(now);
   expiresAt.setDate(expiresAt.getDate() + 90); // 90-day freshness window
 
-  // Combine all flags
+  // Combine all flags (skip system-level OpenAI flags if service was just unavailable)
   const allFlags = [
     ...geminiResult.flags.map(f => ({ marker: "gemini", ...f })),
-    ...openaiResult.flags.map(f => ({ marker: "openai", ...f })),
+    ...(openaiUnavailable ? [] : openaiResult.flags.map(f => ({ marker: "openai", ...f }))),
   ];
 
   // CONSENSUS GATE LOGIC:
-  // Pass only if BOTH score ≥95 AND score difference ≤10 AND no critical flags
-  const scoreDifference = Math.abs(geminiResult.score - openaiResult.score);
+  // Full pass: BOTH AIs ≥95 AND diff ≤10 AND no critical flags
+  // OpenAI unavailable: route to human review (can't auto-publish with only one verifier)
   const hasCriticalFlags = allFlags.some(f => f.severity === "critical" && !f.claim.startsWith("SYSTEM"));
-  const bothAboveThreshold = geminiResult.score >= 95 && openaiResult.score >= 95;
-  const scoresAgree = scoreDifference <= 10;
 
-  const passed = bothAboveThreshold && scoresAgree && !hasCriticalFlags;
-  const requiresHumanReview = !passed;
-
+  let passed = false;
   let consensusReason = "";
-  if (passed) {
-    consensusReason = `Both AIs agree: Gemini ${geminiResult.score}/100, OpenAI ${openaiResult.score}/100. No critical flags. Auto-publishing approved.`;
+
+  if (openaiUnavailable) {
+    consensusReason = `OpenAI unavailable (quota exceeded) — Gemini only: ${geminiResult.score}/100. Routing to human review for single-verifier result.`;
   } else {
-    const reasons: string[] = [];
-    if (!bothAboveThreshold) reasons.push(`Score threshold not met (Gemini: ${geminiResult.score}, OpenAI: ${openaiResult.score}, both need ≥95)`);
-    if (!scoresAgree) reasons.push(`Score divergence too large: ${scoreDifference} points`);
-    if (hasCriticalFlags) reasons.push(`${allFlags.filter(f => f.severity === "critical" && !f.claim.startsWith("SYSTEM")).length} critical flag(s) raised`);
-    consensusReason = "Human review required: " + reasons.join("; ");
+    const scoreDifference = Math.abs(geminiResult.score - openaiResult.score);
+    const bothAboveThreshold = geminiResult.score >= 95 && openaiResult.score >= 95;
+    const scoresAgree = scoreDifference <= 10;
+    passed = bothAboveThreshold && scoresAgree && !hasCriticalFlags;
+
+    if (passed) {
+      consensusReason = `Both AIs agree: Gemini ${geminiResult.score}/100, OpenAI ${openaiResult.score}/100. No critical flags. Auto-publishing approved.`;
+    } else {
+      const reasons: string[] = [];
+      if (!bothAboveThreshold) reasons.push(`Score threshold not met (Gemini: ${geminiResult.score}, OpenAI: ${openaiResult.score}, both need ≥95)`);
+      if (!scoresAgree) reasons.push(`Score divergence too large: ${scoreDifference} points`);
+      if (hasCriticalFlags) reasons.push(`${allFlags.filter(f => f.severity === "critical" && !f.claim.startsWith("SYSTEM")).length} critical flag(s) raised`);
+      consensusReason = "Human review required: " + reasons.join("; ");
+    }
   }
 
-  console.log(`[MultiVerifier] Result: ${passed ? "PASSED" : "FLAGGED"} | Gemini: ${geminiResult.score} | OpenAI: ${openaiResult.score} | Composite: ${compositeScore}`);
+  const requiresHumanReview = !passed;
+
+  const openaiDisplayScore = openaiUnavailable ? 0 : openaiResult.score;
+  console.log(`[MultiVerifier] Result: ${passed ? "PASSED" : "FLAGGED"} | Gemini: ${geminiResult.score} | OpenAI: ${openaiUnavailable ? "unavailable" : openaiResult.score} | Composite: ${compositeScore}`);
 
   return {
     passed,
     requiresHumanReview,
     compositeScore,
     geminiScore: geminiResult.score,
-    openaiScore: openaiResult.score,
+    openaiScore: openaiDisplayScore,
     contradictionFlags: contradictions,
     sourcesCited: sources,
     contentHash: hash,

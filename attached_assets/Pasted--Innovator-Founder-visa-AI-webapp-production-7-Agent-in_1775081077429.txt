@@ -1,0 +1,171 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+7
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+a7d24de0
+Active
+
+Apr 1, 2026, 10:53 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+    at async file:///app/dist/index.js:27977:21 {
+  length: 111,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '14',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+9:59:38 PM [express] GET /api/admin/blog/posts/all/ 200 in 36ms
+9:59:38 PM [express] GET /api/admin/blog/queue 500 in 36ms :: {"error":"Failed to fetch queue"}
+[2026-04-01T21:59:40.436Z] POST /api/admin/blog/generate-next
+[Blog Generator] Generation attempt 1/1
+[2026-04-01T22:00:01.504Z] POST /api/activity/session
+10:00:01 PM [express] POST /api/activity/session 200 in 251ms :: {"sessionId":"c6f8aa28-cf3f-4526-af7…
+[2026-04-01T22:00:30.937Z] GET /api/auth/user
+[2026-04-01T22:00:30.940Z] POST /api/activity/session
+[2026-04-01T22:00:30.939Z] POST /api/activity/session/end
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:00:31 PM [express] GET /api/auth/user 200 in 213ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+10:00:31 PM [express] POST /api/activity/session/end 200 in 212ms :: {"success":true}
+10:00:31 PM [express] POST /api/activity/session 200 in 218ms :: {"sessionId":"786714de-31bb-42a2-8bd…
+[2026-04-01T22:00:31.495Z] POST /api/activity/page-view
+10:00:31 PM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"25c150dc-188e-4edd-8…
+[2026-04-01T22:00:32.799Z] GET /api/admin/activity-log
+10:00:32 PM [express] GET /api/admin/activity-log 200 in 33ms :: [{"id":"plan-52fefd3d-a1aa-4904-8649…
+[2026-04-01T22:00:33.057Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+10:00:33 PM [express] GET /api/admin/analytics/overview 200 in 405ms :: {"kpiMetrics":[{"label":"Tota…
+[Blog Generator] Validation Report:
+============================================================
+BLOG CONTENT VALIDATION REPORT
+============================================================
+Overall Score: 45/100
+Status: FAILED - REQUIRES CORRECTION
+Critical Issues: 2
+Warnings: 1
+Suggestions: 0
+ISSUES FOUND:
+----------------------------------------
+1. [WARNING] factual_accuracy
+   Verify financial requirement amount: £127
+   Location: "£127"
+2. [CRITICAL] factual_accuracy
+   Incorrect visa fee: £119. Current fee is £1191
+   Location: "£119"
+   Fix: Replace with £1191
+3. [CRITICAL] factual_accuracy
+[Blog Generator] Content published with 2 warnings after max retries. Sending to triple-AI verification.
+   Incorrect visa fee: £119. Current fee is £1191
+[MultiVerifier] Starting triple-AI verification for: Demonstrating Scalability for the UK Innovator Founder Visa
+   Location: "£119"
+[2026-04-01T22:00:33.658Z] POST /api/activity/session/end
+   Fix: Replace with £1191
+10:00:33 PM [express] POST /api/activity/session/end 200 in 15ms :: {"success":true}
+============================================================
+[Blog Generator] 2 issues remain after auto-correction. Proceeding with corrected content.
+[Blog Generator] Running triple-AI verification (Gemini + OpenAI)...
+[MultiVerifier] OpenAI verification error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+[MultiVerifier] Result: FLAGGED | Gemini: 100 | OpenAI: 0 | Composite: 50
+[Blog Generator] ✗ Verification FAILED — Composite: 50/100. Sending to human review queue.
+[Blog Generator] Reason: Human review required: Score threshold not met (Gemini: 100, OpenAI: 0, both need ≥95); Score divergence too large: 100 points
+Generate next post error: error: column "scheduled_for" of relation "blog_posts" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/dist/index.js:27991:9 {
+  length: 138,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '66',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'analyze.c',
+  line: '2528',
+  routine: 'transformUpdateTargetList'
+}
+10:00:37 PM [express] POST /api/admin/blog/generate-next 500 in 57407ms :: {"error":"Failed to genera…
+[2026-04-01T22:03:08.595Z] POST /api/activity/session
+[2026-04-01T22:03:08.596Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:03:08 PM [express] GET /api/auth/user 200 in 205ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+10:03:08 PM [express] POST /api/activity/session 200 in 208ms :: {"sessionId":"76147e76-8c77-42df-a66…
+[2026-04-01T22:03:09.142Z] POST /api/activity/page-view
+10:03:09 PM [express] POST /api/activity/page-view 200 in 18ms :: {"pageViewId":"128c6aa0-6aad-464c-9…
+[2026-04-01T22:03:14.893Z] POST /api/activity/session/end
+10:03:14 PM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+
+

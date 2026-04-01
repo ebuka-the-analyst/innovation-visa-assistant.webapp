@@ -29,6 +29,58 @@ async function runAutoMigrations() {
   } catch (error) {
     console.log('[DB] Auto-migration skipped or failed:', error);
   }
+
+  // Blog posts: scheduling + AI verification columns (added after initial deployment)
+  const blogMigrations: Array<{ col: string; ddl: string }> = [
+    { col: 'post_status',             ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS post_status VARCHAR(20) NOT NULL DEFAULT 'published'` },
+    { col: 'scheduled_for',           ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS scheduled_for TIMESTAMP` },
+    { col: 'generated_at',            ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS generated_at TIMESTAMP` },
+    { col: 'is_auto_generated',       ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS is_auto_generated BOOLEAN NOT NULL DEFAULT false` },
+    { col: 'was_edited',              ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS was_edited BOOLEAN NOT NULL DEFAULT false` },
+    { col: 'edited_at',               ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS edited_at TIMESTAMP` },
+    { col: 'edited_by',               ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS edited_by VARCHAR` },
+    { col: 'original_content',        ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS original_content TEXT` },
+    { col: 'likes',                   ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS likes INTEGER NOT NULL DEFAULT 0` },
+    { col: 'shares',                  ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS shares INTEGER NOT NULL DEFAULT 0` },
+    { col: 'comments',                ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS comments INTEGER NOT NULL DEFAULT 0` },
+    { col: 'avg_time_on_page',        ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS avg_time_on_page INTEGER NOT NULL DEFAULT 0` },
+    { col: 'bounce_rate',             ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS bounce_rate REAL NOT NULL DEFAULT 0` },
+    { col: 'social_shares',           ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS social_shares JSONB` },
+    { col: 'google_ranking',          ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS google_ranking INTEGER` },
+    { col: 'organic_traffic',         ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS organic_traffic INTEGER NOT NULL DEFAULT 0` },
+    { col: 'click_through_rate',      ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS click_through_rate REAL NOT NULL DEFAULT 0` },
+    { col: 'word_count',              ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS word_count INTEGER NOT NULL DEFAULT 0` },
+    { col: 'readability_score',       ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS readability_score REAL` },
+    { col: 'seo_score',               ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS seo_score INTEGER` },
+    { col: 'ai_verification_score',   ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS ai_verification_score INTEGER` },
+    { col: 'gemini_score',            ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS gemini_score INTEGER` },
+    { col: 'openai_score',            ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS openai_score INTEGER` },
+    { col: 'verification_status',     ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS verification_status VARCHAR(20) NOT NULL DEFAULT 'pending'` },
+    { col: 'verification_details',    ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS verification_details JSONB` },
+    { col: 'verified_at',             ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS verified_at TIMESTAMP` },
+    { col: 'verification_expires_at', ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS verification_expires_at TIMESTAMP` },
+    { col: 'human_review_required',   ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS human_review_required BOOLEAN NOT NULL DEFAULT false` },
+    { col: 'contradiction_flags',     ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS contradiction_flags INTEGER NOT NULL DEFAULT 0` },
+    { col: 'sources_cited',           ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS sources_cited INTEGER NOT NULL DEFAULT 0` },
+    { col: 'content_hash',            ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS content_hash TEXT` },
+    { col: 'author_bio',              ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS author_bio TEXT` },
+    { col: 'meta_title',              ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS meta_title TEXT` },
+    { col: 'meta_description',        ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS meta_description TEXT` },
+    { col: 'meta_keywords',           ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS meta_keywords TEXT[]` },
+  ];
+
+  let migratedCount = 0;
+  for (const { col, ddl } of blogMigrations) {
+    try {
+      await db.execute(sql.raw(ddl));
+      migratedCount++;
+    } catch {
+      // Column already exists or other harmless error — skip silently
+    }
+  }
+  if (migratedCount > 0) {
+    console.log(`[DB] Auto-migration: ${migratedCount} blog_posts column(s) ensured`);
+  }
   
   // Update blog post image URLs to use object storage
   try {
