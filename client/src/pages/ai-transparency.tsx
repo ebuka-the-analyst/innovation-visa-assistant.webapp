@@ -70,8 +70,8 @@ export default function AITransparencyPage() {
                   Key Fact: We Do NOT Train AI Models
                 </h4>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Our platform uses <strong>Google Gemini</strong>, a commercial AI service provided by Google. 
-                  We do not train, fine-tune, or modify any AI models. We use Google's pre-trained models 
+                  Our platform uses <strong>Qwen AI</strong>, a commercial AI service provided by Alibaba Cloud. 
+                  We do not train, fine-tune, or modify any AI models. We use Alibaba's pre-trained models 
                   through their official API with carefully designed prompts.
                 </p>
               </div>
@@ -85,7 +85,7 @@ export default function AITransparencyPage() {
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Use Google Gemini API (commercial, pre-trained model)</span>
+                      <span>Use Qwen AI API (commercial, pre-trained model by Alibaba Cloud)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -156,18 +156,18 @@ export default function AITransparencyPage() {
                     <Cloud className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold">Google Gemini API</p>
+                    <p className="font-semibold">Qwen AI API (Alibaba Cloud)</p>
                     <p className="text-sm text-muted-foreground">
-                      Commercial AI service trained by Google on publicly available data. 
-                      We access this via their official API.
+                      Commercial AI service developed by Alibaba Cloud on publicly available data. 
+                      We access this via their official Dashscope API.
                     </p>
                     <a 
-                      href="https://ai.google.dev/gemini-api/terms" 
+                      href="https://www.alibabacloud.com/help/en/model-studio/developer-reference/terms-of-service" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-1"
                     >
-                      View Google Gemini Terms <ExternalLink className="h-3 w-3" />
+                      View Alibaba Cloud AI Terms <ExternalLink className="h-3 w-3" />
                     </a>
                   </div>
                 </div>
@@ -309,7 +309,7 @@ export default function AITransparencyPage() {
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-purple-500" />
-                      Google Gemini API (AI)
+                      Qwen AI API (Alibaba Cloud)
                     </li>
                     <li className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-purple-500" />

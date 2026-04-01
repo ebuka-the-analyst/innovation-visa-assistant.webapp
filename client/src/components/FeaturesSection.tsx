@@ -8,7 +8,7 @@ const features = [
     id: "ai-intelligence",
     icon: Brain,
     title: "AI-Powered Intelligence",
-    description: "Advanced GPT-4 technology generates tailored content specific to your business and industry",
+    description: "Advanced Qwen AI technology generates tailored content specific to your business and industry",
     color: "from-primary to-chart-1",
   },
   {

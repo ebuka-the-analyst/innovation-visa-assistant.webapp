@@ -16,7 +16,7 @@ const FEATURES: Feature[] = [
   {
     id: "ai-intelligence",
     title: "AI-Powered Intelligence",
-    shortDesc: "Advanced GPT-4 technology generates tailored content specific to your business and industry",
+    shortDesc: "Advanced Qwen AI technology generates tailored content specific to your business and industry",
     icon: Brain,
     color: "from-orange-400 to-orange-600",
     detailedInstructions: [
