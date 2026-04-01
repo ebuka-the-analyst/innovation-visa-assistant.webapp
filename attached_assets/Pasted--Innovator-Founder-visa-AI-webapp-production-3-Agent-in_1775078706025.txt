@@ -1,0 +1,176 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+3
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+dc05eb67
+Active
+
+Apr 1, 2026, 9:20 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+    themePrimaryColor: '#1d4ed8',
+[CoverPage] Using full custom cover image mode
+    themeFont: 'Montserrat',
+[CoverPage] textElements data: { exists: true, isArray: true, count: 0, sample: null }
+    hasBackgroundImage: true,
+    useFullCoverImage: true
+[CoverPage] Logo rendered at: { x: 0, y: 0, width: 47.69230769230769 }
+  },
+  finalTheme: {
+    themeId: 'custom-cover',
+    themePrimaryColor: '#1d4ed8',
+    themeFont: 'Montserrat',
+    hasBackgroundImage: true,
+    useFullCoverImage: true,
+    hasTextElements: true,
+    textElementsCount: 0
+  }
+9:21:44 PM [express] GET /api/view/html/52fefd3d-a1aa-4904-8649-a646474ac13f 200 in 1362ms
+[2026-04-01T21:21:49.436Z] POST /api/activity/session
+9:21:49 PM [express] POST /api/activity/session 200 in 12ms :: {"sessionId":"b3c2812f-b7d3-4f5b-acd3…
+[2026-04-01T21:22:07.231Z] POST /api/activity/session
+9:22:07 PM [express] POST /api/activity/session 200 in 195ms :: {"sessionId":"49b2f19c-a16c-4376-91b…
+[2026-04-01T21:22:19.739Z] POST /api/activity/session
+9:22:19 PM [express] POST /api/activity/session 200 in 197ms :: {"sessionId":"b3c2812f-b7d3-4f5b-acd…
+[2026-04-01T21:22:36.936Z] POST /api/activity/session
+9:22:37 PM [express] POST /api/activity/session 200 in 189ms :: {"sessionId":"49b2f19c-a16c-4376-91b…
+  planId: '52fefd3d-a1aa-4904-8649-a646474ac13f',
+    themePrimaryColor: '#1d4ed8',
+    themeFont: 'Montserrat',
+    hasBackgroundImage: true,
+    hasBackgroundImage: true
+  },
+  businessPlanTheme: {
+    themeId: 'custom-cover',
+    themePrimaryColor: '#1d4ed8',
+    themeFont: 'Montserrat',
+    hasBackgroundImage: true,
+    useFullCoverImage: true
+  },
+  finalTheme: {
+    themeId: 'custom-cover',
+  savedCoverDesign: {
+    themeId: null,
+    primaryColor: '#1d4ed8',
+    font: 'Montserrat',
+[2026-04-01T21:22:49.075Z] POST /api/activity/session
+9:22:49 PM [express] POST /api/activity/session 200 in 195ms :: {"sessionId":"b3c2812f-b7d3-4f5b-acd…
+    useFullCoverImage: true,
+[2026-04-01T21:22:53.532Z] GET /api/view/html/52fefd3d-a1aa-4904-8649-a646474ac13f
+    hasTextElements: true,
+[HTML View] Theme data for plan: {
+    textElementsCount: 0
+  }
+}
+[CoverPage] textElements data: { exists: true, isArray: true, count: 0, sample: null }
+[CoverPage] Using full custom cover image mode
+[CoverPage] Logo rendered at: { x: 0, y: 0, width: 47.69230769230769 }
+9:22:54 PM [express] GET /api/view/html/52fefd3d-a1aa-4904-8649-a646474ac13f 200 in 1310ms
+9:23:07 PM [express] POST /api/activity/session 200 in 195ms :: {"sessionId":"49b2f19c-a16c-4376-91b…
+[2026-04-01T21:23:07.237Z] POST /api/activity/session
+[2026-04-01T21:23:19.144Z] POST /api/activity/session
+9:23:19 PM [express] POST /api/activity/session 200 in 195ms :: {"sessionId":"b3c2812f-b7d3-4f5b-acd…
+[2026-04-01T21:23:36.925Z] POST /api/activity/session
+9:23:37 PM [express] POST /api/activity/session 200 in 194ms :: {"sessionId":"49b2f19c-a16c-4376-91b…
+[2026-04-01T21:23:41.360Z] POST /api/activity/session/end
+9:23:41 PM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+[2026-04-01T21:24:06.920Z] POST /api/activity/session
+9:24:07 PM [express] POST /api/activity/session 200 in 193ms :: {"sessionId":"49b2f19c-a16c-4376-91b…
+9:24:15 PM [express] POST /api/activity/session 200 in 193ms :: {"sessionId":"ec83a5af-47fe-43ff-a41…
+[2026-04-01T21:24:14.808Z] GET /api/auth/user
+[2026-04-01T21:24:14.812Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+9:24:14 PM [express] GET /api/auth/user 200 in 11ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-01T21:24:15.213Z] POST /api/activity/page-view
+9:24:15 PM [express] POST /api/activity/page-view 200 in 12ms :: {"pageViewId":"34cd8511-05b2-4460-b…
+[2026-04-01T21:24:21.615Z] GET /api/view/html/52fefd3d-a1aa-4904-8649-a646474ac13f
+    hasTextElements: true,
+    textElementsCount: 0
+[HTML View] Theme data for plan: {
+  }
+}
+  planId: '52fefd3d-a1aa-4904-8649-a646474ac13f',
+[CoverPage] Using full custom cover image mode
+  savedCoverDesign: {
+[CoverPage] textElements data: { exists: true, isArray: true, count: 0, sample: null }
+    themeId: null,
+[CoverPage] Logo rendered at: { x: 0, y: 0, width: 47.69230769230769 }
+    primaryColor: '#1d4ed8',
+    font: 'Montserrat',
+    hasBackgroundImage: true
+  },
+  businessPlanTheme: {
+    themeId: 'custom-cover',
+    themePrimaryColor: '#1d4ed8',
+    themeFont: 'Montserrat',
+    hasBackgroundImage: true,
+    useFullCoverImage: true
+  },
+  finalTheme: {
+    themeId: 'custom-cover',
+    themePrimaryColor: '#1d4ed8',
+    themeFont: 'Montserrat',
+    hasBackgroundImage: true,
+    useFullCoverImage: true,
+9:24:22 PM [express] GET /api/view/html/52fefd3d-a1aa-4904-8649-a646474ac13f 200 in 1315ms
+[2026-04-01T21:24:32.456Z] POST /api/activity/session/end
+9:24:32 PM [express] POST /api/activity/session/end 200 in 181ms :: {"success":true}
+[2026-04-01T21:24:36.922Z] POST /api/activity/session
+9:24:36 PM [express] POST /api/activity/session 200 in 9ms :: {"sessionId":"49b2f19c-a16c-4376-91b1-…
+
+
