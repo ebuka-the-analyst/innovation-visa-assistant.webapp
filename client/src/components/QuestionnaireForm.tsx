@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw, Building2, Stethoscope, ShoppingBag, Laptop, Lightbulb, FileText, Upload, Sparkles, ChevronDown, ChevronUp, Palette, Globe, Lock } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw, Building2, Stethoscope, ShoppingBag, Laptop, Lightbulb, FileText, Upload, Sparkles, ChevronDown, ChevronUp, Palette, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -38,13 +38,6 @@ import {
 
 // Industry template definitions - Tech AND Non-Tech sectors
 const INDUSTRY_TEMPLATES = {
-  globalvisa: {
-    name: "Global AI Visa Platform (My Business)",
-    icon: Globe,
-    description: "World's First Global AI Visa Platform - Your actual business for Innovator Founder Visa",
-    templates: ["Visa Assistant Global - Benedict Umeh (COMPREHENSIVE)"],
-    locked: true
-  },
   visatech: {
     name: "Legal Tech / Immigration Tech",
     icon: FileText,
@@ -397,37 +390,15 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   
-  // Password protection for templates
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [passwordInput, setPasswordInput] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [isTemplatesUnlocked, setIsTemplatesUnlocked] = useState(false);
-  const [pendingIndustrySelection, setPendingIndustrySelection] = useState<string | null>(null);
-  
-  const TEMPLATE_PASSWORD = "BENEDICT";
-  
-  const handleUnlockTemplates = () => {
-    if (passwordInput === TEMPLATE_PASSWORD) {
-      setIsTemplatesUnlocked(true);
-      setShowPasswordDialog(false);
-      setPasswordError("");
-      setPasswordInput("");
-      // If there was a pending industry selection, continue with it
-      if (pendingIndustrySelection) {
-        setSelectedIndustry(pendingIndustrySelection);
-        setPendingIndustrySelection(null);
-      }
-    } else {
-      setPasswordError("Incorrect password. Please try again.");
-    }
-  };
-  
+  // Templates unlocked for Ultimate tier users only
+  const isTemplatesUnlocked = user?.subscriptionTier === 'ultimate';
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+
   const handleIndustryClick = (industryKey: string) => {
     if (isTemplatesUnlocked) {
       setSelectedIndustry(industryKey);
     } else {
-      setPendingIndustrySelection(industryKey);
-      setShowPasswordDialog(true);
+      setShowUpgradePrompt(true);
     }
   };
   
@@ -1162,11 +1133,6 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
 
   // Load industry-specific template for non-founder users
   const handleLoadIndustryTemplate = (industry: string, templateIndex: number) => {
-    // Protect globalvisa template - only owner can load it
-    if (industry === 'globalvisa' && user?.email?.toLowerCase() !== 'benedict9211@gmail.com') {
-      return; // Block unauthorized access
-    }
-    
     const userName = user?.displayName || user?.firstName || user?.email?.split('@')[0] || 'Your Name';
     
     // COMPREHENSIVE Industry-specific template data - ALL fields filled
@@ -2875,35 +2841,28 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
             
             {!selectedIndustry ? (
               <div className="grid gap-3 mt-4">
-                {Object.entries(INDUSTRY_TEMPLATES)
-                  .filter(([key]) => {
-                    // "globalvisa" template only visible to the owner (benedict9211@gmail.com)
-                    if (key === 'globalvisa') {
-                      return user?.email?.toLowerCase() === 'benedict9211@gmail.com';
-                    }
-                    return true;
-                  })
-                  .map(([key, industry]) => {
+                {!isTemplatesUnlocked && (
+                  <div className="flex items-center gap-2 p-3 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-sm">
+                    <Lock className="w-4 h-4 shrink-0" />
+                    <span>These templates are available on the <strong>Ultimate</strong> plan. <a href="/pricing" className="underline font-medium">Upgrade to unlock</a>.</span>
+                  </div>
+                )}
+                {Object.entries(INDUSTRY_TEMPLATES).map(([key, industry]) => {
                   const IconComponent = industry.icon;
-                  const isLocked = (industry as any).locked && !isTemplatesUnlocked;
+                  const isLocked = !isTemplatesUnlocked;
                   return (
                     <Card 
                       key={key}
-                      className={`p-4 cursor-pointer hover-elevate border-2 transition-all ${key === 'globalvisa' ? 'border-primary bg-primary/5' : 'border-transparent hover:border-primary/50'}`}
+                      className={`p-4 cursor-pointer hover-elevate border-2 transition-all border-transparent hover:border-primary/50`}
                       onClick={() => handleIndustryClick(key)}
                       data-testid={`industry-${key}`}
                     >
                       <div className="flex items-start gap-4">
-                        <div className={`p-2 rounded-lg ${key === 'globalvisa' ? 'bg-primary/20' : 'bg-primary/10'}`}>
+                        <div className="p-2 rounded-lg bg-primary/10">
                           <IconComponent className="w-6 h-6 text-primary" />
                         </div>
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{industry.name}</h4>
-                            {key === 'globalvisa' && (
-                              <Badge variant="default" className="text-xs">YOUR BUSINESS</Badge>
-                            )}
-                          </div>
+                          <h4 className="font-semibold">{industry.name}</h4>
                           <p className="text-sm text-muted-foreground">{industry.description}</p>
                         </div>
                         {isLocked ? (
@@ -2964,67 +2923,28 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           </DialogContent>
         </Dialog>
 
-        {/* Password Protection Dialog */}
-        <Dialog open={showPasswordDialog} onOpenChange={(open) => {
-          setShowPasswordDialog(open);
-          if (!open) {
-            setPasswordInput("");
-            setPasswordError("");
-            setPendingIndustrySelection(null);
-          }
-        }}>
+        {/* Ultimate Plan Required Dialog */}
+        <Dialog open={showUpgradePrompt} onOpenChange={setShowUpgradePrompt}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Lock className="w-5 h-5 text-amber-500" />
-                Templates Protected
+                Ultimate Plan Required
               </DialogTitle>
               <DialogDescription>
-                These business plan templates are password-protected. Enter the password to unlock all templates.
+                These professionally-crafted business plan templates are exclusively available to Ultimate plan members.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="template-password">Password</Label>
-                <Input
-                  id="template-password"
-                  type="password"
-                  placeholder="Enter password..."
-                  value={passwordInput}
-                  onChange={(e) => {
-                    setPasswordInput(e.target.value);
-                    setPasswordError("");
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleUnlockTemplates();
-                    }
-                  }}
-                  data-testid="input-template-password"
-                />
-                {passwordError && (
-                  <p className="text-sm text-destructive">{passwordError}</p>
-                )}
-              </div>
+            <div className="space-y-4 mt-2">
+              <p className="text-sm text-muted-foreground">
+                Upgrade to Ultimate to instantly unlock all industry templates, auto-fill your questionnaire with expert data, and get a complete business plan ready for endorsement.
+              </p>
               <div className="flex gap-2 justify-end">
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setShowPasswordDialog(false);
-                    setPasswordInput("");
-                    setPasswordError("");
-                    setPendingIndustrySelection(null);
-                  }}
-                  data-testid="button-cancel-password"
-                >
-                  Cancel
+                <Button variant="outline" onClick={() => setShowUpgradePrompt(false)} data-testid="button-cancel-upgrade">
+                  Maybe Later
                 </Button>
-                <Button 
-                  onClick={handleUnlockTemplates}
-                  data-testid="button-unlock-templates"
-                >
-                  <Lock className="w-4 h-4 mr-2" />
-                  Unlock Templates
+                <Button onClick={() => { setShowUpgradePrompt(false); window.location.href = '/pricing'; }} data-testid="button-go-to-pricing">
+                  View Ultimate Plan
                 </Button>
               </div>
             </div>
