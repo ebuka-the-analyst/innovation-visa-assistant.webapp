@@ -14910,7 +14910,9 @@ export default function AdminDashboard() {
                 </div>
                 <div className="p-3 bg-muted rounded-lg">
                   <p className="text-xs text-muted-foreground">Credits Remaining</p>
-                  <p className="font-medium">{(viewingUserActivity as any)?.credits || 0}</p>
+                  <p className="font-medium">
+                    {((viewingUserActivity as any)?.planCredits || 0) + ((viewingUserActivity as any)?.bonusCredits || 0)}
+                  </p>
                 </div>
               </div>
               
@@ -14919,8 +14921,8 @@ export default function AdminDashboard() {
               <div>
                 <h4 className="font-medium mb-2">Account Status</h4>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant={viewingUserActivity?.isVerified ? "default" : "secondary"}>
-                    {viewingUserActivity?.isVerified ? "Email Verified" : "Email Not Verified"}
+                  <Badge variant={(viewingUserActivity as any)?.isVerified ? "default" : "secondary"}>
+                    {(viewingUserActivity as any)?.isVerified ? "Email Verified" : "Email Not Verified"}
                   </Badge>
                   {viewingUserActivity?.isAdmin && (
                     <Badge variant="default" className="bg-purple-600">Admin</Badge>
