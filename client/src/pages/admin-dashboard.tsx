@@ -3543,7 +3543,7 @@ export default function AdminDashboard() {
                                               className="w-3 h-3 rounded-full" 
                                               style={{ backgroundColor: stage.color }}
                                             />
-                                            <span className="font-semibold text-foreground">{stage.stage}</span>
+                                            <span className="text-[9px] font-semibold text-foreground">{stage.stage}</span>
                                           </div>
                                           <Badge 
                                             className="text-white font-medium px-1.5"
@@ -3582,9 +3582,9 @@ export default function AdminDashboard() {
                             </div>
                             
                             {/* Growth Rate Summary with enhanced styling */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 mt-1 border-t">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-1 pt-1 mt-0.5 border-t">
                               <motion.div 
-                                className="text-center p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20"
+                                className="text-center p-1 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.5 }}
@@ -3593,7 +3593,7 @@ export default function AdminDashboard() {
                                 <p className="text-[9px] text-muted-foreground">Daily Growth</p>
                               </motion.div>
                               <motion.div 
-                                className="text-center p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20"
+                                className="text-center p-1 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.6 }}
@@ -3602,7 +3602,7 @@ export default function AdminDashboard() {
                                 <p className="text-[9px] text-muted-foreground">Weekly Growth</p>
                               </motion.div>
                               <motion.div 
-                                className="text-center p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20"
+                                className="text-center p-1 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.7 }}
@@ -3611,7 +3611,7 @@ export default function AdminDashboard() {
                                 <p className="text-[9px] text-muted-foreground">Monthly Growth</p>
                               </motion.div>
                               <motion.div 
-                                className="text-center p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20"
+                                className="text-center p-1 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.8 }}
@@ -3858,7 +3858,7 @@ export default function AdminDashboard() {
                                   <div className="flex items-center gap-1.5">
                                     <div className={`w-2 h-2 rounded-full ${riskLevel === 'high' ? 'bg-red-500' : riskLevel === 'medium' ? 'bg-amber-500' : 'bg-yellow-500'}`} />
                                     <div>
-                                      <p className="font-medium">{user.firstName || user.email?.split('@')[0] || 'Unknown'}</p>
+                                      <p className="text-[9px] font-medium">{user.firstName || user.email?.split('@')[0] || 'Unknown'}</p>
                                       <p className="text-[9px] text-muted-foreground">{user.email}</p>
                                     </div>
                                   </div>
@@ -3866,7 +3866,7 @@ export default function AdminDashboard() {
                                     <Badge variant={riskLevel === 'high' ? 'destructive' : riskLevel === 'medium' ? 'secondary' : 'outline'}>
                                       {riskLevel === 'high' ? 'High Risk' : riskLevel === 'medium' ? 'At Risk' : 'Dormant'}
                                     </Badge>
-                                    <p className="text-xs text-muted-foreground mt-1">
+                                    <p className="text-[9px] text-muted-foreground">
                                       Last active {daysSinceActivity} days ago
                                     </p>
                                   </div>
@@ -3899,7 +3899,7 @@ export default function AdminDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="overflow-x-auto">
-                        <Table>
+                        <Table className="[&_td]:py-0.5 [&_td]:px-1.5 [&_th]:py-0.5 [&_th]:px-1.5 text-[9px]">
                           <TableHeader>
                             <TableRow>
                               <TableHead>Cohort</TableHead>
@@ -3913,10 +3913,10 @@ export default function AdminDashboard() {
                           <TableBody>
                             {usersAnalytics.cohortAnalysis.map((cohort) => (
                               <TableRow key={cohort.cohort}>
-                                <TableCell className="font-medium">{cohort.cohort}</TableCell>
+                                <TableCell className="text-[9px] font-medium">{cohort.cohort}</TableCell>
                                 <TableCell>
                                   <div className="flex items-center gap-2">
-                                    <div className="h-6 px-1.5 rounded bg-chart-1 text-white text-xs font-medium flex items-center justify-center">
+                                    <div className="h-4 px-1 rounded bg-chart-1 text-white text-xs font-medium flex items-center justify-center">
                                       100%
                                     </div>
                                   </div>
@@ -3924,7 +3924,7 @@ export default function AdminDashboard() {
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <div
-                                      className="h-6 px-1.5 rounded bg-chart-2 text-white text-xs font-medium flex items-center justify-center"
+                                      className="h-4 px-1 rounded bg-chart-2 text-white text-xs font-medium flex items-center justify-center"
                                       style={{ opacity: cohort.week1 / cohort.week0 }}
                                     >
                                       {((cohort.week1 / cohort.week0) * 100).toFixed(0)}%
@@ -3934,7 +3934,7 @@ export default function AdminDashboard() {
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <div
-                                      className="h-6 px-1.5 rounded bg-chart-3 text-white text-xs font-medium flex items-center justify-center"
+                                      className="h-4 px-1 rounded bg-chart-3 text-white text-xs font-medium flex items-center justify-center"
                                       style={{ opacity: cohort.week2 / cohort.week0 }}
                                     >
                                       {((cohort.week2 / cohort.week0) * 100).toFixed(0)}%
@@ -3944,7 +3944,7 @@ export default function AdminDashboard() {
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <div
-                                      className="h-6 px-1.5 rounded bg-chart-4 text-white text-xs font-medium flex items-center justify-center"
+                                      className="h-4 px-1 rounded bg-chart-4 text-white text-xs font-medium flex items-center justify-center"
                                       style={{ opacity: cohort.week3 / cohort.week0 }}
                                     >
                                       {((cohort.week3 / cohort.week0) * 100).toFixed(0)}%
@@ -3954,7 +3954,7 @@ export default function AdminDashboard() {
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <div
-                                      className="h-6 px-1.5 rounded bg-chart-5 text-white text-xs font-medium flex items-center justify-center"
+                                      className="h-4 px-1 rounded bg-chart-5 text-white text-xs font-medium flex items-center justify-center"
                                       style={{ opacity: cohort.week4 / cohort.week0 }}
                                     >
                                       {((cohort.week4 / cohort.week0) * 100).toFixed(0)}%
@@ -3973,7 +3973,7 @@ export default function AdminDashboard() {
                 {/* User Management Table - Always shown at bottom */}
                 <Card>
                   <CardHeader className="p-2 pb-1">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-1.5">
+                    <div className="flex flex-row flex-wrap items-center justify-between gap-1.5">
                       <div>
                         <CardTitle className="text-[10px] font-semibold">User Management</CardTitle>
                         <CardDescription className="text-[9px]">View, search, and manage all platform users</CardDescription>
@@ -4170,10 +4170,10 @@ export default function AdminDashboard() {
                     ) : usersData && filteredUsers.length > 0 ? (
                       <>
                         <div className="overflow-x-auto">
-                          <Table>
+                          <Table className="[&_td]:py-0.5 [&_td]:px-1.5 [&_th]:py-0.5 [&_th]:px-1.5 text-[9px]">
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="w-12">
+                                <TableHead className="w-8">
                                   <Checkbox
                                     checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
                                     onCheckedChange={(checked) => {
@@ -4216,7 +4216,7 @@ export default function AdminDashboard() {
                                       }}
                                     />
                                   </TableCell>
-                                  <TableCell className="font-medium">{user.email}</TableCell>
+                                  <TableCell className="text-[9px] font-medium">{user.email}</TableCell>
                                   <TableCell>
                                     {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : '-'}
                                   </TableCell>
@@ -4552,7 +4552,7 @@ export default function AdminDashboard() {
                 {/* Plans Management Table */}
                 <Card>
                   <CardHeader className="p-2 pb-1">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-1.5">
+                    <div className="flex flex-row flex-wrap items-center justify-between gap-1.5">
                       <div>
                         <CardTitle className="text-[10px] font-semibold">Business Plans Management</CardTitle>
                         <CardDescription className="text-[9px]">View and manage all business plans</CardDescription>
@@ -4639,7 +4639,7 @@ export default function AdminDashboard() {
                     ) : plansData && plansData.plans.length > 0 ? (
                       <>
                         <div className="overflow-x-auto">
-                          <Table>
+                          <Table className="[&_td]:py-0.5 [&_td]:px-1.5 [&_th]:py-0.5 [&_th]:px-1.5 text-[9px]">
                             <TableHeader>
                               <TableRow>
                                 <TableHead className="w-12">
@@ -4684,7 +4684,7 @@ export default function AdminDashboard() {
                                       }}
                                     />
                                   </TableCell>
-                                  <TableCell className="font-medium">
+                                  <TableCell className="text-[9px] font-medium">
                                     {plan.businessName}
                                     {plan.isDemoData && (
                                       <Badge variant="secondary" className="ml-2 text-xs">
@@ -6928,17 +6928,17 @@ export default function AdminDashboard() {
                                       <div className="p-1.5 rounded-lg bg-muted/50 border">
                                         <p className="text-[9px] text-muted-foreground">Year 1 Target</p>
                                         <p className="text-[9px] font-bold">£{year1Target.toLocaleString()}</p>
-                                        <p className="text-xs text-muted-foreground mt-1">£{monthlyTarget.toLocaleString()}/mo average</p>
+                                        <p className="text-[9px] text-muted-foreground">£{monthlyTarget.toLocaleString()}/mo average</p>
                                       </div>
                                       <div className="p-1.5 rounded-lg bg-green-500/10 border border-green-500/20">
                                         <p className="text-[9px] text-muted-foreground">Actual Revenue</p>
                                         <p className="text-xs font-bold text-green-500">£{actualRevenue.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                        <p className="text-xs text-muted-foreground mt-1">{daysSinceLaunch} days since launch</p>
+                                        <p className="text-[9px] text-muted-foreground">{daysSinceLaunch} days since launch</p>
                                       </div>
                                       <div className={`p-4 rounded-lg ${isAheadOfTarget ? 'bg-green-500/10 border-green-500/20' : 'bg-amber-500/10 border-amber-500/20'} border`}>
                                         <p className="text-[9px] text-muted-foreground">Projected ARR (based on MRR)</p>
                                         <p className={`text-xs font-bold ${isAheadOfTarget ? 'text-green-500' : 'text-amber-500'}`}>£{projectedARR.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                        <p className="text-xs text-muted-foreground mt-1">{projectedARR >= year1Target ? 'On track' : 'Below target'}</p>
+                                        <p className="text-[9px] text-muted-foreground">{projectedARR >= year1Target ? 'On track' : 'Below target'}</p>
                                       </div>
                                     </div>
                                     
@@ -7378,7 +7378,7 @@ export default function AdminDashboard() {
                                               sub.tier === 'enterprise' ? 'bg-amber-500' :
                                               sub.tier === 'premium' ? 'bg-blue-500' : 'bg-green-500'
                                             }><span className="capitalize">{sub.tier}</span></Badge>
-                                            <p className="text-xs text-muted-foreground mt-1">Since {sub.since}</p>
+                                            <p className="text-[9px] text-muted-foreground">Since {sub.since}</p>
                                           </div>
                                           <div className="text-center">
                                             <p className="font-bold">£{sub.amount.toFixed(2)}/mo</p>
@@ -8368,7 +8368,7 @@ export default function AdminDashboard() {
                                                   {formatDistance(new Date(entry.timestamp), new Date(), { addSuffix: true })}
                                                 </p>
                                                 {entry.ipAddress && (
-                                                  <p className="text-xs text-muted-foreground mt-1">
+                                                  <p className="text-[9px] text-muted-foreground">
                                                     IP: {entry.ipAddress}
                                                   </p>
                                                 )}
@@ -8743,7 +8743,7 @@ export default function AdminDashboard() {
                                         <kpi.icon className={`h-8 w-8 text-${kpi.color}-500 mb-0.5`} />
                                         <p className="text-[9px] font-bold">{kpi.value}</p>
                                         <p className="text-[9px] text-muted-foreground">{kpi.label}</p>
-                                        <p className="text-xs text-muted-foreground mt-1">{kpi.sub}</p>
+                                        <p className="text-[9px] text-muted-foreground">{kpi.sub}</p>
                                       </CardContent>
                                     </Card>
                                   </motion.div>
@@ -9027,7 +9027,7 @@ export default function AdminDashboard() {
                                                 </div>
                                                 <div className="flex-1">
                                                   <p className="font-medium text-[9px]">{notif.title}</p>
-                                                  <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
+                                                  <p className="text-[9px] text-muted-foreground">{notif.message}</p>
                                                   <div className="flex items-center gap-2 mt-0.5">
                                                     <Badge variant="outline" className="text-xs">
                                                       {notif.recipientCount === 0 ? 'All users' : `${notif.recipientCount} user${notif.recipientCount > 1 ? 's' : ''}`}
@@ -9492,7 +9492,7 @@ export default function AdminDashboard() {
                                     <Skeleton className="h-64 w-full" />
                                   ) : (
                                     <ScrollArea className="h-[160px]">
-                                      <Table>
+                                      <Table className="[&_td]:py-0.5 [&_td]:px-1.5 [&_th]:py-0.5 [&_th]:px-1.5 text-[9px]">
                                         <TableHeader>
                                           <TableRow>
                                             <TableHead>Title</TableHead>
@@ -9701,7 +9701,7 @@ export default function AdminDashboard() {
                                     value={(referralAnalytics?.conversionRate || 0) * 100} 
                                     className="h-1" 
                                   />
-                                  <p className="text-xs text-muted-foreground mt-1">Conversion rate</p>
+                                  <p className="text-[9px] text-muted-foreground">Conversion rate</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -10613,7 +10613,7 @@ export default function AdminDashboard() {
                                             </div>
                                             <p className="text-[9px] font-medium">{promo.name}</p>
                                             {promo.description && (
-                                              <p className="text-xs text-muted-foreground mt-1">{promo.description}</p>
+                                              <p className="text-[9px] text-muted-foreground">{promo.description}</p>
                                             )}
                                           </div>
                                           
@@ -11896,7 +11896,7 @@ export default function AdminDashboard() {
                                   ))}
                                 </div>
                               ) : lawyerReviews && lawyerReviews.length > 0 ? (
-                                <Table>
+                                <Table className="[&_td]:py-0.5 [&_td]:px-1.5 [&_th]:py-0.5 [&_th]:px-1.5 text-[9px]">
                                   <TableHeader>
                                     <TableRow>
                                       <TableHead>Document</TableHead>
@@ -12140,7 +12140,7 @@ export default function AdminDashboard() {
                                                   <span className="text-[9px] font-bold">{lawyer.currentReviewCount}/{lawyer.maxConcurrentReviews}</span>
                                                 </div>
                                               </div>
-                                              <p className="text-xs text-muted-foreground mt-1">Workload</p>
+                                              <p className="text-[9px] text-muted-foreground">Workload</p>
                                             </div>
                                             <div className="text-center px-4 border-l">
                                               <p className="text-[9px] font-bold">{lawyer.totalReviewsCompleted}</p>
@@ -12319,15 +12319,15 @@ export default function AdminDashboard() {
                                 <div className="grid grid-cols-3 gap-4 w-full">
                                   <div className="text-center p-4 rounded-lg bg-green-500/10 border border-green-500/20">
                                     <p className="text-xs font-bold text-green-500">{lawyerAnalytics?.approvedReviews || 0}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Approved</p>
+                                    <p className="text-[9px] text-muted-foreground">Approved</p>
                                   </div>
                                   <div className="text-center p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
                                     <p className="text-xs font-bold text-yellow-500">{lawyerAnalytics?.needsRevisionReviews || 0}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Needs Revision</p>
+                                    <p className="text-[9px] text-muted-foreground">Needs Revision</p>
                                   </div>
                                   <div className="text-center p-4 rounded-lg bg-red-500/10 border border-red-500/20">
                                     <p className="text-xs font-bold text-red-500">{lawyerAnalytics?.rejectedReviews || 0}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Rejected</p>
+                                    <p className="text-[9px] text-muted-foreground">Rejected</p>
                                   </div>
                                 </div>
                                 <div className="mt-6 text-center">
@@ -12394,7 +12394,7 @@ export default function AdminDashboard() {
                                   ))}
                                 </div>
                               ) : lawyerReviews?.filter(r => r.status === 'completed').length ? (
-                                <Table>
+                                <Table className="[&_td]:py-0.5 [&_td]:px-1.5 [&_th]:py-0.5 [&_th]:px-1.5 text-[9px]">
                                   <TableHeader>
                                     <TableRow>
                                       <TableHead>Document</TableHead>
@@ -13045,7 +13045,7 @@ export default function AdminDashboard() {
                                         <div className="flex items-center gap-1.5">
                                           <div className="text-right">
                                             <Badge variant="default" className="text-xs bg-green-500">{admin.status}</Badge>
-                                            <p className="text-xs text-muted-foreground mt-1">Last login: {admin.lastLogin}</p>
+                                            <p className="text-[9px] text-muted-foreground">Last login: {admin.lastLogin}</p>
                                           </div>
                                           <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -13088,7 +13088,7 @@ export default function AdminDashboard() {
                               <CardDescription className="text-[9px]">Role-based access control settings</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <Table>
+                              <Table className="[&_td]:py-0.5 [&_td]:px-1.5 [&_th]:py-0.5 [&_th]:px-1.5 text-[9px]">
                                 <TableHeader>
                                   <TableRow>
                                     <TableHead>Permission</TableHead>
@@ -13111,7 +13111,7 @@ export default function AdminDashboard() {
                                     { permission: 'Maintenance Mode', superAdmin: true, admin: false, moderator: false },
                                   ].map((row, i) => (
                                     <TableRow key={i}>
-                                      <TableCell className="font-medium">{row.permission}</TableCell>
+                                      <TableCell className="text-[9px] font-medium">{row.permission}</TableCell>
                                       <TableCell className="text-center">
                                         {row.superAdmin ? <CheckCircle className="h-3 w-3 text-green-500 mx-auto" /> : <XCircle className="h-3 w-3 text-muted-foreground/30 mx-auto" />}
                                       </TableCell>
@@ -13167,7 +13167,7 @@ export default function AdminDashboard() {
                                       <Badge variant={event.status === 'blocked' ? 'destructive' : 'default'} className="text-xs">
                                         {event.status}
                                       </Badge>
-                                      <p className="text-xs text-muted-foreground mt-1">{event.time}</p>
+                                      <p className="text-[9px] text-muted-foreground">{event.time}</p>
                                     </div>
                                   </div>
                                 ))}
@@ -13378,7 +13378,7 @@ export default function AdminDashboard() {
                               <CardDescription className="text-[9px]">Recent database backups and restore points</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <Table>
+                              <Table className="[&_td]:py-0.5 [&_td]:px-1.5 [&_th]:py-0.5 [&_th]:px-1.5 text-[9px]">
                                 <TableHeader>
                                   <TableRow>
                                     <TableHead>Backup Name</TableHead>
@@ -13397,7 +13397,7 @@ export default function AdminDashboard() {
                                     { name: 'auto_backup_2025_11_26', type: 'Automatic', size: '1.0 GB', created: '4 days ago', status: 'Completed' },
                                   ].map((backup, i) => (
                                     <TableRow key={i}>
-                                      <TableCell className="font-medium">
+                                      <TableCell className="text-[9px] font-medium">
                                         <div className="flex items-center gap-2">
                                           <Database className="h-3 w-3 text-muted-foreground" />
                                           {backup.name}
@@ -13720,7 +13720,7 @@ export default function AdminDashboard() {
                         <span className="text-xs font-medium">Business Plans</span>
                       </div>
                       <div className="text-xs font-bold">{userAnalysis.businessPlans.total}</div>
-                      <p className="text-xs text-muted-foreground mt-1">Created</p>
+                      <p className="text-[9px] text-muted-foreground">Created</p>
                     </Card>
                     <Card className="p-4">
                       <div className="flex items-center gap-2 text-muted-foreground mb-1">
@@ -13728,7 +13728,7 @@ export default function AdminDashboard() {
                         <span className="text-xs font-medium">Credits</span>
                       </div>
                       <div className="text-xs font-bold">{userAnalysis.credits.current}</div>
-                      <p className="text-xs text-muted-foreground mt-1">Available ({userAnalysis.credits.used} used)</p>
+                      <p className="text-[9px] text-muted-foreground">Available ({userAnalysis.credits.used} used)</p>
                     </Card>
                     <Card className="p-4">
                       <div className="flex items-center gap-2 text-muted-foreground mb-1">
@@ -13736,7 +13736,7 @@ export default function AdminDashboard() {
                         <span className="text-xs font-medium">Lifetime Value</span>
                       </div>
                       <div className="text-xs font-bold">£{userAnalysis.financials.lifetimeValue?.toFixed(2) || '0.00'}</div>
-                      <p className="text-xs text-muted-foreground mt-1">{userAnalysis.financials.transactionCount} transactions</p>
+                      <p className="text-[9px] text-muted-foreground">{userAnalysis.financials.transactionCount} transactions</p>
                     </Card>
                   </div>
 
@@ -13755,7 +13755,7 @@ export default function AdminDashboard() {
                         } className={userAnalysis.insights.riskLevel === 'low' ? 'bg-green-500' : ''}>
                           {userAnalysis.insights.riskLevel.toUpperCase()}
                         </Badge>
-                        <p className="text-xs text-muted-foreground mt-1">{userAnalysis.insights.churnRisk}</p>
+                        <p className="text-[9px] text-muted-foreground">{userAnalysis.insights.churnRisk}</p>
                       </div>
                       <div>
                         <p className="text-[9px] text-muted-foreground">Upgrade Readiness</p>
