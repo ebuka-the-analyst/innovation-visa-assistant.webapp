@@ -2210,7 +2210,7 @@ Write the complete narrative for: ${section.title}
 Remember: Write FULL prose content for this section. No outlines or placeholders. Use ALL relevant data above.`;
 
       try {
-        // Use OpenAI for business plan generation
+        // Use Qwen for business plan generation
         const fullPrompt = `${sectionSystemPrompt}\n\n${sectionUserPrompt}`;
         let sectionContent = await callAI(fullPrompt);
         
@@ -3627,7 +3627,7 @@ EXAMPLES OF GOOD RESPONSES:
 - "I notice you mentioned 3 direct competitors - excellent. Adding HOW you differentiate from each would strengthen your innovation case."
 - "The 18-month breakeven timeline is realistic. However, endorsers will want to see the assumptions behind your £45K/month revenue target."`;
 
-      // Use OpenAI for AI feedback
+      // Use Qwen for AI feedback
       try {
         const feedback = await callAI(prompt);
         res.json({ feedback });
@@ -8626,8 +8626,8 @@ Return ONLY valid JSON:
             if (textDocuments.length === 0 && imageDocuments.length === 0) {
               throw new Error("No document content to process");
             }
-          } catch (openaiError: any) {
-            console.error(`[Document Extract] OpenAI failed: ${openaiError.message}`);
+          } catch (qwenError: any) {
+            console.error(`[Document Extract] Qwen failed: ${qwenError.message}`);
             // Don't throw - let it fall through to intelligent placeholders
           }
         } else {
@@ -10547,11 +10547,11 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
 
       let responseText: string | null = null;
 
-      // Use OpenAI for AI response
+      // Use Qwen for AI response
       try {
         responseText = await callAI(`${systemPrompt}\n\nUser query: ${userPrompt}`);
-      } catch (openaiError: any) {
-        console.log("OpenAI failed:", openaiError?.message || openaiError);
+      } catch (qwenError: any) {
+        console.log("Qwen failed:", qwenError?.message);
       }
 
       // If we got a response from OpenAI, return it
@@ -10662,15 +10662,15 @@ Reference actual visa requirements where relevant.`;
       
       let output: string | null = null;
 
-      // Use OpenAI for autopilot step
+      // Use Qwen for autopilot step
       try {
-        console.log(`[Autopilot] Attempting OpenAI for step: ${stepId}`);
+        console.log(`[Autopilot] Calling Qwen for step: ${stepId}`);
         output = await callAI(`${systemPrompt}\n\n${userMessage}`);
         if (output) {
-          console.log(`[Autopilot] OpenAI success for step: ${stepId}, output length: ${output.length}`);
+          console.log(`[Autopilot] Qwen success for step: ${stepId}, output length: ${output.length}`);
         }
-      } catch (openaiError: any) {
-        console.error(`[Autopilot] OpenAI failed for step ${stepId}:`, openaiError?.message || openaiError);
+      } catch (qwenError: any) {
+        console.error(`[Autopilot] Qwen failed for step ${stepId}:`, qwenError?.message);
       }
 
       // Calculate score based on content quality
@@ -10733,14 +10733,14 @@ Founder Profile:
 Respond as this founder would, matching their communication style and expertise.
 Keep responses focused, professional, and relevant to UK visa requirements.`;
 
-      // Use Gemini with 4-key rotation for guaranteed uptime
+      // Use Qwen for neural twin
       try {
         const responseText = await callAI(`${systemPrompt}\n\nQuestion: ${question}`);
         res.json({
           response: responseText || "I would approach this by focusing on our unique value proposition and UK market opportunity."
         });
       } catch (error: any) {
-        console.log("OpenAI failed for neural twin:", error?.message);
+        console.log("Qwen failed for neural twin:", error?.message);
         res.json({
           response: `As the founder of ${profile.businessName}, I would highlight our innovative approach in the ${profile.industry} sector and our commitment to creating jobs in the UK economy.`
         });
@@ -10822,7 +10822,7 @@ FORMAT YOUR RESPONSE AS:
 
 BE HARSH BUT FAIR. This is visa preparation - false confidence could lead to rejection.`;
 
-      // Use Gemini with 4-key rotation for evaluation
+      // Use Qwen for evaluation
       try {
         const feedbackText = await callAI(`${systemPrompt}\n\nQUESTION ASKED: "${question}"\n\nFOUNDER'S RESPONSE (${wordCount} words):\n"${response}"`);
         
@@ -10849,8 +10849,8 @@ BE HARSH BUT FAIR. This is visa preparation - false confidence could lead to rej
           score: Math.min(100, Math.max(0, score)),
           feedback: feedbackText
         });
-      } catch (geminiError) {
-        console.error("Gemini evaluation error:", geminiError);
+      } catch (qwenError) {
+        console.error("Qwen evaluation error:", qwenError);
         return res.json({
           score: 0,
           feedback: "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this problem persists, please contact support@ukvisaassistant.com for assistance.",
@@ -10932,7 +10932,7 @@ Return a JSON object with:
 - suggestions: Array of improvement suggestions
 - wordCount: Total word count`;
 
-      // Use Gemini with 4-key rotation
+      // Use Qwen
       try {
         const jsonPrompt = `${systemPrompt}\n\nTranscript: ${transcript}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
         const responseText = await callAI(jsonPrompt);
@@ -10940,7 +10940,7 @@ Return a JSON object with:
         const result = JSON.parse(cleanedResponse);
         res.json(result);
       } catch (error: any) {
-        console.log("Gemini failed for voice-to-document:", error?.message);
+        console.log("Qwen failed for voice-to-document:", error?.message);
         // Fallback response
         const sections = template.sections.map((heading) => ({
           heading,
@@ -11074,7 +11074,7 @@ Return a JSON object with:
 
       const systemPrompt = `You are a UK patent attorney specialist. Generate a comprehensive patent blueprint for the following invention. Return JSON with: title, abstract (150 words), technicalField, backgroundProblem, solutionSummary, claims (array of 5 patent claims), advantages (array of 4), diagrams (array of 3 objects with name and description).`;
 
-      // Use Gemini with 4-key rotation
+      // Use Qwen
       try {
         const jsonPrompt = `${systemPrompt}\n\nTitle: ${title}\nDescription: ${description}\nTechnical Details: ${technical || 'Not provided'}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
         const responseText = await callAI(jsonPrompt);
@@ -11082,7 +11082,7 @@ Return a JSON object with:
         const result = JSON.parse(cleanedResponse);
         res.json({ blueprint: result });
       } catch (error: any) {
-        console.log("Gemini failed for patent blueprint:", error?.message);
+        console.log("Qwen failed for patent blueprint:", error?.message);
         res.json({
           blueprint: {
             title: `System and Method for ${title}`,
@@ -11208,7 +11208,7 @@ Each strategy should be 1-2 sentences and directly actionable.
 Return a JSON object with:
 - remediations: Array of 5 remediation strategy strings`;
 
-      // Use Gemini with 4-key rotation
+      // Use Qwen
       try {
         const jsonPrompt = `${systemPrompt}\n\nRisk: ${risk.name}\nCategory: ${risk.category}\nDescription: ${risk.description}\nCurrent Mitigation: ${risk.mitigation}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
         const responseText = await callAI(jsonPrompt);
@@ -11216,7 +11216,7 @@ Return a JSON object with:
         const result = JSON.parse(cleanedResponse);
         res.json(result);
       } catch (error: any) {
-        console.log("Gemini failed for auto-remediation:", error?.message);
+        console.log("Qwen failed for auto-remediation:", error?.message);
         const remediations: Record<string, string[]> = {
           market: [
             "Conduct a detailed UK competitor analysis with differentiation matrix",
@@ -11304,7 +11304,7 @@ Return a JSON object with:
 - strengths: Array of strength statements
 - recommendations: Array of improvement recommendations`;
 
-      // Use Gemini with 4-key rotation
+      // Use Qwen
       try {
         const jsonPrompt = `${systemPrompt}\n\nDocuments:\n${combinedContent.slice(0, 15000)}\n\nRespond ONLY with valid JSON, no markdown formatting.`;
         const responseText = await callAI(jsonPrompt);
@@ -11312,7 +11312,7 @@ Return a JSON object with:
         const result = JSON.parse(cleanedResponse);
         res.json(result);
       } catch (error: any) {
-        console.log("Gemini failed for document scan:", error?.message);
+        console.log("Qwen failed for document scan:", error?.message);
         // Fallback response with simulated analysis
         res.json({
           overallScore: Math.floor(Math.random() * 25) + 55,

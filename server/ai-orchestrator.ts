@@ -126,7 +126,7 @@ export async function orchestrateChat(
       if (!action) {
         return {
           response: `I tried to perform an action but encountered an error. Please try rephrasing your request.`,
-          provider: "GPT-4o Orchestrator"
+          provider: "Qwen Orchestrator"
         };
       }
 
@@ -149,7 +149,7 @@ export async function orchestrateChat(
 
         return {
           response: `⚠️ **Confirmation Required**\n\n${confirmDetails?.message}\n\nClick "Confirm" to proceed or "Cancel" to abort.`,
-          provider: "GPT-4o Orchestrator",
+          provider: "Qwen Orchestrator",
           pendingConfirmation: {
             id: confirmation.id,
             actionType: functionName,
@@ -177,7 +177,7 @@ export async function orchestrateChat(
 
       return {
         response: finalResponse,
-        provider: "GPT-4o Orchestrator",
+        provider: "Qwen Orchestrator",
         actionExecuted: functionName,
         actionResult
       };
@@ -186,7 +186,7 @@ export async function orchestrateChat(
     // No function call - return regular response
     return {
       response: message?.content || "I apologize, I couldn't process your request. Please try again.",
-      provider: "GPT-4o Orchestrator"
+      provider: "Qwen Orchestrator"
     };
 
   } catch (error: any) {

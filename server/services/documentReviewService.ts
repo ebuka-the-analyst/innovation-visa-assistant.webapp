@@ -95,7 +95,7 @@ export async function processDocumentReview(reviewId: string) {
         strengthsFound: analysis.strengths,
         weaknessesFound: analysis.weaknesses,
         suggestions: analysis.suggestions,
-        aiProvider: 'gemini'
+        aiProvider: 'qwen'
       })
       .where(eq(documentReviews.id, reviewId));
 
