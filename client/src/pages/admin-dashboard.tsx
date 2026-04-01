@@ -2304,7 +2304,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <Shield className="h-16 w-16 text-muted-foreground mx-auto mb-1" />
-          <h2 className="text-xl font-semibold mb-0.5">Admin Access Required</h2>
+          <h2 className="text-xs font-semibold mb-0.5">Admin Access Required</h2>
           <p className="text-muted-foreground mb-1">Redirecting to home page...</p>
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
         </div>
@@ -2312,7 +2312,7 @@ export default function AdminDashboard() {
     );
   }
 
-  const rowSpacing = dataDensity === 'compact' ? 'py-2' : dataDensity === 'comfortable' ? 'py-3' : 'py-1';
+  const rowSpacing = dataDensity === 'compact' ? 'py-0.5' : dataDensity === 'comfortable' ? 'py-1' : 'py-0.5';
 
   const sidebarStyle = {
     "--sidebar-width": "18rem",
@@ -3036,7 +3036,7 @@ export default function AdminDashboard() {
                                     <Badge variant="outline" className="text-green-500 border-green-500/30">On Track</Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-1.5">
+                                <CardContent className="p-2 space-y-1">
                                   <div className="flex items-end justify-between">
                                     <div>
                                       <p className="text-[9px] font-bold">{filteredOverviewData?.kpiMetrics?.[0]?.value || 0}</p>
@@ -3047,8 +3047,8 @@ export default function AdminDashboard() {
                                       <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={Math.min(((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 50) * 100, 100)} className="h-3" />
-                                  <div className="flex items-center justify-between text-sm">
+                                  <Progress value={Math.min(((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 50) * 100, 100)} className="h-1" />
+                                  <div className="flex items-center justify-between text-[9px]">
                                     <span className="text-muted-foreground">Progress</span>
                                     <span className="text-[9px] font-medium text-green-500">{Math.round(((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 50) * 100)}%</span>
                                   </div>
@@ -3075,7 +3075,7 @@ export default function AdminDashboard() {
                                     </Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-1.5">
+                                <CardContent className="p-2 space-y-1">
                                   <div className="flex items-end justify-between">
                                     <div>
                                       <p className="text-[9px] font-bold">{overviewData.extendedKPIs?.planCompletionRate || 0}%</p>
@@ -3086,8 +3086,8 @@ export default function AdminDashboard() {
                                       <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={overviewData.extendedKPIs?.planCompletionRate || 0} className="h-3" />
-                                  <div className="flex items-center justify-between text-sm">
+                                  <Progress value={overviewData.extendedKPIs?.planCompletionRate || 0} className="h-1" />
+                                  <div className="flex items-center justify-between text-[9px]">
                                     <span className="text-muted-foreground">vs Target</span>
                                     <span className={`font-medium ${
                                       (overviewData.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'text-green-500' : 'text-amber-500'
@@ -3116,7 +3116,7 @@ export default function AdminDashboard() {
                                     </Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-1.5">
+                                <CardContent className="p-2 space-y-1">
                                   <div className="flex items-end justify-between">
                                     <div>
                                       <p className="text-[9px] font-bold">£{(overviewData.extendedKPIs?.monthlyRevenue || 0).toLocaleString()}</p>
@@ -3127,8 +3127,8 @@ export default function AdminDashboard() {
                                       <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={Math.min(((overviewData.extendedKPIs?.monthlyRevenue || 0) / (overviewData.extendedKPIs?.revenueTarget || 2000)) * 100, 100)} className="h-3" />
-                                  <div className="flex items-center justify-between text-sm">
+                                  <Progress value={Math.min(((overviewData.extendedKPIs?.monthlyRevenue || 0) / (overviewData.extendedKPIs?.revenueTarget || 2000)) * 100, 100)} className="h-1" />
+                                  <div className="flex items-center justify-between text-[9px]">
                                     <span className="text-muted-foreground">vs Target</span>
                                     <span className={`font-medium ${
                                       (overviewData.extendedKPIs?.monthlyRevenue || 0) >= (overviewData.extendedKPIs?.revenueTarget || 2000) ? 'text-green-500' : 'text-amber-500'
@@ -3151,7 +3151,7 @@ export default function AdminDashboard() {
                                     <Badge variant="outline" className="text-green-500 border-green-500/30">Strong</Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-1.5">
+                                <CardContent className="p-2 space-y-1">
                                   <div className="flex items-end justify-between">
                                     <div>
                                       <p className="text-[9px] font-bold">{overviewData.kpiMetrics?.[1]?.value || 0}</p>
@@ -3162,8 +3162,8 @@ export default function AdminDashboard() {
                                       <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={Math.min(((overviewData.kpiMetrics?.[1]?.value || 0) / 25) * 100, 100)} className="h-3" />
-                                  <div className="flex items-center justify-between text-sm">
+                                  <Progress value={Math.min(((overviewData.kpiMetrics?.[1]?.value || 0) / 25) * 100, 100)} className="h-1" />
+                                  <div className="flex items-center justify-between text-[9px]">
                                     <span className="text-muted-foreground">Engagement</span>
                                     <span className="text-[9px] font-medium text-green-500">{Math.round(((filteredOverviewData?.kpiMetrics?.[1]?.value || 0) / (filteredOverviewData?.kpiMetrics?.[0]?.value || 1)) * 100)}% of users</span>
                                   </div>
@@ -3190,7 +3190,7 @@ export default function AdminDashboard() {
                                     </Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-1.5">
+                                <CardContent className="p-2 space-y-1">
                                   <div className="flex items-end justify-between">
                                     <div>
                                       <p className="text-[9px] font-bold">{overviewData.extendedKPIs?.toolAdoptionRate || 0}%</p>
@@ -3201,8 +3201,8 @@ export default function AdminDashboard() {
                                       <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={overviewData.extendedKPIs?.toolAdoptionRate || 0} className="h-3" />
-                                  <div className="flex items-center justify-between text-sm">
+                                  <Progress value={overviewData.extendedKPIs?.toolAdoptionRate || 0} className="h-1" />
+                                  <div className="flex items-center justify-between text-[9px]">
                                     <span className="text-muted-foreground">Avg tools/user</span>
                                     <span className="text-[9px] font-medium text-blue-500">{overviewData.extendedKPIs?.avgToolsPerUser || 0} tools</span>
                                   </div>
@@ -3229,7 +3229,7 @@ export default function AdminDashboard() {
                                     </Badge>
                                   </div>
                                 </CardHeader>
-                                <CardContent className="space-y-1.5">
+                                <CardContent className="p-2 space-y-1">
                                   <div className="flex items-end justify-between">
                                     <div>
                                       <p className="text-[9px] font-bold">{Math.round(((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100)}%</p>
@@ -3240,8 +3240,8 @@ export default function AdminDashboard() {
                                       <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={Math.min(((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100, 100)} className="h-3" />
-                                  <div className="flex items-center justify-between text-sm">
+                                  <Progress value={Math.min(((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100, 100)} className="h-1" />
+                                  <div className="flex items-center justify-between text-[9px]">
                                     <span className="text-muted-foreground">Active users</span>
                                     <span className="text-[9px] font-medium text-blue-500">{overviewData.extendedKPIs?.dailyActiveUsers || 0} of {filteredOverviewData?.kpiMetrics?.[0]?.value || 0}</span>
                                   </div>
@@ -3255,7 +3255,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <Target className="h-3 w-3 text-primary" />
                                     Quarterly Strategic Goals
                                   </CardTitle>
@@ -3270,13 +3270,13 @@ export default function AdminDashboard() {
                                 <div className="p-4 rounded-lg border bg-muted/30">
                                   <div className="flex items-start justify-between mb-0.5">
                                     <div>
-                                      <h4 className="font-semibold">Reach 100 Active Users</h4>
+                                      <h4 className="text-[10px] font-semibold">Reach 100 Active Users</h4>
                                       <p className="text-[9px] text-muted-foreground">Grow user base through organic marketing and referrals</p>
                                     </div>
                                     <Badge variant="secondary">{filteredOverviewData?.kpiMetrics?.[0]?.value || 0}/100</Badge>
                                   </div>
-                                  <Progress value={((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 100) * 100} className="h-2" />
-                                  <div className="flex items-center justify-between mt-0.5 text-sm">
+                                  <Progress value={((filteredOverviewData?.kpiMetrics?.[0]?.value || 0) / 100) * 100} className="h-1" />
+                                  <div className="flex items-center justify-between mt-0.5 text-[9px]">
                                     <span className="text-muted-foreground">Due: Dec 31, 2025</span>
                                     <span className="text-primary font-medium">{((filteredOverviewData?.kpiMetrics?.[0]?.value || 0))}% complete</span>
                                   </div>
@@ -3286,13 +3286,13 @@ export default function AdminDashboard() {
                                 <div className="p-4 rounded-lg border bg-muted/30">
                                   <div className="flex items-start justify-between mb-0.5">
                                     <div>
-                                      <h4 className="font-semibold">£5,000 Monthly Recurring Revenue</h4>
+                                      <h4 className="text-[10px] font-semibold">£5,000 Monthly Recurring Revenue</h4>
                                       <p className="text-[9px] text-muted-foreground">Scale premium tier conversions</p>
                                     </div>
                                     <Badge variant="secondary">£{(overviewData.extendedKPIs?.monthlyRevenue || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/£5,000</Badge>
                                   </div>
-                                  <Progress value={Math.min(((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100, 100)} className="h-2" />
-                                  <div className="flex items-center justify-between mt-0.5 text-sm">
+                                  <Progress value={Math.min(((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100, 100)} className="h-1" />
+                                  <div className="flex items-center justify-between mt-0.5 text-[9px]">
                                     <span className="text-muted-foreground">Due: Dec 31, 2025</span>
                                     <span className={`font-medium ${((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100 >= 75 ? 'text-green-500' : ((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100 >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
                                       {Math.round(((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100)}% complete
@@ -3304,13 +3304,13 @@ export default function AdminDashboard() {
                                 <div className="p-4 rounded-lg border bg-muted/30">
                                   <div className="flex items-start justify-between mb-0.5">
                                     <div>
-                                      <h4 className="font-semibold">75% Plan Completion Rate</h4>
+                                      <h4 className="text-[10px] font-semibold">75% Plan Completion Rate</h4>
                                       <p className="text-[9px] text-muted-foreground">Improve user journey and tool guidance</p>
                                     </div>
                                     <Badge variant="secondary">{overviewData.extendedKPIs?.planCompletionRate || 0}%/75%</Badge>
                                   </div>
-                                  <Progress value={Math.min(((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100, 100)} className="h-2" />
-                                  <div className="flex items-center justify-between mt-0.5 text-sm">
+                                  <Progress value={Math.min(((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100, 100)} className="h-1" />
+                                  <div className="flex items-center justify-between mt-0.5 text-[9px]">
                                     <span className="text-muted-foreground">Due: Dec 31, 2025</span>
                                     <span className={`font-medium ${((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100 >= 75 ? 'text-green-500' : ((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100 >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
                                       {Math.round(((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100)}% complete
@@ -3363,39 +3363,39 @@ export default function AdminDashboard() {
                               <CardContent>
                                 <div className="space-y-1.5">
                                   <div className="flex items-center gap-1.5">
-                                    <div className="w-24 text-sm font-medium">Free</div>
+                                    <div className="w-24 text-[9px] font-medium">Free</div>
                                     <div className="flex-1">
                                       <Progress value={100} className="h-6" />
                                     </div>
-                                    <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Free')?.count || 0}</div>
+                                    <div className="w-16 text-right text-[9px]">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Free')?.count || 0}</div>
                                   </div>
                                   <div className="flex items-center gap-1.5">
-                                    <div className="w-24 text-sm font-medium">Basic</div>
+                                    <div className="w-24 text-[9px] font-medium">Basic</div>
                                     <div className="flex-1">
                                       <Progress value={60} className="h-6" />
                                     </div>
-                                    <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Basic')?.count || 0}</div>
+                                    <div className="w-16 text-right text-[9px]">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Basic')?.count || 0}</div>
                                   </div>
                                   <div className="flex items-center gap-1.5">
-                                    <div className="w-24 text-sm font-medium">Premium</div>
+                                    <div className="w-24 text-[9px] font-medium">Premium</div>
                                     <div className="flex-1">
                                       <Progress value={40} className="h-6" />
                                     </div>
-                                    <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Premium')?.count || 0}</div>
+                                    <div className="w-16 text-right text-[9px]">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Premium')?.count || 0}</div>
                                   </div>
                                   <div className="flex items-center gap-1.5">
-                                    <div className="w-24 text-sm font-medium">Enterprise</div>
+                                    <div className="w-24 text-[9px] font-medium">Enterprise</div>
                                     <div className="flex-1">
                                       <Progress value={20} className="h-6" />
                                     </div>
-                                    <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Enterprise')?.count || 0}</div>
+                                    <div className="w-16 text-right text-[9px]">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Enterprise')?.count || 0}</div>
                                   </div>
                                   <div className="flex items-center gap-1.5">
-                                    <div className="w-24 text-sm font-medium">Ultimate</div>
+                                    <div className="w-24 text-[9px] font-medium">Ultimate</div>
                                     <div className="flex-1">
                                       <Progress value={10} className="h-6" />
                                     </div>
-                                    <div className="w-16 text-right text-sm">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Ultimate')?.count || 0}</div>
+                                    <div className="w-16 text-right text-[9px]">{filteredOverviewData?.subscriptionDistribution?.find(s => s.tier === 'Ultimate')?.count || 0}</div>
                                   </div>
                                 </div>
                               </CardContent>
@@ -3405,7 +3405,7 @@ export default function AdminDashboard() {
                           {/* Key Insights */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <Lightbulb className="h-3 w-3 text-amber-500" />
                                 Key Performance Insights
                               </CardTitle>
@@ -3553,7 +3553,7 @@ export default function AdminDashboard() {
                                           </Badge>
                                         </div>
                                         
-                                        <div className="flex items-center justify-between text-sm">
+                                        <div className="flex items-center justify-between text-[9px]">
                                           <span className="text-muted-foreground">Conversion from previous stage</span>
                                           <span className={`font-bold ${
                                             parseFloat(conversionRate) >= 100 ? 'text-green-500' :
@@ -3589,7 +3589,7 @@ export default function AdminDashboard() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.5 }}
                               >
-                                <p className="text-lg font-bold text-green-500">+{usersAnalytics?.growthRate?.daily || 5.2}%</p>
+                                <p className="text-xs font-bold text-green-500">+{usersAnalytics?.growthRate?.daily || 5.2}%</p>
                                 <p className="text-[9px] text-muted-foreground">Daily Growth</p>
                               </motion.div>
                               <motion.div 
@@ -3598,7 +3598,7 @@ export default function AdminDashboard() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.6 }}
                               >
-                                <p className="text-lg font-bold text-blue-500">+{usersAnalytics?.growthRate?.weekly || 12.8}%</p>
+                                <p className="text-xs font-bold text-blue-500">+{usersAnalytics?.growthRate?.weekly || 12.8}%</p>
                                 <p className="text-[9px] text-muted-foreground">Weekly Growth</p>
                               </motion.div>
                               <motion.div 
@@ -3607,7 +3607,7 @@ export default function AdminDashboard() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.7 }}
                               >
-                                <p className="text-lg font-bold text-purple-500">+{usersAnalytics?.growthRate?.monthly || 28.5}%</p>
+                                <p className="text-xs font-bold text-purple-500">+{usersAnalytics?.growthRate?.monthly || 28.5}%</p>
                                 <p className="text-[9px] text-muted-foreground">Monthly Growth</p>
                               </motion.div>
                               <motion.div 
@@ -3616,7 +3616,7 @@ export default function AdminDashboard() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.8 }}
                               >
-                                <p className="text-lg font-bold text-amber-500">{((activeUsers / totalUsers) * 100).toFixed(1)}%</p>
+                                <p className="text-xs font-bold text-amber-500">{((activeUsers / totalUsers) * 100).toFixed(1)}%</p>
                                 <p className="text-[9px] text-muted-foreground">Activation Rate</p>
                               </motion.div>
                             </div>
@@ -3745,7 +3745,7 @@ export default function AdminDashboard() {
                               <div key={item.country} className="p-1.5 rounded-lg bg-muted/50">
                                 <div className="flex items-center gap-1 mb-0.5">
                                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
-                                  <span className="font-medium text-sm">{item.country}</span>
+                                  <span className="font-medium text-[9px]">{item.country}</span>
                                 </div>
                                 <p className="text-[9px] font-bold">{item.users}</p>
                                 <p className="text-[9px] text-muted-foreground">
@@ -3769,7 +3769,7 @@ export default function AdminDashboard() {
                 {activeSection === 'users-churn' && (
                   <Card data-testid="card-churn-analysis">
                     <CardHeader className="p-2 pb-1">
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                         <UserX className="h-3 w-3 text-red-500" />
                         Churn Risk Analysis
                       </CardTitle>
@@ -3784,7 +3784,7 @@ export default function AdminDashboard() {
                               <UserX className="h-3 w-3 text-red-500" />
                               <span className="text-[9px] font-medium">At-Risk Users</span>
                             </div>
-                            <p className="text-lg font-bold text-red-500">
+                            <p className="text-xs font-bold text-red-500">
                               {usersData?.users?.filter(u => {
                                 const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
                                 const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
@@ -3798,7 +3798,7 @@ export default function AdminDashboard() {
                               <AlertTriangle className="h-3 w-3 text-amber-500" />
                               <span className="text-[9px] font-medium">Churned Users</span>
                             </div>
-                            <p className="text-lg font-bold text-amber-500">
+                            <p className="text-xs font-bold text-amber-500">
                               {usersData?.users?.filter(u => {
                                 const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
                                 const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
@@ -3812,7 +3812,7 @@ export default function AdminDashboard() {
                               <UserCheck className="h-3 w-3 text-green-500" />
                               <span className="text-[9px] font-medium">Active Users</span>
                             </div>
-                            <p className="text-lg font-bold text-green-500">
+                            <p className="text-xs font-bold text-green-500">
                               {usersData?.users?.filter(u => {
                                 const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
                                 const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
@@ -3826,7 +3826,7 @@ export default function AdminDashboard() {
                               <Target className="h-3 w-3 text-blue-500" />
                               <span className="text-[9px] font-medium">Retention Rate</span>
                             </div>
-                            <p className="text-lg font-bold text-blue-500">
+                            <p className="text-xs font-bold text-blue-500">
                               {usersData?.users?.length ? 
                                 ((usersData.users.filter(u => {
                                   const lastActivity = u.updatedAt ? new Date(u.updatedAt) : new Date(u.createdAt);
@@ -3840,7 +3840,7 @@ export default function AdminDashboard() {
 
                         {/* At-Risk Users List */}
                         <div className="space-y-1.5">
-                          <h4 className="font-medium flex items-center gap-2">
+                          <h4 className="text-[10px] font-medium flex items-center gap-1">
                             <AlertCircle className="h-3 w-3 text-amber-500" />
                             Users Requiring Attention
                           </h4>
@@ -3854,7 +3854,7 @@ export default function AdminDashboard() {
                               const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
                               const riskLevel = daysSinceActivity > 30 ? 'high' : daysSinceActivity > 14 ? 'medium' : 'low';
                               return (
-                                <div key={user.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover-elevate">
+                                <div key={user.id} className="flex items-center justify-between p-1 rounded-lg border bg-card hover-elevate">
                                   <div className="flex items-center gap-1.5">
                                     <div className={`w-2 h-2 rounded-full ${riskLevel === 'high' ? 'bg-red-500' : riskLevel === 'medium' ? 'bg-amber-500' : 'bg-yellow-500'}`} />
                                     <div>
@@ -4022,7 +4022,7 @@ export default function AdminDashboard() {
                         </DropdownMenu>
 
                         {/* Search */}
-                        <div className="relative w-64">
+                        <div className="relative w-40">
                           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
                           <Input
                             placeholder="Search users..."
@@ -4857,7 +4857,7 @@ export default function AdminDashboard() {
                                         <p className="text-[9px] font-bold">{stat.value}</p>
                                         <Badge className={`mt-2 bg-${stat.color}-500/10 text-${stat.color}-500`}>{stat.change}</Badge>
                                       </div>
-                                      <stat.icon className={`h-10 w-10 text-${stat.color}-500 opacity-50`} />
+                                      <stat.icon className={`h-5 w-5 text-${stat.color}-500 opacity-50`} />
                                     </div>
                                   </CardContent>
                                 </Card>
@@ -5079,7 +5079,7 @@ export default function AdminDashboard() {
                                     transition={{ delay: dayIndex * 0.08 }}
                                     className="flex items-center gap-1.5"
                                   >
-                                    <span className="w-24 text-sm font-medium">{day}</span>
+                                    <span className="w-24 text-[9px] font-medium">{day}</span>
                                     <div className="flex-1 grid grid-cols-6 gap-2">
                                       {['Early Morning', 'Morning', 'Midday', 'Afternoon', 'Evening', 'Night'].map((period, periodIndex) => {
                                         const intensity = Math.random() * 100;
@@ -5104,7 +5104,7 @@ export default function AdminDashboard() {
                                   </motion.div>
                                 ))}
                                 <div className="flex items-center gap-4 pt-4 border-t">
-                                  <span className="w-24 text-sm text-muted-foreground">Legend:</span>
+                                  <span className="w-24 text-[9px] text-muted-foreground">Legend:</span>
                                   <div className="flex items-center gap-2">
                                     {['Low', 'Medium', 'High', 'Peak'].map((level, i) => (
                                       <div key={level} className="flex items-center gap-1">
@@ -5128,7 +5128,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <Zap className="h-3 w-3 text-amber-500" />
                                     Tool Leaderboard
                                   </CardTitle>
@@ -5177,7 +5177,7 @@ export default function AdminDashboard() {
                                         transition={{ delay: index * 0.05 }}
                                         className="flex items-center gap-4 p-3 rounded-lg border border-border/50 hover-elevate"
                                       >
-                                        <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-white ${
+                                        <div className={`flex items-center justify-center w-5 h-5 rounded-full font-bold text-white ${
                                           index === 0 ? 'bg-amber-500' :
                                           index === 1 ? 'bg-gray-400' :
                                           index === 2 ? 'bg-amber-700' : 'bg-muted text-muted-foreground'
@@ -5328,7 +5328,7 @@ export default function AdminDashboard() {
                                     <div className="flex items-center justify-between">
                                       <div>
                                         <p className="text-[9px] text-muted-foreground">{metric.label}</p>
-                                        <p className="text-xl font-bold mt-1">{metric.value}</p>
+                                        <p className="text-xs font-bold mt-1">{metric.value}</p>
                                         <Badge className={`mt-2 bg-green-500/10 text-green-500`}>{metric.change}</Badge>
                                       </div>
                                       <div className={`p-3 rounded-xl bg-${metric.color}-500/10`}>
@@ -5365,7 +5365,7 @@ export default function AdminDashboard() {
                                     className="flex items-center gap-1.5"
                                   >
                                     <div className="w-48">
-                                      <p className="font-medium text-sm">{item.stage}</p>
+                                      <p className="font-medium text-[9px]">{item.stage}</p>
                                       <p className="text-[9px] text-muted-foreground">{item.users} users</p>
                                     </div>
                                     <div className="flex-1 relative h-8 rounded-lg overflow-hidden bg-muted/30">
@@ -5376,7 +5376,7 @@ export default function AdminDashboard() {
                                         animate={{ width: `${item.percent}%` }}
                                         transition={{ delay: index * 0.1 + 0.3, duration: 0.8 }}
                                       >
-                                        <span className="text-white text-sm font-bold">{item.percent}%</span>
+                                        <span className="text-white text-[9px] font-bold">{item.percent}%</span>
                                       </motion.div>
                                     </div>
                                   </motion.div>
@@ -5408,7 +5408,7 @@ export default function AdminDashboard() {
                                       transition={{ delay: index * 0.1 }}
                                       className="flex items-center gap-1.5"
                                     >
-                                      <span className="w-32 text-sm font-medium">{item.feature}</span>
+                                      <span className="w-32 text-[9px] font-medium">{item.feature}</span>
                                       <div className="flex-1 h-4 rounded-full bg-muted overflow-hidden">
                                         <motion.div
                                           className="h-full rounded-full"
@@ -5418,7 +5418,7 @@ export default function AdminDashboard() {
                                           transition={{ delay: index * 0.1 + 0.2, duration: 0.6 }}
                                         />
                                       </div>
-                                      <span className="w-12 text-sm font-bold text-right">{item.engagement}%</span>
+                                      <span className="w-12 text-[9px] font-bold text-right">{item.engagement}%</span>
                                     </motion.div>
                                   ))}
                                 </div>
@@ -5538,7 +5538,7 @@ export default function AdminDashboard() {
                                     className="p-4 rounded-lg border border-border/50 hover-elevate"
                                   >
                                     <div className="flex items-center justify-between mb-0.5">
-                                      <span className="font-medium text-sm">{item.tool}</span>
+                                      <span className="font-medium text-[9px]">{item.tool}</span>
                                       <Badge className={
                                         item.rate >= 80 ? 'bg-green-500' :
                                         item.rate >= 50 ? 'bg-amber-500' : 'bg-red-500'
@@ -5593,7 +5593,7 @@ export default function AdminDashboard() {
                                       <span className="text-[9px] text-muted-foreground">Complete</span>
                                     </div>
                                   </div>
-                                  <div className="flex gap-4 mt-1 text-sm">
+                                  <div className="flex gap-4 mt-1 text-[9px]">
                                     <div className="text-center">
                                       <p className="font-bold text-green-500">{overviewData.extendedKPIs?.completedPlans || 0}</p>
                                       <p className="text-[9px] text-muted-foreground">Completed</p>
@@ -5632,7 +5632,7 @@ export default function AdminDashboard() {
                                     >
                                       <CheckCircle2 className={`h-3 w-3 ${item.color === 'green' ? 'text-green-500' : 'text-blue-500'}`} />
                                       <div className="flex-1">
-                                        <p className="font-medium text-sm">{item.stage}</p>
+                                        <p className="font-medium text-[9px]">{item.stage}</p>
                                       </div>
                                       <Badge className={`${item.color === 'green' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}`}>{item.count}</Badge>
                                     </motion.div>
@@ -5689,7 +5689,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <div className="text-center">
                                     <p className="text-[9px] text-muted-foreground">Health Score</p>
-                                    <p className="text-lg font-bold text-green-500">{systemMetrics?.healthScore || 98}/100</p>
+                                    <p className="text-xs font-bold text-green-500">{systemMetrics?.healthScore || 98}/100</p>
                                   </div>
                                   <Badge className="bg-green-500 text-white px-4 py-2">
                                     <CheckCircle className="h-3 w-3 mr-1" />
@@ -5723,7 +5723,7 @@ export default function AdminDashboard() {
                                         {service.status}
                                       </Badge>
                                     </div>
-                                    <h3 className="font-semibold">{service.name}</h3>
+                                    <h3 className="text-[10px] font-semibold">{service.name}</h3>
                                     <p className="text-[9px] text-muted-foreground">Uptime: {service.uptime}</p>
                                   </CardContent>
                                 </Card>
@@ -5735,32 +5735,32 @@ export default function AdminDashboard() {
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <Cpu className="h-3 w-3 text-blue-500" />
                                   CPU Usage
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-center mb-1">
+                                <div className="text-xs font-bold text-center mb-1">
                                   {Math.min(100, Math.round(((systemMetrics?.cpu?.user || 0) + (systemMetrics?.cpu?.system || 0)) / 10000) || 35)}%
                                 </div>
-                                <Progress value={Math.min(100, Math.round(((systemMetrics?.cpu?.user || 0) + (systemMetrics?.cpu?.system || 0)) / 10000) || 35)} className="h-3" />
+                                <Progress value={Math.min(100, Math.round(((systemMetrics?.cpu?.user || 0) + (systemMetrics?.cpu?.system || 0)) / 10000) || 35)} className="h-1" />
                                 <p className="text-[9px] text-muted-foreground text-center mt-0.5">Normal load</p>
                               </CardContent>
                             </Card>
 
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <HardDrive className="h-3 w-3 text-purple-500" />
                                   Memory
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-center mb-1">
+                                <div className="text-xs font-bold text-center mb-1">
                                   {systemMetrics?.memory?.heapUsed || 256} MB
                                 </div>
-                                <Progress value={systemMetrics?.memory?.percentage || 62} className="h-3" />
+                                <Progress value={systemMetrics?.memory?.percentage || 62} className="h-1" />
                                 <p className="text-[9px] text-muted-foreground text-center mt-0.5">
                                   {systemMetrics?.memory?.heapUsed || 256} / {systemMetrics?.memory?.heapTotal || 512} MB
                                 </p>
@@ -5769,16 +5769,16 @@ export default function AdminDashboard() {
 
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <Activity className="h-3 w-3 text-green-500" />
                                   Active Connections
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-center mb-1">
+                                <div className="text-xs font-bold text-center mb-1">
                                   {systemMetrics?.database?.connections || 12}
                                 </div>
-                                <Progress value={((systemMetrics?.database?.connections || 12) / (systemMetrics?.database?.maxConnections || 100)) * 100} className="h-3" />
+                                <Progress value={((systemMetrics?.database?.connections || 12) / (systemMetrics?.database?.maxConnections || 100)) * 100} className="h-1" />
                                 <p className="text-[9px] text-muted-foreground text-center mt-0.5">of {systemMetrics?.database?.maxConnections || 100} max</p>
                               </CardContent>
                             </Card>
@@ -5787,7 +5787,7 @@ export default function AdminDashboard() {
                           {/* Admin Actions */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <Settings className="h-3 w-3" />
                                 Quick Actions
                               </CardTitle>
@@ -5836,7 +5836,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Performance Grade</p>
-                                    <p className="text-lg font-bold text-blue-500">A+ (Excellent)</p>
+                                    <p className="text-xs font-bold text-blue-500">A+ (Excellent)</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1.5">
@@ -5968,7 +5968,7 @@ export default function AdminDashboard() {
                                     className={`text-center p-4 rounded-lg border border-${item.color}-500/30 bg-${item.color}-500/5`}
                                   >
                                     <p className="text-[9px] text-muted-foreground mb-1">{item.percentile}</p>
-                                    <p className={`text-lg font-bold text-${item.color}-500`}>{item.value}ms</p>
+                                    <p className={`text-xs font-bold text-${item.color}-500`}>{item.value}ms</p>
                                   </motion.div>
                                 ))}
                               </div>
@@ -5990,7 +5990,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Core Web Vitals Monitoring</p>
-                                    <p className="text-lg font-bold text-green-500">
+                                    <p className="text-xs font-bold text-green-500">
                                       {webVitalsData?.totalSamples || 0} Samples Collected
                                     </p>
                                   </div>
@@ -6008,7 +6008,7 @@ export default function AdminDashboard() {
                             {/* LCP - Largest Contentful Paint */}
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-blue-500" />
                                   LCP (Largest Contentful Paint)
                                 </CardTitle>
@@ -6016,7 +6016,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center mb-1">
-                                  <p className={`text-2xl font-bold ${
+                                  <p className={`text-xs font-bold ${
                                     (webVitalsData?.averages?.lcp || 0) < 2500 ? 'text-green-500' :
                                     (webVitalsData?.averages?.lcp || 0) < 4000 ? 'text-yellow-500' : 'text-red-500'
                                   }`}>
@@ -6026,17 +6026,17 @@ export default function AdminDashboard() {
                                 </div>
                                 {webVitalsData?.ratings?.lcp && (
                                   <div className="space-y-0.5">
-                                    <div className="flex justify-between text-sm">
+                                    <div className="flex justify-between text-[9px]">
                                       <span className="text-green-500">Good</span>
                                       <span>{webVitalsData.ratings.lcp.good || 0}%</span>
                                     </div>
                                     <Progress value={webVitalsData.ratings.lcp.good || 0} className="h-2 bg-green-100" />
-                                    <div className="flex justify-between text-sm">
+                                    <div className="flex justify-between text-[9px]">
                                       <span className="text-yellow-500">Needs Work</span>
                                       <span>{webVitalsData.ratings.lcp.needsImprovement || 0}%</span>
                                     </div>
                                     <Progress value={webVitalsData.ratings.lcp.needsImprovement || 0} className="h-2 bg-yellow-100" />
-                                    <div className="flex justify-between text-sm">
+                                    <div className="flex justify-between text-[9px]">
                                       <span className="text-red-500">Poor</span>
                                       <span>{webVitalsData.ratings.lcp.poor || 0}%</span>
                                     </div>
@@ -6049,7 +6049,7 @@ export default function AdminDashboard() {
                             {/* FID - First Input Delay */}
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-purple-500" />
                                   FID (First Input Delay)
                                 </CardTitle>
@@ -6057,7 +6057,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center mb-1">
-                                  <p className={`text-2xl font-bold ${
+                                  <p className={`text-xs font-bold ${
                                     (webVitalsData?.averages?.fid || 0) < 100 ? 'text-green-500' :
                                     (webVitalsData?.averages?.fid || 0) < 300 ? 'text-yellow-500' : 'text-red-500'
                                   }`}>
@@ -6067,17 +6067,17 @@ export default function AdminDashboard() {
                                 </div>
                                 {webVitalsData?.ratings?.fid && (
                                   <div className="space-y-0.5">
-                                    <div className="flex justify-between text-sm">
+                                    <div className="flex justify-between text-[9px]">
                                       <span className="text-green-500">Good</span>
                                       <span>{webVitalsData.ratings.fid.good || 0}%</span>
                                     </div>
                                     <Progress value={webVitalsData.ratings.fid.good || 0} className="h-2 bg-green-100" />
-                                    <div className="flex justify-between text-sm">
+                                    <div className="flex justify-between text-[9px]">
                                       <span className="text-yellow-500">Needs Work</span>
                                       <span>{webVitalsData.ratings.fid.needsImprovement || 0}%</span>
                                     </div>
                                     <Progress value={webVitalsData.ratings.fid.needsImprovement || 0} className="h-2 bg-yellow-100" />
-                                    <div className="flex justify-between text-sm">
+                                    <div className="flex justify-between text-[9px]">
                                       <span className="text-red-500">Poor</span>
                                       <span>{webVitalsData.ratings.fid.poor || 0}%</span>
                                     </div>
@@ -6090,7 +6090,7 @@ export default function AdminDashboard() {
                             {/* CLS - Cumulative Layout Shift */}
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-orange-500" />
                                   CLS (Cumulative Layout Shift)
                                 </CardTitle>
@@ -6098,7 +6098,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center mb-1">
-                                  <p className={`text-2xl font-bold ${
+                                  <p className={`text-xs font-bold ${
                                     (webVitalsData?.averages?.cls || 0) < 100 ? 'text-green-500' :
                                     (webVitalsData?.averages?.cls || 0) < 250 ? 'text-yellow-500' : 'text-red-500'
                                   }`}>
@@ -6108,17 +6108,17 @@ export default function AdminDashboard() {
                                 </div>
                                 {webVitalsData?.ratings?.cls && (
                                   <div className="space-y-0.5">
-                                    <div className="flex justify-between text-sm">
+                                    <div className="flex justify-between text-[9px]">
                                       <span className="text-green-500">Good</span>
                                       <span>{webVitalsData.ratings.cls.good || 0}%</span>
                                     </div>
                                     <Progress value={webVitalsData.ratings.cls.good || 0} className="h-2 bg-green-100" />
-                                    <div className="flex justify-between text-sm">
+                                    <div className="flex justify-between text-[9px]">
                                       <span className="text-yellow-500">Needs Work</span>
                                       <span>{webVitalsData.ratings.cls.needsImprovement || 0}%</span>
                                     </div>
                                     <Progress value={webVitalsData.ratings.cls.needsImprovement || 0} className="h-2 bg-yellow-100" />
-                                    <div className="flex justify-between text-sm">
+                                    <div className="flex justify-between text-[9px]">
                                       <span className="text-red-500">Poor</span>
                                       <span>{webVitalsData.ratings.cls.poor || 0}%</span>
                                     </div>
@@ -6138,7 +6138,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center">
-                                  <p className={`text-xl font-bold ${
+                                  <p className={`text-xs font-bold ${
                                     (webVitalsData?.averages?.fcp || 0) < 1800 ? 'text-green-500' :
                                     (webVitalsData?.averages?.fcp || 0) < 3000 ? 'text-yellow-500' : 'text-red-500'
                                   }`}>
@@ -6156,7 +6156,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center">
-                                  <p className={`text-xl font-bold ${
+                                  <p className={`text-xs font-bold ${
                                     (webVitalsData?.averages?.ttfb || 0) < 800 ? 'text-green-500' :
                                     (webVitalsData?.averages?.ttfb || 0) < 1800 ? 'text-yellow-500' : 'text-red-500'
                                   }`}>
@@ -6174,7 +6174,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <div className="text-center">
-                                  <p className={`text-xl font-bold ${
+                                  <p className={`text-xs font-bold ${
                                     (webVitalsData?.averages?.inp || 0) < 200 ? 'text-green-500' :
                                     (webVitalsData?.averages?.inp || 0) < 500 ? 'text-yellow-500' : 'text-red-500'
                                   }`}>
@@ -6195,7 +6195,7 @@ export default function AdminDashboard() {
                               </CardHeader>
                               <CardContent>
                                 <div className="overflow-x-auto">
-                                  <table className="w-full text-sm">
+                                  <table className="w-full text-[9px]">
                                     <thead>
                                       <tr className="border-b">
                                         <th className="text-left p-2">Page</th>
@@ -6240,7 +6240,7 @@ export default function AdminDashboard() {
                                   {webVitalsData.byDevice.map((device, i) => (
                                     <div key={i} className="p-4 rounded-lg border text-center">
                                       <p className="text-xs font-semibold capitalize">{device.deviceType || 'Unknown'}</p>
-                                      <p className="text-xl font-bold mt-0.5">
+                                      <p className="text-xs font-bold mt-0.5">
                                         {device.avgLcp ? `${(device.avgLcp / 1000).toFixed(2)}s` : '--'}
                                       </p>
                                       <p className="text-[9px] text-muted-foreground">Avg LCP</p>
@@ -6257,7 +6257,7 @@ export default function AdminDashboard() {
                             <Card className="text-center py-1">
                               <CardContent>
                                 <Activity className="h-16 w-16 mx-auto text-muted-foreground mb-1" />
-                                <h3 className="text-xl font-semibold mb-0.5">No Performance Data Yet</h3>
+                                <h3 className="text-xs font-semibold mb-0.5">No Performance Data Yet</h3>
                                 <p className="text-muted-foreground max-w-md mx-auto">
                                   Performance metrics are automatically collected as users browse your site.
                                   Check back later to see real user performance data.
@@ -6288,7 +6288,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">PostgreSQL (Neon)</p>
-                                    <p className="text-lg font-bold text-purple-500">Connected & Healthy</p>
+                                    <p className="text-xs font-bold text-purple-500">Connected & Healthy</p>
                                   </div>
                                 </div>
                                 <Badge className="bg-green-500 text-white px-4 py-2">
@@ -6310,7 +6310,7 @@ export default function AdminDashboard() {
                                   <p className="text-[9px] font-bold">{systemMetrics?.database?.connections || 8}</p>
                                   <p className="text-[9px] text-muted-foreground">of {systemMetrics?.database?.maxConnections || 100} connections</p>
                                 </div>
-                                <Progress value={((systemMetrics?.database?.connections || 8) / (systemMetrics?.database?.maxConnections || 100)) * 100} className="h-3" />
+                                <Progress value={((systemMetrics?.database?.connections || 8) / (systemMetrics?.database?.maxConnections || 100)) * 100} className="h-1" />
                               </CardContent>
                             </Card>
 
@@ -6345,7 +6345,7 @@ export default function AdminDashboard() {
                                   <p className="text-[9px] font-bold">2.4</p>
                                   <p className="text-[9px] text-muted-foreground">GB used</p>
                                 </div>
-                                <Progress value={24} className="h-3" />
+                                <Progress value={24} className="h-1" />
                                 <p className="text-[9px] text-muted-foreground text-center mt-0.5">of 10 GB allocated</p>
                               </CardContent>
                             </Card>
@@ -6377,7 +6377,7 @@ export default function AdminDashboard() {
                                       <Database className="h-3 w-3 text-purple-500" />
                                       <span className="font-mono font-medium">{item.table}</span>
                                     </div>
-                                    <div className="flex items-center gap-6 text-sm">
+                                    <div className="flex items-center gap-6 text-[9px]">
                                       <span>{item.rows.toLocaleString()} rows</span>
                                       <span className="text-muted-foreground">{item.size}</span>
                                       <Badge className="bg-green-500/10 text-green-500">{item.growth}</Badge>
@@ -6403,7 +6403,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Total Storage Used</p>
-                                    <p className="text-[9px] font-bold">4.7 GB <span className="text-lg text-muted-foreground font-normal">of 50 GB</span></p>
+                                    <p className="text-[9px] font-bold">4.7 GB <span className="text-xs text-muted-foreground font-normal">of 50 GB</span></p>
                                   </div>
                                 </div>
                                 <div className="text-right">
@@ -6544,7 +6544,7 @@ export default function AdminDashboard() {
                                   </motion.div>
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">API Gateway</p>
-                                    <p className="text-lg font-bold text-cyan-500">All Endpoints Healthy</p>
+                                    <p className="text-xs font-bold text-cyan-500">All Endpoints Healthy</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1.5">
@@ -6617,7 +6617,7 @@ export default function AdminDashboard() {
                                       <div className={`w-2 h-2 rounded-full ${ep.status === 'healthy' ? 'bg-green-500' : 'bg-amber-500'}`} />
                                       <code className="text-[9px] font-mono">{ep.endpoint}</code>
                                     </div>
-                                    <div className="flex items-center gap-6 text-sm">
+                                    <div className="flex items-center gap-6 text-[9px]">
                                       <span>{ep.calls.toLocaleString()} calls</span>
                                       <span className={ep.latency > 500 ? 'text-amber-500' : 'text-green-500'}>{ep.latency}ms avg</span>
                                       <Badge className={ep.status === 'healthy' ? 'bg-green-500 text-white' : 'bg-amber-500 text-white'}>
@@ -6648,7 +6648,7 @@ export default function AdminDashboard() {
                                       <span className="font-medium">{item.tier}</span>
                                       <Badge variant="outline">{item.limit}</Badge>
                                     </div>
-                                    <Progress value={item.used} className="h-2" />
+                                    <Progress value={item.used} className="h-1" />
                                     <p className="text-[9px] text-muted-foreground mt-0.5">{item.used}% utilized</p>
                                   </div>
                                 ))}
@@ -6894,7 +6894,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <Target className="h-3 w-3 text-primary" />
                                     Revenue vs Target (Year 1)
                                   </CardTitle>
@@ -6932,18 +6932,18 @@ export default function AdminDashboard() {
                                       </div>
                                       <div className="p-1.5 rounded-lg bg-green-500/10 border border-green-500/20">
                                         <p className="text-[9px] text-muted-foreground">Actual Revenue</p>
-                                        <p className="text-lg font-bold text-green-500">£{actualRevenue.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                        <p className="text-xs font-bold text-green-500">£{actualRevenue.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                         <p className="text-xs text-muted-foreground mt-1">{daysSinceLaunch} days since launch</p>
                                       </div>
                                       <div className={`p-4 rounded-lg ${isAheadOfTarget ? 'bg-green-500/10 border-green-500/20' : 'bg-amber-500/10 border-amber-500/20'} border`}>
                                         <p className="text-[9px] text-muted-foreground">Projected ARR (based on MRR)</p>
-                                        <p className={`text-lg font-bold ${isAheadOfTarget ? 'text-green-500' : 'text-amber-500'}`}>£{projectedARR.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                        <p className={`text-xs font-bold ${isAheadOfTarget ? 'text-green-500' : 'text-amber-500'}`}>£{projectedARR.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                         <p className="text-xs text-muted-foreground mt-1">{projectedARR >= year1Target ? 'On track' : 'Below target'}</p>
                                       </div>
                                     </div>
                                     
                                     <div className="space-y-0.5">
-                                      <div className="flex items-center justify-between text-sm">
+                                      <div className="flex items-center justify-between text-[9px]">
                                         <span className="text-muted-foreground">Progress to Year 1 Target</span>
                                         <span className="font-bold">{progressPercent.toFixed(1)}%</span>
                                       </div>
@@ -7034,7 +7034,7 @@ export default function AdminDashboard() {
                                       className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover-elevate"
                                     >
                                       <div className="flex items-center gap-1.5">
-                                        <Avatar className="h-10 w-10">
+                                        <Avatar className="h-5 w-5">
                                           <AvatarFallback className="bg-primary/10 text-primary">
                                             {tx.user.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'CU'}
                                           </AvatarFallback>
@@ -7442,8 +7442,8 @@ export default function AdminDashboard() {
                                     <div className="p-3 rounded-full mx-auto w-fit" style={{ backgroundColor: `${tier.color}20` }}>
                                       <tier.icon className="h-3 w-3" style={{ color: tier.color }} />
                                     </div>
-                                    <p className="font-bold text-lg mt-0.5">{tier.tier}</p>
-                                    <p className="text-lg font-bold mt-1" style={{ color: tier.color }}>
+                                    <p className="font-bold text-xs mt-0.5">{tier.tier}</p>
+                                    <p className="text-xs font-bold mt-1" style={{ color: tier.color }}>
                                       {tier.price === 0 ? 'Free' : `£${tier.price}`}
                                     </p>
                                     <Badge className="mt-2" style={{ backgroundColor: `${tier.color}20`, color: tier.color }}>
@@ -7564,7 +7564,7 @@ export default function AdminDashboard() {
                                         className="text-center p-4 rounded-lg bg-muted/50"
                                       >
                                         <p className="text-[9px] text-muted-foreground">{stage.tier}</p>
-                                        <p className="text-lg font-bold mt-1">{stage.users}</p>
+                                        <p className="text-xs font-bold mt-1">{stage.users}</p>
                                         {index < arr.length - 1 && stage.users > 0 && arr[index + 1].users > 0 && (
                                           <Badge className="mt-2 bg-green-500/10 text-green-500">
                                             {((arr[index + 1].users / stage.users) * 100).toFixed(1)}% upgrade
@@ -7598,7 +7598,7 @@ export default function AdminDashboard() {
                                     <p className="text-[9px] font-bold">£{(revenueAnalytics?.avgLTV || 0).toFixed(2)}</p>
                                     <Badge className="mt-2 bg-green-500/10 text-green-500">from Stripe</Badge>
                                   </div>
-                                  <LineChart className="h-10 w-10 text-purple-500 opacity-50" />
+                                  <LineChart className="h-5 w-5 text-purple-500 opacity-50" />
                                 </div>
                               </CardContent>
                             </Card>
@@ -7611,7 +7611,7 @@ export default function AdminDashboard() {
                                     <p className="text-[9px] font-bold">£{(revenueAnalytics?.revenueAllTime || 0).toFixed(2)}</p>
                                     <Badge className="mt-2 bg-green-500/10 text-green-500">All-time</Badge>
                                   </div>
-                                  <Target className="h-10 w-10 text-green-500 opacity-50" />
+                                  <Target className="h-5 w-5 text-green-500 opacity-50" />
                                 </div>
                               </CardContent>
                             </Card>
@@ -7624,7 +7624,7 @@ export default function AdminDashboard() {
                                     <p className="text-[9px] font-bold">{revenueAnalytics?.totalCustomers || 0}</p>
                                     <Badge className="mt-2 bg-blue-500/10 text-blue-500">Unique</Badge>
                                   </div>
-                                  <Users className="h-10 w-10 text-blue-500 opacity-50" />
+                                  <Users className="h-5 w-5 text-blue-500 opacity-50" />
                                 </div>
                               </CardContent>
                             </Card>
@@ -7637,7 +7637,7 @@ export default function AdminDashboard() {
                                     <p className="text-[9px] font-bold">£{(revenueAnalytics?.avgOrderValue || 0).toFixed(2)}</p>
                                     <Badge className="mt-2 bg-amber-500/10 text-amber-500">Per transaction</Badge>
                                   </div>
-                                  <Zap className="h-10 w-10 text-amber-500 opacity-50" />
+                                  <Zap className="h-5 w-5 text-amber-500 opacity-50" />
                                 </div>
                               </CardContent>
                             </Card>
@@ -7666,10 +7666,10 @@ export default function AdminDashboard() {
                                     <Card className="text-center" style={{ borderColor: item.color, borderWidth: '2px' }}>
                                       <CardContent className="pt-6">
                                         <p className="font-medium" style={{ color: item.color }}>{item.tier}</p>
-                                        <p className="text-xl font-bold mt-0.5">£{item.ltv}</p>
+                                        <p className="text-xs font-bold mt-0.5">£{item.ltv}</p>
                                         <p className="text-[9px] text-muted-foreground mt-1">Lifetime Value</p>
                                         <Separator className="my-4" />
-                                        <div className="space-y-2 text-sm">
+                                        <div className="space-y-2 text-[9px]">
                                           <div className="flex justify-between">
                                             <span className="text-muted-foreground">ARPU</span>
                                             <span className="font-medium">£{item.arpu}/mo</span>
@@ -7702,7 +7702,7 @@ export default function AdminDashboard() {
                               <CardContent>
                                 <div className="flex flex-col items-center justify-center h-[300px]">
                                   <div className="text-center mb-1">
-                                    <p className="text-xl font-bold text-purple-500">£{(revenueAnalytics?.avgLTV || 0).toFixed(2)}</p>
+                                    <p className="text-xs font-bold text-purple-500">£{(revenueAnalytics?.avgLTV || 0).toFixed(2)}</p>
                                     <p className="text-muted-foreground mt-0.5">Average Customer Lifetime Value</p>
                                   </div>
                                   <div className="grid grid-cols-3 gap-6 w-full mt-1">
@@ -7737,7 +7737,7 @@ export default function AdminDashboard() {
                                 <div className="space-y-1.5">
                                   <div className="text-center p-6 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
                                     <p className="text-[9px] text-muted-foreground">Monthly Recurring Revenue</p>
-                                    <p className="text-2xl font-bold text-green-500 mt-0.5">£{(revenueAnalytics?.mrr || 0).toFixed(2)}</p>
+                                    <p className="text-xs font-bold text-green-500 mt-0.5">£{(revenueAnalytics?.mrr || 0).toFixed(2)}</p>
                                     <p className="text-[9px] text-muted-foreground mt-0.5">
                                       ARR: £{(revenueAnalytics?.arr || 0).toFixed(2)}
                                     </p>
@@ -7795,7 +7795,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Activity Stream</p>
-                                    <p className="text-lg font-bold text-blue-500">Real-Time Event Monitoring</p>
+                                    <p className="text-xs font-bold text-blue-500">Real-Time Event Monitoring</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1.5">
@@ -7842,7 +7842,7 @@ export default function AdminDashboard() {
                                       <stat.icon className={`h-8 w-8 text-${stat.color}-500`} />
                                       <Badge className={`bg-${stat.color}-500/10 text-${stat.color}-500`}>{stat.change}</Badge>
                                     </div>
-                                    <p className="text-xl font-bold mt-0.5">{stat.value}</p>
+                                    <p className="text-xs font-bold mt-0.5">{stat.value}</p>
                                     <p className="text-[9px] text-muted-foreground">{stat.label}</p>
                                   </CardContent>
                                 </Card>
@@ -7951,7 +7951,7 @@ export default function AdminDashboard() {
                                   </motion.div>
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Live Error Monitor</p>
-                                    <p className={`text-lg font-bold ${
+                                    <p className={`text-xs font-bold ${
                                       (errorLogsData?.stats?.unresolved || 0) > 0 ? 'text-red-500' : 'text-green-500'
                                     }`}>
                                       {errorLogsData?.stats?.unresolved || 0} Unresolved Issues
@@ -7961,15 +7961,15 @@ export default function AdminDashboard() {
                                 <div className="flex items-center gap-1.5">
                                   <div className="text-center">
                                     <p className="text-[9px] text-muted-foreground">Critical</p>
-                                    <p className="text-xl font-bold text-red-500">{errorLogsData?.stats?.bySeverity?.critical || 0}</p>
+                                    <p className="text-xs font-bold text-red-500">{errorLogsData?.stats?.bySeverity?.critical || 0}</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-[9px] text-muted-foreground">Error</p>
-                                    <p className="text-xl font-bold text-orange-500">{errorLogsData?.stats?.bySeverity?.error || 0}</p>
+                                    <p className="text-xs font-bold text-orange-500">{errorLogsData?.stats?.bySeverity?.error || 0}</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-[9px] text-muted-foreground">Warning</p>
-                                    <p className="text-xl font-bold text-amber-500">{errorLogsData?.stats?.bySeverity?.warning || 0}</p>
+                                    <p className="text-xs font-bold text-amber-500">{errorLogsData?.stats?.bySeverity?.warning || 0}</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-[9px] text-muted-foreground">Total</p>
@@ -8012,7 +8012,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex flex-wrap items-center justify-between gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     Recent Errors
                                     {errorLogsLoading && <RefreshCw className="h-3 w-3 animate-spin" />}
                                   </CardTitle>
@@ -8049,7 +8049,7 @@ export default function AdminDashboard() {
                               ) : errorLogsData?.errors?.length === 0 ? (
                                 <div className="py-1 text-center">
                                   <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-1" />
-                                  <p className="text-lg font-medium text-green-600">No errors logged!</p>
+                                  <p className="text-xs font-medium text-green-600">No errors logged!</p>
                                   <p className="text-[9px] text-muted-foreground">Your system is running smoothly.</p>
                                 </div>
                               ) : (
@@ -8194,7 +8194,7 @@ export default function AdminDashboard() {
                                     {selectedError.pageUrl && (
                                       <div className="col-span-2">
                                         <Label className="text-muted-foreground">Page URL</Label>
-                                        <p className="break-all text-sm">{selectedError.pageUrl}</p>
+                                        <p className="break-all text-[9px]">{selectedError.pageUrl}</p>
                                       </div>
                                     )}
                                   </div>
@@ -8283,7 +8283,7 @@ export default function AdminDashboard() {
                                   </div>
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Admin Audit Trail</p>
-                                    <p className="text-lg font-bold text-purple-500">Complete Action History</p>
+                                    <p className="text-xs font-bold text-purple-500">Complete Action History</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1.5">
@@ -8381,7 +8381,7 @@ export default function AdminDashboard() {
                                               <div className="space-y-0.5">
                                                 <Label className="text-xs text-muted-foreground">Changes Made:</Label>
                                                 {Object.entries(entry.changes).map(([field, values]) => (
-                                                  <div key={field} className="flex items-center gap-2 text-sm">
+                                                  <div key={field} className="flex items-center gap-2 text-[9px]">
                                                     <span className="font-medium">{field}:</span>
                                                     <span className="text-red-500 line-through">
                                                       {JSON.stringify(values.old)}
@@ -8434,7 +8434,7 @@ export default function AdminDashboard() {
                                   </motion.div>
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Security Status</p>
-                                    <p className={`text-lg font-bold ${
+                                    <p className={`text-xs font-bold ${
                                       (securityEventsData?.stats?.unresolved || 0) > 0 ? 'text-amber-500' : 'text-green-500'
                                     }`}>
                                       {(securityEventsData?.stats?.unresolved || 0) > 0 
@@ -8635,7 +8635,7 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="py-1 text-center">
                                   <Shield className="h-12 w-12 text-green-500 mx-auto mb-1" />
-                                  <p className="text-lg font-medium text-green-500">All Systems Secure</p>
+                                  <p className="text-xs font-medium text-green-500">All Systems Secure</p>
                                   <p className="text-muted-foreground mt-1">No security events recorded</p>
                                 </div>
                               )}
@@ -8678,7 +8678,7 @@ export default function AdminDashboard() {
                                       </div>
                                       <div>
                                         <p className="text-[9px] text-muted-foreground">Email Analytics</p>
-                                        <p className="text-lg font-bold text-blue-500">Email Performance Dashboard</p>
+                                        <p className="text-xs font-bold text-blue-500">Email Performance Dashboard</p>
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-6 flex-wrap">
@@ -8849,7 +8849,7 @@ export default function AdminDashboard() {
                                             <div className="flex items-center gap-1.5">
                                               <Mail className="h-3 w-3 text-blue-500" />
                                               <div>
-                                                <p className="font-medium text-sm">{email.subject}</p>
+                                                <p className="font-medium text-[9px]">{email.subject}</p>
                                                 <p className="text-[9px] text-muted-foreground">{email.to}</p>
                                               </div>
                                             </div>
@@ -8902,7 +8902,7 @@ export default function AdminDashboard() {
                                       </motion.div>
                                       <div>
                                         <p className="text-[9px] text-muted-foreground">Notification Center</p>
-                                        <p className="text-lg font-bold text-amber-500">In-App & Push Notifications</p>
+                                        <p className="text-xs font-bold text-amber-500">In-App & Push Notifications</p>
                                       </div>
                                     </div>
                                     <Button 
@@ -8973,7 +8973,7 @@ export default function AdminDashboard() {
                                               </div>
                                               <div className="flex-1">
                                                 <div className="flex items-center justify-between mb-1">
-                                                  <span className="font-medium text-sm">{cat.type}</span>
+                                                  <span className="font-medium text-[9px]">{cat.type}</span>
                                                   <span className="text-[9px] font-bold">{cat.count}</span>
                                                 </div>
                                                 <div className="relative h-2 rounded-full bg-muted overflow-hidden">
@@ -9026,7 +9026,7 @@ export default function AdminDashboard() {
                                                    <Info className="h-3 w-3" />}
                                                 </div>
                                                 <div className="flex-1">
-                                                  <p className="font-medium text-sm">{notif.title}</p>
+                                                  <p className="font-medium text-[9px]">{notif.title}</p>
                                                   <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
                                                   <div className="flex items-center gap-2 mt-0.5">
                                                     <Badge variant="outline" className="text-xs">
@@ -9075,7 +9075,7 @@ export default function AdminDashboard() {
                                         <Card className="hover-elevate cursor-pointer">
                                           <CardContent className="pt-4 pb-4">
                                             <div className="flex items-center justify-between mb-0.5">
-                                              <span className="font-medium text-sm">{template.name}</span>
+                                              <span className="font-medium text-[9px]">{template.name}</span>
                                               <Badge className="bg-green-500 text-white">{template.status}</Badge>
                                             </div>
                                             <p className="text-[9px] text-muted-foreground">{template.description}</p>
@@ -9264,7 +9264,7 @@ export default function AdminDashboard() {
                                             {format(new Date(feedback.createdAt), 'MMM d, yyyy h:mm a')}
                                           </span>
                                         </div>
-                                        <p className="mt-2 text-sm">{feedback.comment}</p>
+                                        <p className="mt-2 text-[9px]">{feedback.comment}</p>
                                         <div className="flex items-center gap-2 mt-0.5">
                                           <Badge variant="secondary" className="text-xs">{feedback.pageUrl || 'Unknown page'}</Badge>
                                           {feedback.timeSpentMinutes && (
@@ -9298,7 +9298,7 @@ export default function AdminDashboard() {
                                 </div>
                                 <div>
                                   <p className="text-[9px] text-muted-foreground">All Feedback Responses</p>
-                                  <p className="text-lg font-bold text-amber-500">{feedbackData?.feedback?.length || 0} Total</p>
+                                  <p className="text-xs font-bold text-amber-500">{feedbackData?.feedback?.length || 0} Total</p>
                                 </div>
                               </div>
                             </CardContent>
@@ -9406,7 +9406,7 @@ export default function AdminDashboard() {
                                     </CardTitle>
                                   </CardHeader>
                                   <CardContent>
-                                    <div className="text-2xl font-bold text-blue-500">
+                                    <div className="text-xs font-bold text-blue-500">
                                       {blogStats?.counts?.total || 0}
                                     </div>
                                   </CardContent>
@@ -9420,7 +9420,7 @@ export default function AdminDashboard() {
                                     </CardTitle>
                                   </CardHeader>
                                   <CardContent>
-                                    <div className="text-2xl font-bold text-emerald-500">
+                                    <div className="text-xs font-bold text-emerald-500">
                                       {blogStats?.counts?.published || 0}
                                     </div>
                                   </CardContent>
@@ -9434,7 +9434,7 @@ export default function AdminDashboard() {
                                     </CardTitle>
                                   </CardHeader>
                                   <CardContent>
-                                    <div className="text-2xl font-bold text-amber-500">
+                                    <div className="text-xs font-bold text-amber-500">
                                       {blogStats?.counts?.scheduled || 0}
                                     </div>
                                   </CardContent>
@@ -9448,7 +9448,7 @@ export default function AdminDashboard() {
                                     </CardTitle>
                                   </CardHeader>
                                   <CardContent>
-                                    <div className="text-2xl font-bold text-gray-500">
+                                    <div className="text-xs font-bold text-gray-500">
                                       {blogStats?.counts?.draft || 0}
                                     </div>
                                   </CardContent>
@@ -9459,7 +9459,7 @@ export default function AdminDashboard() {
                               <Card>
                                 <CardHeader className="flex flex-row items-center justify-between gap-1.5">
                                   <div>
-                                    <CardTitle className="flex items-center gap-2">
+                                    <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                       <FileText className="h-3 w-3 text-[#005EB8]" />
                                       Blog Posts
                                     </CardTitle>
@@ -9522,7 +9522,7 @@ export default function AdminDashboard() {
                                                 </Badge>
                                               </TableCell>
                                               <TableCell>{post.views || 0}</TableCell>
-                                              <TableCell className="text-muted-foreground text-sm">
+                                              <TableCell className="text-muted-foreground text-[9px]">
                                                 {post.publishedAt ? format(new Date(post.publishedAt), 'dd MMM yyyy') :
                                                  post.scheduledFor ? format(new Date(post.scheduledFor), 'dd MMM yyyy') :
                                                  '-'}
@@ -9557,7 +9557,7 @@ export default function AdminDashboard() {
                               <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                                 <Card>
                                   <CardHeader className="p-2 pb-1">
-                                    <CardTitle className="flex items-center gap-2 text-lg">
+                                    <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                       <Clock className="h-3 w-3 text-amber-500" />
                                       Upcoming Scheduled
                                     </CardTitle>
@@ -9581,7 +9581,7 @@ export default function AdminDashboard() {
 
                                 <Card>
                                   <CardHeader className="p-2 pb-1">
-                                    <CardTitle className="flex items-center gap-2 text-lg">
+                                    <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                       <TrendingUp className="h-3 w-3 text-emerald-500" />
                                       Top Performing
                                     </CardTitle>
@@ -9612,7 +9612,7 @@ export default function AdminDashboard() {
                       {activeSection === 'content-seo' && (
                         <Card>
                           <CardHeader className="p-2 pb-1">
-                            <CardTitle className="flex items-center gap-2">
+                            <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                               <TrendingUp className="h-3 w-3 text-[#005EB8]" />
                               SEO Analytics
                             </CardTitle>
@@ -9651,7 +9651,7 @@ export default function AdminDashboard() {
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-cyan-500">
+                                <div className="text-xs font-bold text-cyan-500">
                                   {referralAnalytics?.totalReferralCodes || 0}
                                 </div>
                                 <div className="flex items-center gap-2 mt-0.5">
@@ -9673,7 +9673,7 @@ export default function AdminDashboard() {
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-violet-500">
+                                <div className="text-xs font-bold text-violet-500">
                                   {referralAnalytics?.totalReferrals || 0}
                                 </div>
                                 <div className="flex items-center gap-2 mt-0.5">
@@ -9693,13 +9693,13 @@ export default function AdminDashboard() {
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-emerald-500">
+                                <div className="text-xs font-bold text-emerald-500">
                                   {((referralAnalytics?.conversionRate || 0) * 100).toFixed(1)}%
                                 </div>
                                 <div className="mt-2">
                                   <Progress 
                                     value={(referralAnalytics?.conversionRate || 0) * 100} 
-                                    className="h-2" 
+                                    className="h-1" 
                                   />
                                   <p className="text-xs text-muted-foreground mt-1">Conversion rate</p>
                                 </div>
@@ -9714,7 +9714,7 @@ export default function AdminDashboard() {
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-amber-500">
+                                <div className="text-xs font-bold text-amber-500">
                                   £{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}
                                 </div>
                                 <div className="flex items-center gap-2 mt-0.5">
@@ -9731,7 +9731,7 @@ export default function AdminDashboard() {
                             {/* Referral Funnel Visualization */}
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <TrendingUp className="h-3 w-3 text-cyan-500" />
                                   Referral Conversion Funnel
                                 </CardTitle>
@@ -9773,7 +9773,7 @@ export default function AdminDashboard() {
                             {/* Referral Network Visualization */}
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <Globe className="h-3 w-3 text-violet-500" />
                                   Network Growth
                                 </CardTitle>
@@ -9797,7 +9797,7 @@ export default function AdminDashboard() {
                                     return (
                                       <div 
                                         key={referrer.userId}
-                                        className="absolute w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-md"
+                                        className="absolute w-5 h-5 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-md"
                                         style={{ transform: `translate(${x}px, ${y}px)` }}
                                       >
                                         <span className="text-white text-xs font-bold">{referrer.referrals}</span>
@@ -9837,7 +9837,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <Crown className="h-3 w-3 text-amber-500" />
                                     Top Referrers Leaderboard
                                   </CardTitle>
@@ -9863,7 +9863,7 @@ export default function AdminDashboard() {
                                       <CardContent className="p-2">
                                         <div className="flex items-center gap-1.5">
                                           {/* Rank Badge */}
-                                          <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
+                                          <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
                                             index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white' :
                                             index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-white' :
                                             index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' :
@@ -9899,11 +9899,11 @@ export default function AdminDashboard() {
                                           {/* Stats */}
                                           <div className="flex items-center gap-1.5">
                                             <div className="text-center">
-                                              <p className="text-lg font-bold text-cyan-500">{referrer.referrals}</p>
+                                              <p className="text-xs font-bold text-cyan-500">{referrer.referrals}</p>
                                               <p className="text-[9px] text-muted-foreground">Referrals</p>
                                             </div>
                                             <div className="text-center">
-                                              <p className="text-lg font-bold text-green-500">
+                                              <p className="text-xs font-bold text-green-500">
                                                 £{(referrer.earnings / 100).toFixed(0)}
                                               </p>
                                               <p className="text-[9px] text-muted-foreground">Earned</p>
@@ -9917,9 +9917,9 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="py-16 text-center">
                                   <div className="w-20 h-20 mx-auto mb-1 rounded-full bg-cyan-500/10 flex items-center justify-center">
-                                    <Gift className="h-10 w-10 text-cyan-500" />
+                                    <Gift className="h-5 w-5 text-cyan-500" />
                                   </div>
-                                  <h3 className="text-xl font-semibold mb-0.5">No Referrers Yet</h3>
+                                  <h3 className="text-xs font-semibold mb-0.5">No Referrers Yet</h3>
                                   <p className="text-muted-foreground mb-1 max-w-md mx-auto">
                                     Start your referral programme to incentivize users to bring in new customers.
                                   </p>
@@ -9933,7 +9933,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <Activity className="h-3 w-3 text-violet-500" />
                                     Referral Activity Timeline
                                   </CardTitle>
@@ -9948,7 +9948,7 @@ export default function AdminDashboard() {
                                     <div key={event.id} className="flex items-start gap-1.5">
                                       {/* Timeline connector */}
                                       <div className="relative flex flex-col items-center">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
                                           event.status === 'rewarded' ? 'bg-green-500/20' :
                                           event.status === 'qualified' ? 'bg-amber-500/20' :
                                           'bg-blue-500/20'
@@ -10004,7 +10004,7 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="py-1 text-center text-muted-foreground">
                                   <Activity className="h-12 w-12 mx-auto mb-1 opacity-50" />
-                                  <p className="text-lg font-medium">No Activity Yet</p>
+                                  <p className="text-xs font-medium">No Activity Yet</p>
                                   <p>Referral events will appear here in real-time</p>
                                 </div>
                               )}
@@ -10023,9 +10023,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Total Codes</p>
-                                    <p className="text-lg font-bold text-blue-500">{referralAnalytics?.totalReferralCodes || 0}</p>
+                                    <p className="text-xs font-bold text-blue-500">{referralAnalytics?.totalReferralCodes || 0}</p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <Link2 className="h-3 w-3 text-blue-500" />
                                   </div>
                                 </div>
@@ -10036,9 +10036,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Active Codes</p>
-                                    <p className="text-lg font-bold text-green-500">{referralAnalytics?.activeReferralCodes || 0}</p>
+                                    <p className="text-xs font-bold text-green-500">{referralAnalytics?.activeReferralCodes || 0}</p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
                                   </div>
                                 </div>
@@ -10049,9 +10049,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Total Conversions</p>
-                                    <p className="text-lg font-bold text-purple-500">{referralAnalytics?.successfulReferrals || 0}</p>
+                                    <p className="text-xs font-bold text-purple-500">{referralAnalytics?.successfulReferrals || 0}</p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-purple-500/10 flex items-center justify-center">
                                     <Users className="h-3 w-3 text-purple-500" />
                                   </div>
                                 </div>
@@ -10062,9 +10062,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Total Payouts</p>
-                                    <p className="text-lg font-bold text-amber-500">£{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}</p>
+                                    <p className="text-xs font-bold text-amber-500">£{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}</p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-amber-500/10 flex items-center justify-center">
                                     <PoundSterling className="h-3 w-3 text-amber-500" />
                                   </div>
                                 </div>
@@ -10077,7 +10077,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <Link2 className="h-3 w-3 text-blue-500" />
                                     All Referral Codes
                                   </CardTitle>
@@ -10116,7 +10116,7 @@ export default function AdminDashboard() {
                                         <div className="flex items-center gap-1.5">
                                           {/* Rank & Code */}
                                           <div className="flex items-center gap-1.5">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
                                               index < 3 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white' : 'bg-muted text-muted-foreground'
                                             }`}>
                                               {index + 1}
@@ -10145,21 +10145,21 @@ export default function AdminDashboard() {
                                           {/* Stats */}
                                           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                                             <div className="p-2 rounded-lg bg-muted/50">
-                                              <p className="text-lg font-bold text-blue-500">{referrer.referrals}</p>
+                                              <p className="text-xs font-bold text-blue-500">{referrer.referrals}</p>
                                               <p className="text-[9px] text-muted-foreground">Total Clicks</p>
                                             </div>
                                             <div className="p-2 rounded-lg bg-muted/50">
-                                              <p className="text-lg font-bold text-green-500">{referrer.referrals}</p>
+                                              <p className="text-xs font-bold text-green-500">{referrer.referrals}</p>
                                               <p className="text-[9px] text-muted-foreground">Conversions</p>
                                             </div>
                                             <div className="p-2 rounded-lg bg-muted/50">
-                                              <p className="text-lg font-bold text-purple-500">
+                                              <p className="text-xs font-bold text-purple-500">
                                                 {referrer.referrals > 0 ? '100%' : '0%'}
                                               </p>
                                               <p className="text-[9px] text-muted-foreground">Rate</p>
                                             </div>
                                             <div className="p-2 rounded-lg bg-muted/50">
-                                              <p className="text-lg font-bold text-amber-500">
+                                              <p className="text-xs font-bold text-amber-500">
                                                 £{(referrer.earnings / 100).toFixed(0)}
                                               </p>
                                               <p className="text-[9px] text-muted-foreground">Earnings</p>
@@ -10206,9 +10206,9 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="py-16 text-center">
                                   <div className="w-20 h-20 mx-auto mb-1 rounded-full bg-blue-500/10 flex items-center justify-center">
-                                    <Link2 className="h-10 w-10 text-blue-500" />
+                                    <Link2 className="h-5 w-5 text-blue-500" />
                                   </div>
-                                  <h3 className="text-xl font-semibold mb-0.5">No Referral Codes Yet</h3>
+                                  <h3 className="text-xs font-semibold mb-0.5">No Referral Codes Yet</h3>
                                   <p className="text-muted-foreground mb-1 max-w-md mx-auto">
                                     Users can generate referral codes from their dashboard to start earning rewards.
                                   </p>
@@ -10229,9 +10229,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Pending Queue</p>
-                                    <p className="text-lg font-bold text-amber-500">{pendingRewardsData?.total || 0}</p>
+                                    <p className="text-xs font-bold text-amber-500">{pendingRewardsData?.total || 0}</p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-amber-500/10 flex items-center justify-center">
                                     <Clock className="h-3 w-3 text-amber-500" />
                                   </div>
                                 </div>
@@ -10242,9 +10242,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Pending Amount</p>
-                                    <p className="text-lg font-bold text-green-500">£{((pendingRewardsData?.totalPendingAmount || 0) / 100).toFixed(0)}</p>
+                                    <p className="text-xs font-bold text-green-500">£{((pendingRewardsData?.totalPendingAmount || 0) / 100).toFixed(0)}</p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <PoundSterling className="h-3 w-3 text-green-500" />
                                   </div>
                                 </div>
@@ -10255,9 +10255,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Total Paid</p>
-                                    <p className="text-lg font-bold text-blue-500">£{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}</p>
+                                    <p className="text-xs font-bold text-blue-500">£{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}</p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-blue-500" />
                                   </div>
                                 </div>
@@ -10268,13 +10268,13 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Avg Reward</p>
-                                    <p className="text-lg font-bold text-purple-500">
+                                    <p className="text-xs font-bold text-purple-500">
                                       £{pendingRewardsData?.total && pendingRewardsData.total > 0 
                                         ? ((pendingRewardsData.totalPendingAmount || 0) / 100 / pendingRewardsData.total).toFixed(0)
                                         : '0'}
                                     </p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-purple-500/10 flex items-center justify-center">
                                     <Gift className="h-3 w-3 text-purple-500" />
                                   </div>
                                 </div>
@@ -10287,7 +10287,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <Receipt className="h-3 w-3 text-amber-500" />
                                     Pending Rewards Queue
                                   </CardTitle>
@@ -10323,7 +10323,7 @@ export default function AdminDashboard() {
                                       <CardContent className="p-2">
                                         <div className="flex items-center gap-1.5">
                                           {/* Queue Number */}
-                                          <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 font-bold">
+                                          <div className="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 font-bold">
                                             {index + 1}
                                           </div>
                                           
@@ -10342,7 +10342,7 @@ export default function AdminDashboard() {
                                           
                                           {/* Amount */}
                                           <div className="text-center px-4">
-                                            <p className="text-lg font-bold text-green-500">£{(reward.amount / 100).toFixed(2)}</p>
+                                            <p className="text-xs font-bold text-green-500">£{(reward.amount / 100).toFixed(2)}</p>
                                             <p className="text-[9px] text-muted-foreground">Reward</p>
                                           </div>
                                           
@@ -10375,9 +10375,9 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="py-16 text-center">
                                   <div className="w-20 h-20 mx-auto mb-1 rounded-full bg-green-500/10 flex items-center justify-center">
-                                    <CheckCircle className="h-10 w-10 text-green-500" />
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
                                   </div>
-                                  <h3 className="text-xl font-semibold mb-0.5">All Caught Up!</h3>
+                                  <h3 className="text-xs font-semibold mb-0.5">All Caught Up!</h3>
                                   <p className="text-muted-foreground max-w-md mx-auto">
                                     No pending rewards to review. All referral payouts have been processed.
                                   </p>
@@ -10389,7 +10389,7 @@ export default function AdminDashboard() {
                           {/* Recent Processed Rewards */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <History className="h-3 w-3 text-blue-500" />
                                 Recently Processed
                               </CardTitle>
@@ -10445,7 +10445,7 @@ export default function AdminDashboard() {
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-purple-500">
+                                <div className="text-xs font-bold text-purple-500">
                                   {promoCodesData?.summary?.totalCodes || 0}
                                 </div>
                                 <div className="flex items-center gap-2 mt-0.5">
@@ -10484,7 +10484,7 @@ export default function AdminDashboard() {
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-blue-500">
+                                <div className="text-xs font-bold text-blue-500">
                                   £{((promoCodesData?.summary?.totalRevenueSaved || 0) / 100).toFixed(0)}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -10501,7 +10501,7 @@ export default function AdminDashboard() {
                                 </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <div className="text-xl font-bold text-orange-500">
+                                <div className="text-xs font-bold text-orange-500">
                                   £{((promoCodesData?.summary?.averageDiscount || 0) / 100).toFixed(2)}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -10516,7 +10516,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <BarChart3 className="h-3 w-3 text-purple-500" />
                                     Promo Code Performance
                                   </CardTitle>
@@ -10562,7 +10562,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <Tag className="h-3 w-3 text-purple-500" />
                                     All Promo Codes
                                   </CardTitle>
@@ -10595,7 +10595,7 @@ export default function AdminDashboard() {
                                         <div className="flex items-start justify-between flex-wrap gap-1.5">
                                           <div className="flex-1 min-w-[200px]">
                                             <div className="flex items-center gap-3 mb-0.5">
-                                              <Badge variant="outline" className="font-mono text-lg px-1.5 py-1 bg-purple-500/10 text-purple-600 border-purple-500/30">
+                                              <Badge variant="outline" className="font-mono text-[9px] px-1 py-0 bg-purple-500/10 text-purple-600 border-purple-500/30">
                                                 {promo.code}
                                               </Badge>
                                               <Badge variant={promo.isActive ? 'default' : promo.status === 'paused' ? 'secondary' : 'destructive'}>
@@ -10619,23 +10619,23 @@ export default function AdminDashboard() {
                                           
                                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                                             <div className="bg-muted/50 rounded-lg p-3">
-                                              <p className="text-lg font-bold text-purple-500">
+                                              <p className="text-xs font-bold text-purple-500">
                                                 {promo.discountType === 'percentage' ? `${promo.discountValue}%` : `£${promo.discountValue}`}
                                               </p>
                                               <p className="text-[9px] text-muted-foreground">Discount</p>
                                             </div>
                                             <div className="bg-muted/50 rounded-lg p-3">
-                                              <p className="text-lg font-bold text-green-500">
+                                              <p className="text-xs font-bold text-green-500">
                                                 {promo.usedCount}{promo.maxUses ? `/${promo.maxUses}` : ''}
                                               </p>
                                               <p className="text-[9px] text-muted-foreground">Redemptions</p>
                                             </div>
                                             <div className="bg-muted/50 rounded-lg p-3">
-                                              <p className="text-lg font-bold text-blue-500">{promo.uniqueUsers}</p>
+                                              <p className="text-xs font-bold text-blue-500">{promo.uniqueUsers}</p>
                                               <p className="text-[9px] text-muted-foreground">Unique Users</p>
                                             </div>
                                             <div className="bg-muted/50 rounded-lg p-3">
-                                              <p className="text-lg font-bold text-orange-500">
+                                              <p className="text-xs font-bold text-orange-500">
                                                 £{(promo.totalRevenueSaved / 100).toFixed(0)}
                                               </p>
                                               <p className="text-[9px] text-muted-foreground">Total Savings</p>
@@ -10702,7 +10702,7 @@ export default function AdminDashboard() {
                                               <span className="text-xs text-muted-foreground">Usage Progress</span>
                                               <span className="text-xs font-medium">{Math.round((promo.usedCount / promo.maxUses) * 100)}%</span>
                                             </div>
-                                            <Progress value={(promo.usedCount / promo.maxUses) * 100} className="h-2" />
+                                            <Progress value={(promo.usedCount / promo.maxUses) * 100} className="h-1" />
                                           </div>
                                         )}
                                         
@@ -10722,9 +10722,9 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="py-16 text-center">
                                   <div className="w-20 h-20 mx-auto mb-1 rounded-full bg-purple-500/10 flex items-center justify-center">
-                                    <Tag className="h-10 w-10 text-purple-500" />
+                                    <Tag className="h-5 w-5 text-purple-500" />
                                   </div>
-                                  <h3 className="text-xl font-semibold mb-0.5">No Promo Codes Yet</h3>
+                                  <h3 className="text-xs font-semibold mb-0.5">No Promo Codes Yet</h3>
                                   <p className="text-muted-foreground mb-1 max-w-md mx-auto">
                                     Create promotional codes to offer discounts and track customer acquisition through marketing campaigns.
                                   </p>
@@ -10755,7 +10755,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-cyan-500/10 flex items-center justify-center">
                                     <Target className="h-3 w-3 text-cyan-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-cyan-500">{((referralAnalytics?.conversionRate || 0) * 100).toFixed(1)}%</p>
+                                  <p className="text-xs font-bold text-cyan-500">{((referralAnalytics?.conversionRate || 0) * 100).toFixed(1)}%</p>
                                   <p className="text-[9px] text-muted-foreground">Conversion Rate</p>
                                 </div>
                               </CardContent>
@@ -10766,7 +10766,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-violet-500/10 flex items-center justify-center">
                                     <Sparkles className="h-3 w-3 text-violet-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-violet-500">
+                                  <p className="text-xs font-bold text-violet-500">
                                     {referralAnalytics?.topReferrers?.length || 0 > 0 
                                       ? ((referralAnalytics?.successfulReferrals || 0) / Math.max(1, referralAnalytics?.topReferrers?.length || 1)).toFixed(1)
                                       : '0'}
@@ -10781,7 +10781,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <Users className="h-3 w-3 text-green-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-green-500">{referralAnalytics?.successfulReferrals || 0}</p>
+                                  <p className="text-xs font-bold text-green-500">{referralAnalytics?.successfulReferrals || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Total Conversions</p>
                                 </div>
                               </CardContent>
@@ -10792,7 +10792,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-amber-500/10 flex items-center justify-center">
                                     <PoundSterling className="h-3 w-3 text-amber-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-amber-500">£{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}</p>
+                                  <p className="text-xs font-bold text-amber-500">£{((referralAnalytics?.totalRewardsPaid || 0) / 100).toFixed(0)}</p>
                                   <p className="text-[9px] text-muted-foreground">Rewards Paid</p>
                                 </div>
                               </CardContent>
@@ -10803,7 +10803,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-rose-500/10 flex items-center justify-center">
                                     <TrendingUp className="h-3 w-3 text-rose-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-rose-500">
+                                  <p className="text-xs font-bold text-rose-500">
                                     £{Math.round((referralAnalytics?.successfulReferrals || 0) * 45)}
                                   </p>
                                   <p className="text-[9px] text-muted-foreground">Est. Revenue Impact</p>
@@ -10817,7 +10817,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <LineChart className="h-3 w-3 text-cyan-500" />
                                     Referral Summary
                                   </CardTitle>
@@ -10830,7 +10830,7 @@ export default function AdminDashboard() {
                               <div className="flex flex-col items-center justify-center h-[300px]">
                                 <div className="grid grid-cols-2 gap-6 w-full max-w-md">
                                   <div className="text-center p-6 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                                    <p className="text-xl font-bold text-cyan-500">{referralAnalytics?.totalReferrals || 0}</p>
+                                    <p className="text-xs font-bold text-cyan-500">{referralAnalytics?.totalReferrals || 0}</p>
                                     <p className="text-[9px] text-muted-foreground mt-0.5">Total Referrals</p>
                                   </div>
                                   <div className="text-center p-6 rounded-lg bg-green-500/10 border border-green-500/20">
@@ -10839,7 +10839,7 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
                                 <div className="text-center mt-1">
-                                  <p className="text-lg font-bold text-amber-500">
+                                  <p className="text-xs font-bold text-amber-500">
                                     £{Math.round((referralAnalytics?.successfulReferrals || 0) * 45)}
                                   </p>
                                   <p className="text-[9px] text-muted-foreground">Est. Revenue from Referrals</p>
@@ -10857,7 +10857,7 @@ export default function AdminDashboard() {
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <Globe className="h-3 w-3 text-violet-500" />
                                   Referral Sources
                                 </CardTitle>
@@ -10877,7 +10877,7 @@ export default function AdminDashboard() {
                                         <span className="text-[9px] font-medium">{source.source}</span>
                                         <span className="text-[9px] text-muted-foreground">{source.count} ({source.percentage}%)</span>
                                       </div>
-                                      <Progress value={source.percentage} className="h-2" />
+                                      <Progress value={source.percentage} className="h-1" />
                                     </div>
                                   ))}
                                 </div>
@@ -10886,7 +10886,7 @@ export default function AdminDashboard() {
 
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <BarChart3 className="h-3 w-3 text-green-500" />
                                   Top Converting Tiers
                                 </CardTitle>
@@ -10924,9 +10924,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Total Redemptions</p>
-                                    <p className="text-lg font-bold text-purple-500">{promoCodesData?.summary?.totalRedemptions || 0}</p>
+                                    <p className="text-xs font-bold text-purple-500">{promoCodesData?.summary?.totalRedemptions || 0}</p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-purple-500/10 flex items-center justify-center">
                                     <Tag className="h-3 w-3 text-purple-500" />
                                   </div>
                                 </div>
@@ -10937,9 +10937,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Total Revenue Saved</p>
-                                    <p className="text-lg font-bold text-green-500">£{((promoCodesData?.summary?.totalRevenueSaved || 0) / 100).toFixed(0)}</p>
+                                    <p className="text-xs font-bold text-green-500">£{((promoCodesData?.summary?.totalRevenueSaved || 0) / 100).toFixed(0)}</p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <PoundSterling className="h-3 w-3 text-green-500" />
                                   </div>
                                 </div>
@@ -10950,9 +10950,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Avg Discount</p>
-                                    <p className="text-lg font-bold text-blue-500">£{((promoCodesData?.summary?.averageDiscount || 0) / 100).toFixed(2)}</p>
+                                    <p className="text-xs font-bold text-blue-500">£{((promoCodesData?.summary?.averageDiscount || 0) / 100).toFixed(2)}</p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <Percent className="h-3 w-3 text-blue-500" />
                                   </div>
                                 </div>
@@ -10963,13 +10963,13 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">ROI</p>
-                                    <p className="text-lg font-bold text-amber-500">
+                                    <p className="text-xs font-bold text-amber-500">
                                       {promoCodesData?.summary?.totalRedemptions && promoCodesData.summary.totalRedemptions > 0
                                         ? `${((promoCodesData.summary.totalRedemptions * 45 * 100) / Math.max(1, promoCodesData.summary.totalRevenueSaved || 1)).toFixed(0)}%`
                                         : 'N/A'}
                                     </p>
                                   </div>
-                                  <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                  <div className="h-5 w-5 rounded-full bg-amber-500/10 flex items-center justify-center">
                                     <TrendingUp className="h-3 w-3 text-amber-500" />
                                   </div>
                                 </div>
@@ -10980,7 +10980,7 @@ export default function AdminDashboard() {
                           {/* Redemption Trends */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <LineChart className="h-3 w-3 text-purple-500" />
                                 Promo Code Performance Over Time
                               </CardTitle>
@@ -11009,7 +11009,7 @@ export default function AdminDashboard() {
                           {/* Top Performing Codes */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <Crown className="h-3 w-3 text-amber-500" />
                                 Top Performing Promo Codes
                               </CardTitle>
@@ -11026,7 +11026,7 @@ export default function AdminDashboard() {
                                 <div className="space-y-1">
                                   {promoCodesData.promoCodes.slice(0, 5).map((promo, index) => (
                                     <div key={promo.id} className="flex items-center gap-4 p-4 rounded-lg bg-muted/30">
-                                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                                      <div className={`w-5 h-5 rounded-full flex items-center justify-center font-bold ${
                                         index === 0 ? 'bg-amber-500 text-white' :
                                         index === 1 ? 'bg-gray-400 text-white' :
                                         index === 2 ? 'bg-orange-600 text-white' :
@@ -11041,11 +11041,11 @@ export default function AdminDashboard() {
                                         </p>
                                       </div>
                                       <div className="text-center px-4">
-                                        <p className="text-lg font-bold text-purple-500">{promo.usedCount}</p>
+                                        <p className="text-xs font-bold text-purple-500">{promo.usedCount}</p>
                                         <p className="text-[9px] text-muted-foreground">Uses</p>
                                       </div>
                                       <div className="text-center px-4">
-                                        <p className="text-lg font-bold text-green-500">
+                                        <p className="text-xs font-bold text-green-500">
                                           £{((promo.totalRevenueSaved || 0) / 100).toFixed(0)}
                                         </p>
                                         <p className="text-[9px] text-muted-foreground">Savings</p>
@@ -11071,7 +11071,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <Target className="h-3 w-3 text-blue-500" />
                                     Campaign Manager
                                   </CardTitle>
@@ -11089,9 +11089,9 @@ export default function AdminDashboard() {
                             <CardContent>
                               <div className="py-16 text-center">
                                 <div className="w-20 h-20 mx-auto mb-1 rounded-full bg-blue-500/10 flex items-center justify-center">
-                                  <Target className="h-10 w-10 text-blue-500" />
+                                  <Target className="h-5 w-5 text-blue-500" />
                                 </div>
-                                <h3 className="text-xl font-semibold mb-0.5">Campaign Manager</h3>
+                                <h3 className="text-xs font-semibold mb-0.5">Campaign Manager</h3>
                                 <p className="text-muted-foreground mb-1 max-w-md mx-auto">
                                   Create sophisticated marketing campaigns with multiple promo codes, A/B testing, and targeted audience segmentation.
                                 </p>
@@ -11139,7 +11139,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <FileText className="h-3 w-3 text-green-500" />
                                     Promotional Reports
                                   </CardTitle>
@@ -11208,7 +11208,7 @@ export default function AdminDashboard() {
                               <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                 <Card className="bg-muted/30">
                                   <CardContent className="p-1.5 text-center">
-                                    <p className="text-xl font-bold text-purple-500">{promoCodesData?.summary?.totalCodes || 0}</p>
+                                    <p className="text-xs font-bold text-purple-500">{promoCodesData?.summary?.totalCodes || 0}</p>
                                     <p className="text-[9px] text-muted-foreground">Total Codes Created</p>
                                   </CardContent>
                                 </Card>
@@ -11220,13 +11220,13 @@ export default function AdminDashboard() {
                                 </Card>
                                 <Card className="bg-muted/30">
                                   <CardContent className="p-1.5 text-center">
-                                    <p className="text-xl font-bold text-blue-500">£{((promoCodesData?.summary?.totalRevenueSaved || 0) / 100).toFixed(0)}</p>
+                                    <p className="text-xs font-bold text-blue-500">£{((promoCodesData?.summary?.totalRevenueSaved || 0) / 100).toFixed(0)}</p>
                                     <p className="text-[9px] text-muted-foreground">Total Savings</p>
                                   </CardContent>
                                 </Card>
                                 <Card className="bg-muted/30">
                                   <CardContent className="p-1.5 text-center">
-                                    <p className="text-xl font-bold text-amber-500">
+                                    <p className="text-xs font-bold text-amber-500">
                                       £{Math.round((promoCodesData?.summary?.totalRedemptions || 0) * 45)}
                                     </p>
                                     <p className="text-[9px] text-muted-foreground">Est. Revenue Generated</p>
@@ -11261,7 +11261,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-orange-500/10 flex items-center justify-center">
                                     <FileText className="h-3 w-3 text-orange-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-orange-500">{lawyerAnalytics?.totalReviews || 0}</p>
+                                  <p className="text-xs font-bold text-orange-500">{lawyerAnalytics?.totalReviews || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Total Reviews</p>
                                 </div>
                               </CardContent>
@@ -11272,7 +11272,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-yellow-500/10 flex items-center justify-center">
                                     <Clock className="h-3 w-3 text-yellow-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-yellow-500">{lawyerAnalytics?.pendingReviews || 0}</p>
+                                  <p className="text-xs font-bold text-yellow-500">{lawyerAnalytics?.pendingReviews || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Pending Queue</p>
                                 </div>
                               </CardContent>
@@ -11283,7 +11283,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <Activity className="h-3 w-3 text-blue-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-blue-500">{lawyerAnalytics?.inProgressReviews || 0}</p>
+                                  <p className="text-xs font-bold text-blue-500">{lawyerAnalytics?.inProgressReviews || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">In Progress</p>
                                 </div>
                               </CardContent>
@@ -11294,7 +11294,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-green-500">{lawyerAnalytics?.completedReviews || 0}</p>
+                                  <p className="text-xs font-bold text-green-500">{lawyerAnalytics?.completedReviews || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Completed</p>
                                 </div>
                               </CardContent>
@@ -11305,7 +11305,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-red-500/10 flex items-center justify-center">
                                     <AlertTriangle className="h-3 w-3 text-red-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-red-500">{lawyerAnalytics?.overdueReviews || 0}</p>
+                                  <p className="text-xs font-bold text-red-500">{lawyerAnalytics?.overdueReviews || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Overdue</p>
                                 </div>
                               </CardContent>
@@ -11317,7 +11317,7 @@ export default function AdminDashboard() {
                             {/* SLA Compliance Gauge */}
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <Target className="h-3 w-3 text-cyan-500" />
                                   SLA Compliance
                                 </CardTitle>
@@ -11355,11 +11355,11 @@ export default function AdminDashboard() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 mt-1">
                                   <div className="text-center p-3 rounded-lg bg-green-500/10">
-                                    <p className="text-lg font-bold text-green-500">{(lawyerAnalytics?.completedReviews || 0) - (lawyerAnalytics?.overdueReviews || 0)}</p>
+                                    <p className="text-xs font-bold text-green-500">{(lawyerAnalytics?.completedReviews || 0) - (lawyerAnalytics?.overdueReviews || 0)}</p>
                                     <p className="text-[9px] text-muted-foreground">Met SLA</p>
                                   </div>
                                   <div className="text-center p-3 rounded-lg bg-red-500/10">
-                                    <p className="text-lg font-bold text-red-500">{lawyerAnalytics?.overdueReviews || 0}</p>
+                                    <p className="text-xs font-bold text-red-500">{lawyerAnalytics?.overdueReviews || 0}</p>
                                     <p className="text-[9px] text-muted-foreground">Breached</p>
                                   </div>
                                 </div>
@@ -11369,7 +11369,7 @@ export default function AdminDashboard() {
                             {/* Review Outcome Breakdown */}
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <PieChart className="h-3 w-3 text-violet-500" />
                                   Review Outcomes
                                 </CardTitle>
@@ -11385,7 +11385,7 @@ export default function AdminDashboard() {
                                       </div>
                                       <span className="text-[9px] font-medium text-green-500">{lawyerAnalytics?.approvedReviews || 0}</span>
                                     </div>
-                                    <Progress value={lawyerAnalytics?.totalReviews ? (lawyerAnalytics.approvedReviews / lawyerAnalytics.totalReviews) * 100 : 0} className="h-2" />
+                                    <Progress value={lawyerAnalytics?.totalReviews ? (lawyerAnalytics.approvedReviews / lawyerAnalytics.totalReviews) * 100 : 0} className="h-1" />
                                   </div>
                                   <div>
                                     <div className="flex items-center justify-between mb-0.5">
@@ -11395,7 +11395,7 @@ export default function AdminDashboard() {
                                       </div>
                                       <span className="font-medium text-yellow-500">{lawyerAnalytics?.needsRevisionReviews || 0}</span>
                                     </div>
-                                    <Progress value={lawyerAnalytics?.totalReviews ? (lawyerAnalytics.needsRevisionReviews / lawyerAnalytics.totalReviews) * 100 : 0} className="h-2" />
+                                    <Progress value={lawyerAnalytics?.totalReviews ? (lawyerAnalytics.needsRevisionReviews / lawyerAnalytics.totalReviews) * 100 : 0} className="h-1" />
                                   </div>
                                   <div>
                                     <div className="flex items-center justify-between mb-0.5">
@@ -11405,7 +11405,7 @@ export default function AdminDashboard() {
                                       </div>
                                       <span className="font-medium text-red-500">{Math.max(0, (lawyerAnalytics?.completedReviews || 0) - (lawyerAnalytics?.approvedReviews || 0) - (lawyerAnalytics?.needsRevisionReviews || 0))}</span>
                                     </div>
-                                    <Progress value={lawyerAnalytics?.totalReviews ? Math.max(0, ((lawyerAnalytics.completedReviews - lawyerAnalytics.approvedReviews - lawyerAnalytics.needsRevisionReviews) / lawyerAnalytics.totalReviews) * 100) : 0} className="h-2" />
+                                    <Progress value={lawyerAnalytics?.totalReviews ? Math.max(0, ((lawyerAnalytics.completedReviews - lawyerAnalytics.approvedReviews - lawyerAnalytics.needsRevisionReviews) / lawyerAnalytics.totalReviews) * 100) : 0} className="h-1" />
                                   </div>
                                 </div>
                                 <div className="mt-6 p-4 rounded-lg bg-muted/50">
@@ -11424,7 +11424,7 @@ export default function AdminDashboard() {
                             {/* Performance Metrics */}
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <Zap className="h-3 w-3 text-amber-500" />
                                   Performance Metrics
                                 </CardTitle>
@@ -11437,7 +11437,7 @@ export default function AdminDashboard() {
                                       <p className="text-[9px] text-muted-foreground">Avg. Turnaround</p>
                                       <p className="text-[9px] font-bold">{lawyerAnalytics?.averageTurnaroundHours || 0} hrs</p>
                                     </div>
-                                    <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                    <div className="h-5 w-5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                       <Clock className="h-3 w-3 text-blue-500" />
                                     </div>
                                   </div>
@@ -11446,7 +11446,7 @@ export default function AdminDashboard() {
                                       <p className="text-[9px] text-muted-foreground">Active Lawyers</p>
                                       <p className="text-[9px] font-bold">{lawyerTeam?.filter(l => l.isAvailable).length || 0}/{lawyerTeam?.length || 0}</p>
                                     </div>
-                                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <div className="h-5 w-5 rounded-full bg-green-500/10 flex items-center justify-center">
                                       <Users className="h-3 w-3 text-green-500" />
                                     </div>
                                   </div>
@@ -11459,7 +11459,7 @@ export default function AdminDashboard() {
                                           : 0}
                                       </p>
                                     </div>
-                                    <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                    <div className="h-5 w-5 rounded-full bg-amber-500/10 flex items-center justify-center">
                                       <Layers className="h-3 w-3 text-amber-500" />
                                     </div>
                                   </div>
@@ -11473,7 +11473,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <BarChart3 className="h-3 w-3 text-blue-500" />
                                     Review Statistics
                                   </CardTitle>
@@ -11489,11 +11489,11 @@ export default function AdminDashboard() {
                                   <p className="text-[9px] text-muted-foreground mt-0.5">Completed</p>
                                 </div>
                                 <div className="text-center p-6 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                                  <p className="text-xl font-bold text-amber-500">{lawyerAnalytics?.pendingReviews || 0}</p>
+                                  <p className="text-xs font-bold text-amber-500">{lawyerAnalytics?.pendingReviews || 0}</p>
                                   <p className="text-[9px] text-muted-foreground mt-0.5">Pending</p>
                                 </div>
                                 <div className="text-center p-6 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                                  <p className="text-xl font-bold text-blue-500">{lawyerAnalytics?.approvedReviews || 0}</p>
+                                  <p className="text-xs font-bold text-blue-500">{lawyerAnalytics?.approvedReviews || 0}</p>
                                   <p className="text-[9px] text-muted-foreground mt-0.5">Approved</p>
                                 </div>
                               </div>
@@ -11509,7 +11509,7 @@ export default function AdminDashboard() {
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <Users className="h-3 w-3 text-violet-500" />
                                   Team Workload Distribution
                                 </CardTitle>
@@ -11520,7 +11520,7 @@ export default function AdminDashboard() {
                                   <div className="space-y-1.5">
                                     {lawyerTeam.map((lawyer) => (
                                       <div key={lawyer.id} className="flex items-center gap-1.5">
-                                        <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${lawyer.isAvailable ? 'bg-green-500/10 text-green-600' : 'bg-gray-500/10 text-gray-500'}`}>
+                                        <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold ${lawyer.isAvailable ? 'bg-green-500/10 text-green-600' : 'bg-gray-500/10 text-gray-500'}`}>
                                           {lawyer.firstName[0]}{lawyer.lastName[0]}
                                         </div>
                                         <div className="flex-1">
@@ -11550,7 +11550,7 @@ export default function AdminDashboard() {
 
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <AlertTriangle className="h-3 w-3 text-red-500" />
                                   Risk Matrix
                                 </CardTitle>
@@ -11560,7 +11560,7 @@ export default function AdminDashboard() {
                                 <div className="space-y-1.5">
                                   <div className="flex items-center justify-between p-4 rounded-lg bg-red-500/10 border border-red-500/20">
                                     <div className="flex items-center gap-1.5">
-                                      <div className="h-10 w-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                                      <div className="h-5 w-5 rounded-full bg-red-500/20 flex items-center justify-center">
                                         <AlertTriangle className="h-3 w-3 text-red-500" />
                                       </div>
                                       <div>
@@ -11568,11 +11568,11 @@ export default function AdminDashboard() {
                                         <p className="text-[9px] text-muted-foreground">SLA breached, immediate action needed</p>
                                       </div>
                                     </div>
-                                    <Badge variant="destructive" className="text-lg px-1.5 py-1">{lawyerAnalytics?.overdueReviews || 0}</Badge>
+                                    <Badge variant="destructive" className="text-xs px-1.5 py-1">{lawyerAnalytics?.overdueReviews || 0}</Badge>
                                   </div>
                                   <div className="flex items-center justify-between p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
                                     <div className="flex items-center gap-1.5">
-                                      <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                                      <div className="h-5 w-5 rounded-full bg-amber-500/20 flex items-center justify-center">
                                         <Clock className="h-3 w-3 text-amber-500" />
                                       </div>
                                       <div>
@@ -11580,11 +11580,11 @@ export default function AdminDashboard() {
                                         <p className="text-[9px] text-muted-foreground">Due within 24 hours</p>
                                       </div>
                                     </div>
-                                    <Badge className="bg-amber-500 text-lg px-1.5 py-1">{lawyerReviews?.filter(r => r.priority === 'urgent').length || 0}</Badge>
+                                    <Badge className="bg-amber-500 text-[9px] px-1 py-0">{lawyerReviews?.filter(r => r.priority === 'urgent').length || 0}</Badge>
                                   </div>
                                   <div className="flex items-center justify-between p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
                                     <div className="flex items-center gap-1.5">
-                                      <div className="h-10 w-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                                      <div className="h-5 w-5 rounded-full bg-yellow-500/20 flex items-center justify-center">
                                         <Zap className="h-3 w-3 text-yellow-500" />
                                       </div>
                                       <div>
@@ -11592,7 +11592,7 @@ export default function AdminDashboard() {
                                         <p className="text-[9px] text-muted-foreground">Premium customer priority</p>
                                       </div>
                                     </div>
-                                    <Badge className="bg-yellow-500 text-lg px-1.5 py-1">{lawyerReviews?.filter(r => r.tier === 'enterprise' || r.tier === 'ultimate').length || 0}</Badge>
+                                    <Badge className="bg-yellow-500 text-[9px] px-1 py-0">{lawyerReviews?.filter(r => r.tier === 'enterprise' || r.tier === 'ultimate').length || 0}</Badge>
                                   </div>
                                 </div>
                               </CardContent>
@@ -11611,7 +11611,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Urgent</p>
-                                    <p className="text-lg font-bold text-red-500">{lawyerReviews?.filter(r => r.priority === 'urgent' && r.status === 'pending').length || 0}</p>
+                                    <p className="text-xs font-bold text-red-500">{lawyerReviews?.filter(r => r.priority === 'urgent' && r.status === 'pending').length || 0}</p>
                                   </div>
                                   <AlertTriangle className="h-8 w-8 text-red-500/50" />
                                 </div>
@@ -11622,7 +11622,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">High Priority</p>
-                                    <p className="text-lg font-bold text-amber-500">{lawyerReviews?.filter(r => r.priority === 'high' && r.status === 'pending').length || 0}</p>
+                                    <p className="text-xs font-bold text-amber-500">{lawyerReviews?.filter(r => r.priority === 'high' && r.status === 'pending').length || 0}</p>
                                   </div>
                                   <Zap className="h-8 w-8 text-amber-500/50" />
                                 </div>
@@ -11633,7 +11633,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Normal</p>
-                                    <p className="text-lg font-bold text-blue-500">{lawyerReviews?.filter(r => r.priority === 'normal' && r.status === 'pending').length || 0}</p>
+                                    <p className="text-xs font-bold text-blue-500">{lawyerReviews?.filter(r => r.priority === 'normal' && r.status === 'pending').length || 0}</p>
                                   </div>
                                   <Clock className="h-8 w-8 text-blue-500/50" />
                                 </div>
@@ -11644,7 +11644,7 @@ export default function AdminDashboard() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-[9px] text-muted-foreground">Available Lawyers</p>
-                                    <p className="text-lg font-bold text-green-500">{lawyerTeam?.filter(l => l.isAvailable && l.currentReviewCount < l.maxConcurrentReviews).length || 0}</p>
+                                    <p className="text-xs font-bold text-green-500">{lawyerTeam?.filter(l => l.isAvailable && l.currentReviewCount < l.maxConcurrentReviews).length || 0}</p>
                                   </div>
                                   <Users className="h-8 w-8 text-green-500/50" />
                                 </div>
@@ -11657,7 +11657,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <ClipboardCheck className="h-3 w-3 text-orange-500" />
                                     Pending Review Queue
                                   </CardTitle>
@@ -11729,7 +11729,7 @@ export default function AdminDashboard() {
                                                   <Badge variant="outline" className="capitalize text-xs">{review.tier}</Badge>
                                                   {review.isOverdue && <Badge variant="destructive" className="text-xs">Overdue</Badge>}
                                                 </div>
-                                                <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                                                <div className="flex items-center gap-4 mt-1 text-[9px] text-muted-foreground">
                                                   <span className="flex items-center gap-1">
                                                     <Clock className="h-3 w-3" />
                                                     Requested {format(new Date(review.requestedAt), 'MMM d, h:mm a')}
@@ -11797,9 +11797,9 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="py-16 text-center">
                                   <div className="w-20 h-20 mx-auto mb-1 rounded-full bg-green-500/10 flex items-center justify-center">
-                                    <CheckCircle className="h-10 w-10 text-green-500" />
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
                                   </div>
-                                  <h3 className="text-xl font-semibold mb-0.5">Queue is Empty</h3>
+                                  <h3 className="text-xs font-semibold mb-0.5">Queue is Empty</h3>
                                   <p className="text-muted-foreground max-w-md mx-auto">
                                     All pending reviews have been assigned. New reviews will appear here when users request document reviews.
                                   </p>
@@ -11811,7 +11811,7 @@ export default function AdminDashboard() {
                           {/* Aging Distribution */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <Clock className="h-3 w-3 text-blue-500" />
                                 Queue Aging Distribution
                               </CardTitle>
@@ -11852,7 +11852,7 @@ export default function AdminDashboard() {
                             ].map((tab) => (
                               <Card key={tab.status} className={`hover-elevate cursor-pointer bg-gradient-to-br from-${tab.color}-500/10 to-${tab.color}-600/5 border-${tab.color}-500/20`}>
                                 <CardContent className="pt-4 pb-4 text-center">
-                                  <p className={`text-lg font-bold text-${tab.color}-500`}>{tab.count}</p>
+                                  <p className={`text-xs font-bold text-${tab.color}-500`}>{tab.count}</p>
                                   <p className="text-[9px] text-muted-foreground">{tab.label}</p>
                                 </CardContent>
                               </Card>
@@ -11864,7 +11864,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <FileSearch className="h-3 w-3 text-blue-500" />
                                     All Document Reviews
                                   </CardTitle>
@@ -11990,9 +11990,9 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="py-16 text-center">
                                   <div className="w-20 h-20 mx-auto mb-1 rounded-full bg-blue-500/10 flex items-center justify-center">
-                                    <FileSearch className="h-10 w-10 text-blue-500" />
+                                    <FileSearch className="h-5 w-5 text-blue-500" />
                                   </div>
-                                  <h3 className="text-xl font-semibold mb-0.5">No Document Reviews</h3>
+                                  <h3 className="text-xs font-semibold mb-0.5">No Document Reviews</h3>
                                   <p className="text-muted-foreground max-w-md mx-auto">
                                     Document reviews will appear here when users request professional review of their business plans.
                                   </p>
@@ -12014,7 +12014,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <Users className="h-3 w-3 text-blue-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-blue-500">{lawyerTeam?.length || 0}</p>
+                                  <p className="text-xs font-bold text-blue-500">{lawyerTeam?.length || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Total Lawyers</p>
                                 </div>
                               </CardContent>
@@ -12025,7 +12025,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <UserCheck className="h-3 w-3 text-green-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-green-500">{lawyerTeam?.filter(l => l.isAvailable).length || 0}</p>
+                                  <p className="text-xs font-bold text-green-500">{lawyerTeam?.filter(l => l.isAvailable).length || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Available</p>
                                 </div>
                               </CardContent>
@@ -12036,7 +12036,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-amber-500/10 flex items-center justify-center">
                                     <Activity className="h-3 w-3 text-amber-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-amber-500">{lawyerTeam?.reduce((sum, l) => sum + l.currentReviewCount, 0) || 0}</p>
+                                  <p className="text-xs font-bold text-amber-500">{lawyerTeam?.reduce((sum, l) => sum + l.currentReviewCount, 0) || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Active Reviews</p>
                                 </div>
                               </CardContent>
@@ -12047,7 +12047,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-violet-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-violet-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-violet-500">{lawyerTeam?.reduce((sum, l) => sum + l.totalReviewsCompleted, 0) || 0}</p>
+                                  <p className="text-xs font-bold text-violet-500">{lawyerTeam?.reduce((sum, l) => sum + l.totalReviewsCompleted, 0) || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Total Completed</p>
                                 </div>
                               </CardContent>
@@ -12058,7 +12058,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-cyan-500/10 flex items-center justify-center">
                                     <Star className="h-3 w-3 text-cyan-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-cyan-500">
+                                  <p className="text-xs font-bold text-cyan-500">
                                     {lawyerTeam?.length 
                                       ? (lawyerTeam.reduce((sum, l) => sum + (l.averageRating || 0), 0) / lawyerTeam.length).toFixed(1)
                                       : '0'}
@@ -12074,7 +12074,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <UserCog className="h-3 w-3 text-blue-500" />
                                     Immigration Lawyer Team
                                   </CardTitle>
@@ -12100,7 +12100,7 @@ export default function AdminDashboard() {
                                       <CardContent className="p-2">
                                         <div className="flex items-center justify-between gap-4 flex-wrap">
                                           <div className="flex items-center gap-1.5">
-                                            <div className={`h-14 w-14 rounded-full flex items-center justify-center text-lg font-bold ${lawyer.isAvailable ? 'bg-gradient-to-br from-green-500/20 to-blue-500/20 text-green-600' : 'bg-gray-500/10 text-gray-500'}`}>
+                                            <div className={`h-4 w-4 rounded-full flex items-center justify-center text-xs font-bold ${lawyer.isAvailable ? 'bg-gradient-to-br from-green-500/20 to-blue-500/20 text-green-600' : 'bg-gray-500/10 text-gray-500'}`}>
                                               {lawyer.firstName[0]}{lawyer.lastName[0]}
                                             </div>
                                             <div>
@@ -12198,9 +12198,9 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="py-16 text-center">
                                   <div className="w-20 h-20 mx-auto mb-1 rounded-full bg-blue-500/10 flex items-center justify-center">
-                                    <UserCog className="h-10 w-10 text-blue-500" />
+                                    <UserCog className="h-5 w-5 text-blue-500" />
                                   </div>
-                                  <h3 className="text-xl font-semibold mb-0.5">No Lawyers Added Yet</h3>
+                                  <h3 className="text-xs font-semibold mb-0.5">No Lawyers Added Yet</h3>
                                   <p className="text-muted-foreground mb-1 max-w-md mx-auto">
                                     Add immigration lawyers to your team to handle professional document reviews for visa applicants.
                                   </p>
@@ -12217,7 +12217,7 @@ export default function AdminDashboard() {
                           {lawyerTeam && lawyerTeam.length > 0 && (
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                   <BarChart3 className="h-3 w-3 text-violet-500" />
                                   Team Performance Comparison
                                 </CardTitle>
@@ -12256,7 +12256,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-green-500">{lawyerAnalytics?.approvedReviews || 0}</p>
+                                  <p className="text-xs font-bold text-green-500">{lawyerAnalytics?.approvedReviews || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Approved</p>
                                 </div>
                               </CardContent>
@@ -12267,7 +12267,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-yellow-500/10 flex items-center justify-center">
                                     <Edit className="h-3 w-3 text-yellow-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-yellow-500">{lawyerAnalytics?.needsRevisionReviews || 0}</p>
+                                  <p className="text-xs font-bold text-yellow-500">{lawyerAnalytics?.needsRevisionReviews || 0}</p>
                                   <p className="text-[9px] text-muted-foreground">Needs Revision</p>
                                 </div>
                               </CardContent>
@@ -12278,7 +12278,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <Target className="h-3 w-3 text-blue-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-blue-500">
+                                  <p className="text-xs font-bold text-blue-500">
                                     {lawyerAnalytics?.completedReviews 
                                       ? Math.round((lawyerAnalytics.approvedReviews / lawyerAnalytics.completedReviews) * 100) 
                                       : 0}%
@@ -12293,7 +12293,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-violet-500/10 flex items-center justify-center">
                                     <Clock className="h-3 w-3 text-violet-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-violet-500">{lawyerAnalytics?.averageTurnaroundHours || 0}h</p>
+                                  <p className="text-xs font-bold text-violet-500">{lawyerAnalytics?.averageTurnaroundHours || 0}h</p>
                                   <p className="text-[9px] text-muted-foreground">Avg. Turnaround</p>
                                 </div>
                               </CardContent>
@@ -12305,7 +12305,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <TrendingUp className="h-3 w-3 text-green-500" />
                                     Review Outcomes
                                   </CardTitle>
@@ -12322,11 +12322,11 @@ export default function AdminDashboard() {
                                     <p className="text-xs text-muted-foreground mt-1">Approved</p>
                                   </div>
                                   <div className="text-center p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                                    <p className="text-xl font-bold text-yellow-500">{lawyerAnalytics?.needsRevisionReviews || 0}</p>
+                                    <p className="text-xs font-bold text-yellow-500">{lawyerAnalytics?.needsRevisionReviews || 0}</p>
                                     <p className="text-xs text-muted-foreground mt-1">Needs Revision</p>
                                   </div>
                                   <div className="text-center p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                                    <p className="text-xl font-bold text-red-500">{lawyerAnalytics?.rejectedReviews || 0}</p>
+                                    <p className="text-xs font-bold text-red-500">{lawyerAnalytics?.rejectedReviews || 0}</p>
                                     <p className="text-xs text-muted-foreground mt-1">Rejected</p>
                                   </div>
                                 </div>
@@ -12352,7 +12352,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
                                     Completed Reviews Archive
                                   </CardTitle>
@@ -12487,9 +12487,9 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="py-16 text-center">
                                   <div className="w-20 h-20 mx-auto mb-1 rounded-full bg-green-500/10 flex items-center justify-center">
-                                    <CheckCircle className="h-10 w-10 text-green-500" />
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
                                   </div>
-                                  <h3 className="text-xl font-semibold mb-0.5">No Completed Reviews Yet</h3>
+                                  <h3 className="text-xs font-semibold mb-0.5">No Completed Reviews Yet</h3>
                                   <p className="text-muted-foreground max-w-md mx-auto">
                                     Once lawyers complete document reviews, they will appear here with detailed outcomes and reports.
                                   </p>
@@ -12511,7 +12511,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <MessageSquare className="h-3 w-3 text-blue-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-blue-500">47</p>
+                                  <p className="text-xs font-bold text-blue-500">47</p>
                                   <p className="text-[9px] text-muted-foreground">Total Comments</p>
                                 </div>
                               </CardContent>
@@ -12522,7 +12522,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-green-500">38</p>
+                                  <p className="text-xs font-bold text-green-500">38</p>
                                   <p className="text-[9px] text-muted-foreground">Resolved</p>
                                 </div>
                               </CardContent>
@@ -12533,7 +12533,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-amber-500/10 flex items-center justify-center">
                                     <Clock className="h-3 w-3 text-amber-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-amber-500">9</p>
+                                  <p className="text-xs font-bold text-amber-500">9</p>
                                   <p className="text-[9px] text-muted-foreground">Pending</p>
                                 </div>
                               </CardContent>
@@ -12544,7 +12544,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-violet-500/10 flex items-center justify-center">
                                     <Users className="h-3 w-3 text-violet-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-violet-500">12</p>
+                                  <p className="text-xs font-bold text-violet-500">12</p>
                                   <p className="text-[9px] text-muted-foreground">Active Threads</p>
                                 </div>
                               </CardContent>
@@ -12556,7 +12556,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <MessageSquare className="h-3 w-3 text-blue-500" />
                                     Review Comments & Notes
                                   </CardTitle>
@@ -12592,7 +12592,7 @@ export default function AdminDashboard() {
                                   <Card key={comment.id} className={`hover-elevate ${comment.status === 'pending' ? 'border-amber-500/30' : ''}`}>
                                     <CardContent className="p-2">
                                       <div className="flex items-start gap-1.5">
-                                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 flex items-center justify-center text-sm font-bold">
+                                        <div className="h-5 w-5 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 flex items-center justify-center text-[9px] font-bold">
                                           {comment.author.split(' ').map(n => n[0]).join('')}
                                         </div>
                                         <div className="flex-1">
@@ -12609,7 +12609,7 @@ export default function AdminDashboard() {
                                               <span>{comment.time}</span>
                                             </div>
                                           </div>
-                                          <p className="mt-2 text-sm">{comment.content}</p>
+                                          <p className="mt-2 text-[9px]">{comment.content}</p>
                                           <div className="flex items-center gap-2 mt-0.5">
                                             <Button variant="ghost" size="sm">
                                               <MessageSquare className="h-3 w-3 mr-1" />
@@ -12690,7 +12690,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <Settings className="h-3 w-3 text-blue-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-blue-500">24</p>
+                                  <p className="text-xs font-bold text-blue-500">24</p>
                                   <p className="text-[9px] text-muted-foreground">Active Settings</p>
                                 </div>
                               </CardContent>
@@ -12701,7 +12701,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-green-500">18</p>
+                                  <p className="text-xs font-bold text-green-500">18</p>
                                   <p className="text-[9px] text-muted-foreground">Enabled Features</p>
                                 </div>
                               </CardContent>
@@ -12712,7 +12712,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-amber-500/10 flex items-center justify-center">
                                     <Clock className="h-3 w-3 text-amber-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-amber-500">3</p>
+                                  <p className="text-xs font-bold text-amber-500">3</p>
                                   <p className="text-[9px] text-muted-foreground">Pending Changes</p>
                                 </div>
                               </CardContent>
@@ -12723,7 +12723,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-violet-500/10 flex items-center justify-center">
                                     <History className="h-3 w-3 text-violet-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-violet-500">12</p>
+                                  <p className="text-xs font-bold text-violet-500">12</p>
                                   <p className="text-[9px] text-muted-foreground">Config History</p>
                                 </div>
                               </CardContent>
@@ -12733,13 +12733,13 @@ export default function AdminDashboard() {
                           {/* Platform Configuration */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <Settings className="h-3 w-3 text-blue-500" />
                                 Platform Configuration
                               </CardTitle>
                               <CardDescription className="text-[9px]">Core platform settings and feature toggles</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-1.5">
+                            <CardContent className="p-2 space-y-1">
                               <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                                 {/* Registration Settings */}
                                 <div className="space-y-4 p-4 rounded-lg border border-border/50">
@@ -12871,7 +12871,7 @@ export default function AdminDashboard() {
                           {/* System Information */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <Server className="h-3 w-3 text-violet-500" />
                                 System Information
                               </CardTitle>
@@ -12881,7 +12881,7 @@ export default function AdminDashboard() {
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
                                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20">
                                   <p className="text-[9px] text-muted-foreground">Version</p>
-                                  <p className="text-xl font-bold text-blue-500">v2.0.0</p>
+                                  <p className="text-xs font-bold text-blue-500">v2.0.0</p>
                                 </div>
                                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20">
                                   <p className="text-[9px] text-muted-foreground">Environment</p>
@@ -12889,11 +12889,11 @@ export default function AdminDashboard() {
                                 </div>
                                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20">
                                   <p className="text-[9px] text-muted-foreground">Node.js</p>
-                                  <p className="text-xl font-bold text-amber-500">v20.x</p>
+                                  <p className="text-xs font-bold text-amber-500">v20.x</p>
                                 </div>
                                 <div className="p-1.5 rounded-lg bg-gradient-to-br from-violet-500/10 to-violet-600/5 border border-violet-500/20">
                                   <p className="text-[9px] text-muted-foreground">Database</p>
-                                  <p className="text-xl font-bold text-violet-500">PostgreSQL</p>
+                                  <p className="text-xs font-bold text-violet-500">PostgreSQL</p>
                                 </div>
                               </div>
                             </CardContent>
@@ -12902,7 +12902,7 @@ export default function AdminDashboard() {
                           {/* Configuration History */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <History className="h-3 w-3 text-amber-500" />
                                 Recent Configuration Changes
                               </CardTitle>
@@ -12921,7 +12921,7 @@ export default function AdminDashboard() {
                                         <Settings className="h-3 w-3 text-amber-500" />
                                       </div>
                                       <div>
-                                        <p className="font-medium text-sm">{change.setting}</p>
+                                        <p className="font-medium text-[9px]">{change.setting}</p>
                                         <p className="text-[9px] text-muted-foreground">
                                           <span className="text-red-500">{change.oldValue}</span>
                                           <ArrowRight className="h-3 w-3 inline mx-1" />
@@ -12952,7 +12952,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-violet-500/10 flex items-center justify-center">
                                     <Shield className="h-3 w-3 text-violet-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-violet-500">3</p>
+                                  <p className="text-xs font-bold text-violet-500">3</p>
                                   <p className="text-[9px] text-muted-foreground">Admin Users</p>
                                 </div>
                               </CardContent>
@@ -12963,7 +12963,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <LockKeyhole className="h-3 w-3 text-blue-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-blue-500">12</p>
+                                  <p className="text-xs font-bold text-blue-500">12</p>
                                   <p className="text-[9px] text-muted-foreground">Permission Sets</p>
                                 </div>
                               </CardContent>
@@ -12974,7 +12974,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-green-500">45</p>
+                                  <p className="text-xs font-bold text-green-500">45</p>
                                   <p className="text-[9px] text-muted-foreground">Active Sessions</p>
                                 </div>
                               </CardContent>
@@ -12985,7 +12985,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-red-500/10 flex items-center justify-center">
                                     <AlertTriangle className="h-3 w-3 text-red-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-red-500">2</p>
+                                  <p className="text-xs font-bold text-red-500">2</p>
                                   <p className="text-[9px] text-muted-foreground">Security Alerts</p>
                                 </div>
                               </CardContent>
@@ -12997,7 +12997,7 @@ export default function AdminDashboard() {
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
                                 <div>
-                                  <CardTitle className="flex items-center gap-2">
+                                  <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                     <Shield className="h-3 w-3 text-violet-500" />
                                     Admin Team
                                   </CardTitle>
@@ -13020,7 +13020,7 @@ export default function AdminDashboard() {
                                     <CardContent className="p-2">
                                       <div className="flex items-center justify-between gap-4 flex-wrap">
                                         <div className="flex items-center gap-1.5">
-                                          <div className={`h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold ${
+                                          <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
                                             admin.role === 'Super Admin' ? 'bg-gradient-to-br from-violet-500/20 to-purple-500/20 text-violet-600' :
                                             admin.role === 'Admin' ? 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 text-blue-600' :
                                             'bg-gradient-to-br from-green-500/20 to-emerald-500/20 text-green-600'
@@ -13081,7 +13081,7 @@ export default function AdminDashboard() {
                           {/* Permission Matrix */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <LockKeyhole className="h-3 w-3 text-blue-500" />
                                 Permission Matrix
                               </CardTitle>
@@ -13131,7 +13131,7 @@ export default function AdminDashboard() {
                           {/* Recent Security Events */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <AlertTriangle className="h-3 w-3 text-amber-500" />
                                 Security Events
                               </CardTitle>
@@ -13159,7 +13159,7 @@ export default function AdminDashboard() {
                                         )}
                                       </div>
                                       <div>
-                                        <p className="font-medium text-sm">{event.event}</p>
+                                        <p className="font-medium text-[9px]">{event.event}</p>
                                         <p className="text-[9px] text-muted-foreground">{event.user} • IP: {event.ip}</p>
                                       </div>
                                     </div>
@@ -13188,7 +13188,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-green-500">Online</p>
+                                  <p className="text-xs font-bold text-green-500">Online</p>
                                   <p className="text-[9px] text-muted-foreground">System Status</p>
                                 </div>
                               </CardContent>
@@ -13199,7 +13199,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <Clock className="h-3 w-3 text-blue-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-blue-500">99.9%</p>
+                                  <p className="text-xs font-bold text-blue-500">99.9%</p>
                                   <p className="text-[9px] text-muted-foreground">Uptime (30 days)</p>
                                 </div>
                               </CardContent>
@@ -13210,7 +13210,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-amber-500/10 flex items-center justify-center">
                                     <Database className="h-3 w-3 text-amber-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-amber-500">1.2GB</p>
+                                  <p className="text-xs font-bold text-amber-500">1.2GB</p>
                                   <p className="text-[9px] text-muted-foreground">Database Size</p>
                                 </div>
                               </CardContent>
@@ -13221,7 +13221,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-violet-500/10 flex items-center justify-center">
                                     <History className="h-3 w-3 text-violet-500" />
                                   </div>
-                                  <p className="text-lg font-bold text-violet-500">2h ago</p>
+                                  <p className="text-xs font-bold text-violet-500">2h ago</p>
                                   <p className="text-[9px] text-muted-foreground">Last Backup</p>
                                 </div>
                               </CardContent>
@@ -13231,20 +13231,20 @@ export default function AdminDashboard() {
                           {/* Maintenance Mode Control */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <AlertTriangle className="h-3 w-3 text-amber-500" />
                                 Maintenance Mode
                               </CardTitle>
                               <CardDescription className="text-[9px]">Temporarily disable access for non-admin users</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-1.5">
+                            <CardContent className="p-2 space-y-1">
                               <div className="flex items-center justify-between p-6 rounded-lg bg-amber-500/10 border border-amber-500/20">
                                 <div className="flex items-center gap-1.5">
-                                  <div className="h-14 w-14 rounded-full bg-amber-500/20 flex items-center justify-center">
+                                  <div className="h-4 w-4 rounded-full bg-amber-500/20 flex items-center justify-center">
                                     <AlertTriangle className="h-7 w-7 text-amber-500" />
                                   </div>
                                   <div>
-                                    <p className="font-semibold text-lg">Enable Maintenance Mode</p>
+                                    <p className="font-semibold text-xs">Enable Maintenance Mode</p>
                                     <p className="text-[9px] text-muted-foreground">
                                       When enabled, only administrators can access the platform. Users will see a maintenance page.
                                     </p>
@@ -13277,7 +13277,7 @@ export default function AdminDashboard() {
                           {/* System Maintenance Actions */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <Server className="h-3 w-3 text-blue-500" />
                                 System Actions
                               </CardTitle>
@@ -13289,7 +13289,7 @@ export default function AdminDashboard() {
                                   <CardContent className="p-2">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-1.5">
-                                        <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                        <div className="h-5 w-5 rounded-lg bg-blue-500/10 flex items-center justify-center">
                                           <Database className="h-3 w-3 text-blue-500" />
                                         </div>
                                         <div>
@@ -13309,7 +13309,7 @@ export default function AdminDashboard() {
                                   <CardContent className="p-2">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-1.5">
-                                        <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                                        <div className="h-5 w-5 rounded-lg bg-amber-500/10 flex items-center justify-center">
                                           <RefreshCw className="h-3 w-3 text-amber-500" />
                                         </div>
                                         <div>
@@ -13329,7 +13329,7 @@ export default function AdminDashboard() {
                                   <CardContent className="p-2">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-1.5">
-                                        <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                        <div className="h-5 w-5 rounded-lg bg-green-500/10 flex items-center justify-center">
                                           <RotateCcw className="h-3 w-3 text-green-500" />
                                         </div>
                                         <div>
@@ -13349,7 +13349,7 @@ export default function AdminDashboard() {
                                   <CardContent className="p-2">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-1.5">
-                                        <div className="h-10 w-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                                        <div className="h-5 w-5 rounded-lg bg-violet-500/10 flex items-center justify-center">
                                           <FileText className="h-3 w-3 text-violet-500" />
                                         </div>
                                         <div>
@@ -13371,7 +13371,7 @@ export default function AdminDashboard() {
                           {/* Backup History */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <History className="h-3 w-3 text-violet-500" />
                                 Backup History
                               </CardTitle>
@@ -13447,7 +13447,7 @@ export default function AdminDashboard() {
                           {/* Scheduled Tasks */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="flex items-center gap-2">
+                              <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <Clock className="h-3 w-3 text-cyan-500" />
                                 Scheduled Tasks
                               </CardTitle>
@@ -13463,7 +13463,7 @@ export default function AdminDashboard() {
                                 ].map((task, i) => (
                                   <div key={i} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover-elevate">
                                     <div className="flex items-center gap-1.5">
-                                      <div className="h-10 w-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
+                                      <div className="h-5 w-5 rounded-full bg-cyan-500/10 flex items-center justify-center">
                                         <Clock className="h-3 w-3 text-cyan-500" />
                                       </div>
                                       <div>
@@ -13682,12 +13682,12 @@ export default function AdminDashboard() {
                   <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/30">
                     <Avatar className="h-16 w-16">
                       <AvatarImage src={userAnalysis.user.avatar} />
-                      <AvatarFallback className="text-lg">
+                      <AvatarFallback className="text-[9px]">
                         {userAnalysis.user.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '?'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold">{userAnalysis.user.name || 'Unknown User'}</h3>
+                      <h3 className="text-xs font-semibold">{userAnalysis.user.name || 'Unknown User'}</h3>
                       <p className="text-[9px] text-muted-foreground">{userAnalysis.user.email}</p>
                       <div className="flex flex-wrap gap-2 mt-0.5">
                         <Badge variant="outline" className="capitalize">{userAnalysis.user.tier}</Badge>
@@ -13711,7 +13711,7 @@ export default function AdminDashboard() {
                         <Gauge className="h-3 w-3" />
                         <span className="text-xs font-medium">Engagement Score</span>
                       </div>
-                      <div className="text-lg font-bold">{userAnalysis.insights.engagementScore}/100</div>
+                      <div className="text-xs font-bold">{userAnalysis.insights.engagementScore}/100</div>
                       <Progress value={userAnalysis.insights.engagementScore} className="h-1.5 mt-0.5" />
                     </Card>
                     <Card className="p-4">
@@ -13719,7 +13719,7 @@ export default function AdminDashboard() {
                         <FileText className="h-3 w-3" />
                         <span className="text-xs font-medium">Business Plans</span>
                       </div>
-                      <div className="text-lg font-bold">{userAnalysis.businessPlans.total}</div>
+                      <div className="text-xs font-bold">{userAnalysis.businessPlans.total}</div>
                       <p className="text-xs text-muted-foreground mt-1">Created</p>
                     </Card>
                     <Card className="p-4">
@@ -13727,7 +13727,7 @@ export default function AdminDashboard() {
                         <Wallet className="h-3 w-3" />
                         <span className="text-xs font-medium">Credits</span>
                       </div>
-                      <div className="text-lg font-bold">{userAnalysis.credits.current}</div>
+                      <div className="text-xs font-bold">{userAnalysis.credits.current}</div>
                       <p className="text-xs text-muted-foreground mt-1">Available ({userAnalysis.credits.used} used)</p>
                     </Card>
                     <Card className="p-4">
@@ -13735,7 +13735,7 @@ export default function AdminDashboard() {
                         <PoundSterling className="h-3 w-3" />
                         <span className="text-xs font-medium">Lifetime Value</span>
                       </div>
-                      <div className="text-lg font-bold">£{userAnalysis.financials.lifetimeValue?.toFixed(2) || '0.00'}</div>
+                      <div className="text-xs font-bold">£{userAnalysis.financials.lifetimeValue?.toFixed(2) || '0.00'}</div>
                       <p className="text-xs text-muted-foreground mt-1">{userAnalysis.financials.transactionCount} transactions</p>
                     </Card>
                   </div>
@@ -13787,15 +13787,15 @@ export default function AdminDashboard() {
                     </h4>
                     <div className="grid grid-cols-3 gap-4 mb-1">
                       <div className="text-center p-3 bg-muted/30 rounded-lg">
-                        <div className="text-lg font-bold">{userAnalysis.toolEngagement.uniqueToolsUsed}</div>
+                        <div className="text-xs font-bold">{userAnalysis.toolEngagement.uniqueToolsUsed}</div>
                         <p className="text-[9px] text-muted-foreground">Unique Tools</p>
                       </div>
                       <div className="text-center p-3 bg-muted/30 rounded-lg">
-                        <div className="text-lg font-bold">{userAnalysis.toolEngagement.totalToolInteractions}</div>
+                        <div className="text-xs font-bold">{userAnalysis.toolEngagement.totalToolInteractions}</div>
                         <p className="text-[9px] text-muted-foreground">Total Interactions</p>
                       </div>
                       <div className="text-center p-3 bg-muted/30 rounded-lg">
-                        <div className="text-lg font-bold">{userAnalysis.aiInteractions.total}</div>
+                        <div className="text-xs font-bold">{userAnalysis.aiInteractions.total}</div>
                         <p className="text-[9px] text-muted-foreground">AI Interactions</p>
                       </div>
                     </div>
@@ -13851,7 +13851,7 @@ export default function AdminDashboard() {
                           <p className="text-[9px] text-muted-foreground">Total</p>
                         </div>
                         <div className="p-2 bg-muted/30 rounded">
-                          <div className="text-xl font-bold text-orange-500">{userAnalysis.support.openTickets}</div>
+                          <div className="text-xs font-bold text-orange-500">{userAnalysis.support.openTickets}</div>
                           <p className="text-[9px] text-muted-foreground">Open</p>
                         </div>
                         <div className="p-2 bg-muted/30 rounded">
@@ -14043,7 +14043,7 @@ export default function AdminDashboard() {
               </AlertDialogTitle>
               <AlertDialogDescription className="space-y-0.5">
                 <p>This action <span className="font-bold text-red-600">CANNOT be undone</span>. This will permanently delete:</p>
-                <ul className="list-disc list-inside text-sm space-y-1 mt-0.5">
+                <ul className="list-disc list-inside text-[9px] space-y-0.5 mt-0.5">
                   <li>User account and profile</li>
                   <li>All business plans</li>
                   <li>Payment history</li>
@@ -14440,7 +14440,7 @@ export default function AdminDashboard() {
               <div className="space-y-1.5 py-1">
                 <div className="p-4 bg-muted rounded-lg">
                   <h4 className="font-semibold mb-0.5">Account Overview</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-4 text-[9px]">
                     <div>
                       <p className="text-[9px] text-muted-foreground">Email</p>
                       <p className="font-medium">{impersonationData.user?.email}</p>
@@ -14465,7 +14465,7 @@ export default function AdminDashboard() {
                   {impersonationData.businessPlans?.length > 0 ? (
                     <div className="space-y-0.5">
                       {impersonationData.businessPlans.map((plan: any) => (
-                        <div key={plan.id} className="p-3 border rounded-lg text-sm">
+                        <div key={plan.id} className="p-3 border rounded-lg text-[9px]">
                           <div className="flex justify-between">
                             <span className="font-medium">{plan.businessName || 'Unnamed Plan'}</span>
                             <Badge variant="outline" className="text-xs">{plan.status}</Badge>
@@ -14477,7 +14477,7 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground text-sm">No business plans found</p>
+                    <p className="text-muted-foreground text-[9px]">No business plans found</p>
                   )}
                 </div>
 
