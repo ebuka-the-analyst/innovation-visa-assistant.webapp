@@ -2526,164 +2526,174 @@ export default function AdminDashboard() {
                       </div>
                     )}
 
-                    {/* Row 1: KPI Cards 2×2 grid */}
-                    <div key={`kpi-${hideDemoUsers}`} className="grid grid-cols-2 gap-1.5">
-                      {filteredOverviewData?.kpiMetrics?.map((metric) => {
-                        const IconComponent = iconMap[metric.icon] || Activity;
-                        return (
-                          <Card key={`${metric.label}-${hideDemoUsers}`} data-testid={`card-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                    {/* 2-Column Dashboard Layout */}
+                    <div className="grid grid-cols-5 gap-1.5 items-start">
+
+                      {/* LEFT COLUMN (2/5): KPI 2×2 + Tier Distribution + System Health */}
+                      <div className="col-span-2 flex flex-col gap-1.5">
+
+                        {/* KPI 2×2 grid */}
+                        <div key={`kpi-${hideDemoUsers}`} className="grid grid-cols-2 gap-1.5">
+                          {filteredOverviewData?.kpiMetrics?.map((metric) => {
+                            const IconComponent = iconMap[metric.icon] || Activity;
+                            return (
+                              <Card key={`${metric.label}-${hideDemoUsers}`} data-testid={`card-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                                <CardContent className="p-2">
+                                  <div className="flex items-center justify-between mb-0.5">
+                                    <span className="text-[10px] font-medium text-muted-foreground leading-none">{metric.label}</span>
+                                    <IconComponent className={`h-3 w-3 shrink-0 ${metric.color}`} />
+                                  </div>
+                                  <div className="text-sm font-bold tabular-nums leading-none">
+                                    <AnimatedNumber key={`num-${metric.label}-${metric.value}`} value={metric.value} />
+                                  </div>
+                                  <div className="flex items-center gap-0.5 mt-0.5">
+                                    <TrendIndicator trend={metric.trend} />
+                                    <span className="text-[9px] text-muted-foreground">vs last period</span>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </div>
+
+                        {/* Subscription Tier Distribution */}
+                        <Card>
+                          <CardContent className="p-2">
+                            <span className="text-[10px] font-medium block mb-1">Subscription Tier Distribution</span>
+                            <div className="space-y-0.5">
+                              {(overviewData?.subscriptionDistribution?.length ? overviewData.subscriptionDistribution : [
+                                { tier: 'free', count: 0, percentage: 0 }, { tier: 'basic', count: 0, percentage: 0 },
+                                { tier: 'premium', count: 0, percentage: 0 }, { tier: 'enterprise', count: 0, percentage: 0 }, { tier: 'ultimate', count: 0, percentage: 0 }
+                              ]).map((item) => (
+                                <div key={item.tier} className="flex items-center gap-1">
+                                  <span className="text-[9px] text-muted-foreground w-14 capitalize">{item.tier}</span>
+                                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                                    <div className="h-full rounded-full" style={{ width: `${item.percentage || 0}%`, backgroundColor: item.tier === 'free' ? '#94a3b8' : item.tier === 'basic' ? '#22c55e' : item.tier === 'premium' ? '#3b82f6' : item.tier === 'enterprise' ? '#f59e0b' : '#8b5cf6' }} />
+                                  </div>
+                                  <span className="text-[9px] font-medium w-7 text-right">{Math.round(item.percentage || 0)}%</span>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {/* System Health */}
+                        <Card>
+                          <CardContent className="p-2">
+                            <div className="flex items-center justify-between mb-0.5">
+                              <span className="text-[10px] font-medium">System Health Overview</span>
+                              <Badge variant="outline" className="text-[9px] h-4 px-1 text-green-600 border-green-500/30">
+                                {overviewData?.systemMetrics?.healthScore || 0}/100
+                              </Badge>
+                            </div>
+                            <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                              {[
+                                { label: 'CPU', value: `${Math.min(100, Math.round(((overviewData?.systemMetrics?.cpu?.user || 0) + (overviewData?.systemMetrics?.cpu?.system || 0)) / 10000) || 35)}%` },
+                                { label: 'Memory', value: `${overviewData?.systemMetrics?.memory?.heapUsed || 0} MB` },
+                                { label: 'Response', value: `${overviewData?.systemMetrics?.api?.avgResponseTime || 0}ms` },
+                                { label: 'Errors', value: `${overviewData?.systemMetrics?.api?.errorRate || 0}%` },
+                              ].map((m) => (
+                                <div key={m.label} className="flex items-center justify-between">
+                                  <span className="text-[9px] text-muted-foreground">{m.label}</span>
+                                  <span className="text-[9px] font-medium">{m.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                      </div>
+
+                      {/* RIGHT COLUMN (3/5): Growth Chart + Daily Active + Activity Feed + Top Tools */}
+                      <div className="col-span-3 flex flex-col gap-1.5">
+
+                        {/* Growth Chart */}
+                        <Card data-testid="card-growth-chart">
+                          <CardContent className="p-2">
+                            <div className="flex items-center justify-between mb-0.5">
+                              <span className="text-[10px] font-medium">Users & Plans Growth (90 Days)</span>
+                              <Badge variant="outline" className="text-[9px] h-4 px-1"><TrendingUp className="h-2 w-2 mr-0.5" />Live</Badge>
+                            </div>
+                            <ResponsiveContainer width="100%" height={55}>
+                              <RechartsLineChart data={filteredOverviewData?.timeSeriesData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={7} tickFormatter={(v) => format(new Date(v), 'MMM d')} />
+                                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={7} width={18} />
+                                <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '6px', fontSize: '9px' }} labelFormatter={(v) => format(new Date(v), 'PPP')} />
+                                <Line type="monotone" dataKey="users" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name="Users" />
+                                <Line type="monotone" dataKey="plans" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} name="Plans" />
+                                <Line type="monotone" dataKey="activeUsers" stroke="hsl(var(--chart-3))" strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="Active" />
+                              </RechartsLineChart>
+                            </ResponsiveContainer>
+                          </CardContent>
+                        </Card>
+
+                        {/* Daily Active + Activity Feed side by side */}
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <Card>
                             <CardContent className="p-2">
-                              <div className="flex items-center justify-between mb-0.5">
-                                <span className="text-[10px] font-medium text-muted-foreground leading-none">{metric.label}</span>
-                                <IconComponent className={`h-3 w-3 shrink-0 ${metric.color}`} />
-                              </div>
-                              <div className="text-sm font-bold tabular-nums leading-none">
-                                <AnimatedNumber key={`num-${metric.label}-${metric.value}`} value={metric.value} />
-                              </div>
-                              <div className="flex items-center gap-0.5 mt-0.5">
-                                <TrendIndicator trend={metric.trend} />
-                                <span className="text-[9px] text-muted-foreground">vs last period</span>
+                              <span className="text-[10px] font-medium block mb-0.5">Daily Active Users (30 Days)</span>
+                              <ResponsiveContainer width="100%" height={45}>
+                                <RechartsAreaChart data={overviewData?.activityData?.slice(-30) || []}>
+                                  <defs>
+                                    <linearGradient id="ovActivityGrad" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.4}/>
+                                      <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0}/>
+                                    </linearGradient>
+                                  </defs>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={7} tickFormatter={(v) => { try { return format(new Date(v), 'MMM d'); } catch { return v; } }} />
+                                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={7} width={18} />
+                                  <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '6px', fontSize: '9px' }} />
+                                  <Area type="monotone" dataKey="count" stroke="hsl(var(--chart-1))" strokeWidth={1.5} fill="url(#ovActivityGrad)" name="Users" />
+                                </RechartsAreaChart>
+                              </ResponsiveContainer>
+                            </CardContent>
+                          </Card>
+                          <Card>
+                            <CardContent className="p-2">
+                              <span className="text-[10px] font-medium block mb-0.5">Live Activity Feed</span>
+                              <div className="space-y-0.5" style={{ height: 45, overflow: 'hidden' }}>
+                                {(overviewData?.recentActivity || []).slice(0, 5).map((activity, i) => (
+                                  <div key={i} className="flex items-center gap-1">
+                                    <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${activity.severity === 'error' ? 'bg-red-500' : activity.severity === 'success' ? 'bg-green-500' : activity.severity === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`} />
+                                    <span className="text-[9px] text-muted-foreground truncate">{activity.description || activity.message || activity.type}</span>
+                                  </div>
+                                ))}
+                                {(!overviewData?.recentActivity || overviewData.recentActivity.length === 0) && (
+                                  <p className="text-[9px] text-muted-foreground">No recent activity</p>
+                                )}
                               </div>
                             </CardContent>
                           </Card>
-                        );
-                      })}
-                    </div>
+                        </div>
 
-                    {/* Row 2: Growth Chart + Subscription Tiers */}
-                    <div className="grid grid-cols-5 gap-1.5">
-                      <Card className="col-span-3" data-testid="card-growth-chart">
-                        <CardContent className="p-2">
-                          <div className="flex items-center justify-between mb-0.5">
-                            <span className="text-[10px] font-medium">Users & Plans Growth (90 Days)</span>
-                            <Badge variant="outline" className="text-[9px] h-4 px-1"><TrendingUp className="h-2 w-2 mr-0.5" />Live</Badge>
-                          </div>
-                          <ResponsiveContainer width="100%" height={45}>
-                            <RechartsLineChart data={filteredOverviewData?.timeSeriesData}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={7} tickFormatter={(v) => format(new Date(v), 'MMM d')} />
-                              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={7} width={18} />
-                              <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '6px', fontSize: '9px' }} labelFormatter={(v) => format(new Date(v), 'PPP')} />
-                              <Line type="monotone" dataKey="users" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name="Users" />
-                              <Line type="monotone" dataKey="plans" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} name="Plans" />
-                              <Line type="monotone" dataKey="activeUsers" stroke="hsl(var(--chart-3))" strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="Active" />
-                            </RechartsLineChart>
-                          </ResponsiveContainer>
-                        </CardContent>
-                      </Card>
-                      <Card className="col-span-2">
-                        <CardContent className="p-2">
-                          <span className="text-[10px] font-medium block mb-0.5">Subscription Tier Distribution</span>
-                          <div className="space-y-0.5">
-                            {(overviewData?.subscriptionDistribution?.length ? overviewData.subscriptionDistribution : [
-                              { tier: 'free', count: 0, percentage: 0 }, { tier: 'basic', count: 0, percentage: 0 },
-                              { tier: 'premium', count: 0, percentage: 0 }, { tier: 'enterprise', count: 0, percentage: 0 }, { tier: 'ultimate', count: 0, percentage: 0 }
-                            ]).map((item) => (
-                              <div key={item.tier} className="flex items-center gap-1">
-                                <span className="text-[9px] text-muted-foreground w-14 capitalize">{item.tier}</span>
-                                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                                  <div className="h-full rounded-full" style={{ width: `${item.percentage || 0}%`, backgroundColor: item.tier === 'free' ? '#94a3b8' : item.tier === 'basic' ? '#22c55e' : item.tier === 'premium' ? '#3b82f6' : item.tier === 'enterprise' ? '#f59e0b' : '#8b5cf6' }} />
-                                </div>
-                                <span className="text-[9px] font-medium w-7 text-right">{Math.round(item.percentage || 0)}%</span>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* Row 3: Daily Active Users + Live Activity Feed */}
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <Card>
-                        <CardContent className="p-2">
-                          <span className="text-[10px] font-medium block mb-0.5">Daily Active Users (30 Days)</span>
-                          <ResponsiveContainer width="100%" height={40}>
-                            <RechartsAreaChart data={overviewData?.activityData?.slice(-30) || []}>
-                              <defs>
-                                <linearGradient id="ovActivityGrad" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.4}/>
-                                  <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0}/>
-                                </linearGradient>
-                              </defs>
-                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={7} tickFormatter={(v) => { try { return format(new Date(v), 'MMM d'); } catch { return v; } }} />
-                              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={7} width={18} />
-                              <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '6px', fontSize: '9px' }} />
-                              <Area type="monotone" dataKey="count" stroke="hsl(var(--chart-1))" strokeWidth={1.5} fill="url(#ovActivityGrad)" name="Users" />
-                            </RechartsAreaChart>
-                          </ResponsiveContainer>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-2">
-                          <div className="flex items-center justify-between mb-0.5">
-                            <span className="text-[10px] font-medium">Live Activity Feed</span>
-                            <span className="text-[9px] text-muted-foreground">Recent platform events</span>
-                          </div>
-                          <div className="space-y-0.5" style={{ height: 40, overflow: 'hidden' }}>
-                            {(overviewData?.recentActivity || []).slice(0, 6).map((activity, i) => (
-                              <div key={i} className="flex items-center gap-1">
-                                <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${activity.severity === 'error' ? 'bg-red-500' : activity.severity === 'success' ? 'bg-green-500' : activity.severity === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`} />
-                                <span className="text-[9px] text-muted-foreground truncate flex-1">{activity.description || activity.message || activity.type}</span>
-                                <span className="text-[9px] text-muted-foreground shrink-0">{formatDistance(new Date(activity.timestamp), new Date(), { addSuffix: true })}</span>
-                              </div>
-                            ))}
-                            {(!overviewData?.recentActivity || overviewData.recentActivity.length === 0) && (
-                              <p className="text-[9px] text-muted-foreground mt-1">No recent activity</p>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* Row 4: Top Tools + System Health */}
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <Card>
-                        <CardContent className="p-2">
-                          <span className="text-[10px] font-medium block mb-0.5">Top 10 Most Used Tools</span>
-                          <div className="space-y-0.5">
-                            {(overviewData?.topTools || []).slice(0, 3).map((tool, i) => {
-                              const maxCount = overviewData?.topTools?.[0]?.usageCount || 1;
-                              return (
-                                <div key={tool.toolId} className="flex items-center gap-1">
-                                  <span className="text-[9px] text-muted-foreground w-3">{i + 1}.</span>
-                                  <span className="text-[9px] truncate flex-1">{tool.toolName}</span>
-                                  <div className="w-10 h-1.5 bg-muted rounded-full overflow-hidden shrink-0">
-                                    <div className="h-full bg-primary rounded-full" style={{ width: `${Math.round((tool.usageCount / maxCount) * 100)}%` }} />
+                        {/* Top Tools */}
+                        <Card>
+                          <CardContent className="p-2">
+                            <span className="text-[10px] font-medium block mb-0.5">Top 10 Most Used Tools</span>
+                            <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+                              {(overviewData?.topTools || []).slice(0, 4).map((tool, i) => {
+                                const maxCount = overviewData?.topTools?.[0]?.usageCount || 1;
+                                return (
+                                  <div key={tool.toolId} className="flex items-center gap-1">
+                                    <span className="text-[9px] text-muted-foreground w-3">{i + 1}.</span>
+                                    <span className="text-[9px] truncate flex-1">{tool.toolName}</span>
+                                    <div className="w-8 h-1.5 bg-muted rounded-full overflow-hidden shrink-0">
+                                      <div className="h-full bg-primary rounded-full" style={{ width: `${Math.round((tool.usageCount / maxCount) * 100)}%` }} />
+                                    </div>
+                                    <span className="text-[9px] font-medium w-4 text-right">{tool.usageCount}</span>
                                   </div>
-                                  <span className="text-[9px] font-medium w-4 text-right">{tool.usageCount}</span>
-                                </div>
-                              );
-                            })}
-                            {(!overviewData?.topTools || overviewData.topTools.length === 0) && (
-                              <p className="text-[9px] text-muted-foreground">Platform feature utilization data loading...</p>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-2">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-[10px] font-medium">System Health Overview</span>
-                            <Badge variant="outline" className="text-[9px] h-4 px-1 text-green-600 border-green-500/30">
-                              Score: {overviewData?.systemMetrics?.healthScore || 0}/100
-                            </Badge>
-                          </div>
-                          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
-                            {[
-                              { label: 'CPU Usage', value: `${Math.min(100, Math.round(((overviewData?.systemMetrics?.cpu?.user || 0) + (overviewData?.systemMetrics?.cpu?.system || 0)) / 10000) || 35)}%` },
-                              { label: 'Memory', value: `${overviewData?.systemMetrics?.memory?.heapUsed || 0} MB` },
-                              { label: 'Avg Response', value: `${overviewData?.systemMetrics?.api?.avgResponseTime || 0}ms` },
-                              { label: 'Error Rate', value: `${overviewData?.systemMetrics?.api?.errorRate || 0}%` },
-                            ].map((m) => (
-                              <div key={m.label} className="flex items-center justify-between">
-                                <span className="text-[9px] text-muted-foreground">{m.label}</span>
-                                <span className="text-[9px] font-medium">{m.value}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
+                                );
+                              })}
+                              {(!overviewData?.topTools || overviewData.topTools.length === 0) && (
+                                <p className="text-[9px] text-muted-foreground col-span-2">No tool usage data yet</p>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                      </div>
                     </div>
 
                   </motion.div>
