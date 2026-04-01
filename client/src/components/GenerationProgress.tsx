@@ -287,20 +287,21 @@ export default function GenerationProgress({ planId }: { planId: string }) {
         <div className="bg-card/90 backdrop-blur-xl border border-border rounded-3xl p-8 md:p-12 shadow-2xl">
           <div className="flex flex-col items-center mb-8">
             <div className="relative w-48 h-48 md:w-56 md:h-56 mb-6">
-              <svg className="transform -rotate-90 w-full h-full">
+              {/* viewBox="0 0 100 100" makes r=45 match the strokeDasharray calculation exactly */}
+              <svg className="transform -rotate-90 w-full h-full" viewBox="0 0 100 100">
                 <circle
-                  cx="50%"
-                  cy="50%"
-                  r="45%"
+                  cx="50"
+                  cy="50"
+                  r="45"
                   stroke="currentColor"
                   strokeWidth="6"
                   fill="none"
                   className="text-muted/20"
                 />
                 <circle
-                  cx="50%"
-                  cy="50%"
-                  r="45%"
+                  cx="50"
+                  cy="50"
+                  r="45"
                   stroke="url(#progressGradient)"
                   strokeWidth="6"
                   fill="none"
@@ -394,70 +395,48 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 </p>
               </div>
 
-              {/* Download Options */}
+              {/* Download Options — 2 icon buttons */}
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-center text-muted-foreground">Download Options</p>
-                
-                {/* Visual PDF Progress Indicator */}
+                {/* Progress indicator while PDF is being built */}
                 {(isVisualExporting || visualPdfProgress) && (
                   <div className="bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-lg p-3 text-center">
                     <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-300">
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm font-medium">{visualPdfProgress || 'Generating PDF with charts...'}</span>
+                      <span className="text-sm font-medium">{visualPdfProgress || 'Generating PDF…'}</span>
                     </div>
                   </div>
                 )}
-                
-                <div className="grid grid-cols-2 gap-3">
-                  {/* PDF with Charts - Primary */}
-                  <Button
-                    size="lg"
-                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* PDF download */}
+                  <button
                     onClick={() => handleDownload('pdf')}
                     disabled={isVisualExporting || isExporting}
                     data-testid="button-download-pdf"
+                    className="group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 transition-colors duration-200 py-6 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isVisualExporting ? (
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      <Loader2 className="w-10 h-10 text-emerald-600 group-hover:text-white animate-spin" />
                     ) : (
-                      <Download className="w-5 h-5 mr-2" />
+                      <FileSpreadsheet className="w-10 h-10 text-emerald-600 group-hover:text-white transition-colors duration-200" />
                     )}
-                    PDF (with Charts)
-                  </Button>
-                  
-                  {/* Word with Charts */}
-                  <Button
-                    size="lg"
-                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold shadow-md"
+                    <span className="text-base font-bold text-emerald-700 group-hover:text-white transition-colors duration-200">
+                      PDF
+                    </span>
+                  </button>
+
+                  {/* Word download */}
+                  <button
                     onClick={() => handleDownload('word')}
-                    disabled={isExporting}
+                    disabled={isExporting || isVisualExporting}
                     data-testid="button-download-word"
+                    className="group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 transition-colors duration-200 py-6 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Download className="w-5 h-5 mr-2" />
-                    Word (with Charts)
-                  </Button>
-                  
-                  {/* Preview buttons */}
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950 font-semibold"
-                    onClick={() => window.open(`/api/view/html/${planId}`, '_blank')}
-                    data-testid="button-preview-html"
-                  >
-                    <Eye className="w-5 h-5 mr-2" />
-                    Preview Plan
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950 font-semibold"
-                    onClick={() => window.open(`/api/view/word/${planId}`, '_blank')}
-                    data-testid="button-view-word"
-                  >
-                    <Eye className="w-5 h-5 mr-2" />
-                    Preview Word
-                  </Button>
+                    <FileText className="w-10 h-10 text-emerald-600 group-hover:text-white transition-colors duration-200" />
+                    <span className="text-base font-bold text-emerald-700 group-hover:text-white transition-colors duration-200">
+                      Word
+                    </span>
+                  </button>
                 </div>
               </div>
 
