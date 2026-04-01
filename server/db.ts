@@ -81,6 +81,43 @@ async function runAutoMigrations() {
   if (migratedCount > 0) {
     console.log(`[DB] Auto-migration: ${migratedCount} blog_posts column(s) ensured`);
   }
+
+  // blog_generation_queue table — create if missing, then add any missing columns
+  try {
+    await db.execute(sql.raw(`
+      CREATE TABLE IF NOT EXISTS blog_generation_queue (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        target_date TIMESTAMP NOT NULL DEFAULT NOW(),
+        topic TEXT,
+        category VARCHAR(100),
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        generated_post_id VARCHAR,
+        generation_started_at TIMESTAMP,
+        generation_completed_at TIMESTAMP,
+        error TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `));
+    console.log('[DB] Auto-migration: blog_generation_queue table ensured');
+  } catch {
+    // Table already exists — skip
+  }
+
+  // Ensure individual columns on blog_generation_queue in case table pre-existed without them
+  const queueMigrations: string[] = [
+    `ALTER TABLE blog_generation_queue ADD COLUMN IF NOT EXISTS target_date TIMESTAMP NOT NULL DEFAULT NOW()`,
+    `ALTER TABLE blog_generation_queue ADD COLUMN IF NOT EXISTS topic TEXT`,
+    `ALTER TABLE blog_generation_queue ADD COLUMN IF NOT EXISTS category VARCHAR(100)`,
+    `ALTER TABLE blog_generation_queue ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'pending'`,
+    `ALTER TABLE blog_generation_queue ADD COLUMN IF NOT EXISTS generated_post_id VARCHAR`,
+    `ALTER TABLE blog_generation_queue ADD COLUMN IF NOT EXISTS generation_started_at TIMESTAMP`,
+    `ALTER TABLE blog_generation_queue ADD COLUMN IF NOT EXISTS generation_completed_at TIMESTAMP`,
+    `ALTER TABLE blog_generation_queue ADD COLUMN IF NOT EXISTS error TEXT`,
+  ];
+  for (const ddl of queueMigrations) {
+    try { await db.execute(sql.raw(ddl)); } catch { /* already exists */ }
+  }
+  console.log('[DB] Auto-migration: blog_generation_queue columns ensured');
   
   // Update blog post image URLs to use object storage
   try {

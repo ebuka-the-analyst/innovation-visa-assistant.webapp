@@ -1,0 +1,190 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+8
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+30031b38
+Active
+
+Apr 1, 2026, 11:11 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+  dataType: undefined,
+[MultiVerifier] Result: FLAGGED | Gemini: 100 | OpenAI: unavailable | Composite: 100
+[Blog Generator] ✗ Verification FAILED — Composite: 100/100. Sending to human review queue.
+[Blog Generator] Reason: OpenAI unavailable (quota exceeded) — Gemini only: 100/100. Routing to human review for single-verifier result.
+Generate next post error: error: column "target_date" of relation "blog_generation_queue" does not exist
+  hint: undefined,
+    at /app/node_modules/pg-pool/index.js:45:11
+  position: '44',
+  internalPosition: undefined,
+  internalQuery: undefined,
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+  where: undefined,
+  schema: undefined,
+    at async file:///app/dist/index.js:28066:9 {
+  table: undefined,
+  column: undefined,
+  length: 145,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  routine: 'checkInsertTargets'
+}
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+10:20:59 PM [express] POST /api/admin/blog/generate-next 500 in 60597ms :: {"error":"Failed to genera…
+[2026-04-01T22:20:59.355Z] GET /blog/crafting-a-winning-innovation-statement-for-uk-visa-2026-01-24-vbxt
+[2026-04-01T22:20:59.363Z] POST /api/activity/session/end
+10:20:59 PM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+[2026-04-01T22:20:59.625Z] GET /assets/blog-post-Ca2sNMVK.js
+[2026-04-01T22:20:59.630Z] GET /assets/SEOHead-B4UGfkgp.js
+[2026-04-01T22:20:59.801Z] GET /assets/Footer-CjgiTPEu.js
+[2026-04-01T22:20:59.802Z] GET /assets/ComplianceBadges-BScBSdEV.js
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:20:59 PM [express] GET /api/auth/user 200 in 17ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-01T22:20:59.787Z] GET /attached_assets/official_logo.webp
+[2026-04-01T22:20:59.796Z] GET /api/auth/user
+[2026-04-01T22:21:00.014Z] POST /api/activity/session
+[2026-04-01T22:21:00.017Z] POST /api/activity/session
+10:21:00 PM [express] POST /api/activity/session 200 in 31ms :: {"sessionId":"2ca57bd0-0c32-4388-85a6…
+10:21:00 PM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"fbe302e3-3401-4ac3-9ce3…
+[2026-04-01T22:21:00.065Z] POST /api/blog/crafting-a-winning-innovation-statement-for-uk-visa-2026-01-24-vbxt/view
+[2026-04-01T22:21:00.068Z] GET /api/blog/crafting-a-winning-innovation-statement-for-uk-visa-2026-01-24-vbxt
+10:21:00 PM [express] GET /api/blog/crafting-a-winning-innovation-statement-for-uk-visa-2026-01-24-vb…
+[2026-04-01T22:21:00.238Z] POST /api/activity/page-view
+10:21:00 PM [express] POST /api/activity/page-view 200 in 23ms :: {"pageViewId":"6c298060-41e3-4619-b…
+[2026-04-01T22:21:00.290Z] GET /assets/blog/unique/visa-documents-spread.png
+10:21:00 PM [express] POST /api/blog/crafting-a-winning-innovation-statement-for-uk-visa-2026-01-24-v…
+[2026-04-01T22:21:15.220Z] POST /api/activity/session/end
+[2026-04-01T22:21:15.246Z] GET /api/auth/user
+[2026-04-01T22:21:15.249Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:21:15 PM [express] GET /api/auth/user 200 in 192ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+10:21:15 PM [express] POST /api/activity/session/end 200 in 222ms :: {"success":true}
+10:21:15 PM [express] POST /api/activity/session 200 in 198ms :: {"sessionId":"37464bfe-fe71-4acf-8bd…
+[2026-04-01T22:21:15.612Z] GET /api/admin/blog/stats
+Blog stats error: error: column "target_date" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///app/dist/index.js:28013:29 {
+  length: 111,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '14',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+[2026-04-01T22:21:15.648Z] POST /api/activity/page-view
+10:21:15 PM [express] GET /api/admin/blog/stats 500 in 38ms :: {"error":"Failed to fetch blog stats"}
+[2026-04-01T22:21:15.682Z] GET /api/admin/activity-log
+10:21:15 PM [express] POST /api/activity/page-view 200 in 48ms :: {"pageViewId":"bb63cc17-404b-4d42-9…
+10:21:15 PM [express] GET /api/admin/activity-log 200 in 63ms :: [{"id":"plan-52fefd3d-a1aa-4904-8649…
+[2026-04-01T22:21:15.842Z] GET /api/admin/blog/posts
+10:21:15 PM [express] GET /api/admin/blog/posts 200 in 26ms :: [{"id":"49164fe1-3ae8-4fde-aaf2-f30c9f…
+[2026-04-01T22:21:15.952Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+10:21:16 PM [express] GET /api/admin/analytics/overview 200 in 385ms :: {"kpiMetrics":[{"label":"Tota…
+}
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/drizzle-orm/node-postgres/session.js:83:22
+  length: 111,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+[2026-04-01T22:21:30.411Z] GET /api/admin/blog/stats
+[2026-04-01T22:21:30.413Z] GET /api/admin/blog/posts
+10:21:30 PM [express] GET /api/admin/blog/posts 200 in 233ms :: [{"id":"49164fe1-3ae8-4fde-aaf2-f30c9…
+Blog stats error: error: column "target_date" does not exist
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:21:33 PM [express] GET /api/auth/user 200 in 196ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+[2026-04-01T22:21:33.693Z] POST /api/activity/page-view
+10:21:33 PM [express] POST /api/activity/page-view 200 in 26ms :: {"pageViewId":"4a17ec3b-a3f3-4e08-a…
+[2026-04-01T22:21:35.843Z] POST /api/activity/session/end
+10:21:35 PM [express] POST /api/activity/session/end 200 in 17ms :: {"success":true}
+10:21:30 PM [express] GET /api/admin/blog/stats 500 in 255ms :: {"error":"Failed to fetch blog stats"}
+[2026-04-01T22:21:33.292Z] POST /api/activity/session
+[2026-04-01T22:21:33.294Z] GET /api/auth/user
+10:21:33 PM [express] POST /api/activity/session 200 in 27ms :: {"sessionId":"422a325e-c0ca-435d-894e…
+[2026-04-01T22:21:33.463Z] POST /api/activity/session/end
+10:21:33 PM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+
+
