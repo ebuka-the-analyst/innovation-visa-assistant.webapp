@@ -3,11 +3,10 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Download, CheckCircle, Home, FileText, Mail, Send, Linkedin, RefreshCw, LayoutDashboard, Clock, Lightbulb, BookOpen, Shield, TrendingUp, FileSpreadsheet, Eye, Twitter, Share2, Copy, MessageCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Home, FileText, Mail, Linkedin, RefreshCw, LayoutDashboard, Clock, Lightbulb, BookOpen, Shield, TrendingUp, FileSpreadsheet, Eye, Twitter, Share2, Copy, MessageCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
-import { useVisualPdfExport } from "@/hooks/useVisualPdfExport";
 import novaAvatar from "@assets/generated_images/nova_innovation_agent_avatar.webp";
 import sterlingAvatar from "@assets/generated_images/sterling_financial_agent_avatar.webp";
 import atlasAvatar from "@assets/generated_images/atlas_growth_agent_avatar.webp";
@@ -61,53 +60,30 @@ const tierPageTargets: Record<string, string> = {
 export default function GenerationProgress({ planId }: { planId: string }) {
   const [status, setStatus] = useState<string>('pending');
   const [currentStage, setCurrentStage] = useState<string>('Initializing...');
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [tier, setTier] = useState<string>('basic');
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [currentTipIndex, setCurrentTipIndex] = useState<number>(0);
   const [sectionNumber, setSectionNumber] = useState<number>(0);
-  const [showFormatDialog, setShowFormatDialog] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
   const [businessName, setBusinessName] = useState<string>('Business Plan');
-  const [visualPdfProgress, setVisualPdfProgress] = useState<string>('');
   const { toast } = useToast();
-  const { exportVisualPdf, isExporting: isVisualExporting } = useVisualPdfExport();
 
-  // Download handler for selected format
-  const handleDownload = async (format: 'pdf' | 'word') => {
-    setIsExporting(true);
-    try {
-      if (format === 'pdf') {
-        // Use visual PDF export (with charts)
-        const success = await exportVisualPdf({
-          planId,
-          businessName,
-          onProgress: setVisualPdfProgress
-        });
-        if (!success) {
-          // Fallback to text-only PDF
-          window.open(pdfUrl || `/api/download/pdf/${planId}`, '_blank');
-        }
-      } else {
-        // Use Word endpoint
-        window.open(`/api/download/word/${planId}`, '_blank');
-      }
-      setShowFormatDialog(false);
-      setVisualPdfProgress('');
-      toast({
-        title: "Download Started",
-        description: `Your business plan is downloading as ${format.toUpperCase()}.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Download Failed",
-        description: "Please try again or contact support.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExporting(false);
-      setVisualPdfProgress('');
-    }
+  // Trigger a direct browser download without opening a new tab or any processing screen
+  const handleDownload = (format: 'pdf' | 'word') => {
+    const url = format === 'pdf'
+      ? `/api/download/pdf/${planId}`
+      : `/api/download/word/${planId}`;
+    const ext = format === 'pdf' ? 'pdf' : 'docx';
+    const safeName = businessName.replace(/[^a-zA-Z0-9\s-]/g, '').trim() || 'Business-Plan';
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${safeName}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast({
+      title: "Download Started",
+      description: `Your business plan is downloading as ${format.toUpperCase()}.`,
+    });
   };
 
   useEffect(() => {
@@ -194,8 +170,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
           }
         }
         
-        if (data.status === 'completed' && data.pdfUrl) {
-          setPdfUrl(data.pdfUrl);
+        if (data.status === 'completed') {
           clearInterval(pollInterval);
         } else if (data.status === 'failed') {
           clearInterval(pollInterval);
@@ -370,7 +345,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
             </div>
           )}
 
-          {status === 'completed' && pdfUrl ? (
+          {status === 'completed' ? (
             <div className="space-y-6 mt-8 border-t border-border pt-8">
               <div className="flex items-center justify-center gap-2 text-emerald-500">
                 <CheckCircle className="w-8 h-8" />
@@ -395,49 +370,29 @@ export default function GenerationProgress({ planId }: { planId: string }) {
                 </p>
               </div>
 
-              {/* Download Options — 2 icon buttons */}
-              <div className="space-y-3">
-                {/* Progress indicator while PDF is being built */}
-                {(isVisualExporting || visualPdfProgress) && (
-                  <div className="bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-lg p-3 text-center">
-                    <div className="flex items-center justify-center gap-2 text-emerald-700 dark:text-emerald-300">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm font-medium">{visualPdfProgress || 'Generating PDF…'}</span>
-                    </div>
-                  </div>
-                )}
+              {/* Download Options — 2 icon buttons, instant download */}
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => handleDownload('pdf')}
+                  data-testid="button-download-pdf"
+                  className="group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 transition-colors duration-200 py-6 px-4"
+                >
+                  <FileSpreadsheet className="w-10 h-10 text-emerald-600 group-hover:text-white transition-colors duration-200" />
+                  <span className="text-base font-bold text-emerald-700 group-hover:text-white transition-colors duration-200">
+                    PDF
+                  </span>
+                </button>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {/* PDF download */}
-                  <button
-                    onClick={() => handleDownload('pdf')}
-                    disabled={isVisualExporting || isExporting}
-                    data-testid="button-download-pdf"
-                    className="group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 transition-colors duration-200 py-6 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isVisualExporting ? (
-                      <Loader2 className="w-10 h-10 text-emerald-600 group-hover:text-white animate-spin" />
-                    ) : (
-                      <FileSpreadsheet className="w-10 h-10 text-emerald-600 group-hover:text-white transition-colors duration-200" />
-                    )}
-                    <span className="text-base font-bold text-emerald-700 group-hover:text-white transition-colors duration-200">
-                      PDF
-                    </span>
-                  </button>
-
-                  {/* Word download */}
-                  <button
-                    onClick={() => handleDownload('word')}
-                    disabled={isExporting || isVisualExporting}
-                    data-testid="button-download-word"
-                    className="group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 transition-colors duration-200 py-6 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <FileText className="w-10 h-10 text-emerald-600 group-hover:text-white transition-colors duration-200" />
-                    <span className="text-base font-bold text-emerald-700 group-hover:text-white transition-colors duration-200">
-                      Word
-                    </span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleDownload('word')}
+                  data-testid="button-download-word"
+                  className="group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 transition-colors duration-200 py-6 px-4"
+                >
+                  <FileText className="w-10 h-10 text-emerald-600 group-hover:text-white transition-colors duration-200" />
+                  <span className="text-base font-bold text-emerald-700 group-hover:text-white transition-colors duration-200">
+                    Word
+                  </span>
+                </button>
               </div>
 
               {/* Social Sharing Section */}

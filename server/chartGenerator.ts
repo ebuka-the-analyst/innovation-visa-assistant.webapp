@@ -1298,35 +1298,46 @@ function generateMarketingChannelsChart(data: { channel: string; budget: number;
 
 function generateProcessFlowChart(data: { step: number; title: string; description: string }[]): string {
   const width = 600;
-  const height = 200;
-  const circleRadius = 55;
+  const height = 300;
+  const circleRadius = 52;
   const spacing = width / (data.length + 1);
-  
+  const cy = 110; // circle center Y — gives room for title above and description below
+
   let circles = '';
   let arrows = '';
   let labels = '';
-  
+
   const colors = ['#F59E0B', '#F97316', '#EF4444'];
-  
+
+  // Helper: split a string into two lines of at most maxLen chars each
+  const splitTwo = (text: string, maxLen = 22): [string, string] => {
+    if (text.length <= maxLen) return [text, ''];
+    const cut = text.lastIndexOf(' ', maxLen);
+    const breakAt = cut > 0 ? cut : maxLen;
+    return [text.substring(0, breakAt).trim(), text.substring(breakAt).trim().substring(0, maxLen)];
+  };
+
   data.forEach((d, i) => {
     const x = spacing * (i + 1);
-    const y = 90;
     const color = colors[i % colors.length];
-    
-    circles += `<circle cx="${x}" cy="${y}" r="${circleRadius}" fill="${color}" opacity="0.9"/>`;
-    circles += `<circle cx="${x}" cy="${y}" r="${circleRadius - 8}" fill="none" stroke="white" stroke-width="2" stroke-dasharray="4,4"/>`;
-    
-    circles += `<text x="${x}" y="${y - 10}" text-anchor="middle" font-size="24" font-weight="bold" fill="white">${d.step}</text>`;
-    circles += `<text x="${x}" y="${y + 12}" text-anchor="middle" font-size="10" font-weight="600" fill="white">${d.title}</text>`;
-    
+
+    circles += `<circle cx="${x}" cy="${cy}" r="${circleRadius}" fill="${color}" opacity="0.9"/>`;
+    circles += `<circle cx="${x}" cy="${cy}" r="${circleRadius - 8}" fill="none" stroke="white" stroke-width="2" stroke-dasharray="4,4"/>`;
+    circles += `<text x="${x}" y="${cy - 10}" text-anchor="middle" font-size="22" font-weight="bold" fill="white">${d.step}</text>`;
+    circles += `<text x="${x}" y="${cy + 12}" text-anchor="middle" font-size="10" font-weight="600" fill="white">${d.title}</text>`;
+
     if (i < data.length - 1) {
       const nextX = spacing * (i + 2);
-      arrows += `<path d="M${x + circleRadius + 5} ${y} L${nextX - circleRadius - 15} ${y}" stroke="#374151" stroke-width="3" marker-end="url(#arrowhead)"/>`;
+      arrows += `<path d="M${x + circleRadius + 5} ${cy} L${nextX - circleRadius - 15} ${cy}" stroke="#374151" stroke-width="3" marker-end="url(#arrowhead)"/>`;
     }
-    
-    labels += `<text x="${x}" y="${height - 15}" text-anchor="middle" font-size="9" fill="#6B7280">${d.description.substring(0, 35)}</text>`;
+
+    const [line1, line2] = splitTwo(d.description);
+    labels += `<text x="${x}" y="${cy + circleRadius + 28}" text-anchor="middle" font-size="9" fill="#6B7280">${line1}</text>`;
+    if (line2) {
+      labels += `<text x="${x}" y="${cy + circleRadius + 44}" text-anchor="middle" font-size="9" fill="#6B7280">${line2}</text>`;
+    }
   });
-  
+
   return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -1334,7 +1345,7 @@ function generateProcessFlowChart(data: { step: number; title: string; descripti
       </marker>
     </defs>
     <rect width="100%" height="100%" fill="white"/>
-    <text x="${width/2}" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#111827">Your Business Journey</text>
+    <text x="${width/2}" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="#111827">Your Business Journey</text>
     ${arrows}
     ${circles}
     ${labels}
