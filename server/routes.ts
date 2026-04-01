@@ -11946,12 +11946,16 @@ Return a JSON object with:
       }
 
       // Delete all related records - using safe delete that ignores missing tables and type mismatches
-      const safeDelete = async (query: any) => {
+      const safeDelete = async (query: any, allowConstraintErrors = false) => {
         try {
           await db.execute(query);
         } catch (e: any) {
-          // Ignore "relation does not exist" and type mismatch errors (some tables have integer user_id)
+          // Always ignore "relation does not exist" and type mismatch errors (some tables have integer user_id)
           const ignoredErrors = ['does not exist', 'invalid input syntax for type integer'];
+          if (allowConstraintErrors) {
+            // Also ignore NOT NULL and foreign key constraint violations for nullable cleanup operations
+            ignoredErrors.push('violates not-null constraint', 'violates foreign key constraint', 'null value in column');
+          }
           if (!ignoredErrors.some(err => e.message?.includes(err))) {
             throw e;
           }
@@ -12008,9 +12012,9 @@ Return a JSON object with:
       await safeDelete(sql`DELETE FROM lawyer_review_comments WHERE resolved_by = ${userId}`);
       await safeDelete(sql`DELETE FROM lawyer_document_reviews WHERE user_id = ${userId}`);
       
-      // Promo codes (owner and creator)
-      await safeDelete(sql`UPDATE promo_codes SET owner_id = NULL WHERE owner_id = ${userId}`);
-      await safeDelete(sql`UPDATE promo_codes SET created_by = NULL WHERE created_by = ${userId}`);
+      // Promo codes — reassign to the admin performing the deletion (created_by is NOT NULL so cannot be nulled)
+      await safeDelete(sql`UPDATE promo_codes SET owner_id = NULL WHERE owner_id = ${userId}`, true);
+      await safeDelete(sql`UPDATE promo_codes SET created_by = ${adminUser.id} WHERE created_by = ${userId}`);
       
       // Referral events by referrer
       await safeDelete(sql`DELETE FROM referral_events WHERE referrer_id = ${userId}`);

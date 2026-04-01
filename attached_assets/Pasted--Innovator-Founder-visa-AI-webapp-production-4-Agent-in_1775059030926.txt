@@ -1,0 +1,176 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+4
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+5121bffe
+Active
+
+Apr 1, 2026, 4:46 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-04-01T15:53:58.269Z] POST /api/activity/session
+3:53:58 PM [express] POST /api/activity/session 200 in 220ms :: {"sessionId":"9122d29f-18d2-4acf-ad2…
+[2026-04-01T15:53:59.546Z] GET /api/admin/activity-log
+3:53:59 PM [express] GET /api/admin/activity-log 200 in 63ms :: [{"id":"plan-d198155d-99a2-4d86-824e…
+[2026-04-01T15:54:00.909Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+3:54:01 PM [express] GET /api/admin/analytics/overview 200 in 568ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-01T15:54:02.544Z] GET /api/admin/analytics/users
+3:54:02 PM [express] GET /api/admin/analytics/users 200 in 25ms :: {"byTier":{"free":7,"basic":0,"pr…
+[2026-04-01T15:54:08.559Z] DELETE /api/admin/users/ad00c842-a318-46aa-8f49-167341f84589
+3:54:08 PM [express] DELETE /api/admin/users/ad00c842-a318-46aa-8f49-167341f84589 200 in 304ms :: {"…
+[2026-04-01T15:54:09.045Z] GET /api/admin/users?page=1&pageSize=25
+3:54:09 PM [express] GET /api/admin/users 200 in 46ms :: {"users":[{"id":"28bf17a7-ba4b-4d30-b986-e3…
+[2026-04-01T15:54:28.252Z] POST /api/activity/session
+3:54:28 PM [express] POST /api/activity/session 200 in 228ms :: {"sessionId":"9122d29f-18d2-4acf-ad2…
+[2026-04-01T15:54:29.963Z] GET /api/admin/activity-log
+3:54:29 PM [express] GET /api/admin/activity-log 200 in 36ms :: [{"id":"plan-d198155d-99a2-4d86-824e…
+[2026-04-01T15:54:31.821Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+3:54:32 PM [express] GET /api/admin/analytics/overview 200 in 1014ms :: {"kpiMetrics":[{"label":"Tot…
+[2026-04-01T15:54:32.909Z] GET /api/admin/analytics/users
+3:54:32 PM [express] GET /api/admin/analytics/users 200 in 11ms :: {"byTier":{"free":6,"basic":0,"pr…
+3:54:58 PM [express] POST /api/activity/session 200 in 306ms :: {"sessionId":"9122d29f-18d2-4acf-ad2…
+[2026-04-01T15:55:00.340Z] GET /api/admin/activity-log
+3:55:00 PM [express] GET /api/admin/activity-log 200 in 38ms :: [{"id":"plan-d198155d-99a2-4d86-824e…
+[2026-04-01T15:55:03.188Z] GET /api/admin/analytics/overview
+[2026-04-01T15:55:03.265Z] GET /api/admin/analytics/users
+3:55:03 PM [express] GET /api/admin/analytics/users 200 in 121ms :: {"byTier":{"free":6,"basic":0,"p…
+[Stripe] Using LIVE mode credentials - payments are real
+[2026-04-01T15:54:58.262Z] POST /api/activity/session
+3:55:03 PM [express] GET /api/admin/analytics/overview 200 in 579ms :: {"kpiMetrics":[{"label":"Tota…
+[Stripe] Using LIVE mode credentials - payments are real
+3:55:27 PM [express] GET /api/admin/activity-log 200 in 66ms :: [{"id":"plan-d198155d-99a2-4d86-824e…
+[2026-04-01T15:55:27.654Z] POST /api/activity/page-view
+[2026-04-01T15:55:26.640Z] GET /admin
+[2026-04-01T15:55:26.644Z] POST /api/activity/session/end
+3:55:26 PM [express] POST /api/activity/session/end 200 in 202ms :: {"success":true}
+[2026-04-01T15:55:27.059Z] GET /attached_assets/official_logo.webp
+[2026-04-01T15:55:27.087Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:55:27 PM [express] GET /api/auth/user 200 in 10ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-01T15:55:27.284Z] POST /api/activity/session
+[2026-04-01T15:55:27.285Z] POST /api/activity/session
+3:55:27 PM [express] POST /api/activity/session 200 in 27ms :: {"sessionId":"3432296c-85ea-405e-88f8…
+3:55:27 PM [express] POST /api/activity/session 200 in 42ms :: {"sessionId":"1e898776-da3e-4a0e-a074…
+[2026-04-01T15:55:27.481Z] GET /api/admin/users?page=1&pageSize=1000
+[2026-04-01T15:55:27.489Z] GET /api/admin/analytics/overview
+[2026-04-01T15:55:27.499Z] GET /api/admin/activity-log
+3:55:27 PM [express] GET /api/admin/users 200 in 20ms :: {"users":[{"id":"28bf17a7-ba4b-4d30-b986-e3…
+3:55:27 PM [express] POST /api/activity/page-view 200 in 19ms :: {"pageViewId":"e4e9a066-0438-41a0-8…
+3:55:27 PM [express] GET /api/admin/analytics/overview 200 in 396ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-01T15:55:31.040Z] GET /api/admin/analytics/users
+[2026-04-01T15:55:31.041Z] GET /api/admin/users?page=1&pageSize=25
+3:55:31 PM [express] GET /api/admin/analytics/users 200 in 25ms :: {"byTier":{"free":6,"basic":0,"pr…
+3:55:31 PM [express] GET /api/admin/users 200 in 194ms :: {"users":[{"id":"28bf17a7-ba4b-4d30-b986-e…
+[2026-04-01T15:55:44.117Z] POST /api/activity/session/end
+3:55:44 PM [express] POST /api/activity/session/end 200 in 213ms :: {"success":true}
+[2026-04-01T15:55:53.417Z] POST /api/activity/session
+3:55:53 PM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"a0ca5cd5-fa44-451f-a812…
+[2026-04-01T15:55:53.633Z] POST /api/activity/page-view
+3:55:53 PM [express] POST /api/activity/page-view 200 in 27ms :: {"pageViewId":"3cd25900-868f-4ebd-a…
+3:55:56 PM [express] POST /api/activity/session/end 200 in 14ms :: {"success":true}
+[2026-04-01T15:55:56.023Z] POST /api/activity/session/end
+[2026-04-01T15:55:58.999Z] POST /api/activity/session
+3:55:59 PM [express] POST /api/activity/session 200 in 23ms :: {"sessionId":"5986cc13-91f9-4d18-bcd4…
+[2026-04-01T15:55:59.157Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:55:59 PM [express] GET /api/auth/user 200 in 18ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-01T15:55:59.212Z] POST /api/activity/page-view
+3:55:59 PM [express] POST /api/activity/page-view 200 in 218ms :: {"pageViewId":"ce032bc6-bb91-4160-…
+3:56:01 PM [express] POST /api/activity/session/end 200 in 15ms :: {"success":true}
+[2026-04-01T15:56:01.302Z] POST /api/activity/session/end
+3:56:04 PM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"4d67507f-0abc-4709-a43a…
+[2026-04-01T15:56:04.575Z] POST /api/activity/page-view
+3:56:04 PM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"8e2181ce-0090-4ca6-b…
+[2026-04-01T15:56:04.210Z] POST /api/activity/session
+[2026-04-01T15:56:16.810Z] GET /api/admin/users?page=1&pageSize=25&tierFilters=premium&tierFilters=enterprise&tierFilters=ultimate
+3:56:17 PM [express] GET /api/admin/users 200 in 223ms :: {"users":[{"id":"28bf17a7-ba4b-4d30-b986-e…
+[2026-04-01T15:56:27.905Z] GET /api/admin/activity-log
+3:56:28 PM [express] GET /api/admin/activity-log 200 in 223ms :: [{"id":"plan-d198155d-99a2-4d86-824…
+[2026-04-01T15:56:28.236Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+3:56:28 PM [express] GET /api/admin/analytics/overview 200 in 420ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-01T15:56:31.459Z] GET /api/admin/analytics/users
+3:56:31 PM [express] GET /api/admin/analytics/users 200 in 12ms :: {"byTier":{"free":6,"basic":0,"pr…
+[2026-04-01T15:56:34.423Z] POST /api/activity/session
+3:56:34 PM [express] POST /api/activity/session 200 in 18ms :: {"sessionId":"4d67507f-0abc-4709-a43a…
+  detail: 'Failing row contains (62271284-6b8b-471a-88ea-5b658911d9a7, FREECOVER100, null, Owner Free Cover Access, 100% discount for premium covers - owner/admin use, percentage, 100, null, null, null, 1, 1, 2026-01-27 17:14:33.616086, null, null, null, active, null, 2026-01-27 17:14:33.616086, 2026-01-27 17:29:06.087, null, null).',
+  hint: undefined,
+  position: undefined,
+Delete user error: error: null value in column "created_by" of relation "promo_codes" violates not-null constraint
+  internalPosition: undefined,
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+  where: undefined,
+    at async safeDelete (file:///app/dist/index.js:24919:11)
+    at async file:///app/dist/index.js:24970:7 {
+  schema: 'public',
+  length: 509,
+  table: 'promo_codes',
+  severity: 'ERROR',
+  column: 'created_by',
+  code: '23502',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2022',
+3:56:49 PM [express] DELETE /api/admin/users/65e4e33f-f527-453d-961f-eb40d3d91386 500 in 349ms :: {"…
+}
+3:56:56 PM [express] POST /api/activity/session/end 200 in 185ms :: {"success":true}
+
+
