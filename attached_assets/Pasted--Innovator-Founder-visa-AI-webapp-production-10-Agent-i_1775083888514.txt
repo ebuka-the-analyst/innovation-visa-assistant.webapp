@@ -1,0 +1,171 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+10
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+ad8a91a8
+Active
+
+Apr 1, 2026, 11:27 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-04-01T22:32:03.719Z] POST /api/activity/session
+10:32:04 PM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"e143080f-16f1-4b7a-b…
+[2026-04-01T22:32:34.079Z] POST /api/activity/session
+10:32:34 PM [express] POST /api/activity/session 200 in 203ms :: {"sessionId":"9c2bdbe0-31d3-4204-aed…
+[2026-04-01T22:32:38.097Z] POST /api/admin/blog/generate-next
+[Blog Generator] Generation attempt 1/1
+[2026-04-01T22:33:04.080Z] POST /api/activity/session
+10:33:04 PM [express] POST /api/activity/session 200 in 200ms :: {"sessionId":"9c2bdbe0-31d3-4204-aed…
+3. [WARNING] seo
+[Blog Generator] Validation Report:
+   Meta title too long: 72 chars (max 65)
+============================================================
+   Fix: Shorten meta title to under 65 characters
+BLOG CONTENT VALIDATION REPORT
+============================================================
+Overall Score: 45/100
+Status: FAILED - REQUIRES CORRECTION
+Critical Issues: 2
+Warnings: 1
+Suggestions: 0
+ISSUES FOUND:
+----------------------------------------
+1. [CRITICAL] invalid_endorsing_body
+   Unknown endorsing body mentioned: "similar ideas". Only 4 approved bodies exist.
+   Location: "Endorsing bodies receive many applications with similar ideas."
+   Fix: Only reference: Envestors, Innovator International, UK Endorsing Services (UKES), or Global Entrepreneurs Programme (GEP - invitation only)
+2. [CRITICAL] illegal_guarantee
+   Content makes guarantees about visa outcomes - this is prohibited
+   Fix: Remove all guarantee language. No one can guarantee visa approval.
+10:33:35 PM [express] POST /api/admin/blog/generate-next 200 in 57880ms :: {"success":true,"post":{"t…
+[2026-04-01T22:33:36.202Z] GET /api/admin/blog/posts/all/
+10:33:36 PM [express] GET /api/admin/blog/posts/all/ 200 in 8ms
+============================================================
+[Blog Generator] 2 issues remain after auto-correction. Proceeding with corrected content.
+[Blog Generator] Content published with 2 warnings after max retries. Sending to triple-AI verification.
+[Blog Generator] Running triple-AI verification (Gemini + OpenAI)...
+[MultiVerifier] Starting triple-AI verification for: Innovation, Viability, Scalability: The Three Endorsement Cr
+[2026-04-01T22:33:34.067Z] POST /api/activity/session/end
+10:33:34 PM [express] POST /api/activity/session/end 200 in 198ms :: {"success":true}
+[MultiVerifier] OpenAI quota/rate-limit — marking as unavailable (not score 0): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+[MultiVerifier] Result: FLAGGED | Gemini: 100 | OpenAI: unavailable | Composite: 100
+[Blog Generator] ✗ Verification FAILED — Composite: 100/100. Sending to human review queue.
+[Blog Generator] Reason: OpenAI unavailable (quota exceeded) — Gemini only: 100/100. Routing to human review for single-verifier result.
+[2026-04-01T22:33:36.357Z] GET /api/admin/blog/stats
+[2026-04-01T22:33:36.359Z] GET /api/admin/blog/queue
+10:33:36 PM [express] GET /api/admin/blog/stats 200 in 24ms :: {"total":25,"published":25,"scheduled"…
+10:33:36 PM [express] GET /api/admin/blog/queue 200 in 182ms :: [{"id":1,"targetDate":"2026-04-02T06:…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:37:19 PM [express] GET /api/auth/user 200 in 209ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+10:37:19 PM [express] POST /api/activity/session 200 in 210ms :: {"sessionId":"81b48f3e-9d21-4cb5-915…
+[2026-04-01T22:37:19.504Z] POST /api/activity/page-view
+10:37:19 PM [express] POST /api/activity/page-view 200 in 18ms :: {"pageViewId":"fba7e2d6-77f3-48a1-b…
+[2026-04-01T22:37:19.098Z] GET /api/auth/user
+[2026-04-01T22:37:19.103Z] POST /api/activity/session
+[2026-04-01T22:37:24.089Z] GET /api/admin/activity-log
+[2026-04-01T22:37:24.090Z] GET /api/admin/analytics/overview
+[2026-04-01T22:37:24.106Z] GET /api/auth/user
+[2026-04-01T22:37:24.108Z] POST /api/activity/session/end
+[2026-04-01T22:37:24.111Z] POST /api/activity/session
+10:37:24 PM [express] GET /api/admin/activity-log 200 in 35ms :: [{"id":"plan-52fefd3d-a1aa-4904-8649…
+[Stripe] Using LIVE mode credentials - payments are real
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:37:24 PM [express] GET /api/auth/user 200 in 373ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+10:37:24 PM [express] POST /api/activity/session/end 200 in 372ms :: {"success":true}
+10:37:24 PM [express] POST /api/activity/session 200 in 380ms :: {"sessionId":"b22013f6-ab15-44ce-bcb…
+[2026-04-01T22:37:24.724Z] POST /api/activity/page-view
+10:37:24 PM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"f37785fa-5394-4444-b…
+10:37:24 PM [express] GET /api/admin/analytics/overview 200 in 694ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-01T22:37:29.391Z] POST /api/activity/session/end
+10:37:29 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+[2026-04-01T22:45:10.419Z] GET /guide
+10:50:16 PM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"c0c17b93-65a4-4d62-b…
+[2026-04-01T22:50:13.768Z] POST /api/activity/session
+[2026-04-01T22:50:13.769Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:50:13 PM [express] GET /api/auth/user 200 in 198ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+10:50:13 PM [express] POST /api/activity/session 200 in 207ms :: {"sessionId":"16bb4923-5376-4d94-b69…
+[2026-04-01T22:50:14.182Z] POST /api/activity/page-view
+10:50:14 PM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"16630986-041a-4771-b…
+[2026-04-01T22:50:16.211Z] POST /api/activity/session/end
+[2026-04-01T22:50:16.217Z] GET /api/auth/user
+[2026-04-01T22:50:16.218Z] POST /api/activity/session
+10:50:16 PM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:50:16 PM [express] GET /api/auth/user 200 in 9ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c","…
+10:50:16 PM [express] POST /api/activity/session 200 in 188ms :: {"sessionId":"b45672d6-ca03-4b94-989…
+[2026-04-01T22:50:16.587Z] POST /api/activity/page-view
+[2026-04-01T22:50:18.289Z] POST /api/activity/session
+[2026-04-01T22:50:18.292Z] POST /api/activity/session/end
+[2026-04-01T22:50:18.299Z] GET /api/auth/user
+10:50:18 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"518a9075-e676-4912-9384…
+10:50:18 PM [express] POST /api/activity/session/end 200 in 12ms :: {"success":true}
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:50:18 PM [express] GET /api/auth/user 200 in 11ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-01T22:50:18.720Z] POST /api/activity/page-view
+10:50:18 PM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"7b8194a8-a333-46aa-8…
+[2026-04-01T22:50:24.781Z] GET /api/admin/blog/review-queue
+10:50:24 PM [express] GET /api/admin/blog/review-queue 200 in 16ms :: []
+[2026-04-01T22:50:27.373Z] GET /api/admin/blog/review-queue
+10:50:27 PM [express] GET /api/admin/blog/review-queue 200 in 11ms :: []
+[2026-04-01T22:50:50.156Z] POST /api/activity/session/end
+10:50:50 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+[2026-04-01T22:50:48.722Z] POST /api/activity/session
+10:50:48 PM [express] POST /api/activity/session 200 in 199ms :: {"sessionId":"518a9075-e676-4912-938…
+
+
