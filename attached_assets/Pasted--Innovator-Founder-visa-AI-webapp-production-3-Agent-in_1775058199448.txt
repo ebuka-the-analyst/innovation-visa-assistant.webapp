@@ -1,0 +1,173 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+3
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+c11afda8
+Active
+
+Apr 1, 2026, 4:37 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[Email Service] Using Resend HTTP API (recommended)
+[Blog] Image route configured (local + unique + S3 fallback)
+3:40:08 PM [express] [MIGRATION] Checking for required schema updates...
+[DB] Auto-migration: logo_element column ensured
+[DB] Auto-migration: blog image URLs updated to object storage
+3:40:08 PM [express] [MIGRATION] Restoring 3 plan credits for 1 premium subscriber(s) affected by payment bug...
+3:40:08 PM [express] [MIGRATION] Restored 3 credits for ebuka.umeh40@gmail.com (premium tier)
+3:40:08 PM [express] [MIGRATION] Restoring 12 plan credits for 2 ultimate subscriber(s) affected by payment bug...
+3:40:08 PM [express] [MIGRATION] Restored 12 credits for silvermarislogistics@gmail.com (ultimate tier)
+3:40:08 PM [express] [MIGRATION] Restored 12 credits for adamyaraj2@gmail.com (ultimate tier)
+3:40:08 PM [express] [MIGRATION] Schema check complete
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+3:40:08 PM [express] serving on port 8080
+3:40:08 PM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: Assigned unique images to 10 blog posts
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+updates please upgrade to a supported Node.js LTS version.
+[2026-04-01T15:41:35.084Z] GET /api/admin/activity-log
+[2026-04-01T15:41:35.089Z] GET /api/auth/user
+[2026-04-01T15:41:35.092Z] POST /api/activity/session
+[2026-04-01T15:41:35.104Z] GET /api/admin/analytics/users
+[2026-04-01T15:41:35.105Z] GET /api/admin/analytics/overview
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:41:35 PM [express] GET /api/auth/user 200 in 266ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+3:41:35 PM [express] GET /api/admin/analytics/users 200 in 261ms :: {"byTier":{"free":7,"basic":0,"p…
+3:41:35 PM [express] POST /api/activity/session 200 in 273ms :: {"sessionId":"8454b5b1-14a2-48db-b65…
+[Stripe] Using LIVE mode credentials - payments are real
+3:41:35 PM [express] GET /api/admin/activity-log 200 in 327ms :: [{"id":"plan-d198155d-99a2-4d86-824…
+[2026-04-01T15:41:35.556Z] POST /api/activity/page-view
+3:41:35 PM [express] POST /api/activity/page-view 200 in 35ms :: {"pageViewId":"16649d4b-194d-45c6-9…
+3:41:36 PM [express] GET /api/admin/analytics/overview 200 in 1030ms :: {"kpiMetrics":[{"label":"Tot…
+[2026-04-01T15:41:37.165Z] GET /admin
+[2026-04-01T15:41:37.318Z] POST /api/activity/session/end
+3:41:37 PM [express] POST /api/activity/session/end 200 in 15ms :: {"success":true}
+[2026-04-01T15:41:37.451Z] GET /attached_assets/official_logo.webp
+3:41:37 PM [express] GET /api/auth/user 200 in 13ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-01T15:41:37.748Z] POST /api/activity/session
+3:41:37 PM [express] POST /api/activity/session 200 in 19ms :: {"sessionId":"6ede8ec4-619c-4081-8a52…
+[2026-04-01T15:41:37.789Z] POST /api/activity/session
+3:41:37 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"e0d47e2e-dfe1-400f-a230…
+[2026-04-01T15:41:37.823Z] GET /api/admin/users?page=1&pageSize=1000
+[2026-04-01T15:41:37.824Z] GET /api/admin/activity-log
+[2026-04-01T15:41:37.824Z] GET /api/admin/analytics/overview
+[2026-04-01T15:41:37.485Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:41:38 PM [express] GET /api/admin/analytics/overview 200 in 539ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-01T15:41:40.701Z] GET /api/admin/analytics/users
+3:41:37 PM [express] GET /api/admin/users 200 in 19ms :: {"users":[{"id":"28bf17a7-ba4b-4d30-b986-e3…
+3:41:37 PM [express] GET /api/admin/activity-log 200 in 28ms :: [{"id":"plan-d198155d-99a2-4d86-824e…
+[2026-04-01T15:41:37.954Z] POST /api/activity/page-view
+3:41:38 PM [express] POST /api/activity/page-view 200 in 72ms :: {"pageViewId":"1edbe835-5862-492f-b…
+[Stripe] Using LIVE mode credentials - payments are real
+[2026-04-01T15:41:40.703Z] GET /api/admin/users?page=1&pageSize=25
+3:41:40 PM [express] GET /api/admin/analytics/users 200 in 14ms :: {"byTier":{"free":7,"basic":0,"pr…
+3:41:40 PM [express] GET /api/admin/users 200 in 18ms :: {"users":[{"id":"28bf17a7-ba4b-4d30-b986-e3…
+[2026-04-01T15:41:49.655Z] GET /api/admin/users/28bf17a7-ba4b-4d30-b986-e3690854de7b/impersonate-data
+3:41:49 PM [express] GET /api/admin/users/28bf17a7-ba4b-4d30-b986-e3690854de7b/impersonate-data 200 …
+[2026-04-01T15:42:08.120Z] POST /api/activity/session
+[2026-04-01T15:42:08.217Z] GET /api/admin/activity-log
+3:42:08 PM [express] POST /api/activity/session 200 in 255ms :: {"sessionId":"e0d47e2e-dfe1-400f-a23…
+3:42:08 PM [express] GET /api/admin/activity-log 200 in 168ms :: [{"id":"plan-d198155d-99a2-4d86-824…
+[2026-04-01T15:42:08.566Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+3:42:08 PM [express] GET /api/admin/analytics/overview 200 in 407ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-01T15:42:11.051Z] GET /api/admin/analytics/users
+3:42:11 PM [express] GET /api/admin/analytics/users 200 in 21ms :: {"byTier":{"free":7,"basic":0,"pr…
+3:42:38 PM [express] POST /api/activity/session 200 in 204ms :: {"sessionId":"e0d47e2e-dfe1-400f-a23…
+[2026-04-01T15:42:32.987Z] GET /api/admin/users?page=1&pageSize=25&tierFilters=premium&tierFilters=enterprise&tierFilters=ultimate
+3:42:33 PM [express] GET /api/admin/users 200 in 214ms :: {"users":[{"id":"28bf17a7-ba4b-4d30-b986-e…
+[2026-04-01T15:42:38.729Z] GET /api/admin/activity-log
+[2026-04-01T15:42:38.116Z] POST /api/activity/session
+3:42:38 PM [express] GET /api/admin/activity-log 200 in 38ms :: [{"id":"plan-d198155d-99a2-4d86-824e…
+[2026-04-01T15:42:39.161Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+3:42:39 PM [express] GET /api/admin/analytics/overview 200 in 370ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-01T15:42:41.256Z] GET /api/admin/analytics/users
+3:42:41 PM [express] GET /api/admin/analytics/users 200 in 15ms :: {"byTier":{"free":7,"basic":0,"pr…
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async safeDelete (file:///app/dist/index.js:24919:11)
+    at async file:///app/dist/index.js:24957:7 {
+  length: 365,
+  severity: 'ERROR',
+  table: 'page_views',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'page_views_session_id_user_sessions_id_fk',
+  line: '2612',
+  routine: 'ri_ReportViolation'
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  code: '23503',
+  detail: 'Key (id)=(40f6179a-36e5-439a-a3ec-33888bc8cd67) is still referenced from table "page_views".',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+[2026-04-01T15:42:59.853Z] DELETE /api/admin/users/579056b1-5404-46b1-a162-250502a77a18
+Delete user error: error: update or delete on table "user_sessions" violates foreign key constraint "page_views_session_id_user_sessions_id_fk" on table "page_views"
+3:43:00 PM [express] DELETE /api/admin/users/579056b1-5404-46b1-a162-250502a77a18 500 in 417ms :: {"…
+3:43:04 PM [express] POST /api/activity/session/end 200 in 189ms :: {"success":true}
+
+

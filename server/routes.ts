@@ -11990,10 +11990,12 @@ Return a JSON object with:
       await safeDelete(sql`DELETE FROM referrals WHERE referrer_id = ${userId} OR referred_id = ${userId}`);
       await safeDelete(sql`DELETE FROM tool_analytics WHERE user_id = ${userId}`);
       
-      // Activity tracking tables
-      await safeDelete(sql`DELETE FROM user_sessions WHERE user_id = ${userId}`);
+      // Activity tracking tables — order matters: delete child rows referencing user_sessions BEFORE deleting user_sessions
+      await safeDelete(sql`DELETE FROM page_views WHERE session_id IN (SELECT id FROM user_sessions WHERE user_id = ${userId})`);
+      await safeDelete(sql`DELETE FROM activity_events WHERE session_id IN (SELECT id FROM user_sessions WHERE user_id = ${userId})`);
       await safeDelete(sql`DELETE FROM page_views WHERE user_id = ${userId}`);
       await safeDelete(sql`DELETE FROM activity_events WHERE user_id = ${userId}`);
+      await safeDelete(sql`DELETE FROM user_sessions WHERE user_id = ${userId}`);
       
       // Additional tables with user foreign keys
       await safeDelete(sql`DELETE FROM user_notification_reads WHERE user_id = ${userId}`);
