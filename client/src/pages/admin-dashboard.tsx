@@ -2526,8 +2526,8 @@ export default function AdminDashboard() {
                       </div>
                     )}
 
-                    {/* Row 1: 4 KPI Cards */}
-                    <div key={`kpi-${hideDemoUsers}`} className="grid grid-cols-4 gap-1.5">
+                    {/* Row 1: KPI Cards 2×2 grid */}
+                    <div key={`kpi-${hideDemoUsers}`} className="grid grid-cols-2 gap-1.5">
                       {filteredOverviewData?.kpiMetrics?.map((metric) => {
                         const IconComponent = iconMap[metric.icon] || Activity;
                         return (
@@ -2558,13 +2558,12 @@ export default function AdminDashboard() {
                             <span className="text-[10px] font-medium">Users & Plans Growth (90 Days)</span>
                             <Badge variant="outline" className="text-[9px] h-4 px-1"><TrendingUp className="h-2 w-2 mr-0.5" />Live</Badge>
                           </div>
-                          <ResponsiveContainer width="100%" height={72}>
+                          <ResponsiveContainer width="100%" height={45}>
                             <RechartsLineChart data={filteredOverviewData?.timeSeriesData}>
                               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                               <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={7} tickFormatter={(v) => format(new Date(v), 'MMM d')} />
                               <YAxis stroke="hsl(var(--muted-foreground))" fontSize={7} width={18} />
                               <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '6px', fontSize: '9px' }} labelFormatter={(v) => format(new Date(v), 'PPP')} />
-                              <Legend wrapperStyle={{ fontSize: '8px', paddingTop: '1px' }} />
                               <Line type="monotone" dataKey="users" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name="Users" />
                               <Line type="monotone" dataKey="plans" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} name="Plans" />
                               <Line type="monotone" dataKey="activeUsers" stroke="hsl(var(--chart-3))" strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="Active" />
@@ -2574,8 +2573,8 @@ export default function AdminDashboard() {
                       </Card>
                       <Card className="col-span-2">
                         <CardContent className="p-2">
-                          <span className="text-[10px] font-medium block mb-1">Subscription Tier Distribution</span>
-                          <div className="space-y-1">
+                          <span className="text-[10px] font-medium block mb-0.5">Subscription Tier Distribution</span>
+                          <div className="space-y-0.5">
                             {(overviewData?.subscriptionDistribution?.length ? overviewData.subscriptionDistribution : [
                               { tier: 'free', count: 0, percentage: 0 }, { tier: 'basic', count: 0, percentage: 0 },
                               { tier: 'premium', count: 0, percentage: 0 }, { tier: 'enterprise', count: 0, percentage: 0 }, { tier: 'ultimate', count: 0, percentage: 0 }
@@ -2598,7 +2597,7 @@ export default function AdminDashboard() {
                       <Card>
                         <CardContent className="p-2">
                           <span className="text-[10px] font-medium block mb-0.5">Daily Active Users (30 Days)</span>
-                          <ResponsiveContainer width="100%" height={65}>
+                          <ResponsiveContainer width="100%" height={40}>
                             <RechartsAreaChart data={overviewData?.activityData?.slice(-30) || []}>
                               <defs>
                                 <linearGradient id="ovActivityGrad" x1="0" y1="0" x2="0" y2="1">
@@ -2621,7 +2620,7 @@ export default function AdminDashboard() {
                             <span className="text-[10px] font-medium">Live Activity Feed</span>
                             <span className="text-[9px] text-muted-foreground">Recent platform events</span>
                           </div>
-                          <div className="space-y-0.5" style={{ height: 65, overflow: 'hidden' }}>
+                          <div className="space-y-0.5" style={{ height: 40, overflow: 'hidden' }}>
                             {(overviewData?.recentActivity || []).slice(0, 6).map((activity, i) => (
                               <div key={i} className="flex items-center gap-1">
                                 <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${activity.severity === 'error' ? 'bg-red-500' : activity.severity === 'success' ? 'bg-green-500' : activity.severity === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`} />
@@ -2643,7 +2642,7 @@ export default function AdminDashboard() {
                         <CardContent className="p-2">
                           <span className="text-[10px] font-medium block mb-0.5">Top 10 Most Used Tools</span>
                           <div className="space-y-0.5">
-                            {(overviewData?.topTools || []).slice(0, 5).map((tool, i) => {
+                            {(overviewData?.topTools || []).slice(0, 3).map((tool, i) => {
                               const maxCount = overviewData?.topTools?.[0]?.usageCount || 1;
                               return (
                                 <div key={tool.toolId} className="flex items-center gap-1">
