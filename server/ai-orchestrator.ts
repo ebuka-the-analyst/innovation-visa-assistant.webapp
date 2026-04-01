@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { qwen, QWEN_MODELS } from "./qwenClient";
 import { storage } from "./storage";
 import { 
   AI_ACTIONS, 
@@ -33,10 +33,6 @@ interface OrchestratorResult {
   };
 }
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
 
 // System prompt that includes action capabilities
 const ORCHESTRATOR_SYSTEM_PROMPT = `You are the UK Innovator Founder Visa AI Assistant - an expert-level advisor with the ability to perform actions on behalf of authenticated users.
@@ -101,8 +97,8 @@ export async function orchestrateChat(
 
   try {
     // Call OpenAI with function calling enabled
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const response = await qwen.chat.completions.create({
+      model: QWEN_MODELS.plus,
       messages: [
         { role: "system", content: ORCHESTRATOR_SYSTEM_PROMPT },
         ...conversationHistory.map(msg => ({
@@ -167,8 +163,8 @@ export async function orchestrateChat(
       const actionResult = await executeAction(functionName, actionContext, functionArgs);
 
       // Generate a follow-up response incorporating the action result
-      const followUpResponse = await openai.chat.completions.create({
-        model: "gpt-4o",
+      const followUpResponse = await qwen.chat.completions.create({
+        model: QWEN_MODELS.plus,
         messages: [
           { role: "system", content: "You are a helpful assistant. The user requested an action and you executed it. Provide a brief, helpful response that summarizes the result and offers any relevant next steps. Be conversational and supportive." },
           { role: "user", content: `The user asked: "${userMessage}"\n\nAction executed: ${functionName}\nResult: ${actionResult.message}\n\nProvide a helpful response that incorporates this information.` }
@@ -287,69 +283,12 @@ RULES:
 
 Give direct, helpful answers.`;
 
-  // Try Gemini first (PRIMARY - saves costs) with retry
+  // Qwen primary call with retry
   try {
     return await retryWithBackoff(async () => {
-      const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-      const geminiBaseURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "https://generativelanguage.googleapis.com";
-      
-      console.log("[AI Orchestrator] Attempting Gemini for regular chat (PRIMARY)");
-      
-      const response = await fetchWithTimeout(
-        `${geminiBaseURL}/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: {
-              parts: [{ text: systemPrompt }],
-            },
-            contents: [
-              ...conversationHistory.map((msg) => ({
-                role: msg.role === "user" ? "user" : "model",
-                parts: [{ text: msg.content }],
-              })),
-              {
-                role: "user",
-                parts: [{ text: userMessage }],
-              },
-            ],
-            generationConfig: {
-              maxOutputTokens: 500,
-              temperature: 0.7,
-            },
-          }),
-        },
-        25000
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Gemini error: ${response.status} - ${errorText}`);
-      }
-
-      const data = await response.json() as any;
-      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (!content) {
-        throw new Error("Empty response from Gemini");
-      }
-      
-      return {
-        response: content,
-        provider: "Gemini"
-      };
-    }, 2, 1000, "Gemini regular chat");
-  } catch (error: any) {
-    console.error("[AI Orchestrator] Gemini failed for regular chat after retries:", error.message);
-  }
-
-  // Fallback to OpenAI with retry
-  try {
-    return await retryWithBackoff(async () => {
-      console.log("[AI Orchestrator] Falling back to OpenAI for regular chat");
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+      console.log("[AI Orchestrator] Calling Qwen for regular chat");
+      const response = await qwen.chat.completions.create({
+        model: QWEN_MODELS.plus,
         messages: [
           { role: "system", content: systemPrompt },
           ...conversationHistory.map(msg => ({
@@ -369,9 +308,9 @@ Give direct, helpful answers.`;
       
       return {
         response: content,
-        provider: "GPT-4o"
+        provider: "Qwen"
       };
-    }, 2, 1000, "OpenAI regular chat");
+    }, 2, 1000, "Qwen regular chat");
   } catch (error) {
     console.error("[Regular Chat] All providers failed:", error);
     return getIntelligentFallback(userMessage);

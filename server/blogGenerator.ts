@@ -11,7 +11,7 @@
  * - All claims must be verifiable
  */
 
-import OpenAI from "openai";
+import { qwen, QWEN_MODELS } from "./qwenClient";
 import {
   VERIFIED_VISA_FEES,
   VERIFIED_ELIGIBILITY,
@@ -27,9 +27,6 @@ import {
   generateValidationReport
 } from "./blogContentValidator";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // ============================================================================
 // VERIFIED DATA INJECTION - Prevents AI from making up facts
@@ -306,8 +303,8 @@ Return ONLY valid JSON.`;
     try {
       console.log(`[Blog Generator] Generation attempt ${attempt}/${MAX_RETRIES}`);
       
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+      const response = await qwen.chat.completions.create({
+        model: QWEN_MODELS.plus,
         messages: [
           {
             role: "system",

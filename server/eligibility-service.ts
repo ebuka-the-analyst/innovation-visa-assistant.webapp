@@ -1,52 +1,12 @@
-import OpenAI from "openai";
+import { qwen, QWEN_MODELS } from "./qwenClient";
 import { storage } from "./storage";
 import { InsertEligibilityAssessment, IndustryProfile } from "@shared/schema";
 import crypto from "crypto";
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
-
-// Call Gemini API for JSON response
-async function callGeminiForJSON(systemPrompt: string, userPrompt: string): Promise<any> {
-  const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-  const geminiBaseURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "https://generativelanguage.googleapis.com";
-  
-  const response = await fetch(`${geminiBaseURL}/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      system_instruction: {
-        parts: [{ text: systemPrompt }],
-      },
-      contents: [{
-        role: "user",
-        parts: [{ text: userPrompt }],
-      }],
-      generationConfig: {
-        maxOutputTokens: 2000,
-        temperature: 0.3,
-        responseMimeType: "application/json",
-      },
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Gemini API error: ${response.status}`);
-  }
-
-  const data = await response.json() as any;
-  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!content) throw new Error("No response from Gemini");
-  
-  return JSON.parse(content);
-}
-
-// Fallback to OpenAI
-async function callOpenAIForJSON(systemPrompt: string, userPrompt: string): Promise<any> {
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
+async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<any> {
+  console.log("[EligibilityService] Calling Qwen");
+  const response = await qwen.chat.completions.create({
+    model: QWEN_MODELS.plus,
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt }
@@ -55,22 +15,9 @@ async function callOpenAIForJSON(systemPrompt: string, userPrompt: string): Prom
     max_tokens: 2000,
     temperature: 0.3
   });
-
   const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error("No response from OpenAI");
-  
+  if (!content) throw new Error("No response from Qwen");
   return JSON.parse(content);
-}
-
-// Try Gemini first, fallback to OpenAI
-async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<any> {
-  try {
-    console.log("[EligibilityService] Attempting Gemini (PRIMARY)");
-    return await callGeminiForJSON(systemPrompt, userPrompt);
-  } catch (error: any) {
-    console.error("[EligibilityService] Gemini failed, falling back to OpenAI:", error.message);
-    return await callOpenAIForJSON(systemPrompt, userPrompt);
-  }
 }
 
 interface ConceptBrief {

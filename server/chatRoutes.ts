@@ -1,11 +1,7 @@
 import { Router, Request, Response } from "express";
-import OpenAI from "openai";
+import { qwen, QWEN_MODELS } from "./qwenClient";
 
 const router = Router();
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
 
 const SYSTEM_PROMPT = `You are the Innovator Founder Visa Assistant, trained on official GOV.UK Innovator Founder visa guidance (November 2025) and Home Office internal guidance (Version 9.0, published November 11, 2025).
 
@@ -142,8 +138,8 @@ RECOMMENDATION: Verify directly with Home Office before applying.
 
 export async function chat(userMessage: string): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
+    const response = await qwen.chat.completions.create({
+      model: QWEN_MODELS.plus,
       messages: [
         {
           role: "system",

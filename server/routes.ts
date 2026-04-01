@@ -61,13 +61,12 @@ const documentUpload = multer({
   },
 });
 
-// OpenAI-powered AI generation system
+// Qwen-powered AI generation system
 async function callAI(prompt: string): Promise<string> {
-  const OpenAI = (await import("openai")).default;
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const { qwen, QWEN_MODELS } = await import("./qwenClient");
   
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const response = await qwen.chat.completions.create({
+    model: QWEN_MODELS.turbo,
     messages: [{ role: "user", content: prompt }],
     max_tokens: 4000,
     temperature: 0.7,
@@ -75,7 +74,7 @@ async function callAI(prompt: string): Promise<string> {
   
   const content = response.choices[0]?.message?.content;
   if (!content) {
-    throw new Error("OpenAI returned empty response");
+    throw new Error("Qwen returned empty response");
   }
   return content;
 }
@@ -6097,9 +6096,9 @@ EXAMPLES OF GOOD RESPONSES:
         stripe: {
           secretKey: process.env.STRIPE_SECRET_KEY ? 'Configured' : 'Not configured',
         },
-        openai: {
-          apiKey: process.env.OPENAI_API_KEY ? 'Configured' : 'Not configured',
-          model: 'gpt-4o-mini',
+        qwen: {
+          apiKey: process.env.QWEN_API_KEY ? 'Configured' : 'Not configured',
+          model: 'qwen-plus',
         },
         google: {
           clientId: process.env.GOOGLE_CLIENT_ID ? 'Configured' : 'Not configured',
@@ -8302,18 +8301,17 @@ Return ONLY valid JSON, no markdown or explanation.`;
 
       try {
         // Check if we have OpenAI API key
-        if (!process.env.OPENAI_API_KEY) {
-          console.log("[Document Extract] No OpenAI API key configured - using placeholders");
+        if (!process.env.QWEN_API_KEY) {
+          console.log("[Document Extract] No Qwen API key configured - using placeholders");
           throw new Error("No AI keys configured");
         }
         
-        // Use OpenAI GPT-4 for document extraction
-        if (documentContents.length > 0 && process.env.OPENAI_API_KEY) {
-          console.log("[Document Extract] Using OpenAI GPT-4o for extraction...");
+        // Use Qwen for document extraction
+        if (documentContents.length > 0 && process.env.QWEN_API_KEY) {
+          console.log("[Document Extract] Using Qwen for extraction...");
           
           try {
-            const OpenAI = (await import("openai")).default;
-            const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+            const { qwen, QWEN_MODELS } = await import("./qwenClient");
             
             // Separate content types
             const textDocuments = documentContents.filter(d => d.isText);
@@ -8465,8 +8463,8 @@ Return ONLY valid JSON:
                 }
                 
                 try {
-                  const chunkResponse = await openai.chat.completions.create({
-                    model: "gpt-4o",
+                  const chunkResponse = await qwen.chat.completions.create({
+                    model: QWEN_MODELS.plus,
                     messages: [{
                       role: "user",
                       content: extractionPrompt.replace('{CHUNK_CONTENT}', allChunks[i])
@@ -8565,8 +8563,8 @@ Return ONLY valid JSON:
               }));
               
               try {
-                const visionResponse = await openai.chat.completions.create({
-                  model: "gpt-4o",
+                const visionResponse = await qwen.chat.completions.create({
+                  model: QWEN_MODELS.vl,
                   messages: [{
                     role: "user",
                     content: [
@@ -8633,14 +8631,13 @@ Return ONLY valid JSON:
             // Don't throw - let it fall through to intelligent placeholders
           }
         } else {
-          // No document contents - use OpenAI text-based extraction with metadata only
+          // No document contents - use Qwen text-based extraction with metadata only
           console.log("[Document Extract] No document contents, using text-based extraction...");
           
-          const OpenAI = (await import("openai")).default;
-          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+          const { qwen, QWEN_MODELS } = await import("./qwenClient");
           
-          const response = await openai.chat.completions.create({
-            model: "gpt-4o",
+          const response = await qwen.chat.completions.create({
+            model: QWEN_MODELS.plus,
             messages: [
               {
                 role: "user",
@@ -10198,11 +10195,10 @@ ENHANCEMENT GUIDELINES:
 
 OUTPUT: Return ONLY the enhanced answer text, ready to submit. Do not include explanations or meta-commentary. Keep it between 100-250 words for optimal impact.`;
 
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const { qwen: qwenClient, QWEN_MODELS: QM } = await import("./qwenClient");
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+      const completion = await qwenClient.chat.completions.create({
+        model: QM.turbo,
         messages: [
           { role: "system", content: "You are an expert visa application consultant specializing in UK Innovator Founder Visa. Enhance answers to be compelling, evidence-based, and endorser-ready." },
           { role: "user", content: enhancePrompt }
@@ -10262,11 +10258,10 @@ OUTPUT FORMAT:
 - Make it easy for the applicant to customize
 - Do not include explanations - just the draft answer ready to edit`;
 
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const { qwen: qwenClient2, QWEN_MODELS: QM2 } = await import("./qwenClient");
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+      const completion = await qwenClient2.chat.completions.create({
+        model: QM2.turbo,
         messages: [
           { role: "system", content: "You are an expert UK Innovator Founder Visa consultant. Generate helpful draft answers that applicants can personalize with their specific details." },
           { role: "user", content: draftPrompt }
@@ -10413,11 +10408,10 @@ OUTPUT FORMAT:
 - Use confident, visa-ready language
 - Include any specific dates, numbers, or achievements found in documents`;
 
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const { qwen: qwenClient3, QWEN_MODELS: QM3 } = await import("./qwenClient");
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+      const completion = await qwenClient3.chat.completions.create({
+        model: QM3.turbo,
         messages: [
           { role: "system", content: "You are an expert UK Innovator Founder Visa consultant. Generate answers using the applicant's own document data to create personalized, evidence-based responses." },
           { role: "user", content: autofillPrompt }
@@ -10776,10 +10770,10 @@ Keep responses focused, professional, and relevant to UK visa requirements.`;
       }
 
       // Check if AI is available - if not, return error instead of fake scores
-      if (!process.env.OPENAI_API_KEY) {
+      if (!process.env.QWEN_API_KEY) {
         return res.json({
           score: 0,
-          feedback: "**Evaluation Unavailable.** OpenAI API key is not configured. Please contact support@ukvisaassistant.com for assistance.",
+          feedback: "**Evaluation Unavailable.** AI service is not configured. Please contact support@ukvisaassistant.com for assistance.",
           error: true
         });
       }

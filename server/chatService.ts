@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { qwen, QWEN_MODELS } from "./qwenClient";
 
 interface Message {
   role: "user" | "assistant";
@@ -41,10 +41,6 @@ ${newsSection}
 When users ask about recent news or updates, reference this information.`;
 }
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -95,86 +91,17 @@ async function retryWithBackoff<T>(
   throw lastError || new Error(`${operationName} failed after ${maxRetries} attempts`);
 }
 
-async function callGeminiWithRetry(
-  systemPrompt: string,
-  conversationHistory: Message[],
-  userMessage: string
-): Promise<{ response: string; provider: string } | null> {
-  const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-  const geminiBaseURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "https://generativelanguage.googleapis.com";
-  
-  if (!geminiKey) {
-    console.log("[ChatService] No Gemini API key configured");
-    return null;
-  }
-  
-  try {
-    return await retryWithBackoff(async () => {
-      console.log("[ChatService] Attempting Gemini call (PRIMARY)");
-      
-      const response = await fetchWithTimeout(
-        `${geminiBaseURL}/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: {
-              parts: [{ text: systemPrompt }],
-            },
-            contents: [
-              ...conversationHistory.map((msg) => ({
-                role: msg.role === "user" ? "user" : "model",
-                parts: [{ text: msg.content }],
-              })),
-              {
-                role: "user",
-                parts: [{ text: userMessage }],
-              },
-            ],
-            generationConfig: {
-              maxOutputTokens: 500,
-              temperature: 0.7,
-            },
-          }),
-        },
-        30000
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
-      }
-
-      const data = (await response.json()) as any;
-      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      
-      if (!content) {
-        throw new Error("Empty response from Gemini");
-      }
-      
-      console.log("[ChatService] Gemini response received successfully");
-      return {
-        response: addDisclaimerIfNeeded(content),
-        provider: "Gemini",
-      };
-    }, 2, 1000, "Gemini API call");
-  } catch (error: any) {
-    console.error("[ChatService] Gemini API failed after retries:", error?.message || error);
-    return null;
-  }
-}
-
-async function callOpenAIWithRetry(
+async function callQwenWithRetry(
   systemPrompt: string,
   conversationHistory: Message[],
   userMessage: string
 ): Promise<{ response: string; provider: string } | null> {
   try {
     return await retryWithBackoff(async () => {
-      console.log("[ChatService] Attempting OpenAI call (BACKUP)");
+      console.log("[ChatService] Calling Qwen");
       
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+      const response = await qwen.chat.completions.create({
+        model: QWEN_MODELS.plus,
         messages: [
           {
             role: "system",
@@ -196,17 +123,17 @@ async function callOpenAIWithRetry(
       const content = response.choices[0]?.message?.content || "";
       
       if (!content) {
-        throw new Error("Empty response from OpenAI");
+        throw new Error("Empty response from Qwen");
       }
       
-      console.log("[ChatService] OpenAI response received successfully");
+      console.log("[ChatService] Qwen response received successfully");
       return {
         response: addDisclaimerIfNeeded(content),
-        provider: "GPT-4o",
+        provider: "Qwen",
       };
-    }, 2, 1000, "OpenAI API call");
+    }, 2, 1000, "Qwen API call");
   } catch (error: any) {
-    console.error("[ChatService] OpenAI API failed after retries:", error?.message || error);
+    console.error("[ChatService] Qwen API failed after retries:", error?.message || error);
     return null;
   }
 }
@@ -218,20 +145,12 @@ export async function chatWithMultipleLLMs(
 ): Promise<{ response: string; provider: string }> {
   const systemPrompt = buildSystemPrompt(newsContext);
   
-  // 1. Try Gemini FIRST (PRIMARY - cost effective)
-  const geminiResult = await callGeminiWithRetry(systemPrompt, conversationHistory, userMessage);
-  if (geminiResult) {
-    return geminiResult;
+  const qwenResult = await callQwenWithRetry(systemPrompt, conversationHistory, userMessage);
+  if (qwenResult) {
+    return qwenResult;
   }
 
-  // 2. Fallback to OpenAI (BACKUP)
-  const openaiResult = await callOpenAIWithRetry(systemPrompt, conversationHistory, userMessage);
-  if (openaiResult) {
-    return openaiResult;
-  }
-
-  // 3. Intelligent fallback response based on user query
-  console.log("[ChatService] All AI providers failed, using intelligent fallback");
+  console.log("[ChatService] Qwen failed, using intelligent fallback");
   return getIntelligentFallback(userMessage);
 }
 
