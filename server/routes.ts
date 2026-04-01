@@ -11945,120 +11945,80 @@ Return a JSON object with:
         return res.status(400).json({ error: "Cannot delete admin users" });
       }
 
-      // Delete all related records - using safe delete that ignores missing tables and type mismatches
-      const safeDelete = async (query: any, allowConstraintErrors = false) => {
-        try {
-          await db.execute(query);
-        } catch (e: any) {
-          // Always ignore "relation does not exist" and type mismatch errors (some tables have integer user_id)
-          const ignoredErrors = ['does not exist', 'invalid input syntax for type integer'];
-          if (allowConstraintErrors) {
-            // Also ignore NOT NULL and foreign key constraint violations for nullable cleanup operations
-            ignoredErrors.push('violates not-null constraint', 'violates foreign key constraint', 'null value in column');
-          }
-          if (!ignoredErrors.some(err => e.message?.includes(err))) {
-            throw e;
-          }
-        }
+      // ── Dynamic deletion: query the DB itself for every FK referencing users ────
+      // This approach is future-proof — works regardless of what tables exist in prod.
+
+      // Step 1: Find all FK constraints pointing to the users table
+      const fkResult = await db.execute(sql`
+        SELECT
+          tc.table_name   AS child_table,
+          kcu.column_name AS child_column,
+          col.is_nullable AS nullable
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu
+          ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
+        JOIN information_schema.constraint_column_usage ccu
+          ON tc.constraint_name = ccu.constraint_name AND tc.table_schema = ccu.table_schema
+        JOIN information_schema.columns col
+          ON col.table_name = tc.table_name AND col.column_name = kcu.column_name AND col.table_schema = tc.table_schema
+        WHERE tc.constraint_type = 'FOREIGN KEY'
+          AND ccu.table_name = 'users'
+          AND tc.table_schema = 'public'
+        ORDER BY tc.table_name, kcu.column_name
+      `);
+
+      // Tables that must be handled in a specific order (children-before-parents)
+      const ORDERED_FIRST = ['page_views', 'activity_events']; // must go before user_sessions
+      const SKIP_TABLES = ['users', 'business_plans', 'sessions']; // handled separately below
+
+      // Tables where we reassign to admin instead of deleting (promo codes must stay)
+      const REASSIGN_TO_ADMIN: Record<string, string[]> = {
+        promo_codes: ['created_by'],
       };
-      
-      // ── Step 1: Nullify nullable reference columns that point to this user ─────
-      // These use allowConstraintErrors=true so if a column turns out to be NOT NULL we skip gracefully
-      await safeDelete(sql`UPDATE security_events      SET resolved_by = NULL WHERE resolved_by = ${userId}`, true);
-      await safeDelete(sql`UPDATE floating_feedback     SET resolved_by = NULL WHERE resolved_by = ${userId}`, true);
-      await safeDelete(sql`UPDATE platform_feedback     SET resolved_by = NULL WHERE resolved_by = ${userId}`, true);
-      await safeDelete(sql`UPDATE error_logs            SET resolved_by = NULL WHERE resolved_by = ${userId}`, true);
-      await safeDelete(sql`UPDATE system_settings       SET last_modified_by = NULL WHERE last_modified_by = ${userId}`, true);
-      await safeDelete(sql`UPDATE lawyer_review_comments SET resolved_by = NULL WHERE resolved_by = ${userId}`, true);
 
-      // ── Step 2: Reassign NOT NULL creator/admin columns to the deleting admin ─
-      await safeDelete(sql`UPDATE promo_codes          SET owner_id   = NULL            WHERE owner_id   = ${userId}`, true);
-      await safeDelete(sql`UPDATE promo_codes          SET created_by = ${adminUser.id} WHERE created_by = ${userId}`);
-      await safeDelete(sql`UPDATE system_announcements SET created_by = ${adminUser.id} WHERE created_by = ${userId}`, true);
+      // Process ordered-first tables (page_views/activity_events reference user_sessions)
+      await db.execute(sql.raw(`DELETE FROM page_views WHERE session_id IN (SELECT id FROM user_sessions WHERE user_id = '${userId}')`));
+      await db.execute(sql.raw(`DELETE FROM activity_events WHERE session_id IN (SELECT id FROM user_sessions WHERE user_id = '${userId}')`));
 
-      // ── Step 3: Delete all child records by user_id (comprehensive list) ──────
-      // Core AI & tool tables
-      await safeDelete(sql`DELETE FROM tool_progress               WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM tool_analytics              WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM ai_action_logs              WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM ai_pending_confirmations    WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM ai_rate_limits              WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM ai_interview_sessions       WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM ai_interview_responses      WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM chat_sessions               WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM interview_sessions          WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM interview_milestones        WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM innovation_coaching_sessions WHERE user_id = ${userId}`);
-      // Assessments & credentials
-      await safeDelete(sql`DELETE FROM eligibility_assessments     WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM assessment_attempts         WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM credentials                 WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM user_credentials            WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM certificates                WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM user_achievements           WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM user_journey_progress       WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM stage_tasks                 WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM score_history               WHERE user_id = ${userId}`);
-      // Documents & files
-      await safeDelete(sql`DELETE FROM document_reviews            WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM user_documents              WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM uploaded_files              WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM user_template_downloads     WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM cover_designs               WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM export_analytics            WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM plan_section_analytics      WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM lawyer_document_reviews     WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM lawyer_review_comments      WHERE user_id = ${userId}`);
-      // Calendar & notifications
-      await safeDelete(sql`DELETE FROM calendar_events             WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM calendar_connections        WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM notification_preferences    WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM scheduled_notifications     WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM user_notification_reads     WHERE user_id = ${userId}`);
-      // Payments & credits
-      await safeDelete(sql`DELETE FROM payment_transactions        WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM credit_transactions         WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM addon_purchases             WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM coins_usage_log             WHERE user_id = ${userId}`);
-      // Referrals & promos
-      await safeDelete(sql`DELETE FROM promo_redemptions           WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM referral_codes              WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM referral_rewards            WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM referral_events             WHERE user_id   = ${userId}`);
-      await safeDelete(sql`DELETE FROM referral_events             WHERE referrer_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM referrals                   WHERE referrer_id = ${userId} OR referred_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM referrals                   WHERE user_id = ${userId}`);
-      // Feedback & support
-      await safeDelete(sql`DELETE FROM site_feedback               WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM floating_feedback           WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM platform_feedback           WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM feedback_analytics          WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM support_tickets             WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM session_handoffs            WHERE user_id = ${userId}`);
-      // Security & logging
-      await safeDelete(sql`DELETE FROM security_events             WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM security_analytics          WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM error_logs                  WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM email_logs                  WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM event_log                   WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM user_activity_logs          WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM api_latency_log             WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM conversion_funnel_events    WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM admin_audit_logs            WHERE admin_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM admin_exports               WHERE requested_by = ${userId}`);
-      await safeDelete(sql`DELETE FROM admin_notifications         WHERE created_by = ${userId}`);
-      await safeDelete(sql`DELETE FROM marketing_campaigns         WHERE created_by = ${userId}`);
+      // Process all discovered FK relationships
+      const seen = new Set<string>();
+      for (const row of fkResult.rows as any[]) {
+        const { child_table, child_column, nullable } = row;
+        const key = `${child_table}.${child_column}`;
 
-      // ── Step 4: Activity tracking — page_views must be deleted before user_sessions ──
-      await safeDelete(sql`DELETE FROM page_views      WHERE session_id IN (SELECT id FROM user_sessions WHERE user_id = ${userId})`);
-      await safeDelete(sql`DELETE FROM activity_events WHERE session_id IN (SELECT id FROM user_sessions WHERE user_id = ${userId})`);
-      await safeDelete(sql`DELETE FROM page_views      WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM activity_events WHERE user_id = ${userId}`);
-      await safeDelete(sql`DELETE FROM user_sessions   WHERE user_id = ${userId}`);
+        if (seen.has(key)) continue;
+        seen.add(key);
 
-      // ── Step 5: Business plans and Express sessions ───────────────────────────
+        if (SKIP_TABLES.includes(child_table)) continue;
+        if (ORDERED_FIRST.includes(child_table)) continue; // already handled above
+
+        // Special case: reassign to admin instead of nulling/deleting
+        if (REASSIGN_TO_ADMIN[child_table]?.includes(child_column)) {
+          try {
+            await db.execute(sql.raw(`UPDATE "${child_table}" SET "${child_column}" = '${adminUser.id}' WHERE "${child_column}" = '${userId}'`));
+          } catch { /* ignore */ }
+          continue;
+        }
+
+        if (nullable === 'YES') {
+          // Nullable column → set to NULL (detatches reference without deleting the row)
+          try {
+            await db.execute(sql.raw(`UPDATE "${child_table}" SET "${child_column}" = NULL WHERE "${child_column}" = '${userId}'`));
+          } catch { /* ignore */ }
+        } else {
+          // NOT NULL column → delete the child rows entirely
+          try {
+            await db.execute(sql.raw(`DELETE FROM "${child_table}" WHERE "${child_column}" = '${userId}'`));
+          } catch { /* ignore */ }
+        }
+      }
+
+      // user_sessions last (page_views already cleared above)
+      try { await db.execute(sql.raw(`DELETE FROM user_sessions WHERE user_id = '${userId}'`)); } catch { /* ignore */ }
+
+      // ── Business plans and Express sessions ───────────────────────────────────
       await db.delete(businessPlans).where(eq(businessPlans.userId, userId));
-      await safeDelete(sql`DELETE FROM sessions WHERE sess::jsonb->'passport'->>'user' = ${userId}`);
+      try { await db.execute(sql`DELETE FROM sessions WHERE sess::jsonb->'passport'->>'user' = ${userId}`); } catch { /* ignore */ }
 
       // Finally delete user
       await db.delete(users).where(eq(users.id, userId));

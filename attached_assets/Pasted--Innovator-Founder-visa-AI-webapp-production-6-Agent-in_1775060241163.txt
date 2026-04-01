@@ -1,0 +1,172 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+6
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+826b9d6e
+Active
+
+Apr 1, 2026, 5:06 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+chart_data column added or already exists
+text_elements column added or already exists
+theme_id column added or already exists
+cover_designs table created or already exists
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+cover_designs indexes created or already exist
+theme_font column added or already exists
+theme_applied_at column added or already exists
+background_image column added or already exists
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+blog_posts table created or already exists
+blog_posts indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[Blog] Image route configured (local + unique + S3 fallback)
+4:08:29 PM [express] [MIGRATION] Checking for required schema updates...
+[DB] Auto-migration: logo_element column ensured
+[DB] Auto-migration: blog image URLs updated to object storage
+4:08:29 PM [express] [MIGRATION] Schema check complete
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+4:08:29 PM [express] serving on port 8080
+4:08:29 PM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: Assigned unique images to 10 blog posts
+[2026-04-01T16:15:37.916Z] GET /api/admin/analytics/overview
+[2026-04-01T16:15:37.920Z] POST /api/activity/session
+[2026-04-01T16:15:37.929Z] GET /api/auth/user
+[2026-04-01T16:15:37.930Z] GET /api/admin/activity-log
+[2026-04-01T16:15:37.932Z] GET /api/admin/analytics/users
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+4:15:38 PM [express] GET /api/admin/analytics/users 200 in 239ms :: {"byTier":{"free":5,"basic":0,"p…
+4:15:38 PM [express] GET /api/auth/user 200 in 243ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+4:15:38 PM [express] POST /api/activity/session 200 in 248ms :: {"sessionId":"95120242-611d-42a3-8f8…
+4:15:38 PM [express] GET /api/admin/activity-log 200 in 260ms :: [{"id":"plan-d198155d-99a2-4d86-824…
+[Stripe] Using LIVE mode credentials - payments are real
+[2026-04-01T16:15:38.373Z] POST /api/activity/page-view
+4:15:38 PM [express] POST /api/activity/page-view 200 in 31ms :: {"pageViewId":"b8fa5151-daa7-468b-9…
+4:15:38 PM [express] GET /api/admin/analytics/overview 200 in 659ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-01T16:15:50.057Z] DELETE /api/admin/users/51c8fc24-182e-4dfc-92cf-203edb55d533
+4:15:50 PM [express] DELETE /api/admin/users/51c8fc24-182e-4dfc-92cf-203edb55d533 200 in 787ms :: {"…
+[2026-04-01T16:15:51.047Z] GET /api/admin/users?page=1&pageSize=25
+4:15:51 PM [express] GET /api/admin/users 200 in 45ms :: {"users":[{"id":"28bf17a7-ba4b-4d30-b986-e3…
+[2026-04-01T16:16:10.485Z] GET /api/admin/users?page=1&pageSize=25
+[2026-04-01T16:16:08.541Z] GET /api/admin/analytics/users
+4:16:10 PM [express] GET /api/admin/users 200 in 40ms :: {"users":[{"id":"28bf17a7-ba4b-4d30-b986-e3…
+[2026-04-01T16:16:08.550Z] POST /api/activity/session
+[2026-04-01T16:16:08.563Z] GET /api/admin/activity-log
+4:16:08 PM [express] GET /api/admin/analytics/users 200 in 222ms :: {"byTier":{"free":4,"basic":0,"p…
+4:16:08 PM [express] POST /api/activity/session 200 in 217ms :: {"sessionId":"95120242-611d-42a3-8f8…
+4:16:08 PM [express] GET /api/admin/activity-log 200 in 213ms :: [{"id":"plan-d198155d-99a2-4d86-824…
+[2026-04-01T16:16:08.947Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+4:16:09 PM [express] GET /api/admin/analytics/overview 200 in 384ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-01T16:16:09.685Z] DELETE /api/admin/users/9d09d1cb-fd71-45f8-b53e-9af1c995e8c5
+4:16:10 PM [express] DELETE /api/admin/users/9d09d1cb-fd71-45f8-b53e-9af1c995e8c5 200 in 593ms :: {"…
+[2026-04-01T16:16:39.158Z] GET /api/admin/activity-log
+4:16:39 PM [express] GET /api/admin/activity-log 200 in 32ms :: [{"id":"plan-d198155d-99a2-4d86-824e…
+[2026-04-01T16:16:39.543Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+[2026-04-01T16:16:38.539Z] POST /api/activity/session
+4:16:39 PM [express] GET /api/admin/analytics/overview 200 in 382ms :: {"kpiMetrics":[{"label":"Tota…
+4:16:38 PM [express] POST /api/activity/session 200 in 221ms :: {"sessionId":"95120242-611d-42a3-8f8…
+[2026-04-01T16:16:39.136Z] GET /api/admin/analytics/users
+4:16:39 PM [express] GET /api/admin/analytics/users 200 in 19ms :: {"byTier":{"free":3,"basic":0,"pr…
+[2026-04-01T16:16:41.647Z] DELETE /api/admin/users/579056b1-5404-46b1-a162-250502a77a18
+4:16:42 PM [express] DELETE /api/admin/users/579056b1-5404-46b1-a162-250502a77a18 200 in 781ms :: {"…
+[2026-04-01T16:16:42.801Z] GET /api/admin/users?page=1&pageSize=25
+4:16:42 PM [express] GET /api/admin/users 200 in 44ms :: {"users":[{"id":"28bf17a7-ba4b-4d30-b986-e3…
+  line: '2612',
+[2026-04-01T16:16:57.859Z] DELETE /api/admin/users/3e0feeab-8d95-4aed-a377-4cb40fbea78a
+Delete user error: error: update or delete on table "users" violates foreign key constraint "premium_cover_purchases_user_id_fkey" on table "premium_cover_purchases"
+  routine: 'ri_ReportViolation'
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+}
+    at async file:///app/dist/index.js:25009:7 {
+4:16:58 PM [express] DELETE /api/admin/users/3e0feeab-8d95-4aed-a377-4cb40fbea78a 500 in 782ms :: {"…
+  length: 386,
+  severity: 'ERROR',
+  code: '23503',
+  detail: 'Key (id)=(3e0feeab-8d95-4aed-a377-4cb40fbea78a) is still referenced from table "premium_cover_purchases".',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'premium_cover_purchases',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'premium_cover_purchases_user_id_fkey',
+  file: 'ri_triggers.c',
+[2026-04-01T16:17:06.027Z] POST /api/activity/session/end
+4:17:06 PM [express] POST /api/activity/session/end 200 in 200ms :: {"success":true}
+
+
