@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { 
   Calendar, Clock, User, ArrowRight, Search, TrendingUp, BookOpen, 
   Newspaper, Sparkles, Eye, ChevronLeft, ChevronRight, Flame, Star,
-  Tag, LayoutGrid, List
+  Tag, LayoutGrid, List, ShieldCheck
 } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
 import type { BlogPost } from "@shared/schema";
@@ -65,6 +65,12 @@ function FeaturedHeroCard({ post }: { post: BlogPost }) {
               <Flame className="w-3 h-3" />
               Featured
             </Badge>
+            {(post as any).verificationStatus === 'passed' && (post as any).aiVerificationScore >= 95 && (
+              <Badge className="bg-emerald-600/90 text-white border-0 gap-1" data-testid={`badge-verified-${post.slug}`}>
+                <ShieldCheck className="w-3 h-3" />
+                Triple-AI Verified
+              </Badge>
+            )}
           </div>
           
           <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 leading-tight underline decoration-2 underline-offset-4" data-testid={`text-title-${post.slug}`}>
@@ -242,6 +248,12 @@ function BlogPostCard({ post, variant = "default" }: { post: BlogPost; variant?:
               <Badge className="bg-amber-500 dark:bg-amber-600 text-white text-xs border-0 shadow-md gap-1" data-testid={`badge-featured-${post.id}`}>
                 <Sparkles className="w-3 h-3" />
                 Featured
+              </Badge>
+            )}
+            {(post as any).verificationStatus === 'passed' && (post as any).aiVerificationScore >= 95 && (
+              <Badge className="bg-emerald-600 text-white text-xs border-0 shadow-md gap-1" data-testid={`badge-verified-${post.id}`}>
+                <ShieldCheck className="w-3 h-3" />
+                Verified
               </Badge>
             )}
           </div>

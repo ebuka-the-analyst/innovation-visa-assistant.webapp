@@ -1,17 +1,24 @@
 /**
  * UK INNOVATOR FOUNDER VISA BLOG GENERATOR
- * 
- * PhD-Level Quality AI Blog Generation System
- * 
- * CRITICAL REQUIREMENTS:
- * - 100% factual accuracy verified against official sources
- * - NO fabricated case studies or fictional examples
- * - Full legal compliance and OISC considerations
- * - SEO optimized for Google top 5 ranking
- * - All claims must be verifiable
+ *
+ * PhD-Level Triple-AI Verified Blog Generation System
+ *
+ * PIPELINE:
+ *  1. Qwen generates the article (primary writer — low temperature, verified facts injected)
+ *  2. Auto-correction layer fixes common typos and adds mandatory disclaimers
+ *  3. Internal validator (regex-based) runs fabrication & fee checks
+ *  4. Gemini independently fact-checks and scores the article          [Marker 1]
+ *  5. OpenAI GPT-4o independently fact-checks and scores the article   [Marker 2]
+ *  6. Consensus gate: both must score ≥95 AND no critical flags to auto-publish
+ *  7. If gate fails → post saved as 'human_review', not published
+ *  8. All posts get a SHA-256 content hash for integrity verification
+ *  9. Verification expires after 90 days — stale posts auto-flagged
+ *
+ * 3× DAILY SCHEDULE: 07:00, 12:00, 20:00 GMT
  */
 
 import { qwen, QWEN_MODELS } from "./qwenClient";
+import { verifyBlogPost, computeContentHash } from "./blogMultiVerifier";
 import {
   VERIFIED_VISA_FEES,
   VERIFIED_ELIGIBILITY,
@@ -228,6 +235,20 @@ export async function generateBlogPost(): Promise<{
   readingTime: number;
   author: string;
   authorBio: string;
+  // Triple-AI verification fields
+  aiVerificationScore: number | null;
+  geminiScore: number | null;
+  openaiScore: number | null;
+  verificationStatus: string;
+  verificationDetails: Record<string, unknown> | null;
+  verifiedAt: Date | null;
+  verificationExpiresAt: Date | null;
+  humanReviewRequired: boolean;
+  contradictionFlags: number;
+  sourcesCited: number;
+  contentHash: string;
+  isPublished: boolean;
+  postStatus: string;
 }> {
   const topic = getRandomTopic();
   const category = getRandomCategory();
@@ -394,9 +415,41 @@ Return ONLY valid JSON.`;
       
       // Final check: if still has critical issues on last attempt, log but proceed with corrected content
       if (criticalCount > 0) {
-        console.warn(`[Blog Generator] Content published with ${criticalCount} warnings after max retries. Manual review recommended.`);
+        console.warn(`[Blog Generator] Content published with ${criticalCount} warnings after max retries. Sending to triple-AI verification.`);
       }
-      
+
+      // ──────────────────────────────────────────────────────────────────────
+      // TRIPLE-AI VERIFICATION: Gemini + OpenAI independently mark the article
+      // ──────────────────────────────────────────────────────────────────────
+      let verificationResult = null;
+      let verificationStatus = 'pending';
+      let isPublished = false;
+      let postStatus = 'draft';
+
+      try {
+        console.log("[Blog Generator] Running triple-AI verification (Gemini + OpenAI)...");
+        verificationResult = await verifyBlogPost(parsed.title, correctedContent);
+
+        if (verificationResult.passed) {
+          verificationStatus = 'passed';
+          isPublished = true;
+          postStatus = 'published';
+          console.log(`[Blog Generator] ✓ Verification PASSED — Composite: ${verificationResult.compositeScore}/100. Auto-publishing.`);
+        } else {
+          verificationStatus = 'human_review';
+          isPublished = false;
+          postStatus = 'draft';
+          console.warn(`[Blog Generator] ✗ Verification FAILED — Composite: ${verificationResult.compositeScore}/100. Sending to human review queue.`);
+          console.warn(`[Blog Generator] Reason: ${verificationResult.details.consensusReason}`);
+        }
+      } catch (verifyError) {
+        console.error("[Blog Generator] Triple-AI verification error:", verifyError);
+        // If verification itself fails (API error), mark pending for human review
+        verificationStatus = 'human_review';
+        isPublished = false;
+        postStatus = 'draft';
+      }
+
       return {
         title: parsed.title,
         slug: uniqueSlug,
@@ -410,7 +463,21 @@ Return ONLY valid JSON.`;
         featuredImage: selectFeaturedImage(topic, category),
         readingTime: parsed.readingTime || 8,
         author: "UK Visa Expert Team",
-        authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is reviewed for accuracy against official UK government sources.",
+        authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is triple-verified by Qwen, Gemini, and OpenAI for factual accuracy against official GOV.UK sources.",
+        // Triple-AI verification
+        aiVerificationScore: verificationResult?.compositeScore ?? null,
+        geminiScore: verificationResult?.geminiScore ?? null,
+        openaiScore: verificationResult?.openaiScore ?? null,
+        verificationStatus,
+        verificationDetails: verificationResult?.details ?? null,
+        verifiedAt: verificationResult?.verifiedAt ?? null,
+        verificationExpiresAt: verificationResult?.verificationExpiresAt ?? null,
+        humanReviewRequired: verificationResult?.requiresHumanReview ?? true,
+        contradictionFlags: verificationResult?.contradictionFlags ?? 0,
+        sourcesCited: verificationResult?.sourcesCited ?? 0,
+        contentHash: verificationResult?.contentHash ?? computeContentHash(correctedContent),
+        isPublished,
+        postStatus,
       };
     } catch (error) {
       console.error(`[Blog Generator] Generation attempt ${attempt} failed:`, error);

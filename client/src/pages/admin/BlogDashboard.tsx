@@ -18,8 +18,10 @@ import {
   CheckCircle, AlertCircle, Loader2, ExternalLink, Copy,
   Sparkles, Send, Archive, Play, Pause, Settings, ChevronDown,
   PenTool, Image, Share2, ThumbsUp, MessageSquare, Target,
-  Zap, Timer, BookOpen, Award
+  Zap, Timer, BookOpen, Award, ShieldCheck, ShieldAlert,
+  Fingerprint, Cpu, Check, X
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import type { BlogPost } from "@shared/schema";
 
 interface BlogStats {
@@ -116,6 +118,42 @@ export default function BlogDashboard() {
       toast({ title: "Post Deleted", description: "Post has been removed." });
       refetchPosts();
       refetchStats();
+    },
+  });
+
+  // Human review queue
+  const { data: reviewQueue, isLoading: reviewLoading, refetch: refetchReview } = useQuery<BlogPost[]>({
+    queryKey: ["/api/admin/blog/review-queue"],
+  });
+
+  // Re-verify post mutation
+  const reverifyMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest("POST", `/api/admin/blog/posts/${id}/reverify`);
+    },
+    onSuccess: () => {
+      toast({ title: "Re-verification Complete", description: "AI verification scores updated." });
+      refetchReview();
+      refetchPosts();
+    },
+    onError: (error: any) => {
+      toast({ title: "Verification Failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Approve human-review post
+  const approveMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest("POST", `/api/admin/blog/posts/${id}/approve`);
+    },
+    onSuccess: () => {
+      toast({ title: "Post Approved", description: "Post published successfully." });
+      refetchReview();
+      refetchPosts();
+      refetchStats();
+    },
+    onError: (error: any) => {
+      toast({ title: "Approval Failed", description: error.message, variant: "destructive" });
     },
   });
 
@@ -292,6 +330,15 @@ export default function BlogDashboard() {
             <TabsTrigger value="settings" className="data-[state=active]:bg-[#005EB8] data-[state=active]:text-white">
               <Settings className="h-4 w-4 mr-2" />
               Settings
+            </TabsTrigger>
+            <TabsTrigger value="review" className="data-[state=active]:bg-amber-600 data-[state=active]:text-white" data-testid="tab-review-queue">
+              <ShieldAlert className="h-4 w-4 mr-2" />
+              Review Queue
+              {reviewQueue && reviewQueue.length > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
+                  {reviewQueue.length}
+                </span>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -519,6 +566,17 @@ export default function BlogDashboard() {
                               <span className="flex items-center gap-1">
                                 <Target className="h-4 w-4" /> {post.seoScore}%
                               </span>
+                            )}
+                            {(post as any).aiVerificationScore != null && (
+                              <span className={`flex items-center gap-1 font-medium ${(post as any).verificationStatus === 'passed' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                                <ShieldCheck className="h-3.5 w-3.5" />
+                                {(post as any).aiVerificationScore}
+                              </span>
+                            )}
+                            {(post as any).humanReviewRequired && (
+                              <Badge className="bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] py-0">
+                                Review
+                              </Badge>
                             )}
                           </div>
                           <div className="flex items-center gap-1">
@@ -870,6 +928,160 @@ export default function BlogDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Human Review Queue Tab */}
+          <TabsContent value="review" className="space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <ShieldAlert className="h-5 w-5 text-amber-500" />
+                  Human Review Queue
+                </h2>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Posts flagged by the triple-AI consensus gate — both Gemini and OpenAI must score ≥95 for auto-publish
+                </p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => refetchReview()} data-testid="button-refresh-review">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+
+            {reviewLoading ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                  <p className="text-muted-foreground mt-3">Loading review queue…</p>
+                </CardContent>
+              </Card>
+            ) : !reviewQueue || reviewQueue.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <ShieldCheck className="h-12 w-12 mx-auto text-emerald-500 mb-4" />
+                  <h3 className="font-semibold text-lg mb-2">All Clear</h3>
+                  <p className="text-muted-foreground">No posts are waiting for human review. All auto-generated content passed triple-AI consensus.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {reviewQueue.map((post) => {
+                  const p = post as any;
+                  const composite = p.aiVerificationScore;
+                  const gemini = p.geminiScore;
+                  const openai = p.openaiScore;
+                  const isStale = p.verificationExpiresAt && new Date(p.verificationExpiresAt) < new Date();
+                  return (
+                    <Card key={post.id} className="border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-amber-950/10">
+                      <CardContent className="p-5">
+                        <div className="flex flex-col gap-4">
+                          <div className="flex items-start justify-between gap-4 flex-wrap">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 mb-1">
+                                <Badge className="bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-300 text-xs">
+                                  Human Review Required
+                                </Badge>
+                                {isStale && (
+                                  <Badge className="bg-red-500/20 text-red-600 dark:text-red-400 text-xs">
+                                    Verification Stale
+                                  </Badge>
+                                )}
+                                <Badge variant="outline" className="text-xs">{post.category}</Badge>
+                              </div>
+                              <h3 className="font-semibold line-clamp-2" data-testid={`text-review-title-${post.id}`}>
+                                {post.title}
+                              </h3>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Generated {formatDate(post.createdAt as any)} · {post.readingTime} min read
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => reverifyMutation.mutate(post.id)}
+                                disabled={reverifyMutation.isPending}
+                                data-testid={`button-reverify-${post.id}`}
+                              >
+                                {reverifyMutation.isPending ? (
+                                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                ) : (
+                                  <Cpu className="h-3 w-3 mr-1" />
+                                )}
+                                Re-verify
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                onClick={() => approveMutation.mutate(post.id)}
+                                disabled={approveMutation.isPending}
+                                data-testid={`button-approve-${post.id}`}
+                              >
+                                {approveMutation.isPending ? (
+                                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                ) : (
+                                  <Check className="h-3 w-3 mr-1" />
+                                )}
+                                Approve &amp; Publish
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => deleteMutation.mutate(post.id)}
+                                disabled={deleteMutation.isPending}
+                                data-testid={`button-delete-review-${post.id}`}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Score Bars */}
+                          <div className="grid grid-cols-3 gap-4 bg-background rounded-lg p-3 border text-xs">
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="flex items-center gap-1 text-muted-foreground">
+                                  <Cpu className="h-3 w-3" />Composite
+                                </span>
+                                <span className={`font-bold ${composite >= 95 ? 'text-emerald-600' : composite >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
+                                  {composite ?? '—'}{composite != null && '/100'}
+                                </span>
+                              </div>
+                              <Progress value={composite ?? 0} className="h-1" />
+                            </div>
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-muted-foreground">Gemini</span>
+                                <span className={`font-bold ${(gemini ?? 0) >= 95 ? 'text-emerald-600' : (gemini ?? 0) >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
+                                  {gemini ?? '—'}{gemini != null && '/100'}
+                                </span>
+                              </div>
+                              <Progress value={gemini ?? 0} className="h-1" />
+                            </div>
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-muted-foreground">OpenAI</span>
+                                <span className={`font-bold ${(openai ?? 0) >= 95 ? 'text-emerald-600' : (openai ?? 0) >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
+                                  {openai ?? '—'}{openai != null && '/100'}
+                                </span>
+                              </div>
+                              <Progress value={openai ?? 0} className="h-1" />
+                            </div>
+                          </div>
+
+                          {p.contentHash && (
+                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-mono">
+                              <Fingerprint className="h-3 w-3" />
+                              SHA-256: {p.contentHash.substring(0, 20)}…
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 

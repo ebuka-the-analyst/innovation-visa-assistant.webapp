@@ -3004,6 +3004,19 @@ export const blogPosts = pgTable("blog_posts", {
   wordCount: integer("word_count").notNull().default(0),
   readabilityScore: real("readability_score"), // Flesch-Kincaid score
   seoScore: integer("seo_score"), // 0-100 SEO optimization score
+
+  // Triple-AI Verification System (Gemini + OpenAI marking layer)
+  aiVerificationScore: integer("ai_verification_score"), // Composite 0-100 (avg gemini + openai)
+  geminiScore: integer("gemini_score"),  // Gemini fact-check score 0-100
+  openaiScore: integer("openai_score"),  // OpenAI fact-check score 0-100
+  verificationStatus: varchar("verification_status", { length: 20 }).notNull().default('pending'), // pending, passed, flagged, human_review, expired
+  verificationDetails: jsonb("verification_details"), // Full JSON report from both AIs
+  verifiedAt: timestamp("verified_at"),  // When last verified
+  verificationExpiresAt: timestamp("verification_expires_at"), // 90 days from verifiedAt
+  humanReviewRequired: boolean("human_review_required").notNull().default(false),
+  contradictionFlags: integer("contradiction_flags").notNull().default(0), // How many claims the two AIs disagreed on
+  sourcesCited: integer("sources_cited").notNull().default(0), // Number of gov.uk/official citations found
+  contentHash: text("content_hash"), // SHA-256 of content for integrity verification
   
   publishedAt: timestamp("published_at").notNull().defaultNow(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -3014,6 +3027,7 @@ export const blogPosts = pgTable("blog_posts", {
   index("idx_blog_published").on(table.isPublished, table.publishedAt),
   index("idx_blog_status").on(table.postStatus),
   index("idx_blog_scheduled").on(table.scheduledFor),
+  index("idx_blog_verification").on(table.verificationStatus),
 ]);
 
 export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
