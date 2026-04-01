@@ -584,8 +584,27 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  // Section state (for sidebar navigation)
-  const [activeSection, setActiveSection] = useState("overview");
+  // Section state — persisted in URL hash so refresh restores position
+  const getInitialSection = () => {
+    const hash = window.location.hash.replace('#', '').trim();
+    return hash || "overview";
+  };
+  const [activeSection, setActiveSectionState] = useState(getInitialSection);
+
+  const setActiveSection = (section: string) => {
+    setActiveSectionState(section);
+    window.location.hash = section;
+  };
+
+  // Sync state when user navigates with browser back/forward
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash) setActiveSectionState(hash);
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   // Filter states
   const [usersPage, setUsersPage] = useState(1);
