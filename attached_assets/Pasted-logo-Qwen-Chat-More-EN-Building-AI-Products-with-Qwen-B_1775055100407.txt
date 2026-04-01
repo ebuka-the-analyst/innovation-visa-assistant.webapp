@@ -1,0 +1,90 @@
+logo
+Qwen Chat
+More
+EN
+Building AI Products with Qwen
+Built with Qwen via OpenAI-compatible API. Power apps for chat, Q&A, creative writing, translation, summarization, and coding.
+Our Flagship Models
+Qwen3.5-Plus
+Inputs:Text,Image,Video
+Outputs:Text
+1,000,000 context length
+Qwen3.5-Flash
+Inputs:Text,Image,Video
+Outputs:Text
+1,000,000 context length
+Qwen3-Max
+Inputs:Text
+Outputs:Text
+262,144 context length
+Qwen3-VL-Plus
+Inputs:Text,Image,Video
+Outputs:Text
+131,027 context length
+Qwen3-VL-Flash
+Inputs:Text,Image,Video
+Outputs:Text
+131,027 context length
+Qwen3-Omni-Flash
+Inputs:Text,Image,Audio,Video
+Outputs:Text,Audio
+65,536 context length
+Qwen3-ASR-Flash
+Inputs:Audio
+Outputs:Text
+Qwen3-TTS-Flash
+Inputs:Text
+Outputs:Audio
+Qwen-Image-Plus
+Inputs:Text
+Outputs:Image
+Qwen-Image-Edit
+Inputs:Text,Image
+Outputs:Image
+Unlock the potential of Qwen through APIs
+Chat Completions API
+Chat Completions API
+Get access to the Qwen series models with just a few lines of code. Users utilize the Chat Completions API for downstream tasks, including question answering, conversion, coding assistance, creative writing, tool usage, and more.
+Realtime API
+Realtime API
+Build low-latency, multimodal experiences, including speech-to-speech. This approach is suitable for scenarios such as video chat, audio chat, and avatar.
+Batch API
+Batch API
+Use the Batch API to initiate offline tasks that utilize lower-cost computing resources. This approach is suitable for scenarios where immediate results are not required and there is a need for offline processing of large amounts of data, such as model evaluation, semantic extraction of datasets, and batch extraction of text vectors.
+Boost productivity with Qwen Agent
+Web Search
+Web Search
+Enhance model responses with up-to-date and clearly cited answers from the web search.
+Function Call
+Function Call
+Connect large language models to external tools for more complex tasks.
+Build with Qwen API
+Try Qwen Chat
+Web
+iOS
+Android
+macOS
+Windows
+Qwen Chat
+Qwen Chat Overview
+Download
+API Platform
+Our Flagship Models
+Platform Overview
+API Platform
+Research
+Latest Advancements
+Research Index
+GitHub
+Terms & Policies
+Terms of Service
+Privacy Policy
+Usage Policy
+Cookies Notice
+Training Data Summary
+
+Qwen © 2026
+Manage Cookies
+Powered by Alibaba Cloud
+We'd like to use cookies to remember your preferences and show relevant content. You can accept all cookies for a fully personalized experience, or select only the strictly necessary ones to keep Qwen Chat running securely. For more details, please read our Cookie Notice.
+
