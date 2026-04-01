@@ -489,6 +489,84 @@ async function runAutoMigrations() {
       }
     }
 
+    // Create admin_audit_logs table if missing
+    const auditLogsExists = await db.execute(sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables WHERE table_name = 'admin_audit_logs'
+      ) as table_exists
+    `);
+    if (!auditLogsExists.rows[0]?.table_exists) {
+      log("[DB] Auto-migration: creating admin_audit_logs table");
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS admin_audit_logs (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          admin_id VARCHAR NOT NULL,
+          admin_email VARCHAR NOT NULL,
+          action VARCHAR(100) NOT NULL,
+          action_category VARCHAR(50) NOT NULL DEFAULT 'system',
+          target_type VARCHAR(30) NOT NULL,
+          target_id VARCHAR,
+          target_email VARCHAR,
+          previous_value JSONB,
+          new_value JSONB,
+          reason TEXT,
+          ip_address VARCHAR(50),
+          user_agent TEXT,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+    }
+
+    // Create api_latency_log table if missing
+    const latencyLogExists = await db.execute(sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables WHERE table_name = 'api_latency_log'
+      ) as table_exists
+    `);
+    if (!latencyLogExists.rows[0]?.table_exists) {
+      log("[DB] Auto-migration: creating api_latency_log table");
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS api_latency_log (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          route VARCHAR(255) NOT NULL,
+          method VARCHAR(10) NOT NULL,
+          status_code INTEGER NOT NULL,
+          duration_ms INTEGER NOT NULL,
+          user_id VARCHAR,
+          request_size INTEGER,
+          response_size INTEGER,
+          error_type VARCHAR(100),
+          error_message TEXT,
+          timestamp TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+    }
+
+    // Create coins_usage_log table if missing
+    const coinsLogExists = await db.execute(sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables WHERE table_name = 'coins_usage_log'
+      ) as table_exists
+    `);
+    if (!coinsLogExists.rows[0]?.table_exists) {
+      log("[DB] Auto-migration: creating coins_usage_log table");
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS coins_usage_log (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL,
+          change_type VARCHAR(20) NOT NULL,
+          amount_changed INTEGER NOT NULL,
+          previous_balance INTEGER NOT NULL DEFAULT 0,
+          new_balance INTEGER NOT NULL DEFAULT 0,
+          reason VARCHAR(100) NOT NULL,
+          tool_id VARCHAR(100),
+          plan_id VARCHAR,
+          order_id VARCHAR,
+          timestamp TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+    }
+
     log("[MIGRATION] Schema check complete");
   } catch (error) {
     console.error("[MIGRATION] Auto-migration error:", error);

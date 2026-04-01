@@ -14941,13 +14941,16 @@ Return a JSON object with:
         SELECT 
           aal.id,
           aal.admin_id,
-          u.email as admin_email,
+          COALESCE(aal.admin_email, u.email, 'unknown') as admin_email,
           aal.action,
+          aal.action_category,
           aal.target_type,
           aal.target_id,
-          aal.details,
+          aal.target_email,
+          aal.reason,
+          aal.previous_value,
+          aal.new_value,
           aal.ip_address,
-          aal.status,
           aal.created_at
         FROM admin_audit_logs aal
         LEFT JOIN users u ON aal.admin_id = u.id
