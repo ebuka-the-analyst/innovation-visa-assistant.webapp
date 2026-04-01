@@ -2396,7 +2396,7 @@ export default function AdminDashboard() {
             onHideDemoUsersChange={setHideDemoUsers}
           />
           
-          <SidebarInset className="flex-1 overflow-auto">
+          <SidebarInset className="flex-1 overflow-auto [&::-webkit-scrollbar]:hidden" style={{scrollbarWidth:'none'} as React.CSSProperties}>
             {/* Top Header Bar with Logo, Theme Toggle, Logout */}
             <header className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 sticky top-0">
               <SidebarTrigger data-testid="button-admin-sidebar-toggle" />
@@ -2430,107 +2430,56 @@ export default function AdminDashboard() {
               </Button>
             </header>
             
-            <div className="min-h-screen bg-background">
-              <div className="p-6 space-y-6">
-                {/* Section Header */}
-                <div className="relative overflow-hidden rounded-lg border border-border/50 bg-card/80 backdrop-blur-sm p-4">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
-                  
-                  <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <h1 className="text-lg font-bold tracking-tight" data-testid="heading-admin-dashboard">
-                          {getSectionTitle()}
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                          Professional-level analytics and comprehensive system management
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                      {/* Last Updated & Countdown */}
-                      {overviewData?.lastUpdated && (
-                        <motion.div
-                          className="flex items-center gap-2 px-3 py-2 rounded-md bg-card/80 border border-border/50"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                        >
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">
-                            Updated {formatDistance(new Date(overviewData.lastUpdated), new Date(), { addSuffix: true })}
-                          </span>
-                          <Badge variant="outline" className="ml-2">
-                            {refreshCountdown}s
-                          </Badge>
-                        </motion.div>
-                      )}
-
-                      {/* Manual Refresh */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={handleManualRefresh}
-                            disabled={overviewLoading}
-                            data-testid="button-manual-refresh"
-                          >
-                            <RefreshCw className={`h-4 w-4 ${overviewLoading ? 'animate-spin' : ''}`} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Refresh all data</p>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      {/* Export Menu */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" data-testid="button-export-menu">
-                            <Download className="h-4 w-4 mr-2" />
-                            Export
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Export Data</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => exportMutation.mutate('users')}
-                            disabled={exportMutation.isPending}
-                          >
-                            <Users className="h-4 w-4 mr-2" />
-                            Users (CSV)
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => exportMutation.mutate('plans')}
-                            disabled={exportMutation.isPending}
-                          >
-                            <FileText className="h-4 w-4 mr-2" />
-                            Plans (CSV)
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => exportMutation.mutate('analytics')}
-                            disabled={exportMutation.isPending}
-                          >
-                            <BarChart3 className="h-4 w-4 mr-2" />
-                            Analytics (CSV)
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-
-                      {/* Dashboard Settings */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button size="icon" variant="outline" data-testid="button-dashboard-settings">
-                            <Settings className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Dashboard settings</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
+            <div className="h-full bg-background">
+              <div className="p-3 space-y-2">
+                {/* Section Header — compact single row */}
+                <div className="flex items-center justify-between border-b pb-2">
+                  <h1 className="text-sm font-semibold tracking-tight" data-testid="heading-admin-dashboard">
+                    {getSectionTitle()}
+                  </h1>
+                  <div className="flex items-center gap-1">
+                    {overviewData?.lastUpdated && (
+                      <span className="text-xs text-muted-foreground hidden sm:inline mr-1">
+                        {formatDistance(new Date(overviewData.lastUpdated), new Date(), { addSuffix: true })}
+                        {' · '}<span className="font-mono">{refreshCountdown}s</span>
+                      </span>
+                    )}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" onClick={handleManualRefresh} disabled={overviewLoading} data-testid="button-manual-refresh">
+                          <RefreshCw className={`h-3.5 w-3.5 ${overviewLoading ? 'animate-spin' : ''}`} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent><p>Refresh</p></TooltipContent>
+                    </Tooltip>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="icon" variant="ghost" data-testid="button-export-menu">
+                          <Download className="h-3.5 w-3.5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Export Data</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => exportMutation.mutate('users')} disabled={exportMutation.isPending}>
+                          <Users className="h-4 w-4 mr-2" />Users (CSV)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => exportMutation.mutate('plans')} disabled={exportMutation.isPending}>
+                          <FileText className="h-4 w-4 mr-2" />Plans (CSV)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => exportMutation.mutate('analytics')} disabled={exportMutation.isPending}>
+                          <BarChart3 className="h-4 w-4 mr-2" />Analytics (CSV)
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" data-testid="button-dashboard-settings">
+                          <Settings className="h-3.5 w-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent><p>Settings</p></TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
 
@@ -2538,7 +2487,7 @@ export default function AdminDashboard() {
                 
                 {/* OVERVIEW SECTION - High-level summary */}
                 {activeSection === 'overview' && (
-                  <div className="space-y-6">
+                  <div className="space-y-2">
               <AnimatePresence mode="wait">
                 {overviewLoading ? (
                   <motion.div
@@ -2546,14 +2495,14 @@ export default function AdminDashboard() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                    className="grid grid-cols-2 lg:grid-cols-4 gap-2"
                   >
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                    {[1, 2, 3, 4].map((i) => (
                       <Card key={i}>
-                        <CardHeader>
+                        <CardHeader className="p-3 pb-1">
                           <ShimmerSkeleton />
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-3 pt-1">
                           <ShimmerSkeleton />
                         </CardContent>
                       </Card>
@@ -2566,7 +2515,7 @@ export default function AdminDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.5 }}
-                    className="space-y-6"
+                    className="space-y-2"
                   >
                     {/* Demo filter indicator - only show when active */}
                     {hideDemoUsers && demoUserCount > 0 && (
@@ -2578,7 +2527,7 @@ export default function AdminDashboard() {
                     )}
                     
                     {/* KPI Cards with Animations - key forces re-render when filter changes */}
-                    <div key={`kpi-cards-${hideDemoUsers}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div key={`kpi-cards-${hideDemoUsers}`} className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                       {filteredOverviewData?.kpiMetrics?.map((metric, index) => (
                         <motion.div
                           key={`${metric.label}-${hideDemoUsers}-${metric.value}`}
@@ -2587,37 +2536,22 @@ export default function AdminDashboard() {
                           transition={{ delay: index * 0.1, duration: 0.5 }}
                         >
                           <Card className="relative overflow-hidden hover-elevate" data-testid={`card-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}>
-                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 pointer-events-none" />
-                            
-                            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                              <CardTitle className="text-sm font-medium text-muted-foreground">
+                            <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 p-3 pb-1">
+                              <CardTitle className="text-xs font-medium text-muted-foreground leading-tight">
                                 {metric.label}
                               </CardTitle>
-                              <motion.div
-                                className={`p-2 rounded-lg ${metric.color}`}
-                                whileHover={{ scale: 1.1, rotate: 5 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                              >
-                                {(() => {
-                                  const IconComponent = iconMap[metric.icon] || Activity;
-                                  return <IconComponent className="h-4 w-4" />;
-                                })()}
-                              </motion.div>
+                              {(() => {
+                                const IconComponent = iconMap[metric.icon] || Activity;
+                                return <IconComponent className={`h-3.5 w-3.5 shrink-0 ${metric.color}`} />;
+                              })()}
                             </CardHeader>
-
-                            <CardContent>
-                              <div className="flex items-end justify-between">
-                                <div>
-                                  <div className="text-xl font-bold tabular-nums">
-                                    <AnimatedNumber key={`num-${metric.label}-${metric.value}`} value={metric.value} />
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    <TrendIndicator trend={metric.trend} />
-                                    <span className="text-xs text-muted-foreground">
-                                      vs. last period
-                                    </span>
-                                  </div>
-                                </div>
+                            <CardContent className="p-3 pt-1">
+                              <div className="text-lg font-bold tabular-nums">
+                                <AnimatedNumber key={`num-${metric.label}-${metric.value}`} value={metric.value} />
+                              </div>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <TrendIndicator trend={metric.trend} />
+                                <span className="text-xs text-muted-foreground">vs. last period</span>
                               </div>
                             </CardContent>
                           </Card>
@@ -2632,20 +2566,16 @@ export default function AdminDashboard() {
                       transition={{ delay: 0.4, duration: 0.5 }}
                     >
                       <Card data-testid="card-growth-chart">
-                        <CardHeader>
+                        <CardHeader className="p-3 pb-1">
                           <div className="flex items-center justify-between">
-                            <div>
-                              <CardTitle>Users & Plans Growth (90 Days)</CardTitle>
-                              <CardDescription>Track platform expansion over time</CardDescription>
-                            </div>
-                            <Badge variant="outline">
-                              <TrendingUp className="h-3 w-3 mr-1" />
-                              Live
+                            <CardTitle className="text-xs font-medium">Users & Plans Growth (90 Days)</CardTitle>
+                            <Badge variant="outline" className="text-xs">
+                              <TrendingUp className="h-2.5 w-2.5 mr-1" />Live
                             </Badge>
                           </div>
                         </CardHeader>
-                        <CardContent>
-                          <ResponsiveContainer width="100%" height={350}>
+                        <CardContent className="p-3 pt-1">
+                          <ResponsiveContainer width="100%" height={150}>
                             <RechartsLineChart data={filteredOverviewData?.timeSeriesData}>
                               <defs>
                                 <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
@@ -2709,7 +2639,7 @@ export default function AdminDashboard() {
                     </motion.div>
 
                     {/* Donut Chart & Area Chart Row */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                       {/* Subscription Tier Distribution - Donut Chart */}
                       <motion.div
                         initial={{ opacity: 0, x: -20 }}
@@ -2717,23 +2647,22 @@ export default function AdminDashboard() {
                         transition={{ delay: 0.5, duration: 0.5 }}
                       >
                         <Card data-testid="card-subscription-distribution">
-                          <CardHeader>
-                            <CardTitle>Subscription Tier Distribution</CardTitle>
-                            <CardDescription>Current user base breakdown</CardDescription>
+                          <CardHeader className="p-3 pb-1">
+                            <CardTitle className="text-xs font-medium">Subscription Tier Distribution</CardTitle>
                           </CardHeader>
-                          <CardContent className="flex items-center justify-center">
-                            <ResponsiveContainer width="100%" height={300}>
+                          <CardContent className="p-3 pt-1 flex items-center justify-center">
+                            <ResponsiveContainer width="100%" height={130}>
                               <RechartsPieChart>
                                 <Pie
                                   data={filteredOverviewData?.subscriptionDistribution}
                                   cx="50%"
                                   cy="50%"
-                                  innerRadius={60}
-                                  outerRadius={100}
+                                  innerRadius={28}
+                                  outerRadius={48}
                                   fill="#8884d8"
-                                  paddingAngle={5}
+                                  paddingAngle={3}
                                   dataKey="count"
-                                  label={(entry) => `${entry.tier} (${entry.percentage}%)`}
+                                  label={(entry) => `${entry.tier}`}
                                 >
                                   {filteredOverviewData?.subscriptionDistribution?.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
@@ -2760,12 +2689,11 @@ export default function AdminDashboard() {
                         transition={{ delay: 0.5, duration: 0.5 }}
                       >
                         <Card data-testid="card-daily-active-users">
-                          <CardHeader>
-                            <CardTitle>Daily Active Users (30 Days)</CardTitle>
-                            <CardDescription>User engagement trends</CardDescription>
+                          <CardHeader className="p-3 pb-1">
+                            <CardTitle className="text-xs font-medium">Daily Active Users (30 Days)</CardTitle>
                           </CardHeader>
-                          <CardContent>
-                            <ResponsiveContainer width="100%" height={300}>
+                          <CardContent className="p-3 pt-1">
+                            <ResponsiveContainer width="100%" height={130}>
                               <RechartsAreaChart data={filteredOverviewData?.activityData}>
                                 <defs>
                                   <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
@@ -2804,206 +2732,6 @@ export default function AdminDashboard() {
                       </motion.div>
                     </div>
 
-                    {/* Activity Feed & Top Tools Row */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Live Activity Feed */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6, duration: 0.5 }}
-                      >
-                        <Card data-testid="card-activity-feed" className="h-full">
-                          <CardHeader>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <CardTitle className="flex items-center gap-2">
-                                  <Activity className="h-5 w-5" />
-                                  Live Activity Feed
-                                </CardTitle>
-                                <CardDescription>Recent platform events</CardDescription>
-                              </div>
-                              <motion.div
-                                className="h-2 w-2 rounded-full bg-green-500"
-                                animate={{ scale: [1, 1.2, 1], opacity: [1, 0.5, 1] }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                              />
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <ScrollArea className="h-[400px] pr-4">
-                              <div className="space-y-3">
-                                {overviewData.recentActivity?.map((activity, index) => {
-                                  const Icon = ACTIVITY_ICONS[activity.type as keyof typeof ACTIVITY_ICONS] || Activity;
-                                  const colorClass = ACTIVITY_COLORS[activity.severity || 'info'];
-
-                                  return (
-                                    <motion.div
-                                      key={activity.id}
-                                      initial={{ opacity: 0, x: -20 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.05 }}
-                                      className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-card/50 hover-elevate"
-                                    >
-                                      <div className={`p-2 rounded-lg bg-background ${colorClass}`}>
-                                        <Icon className="h-4 w-4" />
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium truncate">{activity.message}</p>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                          {formatDistance(new Date(activity.timestamp), new Date(), { addSuffix: true })}
-                                        </p>
-                                      </div>
-                                      <Badge variant="outline" className="shrink-0">
-                                        {activity.severity}
-                                      </Badge>
-                                    </motion.div>
-                                  );
-                                })}
-                              </div>
-                            </ScrollArea>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-
-                      {/* Top 10 Tools - Hidden when demo filter is active */}
-                      {!hideDemoUsers && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.6, duration: 0.5 }}
-                        >
-                          <Card data-testid="card-top-tools">
-                            <CardHeader>
-                              <CardTitle>Top 10 Most Used Tools</CardTitle>
-                              <CardDescription>Platform feature utilization</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              <ResponsiveContainer width="100%" height={400}>
-                                <RechartsBarChart data={filteredOverviewData?.topTools?.slice(0, 10)} layout="vertical">
-                                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                                  <XAxis type="number" stroke="hsl(var(--foreground))" fontSize={12} />
-                                  <YAxis
-                                    type="category"
-                                    dataKey="toolName"
-                                    stroke="hsl(var(--foreground))"
-                                    fontSize={11}
-                                    width={120}
-                                  />
-                                  <RechartsTooltip
-                                    contentStyle={{
-                                      backgroundColor: 'hsl(var(--card))',
-                                      border: '1px solid hsl(var(--border))',
-                                      borderRadius: '8px'
-                                    }}
-                                  />
-                                  <Bar dataKey="usageCount" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                                </RechartsBarChart>
-                              </ResponsiveContainer>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      )}
-                    </div>
-
-                    {/* System Health Overview */}
-                    {overviewData.systemMetrics && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.7, duration: 0.5 }}
-                      >
-                        <Card data-testid="card-system-health-overview">
-                          <CardHeader>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <CardTitle className="flex items-center gap-2">
-                                  <Zap className="h-5 w-5 text-primary" />
-                                  System Health Overview
-                                </CardTitle>
-                                <CardDescription>Real-time performance metrics</CardDescription>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-muted-foreground">Health Score:</span>
-                                <Badge
-                                  variant={
-                                    (overviewData.systemMetrics?.healthScore ?? 0) >= 90 ? "default" :
-                                    (overviewData.systemMetrics?.healthScore ?? 0) >= 70 ? "secondary" : "destructive"
-                                  }
-                                  className="text-lg font-bold"
-                                >
-                                  {overviewData.systemMetrics?.healthScore ?? 0}/100
-                                </Badge>
-                              </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                              {/* CPU Usage */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <Cpu className="h-4 w-4 text-primary" />
-                                    <span className="text-sm font-medium">CPU Usage</span>
-                                  </div>
-                                  <span className="text-sm font-bold">{Math.min(100, Math.round(((overviewData.systemMetrics?.cpu?.user ?? 0) + (overviewData.systemMetrics?.cpu?.system ?? 0)) / 10000)) || 35}%</span>
-                                </div>
-                                <Progress value={Math.min(100, Math.round(((overviewData.systemMetrics?.cpu?.user ?? 0) + (overviewData.systemMetrics?.cpu?.system ?? 0)) / 10000)) || 35} className="h-2" />
-                              </div>
-
-                              {/* Memory Usage */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <HardDrive className="h-4 w-4 text-secondary" />
-                                    <span className="text-sm font-medium">Memory</span>
-                                  </div>
-                                  <span className="text-sm font-bold">
-                                    {Math.round((overviewData.systemMetrics?.memory?.heapUsed ?? 0) / 1024 / 1024)} MB
-                                  </span>
-                                </div>
-                                <Progress value={overviewData.systemMetrics?.memory?.percentage ?? 50} className="h-2" />
-                                <p className="text-xs text-muted-foreground">
-                                  Heap usage: {Math.round((overviewData.systemMetrics?.memory?.heapUsed ?? 0) / 1024 / 1024)} MB
-                                </p>
-                              </div>
-
-                              {/* API Response Time */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <Activity className="h-4 w-4 text-chart-3" />
-                                    <span className="text-sm font-medium">Avg Response</span>
-                                  </div>
-                                  <span className="text-sm font-bold">
-                                    {overviewData.systemMetrics?.api?.avgResponseTime ?? 0}ms
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                  <span>Requests/min: {overviewData.systemMetrics?.api?.requestsPerMinute ?? 0}</span>
-                                </div>
-                              </div>
-
-                              {/* Error Rate */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <AlertTriangle className="h-4 w-4 text-orange-500" />
-                                    <span className="text-sm font-medium">Error Rate</span>
-                                  </div>
-                                  <span className="text-sm font-bold">
-                                    {overviewData.systemMetrics?.api?.errorRate ?? 0}%
-                                  </span>
-                                </div>
-                                <Progress 
-                                  value={overviewData.systemMetrics?.api?.errorRate ?? 0} 
-                                  className="h-2"
-                                />
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    )}
                   </motion.div>
                 ) : (
                   <Card>
