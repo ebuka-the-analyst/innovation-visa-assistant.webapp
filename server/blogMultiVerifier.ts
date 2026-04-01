@@ -132,42 +132,58 @@ async function runGeminiVerification(title: string, content: string): Promise<{
   details: Record<string, unknown>;
   error?: string;
 }> {
-  try {
-    const prompt = buildMarkerPrompt(title, content);
-    const result = await geminiClient.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: prompt,
-      config: {
-        temperature: 0.1,
-        maxOutputTokens: 2048,
-        responseMimeType: "application/json",
-      },
-    });
+  // Try models in order — newer versioned names first, fallback to 1.5
+  const GEMINI_MODELS = ["gemini-2.0-flash-001", "gemini-1.5-flash", "gemini-1.5-pro"];
 
-    const text = result.text || "";
-    let jsonText = text.trim();
-    if (jsonText.startsWith("```")) {
-      jsonText = jsonText.replace(/^```json?\n?/, "").replace(/\n?```$/, "");
+  for (const modelName of GEMINI_MODELS) {
+    try {
+      const prompt = buildMarkerPrompt(title, content);
+      const result = await geminiClient.models.generateContent({
+        model: modelName,
+        contents: prompt,
+        config: {
+          temperature: 0.1,
+          maxOutputTokens: 2048,
+          responseMimeType: "application/json",
+        },
+      });
+
+      const text = result.text || "";
+      let jsonText = text.trim();
+      if (jsonText.startsWith("```")) {
+        jsonText = jsonText.replace(/^```json?\n?/, "").replace(/\n?```$/, "");
+      }
+
+      const parsed = JSON.parse(jsonText);
+      return {
+        score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
+        passed: parsed.passed === true,
+        flags: parsed.flags || [],
+        details: parsed,
+      };
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      // Model not found / deprecated → try next model
+      if (errMsg.includes("no longer available") || errMsg.includes("NOT_FOUND") || errMsg.includes("404")) {
+        console.warn(`[MultiVerifier] Gemini model ${modelName} unavailable, trying next...`);
+        continue;
+      }
+      // Quota / rate-limit → mark as unavailable (sentinel score=-1)
+      if (errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("rate") || errMsg.includes("RESOURCE_EXHAUSTED")) {
+        console.warn("[MultiVerifier] Gemini quota/rate-limit — marking as unavailable:", errMsg);
+        const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
+        return r;
+      }
+      // Other errors — fail this model and try next
+      console.error(`[MultiVerifier] Gemini ${modelName} error:`, errMsg);
+      continue;
     }
-
-    const parsed = JSON.parse(jsonText);
-    return {
-      score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
-      passed: parsed.passed === true,
-      flags: parsed.flags || [],
-      details: parsed,
-    };
-  } catch (err: unknown) {
-    const errMsg = err instanceof Error ? err.message : String(err);
-    console.error("[MultiVerifier] Gemini verification error:", errMsg);
-    return {
-      score: 0,
-      passed: false,
-      flags: [{ claim: "SYSTEM", issue: "Gemini verification failed: " + errMsg, severity: "critical" }],
-      details: { error: errMsg },
-      error: errMsg,
-    };
   }
+
+  // All models exhausted — mark Gemini as unavailable
+  console.error("[MultiVerifier] All Gemini models failed — marking as unavailable");
+  const unavailableResult: any = { score: -1, passed: false, flags: [], details: { error: "All Gemini models unavailable" }, error: "All models unavailable", unavailable: true };
+  return unavailableResult;
 }
 
 // ============================================================================
@@ -294,13 +310,22 @@ export async function verifyBlogPost(title: string, content: string): Promise<Ve
     runOpenAIVerification(title, content),
   ]);
 
-  // Detect OpenAI service unavailability (quota/rate-limit) — score=-1 is the sentinel
+  // Detect service unavailability — score=-1 is the sentinel value
   const openaiUnavailable = (openaiResult as any).unavailable === true || openaiResult.score === -1;
+  const geminiUnavailable = (geminiResult as any).unavailable === true || geminiResult.score === -1;
+  const bothUnavailable = openaiUnavailable && geminiUnavailable;
 
-  // Composite: if OpenAI is unavailable use Gemini alone; otherwise average both
-  const compositeScore = openaiUnavailable
-    ? geminiResult.score
-    : Math.round((geminiResult.score + openaiResult.score) / 2);
+  // Composite: if one is unavailable use the other alone; if both unavailable score=0
+  let compositeScore: number;
+  if (bothUnavailable) {
+    compositeScore = 0;
+  } else if (geminiUnavailable) {
+    compositeScore = openaiResult.score;
+  } else if (openaiUnavailable) {
+    compositeScore = geminiResult.score;
+  } else {
+    compositeScore = Math.round((geminiResult.score + openaiResult.score) / 2);
+  }
 
   const contradictions = detectContradictions(geminiResult.flags, openaiResult.flags);
   const sources = countSourcesCited(content);
@@ -309,21 +334,26 @@ export async function verifyBlogPost(title: string, content: string): Promise<Ve
   const expiresAt = new Date(now);
   expiresAt.setDate(expiresAt.getDate() + 90); // 90-day freshness window
 
-  // Combine all flags (skip system-level OpenAI flags if service was just unavailable)
+  // Combine flags (skip system flags from unavailable services)
   const allFlags = [
-    ...geminiResult.flags.map(f => ({ marker: "gemini", ...f })),
+    ...(geminiUnavailable ? [] : geminiResult.flags.map(f => ({ marker: "gemini", ...f }))),
     ...(openaiUnavailable ? [] : openaiResult.flags.map(f => ({ marker: "openai", ...f }))),
   ];
 
   // CONSENSUS GATE LOGIC:
   // Full pass: BOTH AIs ≥95 AND diff ≤10 AND no critical flags
-  // OpenAI unavailable: route to human review (can't auto-publish with only one verifier)
+  // Single verifier: always route to human review (safety policy)
+  // Both unavailable: always route to human review
   const hasCriticalFlags = allFlags.some(f => f.severity === "critical" && !f.claim.startsWith("SYSTEM"));
 
   let passed = false;
   let consensusReason = "";
 
-  if (openaiUnavailable) {
+  if (bothUnavailable) {
+    consensusReason = "Both Gemini and OpenAI unavailable — routing to human review.";
+  } else if (geminiUnavailable) {
+    consensusReason = `Gemini unavailable (model deprecated/quota) — OpenAI only: ${openaiResult.score}/100. Routing to human review for single-verifier result.`;
+  } else if (openaiUnavailable) {
     consensusReason = `OpenAI unavailable (quota exceeded) — Gemini only: ${geminiResult.score}/100. Routing to human review for single-verifier result.`;
   } else {
     const scoreDifference = Math.abs(geminiResult.score - openaiResult.score);
@@ -344,14 +374,15 @@ export async function verifyBlogPost(title: string, content: string): Promise<Ve
 
   const requiresHumanReview = !passed;
 
+  const geminiDisplayScore = geminiUnavailable ? 0 : geminiResult.score;
   const openaiDisplayScore = openaiUnavailable ? 0 : openaiResult.score;
-  console.log(`[MultiVerifier] Result: ${passed ? "PASSED" : "FLAGGED"} | Gemini: ${geminiResult.score} | OpenAI: ${openaiUnavailable ? "unavailable" : openaiResult.score} | Composite: ${compositeScore}`);
+  console.log(`[MultiVerifier] Result: ${passed ? "PASSED" : "FLAGGED"} | Gemini: ${geminiUnavailable ? "unavailable" : geminiResult.score} | OpenAI: ${openaiUnavailable ? "unavailable" : openaiResult.score} | Composite: ${compositeScore}`);
 
   return {
     passed,
     requiresHumanReview,
     compositeScore,
-    geminiScore: geminiResult.score,
+    geminiScore: geminiDisplayScore,
     openaiScore: openaiDisplayScore,
     contradictionFlags: contradictions,
     sourcesCited: sources,
