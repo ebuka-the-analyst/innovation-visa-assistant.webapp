@@ -2711,7 +2711,7 @@ export default function AdminDashboard() {
 
                 {/* REAL-TIME ACTIVITY SECTION - live monitoring */}
                 {activeSection === 'realtime' && (
-                  <div className="space-y-6">
+                  <div className="space-y-1.5">
                     <AnimatePresence mode="wait">
                       {activityLogLoading ? (
                         <motion.div
@@ -2719,7 +2719,7 @@ export default function AdminDashboard() {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          className="space-y-4"
+                          className="space-y-1.5"
                         >
                           {[1, 2, 3, 4, 5].map((i) => (
                             <Card key={i}>
@@ -2736,236 +2736,109 @@ export default function AdminDashboard() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -20 }}
                           transition={{ duration: 0.5 }}
-                          className="space-y-6"
+                          className="space-y-1.5"
                         >
-                          {/* Live Status Header */}
-                          <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-transparent border-green-500/20">
-                            <CardContent className="p-6">
-                              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div className="flex items-center gap-4">
-                                  <motion.div
-                                    className="relative"
-                                    animate={{ scale: [1, 1.1, 1] }}
-                                    transition={{ duration: 2, repeat: Infinity }}
-                                  >
-                                    <div className="h-4 w-4 rounded-full bg-green-500" />
-                                    <div className="absolute inset-0 h-4 w-4 rounded-full bg-green-500 animate-ping opacity-75" />
-                                  </motion.div>
-                                  <div>
-                                    <h2 className="text-lg font-bold flex items-center gap-2">
-                                      Real-Time Activity Monitor
-                                      <Badge variant="default" className="bg-green-500 hover:bg-green-600">LIVE</Badge>
-                                    </h2>
-                                    <p className="text-muted-foreground">Platform activity stream with user identity tracking</p>
+                          {/* Compact Status Bar */}
+                          <Card className="border-green-500/20 bg-green-500/5">
+                            <CardContent className="p-1.5">
+                              <div className="flex items-center gap-3 flex-wrap">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="relative shrink-0">
+                                    <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                                    <div className="absolute inset-0 h-2.5 w-2.5 rounded-full bg-green-500 animate-ping opacity-60" />
                                   </div>
+                                  <span className="text-[11px] font-semibold">Real-Time Activity Monitor</span>
+                                  <Badge variant="default" className="bg-green-500 text-[9px] h-4 px-1.5">LIVE</Badge>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                  <div className="text-center px-4 py-2 bg-background rounded-lg border">
-                                    <p className="text-lg font-bold text-green-500">{activityLog?.length || 0}</p>
-                                    <p className="text-xs text-muted-foreground">Events</p>
-                                  </div>
-                                  <div className="text-center px-4 py-2 bg-background rounded-lg border">
-                                    <p className="text-lg font-bold text-blue-500">{filteredOverviewData?.kpiMetrics?.[1]?.value || 0}</p>
-                                    <p className="text-xs text-muted-foreground">Active Now</p>
-                                  </div>
-                                  <div className="text-center px-4 py-2 bg-background rounded-lg border">
-                                    <p className="text-lg font-bold text-amber-500">30s</p>
-                                    <p className="text-xs text-muted-foreground">Refresh</p>
-                                  </div>
+                                <div className="flex items-center gap-2 ml-auto">
+                                  {[
+                                    { label: 'Events', value: activityLog?.length || 0, color: 'text-green-600' },
+                                    { label: 'Active Now', value: filteredOverviewData?.kpiMetrics?.[1]?.value || 0, color: 'text-blue-600' },
+                                    { label: 'Refresh', value: '30s', color: 'text-amber-600' },
+                                  ].map((s) => (
+                                    <div key={s.label} className="flex items-center gap-1 px-2 py-0.5 bg-background rounded border">
+                                      <span className={`text-[11px] font-bold ${s.color}`}>{s.value}</span>
+                                      <span className="text-[9px] text-muted-foreground">{s.label}</span>
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
                             </CardContent>
                           </Card>
 
-                          {/* Activity Statistics Row */}
-                          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                            <Card className="hover-elevate">
-                              <CardContent className="p-4 text-center">
-                                <UserPlus className="h-6 w-6 mx-auto mb-2 text-green-500" />
-                                <p className="text-lg font-bold">{activityLog?.filter(a => a.type === 'user_registration').length || 0}</p>
-                                <p className="text-xs text-muted-foreground">Registrations</p>
-                              </CardContent>
-                            </Card>
-                            <Card className="hover-elevate">
-                              <CardContent className="p-4 text-center">
-                                <CheckCircle className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-                                <p className="text-lg font-bold">{activityLog?.filter(a => a.type === 'email_verified').length || 0}</p>
-                                <p className="text-xs text-muted-foreground">Verifications</p>
-                              </CardContent>
-                            </Card>
-                            <Card className="hover-elevate">
-                              <CardContent className="p-4 text-center">
-                                <FileText className="h-6 w-6 mx-auto mb-2 text-purple-500" />
-                                <p className="text-lg font-bold">{activityLog?.filter(a => a.type === 'plan_created').length || 0}</p>
-                                <p className="text-xs text-muted-foreground">Plans Created</p>
-                              </CardContent>
-                            </Card>
-                            <Card className="hover-elevate">
-                              <CardContent className="p-4 text-center">
-                                <FileCheck className="h-6 w-6 mx-auto mb-2 text-emerald-500" />
-                                <p className="text-lg font-bold">{activityLog?.filter(a => a.type === 'plan_completed').length || 0}</p>
-                                <p className="text-xs text-muted-foreground">Completed</p>
-                              </CardContent>
-                            </Card>
-                            <Card className="hover-elevate">
-                              <CardContent className="p-4 text-center">
-                                <TrendingUp className="h-6 w-6 mx-auto mb-2 text-orange-500" />
-                                <p className="text-lg font-bold">{activityLog?.filter(a => a.type === 'user_upgrade').length || 0}</p>
-                                <p className="text-xs text-muted-foreground">Upgrades</p>
-                              </CardContent>
-                            </Card>
-                            <Card className="hover-elevate">
-                              <CardContent className="p-4 text-center">
-                                <AlertTriangle className="h-6 w-6 mx-auto mb-2 text-red-500" />
-                                <p className="text-lg font-bold">{activityLog?.filter(a => a.severity === 'error').length || 0}</p>
-                                <p className="text-xs text-muted-foreground">Errors</p>
-                              </CardContent>
-                            </Card>
-                          </div>
-
-                          {/* Main Activity Feed with Timeline */}
-                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Live Activity Timeline - Main Column */}
-                            <div className="lg:col-span-2">
-                              <Card className="h-full">
-                                <CardHeader>
-                                  <div className="flex items-center justify-between">
-                                    <div>
-                                      <CardTitle className="flex items-center gap-2">
-                                        <Activity className="h-5 w-5" />
-                                        Live Activity Timeline
-                                      </CardTitle>
-                                      <CardDescription>Real-time platform events with user identity</CardDescription>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <motion.div
-                                        className="h-2 w-2 rounded-full bg-green-500"
-                                        animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
-                                        transition={{ duration: 1.5, repeat: Infinity }}
-                                      />
-                                      <span className="text-xs text-muted-foreground">Auto-updating</span>
-                                    </div>
-                                  </div>
-                                </CardHeader>
-                                <CardContent>
-                                  <ScrollArea className="h-[600px] pr-4">
-                                    <div className="relative">
-                                      {/* Timeline line */}
-                                      <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border" />
-                                      
-                                      <div className="space-y-4">
-                                        {activityLog?.map((activity, index) => {
-                                          const Icon = ACTIVITY_ICONS[activity.type as keyof typeof ACTIVITY_ICONS] || Activity;
-                                          const severityColor = {
-                                            info: 'bg-blue-500/10 border-blue-500/30 text-blue-500',
-                                            success: 'bg-green-500/10 border-green-500/30 text-green-500',
-                                            warning: 'bg-amber-500/10 border-amber-500/30 text-amber-500',
-                                            error: 'bg-red-500/10 border-red-500/30 text-red-500'
-                                          }[activity.severity || 'info'];
-                                          
-                                          const iconBgColor = {
-                                            user_registration: 'bg-green-500',
-                                            email_verified: 'bg-blue-500',
-                                            plan_created: 'bg-purple-500',
-                                            plan_completed: 'bg-emerald-500',
-                                            user_upgrade: 'bg-orange-500',
-                                            admin_action: 'bg-slate-500',
-                                            error: 'bg-red-500'
-                                          }[activity.type] || 'bg-gray-500';
-
-                                          return (
-                                            <motion.div
-                                              key={activity.id}
-                                              initial={{ opacity: 0, x: -20 }}
-                                              animate={{ opacity: 1, x: 0 }}
-                                              transition={{ delay: index * 0.03 }}
-                                              className="relative pl-14"
-                                            >
-                                              {/* Timeline dot */}
-                                              <div className={`absolute left-4 top-4 h-5 w-5 rounded-full ${iconBgColor} flex items-center justify-center z-10`}>
-                                                <Icon className="h-3 w-3 text-white" />
-                                              </div>
-                                              
-                                              {/* Activity Card */}
-                                              <Card className={`border ${severityColor} hover-elevate`}>
-                                                <CardContent className="p-4">
-                                                  <div className="flex items-start justify-between gap-4">
-                                                    <div className="flex-1 min-w-0">
-                                                      {/* User Identity Section */}
-                                                      {activity.userEmail && (
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                                            <UserCheck className="h-4 w-4 text-primary" />
-                                                          </div>
-                                                          <div>
-                                                            <p className="text-sm font-semibold">{activity.userEmail}</p>
-                                                            <p className="text-xs text-muted-foreground">User ID: {activity.userId?.slice(0, 8)}...</p>
-                                                          </div>
-                                                        </div>
-                                                      )}
-                                                      
-                                                      {/* Activity Description */}
-                                                      <p className="text-sm font-medium">{activity.description || activity.message}</p>
-                                                      
-                                                      {/* Metadata Tags */}
-                                                      {activity.metadata && (
-                                                        <div className="flex flex-wrap gap-2 mt-2">
-                                                          {activity.metadata.tier && (
-                                                            <Badge variant="outline" className="text-xs">
-                                                              Tier: {activity.metadata.tier}
-                                                            </Badge>
-                                                          )}
-                                                          {activity.metadata.status && (
-                                                            <Badge variant="outline" className="text-xs">
-                                                              Status: {activity.metadata.status}
-                                                            </Badge>
-                                                          )}
-                                                          {activity.metadata.verified !== undefined && (
-                                                            <Badge variant={activity.metadata.verified ? "default" : "secondary"} className="text-xs">
-                                                              {activity.metadata.verified ? 'Verified' : 'Unverified'}
-                                                            </Badge>
-                                                          )}
-                                                          {activity.metadata.isDemo && (
-                                                            <Badge variant="secondary" className="text-xs">Demo</Badge>
-                                                          )}
-                                                        </div>
-                                                      )}
-                                                      
-                                                      {/* Timestamp */}
-                                                      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                                                        <Clock className="h-3 w-3" />
-                                                        <span>{format(new Date(activity.timestamp), 'PPpp')}</span>
-                                                        <span className="text-muted-foreground/50">•</span>
-                                                        <span>{formatDistance(new Date(activity.timestamp), new Date(), { addSuffix: true })}</span>
-                                                      </div>
-                                                    </div>
-                                                    
-                                                    {/* Severity Badge */}
-                                                    <Badge variant="outline" className={`shrink-0 ${severityColor}`}>
-                                                      {activity.severity || 'info'}
-                                                    </Badge>
-                                                  </div>
-                                                </CardContent>
-                                              </Card>
-                                            </motion.div>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  </ScrollArea>
+                          {/* Compact 6-stat strip */}
+                          <div className="grid grid-cols-6 gap-1.5">
+                            {[
+                              { label: 'Registrations', count: activityLog?.filter(a => a.type === 'user_registration').length || 0, Icon: UserPlus, color: 'text-green-500' },
+                              { label: 'Verifications', count: activityLog?.filter(a => a.type === 'email_verified').length || 0, Icon: CheckCircle, color: 'text-blue-500' },
+                              { label: 'Plans Created', count: activityLog?.filter(a => a.type === 'plan_created').length || 0, Icon: FileText, color: 'text-purple-500' },
+                              { label: 'Completed', count: activityLog?.filter(a => a.type === 'plan_completed').length || 0, Icon: FileCheck, color: 'text-emerald-500' },
+                              { label: 'Upgrades', count: activityLog?.filter(a => a.type === 'user_upgrade').length || 0, Icon: TrendingUp, color: 'text-orange-500' },
+                              { label: 'Errors', count: activityLog?.filter(a => a.severity === 'error').length || 0, Icon: AlertTriangle, color: 'text-red-500' },
+                            ].map(({ label, count, Icon, color }) => (
+                              <Card key={label}>
+                                <CardContent className="p-1.5 text-center">
+                                  <Icon className={`h-3 w-3 mx-auto mb-0.5 ${color}`} />
+                                  <p className="text-xs font-bold leading-none">{count}</p>
+                                  <p className="text-[9px] text-muted-foreground leading-tight mt-0.5">{label}</p>
                                 </CardContent>
                               </Card>
-                            </div>
+                            ))}
+                          </div>
 
-                            {/* Right Sidebar - Live Stats & Recent Users */}
-                            <div className="space-y-6">
+                          {/* Main 2-col: Timeline + Right Sidebar */}
+                          <div className="grid grid-cols-5 gap-1.5 items-start">
+
+                            {/* LEFT: Live Activity Timeline (compact rows) */}
+                            <Card className="col-span-3">
+                              <CardContent className="p-2">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-[10px] font-medium flex items-center gap-1">
+                                    <Activity className="h-3 w-3" />Live Activity Timeline
+                                  </span>
+                                  <div className="flex items-center gap-1">
+                                    <motion.div className="h-1.5 w-1.5 rounded-full bg-green-500" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                                    <span className="text-[9px] text-muted-foreground">Auto-updating</span>
+                                  </div>
+                                </div>
+                                <ScrollArea className="h-[260px]">
+                                  <div className="space-y-0.5 pr-1">
+                                    {activityLog?.map((activity) => {
+                                      const Icon = ACTIVITY_ICONS[activity.type as keyof typeof ACTIVITY_ICONS] || Activity;
+                                      const dotColor = { user_registration: 'bg-green-500', email_verified: 'bg-blue-500', plan_created: 'bg-purple-500', plan_completed: 'bg-emerald-500', user_upgrade: 'bg-orange-500', admin_action: 'bg-slate-500', error: 'bg-red-500' }[activity.type] || 'bg-gray-400';
+                                      const severityDot = { info: 'bg-blue-400', success: 'bg-green-400', warning: 'bg-amber-400', error: 'bg-red-400' }[activity.severity || 'info'];
+                                      return (
+                                        <div key={activity.id} className="flex items-center gap-1.5 py-0.5 border-b border-border/30 last:border-0">
+                                          <div className={`h-4 w-4 rounded-full ${dotColor} flex items-center justify-center shrink-0`}>
+                                            <Icon className="h-2.5 w-2.5 text-white" />
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            {activity.userEmail && <span className="text-[9px] font-medium text-primary truncate block">{activity.userEmail}</span>}
+                                            <span className="text-[9px] text-muted-foreground truncate block">{activity.description || activity.message}</span>
+                                          </div>
+                                          <div className="flex items-center gap-1 shrink-0">
+                                            <div className={`h-1.5 w-1.5 rounded-full ${severityDot}`} />
+                                            <span className="text-[8px] text-muted-foreground whitespace-nowrap">{formatDistance(new Date(activity.timestamp), new Date(), { addSuffix: true })}</span>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                    {(!activityLog || activityLog.length === 0) && (
+                                      <p className="text-[9px] text-muted-foreground text-center py-4">No activity events yet</p>
+                                    )}
+                                  </div>
+                                </ScrollArea>
+                              </CardContent>
+                            </Card>
+
+                            {/* RIGHT: Activity Distribution + Heatmap + Analytics */}
+                            <div className="col-span-2 flex flex-col gap-1.5">
+
                               {/* Activity Distribution */}
                               <Card>
-                                <CardHeader className="pb-2">
-                                  <CardTitle className="text-sm">Activity Distribution</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="space-y-3">
+                                <CardContent className="p-2">
+                                  <span className="text-[10px] font-medium block mb-1">Activity Distribution</span>
+                                  <div className="space-y-0.5">
                                     {[
                                       { type: 'Registrations', count: activityLog?.filter(a => a.type === 'user_registration').length || 0, color: 'bg-green-500' },
                                       { type: 'Verifications', count: activityLog?.filter(a => a.type === 'email_verified').length || 0, color: 'bg-blue-500' },
@@ -2973,21 +2846,14 @@ export default function AdminDashboard() {
                                       { type: 'Plans Completed', count: activityLog?.filter(a => a.type === 'plan_completed').length || 0, color: 'bg-emerald-500' },
                                     ].map((item) => {
                                       const total = activityLog?.length || 1;
-                                      const percentage = Math.round((item.count / total) * 100);
+                                      const pct = Math.round((item.count / total) * 100);
                                       return (
-                                        <div key={item.type} className="space-y-1">
-                                          <div className="flex items-center justify-between text-sm">
-                                            <span>{item.type}</span>
-                                            <span className="font-medium">{item.count}</span>
+                                        <div key={item.type} className="flex items-center gap-1">
+                                          <span className="text-[9px] text-muted-foreground w-20 truncate">{item.type}</span>
+                                          <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                                            <div className={`h-full ${item.color} rounded-full`} style={{ width: `${pct}%` }} />
                                           </div>
-                                          <div className="h-2 rounded-full bg-muted overflow-hidden">
-                                            <motion.div
-                                              className={`h-full ${item.color}`}
-                                              initial={{ width: 0 }}
-                                              animate={{ width: `${percentage}%` }}
-                                              transition={{ duration: 0.8, delay: 0.2 }}
-                                            />
-                                          </div>
+                                          <span className="text-[9px] font-medium w-5 text-right">{item.count}</span>
                                         </div>
                                       );
                                     })}
@@ -2995,455 +2861,103 @@ export default function AdminDashboard() {
                                 </CardContent>
                               </Card>
 
-                              {/* Recent Active Users */}
+                              {/* Hourly Heatmap */}
                               <Card>
-                                <CardHeader className="pb-2">
-                                  <CardTitle className="text-sm flex items-center gap-2">
-                                    <Users className="h-4 w-4" />
-                                    Recent Active Users
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <ScrollArea className="h-[300px]">
-                                    <div className="space-y-3">
-                                      {activityLog?.filter(a => a.userEmail).slice(0, 15).map((activity, index) => (
-                                        <motion.div
-                                          key={`user-${activity.id}-${index}`}
-                                          initial={{ opacity: 0, y: 10 }}
-                                          animate={{ opacity: 1, y: 0 }}
-                                          transition={{ delay: index * 0.05 }}
-                                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50"
-                                        >
-                                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                                            <span className="text-xs font-bold text-primary">
-                                              {activity.userEmail?.charAt(0).toUpperCase()}
-                                            </span>
-                                          </div>
-                                          <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium truncate">{activity.userEmail}</p>
-                                            <p className="text-xs text-muted-foreground">
-                                              {formatDistance(new Date(activity.timestamp), new Date(), { addSuffix: true })}
-                                            </p>
-                                          </div>
-                                          <div className={`h-2 w-2 rounded-full ${
-                                            activity.type === 'user_registration' ? 'bg-green-500' :
-                                            activity.type === 'email_verified' ? 'bg-blue-500' :
-                                            activity.type === 'plan_created' ? 'bg-purple-500' : 'bg-gray-500'
-                                          }`} />
-                                        </motion.div>
-                                      ))}
-                                    </div>
-                                  </ScrollArea>
-                                </CardContent>
-                              </Card>
-
-                              {/* Activity Heatmap by Hour */}
-                              <Card>
-                                <CardHeader className="pb-2">
-                                  <CardTitle className="text-sm flex items-center gap-2">
-                                    <BarChart3 className="h-4 w-4" />
-                                    Activity by Hour (Today)
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="grid grid-cols-6 gap-1">
+                                <CardContent className="p-2">
+                                  <span className="text-[10px] font-medium block mb-1">Activity by Hour (Today)</span>
+                                  <div className="grid grid-cols-6 gap-0.5">
                                     {Array.from({ length: 24 }, (_, hour) => {
-                                      const count = activityLog?.filter(a => 
-                                        new Date(a.timestamp).getHours() === hour
-                                      ).length || 0;
-                                      const maxCount = Math.max(...Array.from({ length: 24 }, (_, h) => 
-                                        activityLog?.filter(a => new Date(a.timestamp).getHours() === h).length || 0
-                                      ));
-                                      const intensity = maxCount > 0 ? count / maxCount : 0;
-                                      
+                                      const count = activityLog?.filter(a => new Date(a.timestamp).getHours() === hour).length || 0;
+                                      const maxCount = Math.max(...Array.from({ length: 24 }, (_, h) => activityLog?.filter(a => new Date(a.timestamp).getHours() === h).length || 0), 1);
+                                      const intensity = count / maxCount;
                                       return (
                                         <Tooltip key={hour}>
                                           <TooltipTrigger asChild>
-                                            <div
-                                              className={`h-6 rounded cursor-pointer transition-colors ${
-                                                intensity === 0 ? 'bg-muted' :
-                                                intensity < 0.25 ? 'bg-green-500/20' :
-                                                intensity < 0.5 ? 'bg-green-500/40' :
-                                                intensity < 0.75 ? 'bg-green-500/60' :
-                                                'bg-green-500/80'
-                                              }`}
-                                            />
+                                            <div className={`h-3 rounded-sm cursor-pointer ${intensity === 0 ? 'bg-muted' : intensity < 0.25 ? 'bg-green-500/20' : intensity < 0.5 ? 'bg-green-500/40' : intensity < 0.75 ? 'bg-green-500/60' : 'bg-green-500/80'}`} />
                                           </TooltipTrigger>
-                                          <TooltipContent>
-                                            <p>{hour}:00 - {count} events</p>
-                                          </TooltipContent>
+                                          <TooltipContent><p className="text-xs">{hour}:00 — {count} events</p></TooltipContent>
                                         </Tooltip>
                                       );
                                     })}
                                   </div>
-                                  <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                                    <span>00:00</span>
-                                    <span>12:00</span>
-                                    <span>23:00</span>
+                                  <div className="flex justify-between text-[8px] text-muted-foreground mt-0.5">
+                                    <span>00:00</span><span>12:00</span><span>23:00</span>
                                   </div>
                                 </CardContent>
                               </Card>
+
+                              {/* Compact Insights */}
+                              <Card>
+                                <CardContent className="p-2">
+                                  <span className="text-[10px] font-medium block mb-0.5">Insights</span>
+                                  <div className="space-y-0.5">
+                                    {[
+                                      { label: 'Peak Hour', value: (() => { const h = Array.from({ length: 24 }, (_, i) => ({ hour: i, count: activityLog?.filter(a => new Date(a.timestamp).getHours() === i).length || 0 })).reduce((a, b) => a.count > b.count ? a : b, { hour: 0, count: 0 }); return `${h.hour}:00 (${h.count} events)`; })(), color: 'text-green-600' },
+                                      { label: 'User Interactions', value: `${activityLog?.filter(a => a.userEmail).length || 0} tracked`, color: 'text-blue-600' },
+                                      { label: 'Plan Events', value: `${activityLog?.filter(a => a.type.includes('plan')).length || 0} events`, color: 'text-purple-600' },
+                                      { label: 'Last Event', value: activityLog?.[0] ? formatDistance(new Date(activityLog[0].timestamp), new Date(), { addSuffix: true }) : 'None', color: 'text-amber-600' },
+                                    ].map((ins) => (
+                                      <div key={ins.label} className="flex items-center justify-between">
+                                        <span className="text-[9px] text-muted-foreground">{ins.label}</span>
+                                        <span className={`text-[9px] font-medium ${ins.color}`}>{ins.value}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </CardContent>
+                              </Card>
+
+                              {/* Analytics Strip (if available) */}
+                              {activityOverview && (
+                                <Card>
+                                  <CardContent className="p-2">
+                                    <span className="text-[10px] font-medium block mb-0.5">Live Analytics</span>
+                                    <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                                      {[
+                                        { label: 'Active Now', value: activityOverview.realtime?.activeUsersNow || 0, color: 'text-green-600' },
+                                        { label: 'Sessions 1h', value: activityOverview.realtime?.sessionsLastHour || 0, color: 'text-blue-600' },
+                                        { label: 'Views 24h', value: activityOverview.realtime?.pageViewsToday || 0, color: 'text-purple-600' },
+                                        { label: 'Events 24h', value: activityOverview.realtime?.eventsToday || 0, color: 'text-orange-600' },
+                                        { label: 'Avg Session', value: `${Math.round((activityOverview.realtime?.avgSessionDuration || 0) / 60)}m`, color: 'text-cyan-600' },
+                                        { label: 'Countries', value: activityOverview.geoDistribution?.length || 0, color: 'text-emerald-600' },
+                                      ].map((s) => (
+                                        <div key={s.label} className="flex items-center justify-between">
+                                          <span className="text-[9px] text-muted-foreground">{s.label}</span>
+                                          <span className={`text-[9px] font-bold ${s.color}`}>{s.value}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              )}
+
                             </div>
                           </div>
 
-                          {/* Real-Time Analytics */}
-                          {activityOverview && (
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                              <Card className="hover-elevate bg-gradient-to-br from-green-500/5 to-transparent">
-                                <CardContent className="p-4 text-center">
-                                  <div className="relative mx-auto mb-2 h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                                    <Users className="h-5 w-5 text-green-500" />
-                                    <motion.div
-                                      className="absolute inset-0 rounded-full border-2 border-green-500/30"
-                                      animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-                                      transition={{ duration: 2, repeat: Infinity }}
-                                    />
-                                  </div>
-                                  <p className="text-lg font-bold text-green-500">{activityOverview.realtime?.activeUsersNow || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Active Now</p>
-                                </CardContent>
-                              </Card>
-                              <Card className="hover-elevate">
-                                <CardContent className="p-4 text-center">
-                                  <Wifi className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-                                  <p className="text-lg font-bold">{activityOverview.realtime?.sessionsLastHour || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Sessions (1h)</p>
-                                </CardContent>
-                              </Card>
-                              <Card className="hover-elevate">
-                                <CardContent className="p-4 text-center">
-                                  <Eye className="h-6 w-6 mx-auto mb-2 text-purple-500" />
-                                  <p className="text-lg font-bold">{activityOverview.realtime?.pageViewsToday || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Page Views (24h)</p>
-                                </CardContent>
-                              </Card>
-                              <Card className="hover-elevate">
-                                <CardContent className="p-4 text-center">
-                                  <MousePointerClick className="h-6 w-6 mx-auto mb-2 text-orange-500" />
-                                  <p className="text-lg font-bold">{activityOverview.realtime?.eventsToday || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Events (24h)</p>
-                                </CardContent>
-                              </Card>
-                              <Card className="hover-elevate">
-                                <CardContent className="p-4 text-center">
-                                  <Timer className="h-6 w-6 mx-auto mb-2 text-cyan-500" />
-                                  <p className="text-lg font-bold">
-                                    {Math.round((activityOverview.realtime?.avgSessionDuration || 0) / 60)}m
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">Avg Session</p>
-                                </CardContent>
-                              </Card>
-                              <Card className="hover-elevate">
-                                <CardContent className="p-4 text-center">
-                                  <Globe className="h-6 w-6 mx-auto mb-2 text-emerald-500" />
-                                  <p className="text-lg font-bold">{activityOverview.geoDistribution?.length || 0}</p>
-                                  <p className="text-xs text-muted-foreground">Countries</p>
-                                </CardContent>
-                              </Card>
-                            </div>
-                          )}
-
-                          {/* Active Sessions Board */}
+                          {/* Active Sessions (compact, only if present) */}
                           {activeSessions && activeSessions.sessions.length > 0 && (
                             <Card>
-                              <CardHeader>
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <CardTitle className="flex items-center gap-2">
-                                      <Wifi className="h-5 w-5 text-green-500" />
-                                      Active Sessions
-                                      <Badge variant="default" className="bg-green-500 text-white ml-2">
-                                        {activeSessions.count} Live
-                                      </Badge>
-                                    </CardTitle>
-                                    <CardDescription>Currently active user sessions with real-time tracking</CardDescription>
-                                  </div>
+                              <CardContent className="p-2">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Wifi className="h-3 w-3 text-green-500" />
+                                  <span className="text-[10px] font-medium">Active Sessions</span>
+                                  <Badge variant="default" className="bg-green-500 text-[9px] h-4 px-1">{activeSessions.count} Live</Badge>
                                 </div>
-                              </CardHeader>
-                              <CardContent>
-                                <ScrollArea className="h-[300px]">
-                                  <div className="space-y-3">
-                                    {activeSessions.sessions.slice(0, 20).map((session, index) => (
-                                      <motion.div
-                                        key={session.id}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.05 }}
-                                        className="flex items-center gap-4 p-3 rounded-lg border bg-card hover-elevate"
-                                      >
-                                        <div className="relative">
-                                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                            <span className="text-sm font-bold text-primary">
-                                              {session.email?.charAt(0).toUpperCase()}
-                                            </span>
-                                          </div>
-                                          <motion.div
-                                            className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-background"
-                                            animate={{ scale: [1, 1.2, 1] }}
-                                            transition={{ duration: 2, repeat: Infinity }}
-                                          />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                          <div className="flex items-center gap-2">
-                                            <p className="text-sm font-medium truncate">{session.email}</p>
-                                            {session.is_admin && (
-                                              <Badge variant="outline" className="text-xs">Admin</Badge>
-                                            )}
-                                            <Badge variant="secondary" className="text-xs capitalize">
-                                              {session.subscription_tier || 'free'}
-                                            </Badge>
-                                          </div>
-                                          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                                            {session.current_page && (
-                                              <span className="flex items-center gap-1">
-                                                <Eye className="h-3 w-3" />
-                                                {session.current_page}
-                                              </span>
-                                            )}
-                                            {session.device_type && (
-                                              <span className="flex items-center gap-1">
-                                                {session.device_type === 'mobile' ? <Smartphone className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
-                                                {session.device_type}
-                                              </span>
-                                            )}
-                                            {session.country && (
-                                              <span className="flex items-center gap-1">
-                                                <Globe className="h-3 w-3" />
-                                                {session.country}
-                                              </span>
-                                            )}
-                                          </div>
-                                        </div>
-                                        <div className="text-right">
-                                          <p className="text-xs font-medium">{session.page_view_count} pages</p>
-                                          <p className="text-xs text-muted-foreground">
-                                            {Math.round(session.total_duration_seconds / 60)}m session
-                                          </p>
-                                        </div>
-                                      </motion.div>
-                                    ))}
-                                  </div>
-                                </ScrollArea>
+                                <div className="space-y-0.5">
+                                  {activeSessions.sessions.slice(0, 5).map((session) => (
+                                    <div key={session.id} className="flex items-center gap-2 py-0.5 border-b border-border/30 last:border-0">
+                                      <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                        <span className="text-[9px] font-bold text-primary">{session.email?.charAt(0).toUpperCase()}</span>
+                                      </div>
+                                      <span className="text-[9px] font-medium truncate flex-1">{session.email}</span>
+                                      <Badge variant="secondary" className="text-[8px] h-3.5 px-1 capitalize">{session.subscription_tier || 'free'}</Badge>
+                                      {session.current_page && <span className="text-[8px] text-muted-foreground truncate max-w-[80px]">{session.current_page}</span>}
+                                      <span className="text-[8px] text-muted-foreground shrink-0">{session.page_view_count}p · {Math.round(session.total_duration_seconds / 60)}m</span>
+                                    </div>
+                                  ))}
+                                </div>
                               </CardContent>
                             </Card>
                           )}
-
-                          {/* Analytics Breakdown Row */}
-                          {activityOverview && (
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                              {/* Device Distribution */}
-                              <Card>
-                                <CardHeader className="pb-2">
-                                  <CardTitle className="text-sm flex items-center gap-2">
-                                    <Monitor className="h-4 w-4" />
-                                    Device Distribution
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="space-y-3">
-                                    {activityOverview.deviceBreakdown?.map((device) => {
-                                      const total = activityOverview.deviceBreakdown?.reduce((acc, d) => acc + parseInt(d.count), 0) || 1;
-                                      const percentage = Math.round((parseInt(device.count) / total) * 100);
-                                      const Icon = device.device_type === 'mobile' ? Smartphone : 
-                                                   device.device_type === 'tablet' ? Tablet : Monitor;
-                                      return (
-                                        <div key={device.device_type} className="space-y-1">
-                                          <div className="flex items-center justify-between text-sm">
-                                            <span className="flex items-center gap-2">
-                                              <Icon className="h-4 w-4 text-muted-foreground" />
-                                              <span className="capitalize">{device.device_type || 'Unknown'}</span>
-                                            </span>
-                                            <span className="font-medium">{percentage}%</span>
-                                          </div>
-                                          <Progress value={percentage} className="h-2" />
-                                        </div>
-                                      );
-                                    })}
-                                    {(!activityOverview.deviceBreakdown || activityOverview.deviceBreakdown.length === 0) && (
-                                      <p className="text-sm text-muted-foreground text-center py-4">
-                                        No device data yet
-                                      </p>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
-
-                              {/* Browser Distribution */}
-                              <Card>
-                                <CardHeader className="pb-2">
-                                  <CardTitle className="text-sm flex items-center gap-2">
-                                    <Globe className="h-4 w-4" />
-                                    Browser Usage
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="space-y-3">
-                                    {activityOverview.browserBreakdown?.slice(0, 5).map((browser) => {
-                                      const total = activityOverview.browserBreakdown?.reduce((acc, b) => acc + parseInt(b.count), 0) || 1;
-                                      const percentage = Math.round((parseInt(browser.count) / total) * 100);
-                                      return (
-                                        <div key={browser.browser_name} className="space-y-1">
-                                          <div className="flex items-center justify-between text-sm">
-                                            <span>{browser.browser_name || 'Unknown'}</span>
-                                            <span className="font-medium">{percentage}%</span>
-                                          </div>
-                                          <Progress value={percentage} className="h-2" />
-                                        </div>
-                                      );
-                                    })}
-                                    {(!activityOverview.browserBreakdown || activityOverview.browserBreakdown.length === 0) && (
-                                      <p className="text-sm text-muted-foreground text-center py-4">
-                                        No browser data yet
-                                      </p>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
-
-                              {/* Geographic Distribution */}
-                              <Card>
-                                <CardHeader className="pb-2">
-                                  <CardTitle className="text-sm flex items-center gap-2">
-                                    <Globe className="h-4 w-4" />
-                                    Top Countries
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="space-y-2">
-                                    {activityOverview.geoDistribution?.slice(0, 6).map((geo, index) => (
-                                      <div key={geo.country_code || index} className="flex items-center justify-between p-2 rounded hover:bg-muted/50">
-                                        <span className="flex items-center gap-2 text-sm">
-                                          <span className="text-lg">{geo.country_code ? getCountryFlag(geo.country_code) : '🌍'}</span>
-                                          <span>{geo.country || 'Unknown'}</span>
-                                        </span>
-                                        <Badge variant="secondary">{geo.sessions} sessions</Badge>
-                                      </div>
-                                    ))}
-                                    {(!activityOverview.geoDistribution || activityOverview.geoDistribution.length === 0) && (
-                                      <p className="text-sm text-muted-foreground text-center py-4">
-                                        No geographic data yet
-                                      </p>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </div>
-                          )}
-
-                          {/* Top Pages & Tool Usage */}
-                          {activityOverview && (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                              {/* Top Pages */}
-                              <Card>
-                                <CardHeader>
-                                  <CardTitle className="flex items-center gap-2">
-                                    <TrendingUp className="h-5 w-5" />
-                                    Top Pages (24h)
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="space-y-3">
-                                    {activityOverview.topPages?.slice(0, 8).map((page, index) => (
-                                      <div key={page.page_path} className="flex items-center gap-3">
-                                        <span className="text-muted-foreground font-medium w-6">#{index + 1}</span>
-                                        <span className="flex-1 text-sm truncate">{page.page_path}</span>
-                                        <Badge variant="outline">{page.views} views</Badge>
-                                      </div>
-                                    ))}
-                                    {(!activityOverview.topPages || activityOverview.topPages.length === 0) && (
-                                      <p className="text-sm text-muted-foreground text-center py-4">
-                                        No page view data yet
-                                      </p>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
-
-                              {/* Tool Usage */}
-                              <Card>
-                                <CardHeader>
-                                  <CardTitle className="flex items-center gap-2">
-                                    <Wrench className="h-5 w-5" />
-                                    Tool Usage (7d)
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="space-y-3">
-                                    {activityOverview.toolUsage?.slice(0, 8).map((tool, index) => (
-                                      <div key={tool.tool_id} className="flex items-center gap-3">
-                                        <span className="text-muted-foreground font-medium w-6">#{index + 1}</span>
-                                        <span className="flex-1 text-sm truncate">{tool.tool_id?.replace(/-/g, ' ')}</span>
-                                        <Badge variant="secondary" className="text-xs capitalize">{tool.tool_category}</Badge>
-                                        <Badge variant="outline">{tool.usage_count}</Badge>
-                                      </div>
-                                    ))}
-                                    {(!activityOverview.toolUsage || activityOverview.toolUsage.length === 0) && (
-                                      <p className="text-sm text-muted-foreground text-center py-4">
-                                        No tool usage data yet
-                                      </p>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </div>
-                          )}
-
-                          {/* Activity Insights */}
-                          <Card>
-                            <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <Lightbulb className="h-5 w-5 text-amber-500" />
-                                Real-Time Insights
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <TrendingUp className="h-4 w-4 text-green-500" />
-                                    <span className="font-medium text-green-500">Peak Activity</span>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    {(() => {
-                                      const hourCounts = Array.from({ length: 24 }, (_, h) => ({
-                                        hour: h,
-                                        count: activityLog?.filter(a => new Date(a.timestamp).getHours() === h).length || 0
-                                      }));
-                                      const peak = hourCounts.reduce((a, b) => a.count > b.count ? a : b, { hour: 0, count: 0 });
-                                      return `Most active at ${peak.hour}:00 with ${peak.count} events`;
-                                    })()}
-                                  </p>
-                                </div>
-                                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Users className="h-4 w-4 text-blue-500" />
-                                    <span className="font-medium text-blue-500">User Engagement</span>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    {activityLog?.filter(a => a.userEmail).length || 0} unique user interactions tracked
-                                  </p>
-                                </div>
-                                <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <FileText className="h-4 w-4 text-purple-500" />
-                                    <span className="font-medium text-purple-500">Plan Activity</span>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    {activityLog?.filter(a => a.type.includes('plan')).length || 0} plan-related events in feed
-                                  </p>
-                                </div>
-                                <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Clock className="h-4 w-4 text-amber-500" />
-                                    <span className="font-medium text-amber-500">Latest Activity</span>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    {activityLog?.[0] ? formatDistance(new Date(activityLog[0].timestamp), new Date(), { addSuffix: true }) : 'No recent activity'}
-                                  </p>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
                         </motion.div>
                       )}
                     </AnimatePresence>
